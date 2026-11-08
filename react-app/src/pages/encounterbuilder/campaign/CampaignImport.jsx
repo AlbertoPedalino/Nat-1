@@ -3,9 +3,13 @@ import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Paper, Select, St
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { clampInt } from '../../../shared/numbers.js';
+import LoadStatus from '../../../shared/ui/LoadStatus.jsx';
+import { runBusy } from '../../../shared/ui/busyAction.js';
+import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
+  const { notify } = useToast();
   const [selectedId, setSelectedId] = useState('');
   const [importing, setImporting] = useState(false);
   const selected = useMemo(() => (
@@ -17,19 +21,14 @@ export default function CampaignImport() {
   // Sheets are fetched once on page load, so re-fetch the selected campaign's
   // right before importing: ones edited since then (HP, wild shape, level up)
   // would otherwise come in stale. Falls back to the cached list on failure.
-  const handleAdd = useCallback(async () => {
-    if (!selected || importing) return;
-    setImporting(true);
-    try {
-      const fresh = await campaignPlayers.refreshCampaign?.(selected.id);
+  const handleAdd = useCallback(() => {
+    if (!selected || importing) return null;
+    return runBusy({ setBusy: setImporting, notify }, async () => {
+      const fresh = await Promise.resolve(campaignPlayers.refreshCampaign?.(selected.id)).catch(() => null);
       const players = fresh || selected.players;
-      if (players.length) {
-        dispatch({ type: 'importCampaignPlayers', players });
-      }
-    } finally {
-      setImporting(false);
-    }
-  }, [campaignPlayers, dispatch, importing, selected]);
+      if (players.length) dispatch({ type: 'importCampaignPlayers', players });
+    }, 'Could not add the campaign players.');
+  }, [campaignPlayers, dispatch, importing, notify, selected]);
 
   if (!campaignPlayers.cloudEnabled) return null;
 
@@ -40,11 +39,14 @@ export default function CampaignImport() {
           <Users size={17} />
           <Typography variant="h2">Campaign Players</Typography>
         </Stack>
-        {campaignPlayers.loading ? <Typography sx={{ color: 'text.secondary' }}>Loading campaign players...</Typography> : null}
+        <LoadStatus
+          status={campaignPlayers.loading ? 'loading' : campaignPlayers.error ? 'error' : 'ready'}
+          loadingLabel="Loading campaign players…"
+          errorMessage={campaignPlayers.error}
+        />
         {!campaignPlayers.loading && !campaignPlayers.signedIn ? (
           <Typography sx={{ color: 'text.secondary' }}>Log in to import players from your GM campaigns.</Typography>
         ) : null}
-        {campaignPlayers.error ? <Typography sx={{ color: 'error.main' }}>{campaignPlayers.error}</Typography> : null}
         {!campaignPlayers.loading && campaignPlayers.signedIn && !campaignPlayers.campaigns.length ? (
           <Typography sx={{ color: 'text.secondary' }}>No campaigns where you are GM.</Typography>
         ) : null}
@@ -71,7 +73,7 @@ export default function CampaignImport() {
                 disabled={!selected.players.length || importing}
                 onClick={handleAdd}
               >
-                {importing ? 'Adding...' : 'Add'}
+                {importing ? 'Adding…' : 'Add'}
               </Button>
             </Stack>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>

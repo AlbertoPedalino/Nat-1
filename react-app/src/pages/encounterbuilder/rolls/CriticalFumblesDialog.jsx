@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { Dices, Skull } from 'lucide-react';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
 import {
   buildFumbleFormula,
   FUMBLE_CATEGORIES,
@@ -24,6 +24,7 @@ import {
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -31,7 +32,6 @@ export default function CriticalFumblesDialog({ open, onClose }) {
   const mobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [categoryId, setCategoryId] = useState(FUMBLE_CATEGORIES[0].id);
   const [outcome, setOutcome] = useState(null);
-  const [resetArmed, setResetArmed] = useState(false);
   const outcomeRef = useRef(null);
 
   const category = FUMBLE_CATEGORIES.find((item) => item.id === categoryId) || FUMBLE_CATEGORIES[0];
@@ -50,7 +50,6 @@ export default function CriticalFumblesDialog({ open, onClose }) {
   const changeCategory = (_, nextId) => {
     setCategoryId(nextId);
     setOutcome(null);
-    setResetArmed(false);
   };
 
   const adjustDie = (faces, delta) => {
@@ -65,16 +64,13 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       },
     });
     setOutcome(null);
-    setResetArmed(false);
   };
 
   const handleEntryChange = (result, value) => {
     dispatch({ type: 'setFumbleEntry', categoryId: category.id, result, value });
-    setResetArmed(false);
   };
 
   const handleRoll = () => {
-    setResetArmed(false);
     const result = roll(
       formula,
       `${category.label} Fumble`,
@@ -93,18 +89,13 @@ export default function CriticalFumblesDialog({ open, onClose }) {
   };
 
   const handleReset = () => {
-    if (!resetArmed) {
-      setResetArmed(true);
-      return;
-    }
+    if (!confirmAction('Reset this fumble table to its defaults?')) return;
     dispatch({ type: 'resetFumbleCategory', categoryId: category.id });
     setOutcome(null);
-    setResetArmed(false);
   };
 
   const handleClose = () => {
     setOutcome(null);
-    setResetArmed(false);
     onClose?.();
   };
 
@@ -123,12 +114,11 @@ export default function CriticalFumblesDialog({ open, onClose }) {
         <>
           <Button
             onClick={handleReset}
-            variant={resetArmed ? 'contained' : 'text'}
-            color={resetArmed ? 'error' : 'inherit'}
+            color="inherit"
             size="small"
             sx={{ mr: 'auto' }}
           >
-            {resetArmed ? 'Confirm reset' : 'Reset'}
+            Reset
           </Button>
           <Button onClick={handleRoll} variant="contained" size="small" startIcon={<Dices size={15} />}>
             Roll Fumble
@@ -150,7 +140,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
 
       <Box sx={sectionSx}>
         <Stack spacing={0.4}>
-          <Typography sx={sectionTitleSx}>Dice combination</Typography>
+          <Typography sx={dialogSectionTitleSx}>Dice combination</Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Choose any combination. At least one die is always kept.
           </Typography>
@@ -211,7 +201,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       ) : null}
 
       <Stack spacing={0.4} sx={{ mt: 1.75, mb: 1 }}>
-        <Typography sx={sectionTitleSx}>Result table</Typography>
+        <Typography sx={dialogSectionTitleSx}>Result table</Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Entries outside the current range are preserved when you change dice.
         </Typography>
@@ -263,15 +253,6 @@ const sectionSx = {
   borderColor: 'divider',
   borderRadius: 1.5,
   bgcolor: uiAlpha(UI_COLORS.white, 0.02),
-};
-
-const sectionTitleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.7rem',
-  fontWeight: 800,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'primary.main',
 };
 
 const diceGridSx = {

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
-import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
+import { makeRollEntry, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
-import { makeId } from '../../../shared/ids.js';
 
 function readSettings(instanceId) {
   return getStorageJson(`gb-enc-rolls:${instanceId}`, {});
@@ -51,23 +50,23 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   }, [instanceId]);
 
   const shareRoll = useCallback((result, actor) => {
-    const visibility = showToPlayers ? 'public' : 'gm';
-    const timestamp = Date.now();
-    const id = makeId('encounter');
     const toast = buildEncounterDiceToast(result);
-    const annotated = { ...result, rolls: toast.rolls, id, timestamp, visibility };
-    dispatch({ type: 'addRoll', roll: annotated, actor: actor || 'GM' });
-    publish({
-      ...toast,
-      id,
-      timestamp,
+    const entry = makeRollEntry(toast, {
+      idPrefix: 'encounter',
       actorName: actor || 'GM',
-      characterId: result.characterId || null,
-      sourceRef: result.sourceRef || null,
-      ...normalizeRollIdentity(result),
+      characterId: result.characterId,
+      sourceRef: result.sourceRef,
+      identity: result,
       note: result.note,
-      thrown: Boolean(toast.rolls?.length),
-    }, { visibility });
+      visibility: showToPlayers ? 'public' : 'gm',
+    });
+    // The builder's own log keeps the full result (natural d20, class).
+    dispatch({
+      type: 'addRoll',
+      roll: { ...result, rolls: toast.rolls, id: entry.id, timestamp: entry.timestamp, visibility: entry.visibility },
+      actor: entry.actorName,
+    });
+    publish(entry, { visibility: entry.visibility });
   }, [dispatch, publish, showToPlayers]);
 
   return { campaignId, showToPlayers, updateSettings, shareRoll };

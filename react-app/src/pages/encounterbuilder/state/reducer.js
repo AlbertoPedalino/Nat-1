@@ -25,7 +25,7 @@ import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
 import {
-  DEFAULT_PARTY, createDefaultPlayers, setPartyCount, updatePlayer, removePlayer, importCampaignPlayers,
+  DEFAULT_PARTY, MAX_PARTY_LEVEL, createDefaultPlayers, setPartyCount, updatePlayer, removePlayer, importCampaignPlayers,
 } from './partyState.js';
 import {
   launchCombat, withCombat, closeCombat, syncCombatantVitals, absorbFightVitals, absorbActiveFightTurn,
@@ -99,7 +99,7 @@ function reduceEncounterState(state, action) {
     case 'setPartyCount':
       return setPartyCount(state, action.value);
     case 'setPartyLevel':
-      return { ...state, party: { ...state.party, level: clampInt(action.value, 1, 20, state.party.level) } };
+      return { ...state, party: { ...state.party, level: clampInt(action.value, 1, MAX_PARTY_LEVEL, state.party.level) } };
     case 'updatePlayer':
       return updatePlayer(state, action.index, action.patch);
     case 'removePlayer':

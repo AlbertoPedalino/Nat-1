@@ -22,10 +22,6 @@ export const STORAGE_KEYS = Object.freeze({
   negotiation: 'negotiation:v1',
 });
 
-export function scopeKey(id, key) {
-  return `gb:enc:${id}:${key}`;
-}
-
 function readJson(id, key, fallback) {
   try {
     const raw = readInstanceValue(SECTION_KEY, id, key);
@@ -112,7 +108,7 @@ export function persistFights(id, activeFightId, fights) {
   return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.fights]: fightsValue(activeFightId, fights) });
 }
 
-export function normalizeFightsData(value) {
+function normalizeFightsData(value) {
   if (Array.isArray(value)) return { activeFightId: null, items: value };
   return {
     activeFightId: value?.activeFightId || null,

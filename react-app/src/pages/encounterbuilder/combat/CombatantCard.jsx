@@ -17,7 +17,7 @@ import { hpToneColor } from '../../../shared/character/combat/vitals.js';
 import { HP_TONE_COLORS } from '../../../shared/ui/colors.js';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import {
-  nameSpanStyle, rowSx, removeButtonSx, identityClusterSx, avatarBaseSx, nameButtonSx,
+  nameSpanSx, rowSx, removeButtonSx, identityClusterSx, avatarBaseSx, nameButtonSx,
   sheetLinkButtonSx, acBadgeSx, acLabelSx, acValueSx, conditionsRowSx, effectsRowSx, hpSummaryRowSx,
   hpToggleSx, hpFlagSx, hpDetailsSx, collapseSx, hpPanelRowSx, hpValueRowSx, hpFieldSx, hpMaxSx,
   hpBarSx, cardSx, hpRowSx, buildActiveSx, deadSx,
@@ -108,11 +108,11 @@ export default function CombatantCard({ combatant, active }) {
                 ) : null}
                 {isMonster && combatant.monsterData ? (
                   <Button size="small" onClick={openDetails} sx={nameButtonSx}>
-                    <span style={nameSpanStyle}>{combatant.name}</span>
+                    <Box component="span" sx={nameSpanSx}>{combatant.name}</Box>
                   </Button>
                 ) : !isMonster ? (
                   <Button size="small" onClick={openDetails} sx={nameButtonSx}>
-                    <span style={nameSpanStyle}>{combatant.name}</span>
+                    <Box component="span" sx={nameSpanSx}>{combatant.name}</Box>
                   </Button>
                 ) : (
                   <Typography noWrap sx={{ fontWeight: 800 }}>{combatant.name}</Typography>

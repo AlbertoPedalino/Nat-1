@@ -35,6 +35,16 @@ const titleTextSx = {
   lineHeight: 1.3,
 };
 
+// The title of a section inside a dialog's content.
+export const dialogSectionTitleSx = {
+  fontFamily: UI_FONTS.display,
+  fontSize: '0.7rem',
+  fontWeight: 800,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: 'primary.main',
+};
+
 // Base content padding. Top padding uses the `&.MuiDialogContent-root`
 // selector to match the specificity of MUI's default
 // `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` rule —

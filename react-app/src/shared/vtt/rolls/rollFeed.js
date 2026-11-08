@@ -57,6 +57,27 @@ function normalizeTimestamp(value) {
   return Math.min(parsed, now + ROLL_TTL_MS);
 }
 
+// A dice roll as it goes out on the table's channel: the toast fields (label,
+// detail, total, dice), who rolled it and for which piece, the creature it
+// names (`identity`, see normalizeRollIdentity), and who may see it. The
+// encounter builder and the map's creature rolls send exactly this.
+export function makeRollEntry(toast, {
+  idPrefix = 'roll', actorName = 'GM', characterId = null, sourceRef = null, identity = {}, note = '', visibility = 'gm',
+} = {}) {
+  return {
+    ...toast,
+    id: makeId(idPrefix),
+    timestamp: Date.now(),
+    actorName,
+    characterId: characterId || null,
+    sourceRef: sourceRef || null,
+    ...normalizeRollIdentity(identity),
+    note: note || '',
+    visibility: visibility === 'public' ? 'public' : 'gm',
+    thrown: Boolean(toast?.rolls?.length),
+  };
+}
+
 export function normalizeRoll(entry) {
   if (!entry) return null;
   const label = boundedText(entry.label, 60);

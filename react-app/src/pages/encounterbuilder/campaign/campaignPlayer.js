@@ -1,6 +1,6 @@
 import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
-import { clampInt } from '../../../shared/numbers.js';
+import { clampPlayerStats } from '../state/partyState.js';
 import { totalLevel } from '../../../shared/character/progression/classLevel.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
@@ -26,10 +26,8 @@ export function toEncounterPlayer(row, campaign) {
     name: sheet.name || row.name || 'Character',
     ownerUsername: row.owner_username || null,
     level: totalLevel(sheet),
-    ac: clampInt(summary.ac, 1, 99, 10),
-    hpMax: clampInt(hpMax, 1, 999, 10),
+    ...clampPlayerStats({ ac: summary.ac, hpMax, initMod: summary.initiative }),
     ...combatantToSheetPatch(vitals),
-    initMod: clampInt(summary.initiative, -20, 30, 0),
     iconColor: normalizeHexColor(sheet.classIconColor),
     // The face the sheet chose. A path, not a picture: the bytes are in the
     // bucket and every screen that shows this character reads the same one.

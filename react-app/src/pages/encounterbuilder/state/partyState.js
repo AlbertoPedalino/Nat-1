@@ -8,32 +8,39 @@ import { normalizeHexColor } from '../../../shared/ui/colors.js';
 // and level, edits, and importing a campaign's characters.
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
+export const MAX_PARTY_SIZE = 10;
+export const MAX_PARTY_LEVEL = 20;
 
-export function createDefaultPlayers(count = DEFAULT_PARTY.count) {
-  return Array.from({ length: count }, (_, index) => ({
+// A player's numbers as the builder allows them, from any source (a typed-in
+// row, a campaign sheet's summary).
+export function clampPlayerStats({ initMod, ac, hpMax }) {
+  return {
+    initMod: clampInt(initMod, -20, 30, 0),
+    ac: clampInt(ac, 1, 99, 10),
+    hpMax: clampInt(hpMax, 1, 999, 10),
+  };
+}
+
+// The stand-in for party slot `index` until a real character takes it.
+function placeholderPlayer(index) {
+  return {
     id: index,
     name: `Player ${index + 1}`,
     initMod: [2, 1, 3, 0][index] ?? 0,
     ac: [15, 14, 16, 18][index] ?? 10,
     hpMax: [30, 25, 28, 35][index] ?? 30,
     color: PLAYER_COLORS[index % PLAYER_COLORS.length],
-  }));
+  };
+}
+
+export function createDefaultPlayers(count = DEFAULT_PARTY.count) {
+  return Array.from({ length: count }, (_, index) => placeholderPlayer(index));
 }
 
 export function setPartyCount(state, value) {
-  const count = clampInt(value, 1, 10, state.party.count);
-  let players = state.players.slice(0, count);
-  while (players.length < count) {
-    const index = players.length;
-    players.push({
-      id: index,
-      name: `Player ${index + 1}`,
-      initMod: 0,
-      ac: 10,
-      hpMax: 30,
-      color: PLAYER_COLORS[index % PLAYER_COLORS.length],
-    });
-  }
+  const count = clampInt(value, 1, MAX_PARTY_SIZE, state.party.count);
+  const players = state.players.slice(0, count);
+  while (players.length < count) players.push(placeholderPlayer(players.length));
   return { ...state, party: { ...state.party, count }, players };
 }
 
@@ -60,7 +67,7 @@ export function removePlayer(state, index) {
     players,
     party: {
       ...state.party,
-      count: Math.max(1, Math.min(10, players.length)),
+      count: Math.max(1, Math.min(MAX_PARTY_SIZE, players.length)),
     },
     campaignNotice: `${removed?.name || 'Player'} removed from encounter.`,
   };
@@ -97,7 +104,7 @@ export function importCampaignPlayers(state, campaignPlayers) {
       updated += 1;
       return;
     }
-    if (players.length >= 10) {
+    if (players.length >= MAX_PARTY_SIZE) {
       skipped += 1;
       return;
     }
@@ -109,26 +116,25 @@ export function importCampaignPlayers(state, campaignPlayers) {
   const parts = [];
   if (added) parts.push(`${added} added`);
   if (updated) parts.push(`${updated} updated`);
-  if (skipped) parts.push(`${skipped} skipped (party limit 10)`);
+  if (skipped) parts.push(`${skipped} skipped (party limit ${MAX_PARTY_SIZE})`);
   return {
     ...state,
     players,
-    party: { count: Math.max(1, Math.min(10, players.length)), level },
+    party: { count: Math.max(1, Math.min(MAX_PARTY_SIZE, players.length)), level },
     campaignNotice: parts.length ? `${parts.join(', ')}.` : 'Campaign players already in party.',
   };
 }
 
 function normalizePlayer(player, index) {
-  const hpMax = clampInt(player.hpMax, 1, 999, 10);
+  const stats = clampPlayerStats(player);
+  const { hpMax } = stats;
   // resolveCombatVitals rather than the raw mapper: it is the one that reads an
   // absent current HP as "undamaged" instead of 0.
   const vitals = combatantToSheetPatch(resolveCombatVitals({ hpMax }, { ...player, hpMax }));
   const normalized = {
     ...player,
     name: String(player.name || `Player ${index + 1}`),
-    initMod: clampInt(player.initMod, -20, 30, 0),
-    ac: clampInt(player.ac, 1, 99, 10),
-    hpMax,
+    ...stats,
     color: normalizeHexColor(player.color, '') || normalizeHexColor(player.iconColor, '') || PLAYER_COLORS[index % PLAYER_COLORS.length],
     iconColor: normalizeHexColor(player.iconColor, '') || null,
   };

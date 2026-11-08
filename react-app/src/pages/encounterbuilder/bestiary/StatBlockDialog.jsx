@@ -41,16 +41,7 @@ export function StatBlockPanel() {
   const monster = selection?.monster;
   const isPlayerSelection = selection && !monster && selection.combatantId != null;
 
-  if (!selection) {
-    return (
-      <Paper sx={statPanelSx}>
-        <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-          <Typography variant="h2">Statblock</Typography>
-          <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
-        </Stack>
-      </Paper>
-    );
-  }
+  if (!selection) return <EmptyStatBlock />;
 
   if (isPlayerSelection) {
     return (
@@ -60,16 +51,7 @@ export function StatBlockPanel() {
     );
   }
 
-  if (!monster) {
-    return (
-      <Paper sx={statPanelSx}>
-        <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-          <Typography variant="h2">Statblock</Typography>
-          <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
-        </Stack>
-      </Paper>
-    );
-  }
+  if (!monster) return <EmptyStatBlock />;
 
   return (
     <Paper sx={statPanelSx}>
@@ -130,11 +112,18 @@ function StatBlockBody({ monster, allowAdd = false }) {
   );
 }
 
-// The stat block itself, with every number that can be rolled. Who rolls it is
-// the caller's: the builder's roll log, or the battle map's dice. `conditions`
-// are the creature's (its d20 tests take advantage/disadvantage from them);
-// null for a monster looked up in the bestiary, which rolls straight.
-// `onRoll({ notation, type, advantage, note })`; `children` go at the end.
+// The panel before anything is selected (or after a monster is gone).
+function EmptyStatBlock() {
+  return (
+    <Paper sx={statPanelSx}>
+      <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+        <Typography variant="h2">Statblock</Typography>
+        <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
+      </Stack>
+    </Paper>
+  );
+}
+
 const statPanelSx = {
   bgcolor: 'background.paper',
   overflow: 'hidden',

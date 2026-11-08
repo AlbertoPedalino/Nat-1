@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Box,
   Button,
@@ -10,7 +9,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { Check, Handshake, Skull, Sparkles, X } from 'lucide-react';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
 import {
   getNpcAttitude,
   MAX_INTEREST,
@@ -24,6 +23,8 @@ import {
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -36,7 +37,6 @@ export default function NegotiationDialog({ open, onClose }) {
   const { state, dispatch } = useEncounterBuilder();
   const theme = useTheme();
   const mobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [resetArmed, setResetArmed] = useState(false);
   const negotiation = state.negotiation;
   const attitude = getNpcAttitude(negotiation.attitude);
   const status = negotiationStatus(negotiation);
@@ -44,32 +44,21 @@ export default function NegotiationDialog({ open, onClose }) {
   const setAttitude = (attitudeId) => {
     if (attitudeId === negotiation.attitude) return;
     dispatch({ type: 'setNegotiationAttitude', attitude: attitudeId });
-    setResetArmed(false);
   };
 
   const resolve = (outcome) => {
     dispatch({ type: 'resolveNegotiation', outcome });
-    setResetArmed(false);
   };
 
   const reset = () => {
-    if (!resetArmed) {
-      setResetArmed(true);
-      return;
-    }
+    if (!confirmAction('Reset this negotiation?')) return;
     dispatch({ type: 'resetNegotiation' });
-    setResetArmed(false);
-  };
-
-  const close = () => {
-    setResetArmed(false);
-    onClose?.();
   };
 
   return (
     <SheetDialog
       open={open}
-      onClose={close}
+      onClose={onClose}
       title="Negotiation"
       icon={<Handshake size={20} />}
       showClose
@@ -80,18 +69,17 @@ export default function NegotiationDialog({ open, onClose }) {
       actions={(
         <Button
           onClick={reset}
-          variant={resetArmed ? 'contained' : 'text'}
-          color={resetArmed ? 'error' : 'inherit'}
+          color="inherit"
           size="small"
           sx={{ mr: 'auto' }}
         >
-          {resetArmed ? 'Confirm reset' : 'Reset negotiation'}
+          Reset negotiation
         </Button>
       )}
     >
       <Stack spacing={1.75}>
         <Box>
-          <Typography sx={sectionTitleSx}>NPC attitude</Typography>
+          <Typography sx={dialogSectionTitleSx}>NPC attitude</Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Changing attitude resets Patience and Interest. The threshold is preserved.
           </Typography>
@@ -158,7 +146,7 @@ export default function NegotiationDialog({ open, onClose }) {
         )}
 
         <Box>
-          <Typography sx={sectionTitleSx}>Resolve the check</Typography>
+          <Typography sx={dialogSectionTitleSx}>Resolve the check</Typography>
           <Box sx={actionGridSx}>
             {ACTION_UI.map(({ id, Icon, color }) => {
               const action = NEGOTIATION_ACTIONS[id];
@@ -218,28 +206,14 @@ function attitudeColor(attitudeId) {
 
 function formatActionDelta(action) {
   return [
-    formatDelta('Interest', action.interestDelta),
-    formatDelta('Patience', action.patienceDelta),
+    action.interestDelta ? `Interest ${signed(action.interestDelta)}` : '',
+    action.patienceDelta ? `Patience ${signed(action.patienceDelta)}` : '',
   ].filter(Boolean).join(' · ');
-}
-
-function formatDelta(label, value) {
-  if (!value) return '';
-  return `${label} ${value > 0 ? '+' : '−'}${Math.abs(value)}`;
 }
 
 const contentSx = {
   px: { xs: 1.25, sm: 2.25 },
   pb: { xs: 1.5, sm: 2 },
-};
-
-const sectionTitleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.7rem',
-  fontWeight: 800,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'primary.main',
 };
 
 const attitudeGridSx = {

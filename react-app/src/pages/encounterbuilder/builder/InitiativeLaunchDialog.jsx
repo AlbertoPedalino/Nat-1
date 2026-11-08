@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, ToggleButton, ToggleButtonGroup, Typography,
+  Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
+import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
 // (surprise, a ruling), one row per creature — the second of three goblins can
@@ -19,11 +20,7 @@ const SIDES = [
 ];
 
 export default function InitiativeLaunchDialog({ open, onClose, encounter, players, onLaunch }) {
-  return open ? (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <LaunchPanel encounter={encounter} players={players} onClose={onClose} onLaunch={onLaunch} />
-    </Dialog>
-  ) : null;
+  return open ? <LaunchPanel encounter={encounter} players={players} onClose={onClose} onLaunch={onLaunch} /> : null;
 }
 
 // Mounted only while open, so every opening starts from "everyone normal".
@@ -41,62 +38,67 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
   });
 
   return (
-    <>
-      <DialogTitle>Initiative at launch</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
-          Set only the exceptions; everyone else rolls as usual. Any advantage plus any disadvantage is a straight roll.
-        </Typography>
-        <Stack spacing={2}>
-          {SIDES.map(({ side, label }) => {
-            const sideRows = rows.filter((row) => row.side === side);
-            if (!sideRows.length) return null;
-            const keys = sideRows.map((row) => row.key);
-            const values = new Set(keys.map((key) => choices[key] || 'none'));
-            return (
-              <Stack key={side} spacing={0.75}>
-                <Box sx={rowSx}>
-                  <Typography variant="overline" sx={{ flex: 1, color: 'primary.main' }}>{label}</Typography>
-                  <ModeToggle
-                    label={`All ${label.toLowerCase()}`}
-                    value={values.size === 1 ? [...values][0] : null}
-                    onChange={(value) => choose(keys, value)}
-                  />
-                </Box>
-                {sideRows.map((row) => {
-                  const choice = choices[row.key];
-                  const own = row.sources.adv || row.sources.disadv;
-                  const result = advArgFor(choice ? withExtraSource(row.sources, choice) : row.sources);
-                  return (
-                    <Box key={row.key} sx={rowSx}>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>{row.name}</Typography>
-                        {own || choice ? (
-                          <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
-                            {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
-                          </Typography>
-                        ) : null}
-                      </Box>
-                      <ModeToggle
-                        label={row.name}
-                        value={choice || 'none'}
-                        onChange={(value) => choose([row.key], value)}
-                      />
+    <SheetDialog
+      open
+      onClose={onClose}
+      title="Initiative at launch"
+      icon={<Swords size={14} />}
+      showClose
+      actions={(
+        <>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button variant="contained" startIcon={<Swords size={16} />} onClick={() => onLaunch(choices)}>
+            Launch
+          </Button>
+        </>
+      )}
+    >
+      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+        Set only the exceptions; everyone else rolls as usual. Any advantage plus any disadvantage is a straight roll.
+      </Typography>
+      <Stack spacing={2}>
+        {SIDES.map(({ side, label }) => {
+          const sideRows = rows.filter((row) => row.side === side);
+          if (!sideRows.length) return null;
+          const keys = sideRows.map((row) => row.key);
+          const values = new Set(keys.map((key) => choices[key] || 'none'));
+          return (
+            <Stack key={side} spacing={0.75}>
+              <Box sx={rowSx}>
+                <Typography variant="overline" sx={{ flex: 1, color: 'primary.main' }}>{label}</Typography>
+                <ModeToggle
+                  label={`All ${label.toLowerCase()}`}
+                  value={values.size === 1 ? [...values][0] : null}
+                  onChange={(value) => choose(keys, value)}
+                />
+              </Box>
+              {sideRows.map((row) => {
+                const choice = choices[row.key];
+                const own = row.sources.adv || row.sources.disadv;
+                const result = advArgFor(choice ? withExtraSource(row.sources, choice) : row.sources);
+                return (
+                  <Box key={row.key} sx={rowSx}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>{row.name}</Typography>
+                      {own || choice ? (
+                        <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
+                          {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
+                        </Typography>
+                      ) : null}
                     </Box>
-                  );
-                })}
-              </Stack>
-            );
-          })}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" startIcon={<Swords size={16} />} onClick={() => onLaunch(choices)}>
-          Launch
-        </Button>
-      </DialogActions>
-    </>
+                    <ModeToggle
+                      label={row.name}
+                      value={choice || 'none'}
+                      onChange={(value) => choose([row.key], value)}
+                    />
+                  </Box>
+                );
+              })}
+            </Stack>
+          );
+        })}
+      </Stack>
+    </SheetDialog>
   );
 }
 

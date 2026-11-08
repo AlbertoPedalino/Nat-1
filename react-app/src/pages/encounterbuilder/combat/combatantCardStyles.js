@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
-export const nameSpanStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
 export const rowSx = {
   display: 'flex',

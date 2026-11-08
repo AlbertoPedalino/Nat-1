@@ -4,14 +4,9 @@ import {
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import {
-  addRoll,
-  currentBubbles,
-  currentThrows,
-  normalizeRoll,
-  rollAuthor,
+  addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor,
 } from '../../../shared/vtt/rolls/rollFeed.js';
 import { rollCustomFormula } from '../../../shared/vtt/rolls/customRoll.js';
-import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { makeId } from '../../../shared/ids.js';
@@ -95,20 +90,9 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     const result = rollDice(notation, type, Math.random, { advantage });
     if (!result) return null;
     const actorName = actor.actorName || 'GM';
-    const toast = buildEncounterDiceToast({ ...result, actor: actorName });
-    const timestamp = Date.now();
-    const entry = {
-      ...toast,
-      id: makeId('creature'),
-      timestamp,
-      actorName,
-      characterId: null,
-      sourceRef: actor.sourceRef || null,
-      ...normalizeRollIdentity(actor),
-      note,
-      visibility: visibility === 'public' ? 'public' : 'gm',
-      thrown: Boolean(toast.rolls?.length),
-    };
+    const entry = makeRollEntry(buildEncounterDiceToast({ ...result, actor: actorName }), {
+      idPrefix: 'creature', actorName, sourceRef: actor.sourceRef, identity: actor, note, visibility,
+    });
     acceptRoll(entry, { local: true });
     publish(entry, { visibility: entry.visibility });
     return entry;

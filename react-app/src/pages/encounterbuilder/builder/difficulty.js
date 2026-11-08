@@ -1,11 +1,12 @@
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS, XT } from '../state/constants.js';
 import { clampInt, numberOr } from '../../../shared/numbers.js';
+import { DEFAULT_PARTY, MAX_PARTY_LEVEL, MAX_PARTY_SIZE } from '../state/partyState.js';
 
 export function calculateDifficulty(encounter, party) {
   const totalXp = (Array.isArray(encounter) ? encounter : [])
     .reduce((sum, item) => sum + numberOr(item.xp, 0) * clampInt(item.qty, 0, 99, 0), 0);
-  const count = clampInt(party?.count, 1, 10, 4);
-  const level = clampInt(party?.level, 1, 20, 1);
+  const count = clampInt(party?.count, 1, MAX_PARTY_SIZE, DEFAULT_PARTY.count);
+  const level = clampInt(party?.level, 1, MAX_PARTY_LEVEL, 1);
   const thresholds = XT[level - 1].map((value) => value * count);
   let difficultyIndex = -1;
   for (let i = thresholds.length - 1; i >= 0; i -= 1) {

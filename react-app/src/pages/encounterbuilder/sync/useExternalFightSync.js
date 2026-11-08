@@ -20,7 +20,8 @@ import { externalDelta } from './externalSync.js';
 //                        whole, so a fight it never heard about is deleted by
 //                        the next save it makes.
 
-function fightSignature(entry) {
+// The vitals of a fight's combatants, to tell a real change from an echo.
+function combatantVitalsSignature(entry) {
   return JSON.stringify((entry?.fight?.combatants || []).map((combatant) => [
     combatant.id,
     combatant.hpCurrent,
@@ -48,7 +49,7 @@ export function useExternalFightSync({
         .find((fight) => String(fight.id) === String(activeFightId));
       if (!entry) return;
 
-      const signature = fightSignature(entry);
+      const signature = combatantVitalsSignature(entry);
       if (signature === lastRef.current) return;
       lastRef.current = signature;
       dispatch({ type: 'syncExternalFight', entry, monsters, preserveMonsterVitals: cloudFights });
@@ -59,7 +60,7 @@ export function useExternalFightSync({
     const persisted = readPersistedInstance(instanceId, monsters);
     const current = (persisted?.fightsData?.items || [])
       .find((fight) => String(fight.id) === String(activeFightId));
-    lastRef.current = current ? fightSignature(current) : '';
+    lastRef.current = current ? combatantVitalsSignature(current) : '';
 
     return followInstanceData('encounters', instanceId, apply);
   }, [activeFightId, cloudFights, dispatch, instanceId, monsters]);
