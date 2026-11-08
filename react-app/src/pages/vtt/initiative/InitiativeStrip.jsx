@@ -6,6 +6,7 @@ import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { ICON_STRIP } from '../scene/MapCorner.jsx';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -187,15 +188,16 @@ function entryTitle(entry, gmView) {
   return notes.length ? `${entry.name} (${notes.join(', ')})` : entry.name;
 }
 
-// Top centre: the picture switch holds the top left, the tools and the sheet
-// button the top right.
+// Centred on a row of its own under the corner buttons (the picture switch top
+// left, the dice, tools and sheet top right), on every screen: sharing their
+// row it ran into them on a phone. The sides stay clear for the tool rail.
 const stripRootSx = {
   position: 'absolute',
-  top: 8,
+  top: 8 + ICON_STRIP,
   left: '50%',
   transform: 'translateX(-50%)',
   zIndex: 6,
-  maxWidth: { xs: 'calc(100% - 104px)', md: 'min(760px, calc(100% - 340px))' },
+  maxWidth: { xs: 'calc(100% - 104px)', md: 'min(760px, calc(100% - 104px))' },
   display: 'flex',
   justifyContent: 'center',
   cursor: 'default',
