@@ -38,3 +38,34 @@ test('a Large piece is drawn on its corner and dropped back on the same hex', ()
   const landing = dropPosition({ pointerWorld: { x: rect.x, y: rect.y }, grabOffset: { x: 0, y: 0 }, grid, span: { w: 2, h: 2 } });
   assert.deepEqual(landing, { x: 3, y: 2 });
 });
+
+test('every size moves by whole hexes in all six directions, wherever it is grabbed', () => {
+  const directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+  for (const span of [1, 2, 3, 4]) {
+    const token = { x: 4, y: 3, w: span, h: span };
+    const rect = tokenWorldRect(token, grid);
+    // Grabbed at a corner, the middle, and somewhere odd on the piece.
+    for (const grab of [[0, 0], [rect.width / 2, rect.height / 2], [rect.width * 0.8, rect.height * 0.3]]) {
+      const grabOffset = { x: grab[0], y: grab[1] };
+      for (const [dq, dr] of directions) {
+        const from = hexToWorld({ q: token.x, r: token.y }, grid);
+        const to = hexToWorld({ q: token.x + dq, r: token.y + dr }, grid);
+        const pointerWorld = { x: rect.x + grab[0] + (to.x - from.x), y: rect.y + grab[1] + (to.y - from.y) };
+        const landing = dropPosition({ pointerWorld, grabOffset, grid, span: token });
+        assert.deepEqual(landing, { x: token.x + dq, y: token.y + dr }, `span ${span}, move ${dq},${dr}`);
+      }
+    }
+  }
+});
+
+test('a piece dropped where it was grabbed stays put, and its footprint moves with it', () => {
+  for (const span of [1, 2, 3, 4]) {
+    const token = { x: -2, y: 5, w: span, h: span };
+    const rect = tokenWorldRect(token, grid);
+    const grabOffset = { x: rect.width / 3, y: rect.height / 4 };
+    const landing = dropPosition({ pointerWorld: { x: rect.x + grabOffset.x, y: rect.y + grabOffset.y }, grabOffset, grid, span: token });
+    assert.deepEqual(landing, { x: -2, y: 5 });
+    const moved = hexFootprint({ q: -1, r: 5 }, span).map(({ q, r }) => `${q - 1}:${r}`).sort();
+    assert.deepEqual(moved, keys(hexFootprint({ q: -2, r: 5 }, span)));
+  }
+});
