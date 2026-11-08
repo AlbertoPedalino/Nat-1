@@ -2,7 +2,7 @@ import { Avatar, Box, Button, Divider, IconButton, Stack, Typography } from '@mu
 import { ExternalLink, X } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
-import { campaignSheetUrl } from './campaignSheetUrl.js';
+import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
@@ -44,7 +44,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
           {sourceId ? (
             <Button
               component="a"
-              href={campaignSheetUrl(sourceId)}
+              href={campaignSheetUrl(sourceId, { edit: true })}
               target="_blank"
               rel="noopener"
               size="small"

@@ -69,6 +69,11 @@ export const VTT_COLORS = Object.freeze({
   turnActive: '#3fe0ff',
 });
 
+// The map's darker hit point tones, for bars drawn over the board.
+export const VTT_HP_TONE_COLORS = Object.freeze({
+  healthy: VTT_COLORS.hpHealthy, wounded: VTT_COLORS.hpWounded, critical: VTT_COLORS.hpCritical,
+});
+
 export function vttAlpha(color, alpha) {
   const match = /^#([0-9a-f]{6})$/i.exec(color || '');
   if (!match) return color;

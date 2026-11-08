@@ -10,27 +10,20 @@
 // Everything here goes through the builder's own storage functions rather than
 // touching its keys, so a change to how it stores things changes this too.
 
-import { buildCombat, restoreFight, snapshotFight } from '../../../shared/encounter/combat.js';
+import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import {
   makeSavedEncounter, persistFights, persistLibrary, readPersistedInstance,
 } from '../state/storage.js';
 import { getInstance } from '../../../shared/instances/instanceStore.js';
-import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
+import { hydrateEncounterItems, toEncounterMonster } from '../../../shared/bestiary/monsterUtils.js';
+import { freeId, makeFightEntry } from '../../../shared/encounter/fightRecord.js';
 import { isFightSuperseded } from '../../../shared/encounter/library.js';
 import { DEFAULT_PARTY } from '../state/partyState.js';
 
 // The builder's own shape for a line of an encounter: a creature and how many.
 function encounterItem(monster, count) {
-  return {
-    id: `dungeon-${monster.name}-${count}`,
-    name: monster.name,
-    source: monster.source || '',
-    cr: monster.cr,
-    xp: monster.xp,
-    qty: count,
-    monsterData: monster,
-  };
+  return { ...toEncounterMonster(monster, `dungeon-${monster.name}-${count}`), qty: count };
 }
 
 export function encounterFromGroups(groups) {
@@ -83,27 +76,16 @@ export function sendEncounterToBuilder(instanceId, {
   const players = withSheetIdentity(persisted.partyData?.players || [], roster);
 
   const entry = makeSavedEncounter(name, encounter, party);
+  entry.id = freeId(entry.id, persisted.library);
   const library = [entry, ...(persisted.library || [])];
 
+  const items = persisted.fightsData?.items || [];
   const combat = buildCombat(encounter, players, entry.id);
+  combat.fightId = freeId(combat.fightId, items);
   combat.name = entry.name;
-  const fightEntry = {
-    id: combat.fightId,
-    name: entry.name,
-    savedAt: Date.now(),
-    encounterId: entry.id,
-    // The library card travels with the fight. A fight is only reachable
-    // through the card of the encounter it was launched from, and the library
-    // is still a blob in one browser — without this, a room sent from here
-    // would arrive on another device as a fight nothing can open.
-    encounter: entry,
-    // The builder's own snapshot, so a fight sent from the map is stored
-    // exactly as one launched by hand — including the vitals that were once
-    // dropped here by listing fields out by name.
-    fight: snapshotFight(combat),
-  };
-  const fights = [fightEntry, ...(persisted.fightsData?.items || [])
-    .filter((fight) => fight.id !== fightEntry.id)];
+  // Stored exactly as a fight launched by hand, with its library card.
+  const fightEntry = makeFightEntry(combat, { name: entry.name, encounterId: entry.id, encounter: entry });
+  const fights = [fightEntry, ...items];
 
   persistLibrary(instanceId, library);
   // Not made active: the GM may be sending twenty rooms in a row, and each one
@@ -171,21 +153,9 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
   const players = withSheetIdentity(persisted.partyData?.players || [], roster);
   const combat = buildCombat(encounter, players, card.id);
   if (!combat.combatants.length) throw new Error('That encounter has no creatures to place.');
-  // An id minted in the same millisecond as a fight already in the list would
-  // overwrite it rather than stand beside it.
-  while (items.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
+  combat.fightId = freeId(combat.fightId, items);
   combat.name = card.name;
-  const fightEntry = {
-    id: combat.fightId,
-    name: card.name,
-    savedAt: Date.now(),
-    encounterId: card.id,
-    // The card travels with the fight, as it does for a room sent from the map:
-    // a device that never got this instance's library still has something to
-    // open the fight from.
-    encounter: card,
-    fight: snapshotFight(combat),
-  };
+  const fightEntry = makeFightEntry(combat, { name: card.name, encounterId: card.id, encounter: card });
   // The fights of the old version go, as a launch in the builder drops them:
   // named on the way out, because their rows are the caller's to delete. Not
   // the one the builder is running, saved over mid-combat: it is left to finish.

@@ -25,6 +25,17 @@ export function resolveMortality({ player, hp, deathSaves, conditions }) {
   };
 }
 
+// A player character at 0 HP: where the death save controls belong, dead or
+// not (a dead character's saves can still be corrected).
+export function atDeathsDoor({ player, hp }) {
+  return Boolean(player) && hp != null && Number(hp) === 0;
+}
+
+// A player character at 0 HP and not yet dead: the one rolling death saves.
+export function isDying({ player, hp, conditions }) {
+  return atDeathsDoor({ player, hp }) && !normalizeConditions(conditions).includes(DEAD_CONDITION_KEY);
+}
+
 // The changes a sheet, the encounter builder and the battle map make by hand,
 // on the same { player, hp, deathSaves, conditions } shape. Each returns
 // { hp, deathSaves, conditions, dead }.

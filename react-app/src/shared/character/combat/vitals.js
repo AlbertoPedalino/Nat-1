@@ -158,3 +158,9 @@ export function hpTone(current, max) {
   if (ratio > 0.25) return 'wounded';
   return 'critical';
 }
+
+// `tones[hpTone(current, max)]`: the colour a readout takes from a palette of
+// the three tones (HP_TONE_COLORS, VTT_HP_TONE_COLORS).
+export function hpToneColor(current, max, tones) {
+  return tones[hpTone(current, max)];
+}

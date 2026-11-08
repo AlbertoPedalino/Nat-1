@@ -7,6 +7,7 @@ import {
   CONDITION_ACCENT as COND_ACCENT,
   ConditionCard,
   ConditionPill,
+  ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -107,16 +108,13 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
           </Box>
           {open && (
             <Box>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(108px,1fr))', gap: 0.25, mt: 0.5 }}>
-                {CONDITIONS.map((c) => {
-                  const isOn = sheet.activeConditions.includes(c.key);
-                  return (
-                    <Chip key={c.key} size="small" label={c.label} variant={isOn ? 'filled' : 'outlined'}
-                      onClick={() => onToggle(c.key)}
-                      sx={{ fontSize: '0.5rem', cursor: 'pointer', justifyContent: 'flex-start', '&:hover': { boxShadow: `0 0 0 1px ${isOn ? COND_ACCENT : '${uiAlpha(UI_COLORS.white, 0.25)}'}` }, ...(isOn ? { color: COND_ACCENT, bgcolor: alpha(COND_ACCENT, 0.14) } : {}) }} />
-                  );
-                })}
-              </Box>
+              <ConditionToggleGrid
+                conditions={CONDITIONS}
+                active={sheet.activeConditions}
+                onToggle={onToggle}
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(108px,1fr))', gap: 0.25, mt: 0.5 }}
+                chipSx={{ fontSize: '0.5rem' }}
+              />
               {active.length > 0 && (
                 <Button
                   size="small"

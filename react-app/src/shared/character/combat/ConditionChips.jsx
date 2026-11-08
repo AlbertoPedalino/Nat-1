@@ -1,7 +1,9 @@
 import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
-import { UI_COLORS } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { ASSIGNABLE_CONDITIONS } from './conditions.js';
+import { asArray } from '../../lists.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
@@ -103,4 +105,41 @@ const cardCloseSx = {
   color: 'text.secondary',
   borderRadius: '3px',
   '&:hover': { color: CONDITION_ACCENT },
+};
+
+// The grid a condition is switched on and off from, the same on the sheet, in
+// the encounter builder and in the map's piece menu: one chip per condition,
+// an active one in the conditions accent. `sx` lays the grid out and `chipSx`
+// sizes the chips for their surface.
+export function ConditionToggleGrid({
+  conditions = ASSIGNABLE_CONDITIONS, active, onToggle, disabled = false, sx, chipSx,
+}) {
+  return (
+    <Box sx={sx}>
+      {conditions.map((condition) => {
+        const isOn = active.includes(condition.key);
+        return (
+          <Chip
+            key={condition.key}
+            size="small"
+            label={condition.label}
+            variant={isOn ? 'filled' : 'outlined'}
+            disabled={disabled}
+            onClick={disabled ? undefined : () => onToggle(condition.key)}
+            sx={[
+              toggleChipSx,
+              isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, 0.14) } : null,
+              { '&:hover': { boxShadow: `0 0 0 1px ${isOn ? CONDITION_ACCENT : uiAlpha(UI_COLORS.white, 0.25)}` } },
+              ...asArray(chipSx),
+            ]}
+          />
+        );
+      })}
+    </Box>
+  );
+}
+
+const toggleChipSx = {
+  cursor: 'pointer',
+  justifyContent: 'flex-start',
 };

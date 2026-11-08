@@ -53,6 +53,8 @@ export const UI_COLORS = Object.freeze({
   dangerBright: '#e5484d',
   dangerFlat: '#e74c3c',
   danger: '#de675f',
+  // An encounter rated High, between warning and danger.
+  difficultyHigh: '#e27b3e',
   dangerFumble: '#d3473a',
   dangerHp: '#c54a3f',
   dangerSoft: '#d99292',
@@ -85,6 +87,11 @@ export const UI_COLORS = Object.freeze({
   pcToken: '#5c8fe0',
   blue: '#4d95d6',
   purple: '#9d7fb8',
+});
+
+// The colour of a hit point readout by its tone (vitals.hpTone).
+export const HP_TONE_COLORS = Object.freeze({
+  healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerHp,
 });
 
 // A colour of the palette at some opacity: uiAlpha(UI_COLORS.gold, 0.4).

@@ -1,16 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
-import { UI_COLORS } from '../../ui/colors.js';
+import { HP_TONE_COLORS, UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
-import { hpTone } from './vitals.js';
+import { hpToneColor } from './vitals.js';
 
 const CINZEL = UI_FONTS.display;
 
-const HP_TONE_COLORS = { healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerHp };
-
-function hpColor(current, max) {
-  return HP_TONE_COLORS[hpTone(current, max)];
-}
 
 // "HP cur / max [state] + stepper" pool tracker shared by creature-like sheet
 // panels (Eldritch Cannon, Wild Companion familiar). Owns the HP readout styling
@@ -27,7 +22,7 @@ export default function HpPoolBar({
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mr: 0.4 }}>HP</Typography>
-        <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '1.25rem', fontWeight: 700, color: hpColor(current, max), lineHeight: 1 }}>{current}</Typography>
+        <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '1.25rem', fontWeight: 700, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: 1 }}>{current}</Typography>
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', color: 'text.secondary' }}>/</Typography>
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', fontWeight: 600, color: 'text.secondary' }}>{max}</Typography>
         {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: '0.62rem', color: UI_COLORS.dangerMuted, ml: 0.5 }}>{stateLabel}</Typography> : null}

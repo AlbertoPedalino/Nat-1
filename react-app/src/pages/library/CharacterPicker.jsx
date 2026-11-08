@@ -19,6 +19,7 @@ import InstanceRow from './components/InstanceRow.jsx';
 import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
+import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -59,7 +60,7 @@ export default function CharacterPicker() {
   const handleOpen = useCallback(async (row) => {
     const isOwn = row.origin === 'local' || row.owner === myId;
     if (!isOwn) {
-      navigate(`/campaign-sheet?id=${encodeURIComponent(row.id)}${isGm ? '&edit=1' : ''}`);
+      navigate(campaignSheetPath(row.id, { edit: isGm }));
       return;
     }
     const route = REGISTRY_META.gb_char_registry.route(row.id);

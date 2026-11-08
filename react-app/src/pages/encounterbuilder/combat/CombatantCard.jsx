@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { ChevronDown, ChevronUp, ExternalLink, HeartPulse, Shield, Sparkles, X } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
-import { campaignSheetUrl } from '../campaign/campaignSheetUrl.js';
+import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
 import CombatantReminders from './CombatantReminders.jsx';
@@ -13,7 +13,8 @@ import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { hpTone } from '../../../shared/character/combat/vitals.js';
+import { hpToneColor } from '../../../shared/character/combat/vitals.js';
+import { HP_TONE_COLORS } from '../../../shared/ui/colors.js';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import {
   nameSpanStyle, rowSx, removeButtonSx, identityClusterSx, avatarBaseSx, nameButtonSx,
@@ -21,6 +22,7 @@ import {
   hpToggleSx, hpFlagSx, hpDetailsSx, collapseSx, hpPanelRowSx, hpValueRowSx, hpFieldSx, hpMaxSx,
   hpBarSx, cardSx, hpRowSx, buildActiveSx, deadSx,
 } from './combatantCardStyles.js';
+import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -33,7 +35,7 @@ export default function CombatantCard({ combatant, active }) {
   const [hpDetailsOpen, setHpDetailsOpen] = useState(false);
   const isMonster = combatant.type === 'monster';
   const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
-  const isDown = !isMonster && combatant.hpCurrent === 0 && Boolean(combatant.deathSaves);
+  const isDown = atDeathsDoor({ player: !isMonster, hp: combatant.hpCurrent }) && Boolean(combatant.deathSaves);
   const tempHp = Number(combatant.tempHP) || 0;
   const maxHpBonus = Number(combatant.maxHPBonus) || 0;
   const maxHpBonusText = signed(maxHpBonus);
@@ -119,7 +121,7 @@ export default function CombatantCard({ combatant, active }) {
                   <Tooltip title="Open sheet">
                     <IconButton
                       component="a"
-                      href={campaignSheetUrl(combatant.sourceId)}
+                      href={campaignSheetUrl(combatant.sourceId, { edit: true })}
                       target="_blank"
                       rel="noopener"
                       size="small"
@@ -255,7 +257,7 @@ export default function CombatantCard({ combatant, active }) {
               <LinearProgress
                 variant="determinate"
                 value={hpPct}
-                sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpColor(hpPct) } }}
+                sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpToneColor(hpPct, 100, HP_TONE_COLORS) } }}
               />
             </>
           )}
@@ -317,11 +319,6 @@ function DeathSaves({ combatant }) {
   );
 }
 
-const HP_TONE_COLORS = { healthy: 'success.main', wounded: 'warning.main', critical: 'error.main' };
-
-function hpColor(percent) {
-  return HP_TONE_COLORS[hpTone(percent, 100)];
-}
 
 function selectInputText(event) {
   event.target.select();

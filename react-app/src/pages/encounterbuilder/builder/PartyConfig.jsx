@@ -2,7 +2,7 @@ import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography }
 import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import { campaignSheetUrl } from '../campaign/campaignSheetUrl.js';
+import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
@@ -49,7 +49,7 @@ export default function PartyConfig() {
               {player.sourceId ? (
                 <Button
                   component="a"
-                  href={campaignSheetUrl(player.sourceId)}
+                  href={campaignSheetUrl(player.sourceId, { edit: true })}
                   target="_blank"
                   rel="noopener"
                   size="small"

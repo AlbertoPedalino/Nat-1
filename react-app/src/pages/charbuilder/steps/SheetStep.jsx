@@ -7,7 +7,7 @@ import { downloadCharacterExport } from '../../../shared/character/profile/chara
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
+import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -109,7 +109,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
                   // is uploaded first so there is a server row to open.
                   let id = importDraft ? null : charIdFromUrl();
                   if (!id) id = await onUploadToCloud?.();
-                  if (id) navigate(`/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`);
+                  if (id) navigate(campaignSheetPath(id, { edit: true }));
                   return;
                 }
                 const saved = saveCharacter(character, state.data);

@@ -17,6 +17,7 @@ import { ensureSheetRuntimeAdapters } from '../../shared/character/sheet/sheetRu
 import { signed } from '../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -84,8 +85,7 @@ export default function CampaignsPage() {
   const openCampaignChar = async (ch, campaign) => {
     const mine = ch.owner === myId;
     const canEdit = mine || isGm || campaign.gm === myId;
-    if (!canEdit) { navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}`); return; }
-    navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}&edit=1`);
+    navigate(campaignSheetPath(ch.id, { edit: canEdit }));
   };
 
   const assignChar = async (charId, campaignId) => {

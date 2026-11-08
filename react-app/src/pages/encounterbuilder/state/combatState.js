@@ -1,6 +1,5 @@
-import {
-  absorbFightTurn, buildCombat, snapshotFight, autoFightName,
-} from '../../../shared/encounter/combat.js';
+import { absorbFightTurn, buildCombat, autoFightName } from '../../../shared/encounter/combat.js';
+import { freeId, makeFightEntry } from '../../../shared/encounter/fightRecord.js';
 import { applySheetVitals } from '../../../shared/encounter/combatantVitals.js';
 import { makeSavedEncounter } from './storage.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
@@ -57,13 +56,12 @@ export function launchCombat(state, encounter, encounterId, name, quest = null, 
   let id = encounterId || null;
   if (id == null && encounter.length) {
     const entry = makeSavedEncounter(name, encounter, state.party, quest);
-    while (library.some((saved) => saved.id === entry.id)) entry.id += 1;
+    entry.id = freeId(entry.id, library);
     library = [entry, ...library];
     id = entry.id;
   }
   const combat = buildCombat(encounter, state.players, id, Math.random, { initiative: initiative || {} });
-  // Two quick launches must not replace each other through Date.now() ids.
-  while (state.fights.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
+  combat.fightId = freeId(combat.fightId, state.fights);
   combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);
   return withCombat({
     ...state,
@@ -77,18 +75,14 @@ export function launchCombat(state, encounter, encounterId, name, quest = null, 
 
 export function withCombat(state, combat, patch = {}) {
   const existing = (state.fights || []).find((fight) => fight.id === combat.fightId);
-  const fightEntry = {
-    id: combat.fightId,
+  const fightEntry = makeFightEntry(combat, {
     name: existing?.name || combat.name || autoFightName(combat.combatants),
-    savedAt: Date.now(),
     encounterId: combat.encounterId || null,
-    // The library card a fight sent from the battle map carries with it, so a
-    // device that never wrote the library blob still has something to open it
-    // from. Kept across a launch: dropping it here would clear the column on the
-    // next save, and the fight would go dark on every other screen.
-    ...(existing?.encounter ? { encounter: existing.encounter } : {}),
-    fight: snapshotFight(combat),
-  };
+    // The library card a fight sent from the battle map carries is kept across
+    // a launch: dropping it here would clear the column on the next save, and
+    // the fight would go dark on every other screen.
+    encounter: existing?.encounter || null,
+  });
   // Keep one fight per encounter: a fresh launch supersedes the previous fight.
   const fights = [fightEntry, ...state.fights.filter((fight) => (
     fight.id !== fightEntry.id

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import { hpColor } from './tokenHpColor.js';
+import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import { VTT_HP_TONE_COLORS } from '../../../shared/vtt/colors.js';
 import {
   stackInsideSx,
   stackBelowSx,
@@ -105,7 +105,7 @@ export default function TokenVitalsStack({
         </Box>
       ) : hasHp ? (
         <Box sx={{ ...hpBarSx, width: hex ? '72%' : '88%' }} title={`${current} / ${token.hpMax}`}>
-          <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpColor(ratio) }} />
+          <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpToneColor(ratio, 1, VTT_HP_TONE_COLORS) }} />
           <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
         </Box>
       ) : null}

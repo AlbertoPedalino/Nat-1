@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Box, Chip } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { Box } from '@mui/material';
 import {
-  ASSIGNABLE_CONDITIONS,
   EXHAUSTION_KEY,
   conditionLabel,
   normalizeConditions,
 } from '../../../shared/character/combat/conditions.js';
 import {
-  CONDITION_ACCENT,
   ConditionCard,
   ConditionPill,
+  ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -76,30 +74,12 @@ export default function CombatantConditions({ combatant }) {
         </Box>
       ) : null}
     >
-      <Box sx={gridSx}>
-        {ASSIGNABLE_CONDITIONS.map((condition) => {
-          const isOn = active.includes(condition.key);
-          return (
-            <Chip
-              key={condition.key}
-              size="small"
-              label={condition.label}
-              variant={isOn ? 'filled' : 'outlined'}
-              onClick={() => toggle(condition.key)}
-              sx={{
-                height: 20,
-                fontSize: '0.6rem',
-                cursor: 'pointer',
-                justifyContent: 'flex-start',
-                ...(isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, 0.14) } : null),
-              }}
-            />
-          );
-        })}
-      </Box>
+      <ConditionToggleGrid active={active} onToggle={toggle} sx={gridSx} chipSx={gridChipSx} />
     </MarkerRow>
   );
 }
+
+const gridChipSx = { height: 20, fontSize: '0.6rem' };
 
 const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.4, mt: 0.5 };
 

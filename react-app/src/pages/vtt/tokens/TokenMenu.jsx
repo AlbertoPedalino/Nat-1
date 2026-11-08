@@ -19,6 +19,7 @@ import TokenMenuActions from './TokenMenuActions.jsx';
 import { compactFieldSx, sectionTitleSx } from './tokenMenuStyles.js';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
+import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -174,7 +175,7 @@ export default function TokenMenu({
           />
         ) : null}
 
-        {!isMapObject && token.characterId && Number(hpCurrent) === 0 ? (
+        {!isMapObject && atDeathsDoor({ player: Boolean(token.characterId), hp: hpCurrent }) ? (
           <DeathSaveControls
             deathSaves={deathSaves}
             disabled={!canSetDeathSaves}

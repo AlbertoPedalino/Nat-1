@@ -10,6 +10,7 @@
 // touch without one of them losing.
 
 import { cardTime, dedupeLibraryById } from './library.js';
+import { snapshotFight } from './combat.js';
 
 export const FIGHT_COLUMNS = 'id, instance_id, name, encounter_id, encounter, fight, updated_at, vitals_revision';
 
@@ -23,6 +24,32 @@ function sameShapeId(value) {
   if (value == null) return null;
   const text = String(value);
   return /^\d+$/.test(text) && Number.isSafeInteger(Number(text)) ? Number(text) : text;
+}
+
+// A fight as the builder's `fights` list holds it, from the running combat:
+// its snapshot, and the library card it was launched from when the caller has
+// one to carry (a fight is only reachable through that card, and the library is
+// a blob another device may never have been given).
+export function makeFightEntry(combat, {
+  name, encounterId = null, encounter = null, savedAt = Date.now(),
+} = {}) {
+  return {
+    id: combat.fightId,
+    name,
+    savedAt,
+    encounterId,
+    ...(encounter ? { encounter } : {}),
+    fight: snapshotFight(combat),
+  };
+}
+
+// `id`, or the next number up that no item in `taken` has: the builder mints
+// ids with Date.now(), and two minted in one millisecond would overwrite each
+// other instead of standing side by side.
+export function freeId(id, taken) {
+  let next = id;
+  while ((taken || []).some((item) => item?.id === next)) next += 1;
+  return next;
 }
 
 // The shape the builder's own `fights` array holds, so what comes back from the

@@ -1,6 +1,6 @@
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
-import { ASSIGNABLE_CONDITIONS } from '../../../shared/character/combat/conditions.js';
+import { ConditionToggleGrid } from '../../../shared/character/combat/ConditionChips.jsx';
 import { sectionTitleSx } from './tokenMenuStyles.js';
 
 // The piece menu's side-by-side Conditions and Reminders columns.
@@ -11,23 +11,13 @@ export default function TokenMarkers({
     <Box sx={markerGridSx}>
       <Box sx={markerSectionSx}>
         <Typography sx={sectionTitleSx}>Conditions</Typography>
-        <Box sx={chipsSx}>
-          {ASSIGNABLE_CONDITIONS.map((condition) => {
-            const active = conditions.includes(condition.key);
-            return (
-              <Chip
-                key={condition.key}
-                size="small"
-                label={condition.label}
-                variant={active ? 'filled' : 'outlined'}
-                color={active ? 'warning' : 'default'}
-                disabled={!canMark}
-                onClick={canMark ? () => onConditionClick(condition.key) : undefined}
-                sx={compactChipSx}
-              />
-            );
-          })}
-        </Box>
+        <ConditionToggleGrid
+          active={conditions}
+          onToggle={onConditionClick}
+          disabled={!canMark}
+          sx={chipsSx}
+          chipSx={compactChipSx}
+        />
       </Box>
 
       {/* Reminders ("Bardic Inspiration", "Guidance"): written by name above

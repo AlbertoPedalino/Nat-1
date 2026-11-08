@@ -139,7 +139,7 @@ test('no literal colours outside the palettes and colour data', () => {
     'shared/ui/colors.js', 'shared/vtt/colors.js', 'app/theme.js', 'shared/ui/entityColors.js',
     'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js',
     'shared/ui/IconColorPicker.jsx', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
-    'pages/encounterbuilder/state/constants.js', 'shared/encounter/combatLabels.js', 'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
+    'shared/encounter/combatLabels.js', 'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
     'shared/character/dice/D100Orb.jsx', 'shared/character/dice/Die3D.jsx', 'shared/vtt/tokens/encounterImport.js',
   ];
   assert.deepEqual(sourceLinesMatching(/['"`]#[0-9a-fA-F]{3,8}['"`]|rgba?\(\s*\d/, { allow: DATA })

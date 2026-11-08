@@ -19,6 +19,7 @@ import {
   badgeSx,
   deadBadgeSx,
 } from './tokenSpriteStyles.js';
+import { isDying } from '../../../shared/character/combat/mortality.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -102,7 +103,7 @@ export default function TokenSprite({
   // and which ones do is a call the GM makes at the table, not a default.
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
   const current = token.hpCurrent ?? token.hpMax;
-  const showDeathSaves = isCharacter && Number(current) === 0 && !dead;
+  const showDeathSaves = isDying({ player: isCharacter, hp: current, conditions });
   // The label the GM typed in secret replaces the public one for them only; a
   // player never receives it in the first place.
   const name = token.secretLabel || token.label || '';
