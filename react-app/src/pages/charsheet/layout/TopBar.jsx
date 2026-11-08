@@ -107,10 +107,13 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
         </>
       ) : null}
       <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? '0.45rem' : { xs: '0.6rem', md: '1.1rem' } }}>
+      {/* On a desktop three columns — identity, XP, actions — with XP in the
+          middle; below that a column (see the XP and actions row). */}
       <Box sx={{
-        display: 'flex', alignItems: 'center', gap: embedded ? '0.4rem' : { xs: '0.4rem', md: '1rem' },
-        flexDirection: embedded ? 'column' : { xs: 'column', md: 'row' },
-        justifyContent: embedded ? 'flex-start' : { md: 'space-between' },
+        display: embedded ? 'flex' : { xs: 'flex', md: 'grid' },
+        gridTemplateColumns: { md: 'minmax(0, 1fr) auto minmax(0, 1fr)' },
+        alignItems: 'center', gap: embedded ? '0.4rem' : { xs: '0.4rem', md: '1rem' },
+        flexDirection: 'column',
         py: embedded ? '0.35rem' : { xs: '0.35rem', md: '0.6rem' },
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: embedded ? '100%' : { xs: '100%', md: 'auto' } }}>
@@ -184,9 +187,11 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           </Box>
         </Box>
 
-        {/* XP and the actions: stacked on a phone, one row from a tablet up. */}
+        {/* XP and the actions: stacked on a phone, one row on a tablet; on a
+            desktop the box dissolves and they take the grid's last columns. */}
         <Box sx={{
-          display: 'flex', alignItems: embedded ? 'stretch' : { xs: 'stretch', sm: 'center' },
+          display: embedded ? 'flex' : { xs: 'flex', md: 'contents' },
+          alignItems: embedded ? 'stretch' : { xs: 'stretch', sm: 'center' },
           flexDirection: embedded ? 'column' : { xs: 'column', sm: 'row' },
           gap: embedded ? '0.4rem' : { xs: '0.4rem', sm: '1rem' },
           width: embedded ? '100%' : { xs: '100%', md: 'auto' },

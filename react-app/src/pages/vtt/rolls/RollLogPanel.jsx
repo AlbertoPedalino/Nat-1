@@ -1,55 +1,31 @@
-import { useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { Dices, Trash2 } from 'lucide-react';
-import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.jsx';
+import { Trash2 } from 'lucide-react';
 import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
 import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import {
-  battleMapDialogActionsSx,
-  battleMapDialogContentSx,
-  battleMapDialogPaperSx,
-  battleMapDialogTitleSx,
-} from '../map/battleMapSurface.js';
 
-// Everything the table has rolled since this page was opened, newest first,
-// plus the same custom-dice picker the character sheets use — so the GM, who
-// has no sheet, and a player whose sheet is in another tab can still roll to
-// the table from here.
+// Everything the table has rolled since this page was opened, newest first.
+// Rolling from the map (the GM has no sheet; a player's may be in another tab)
+// is the dice half of RollsButton.
 //
 // No persistence, and the panel says so: a roll is something that was said, and
 // a log that survived a reload would invite people to treat it as a record of
 // the session — which it is not, since it only ever held what arrived while
 // somebody had the map open.
-export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
-  const [rollerOpen, setRollerOpen] = useState(false);
-
+export default function RollLogPanel({ feed, onClear }) {
   return (
     <Stack spacing={0.75}>
-      <Stack direction="row" spacing={0.75}>
-        {onCustomRoll ? (
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<Dices size={14} />}
-            onClick={() => setRollerOpen(true)}
-            sx={{ flex: 1 }}
-          >
-            Custom Roll
-          </Button>
-        ) : null}
-        {onClear && feed?.length ? (
-          <Button
-            size="small"
-            variant="outlined"
-            aria-label="Clear the roll log"
-            onClick={onClear}
-            sx={{ minWidth: 0, px: 1, color: 'text.secondary' }}
-          >
-            <Trash2 size={14} />
-          </Button>
-        ) : null}
-      </Stack>
+      {onClear && feed?.length ? (
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Trash2 size={14} />}
+          onClick={onClear}
+          sx={{ alignSelf: 'flex-end', color: 'text.secondary' }}
+        >
+          Clear
+        </Button>
+      ) : null}
 
       {!feed?.length ? (
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -64,18 +40,6 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
           Kept in memory only — this list is gone on reload.
         </Typography>
       ) : null}
-
-      <CustomRollDialog
-        open={rollerOpen}
-        onClose={() => setRollerOpen(false)}
-        onRoll={onCustomRoll}
-        // The map is often fullscreen, and a dialog on the body is not painted
-        // at all when it is.
-        slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
-        titleSx={battleMapDialogTitleSx}
-        contentSx={battleMapDialogContentSx}
-        actionsSx={battleMapDialogActionsSx}
-      />
     </Stack>
   );
 }

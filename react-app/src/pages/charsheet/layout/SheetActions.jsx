@@ -13,7 +13,9 @@ export default function SheetActions({
 }) {
   const groupSx = { flex: embedded ? 1 : { xs: 1, sm: 'none' } };
   return (
-    <Box sx={{ display: 'flex', gap: 1, width: embedded ? '100%' : { xs: '100%', sm: 'auto' }, flexShrink: 0 }}>
+    <Box sx={{
+      display: 'flex', gap: 1, flexShrink: 0, justifySelf: 'end', width: embedded ? '100%' : { xs: '100%', sm: 'auto' },
+    }}>
       {!readOnly ? (
         <ButtonGroup size="small" variant="outlined" aria-label="Rest" sx={groupSx}>
           <Button color="warning" startIcon={<Sun size={14} />} onClick={onShortRest} aria-label="Short rest" sx={buttonSx}>
