@@ -10,7 +10,7 @@
 // on the same square instead of drifting by whatever the pixel offset changed.
 
 import {
-  axialRound, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid, worldToAxial,
+  axialRound, hexPieceAxial, hexPieceCentre, hexPlayAreaForImage, hexWidth, isHexGrid,
 } from './hexGeometry.js';
 import { numberOr } from '../../numbers.js';
 
@@ -117,12 +117,12 @@ export function playAreaForImage(image, grid) {
 export function tokenWorldRect(token, grid) {
   const w = Math.max(0.1, numberOr(token?.w, 1));
   const h = Math.max(0.1, numberOr(token?.h, 1));
-  // On hexes x/y are axial q/r and they name the hex a piece stands ON, so the
-  // box is centred rather than hung off a corner: a square grid has a corner to
-  // hang it from, a hex does not.
+  // On hexes x/y are axial q/r and name the hex a piece hangs from; the box is
+  // centred on the piece's footprint (hexPieceCentre: a hex for an odd span,
+  // the corner between three hexes for an even one).
   if (isHexGrid(grid)) {
     const width = hexWidth(grid);
-    const centre = hexToWorld({ q: numberOr(token?.x, 0), r: numberOr(token?.y, 0) }, grid);
+    const centre = hexPieceCentre({ q: numberOr(token?.x, 0), r: numberOr(token?.y, 0) }, w, grid);
     return {
       x: centre.x - (width * w) / 2,
       y: centre.y - (width * h) / 2,
@@ -165,7 +165,7 @@ export function dropPosition({
       x: worldX + (width * Math.max(0.1, numberOr(span?.w, 1))) / 2,
       y: worldY + (width * Math.max(0.1, numberOr(span?.h, 1))) / 2,
     };
-    const axial = worldToAxial(centre, grid);
+    const axial = hexPieceAxial(centre, span?.w, grid);
     const cell = snap ? axialRound(axial) : axial;
     return { x: cell.q, y: cell.r };
   }

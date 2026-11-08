@@ -58,6 +58,53 @@ export function hexToWorld(cell, grid) {
   };
 }
 
+// A piece on hexes, by its span (1 Medium, 2 Large, 3 Huge, 4 Gargantuan).
+// An odd span is centred on its hex: Huge covers the hex and the ring around
+// it. An even span cannot be — no hex has a middle between hexes — so it is
+// centred on the lower-right corner of its hex, the one shared with the hexes
+// east (q + 1) and south-east (r + 1): Large covers those three, Gargantuan
+// the twelve around them. The piece's stored q/r stays the hex it hangs from.
+function isEvenSpan(span) {
+  const n = Math.round(numberOr(span, 1));
+  return n >= 2 && n % 2 === 0;
+}
+
+export function hexPieceCentre(cell, span, grid) {
+  const centre = hexToWorld(cell, grid);
+  if (!isEvenSpan(span)) return centre;
+  return { x: centre.x + hexWidth(grid) / 2, y: centre.y + hexHeight(grid) / 4 };
+}
+
+// The hex a piece of `span` hangs from, for a world point at its centre;
+// fractional, like worldToAxial (round it to snap).
+export function hexPieceAxial(centre, span, grid) {
+  if (!isEvenSpan(span)) return worldToAxial(centre, grid);
+  return worldToAxial({ x: centre.x - hexWidth(grid) / 2, y: centre.y - hexHeight(grid) / 4 }, grid);
+}
+
+// The hexes a piece of `span` covers when it hangs from `cell`: the hexes
+// whose centre lies within half the span of the piece's centre (3 for Large,
+// 7 for Huge, 12 for Gargantuan). Worked in hex widths, so no grid is needed.
+export function hexFootprint(cell, span) {
+  const q0 = Math.round(numberOr(cell?.q, 0));
+  const r0 = Math.round(numberOr(cell?.r, 0));
+  const n = Math.max(1, Math.round(numberOr(span, 1)));
+  if (n === 1) return [{ q: q0, r: r0 }];
+  const even = isEvenSpan(n);
+  const cx = q0 + r0 / 2 + (even ? 0.5 : 0);
+  const cy = (r0 * SQRT3) / 2 + (even ? 1 / (2 * SQRT3) : 0);
+  const reach = n / 2 + 1e-9;
+  const cells = [];
+  for (let dr = -n; dr <= n; dr += 1) {
+    for (let dq = -n; dq <= n; dq += 1) {
+      const q = q0 + dq;
+      const r = r0 + dr;
+      if (Math.hypot(q + r / 2 - cx, (r * SQRT3) / 2 - cy) < reach) cells.push({ q, r });
+    }
+  }
+  return cells;
+}
+
 // Where a world point falls, in hexes, without rounding: scenery placed with
 // snapping off comes to rest on a fraction, exactly as it does on squares.
 export function worldToAxial(point, grid) {

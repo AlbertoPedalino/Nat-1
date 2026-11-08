@@ -8,6 +8,7 @@ import { movementLabel } from '../../../shared/vtt/map/measure.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import {
   axialRound,
+  hexPieceCentre,
   hexToWorld,
   gridShape,
   hexPlayAreaForImage,
@@ -110,7 +111,7 @@ export function measurementBadge(tokens, drag, grid, view, feetPerCell) {
     if (shape !== 'hex') {
       return { x: (position.x || 0) + half.x, y: (position.y || 0) + half.y };
     }
-    const centre = hexToWorld({ q: position.x, r: position.y }, grid);
+    const centre = hexPieceCentre({ q: position.x, r: position.y }, token.w, grid);
     const size = cellSize(grid);
     return {
       x: (centre.x - (grid.offsetX || 0)) / size,

@@ -1,4 +1,4 @@
-import { isHexGrid } from '../map/hexGeometry.js';
+import { hexFootprint, isHexGrid } from '../map/hexGeometry.js';
 
 // The layer a dialog's "GM layer" switch puts new pieces on.
 export function placementLayer(hidden) {
@@ -61,9 +61,9 @@ function* hexRings(center) {
 
 const cellKey = (x, y) => `${Math.round(x)}:${Math.round(y)}`;
 
-// The cells a piece covers from its origin. A hex piece stands on one hex.
+// The cells a piece covers from its origin (hexFootprint on hexes).
 function coveredCells(origin, token, hex) {
-  if (hex) return [cellKey(origin.x, origin.y)];
+  if (hex) return hexFootprint({ q: origin.x, r: origin.y }, token?.w).map(({ q, r }) => cellKey(q, r));
   const w = Math.max(1, Math.round(Number(token?.w) || 1));
   const h = Math.max(1, Math.round(Number(token?.h) || 1));
   const cells = [];
