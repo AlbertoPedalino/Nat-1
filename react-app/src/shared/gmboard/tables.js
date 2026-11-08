@@ -8,28 +8,75 @@ const NO_VALUE = '—';
 // The event row that rolls on the tier Trap Table.
 const TRAP_EVENT = 'Env. Damage/Trap';
 
+// Every table a board keeps: where its rows live in the board's `tables`
+// (a tiered table holds one list per tier), the column a row is known by, the
+// dice it is rolled with, and what it is called and feeds.
+export const BOARD_TABLES = Object.freeze({
+  weather: {
+    key: 'weather', matchField: 's', dice: 'auto-checked', label: 'Seasonal Weather', tableName: 'Seasonal Weather Table', feeds: 'Hexcrawl',
+  },
+  event: {
+    key: 'events', matchField: 'r', dice: '2d20', label: 'Event', tableName: 'Event Table', feeds: 'Hexcrawl, Quest',
+  },
+  loot: {
+    key: 'loot', matchField: 'r', dice: '1d8+1d12', label: 'Loot', tableName: 'Loot Table', feeds: 'Hexcrawl, Dungeon, Quest',
+  },
+  compl: {
+    key: 'compl', matchField: 'r', dice: '1d8+1d12', label: 'Complication', tableName: 'Complication Table', feeds: 'Dungeon',
+  },
+  encounter: {
+    key: 'enc', matchField: 'r', dice: '2d20', tiered: true, label: 'Encounter', tableName: 'Encounter Table', feeds: 'Hexcrawl, Dungeon, Quest',
+  },
+  trap: {
+    key: 'trap', matchField: 'r', dice: '1d8+1d12', tiered: true, label: 'Trap', tableName: 'Trap Table', feeds: 'Hexcrawl, Dungeon',
+  },
+  env: {
+    key: 'env', matchField: 'r', dice: '1d8+1d12', label: 'Environment', tableName: 'Environment Severity Table', feeds: 'Dungeon',
+  },
+});
+
+// A table's rows; `tier` (1–4) picks the list of a tiered one.
+export function tableRows(tables, tableId, tier = 1) {
+  const table = BOARD_TABLES[tableId];
+  if (!table) return [];
+  const rows = tables?.[table.key];
+  return (table.tiered ? rows?.[tier - 1] : rows) || [];
+}
+
+// The board's tables with one cell of one row changed.
+export function editTableCell(tables, { tableId, tier = 1, matchValue, field, value }) {
+  const table = BOARD_TABLES[tableId];
+  if (!table) return tables;
+  const edit = (rows) => rows.map((row) => (row[table.matchField] === matchValue ? { ...row, [field]: value } : row));
+  const rows = tables[table.key];
+  return {
+    ...tables,
+    [table.key]: table.tiered ? rows.map((list, index) => (index === tier - 1 ? edit(list) : list)) : edit(rows),
+  };
+}
+
 export function getEvent(tables, sum) {
-  return tables.events.find((e) => e.r === sum) || { name: NO_VALUE, type: 'nothing' };
+  return tableRows(tables, 'event').find((e) => e.r === sum) || { name: NO_VALUE, type: 'nothing' };
 }
 
 export function getLoot(tables, sum) {
-  return tables.loot.find((e) => e.r === sum) || { type: NOTHING_FOUND, rarity: NO_VALUE, quality: NO_VALUE, value: NO_VALUE, extra: '' };
+  return tableRows(tables, 'loot').find((e) => e.r === sum) || { type: NOTHING_FOUND, rarity: NO_VALUE, quality: NO_VALUE, value: NO_VALUE, extra: '' };
 }
 
 export function getCompl(tables, sum) {
-  return tables.compl.find((e) => e.r === sum) || { type: 'None' };
+  return tableRows(tables, 'compl').find((e) => e.r === sum) || { type: 'None' };
 }
 
 export function getEnc(tables, tier, sum) {
-  return (tables.enc[tier - 1] || []).find((e) => e.r === sum) || { diff: 'Low', lv: '?', xp: 0 };
+  return tableRows(tables, 'encounter', tier).find((e) => e.r === sum) || { diff: 'Low', lv: '?', xp: 0 };
 }
 
 export function getTrap(tables, tier, sum) {
-  return (tables.trap[tier - 1] || []).find((e) => e.r === sum) || { type: 'Nuisance', lv: '?', dc: 10, damage: '?' };
+  return tableRows(tables, 'trap', tier).find((e) => e.r === sum) || { type: 'Nuisance', lv: '?', dc: 10, damage: '?' };
 }
 
 export function getEnvSev(tables, sum) {
-  return tables.env.find((e) => e.r === sum) || { severity: 'Common' };
+  return tableRows(tables, 'env').find((e) => e.r === sum) || { severity: 'Common' };
 }
 
 // What an event row is: 'encounter', 'loot', 'camp' (an enemy camp: spot it,

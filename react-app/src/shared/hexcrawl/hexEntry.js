@@ -50,6 +50,12 @@ export function canEnterHex(hex, board) {
   return missingHexSetup(hex, board).length === 0;
 }
 
+// Advancing time without an event needs less: a terrain to know how long it
+// takes, and the board's season for the weather.
+export function canAdvanceHex(state, board = state) {
+  return Boolean(state?.terrain) && Boolean(board?.season);
+}
+
 // The board's travelling state, with the hex's own terrain, population and tier
 // standing in for whatever the Travel panel happens to be showing. The map is
 // the authority on where the party is; the board is the authority on what time
@@ -142,6 +148,20 @@ export function clockFromState(state) {
   };
 }
 
+// What every campaign clock write carries before its own fields, from `base`
+// (the board as the GM has been keeping it, with the clock laid over): all of
+// the clock when the campaign has none yet, and the travel selections the first
+// time they are written. Afterwards a write carries only what changed, so a map
+// move in another tab cannot have its newer weather or date overwritten.
+export function clockSeedPatch(current, base) {
+  return {
+    ...(!current ? clockFromState(base) : {}),
+    ...(!current?.travelConfigured ? {
+      ...travelFromState(base), travelConfigured: true, season: current?.season || base?.season || null,
+    } : {}),
+  };
+}
+
 // The spoken version of a hex entry, for the bubble that appears over the hex
 // the moment it is clicked. The dialog still holds every die — this is the
 // answer without the arithmetic, and it says all of it: a bubble that stopped at
@@ -202,9 +222,7 @@ export function runHexEntry({
   if (mode === 'proceed' && missing.length) {
     throw new Error(`This hex still needs its ${missing.join(', ')}.`);
   }
-  // Advancing needs a terrain to know how long it takes, and a season for the
-  // weather. The rest only matters once dice are involved.
-  if (mode !== 'proceed' && (!state.terrain || !board.season)) {
+  if (mode !== 'proceed' && !canAdvanceHex(state, board)) {
     throw new Error('This hex still needs its terrain, and the board its season.');
   }
 

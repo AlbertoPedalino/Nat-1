@@ -1,5 +1,6 @@
 import { createDefaultCoreState } from '../../../shared/gmboard/defaultState.js';
 import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
+import { parseJsonOr } from '../../../shared/gmboard/boardFormat.js';
 
 export const LEGACY_KEYS = Object.freeze([
   'gm_state', 'gm_wea', 'gm_ev', 'gm_lo', 'gm_co', 'gm_env',
@@ -26,19 +27,9 @@ const QUALITA_MAP = {
 };
 const COMPL_TYPE_MAP = { Niente: 'None' };
 
-function parseJson(raw, fallback) {
-  if (raw == null) return fallback;
-  try {
-    const value = JSON.parse(raw);
-    return value == null ? fallback : value;
-  } catch {
-    return fallback;
-  }
-}
-
 function migrateState(raw) {
   const base = createDefaultCoreState();
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!parsed) return base;
   return {
     ...base,
@@ -58,7 +49,7 @@ function migrateState(raw) {
 // Legacy rows used Italian field names (and values); a row already in the
 // current shape passes through unchanged.
 function migrateLoot(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!Array.isArray(parsed)) return fallback;
   return parsed.map(({ tipo, rarita, qualita, valore, ...entry }) => {
     const type = tipo ?? entry.type;
@@ -75,13 +66,13 @@ function migrateLoot(raw, fallback) {
 }
 
 function migrateCompl(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!Array.isArray(parsed)) return fallback;
   return parsed.map((entry) => ({ ...entry, type: COMPL_TYPE_MAP[entry.type] || entry.type }));
 }
 
 function migrateEnv(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!Array.isArray(parsed)) return fallback;
   return parsed.map(({ gravita, ...entry }) => {
     const severity = gravita ?? entry.severity;
@@ -90,7 +81,7 @@ function migrateEnv(raw, fallback) {
 }
 
 function migrateWeather(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!Array.isArray(parsed)) return fallback;
   return parsed.map(({ sole, pioggia, ...entry }) => ({
     ...entry, clear: sole ?? entry.clear, rain: pioggia ?? entry.rain,
@@ -98,7 +89,7 @@ function migrateWeather(raw, fallback) {
 }
 
 function migrateTrap(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   if (!Array.isArray(parsed)) return fallback;
   return parsed.map(({ tipo, danno, ...entry }) => ({
     ...entry, type: tipo ?? entry.type, damage: danno ?? entry.damage,
@@ -106,7 +97,7 @@ function migrateTrap(raw, fallback) {
 }
 
 function migratePlainArray(raw, fallback) {
-  const parsed = parseJson(raw, null);
+  const parsed = parseJsonOr(raw, null);
   return Array.isArray(parsed) ? parsed : fallback;
 }
 

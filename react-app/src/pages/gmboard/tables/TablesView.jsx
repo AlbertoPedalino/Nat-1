@@ -1,100 +1,36 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Stack, Tab, Tabs, Typography, useTheme } from '@mui/material';
-import { AlertTriangle, CloudRain, Coins, Flame, Leaf, Map, RotateCcw, Swords, Table as TableIcon } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import TableEditorGrid from './TableEditorGrid.jsx';
-import { EDITOR_TABS } from '../state/constants.js';
+import { EDITOR_TABS } from './tableCatalog.js';
+import { tableRows } from '../../../shared/gmboard/tables.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const WEATHER_COLUMNS = [
-  { field: 's', label: 'Season', editable: false },
-  { field: 'clear', label: 'Clear ≤', editable: true, numeric: true },
-  { field: 'rain', label: 'Rain ≤', editable: true, numeric: true },
-];
-const EVENT_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'name', label: 'Name', editable: true },
-  { field: 'type', label: 'Type', editable: true },
-];
-const LOOT_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'type', label: 'Type', editable: true },
-  { field: 'rarity', label: 'Rarity', editable: true },
-  { field: 'quality', label: 'Quality', editable: true },
-  { field: 'value', label: 'Value', editable: true },
-  { field: 'extra', label: 'Extra', editable: true },
-];
-const COMPL_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'type', label: 'Type', editable: true },
-];
-const ENC_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'diff', label: 'Difficulty', editable: true },
-  { field: 'lv', label: 'Level', editable: true },
-  { field: 'xp', label: 'XP', editable: true, numeric: true },
-];
-const TRAP_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'type', label: 'Type', editable: true },
-  { field: 'lv', label: 'Level', editable: true },
-  { field: 'dc', label: 'DC', editable: true, numeric: true },
-  { field: 'damage', label: 'Damage', editable: true },
-];
-const ENV_COLUMNS = [
-  { field: 'r', label: 'Roll', editable: false },
-  { field: 'severity', label: 'Severity', editable: true },
-];
-
-function resolveEditorSource(editorId, tables) {
-  if (editorId === 'ed-weather') return { rows: tables.weather, tableKey: 'weather', matchField: 's', columns: WEATHER_COLUMNS };
-  if (editorId === 'ed-event') return { rows: tables.events, tableKey: 'events', matchField: 'r', columns: EVENT_COLUMNS };
-  if (editorId === 'ed-loot') return { rows: tables.loot, tableKey: 'loot', matchField: 'r', columns: LOOT_COLUMNS };
-  if (editorId === 'ed-compl') return { rows: tables.compl, tableKey: 'compl', matchField: 'r', columns: COMPL_COLUMNS };
-  if (editorId === 'ed-env') return { rows: tables.env, tableKey: 'env', matchField: 'r', columns: ENV_COLUMNS };
-  const encMatch = /^ed-enc(\d)$/.exec(editorId);
-  if (encMatch) {
-    const tier = Number(encMatch[1]) - 1;
-    return { rows: tables.enc[tier], tableKey: `enc${tier}`, matchField: 'r', columns: ENC_COLUMNS };
-  }
-  const trapMatch = /^ed-trap(\d)$/.exec(editorId);
-  if (trapMatch) {
-    const tier = Number(trapMatch[1]) - 1;
-    return { rows: tables.trap[tier], tableKey: `trap${tier}`, matchField: 'r', columns: TRAP_COLUMNS };
-  }
-  return { rows: [], tableKey: null, matchField: 'r', columns: [] };
-}
-
-function editorIcon(tab) {
-  if (tab.id === 'ed-weather') return CloudRain;
-  if (tab.id === 'ed-event') return Map;
-  if (tab.id === 'ed-loot') return Coins;
-  if (tab.id === 'ed-compl') return AlertTriangle;
-  if (tab.id === 'ed-env') return Leaf;
-  if (tab.id.startsWith('ed-enc')) return Swords;
-  if (tab.id.startsWith('ed-trap')) return Flame;
-  return TableIcon;
-}
-
 export default function TablesView() {
-  const { state, dispatch, resetTables } = useGmBoard();
+  const { state, dispatch } = useGmBoard();
   const { notify } = useToast();
   const theme = useTheme();
   const [editorId, setEditorId] = useState(EDITOR_TABS[0].id);
 
   const activeTab = EDITOR_TABS.find((tab) => tab.id === editorId) || EDITOR_TABS[0];
-  const ActiveIcon = editorIcon(activeTab);
-  const source = useMemo(() => resolveEditorSource(editorId, state.tables), [editorId, state.tables]);
+  const ActiveIcon = activeTab.icon;
+  const rows = useMemo(
+    () => tableRows(state.tables, activeTab.tableId, activeTab.tier || 1),
+    [activeTab, state.tables],
+  );
 
   const handleEdit = (matchValue, field, value) => {
-    dispatch({ type: 'editTableCell', tableKey: source.tableKey, matchField: source.matchField, matchValue, field, value });
+    dispatch({
+      type: 'editTableCell', tableId: activeTab.tableId, tier: activeTab.tier || 1, matchValue, field, value,
+    });
   };
 
   const handleReset = () => {
     if (!confirmAction('Reset all tables to their default values?')) return;
-    resetTables();
+    dispatch({ type: 'resetTables' });
     notify('success', 'Tables reset to defaults.');
   };
 
@@ -141,9 +77,9 @@ export default function TablesView() {
 
       <Box>
         <TableEditorGrid
-          rows={source.rows}
-          columns={source.columns}
-          matchField={source.matchField}
+          rows={rows}
+          columns={activeTab.columns}
+          matchField={activeTab.matchField}
           onEdit={handleEdit}
           tableLabel={activeTab.tableName}
         />

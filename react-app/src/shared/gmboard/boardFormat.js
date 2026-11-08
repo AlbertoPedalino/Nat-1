@@ -14,7 +14,7 @@ export function scopeKey(id, key) {
   return `gb:board:${id}:${key}`;
 }
 
-function parseJsonOr(raw, fallback) {
+export function parseJsonOr(raw, fallback) {
   if (typeof raw !== 'string') return fallback;
   try {
     const value = JSON.parse(raw);

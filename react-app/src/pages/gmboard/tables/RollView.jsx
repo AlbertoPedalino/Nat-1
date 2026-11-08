@@ -1,16 +1,16 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { AlertTriangle, Coins, CornerDownRight, Dices, Flame, History, Leaf, Map, Swords, Trash2 } from 'lucide-react';
+import { CornerDownRight, Dices, History, Trash2 } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import { boardTone, complicationVisual, eventVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
 import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
+import { TABLE_ICONS } from './tableCatalog.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 
-const TABLE_ICON = { event: Map, encounter: Swords, loot: Coins, trap: Flame, compl: AlertTriangle, env: Leaf };
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
 function rollTone(roll, palette) {
@@ -41,7 +41,7 @@ function Stat({ label, note, children }) {
 
 function TableCard({ table, roll, latest, tier, onRoll }) {
   const theme = useTheme();
-  const Icon = TABLE_ICON[table.id];
+  const Icon = TABLE_ICONS[table.id];
   const tone = roll ? rollTone(roll, theme.palette) : null;
   const described = roll ? describeRoll(roll) : null;
   const followUps = roll ? followUpTables(roll) : [];
@@ -111,7 +111,7 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
 
 function HistoryRow({ roll, last }) {
   const theme = useTheme();
-  const Icon = TABLE_ICON[roll.tableId];
+  const Icon = TABLE_ICONS[roll.tableId];
   const tone = rollTone(roll, theme.palette);
   const { title, stats } = describeRoll(roll);
   const detail = summarizeStats(stats);

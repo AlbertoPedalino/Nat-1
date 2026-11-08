@@ -10,7 +10,7 @@ import {
   advanceMinutes, formatDate, formatCampaignDateTime, formatDuration, formatHM,
 } from '../../../shared/gmboard/campaignTime.js';
 import {
-  travelTime, weatherTimerLabel, weatherTone,
+  travelLine, travelTime, weatherTimerLabel, weatherTone,
 } from '../../../shared/gmboard/weather.js';
 import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import {
@@ -158,8 +158,7 @@ function NextHexLine({ terrain, clock, mountSpeed }) {
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography sx={nextHexTitleSx}>Next hex · {formatDuration(travel.hours)}</Typography>
         <Typography sx={effectSx}>
-          {option.label} {formatDuration(travel.base)}
-          {travel.reasons.length ? ` → ${formatDuration(travel.hours)} (${travel.reasons.join(', ')})` : ''}
+          {travelLine(option.label, travel)}
         </Typography>
         {arrival ? (
           <Typography sx={effectSx}>

@@ -1,8 +1,9 @@
 import { createDefaultCoreState, createDefaultResults } from '../../../shared/gmboard/defaultState.js';
 import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
+import { editTableCell } from '../../../shared/gmboard/tables.js';
 import { LOG_STORE_LIMIT, ROLL_HISTORY_LIMIT } from './constants.js';
 import { normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
-import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
+import { clockFromResult, mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 
 export const CORE_FIELD_KEYS = Object.freeze(Object.keys(createDefaultCoreState()));
 
@@ -32,29 +33,6 @@ function pushLog(log, entry) {
   const next = [entry, ...log];
   if (next.length > LOG_STORE_LIMIT) next.length = LOG_STORE_LIMIT;
   return next;
-}
-
-function setTableCell(tables, tableKey, matchField, matchValue, field, value) {
-  const parseTable = (rows) => rows.map((row) => (
-    row[matchField] === matchValue ? { ...row, [field]: value } : row
-  ));
-
-  if (tableKey === 'weather') return { ...tables, weather: parseTable(tables.weather) };
-  if (tableKey === 'events') return { ...tables, events: parseTable(tables.events) };
-  if (tableKey === 'loot') return { ...tables, loot: parseTable(tables.loot) };
-  if (tableKey === 'compl') return { ...tables, compl: parseTable(tables.compl) };
-  if (tableKey === 'env') return { ...tables, env: parseTable(tables.env) };
-  if (tableKey.startsWith('enc')) {
-    const tier = Number(tableKey.slice(3));
-    const enc = tables.enc.map((rows, index) => (index === tier ? parseTable(rows) : rows));
-    return { ...tables, enc };
-  }
-  if (tableKey.startsWith('trap')) {
-    const tier = Number(tableKey.slice(4));
-    const trap = tables.trap.map((rows, index) => (index === tier ? parseTable(rows) : rows));
-    return { ...tables, trap };
-  }
-  return tables;
 }
 
 export function gmBoardReducer(state, action) {
@@ -97,14 +75,7 @@ export function gmBoardReducer(state, action) {
     case 'applyHexResult':
       return {
         ...state,
-        min: action.result.time.min,
-        day: action.result.time.day,
-        month: action.result.time.month,
-        year: action.result.time.year,
-        hoursSinceWeather: action.result.hoursSinceWeather,
-        nextWeatherIn: action.result.nextWeatherIn,
-        weather: action.result.weather,
-        intensity: action.result.intensity,
+        ...clockFromResult(action.result),
         log: pushLog(state.log, action.result.logEntry),
         hexResult: { steps: action.result.steps },
       };
@@ -137,7 +108,7 @@ export function gmBoardReducer(state, action) {
     case 'clearRolls':
       return { ...state, rolls: [] };
     case 'editTableCell':
-      return { ...state, tables: setTableCell(state.tables, action.tableKey, action.matchField, action.matchValue, action.field, action.value) };
+      return { ...state, tables: editTableCell(state.tables, action) };
     case 'resetTables':
       return { ...state, tables: createDefaultTables() };
     default:

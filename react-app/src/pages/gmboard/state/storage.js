@@ -39,23 +39,11 @@ export function readPersistedBoard(id) {
   return { state: createDefaultCoreState(), tables: createDefaultTables(), results: createDefaultResults() };
 }
 
-// A whole save (core state, tables, results) in one local write.
-export function persistBoard(id, { state, tables, results }) {
-  return saveLocal(SECTION_KEY, id, {
-    [STORAGE_KEYS.state]: JSON.stringify(state),
-    [STORAGE_KEYS.tables]: JSON.stringify(tables),
-    [STORAGE_KEYS.results]: JSON.stringify(results),
-  });
-}
-
-export function persistBoardState(id, state) {
-  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.state]: JSON.stringify(state) });
-}
-
-export function persistBoardTables(id, tables) {
-  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.tables]: JSON.stringify(tables) });
-}
-
-export function persistBoardResults(id, results) {
-  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.results]: JSON.stringify(results) });
+// The parts of a save given (core state, tables, results) in one local write.
+export function persistBoard(id, parts) {
+  const values = {};
+  for (const part of ['state', 'tables', 'results']) {
+    if (parts[part] !== undefined) values[STORAGE_KEYS[part]] = JSON.stringify(parts[part]);
+  }
+  return saveLocal(SECTION_KEY, id, values);
 }

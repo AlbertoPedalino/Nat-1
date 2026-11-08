@@ -1,4 +1,5 @@
 import { rollDie } from '../character/dice/dice.js';
+import { formatDuration } from './campaignTime.js';
 
 // How long a hex takes: the terrain, what the sky is doing to it, and what the
 // party is riding. The mount divides rather than subtracts — a mount is a rate,
@@ -35,6 +36,13 @@ export function travelTime(terrainHours, weather, intensity, mountSpeed = 1) {
     hours: effectiveHours(terrainHours, weather, intensity, speed),
     reasons,
   };
+}
+
+// A leg as the panels say it: "Forest 4h", or "Forest 4h → 6h (weather, ×2
+// mount)" when the weather or a mount changes it.
+export function travelLine(terrain, travel) {
+  const base = `${terrain} ${formatDuration(travel.base)}`;
+  return travel.reasons.length ? `${base} → ${formatDuration(travel.hours)} (${travel.reasons.join(', ')})` : base;
 }
 
 // "Rain · Heavy": the condition and, when it has one, its intensity.

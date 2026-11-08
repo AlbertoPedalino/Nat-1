@@ -67,7 +67,7 @@ export default function DungeonView() {
           value={dPopContract.deriveValue(state)}
           onChange={(o) => dispatch(dPopContract.action(o))}
         />
-        <TierSelector value={state.dTier} onChange={(tier) => dispatch({ type: 'setDTier', dTier: tier })} />
+        <TierSelector value={state.dTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.dTier.action({ tier }))} />
         <Box sx={dividerSx} />
         <Stack direction="row" spacing={1}>
           <Button variant="contained" startIcon={<Dices size={15} />} disabled={!canGenerate} onClick={handleGenerate}>

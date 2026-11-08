@@ -37,7 +37,7 @@ const dmScreen = await import('../../../../src/pages/dmscreen/state/storage.js')
 
 // Each tool's own adapter write, so the tests go through real payloads.
 const WRITE = {
-  gmboard: (id, n = 1) => gmBoard.persistBoardState(id, { day: n }),
+  gmboard: (id, n = 1) => gmBoard.persistBoard(id, { state: { day: n } }),
   encounters: (id, n = 1) => encounters.persistParty(id, { count: n, level: 1 }, []),
   dmscreen: (id, n = 1) => dmScreen.persistNotes(id, [{ id: 'n', title: 'T', body: `B${n}` }]),
 };

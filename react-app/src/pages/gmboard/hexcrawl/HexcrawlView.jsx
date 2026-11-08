@@ -10,7 +10,7 @@ import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
+import { canAdvanceHex, missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function HexcrawlView() {
@@ -18,7 +18,7 @@ export default function HexcrawlView() {
   const popContract = SELECTOR_CONTRACTS.pop;
   const terrainContract = SELECTOR_CONTRACTS.terrain;
 
-  const canAdvanceOnly = Boolean(state.season) && Boolean(state.terrain);
+  const canAdvanceOnly = canAdvanceHex(state);
   // The board's Travel picks stand for the hex, the way a map hex's own do.
   const missing = missingHexSetup({ terrain: state.terrain, pop: state.pop, tier: state.hexTier }, state);
   const canProceed = missing.length === 0;
@@ -56,7 +56,7 @@ export default function HexcrawlView() {
           onChange={(mountSpeed) => dispatch({ type: 'setMountSpeed', mountSpeed })}
         />
         <Box sx={dividerSx} />
-        <TierSelector value={state.hexTier} onChange={(tier) => dispatch({ type: 'setHexTier', hexTier: tier })} />
+        <TierSelector value={state.hexTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.hexTier.action({ tier }))} />
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Button

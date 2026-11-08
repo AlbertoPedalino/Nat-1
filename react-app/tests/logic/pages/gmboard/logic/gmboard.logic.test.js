@@ -269,8 +269,8 @@ test('a persisted 12-room dungeon config round-trips through storage without rer
   localStorage.clear();
   const tables = createDefaultTables();
   const dungeon = createDungeon({ roomCount: 12, popMode: 'unexplored', thr: 1, tier: 1 }, tables, Math.random, () => 111);
-  storage.persistBoardState('dungeon-board', createDefaultCoreState());
-  storage.persistBoardResults('dungeon-board', { ...createDefaultResults(), dungeon });
+  storage.persistBoard('dungeon-board', { state: createDefaultCoreState() });
+  storage.persistBoard('dungeon-board', { results: { ...createDefaultResults(), dungeon } });
 
   const persisted = storage.readPersistedBoard('dungeon-board');
   assert.equal(persisted.results.dungeon.config.roomCount, 12);
@@ -393,8 +393,8 @@ test('persisted board state round-trips and stays isolated per board id', () => 
   localStorage.clear();
   const stateA = { ...createDefaultCoreState(), day: 5 };
   const stateB = { ...createDefaultCoreState(), day: 9 };
-  storage.persistBoardState('board-a', stateA);
-  storage.persistBoardState('board-b', stateB);
+  storage.persistBoard('board-a', { state: stateA });
+  storage.persistBoard('board-b', { state: stateB });
 
   const readA = storage.readPersistedBoard('board-a');
   const readB = storage.readPersistedBoard('board-b');
@@ -456,11 +456,11 @@ test('reducer stores and clears dungeon/quest results', () => {
 
 test('reducer editTableCell edits a single row/field without touching others, and resetTables restores defaults', () => {
   let state = createInitialState();
-  state = gmBoardReducer(state, { type: 'editTableCell', tableKey: 'events', matchField: 'r', matchValue: 2, field: 'name', value: '<b>Hacked</b>' });
+  state = gmBoardReducer(state, { type: 'editTableCell', tableId: 'event', matchValue: 2, field: 'name', value: '<b>Hacked</b>' });
   assert.equal(state.tables.events.find((e) => e.r === 2).name, '<b>Hacked</b>');
   assert.equal(state.tables.events.find((e) => e.r === 3).name, 'Cave');
 
-  state = gmBoardReducer(state, { type: 'editTableCell', tableKey: 'enc1', matchField: 'r', matchValue: 2, field: 'xp', value: '999' });
+  state = gmBoardReducer(state, { type: 'editTableCell', tableId: 'encounter', tier: 2, matchValue: 2, field: 'xp', value: '999' });
   assert.equal(state.tables.enc[1].find((e) => e.r === 2).xp, '999');
 
   state = gmBoardReducer(state, { type: 'resetTables' });

@@ -71,7 +71,7 @@ export default function QuestView() {
           value={qPopContract.deriveValue(state)}
           onChange={(o) => dispatch(qPopContract.action(o))}
         />
-        <TierSelector value={state.qTier} onChange={(tier) => dispatch({ type: 'setQTier', qTier: tier })} />
+        <TierSelector value={state.qTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.qTier.action({ tier }))} />
         <Box sx={dividerSx} />
         <Stack direction="row" spacing={1}>
           <Button variant="contained" startIcon={<Dices size={15} />} disabled={!canGenerate} onClick={handleGenerate}>

@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useInstancePersistence } from '../../../shared/instances/useInstancePersistence.js';
 import { persistBoard, readPersistedBoard } from './storage.js';
 import { extractCoreState } from './reducer.js';
@@ -14,10 +13,4 @@ export function useGmBoardPersistence({ instanceId, state, dispatch }) {
     persist: () => persistBoard(instanceId, { state: JSON.parse(coreState), tables: state.tables, results: state.results }),
     persistDeps: [coreState, state.results, state.tables],
   });
-
-  const resetTables = useCallback(() => {
-    dispatch({ type: 'resetTables' });
-  }, [dispatch]);
-
-  return { resetTables };
 }

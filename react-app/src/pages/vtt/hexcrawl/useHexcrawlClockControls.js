@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import {
-  clockFromResult, clockFromState, mergeBoardClock, travelFromState,
+  clockFromResult, clockSeedPatch, mergeBoardClock,
 } from '../../../shared/hexcrawl/hexEntry.js';
 import { resolveManualAdvance } from '../../../shared/hexcrawl/hexRules.js';
 import { runBusy } from '../../../shared/ui/busyAction.js';
@@ -23,12 +23,7 @@ export function useHexcrawlClockControls({
       if (patch.tier !== undefined) fields.hexTier = patch.tier;
       const saved = await clock.saveClock((current) => {
         const base = mergeBoardClock(activeBoard.state, current);
-        return {
-          ...(!current ? clockFromState(base) : {}),
-          ...(!current?.travelConfigured
-            ? { ...travelFromState(base), travelConfigured: true, season: base.season || null } : {}),
-          ...fields,
-        };
+        return { ...clockSeedPatch(current, base), ...fields };
       });
       setError(null);
       return saved;
@@ -47,11 +42,7 @@ export function useHexcrawlClockControls({
       if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
       const saved = await clock.saveClock((current) => {
         const base = mergeBoardClock(activeBoard.state, current);
-        return {
-          ...(!current ? clockFromState(base) : {}),
-          ...(!current?.travelConfigured ? { ...travelFromState(base), travelConfigured: true } : {}),
-          ...(typeof patch === 'function' ? patch(base, activeBoard) : patch),
-        };
+        return { ...clockSeedPatch(current, base), ...(typeof patch === 'function' ? patch(base, activeBoard) : patch) };
       });
       setError(null);
       return saved;

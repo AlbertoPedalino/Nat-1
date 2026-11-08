@@ -1,6 +1,6 @@
 import { rollD8D12, rollD20D20 } from '../../../shared/gmboard/tableDice.js';
 import {
-  eventDcLabel, eventFollowUps, eventKind, getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev, hasTableValue, isNothingFound,
+  BOARD_TABLES, eventDcLabel, eventFollowUps, eventKind, getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev, hasTableValue, isNothingFound,
 } from '../../../shared/gmboard/tables.js';
 import { diceText } from '../../../shared/gmboard/resultText.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
@@ -8,14 +8,12 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 // The tables a GM can roll on directly, in the order the Roll tab shows them.
 // Each one is a single lookup: nothing here advances the clock or chains into
 // another table, which is what the generators are for.
-export const ROLL_TABLES = Object.freeze([
-  { id: 'event', label: 'Event', dice: '2d20', tiered: false },
-  { id: 'encounter', label: 'Encounter', dice: '2d20', tiered: true },
-  { id: 'loot', label: 'Loot', dice: '1d8+1d12', tiered: false },
-  { id: 'trap', label: 'Trap', dice: '1d8+1d12', tiered: true },
-  { id: 'compl', label: 'Complication', dice: '1d8+1d12', tiered: false },
-  { id: 'env', label: 'Environment', dice: '1d8+1d12', tiered: false },
-]);
+export const ROLL_TABLES = Object.freeze(['event', 'encounter', 'loot', 'trap', 'compl', 'env'].map((id) => {
+  const { label, dice, tiered = false } = BOARD_TABLES[id];
+  return Object.freeze({
+    id, label, dice, tiered,
+  });
+}));
 
 const LOOKUPS = {
   event: (tables, sum) => getEvent(tables, sum),

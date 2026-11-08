@@ -3,7 +3,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { CalendarDays, Check, Clock, Compass, FastForward } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM, parseHM, validateStart } from '../../../shared/gmboard/campaignTime.js';
-import { travelTime } from '../../../shared/gmboard/weather.js';
+import { travelLine, travelTime } from '../../../shared/gmboard/weather.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
@@ -54,11 +54,7 @@ export default function TimePanel() {
   };
 
   const travel = travelTime(state.terrainH, state.weather, state.intensity, state.mountSpeed);
-  const terrainLabel = !state.terrain
-    ? '— no terrain —'
-    : travel.hours === travel.base
-      ? `${state.terrain} (${travel.hours}h)`
-      : `${state.terrain} (${travel.base}h → ${travel.hours}h due to ${travel.reasons.join(' and ')})`;
+  const terrainLabel = state.terrain ? travelLine(state.terrain, travel) : '— no terrain —';
 
   return (
     <BoardPanel icon={CalendarDays} title="Date & Time">
