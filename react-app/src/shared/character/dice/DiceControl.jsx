@@ -17,7 +17,8 @@ import { UI_FONTS } from '../../ui/fonts.js';
 // `variant`: 'text' (labelled buttons) or 'icon' (a pill of two icons, for a
 // corner of the map). `surface` restyles the pieces for a screen with its own
 // chrome — the map, which is often fullscreen: { groupSx, segmentSx,
-// paperSx, dialog } where `dialog` holds CustomRollDialog's style props.
+// dividerColor, paperSx, dialog } where `dialog` holds CustomRollDialog's
+// style props.
 export default function DiceControl({
   log, onRoll, onClear, emptyText, variant = 'text', surface = {}, sx,
 }) {
@@ -40,7 +41,7 @@ export default function DiceControl({
             </IconButton>
           </Tooltip>
           <Tooltip title="Roll log">
-            <IconButton size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, anchor ? openSx : null]}>
+            <IconButton size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
               <ScrollText size={16} />
             </IconButton>
           </Tooltip>
@@ -95,10 +96,15 @@ const iconGroupSx = {
   border: 1,
   borderColor: 'divider',
   bgcolor: 'background.paper',
-  '& > * + *': { borderLeft: 1, borderLeftColor: 'divider' },
 };
 
 const iconSegmentSx = { borderRadius: 0, px: 0.9 };
+
+// The rule between the two halves, on the log half itself: a rule set from the
+// group would lose to the buttons' own `border: 0`.
+function dividerSx(color = 'divider') {
+  return { borderLeft: '1px solid', borderLeftColor: color };
+}
 
 // The half whose popover is open is lit.
 const openSx = { bgcolor: uiAlpha(UI_COLORS.gold, 0.16) };

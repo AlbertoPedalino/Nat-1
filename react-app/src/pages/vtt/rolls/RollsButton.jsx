@@ -29,8 +29,8 @@ const MAP_SURFACE = Object.freeze({
   groupSx: {
     bgcolor: mapIconButtonSx.bgcolor,
     border: mapIconButtonSx.border,
-    '& > * + *': { borderLeft: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}` },
   },
+  dividerColor: vttAlpha(VTT_COLORS.gold, 0.35),
   segmentSx: { color: VTT_COLORS.gold, '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) } },
   paperSx: battleMapDialogPaperSx,
   dialog: {
