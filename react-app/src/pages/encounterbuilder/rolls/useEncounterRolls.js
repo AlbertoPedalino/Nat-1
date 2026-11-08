@@ -3,14 +3,10 @@ import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { makeRollEntry, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
-import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
-
-function readSettings(instanceId) {
-  return getStorageJson(`gb-enc-rolls:${instanceId}`, {});
-}
+import { persistRollSettings, readRollSettings } from '../state/storage.js';
 
 export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) {
-  const [settings, setSettings] = useState(() => readSettings(instanceId));
+  const [settings, setSettings] = useState(() => readRollSettings(instanceId));
   const partyCampaigns = [...new Set(players.map((player) => player.campaignId).filter(Boolean))];
   const inferred = partyCampaigns.length === 1 ? partyCampaigns[0] : null;
   const requested = settings.campaignId === undefined ? inferred : settings.campaignId;
@@ -44,7 +40,7 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   const updateSettings = useCallback((patch) => {
     setSettings((current) => {
       const next = { ...current, ...patch };
-      setStorageJson(`gb-enc-rolls:${instanceId}`, next);
+      persistRollSettings(instanceId, next);
       return next;
     });
   }, [instanceId]);

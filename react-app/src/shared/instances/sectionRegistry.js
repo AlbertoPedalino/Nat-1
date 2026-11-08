@@ -39,7 +39,9 @@ export const SECTION_REGISTRY = Object.freeze({
     // is its row. This key is this device's cache of them (and the bridge the
     // battle map writes through in the same browser): kept out of the synced
     // instance, so absorbing another device's hit points never makes it dirty.
-    localOnlyKeys: ['fights:v1'],
+    // The roll settings (which campaign rolls go to, whether players see them)
+    // are this device's too.
+    localOnlyKeys: ['fights:v1', 'roll-settings:v1'],
   }),
   dmscreen: section({
     key: 'dmscreen',

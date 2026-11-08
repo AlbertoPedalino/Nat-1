@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useReducer } from 'react';
 import {
   Box,
   Button,
@@ -83,23 +83,9 @@ export default function CharBuilder() {
   const reloadData = useBuilderData(dispatch);
   useBuilderAdapters(state, dispatch, notify);
 
-  useEffect(() => {
-    // Re-hydrate the PRIMARY class object only. class/select is tab-aware: on an
-    // extra-class tab it would write the primary class into the extra slot, so
-    // guard on the primary tab. (data/adapt also restores cls tab-agnostically.)
-    if (!state.character.cls && state.character.activeClassTab === 0 && state.data.classes.length) {
-      const cls = state.data.classes.find((item) => item.name === state.character.className && item.source === state.character.classSource);
-      if (cls) dispatch({ type: 'class/select', className: cls.name, source: cls.source, classObject: cls });
-    }
-    if (!state.character.speciesObj && state.data.species.length) {
-      const species = state.data.species.find((item) => item.name === state.character.speciesName && item.source === state.character.speciesSource);
-      if (species) dispatch({ type: 'species/select', name: species.name, source: species.source, speciesObj: species });
-    }
-    if (!state.character.backgroundObj && state.data.backgrounds.length) {
-      const background = state.data.backgrounds.find((item) => item.name === state.character.backgroundName && item.source === state.character.backgroundSource);
-      if (background) dispatch({ type: 'background/select', name: background.name, source: background.source, backgroundObj: background, feat: background.feat });
-    }
-  }, [state.data.classes, state.data.species, state.data.backgrounds, state.character]);
+  // The class, species and background objects (and every class's features)
+  // are rebuilt from the loaded data by `data/adapt`, which runs again after
+  // each load and each restored character.
 
   return (
     <ThemeProvider theme={builderTheme}>

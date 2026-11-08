@@ -20,6 +20,7 @@ export const STORAGE_KEYS = Object.freeze({
   fights: 'fights:v1',
   fumbles: 'fumbles:v1',
   negotiation: 'negotiation:v1',
+  rollSettings: 'roll-settings:v1',
 });
 
 function readJson(id, key, fallback) {
@@ -88,6 +89,15 @@ export function persistEncounter(id, state) {
     [STORAGE_KEYS.fumbles]: fumblesValue(state.fumbleTables),
     [STORAGE_KEYS.negotiation]: negotiationValue(state.negotiation),
   });
+}
+
+// The roll log's settings ({ campaignId, showToPlayers }); kept on this device.
+export function readRollSettings(id) {
+  return readJson(id, STORAGE_KEYS.rollSettings, {});
+}
+
+export function persistRollSettings(id, settings) {
+  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.rollSettings]: JSON.stringify(settings || {}) });
 }
 
 export function persistParty(id, party, players) {
