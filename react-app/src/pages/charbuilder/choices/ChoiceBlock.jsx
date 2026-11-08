@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Box, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Collapse,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/combat/weaponMastery.js';
@@ -14,6 +24,7 @@ import {
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
+import ChoiceFrame from './ChoiceFrame.jsx';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -173,96 +184,77 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
   }
 
   return (
-    <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
-      <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              color: 'text.secondary',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              lineHeight: 1.25,
-            }}
-          >
-            {spec.label}
-          </Typography>
-          <Chip size="small" label={`${selected.length}/${max}`} color={selected.length >= max ? 'primary' : 'default'} variant={selected.length >= max ? 'filled' : 'outlined'} />
-        </Stack>
-        {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
-        <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
-          {visibleOptions.length ? (
-          <List dense disablePadding>
-            {visibleOptions.map(({ value, label }) => {
-              const active = selected.includes(value);
-              const full = !active && selected.length >= max;
-              const parsed = parseTypedChoiceValue(value);
-              const optionKind = parsed.kind || (proficiencyKind === 'mixed' ? null : proficiencyKind);
-              const duplicate = !active && optionKind && blockedValues.has(proficiencyBlockKey(optionKind, parsed.label));
-              const desc = getOptionDescription ? getOptionDescription(value) : null;
-              const isOpen = expanded.has(value);
-              return (
-                <Box key={`${spec.key}-${value}`} sx={{ borderBottom: isOpen ? 0 : 1, borderColor: 'divider' }}>
-                  <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
-                    <ListItemButton
-                      selected={active}
-                      disabled={full || duplicate}
-                      onClick={() => toggleOption(value)}
-                      sx={{
-                        flex: 1,
-                        minWidth: 0,
-                        py: 0.65,
-                        px: 1,
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Typography
-                            noWrap
-                            sx={{
-                              color: 'text.primary',
-                              fontSize: '0.82rem',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {label}
-                          </Typography>
-                        }
-                      />
-                      {active ? <Check size={16} color="currentColor" /> : null}
-                    </ListItemButton>
-                    {desc ? (
-                      <IconButton
-                        size="small"
-                        aria-label={isOpen ? 'Collapse description' : 'Expand description'}
-                        onClick={() => toggleExpanded(value)}
-                        sx={{ borderRadius: 0, color: 'text.secondary' }}
-                      >
-                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </IconButton>
-                    ) : null}
-                  </Stack>
+    <ChoiceFrame label={spec.label} count={selected.length} max={max}>
+      {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
+      <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
+        {visibleOptions.length ? (
+        <List dense disablePadding>
+          {visibleOptions.map(({ value, label }) => {
+            const active = selected.includes(value);
+            const full = !active && selected.length >= max;
+            const parsed = parseTypedChoiceValue(value);
+            const optionKind = parsed.kind || (proficiencyKind === 'mixed' ? null : proficiencyKind);
+            const duplicate = !active && optionKind && blockedValues.has(proficiencyBlockKey(optionKind, parsed.label));
+            const desc = getOptionDescription ? getOptionDescription(value) : null;
+            const isOpen = expanded.has(value);
+            return (
+              <Box key={`${spec.key}-${value}`} sx={{ borderBottom: isOpen ? 0 : 1, borderColor: 'divider' }}>
+                <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
+                  <ListItemButton
+                    selected={active}
+                    disabled={full || duplicate}
+                    onClick={() => toggleOption(value)}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      py: 0.65,
+                      px: 1,
+                    }}
+                  >
+                    <ListItemText
+                      primary={
+                        <Typography
+                          noWrap
+                          sx={{
+                            color: 'text.primary',
+                            fontSize: '0.82rem',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {label}
+                        </Typography>
+                      }
+                    />
+                    {active ? <Check size={16} color="currentColor" /> : null}
+                  </ListItemButton>
                   {desc ? (
-                    <Collapse in={isOpen} unmountOnExit>
-                      <Box sx={{ px: 1, py: 0.75, bgcolor: 'background.paper' }}>
-                        <EntryBlocks entries={desc} emptyText="" />
-                      </Box>
-                    </Collapse>
+                    <IconButton
+                      size="small"
+                      aria-label={isOpen ? 'Collapse description' : 'Expand description'}
+                      onClick={() => toggleExpanded(value)}
+                      sx={{ borderRadius: 0, color: 'text.secondary' }}
+                    >
+                      {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </IconButton>
                   ) : null}
-                </Box>
-              );
-            })}
-          </List>
-          ) : (
-            <Box sx={{ px: 1, py: 0.75 }}>
-              <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>No matches.</Typography>
-            </Box>
-          )}
-        </Paper>
-      </Stack>
-    </Paper>
+                </Stack>
+                {desc ? (
+                  <Collapse in={isOpen} unmountOnExit>
+                    <Box sx={{ px: 1, py: 0.75, bgcolor: 'background.paper' }}>
+                      <EntryBlocks entries={desc} emptyText="" />
+                    </Box>
+                  </Collapse>
+                ) : null}
+              </Box>
+            );
+          })}
+        </List>
+        ) : (
+          <Box sx={{ px: 1, py: 0.75 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>No matches.</Typography>
+          </Box>
+        )}
+      </Paper>
+    </ChoiceFrame>
   );
 }

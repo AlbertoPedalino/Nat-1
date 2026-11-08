@@ -12,7 +12,6 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ChoiceDescriptionDialog from './choices/ChoiceDescriptionDialog.jsx';
 import BuilderAppBar from './layout/BuilderAppBar.jsx';
 import PreviewPane from './preview/PreviewPane.jsx';
 import { STEPS } from './constants.js';
@@ -192,7 +191,6 @@ export default function CharBuilder() {
         </Typography>
       </Box>
 
-      <ChoiceDescriptionDialog value={state.choiceDialog} onClose={() => dispatch({ type: 'choice/close' })} />
     </Box>
     </ThemeProvider>
   );

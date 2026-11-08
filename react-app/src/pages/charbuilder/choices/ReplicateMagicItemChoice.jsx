@@ -1,15 +1,5 @@
 import { useMemo } from 'react';
-import {
-  Box,
-  Chip,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
@@ -25,6 +15,8 @@ import {
   replicateBucketItems,
   replicateItemChoiceValue,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
+import { asArray } from '../../../shared/lists.js';
+import ChoiceFrame from './ChoiceFrame.jsx';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -148,14 +140,14 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
   const itemAllowed = typeof spec.itemFilter === 'function' ? spec.itemFilter : () => true;
   const selected = useMemo(() => {
     const raw = character?.choices?.[spec.key];
-    const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    const values = asArray(raw).filter(Boolean);
     return values.filter((value) => parseReplicateChoice(value));
   }, [character?.choices, spec.key]);
   const selectedByOtherPlanSlots = useMemo(() => {
     const values = new Set();
     Object.entries(character?.choices || {}).forEach(([key, raw]) => {
       if (key === spec.key || !isReplicatePlanChoiceKey(key, character)) return;
-      (Array.isArray(raw) ? raw : raw ? [raw] : []).forEach((value) => values.add(String(value)));
+      asArray(raw).filter(Boolean).forEach((value) => values.add(String(value)));
     });
     return values;
   }, [character?.choices, spec.key]);
@@ -192,75 +184,45 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
 
   const total = selected.length;
   const full = total >= max;
-  const setPlans = (next) => dispatch({ type: 'choice/set', key: spec.key, value: next });
-
-  const togglePlan = (name) => {
-    if (selected.includes(name)) setPlans(selected.filter((v) => v !== name));
-    else if (!full) setPlans([...selected, name]);
-  };
+  const togglePlan = (name) => dispatch({ type: 'choice/toggle-item', key: spec.key, value: name, max, capped: true });
 
   return (
-    <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
-      <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              color: 'text.secondary',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              lineHeight: 1.25,
-            }}
-          >
-            {spec.label}
-          </Typography>
-          <Chip
-            size="small"
-            label={`${total}/${max}`}
-            color={full ? 'primary' : 'default'}
-            variant={full ? 'filled' : 'outlined'}
-          />
-        </Stack>
+    <ChoiceFrame label={spec.label} count={total} max={max}>
+      {specifics.length ? (
+        <ItemPlanPanel
+          title="Named magic items"
+          options={specificOptions}
+          selected={selected}
+          full={full}
+          onToggle={togglePlan}
+          searchPlaceholder="Search named plans…"
+        />
+      ) : null}
 
-        {specifics.length ? (
+      {buckets.map((bucket) => {
+        const options = replicateBucketItems(items, bucket, specificNames)
+          .filter(itemAllowed)
+          .map((item) => ({
+            value: replicateBucketChoiceValue(bucket, item),
+            name: item.name,
+            source: item.source,
+            item: applyReplicateItemPlan(item, bucket),
+          }))
+          .filter((option) => !selectedByOtherPlanSlots.has(option.value) || selected.includes(option.value));
+        return (
           <ItemPlanPanel
-            title="Named magic items"
-            options={specificOptions}
+            key={`${spec.key}-bucket-${bucket.id}`}
+            title={bucket.label}
+            note={bucket.requirementLabel}
+            options={options}
             selected={selected}
             full={full}
             onToggle={togglePlan}
-            searchPlaceholder="Search named plans…"
+            searchPlaceholder={`Search ${bucket.label.toLowerCase()}…`}
+            emptyText="No matching items available."
           />
-        ) : null}
-
-        {buckets.map((bucket) => {
-          const options = replicateBucketItems(items, bucket, specificNames)
-            .filter(itemAllowed)
-            .map((item) => ({
-              value: replicateBucketChoiceValue(bucket, item),
-              name: item.name,
-              source: item.source,
-              item: applyReplicateItemPlan(item, bucket),
-            }))
-            .filter((option) => !selectedByOtherPlanSlots.has(option.value) || selected.includes(option.value));
-          return (
-            <ItemPlanPanel
-              key={`${spec.key}-bucket-${bucket.id}`}
-              title={bucket.label}
-              note={bucket.requirementLabel}
-              options={options}
-              selected={selected}
-              full={full}
-              onToggle={togglePlan}
-              searchPlaceholder={`Search ${bucket.label.toLowerCase()}…`}
-              emptyText="No matching items available."
-            />
-          );
-        })}
-      </Stack>
-    </Paper>
+        );
+      })}
+    </ChoiceFrame>
   );
 }

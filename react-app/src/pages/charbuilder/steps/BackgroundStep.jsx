@@ -1,8 +1,7 @@
 import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material';
 import { Feather, GraduationCap, ScrollText, SlidersHorizontal } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import ChoiceBlock from '../choices/ChoiceBlock.jsx';
-import { FeatCategorySlot, FeatFixedSlot } from '../choices/FeatSlots.jsx';
+import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import SearchList from '../choices/SearchList.jsx';
 import { getBackgroundPattern, getBackgroundPool } from '../progression/calculations.js';
 import { backgroundChoiceSpecs } from '../choices/choiceSpecs.js';
@@ -193,15 +192,9 @@ export default function BackgroundStep({ state, dispatch }) {
 
       <BuilderPanel id="panel-bg-choices" title="Background Choices" icon={GraduationCap} note="Origin feat + skill/tool/language picks.">
         <Stack spacing={1.5}>
-          {backgroundChoiceSpecs(character).map((spec) => {
-            if (spec.type === 'feat_fixed') {
-              return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
-            }
-            if (spec.type === 'feat_cat') {
-              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
-            }
-            return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
-          })}
+          {backgroundChoiceSpecs(character).map((spec) => (
+            <ChoiceSpec key={spec.key} spec={spec} state={state} dispatch={dispatch} />
+          ))}
         </Stack>
       </BuilderPanel>
     </Stack>

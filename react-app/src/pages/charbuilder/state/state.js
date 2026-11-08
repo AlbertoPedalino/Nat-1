@@ -85,8 +85,6 @@ export function builderReducer(state, action) {
       };
     case 'adapters/loaded':
       return { ...state, adaptersLoaded: true, dataAdapted: false };
-    case 'adapters/version-bump':
-      return { ...state, adaptersVersion: (state.adaptersVersion || 0) + 1 };
     case 'adapters/loaded-for-classes': {
       const incoming = Array.isArray(action.classes) ? action.classes : [];
       if (!incoming.length) return state;
@@ -267,8 +265,6 @@ export function builderReducer(state, action) {
       const inventory = addInventoryEntries(state.character.inventory, [action.item], state.data.items);
       return updateCharacter(state, { inventory });
     }
-    case 'inventory/custom':
-      return updateCharacter(state, { inventory: [...state.character.inventory, { ...action.item, custom: true, qty: 1 }] });
     case 'equipment/select':
       return updateNestedCharacter(state, 'equipChoices', { [action.key]: state.character.equipChoices[action.key] === action.value ? null : action.value });
     case 'equipment/select-type-item': {
@@ -333,6 +329,9 @@ export function builderReducer(state, action) {
       const exists = current.includes(action.value);
       if (!exists && Array.isArray(action.blockedValues) && action.blockedValues.includes(normChoice(action.value))) return state;
       const max = action.max || 1;
+      // A capped list ignores a pick past its maximum; otherwise the oldest
+      // pick makes room for the new one.
+      if (!exists && action.capped && current.length >= max) return state;
       const next = exists
         ? current.filter((item) => item !== action.value)
         : [...(current.length >= max ? current.slice(1) : current), action.value];
@@ -350,10 +349,6 @@ export function builderReducer(state, action) {
       // (e.g. importing a JSON at runtime, not just the initial cloud hydration).
       return { ...state, character: restored, dataAdapted: false };
     }
-    case 'choice/open':
-      return { ...state, choiceDialog: { title: action.title, body: action.body } };
-    case 'choice/close':
-      return { ...state, choiceDialog: null };
     default:
       return state;
   }

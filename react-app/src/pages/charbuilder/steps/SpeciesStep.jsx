@@ -1,12 +1,10 @@
 import { Box, Chip, Divider, Stack, Typography } from '@mui/material';
 import { ScrollText, Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import ChoiceBlock from '../choices/ChoiceBlock.jsx';
-import { FeatCategorySlot } from '../choices/FeatSlots.jsx';
+import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import SearchList from '../choices/SearchList.jsx';
-import SpellChoiceList from '../spells/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../choices/choiceSpecs.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 
@@ -68,15 +66,9 @@ export default function SpeciesStep({ state, dispatch }) {
           Active species: {character.speciesName}
         </Typography>
         <Stack spacing={1.5}>
-          {speciesChoiceSpecs(character).map((spec) => {
-            if (spec.type === 'feat_cat') {
-              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
-            }
-            if (spec.type === 'spell_choice' || spec.type === 'spell_grant') {
-              return <SpellChoiceList key={spec.key} spec={spec} state={state} dispatch={dispatch} />;
-            }
-            return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
-          })}
+          {speciesChoiceSpecs(character).map((spec) => (
+            <ChoiceSpec key={spec.key} spec={spec} state={state} dispatch={dispatch} />
+          ))}
         </Stack>
       </BuilderPanel>
     </Stack>

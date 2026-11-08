@@ -2,11 +2,7 @@ import { useMemo } from 'react';
 import { Stack, Typography } from '@mui/material';
 import { Layers } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import ChoiceBlock from '../choices/ChoiceBlock.jsx';
-import { FeatCategorySlot, FeatFixedSlot } from '../choices/FeatSlots.jsx';
-import SpellChoiceList from '../spells/SpellChoiceList.jsx';
-import ReplicateMagicItemChoice from '../choices/ReplicateMagicItemChoice.jsx';
-import BeastChoice from '../choices/BeastChoice.jsx';
+import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import { classChoiceSpecs } from '../choices/choiceSpecs.js';
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
 import NamePanel from '../layout/NamePanel.jsx';
@@ -16,7 +12,6 @@ import LevelPanel from '../progression/LevelPanel.jsx';
 import SubclassPanel from '../progression/SubclassPanel.jsx';
 import SpellSlotsPanel from '../spells/SpellSlotsPanel.jsx';
 import SpellSelectionPanel from '../spells/SpellSelectionPanel.jsx';
-import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { activeExtraClass } from '../state/activeClass.js';
 
 export default function ClassStep({ state, dispatch }) {
@@ -52,34 +47,10 @@ export default function ClassStep({ state, dispatch }) {
     return (value) => (lookup ? lookup(value) : null) || (descMap ? descMap[value] : null) || null;
   };
 
-  const renderSpec = (spec) => {
-    if (spec.type === 'spell_choice' || spec.type === 'spell_grant') {
-      return <SpellChoiceList key={spec.key} spec={spec} state={state} dispatch={dispatch} />;
-    }
-    if (spec.type === 'feat_cat') {
-      return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
-    }
-    if (spec.type === 'feat_fixed') {
-      return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
-    }
-    if (spec.type === 'replicate_magic_item' || baseChoiceKey(spec.key) === 'artificer_replicate_magic_item_plans') {
-      return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
-    }
-    if (spec.type === 'beast_choice') {
-      return <BeastChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} beasts={state.data.beasts} />;
-    }
-    return (
-      <ChoiceBlock
-        key={spec.key}
-        spec={spec}
-        choices={character.choices}
-        dispatch={dispatch}
-        character={character}
-        items={state.data.items}
-        getOptionDescription={makeOptionDescription(spec)}
-      />
-    );
-  };
+  const renderSpec = (spec) => (
+    <ChoiceSpec key={spec.key} spec={spec} state={state} dispatch={dispatch} getOptionDescription={makeOptionDescription(spec)} />
+  );
+
 
   return (
     <Stack spacing={2}>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
+import { List, ListItemButton, Paper, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -7,6 +7,7 @@ import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import ChoiceFrame from '../choices/ChoiceFrame.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -77,55 +78,49 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   );
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
-      <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
-          <Chip size="small" label={`${selected.length}/${max}`} color={selected.length >= max ? 'primary' : 'default'} />
-        </Stack>
-        {showSearch ? (
-          <SelectionSearch value={query} onChange={setQuery} placeholder="Search spells" />
-        ) : null}
-        <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
-          <List dense disablePadding>
-            {pool.map((spell) => {
-              const active = selected.includes(spell.name);
-              const full = !active && selected.length >= max;
-              const toggle = () => dispatch({ type: 'choice/toggle-item', key: spec.key, value: spell.name, max });
-              if (compact) {
-                return (
-                  <ListItemButton
-                    key={`${spec.key}-${spell.name}-${spell.source}`}
-                    divider
-                    selected={active}
-                    disabled={full}
-                    onClick={toggle}
-                  >
-                    <SpellRowLabel spell={spell} selected={active} showIcon={false} />
-                    <SpellMiniTags spell={spell} sx={{ ml: 1 }} />
-                  </ListItemButton>
-                );
-              }
+    <ChoiceFrame label={spec.label} count={selected.length} max={max}>
+      {showSearch ? (
+        <SelectionSearch value={query} onChange={setQuery} placeholder="Search spells" />
+      ) : null}
+      <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
+        <List dense disablePadding>
+          {pool.map((spell) => {
+            const active = selected.includes(spell.name);
+            const full = !active && selected.length >= max;
+            const toggle = () => dispatch({ type: 'choice/toggle-item', key: spec.key, value: spell.name, max });
+            if (compact) {
               return (
-                <ExpandableCard
+                <ListItemButton
                   key={`${spec.key}-${spell.name}-${spell.source}`}
-                  containerSx={{ borderBottom: 1, borderColor: 'divider' }}
-                  bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
-                  body={<SpellReferenceBody spell={spell} />}
-                  header={({ open, toggle: toggleOpen }) => (
-                    <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
-                      <SpellRowLabel spell={spell} selected={active} />
-                      <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-                      <SpellSelectButton selected={active} disabled={full} onToggle={toggle} />
-                    </ListItemButton>
-                  )}
-                />
+                  divider
+                  selected={active}
+                  disabled={full}
+                  onClick={toggle}
+                >
+                  <SpellRowLabel spell={spell} selected={active} showIcon={false} />
+                  <SpellMiniTags spell={spell} sx={{ ml: 1 }} />
+                </ListItemButton>
               );
-            })}
-          </List>
-        </Paper>
-        {!pool.length ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>No spells found for this filter.</Typography> : null}
-      </Stack>
-    </Paper>
+            }
+            return (
+              <ExpandableCard
+                key={`${spec.key}-${spell.name}-${spell.source}`}
+                containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+                bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
+                body={<SpellReferenceBody spell={spell} />}
+                header={({ open, toggle: toggleOpen }) => (
+                  <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
+                    <SpellRowLabel spell={spell} selected={active} />
+                    <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
+                    <SpellSelectButton selected={active} disabled={full} onToggle={toggle} />
+                  </ListItemButton>
+                )}
+              />
+            );
+          })}
+        </List>
+      </Paper>
+      {!pool.length ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>No spells found for this filter.</Typography> : null}
+    </ChoiceFrame>
   );
 }

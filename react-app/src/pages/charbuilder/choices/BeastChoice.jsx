@@ -1,20 +1,13 @@
 import { useMemo } from 'react';
-import {
-  Box,
-  Chip,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, List, ListItemButton, ListItemText, Paper, Typography } from '@mui/material';
 import { Check } from 'lucide-react';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { eligibleBeasts, beastRefValue, wildShapeMaxCr, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
+import { asArray } from '../../../shared/lists.js';
+import ChoiceFrame from './ChoiceFrame.jsx';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -35,7 +28,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
 
   const selected = useMemo(() => {
     const raw = character?.choices?.[spec.key];
-    return Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return asArray(raw).filter(Boolean);
   }, [character?.choices, spec.key]);
 
   // Already-chosen forms that are no longer eligible (e.g. a Fly-Speed swarm
@@ -63,59 +56,48 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
   const limit = wildShapeKnownFormsLimit(lv);
   const atLimit = selected.length >= limit;
 
-  const setForms = (next) => dispatch({ type: 'choice/set', key: spec.key, value: next });
-  const toggle = (value) => {
-    if (selected.includes(value)) setForms(selected.filter((v) => v !== value));
-    else if (!atLimit) setForms([...selected, value]); // cap at the known-forms limit
-  };
+  // Capped at the known-forms limit.
+  const toggle = (value) => dispatch({ type: 'choice/toggle-item', key: spec.key, value, max: limit, capped: true });
 
   return (
-    <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
-      <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography sx={{ flex: 1, minWidth: 0, color: 'text.secondary', fontSize: '0.72rem', fontWeight: 800, lineHeight: 1.25 }}>
-            {spec.label}
-          </Typography>
-          <Chip size="small" label={`${selected.length}/${limit} known`} color={atLimit ? 'primary' : selected.length ? 'primary' : 'default'} variant={selected.length ? 'filled' : 'outlined'} />
-        </Stack>
-        <Typography sx={{ color: 'text.secondary', fontSize: '0.62rem', fontStyle: 'italic' }}>
-          {lv < 2
-            ? 'Wild Shape unlocks at Druid level 2.'
-            : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}
-        </Typography>
-        {showSearch ? <SelectionSearch value={query} onChange={setQuery} placeholder="Search beasts…" /> : null}
-        <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto', bgcolor: 'background.default' }}>
-          {visibleOptions.length ? (
-            <List dense disablePadding>
-              {visibleOptions.map(({ value, beast }) => {
-                const active = selected.includes(value);
-                return (
-                  <Box key={value} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.65, px: 1, gap: 0.75 }}>
-                      <ListItemText
-                        primary={(
-                          <Typography noWrap sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}>
-                            {beast.name}
-                          </Typography>
-                        )}
-                        secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
-                        slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
-                      />
-                      {active ? <Check size={16} color="currentColor" /> : null}
-                    </ListItemButton>
-                  </Box>
-                );
-              })}
-            </List>
-          ) : (
-            <Box sx={{ px: 1, py: 0.75 }}>
-              <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
-                {options.length ? 'No matches.' : (lv < 2 ? 'Reach Druid level 2 to learn beast forms.' : 'No beasts available.')}
-              </Typography>
-            </Box>
-          )}
-        </Paper>
-      </Stack>
-    </Paper>
+    <ChoiceFrame label={spec.label} count={selected.length} max={limit} countLabel={`${selected.length}/${limit} known`}>
+      <Typography sx={{ color: 'text.secondary', fontSize: '0.62rem', fontStyle: 'italic' }}>
+        {lv < 2
+          ? 'Wild Shape unlocks at Druid level 2.'
+          : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}
+      </Typography>
+      {showSearch ? <SelectionSearch value={query} onChange={setQuery} placeholder="Search beasts…" /> : null}
+      <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto', bgcolor: 'background.default' }}>
+        {visibleOptions.length ? (
+          <List dense disablePadding>
+            {visibleOptions.map(({ value, beast }) => {
+              const active = selected.includes(value);
+              return (
+                <Box key={value} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.65, px: 1, gap: 0.75 }}>
+                    <ListItemText
+                      primary={(
+                        <Typography noWrap sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}>
+                          {beast.name}
+                        </Typography>
+                      )}
+                      secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
+                      slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
+                    />
+                    {active ? <Check size={16} color="currentColor" /> : null}
+                  </ListItemButton>
+                </Box>
+              );
+            })}
+          </List>
+        ) : (
+          <Box sx={{ px: 1, py: 0.75 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
+              {options.length ? 'No matches.' : (lv < 2 ? 'Reach Druid level 2 to learn beast forms.' : 'No beasts available.')}
+            </Typography>
+          </Box>
+        )}
+      </Paper>
+    </ChoiceFrame>
   );
 }

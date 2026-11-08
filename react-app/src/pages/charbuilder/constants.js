@@ -1,15 +1,4 @@
-import {
-  Backpack,
-  ClipboardList,
-  Dumbbell,
-  Feather,
-  GraduationCap,
-  ScrollText,
-  Shield,
-  Sparkles,
-  Sword,
-  Wand2,
-} from 'lucide-react';
+import { Backpack, ClipboardList, Dumbbell, Feather, Sparkles, Sword } from 'lucide-react';
 
 export const PB_COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -23,33 +12,35 @@ export const STEPS = [
   { id: 'sheet', label: 'Sheet', icon: ClipboardList },
 ];
 
+// Stand-ins listed until the real class, species, background and feat data
+// arrives: enough to list and select by.
 export const CLASS_SUMMARIES = [
-  { name: 'Barbarian', source: 'XPHB', hitDie: 'd12', primary: 'STR', icon: Sword },
-  { name: 'Bard', source: 'XPHB', hitDie: 'd8', primary: 'CHA', icon: Wand2 },
-  { name: 'Cleric', source: 'XPHB', hitDie: 'd8', primary: 'WIS', icon: Shield },
-  { name: 'Druid', source: 'XPHB', hitDie: 'd8', primary: 'WIS', icon: Feather },
-  { name: 'Fighter', source: 'XPHB', hitDie: 'd10', primary: 'STR/DEX', icon: Sword },
-  { name: 'Monk', source: 'XPHB', hitDie: 'd8', primary: 'DEX/WIS', icon: Dumbbell },
-  { name: 'Paladin', source: 'XPHB', hitDie: 'd10', primary: 'STR/CHA', icon: Shield },
-  { name: 'Ranger', source: 'XPHB', hitDie: 'd10', primary: 'DEX/WIS', icon: ScrollText },
-  { name: 'Rogue', source: 'XPHB', hitDie: 'd8', primary: 'DEX', icon: GraduationCap },
-  { name: 'Sorcerer', source: 'XPHB', hitDie: 'd6', primary: 'CHA', icon: Sparkles },
-  { name: 'Warlock', source: 'XPHB', hitDie: 'd8', primary: 'CHA', icon: Wand2 },
-  { name: 'Wizard', source: 'XPHB', hitDie: 'd6', primary: 'INT', icon: Wand2 },
-  { name: 'Artificer', source: 'EFA', hitDie: 'd8', primary: 'INT', icon: ScrollText },
+  { name: 'Barbarian', source: 'XPHB' },
+  { name: 'Bard', source: 'XPHB' },
+  { name: 'Cleric', source: 'XPHB' },
+  { name: 'Druid', source: 'XPHB' },
+  { name: 'Fighter', source: 'XPHB' },
+  { name: 'Monk', source: 'XPHB' },
+  { name: 'Paladin', source: 'XPHB' },
+  { name: 'Ranger', source: 'XPHB' },
+  { name: 'Rogue', source: 'XPHB' },
+  { name: 'Sorcerer', source: 'XPHB' },
+  { name: 'Warlock', source: 'XPHB' },
+  { name: 'Wizard', source: 'XPHB' },
+  { name: 'Artificer', source: 'EFA' },
 ];
 
 export const SPECIES_SUMMARIES = [
-  { name: 'Aasimar', source: 'XPHB', traits: ['Celestial Resistance', 'Healing Hands'] },
-  { name: 'Dragonborn', source: 'XPHB', traits: ['Breath Weapon', 'Draconic Resistance'] },
-  { name: 'Dwarf', source: 'XPHB', traits: ['Darkvision', 'Dwarven Toughness'] },
-  { name: 'Elf', source: 'XPHB', traits: ['Darkvision', 'Fey Ancestry'] },
-  { name: 'Gnome', source: 'XPHB', traits: ['Gnomish Cunning', 'Darkvision'] },
-  { name: 'Goliath', source: 'XPHB', traits: ['Giant Ancestry', 'Powerful Build'] },
-  { name: 'Halfling', source: 'XPHB', traits: ['Brave', 'Halfling Nimbleness'] },
-  { name: 'Human', source: 'XPHB', traits: ['Resourceful', 'Skillful'] },
-  { name: 'Orc', source: 'XPHB', traits: ['Adrenaline Rush', 'Relentless Endurance'] },
-  { name: 'Tiefling', source: 'XPHB', traits: ['Darkvision', 'Fiendish Legacy'] },
+  { name: 'Aasimar', source: 'XPHB' },
+  { name: 'Dragonborn', source: 'XPHB' },
+  { name: 'Dwarf', source: 'XPHB' },
+  { name: 'Elf', source: 'XPHB' },
+  { name: 'Gnome', source: 'XPHB' },
+  { name: 'Goliath', source: 'XPHB' },
+  { name: 'Halfling', source: 'XPHB' },
+  { name: 'Human', source: 'XPHB' },
+  { name: 'Orc', source: 'XPHB' },
+  { name: 'Tiefling', source: 'XPHB' },
 ];
 
 export const BACKGROUND_SUMMARIES = [

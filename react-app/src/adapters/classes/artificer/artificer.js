@@ -156,7 +156,7 @@ registerClassAdapter("Artificer", function (cls, lv, specs) {
     specs.push({
       key: 'artificer_replicate_magic_item_plans',
       label: 'Replicate Magic Item (Plans Known)',
-      type: 'generic_choice',
+      type: 'replicate_magic_item',
       from: _artificerPlanPoolForLevel(lv),
       count: _artificerPlansKnownAtLevel(lv),
       level: 2

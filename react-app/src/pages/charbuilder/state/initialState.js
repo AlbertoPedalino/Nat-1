@@ -97,7 +97,6 @@ export const initialBuilderState = {
   inventoryFilters: emptyItemFilters(),
   currentInventoryFilter: 'all',
   currentInventoryFilters: emptyItemFilters(),
-  choiceDialog: null,
   adaptersLoaded: false,
   adaptersVersion: 0,
   loadedAdapterClasses: [],

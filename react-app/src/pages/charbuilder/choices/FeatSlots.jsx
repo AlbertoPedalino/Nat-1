@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { Button, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Lock } from 'lucide-react';
-import ChoiceBlock from './ChoiceBlock.jsx';
+import ChoiceSpec from './ChoiceSpec.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
-import SpellChoiceList from '../spells/SpellChoiceList.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
@@ -37,22 +36,6 @@ function findFeat(feats, name) {
   const target = featChoiceKey(name);
   return feats.find((entry) => featChoiceKey(entry.name) === target)
     || feats.find((entry) => featChoiceKey(entry.name).startsWith(target));
-}
-
-function renderGrantSpec({ grant, character, state, dispatch }) {
-  if (grant.type === 'spell_choice' || grant.type === 'spell_grant') {
-    return <SpellChoiceList key={grant.key} spec={grant} state={state} dispatch={dispatch} />;
-  }
-  return (
-    <ChoiceBlock
-      key={grant.key}
-      spec={grant}
-      choices={character.choices}
-      dispatch={dispatch}
-      character={character}
-      items={state.data.items}
-    />
-  );
 }
 
 function grantLabel(entry) {
@@ -159,7 +142,7 @@ function FeatChoicesPanel({ feat, slotKey, character, state, dispatch, lockedLis
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Typography variant="h2">{feat.name} Choices</Typography>
         <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} locked={locked} />
-        {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
+        {grants.map((grant) => <ChoiceSpec key={grant.key} spec={grant} state={state} dispatch={dispatch} />)}
       </Stack>
     </Paper>
   );
