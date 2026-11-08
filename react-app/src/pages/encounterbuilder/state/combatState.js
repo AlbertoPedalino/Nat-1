@@ -10,6 +10,8 @@ import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 // back into the fight list, and absorbing vitals and turns that changed
 // elsewhere (character sheets, the battle map).
 
+// A character's vitals from their sheet: into the party and the running fight.
+// Saved fights take them when they are resumed (fight/restore).
 export function syncCombatantVitals(state, sourceId, vitals) {
   const cacheChanged = JSON.stringify(state.characterVitals?.[sourceId]) !== JSON.stringify(vitals);
   let changed = cacheChanged;
@@ -21,15 +23,10 @@ export function syncCombatantVitals(state, sourceId, vitals) {
     changed = true;
     return { ...player, ...patch };
   });
-  const fights = state.fights.map((fight) => {
-    const next = applySheetVitals(fight, sourceId, vitals);
-    if (next !== fight) changed = true;
-    return next;
-  });
   const combat = state.combat ? applySheetVitals(state.combat, sourceId, vitals) : null;
   if (combat !== state.combat) changed = true;
   return changed ? {
-    ...state, players, fights, combat,
+    ...state, players, combat,
     characterVitals: cacheChanged ? { ...state.characterVitals, [sourceId]: vitals } : state.characterVitals,
   } : state;
 }

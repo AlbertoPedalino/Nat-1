@@ -18,6 +18,7 @@ import {
 import { getInstance } from '../../../shared/instances/instanceStore.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { isFightSuperseded } from '../../../shared/encounter/library.js';
+import { DEFAULT_PARTY } from '../state/partyState.js';
 
 // The builder's own shape for a line of an encounter: a creature and how many.
 function encounterItem(monster, count) {
@@ -78,7 +79,7 @@ export function sendEncounterToBuilder(instanceId, {
   if (!encounter.length) throw new Error('That room has no creatures to send.');
 
   const persisted = readPersistedInstance(instanceId, monsters);
-  const party = persisted.partyData?.party || { count: 4, level: 1 };
+  const party = persisted.partyData?.party || { ...DEFAULT_PARTY };
   const players = withSheetIdentity(persisted.partyData?.players || [], roster);
 
   const entry = makeSavedEncounter(name, encounter, party);

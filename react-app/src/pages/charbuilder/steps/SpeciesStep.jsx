@@ -44,7 +44,7 @@ export default function SpeciesStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-species" title="Species" icon={Sparkles} note="Species picker. Card sotto mostra dettagli completi.">
+      <BuilderPanel id="panel-species" title="Species" icon={Sparkles} note="Pick a species; the card below shows its full details.">
         <SearchList
           value={search.species}
           placeholder="Search species"

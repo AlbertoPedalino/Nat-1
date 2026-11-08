@@ -27,7 +27,6 @@ export function EncounterBuilderProvider({ instanceId, children }) {
   const characterIds = [...new Set([
     ...state.players.map((p) => p.sourceId),
     ...(state.combat?.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId),
-    ...state.fights.flatMap((f) => (f.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId)),
   ].filter(Boolean))];
   const characterVitals = useCharacterVitalSync({ characterIds, dispatch: reduce, activeFightId: state.activeFightId });
   characterVitalsRef.current = characterVitals;

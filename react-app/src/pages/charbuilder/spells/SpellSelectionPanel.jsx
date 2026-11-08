@@ -215,16 +215,6 @@ function getAutoGrantedLabel(spell, character) {
   return character?.subclassShortName || character?.className || 'Auto';
 }
 
-function dedupeSpells(spells) {
-  const seen = new Set();
-  return (spells || []).filter((spell) => {
-    const key = String(spell?.name || '').toLowerCase();
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 function containsSpellName(list, name) {
   const target = matchKey(name);
   return (list || []).some((entry) => matchKey(entry) === target);

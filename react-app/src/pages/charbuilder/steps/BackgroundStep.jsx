@@ -124,7 +124,7 @@ export default function BackgroundStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-bg" title="Background" icon={Feather} note="Background picker. Card sotto mostra dettagli completi.">
+      <BuilderPanel id="panel-bg" title="Background" icon={Feather} note="Pick a background; the card below shows its full details.">
         <SearchList
           value={search.background}
           placeholder="Search background"

@@ -98,7 +98,6 @@ test('two active builders consume one player row without publishing echoes', asy
   await receive(25, 2);
   for (const id of ['A', 'B']) {
     expect(screen.getByTestId(id)).toHaveTextContent('12');
-    expect(cloud.states[id].state.fights.every((f) => f.combatants[0].hpCurrent === 12)).toBe(true);
     expect(cloud.states[id].state.players[0].currentHP).toBe(12);
   }
   expect(cloud.command).not.toHaveBeenCalled();
