@@ -5,7 +5,7 @@ import {
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getPB } from '../../../shared/character/sheet/sheetStats.js';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import {
   consumeSlot,
   lowestAvailableSlotLevel,
@@ -79,7 +79,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   const maxHp = Math.max(1, Number(creature?.hp?.average) || 1);
   const currentHp = primalCompanionHp(companion, maxHp);
   const dead = currentHp <= 0;
-  const regularSlots = useMemo(() => getSheetSlots(C)?.regular || [], [C]);
+  const regularSlots = useMemo(() => getSpellSlots(C)?.regular || [], [C]);
   const reviveSlot = lowestAvailableSlotLevel(regularSlots, sheet);
   const damageTypes = primalStrikeDamageTypes(companion.beast, rangerLevel);
   const rules = companionRules(rangerLevel);

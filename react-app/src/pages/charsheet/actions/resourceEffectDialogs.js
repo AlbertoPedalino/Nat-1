@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { addCreatedSlot, availableRegularSlotLevels, consumeSlot, getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, lowestAvailableSlotLevel, persistUsedSlots, recoverPactSlots } from '../../../shared/character/spells/spellSlots.js';
 
 // The dialogs a spent resource can open (useResourceSideEffects), one hook per
@@ -47,7 +47,7 @@ export function useSorceryPointSlots(ctx) {
   };
 
   const openConvertSlotDialog = (result) => {
-    const levels = availableRegularSlotLevels(getSheetSlots(C)?.regular || [], sheet);
+    const levels = availableRegularSlotLevels(getSpellSlots(C)?.regular || [], sheet);
     if (!levels.length) {
       onShowToast?.(result?.label || 'Convert Spell Slot', 'No spell slots available to convert.', 0, []);
       return;
@@ -66,7 +66,7 @@ export function useSorceryPointSlots(ctx) {
     const beforeSP = Number(res[targetKey] || 0);
     const afterSP = Math.min(max, beforeSP + spGain);
     if (afterSP <= beforeSP) { onShowToast?.('Convert Spell Slot', 'Sorcery Points already at maximum.', 0, []); return; }
-    consumeSlot(getSheetSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
+    consumeSlot(getSpellSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
     res[targetKey] = afterSP;
     setResources(res);
     setConvertSlotDialog(null);
@@ -106,7 +106,7 @@ export function useWildResurgence(ctx) {
       addCreatedSlot(sheet, 1, onUpdateSheet, onUpdateCharacter);
       onShowToast?.('Wild Resurgence', 'Expended 1 Wild Shape use to create a temporary level 1 spell slot.', 0, []);
     } else if (choice === 'slot_to_shape') {
-      const regularSlots = getSheetSlots(C)?.regular || [];
+      const regularSlots = getSpellSlots(C)?.regular || [];
       const level = lowestAvailableSlotLevel(regularSlots, sheet);
       const consumed = level > 0 && consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter);
       if (!consumed) { onShowToast?.('Wild Resurgence', 'No available spell slots to expend.', 0, []); return; }
@@ -129,7 +129,7 @@ export function useSlotForResource(ctx) {
 
   const openSpendSlotRecoverResource = (result) => {
     if (!result?.targetKey) return;
-    const levels = availableRegularSlotLevels(getSheetSlots(C)?.regular || [], sheet);
+    const levels = availableRegularSlotLevels(getSpellSlots(C)?.regular || [], sheet);
     if (!levels.length) {
       onShowToast?.(result?.label || 'Spell Slot Recovery', 'No spell slots available to expend.', 0, []);
       return;
@@ -166,7 +166,7 @@ export function useSlotForResource(ctx) {
       setSpendSlotRecoverSelection(null);
       return;
     }
-    consumeSlot(getSheetSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
+    consumeSlot(getSpellSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
     res[targetKey] = afterTarget;
     setResources(res);
     setSpendSlotRecoverDialog(null);
@@ -184,7 +184,7 @@ export function usePactSlotEffects(ctx) {
   const [consumePactSlotDialog, setConsumePactSlotDialog] = useState(null);
 
   const openConsumePactSlotDialog = (result) => {
-    const slots = getSheetSlots(C);
+    const slots = getSpellSlots(C);
     if (!slots?.pact?.level) {
       onShowToast?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available.', 0, []);
       return;
@@ -251,7 +251,7 @@ export function useSlotRecovery(ctx) {
     const budget = Math.max(0, Number(result?.budget || 0));
     if (!budget) return;
     const maxSlotLevel = Math.max(1, Math.min(9, Number(result?.maxSlotLevel || 9)));
-    const regularSlots = getSheetSlots(C)?.regular || [];
+    const regularSlots = getSpellSlots(C)?.regular || [];
     const used = sheet?.spellSlotUsed || {};
     const levels = [];
     const topLevel = Math.min(maxSlotLevel, regularSlots.length);

@@ -1,8 +1,7 @@
-import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { getChoiceLevel } from '../../../shared/character/progression/choiceLevels.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
-import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
+import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { stripMarkup } from '../../../shared/content/markupText.js';
 
 // Keeping the builder's stored choices consistent: what to drop when a level,
@@ -73,7 +72,7 @@ export function totalCharacterLevel(classLevel, extraClasses) {
 }
 
 export function normalizeCharacterLevels(character = {}) {
-  const classLevel = getPrimaryClassLevel(character);
+  const classLevel = primaryClassLevel(character);
   return {
     ...character,
     classLevel,

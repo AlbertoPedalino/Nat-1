@@ -2,7 +2,7 @@ import { adapterRegistry } from '../../../adapters/index.js';
 import {
   usePactSlotEffects, useSlotForResource, useSlotRecovery, useSorceryPointSlots, useWildResurgence,
 } from './resourceEffectDialogs.js';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 
 // What spending an adapter resource triggers (registered with
 // registerResourceSideEffect): recovering slots or resources at once, or opening
@@ -50,7 +50,7 @@ export function useResourceSideEffects(ctx) {
       if (typeof sideEffect === 'function') {
         let result = null;
         try {
-          const slots = getSheetSlots(C);
+          const slots = getSpellSlots(C);
           result = sideEffect({ character: C, C, sheet, resources: res, slots });
         } catch {
           result = null;

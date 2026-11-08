@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { loadItems } from '../../../shared/content/catalogs/itemData.js';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { consumePactSlot, consumeSlot, getAvailablePactSlots, getRegularSlotUsed, persistCreatedSlots } from '../../../shared/character/spells/spellSlots.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
@@ -118,7 +118,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     plan !== transmuteSource && !activePlans.has(plan)
   )), [activePlans, planOptions, transmuteSource]);
 
-  const sheetSlots = useMemo(() => getSheetSlots(character), [character]);
+  const sheetSlots = useMemo(() => getSpellSlots(character), [character]);
   const regularSlots = sheetSlots?.regular || [];
   const pactSlots = sheetSlots?.pact || null;
   const slotOptions = useMemo(

@@ -5,9 +5,9 @@ import { adapterRegistry } from '../../../../../src/adapters/index.js';
 import { useResourceSideEffects } from '../../../../../src/pages/charsheet/actions/useResourceSideEffects.js';
 
 // Three 1st- and two 2nd-level slots, no Pact Magic.
-vi.mock('../../../../../src/pages/charsheet/spells/spellcasting.js', async (importOriginal) => ({
+vi.mock('../../../../../src/shared/character/spells/spellcasting.js', async (importOriginal) => ({
   ...(await importOriginal()),
-  getSheetSlots: () => ({ regular: [3, 2], pact: null }),
+  getSpellSlots: () => ({ regular: [3, 2], pact: null }),
 }));
 
 adapterRegistry.registerResourceSideEffect('test_sorc_pts', () => ({

@@ -1,4 +1,4 @@
-import { getSpellcastingProfile } from './spellcasting.js';
+import { getSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 
 // How many cantrips and spells a class entry may pick at its level.

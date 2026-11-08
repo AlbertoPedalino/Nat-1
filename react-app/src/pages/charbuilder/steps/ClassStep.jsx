@@ -17,11 +17,12 @@ import SubclassPanel from '../progression/SubclassPanel.jsx';
 import SpellSlotsPanel from '../spells/SpellSlotsPanel.jsx';
 import SpellSelectionPanel from '../spells/SpellSelectionPanel.jsx';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { activeExtraClass } from '../state/activeClass.js';
 
 export default function ClassStep({ state, dispatch }) {
   const { character } = state;
   const activeTab = character.activeClassTab || 0;
-  const activeExtra = activeTab > 0 ? character.extraClasses?.[activeTab - 1] : null;
+  const activeExtra = activeExtraClass(character);
 
   const choiceSpecs = useMemo(
     () => classChoiceSpecs(character, { items: state.data.items }),

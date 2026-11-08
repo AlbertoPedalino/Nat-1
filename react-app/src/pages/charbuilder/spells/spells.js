@@ -1,33 +1,22 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
-import { getPrimaryClassLevel } from '../progression/calculations.js';
+import { getSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import {
   enumerateAutoGrantedSpells, enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel,
 } from '../../../shared/character/spells/autoGrantedSpells.js';
 import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
-export function getSpellcastingProfile(character) {
-  const classProfile = adapterRegistry.getClassRuntimeConfig(character.className)?.spellcasting || {};
-  const subclassProfile = character.subclassShortName
-    ? adapterRegistry.getSubclassRuntimeConfig(character.className, character.subclassShortName)?.spellcasting || {}
-    : {};
-  return {
-    ...classProfile,
-    ...subclassProfile,
-    casterProgression: subclassProfile.casterProgression || classProfile.casterProgression || character.cls?.casterProgression || null,
-    alwaysKnownSpells: [
-      ...(classProfile.alwaysKnownSpells || []),
-      ...(subclassProfile.alwaysKnownSpells || []),
-    ],
-    alwaysPreparedSpells: [
-      ...(classProfile.alwaysPreparedSpells || []),
-      ...(subclassProfile.alwaysPreparedSpells || []),
-    ],
-  };
+// The spellcasting profile of the class being edited (shared spellcasting.js).
+function builderSpellcastingProfile(character) {
+  return getSpellcastingProfile({
+    className: character.className,
+    subclassShortName: character.subclassShortName,
+    snapshot: character.cls || character.clsSnapshot,
+  });
 }
 
 function getClassSpellLevel(character) {
-  return Math.max(1, Math.min(20, getPrimaryClassLevel(character)));
+  return Math.max(1, Math.min(20, primaryClassLevel(character)));
 }
 
 // A grant record as the builder lists it: name, levels, mode, and its source
@@ -91,11 +80,11 @@ export function collectCharacterAutoGrantedSpells(character) {
 
 export function getSpellCounts(character) {
   const level = getClassSpellLevel(character);
-  const profile = getSpellcastingProfile(character);
+  const profile = builderSpellcastingProfile(character);
   const { cantrips, spells } = getClassSpellLimits(profile, level);
   return { cantrips, spells, profile };
 }
 
 export function maxSpellLevel(character) {
-  return maxSpellLevelFor(getSpellcastingProfile(character).casterProgression, getClassSpellLevel(character));
+  return maxSpellLevelFor(builderSpellcastingProfile(character).casterProgression, getClassSpellLevel(character));
 }

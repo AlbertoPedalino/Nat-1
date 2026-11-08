@@ -11,9 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
-import {
-  getPrimaryClassLevel,
-} from '../progression/calculations.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
 import {
@@ -273,7 +271,7 @@ function PreviewFeat({ feat }) {
 function PreviewPaneImpl({ character, items = [], feats = [] }) {
   const scores = builtAbilityScores(character);
   const hp = computeMaxHp(character);
-  const primaryLv = getPrimaryClassLevel(character);
+  const primaryLv = primaryClassLevel(character);
   const proficiencySections = collectPreviewProficiencies(character);
   const weaponMasteries = collectResolvedWeaponMasteries(character, items);
   const previewFeats = collectPreviewFeats(character, feats);

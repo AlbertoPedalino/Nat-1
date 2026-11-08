@@ -1,10 +1,11 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
-import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-import { combinedSpellSlots, maxSpellLevelFor, normalizeCasterProgression } from '../../../shared/character/spells/casterProgression.js';
+import { getClassSpellLimits } from './spellProgression.js';
+import { classEntities } from '../progression/classLevel.js';
+import { combinedSpellSlots, maxSpellLevelFor, normalizeCasterProgression } from './casterProgression.js';
 
-// Spellcasting as the sheet sees it: the casting entities (primary class and
-// multiclasses), their spellcasting profile from the adapters, the slot table
+// A character's spellcasting, for the sheet and the builder alike: the casting
+// entities (primary class and multiclasses), their spellcasting profile from
+// the adapters, the slot table
 // (multiclass-combined, plus Pact Magic) and how many spells / which levels a
 // character can know or prepare.
 
@@ -22,7 +23,7 @@ export function getSpellLimits(C) {
   return totals;
 }
 
-export function getSheetSlots(C) {
+export function getSpellSlots(C) {
   return combinedSpellSlots(getSpellEntities(C)
     .map((entity) => ({ entity, profile: getSpellcastingProfile(entity) }))
     .filter(({ profile }) => hasSpellcastingProfile(profile))
@@ -42,22 +43,15 @@ export function canManageSpells(C, limits) {
   return getSpellEntities(C).some((entity) => hasSpellcastingProfile(getSpellcastingProfile(entity)));
 }
 
+// The casting entities: every class (classEntities) with the class data its
+// profile falls back on.
 export function getSpellEntities(C) {
-  if (!C) return [];
-  return [
-    {
-      className: C.className,
-      subclassShortName: C.subclassShortName,
-      level: primaryClassLevel(C),
-      snapshot: C.clsSnapshot,
-    },
-    ...(C.extraClasses || []).map((extra) => ({
-      className: extra.name,
-      subclassShortName: extra.subclassShortName,
-      level: extra.level || 1,
-      snapshot: extra.clsSnapshot || extra.cls,
-    })),
-  ].filter((entity) => entity.className);
+  return classEntities(C).map(({ className, subclassShortName, level, entry }) => ({
+    className,
+    subclassShortName,
+    level,
+    snapshot: entry?.clsSnapshot || entry?.cls,
+  }));
 }
 
 export function getSpellcastingProfile(entity) {

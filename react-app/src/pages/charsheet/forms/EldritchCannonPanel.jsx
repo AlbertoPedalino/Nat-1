@@ -3,7 +3,7 @@ import {
   Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import {
   consumeSlot,
   lowestAvailableSlotLevel,
@@ -65,7 +65,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
 
   const resKey = action?.resKey; // 'eldritch_cannon'
   const usesLeft = resKey ? Number(resources?.[resKey] ?? 0) : 0;
-  const regularSlots = useMemo(() => getSheetSlots(C)?.regular || [], [C]);
+  const regularSlots = useMemo(() => getSpellSlots(C)?.regular || [], [C]);
   const slotLevel = useMemo(() => lowestAvailableSlotLevel(regularSlots, sheet), [regularSlots, sheet]);
   const canUse = usesLeft > 0;
   const canSlot = slotLevel > 0;

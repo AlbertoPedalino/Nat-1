@@ -10,7 +10,7 @@ import {
   getSpellEntities,
   getSpellcastingProfile,
   hasSpellcastingProfile,
-} from './spellcasting.js';
+} from '../../../shared/character/spells/spellcasting.js';
 import { compactInputSx, levelToggleSx } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';

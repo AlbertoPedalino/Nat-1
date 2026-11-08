@@ -1,22 +1,22 @@
 import { Chip, Grid, MenuItem, Select, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { HeartPulse } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { getPrimaryClassLevel } from './calculations.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
-import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
+import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
   const isExtra = tab > 0;
   const extraIdx = tab - 1;
-  const extraClass = isExtra ? character.extraClasses[extraIdx] : null;
-  const cls = isExtra ? extraClass?.cls : character.cls;
+  const extraClass = activeExtraClass(character);
+  const cls = activeClassCharacter(character).cls;
   const hp = computeMaxHp(character);
   const faces = cls ? `d${hitDieFaces(cls)}` : '?';
   const selectedExtraLevels = multiclassLevels(character.extraClasses);
   const otherExtra = multiclassLevels(character.extraClasses, { except: extraIdx });
-  const primaryLv = getPrimaryClassLevel(character);
+  const primaryLv = primaryClassLevel(character);
   const maxLv = isExtra
     ? Math.max(1, 20 - primaryLv - otherExtra)
     : Math.max(1, 20 - selectedExtraLevels);

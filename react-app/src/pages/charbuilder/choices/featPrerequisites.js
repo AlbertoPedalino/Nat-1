@@ -1,9 +1,10 @@
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities } from '../../../shared/character/progression/classLevel.js';
 import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
 import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../../shared/character/proficiency/armorRules.js';
 import { getWeaponCategory, weaponMatchesRule } from '../../../shared/character/proficiency/weaponRules.js';
-import { getCasterProgression } from '../progression/calculations.js';
+import { getSpellEntities, getSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
+import { normalizeCasterProgression } from '../../../shared/character/spells/casterProgression.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 import { characterWithoutFeatChoiceSlot } from './featPrerequisiteRules.js';
 import { buildPreviewSheetCharacter } from '../preview/previewSheet.js';
@@ -16,21 +17,6 @@ function featCategories(feat) {
     .filter(Boolean);
 }
 
-function characterClassEntries(character) {
-  return [
-    {
-      name: character?.className,
-      cls: character?.cls || character?.clsSnapshot,
-      subclass: character?.subclassShortName,
-    },
-    ...(character?.extraClasses || []).map((extra) => ({
-      name: extra?.name,
-      cls: extra?.cls || extra?.clsSnapshot,
-      subclass: extra?.subclassShortName,
-    })),
-  ].filter((entry) => entry.name);
-}
-
 function collectFeatureNames(character, slotCategories) {
   const names = new Set();
   const addAvailable = (features, level) => {
@@ -41,13 +27,9 @@ function collectFeatureNames(character, slotCategories) {
     });
   };
 
-  const primaryLevel = primaryClassLevel(character);
-  addAvailable(character?.allFeatures, primaryLevel);
-  addAvailable(character?.allSubFeatures, primaryLevel);
-  (character?.extraClasses || []).forEach((extra) => {
-    const level = Number(extra?.level || 1);
-    addAvailable(extra?.allFeatures, level);
-    addAvailable(extra?.allSubFeatures, level);
+  classEntities(character).forEach(({ entry, level }) => {
+    addAvailable(entry?.allFeatures, level);
+    addAvailable(entry?.allSubFeatures, level);
   });
   if (asArray(slotCategories).some((category) => String(category).startsWith('FS'))) {
     names.add('fightingstyle');
@@ -56,8 +38,8 @@ function collectFeatureNames(character, slotCategories) {
 }
 
 function hasSpellcastingProgression(character, progression = null) {
-  return characterClassEntries(character).some((entry) => {
-    const current = getCasterProgression(entry.name, entry.cls, entry.subclass);
+  return getSpellEntities(character).some((entity) => {
+    const current = normalizeCasterProgression(getSpellcastingProfile(entity).casterProgression);
     return progression ? current === progression : !!current;
   });
 }

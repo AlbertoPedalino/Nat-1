@@ -10,6 +10,7 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
+import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
@@ -17,18 +18,8 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const { character } = state;
   const activeTab = character.activeClassTab || 0;
   const extraIndex = activeTab > 0 ? activeTab - 1 : null;
-  const activeExtra = extraIndex != null ? character.extraClasses?.[extraIndex] : null;
-  const activeCharacter = activeExtra ? {
-    ...character,
-    className: activeExtra.name,
-    classSource: activeExtra.source,
-    classLevel: activeExtra.level || 1,
-    level: activeExtra.level || 1,
-    cls: activeExtra.cls,
-    subclassShortName: activeExtra.subclassShortName || '',
-    allSubFeatures: activeExtra.allSubFeatures || [],
-    extraClasses: [],
-  } : character;
+  const activeExtra = activeExtraClass(character);
+  const activeCharacter = activeClassCharacter(character);
   const { cantrips, spells, profile } = getSpellCounts(activeCharacter);
   const maxLevel = maxSpellLevel(activeCharacter);
   const activeSpellLevel = Number(character.activeSpellLevel ?? 0);

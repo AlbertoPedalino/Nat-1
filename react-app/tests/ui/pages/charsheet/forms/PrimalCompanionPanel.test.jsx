@@ -32,9 +32,9 @@ vi.mock('../../../../../src/pages/charsheet/forms/useSummonedCreatureRecords.js'
 
 // The class's spellcasting data is loaded at runtime; a level 5 Ranger has
 // four 1st- and two 2nd-level slots.
-vi.mock('../../../../../src/pages/charsheet/spells/spellcasting.js', async (importOriginal) => ({
+vi.mock('../../../../../src/shared/character/spells/spellcasting.js', async (importOriginal) => ({
   ...(await importOriginal()),
-  getSheetSlots: () => ({ regular: [4, 2], pact: null }),
+  getSpellSlots: () => ({ regular: [4, 2], pact: null }),
 }));
 
 // Ranger 5, WIS 16: PB +3, WIS +3.

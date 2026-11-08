@@ -1,4 +1,3 @@
-import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { collectOwnedFeatNames, withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
 import {
@@ -18,6 +17,7 @@ import { stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -85,7 +85,7 @@ function serializeExtraClass(extra = {}) {
 export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
   character = withOwnedFeatSnapshots(character, data.feats);
-  const primaryClassLevel = getPrimaryClassLevel(character);
+  const primaryLevel = primaryClassLevel(character);
   const ownedFeatNames = collectOwnedFeatNames(character);
   const ownedFeatSnapshots = character.allFeatSnapshots
     .map((feat) => {
@@ -186,26 +186,26 @@ export function makeSheetPayload(character, data) {
   );
   const extraClasses = character.extraClasses || [];
   const runtimeClassActions = [
-    ...annotateActions(adapterRegistry.getClassSheetActions(character.className), character.className, primaryClassLevel, 'class'),
+    ...annotateActions(adapterRegistry.getClassSheetActions(character.className), character.className, primaryLevel, 'class'),
     ...extraClasses.flatMap((extra) => annotateActions(adapterRegistry.getClassSheetActions(extra.name), extra.name, Number(extra.level || 1), 'class')),
   ];
   const runtimeClassResources = [
-    ...annotateResources(adapterRegistry.getClassSheetResources(character.className), character.className, primaryClassLevel, 'class'),
+    ...annotateResources(adapterRegistry.getClassSheetResources(character.className), character.className, primaryLevel, 'class'),
     ...extraClasses.flatMap((extra) => annotateResources(adapterRegistry.getClassSheetResources(extra.name), extra.name, Number(extra.level || 1), 'class')),
   ];
   const runtimeSubclassActions = [
-    ...annotateActions(adapterRegistry.getSubclassSheetActions(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
+    ...annotateActions(adapterRegistry.getSubclassSheetActions(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryLevel, 'subclass'),
     ...extraClasses.flatMap((extra) => annotateActions(adapterRegistry.getSubclassSheetActions(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
   ];
   const runtimeSubclassResources = [
-    ...annotateResources(adapterRegistry.getSubclassSheetResources(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
+    ...annotateResources(adapterRegistry.getSubclassSheetResources(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryLevel, 'subclass'),
     ...extraClasses.flatMap((extra) => annotateResources(adapterRegistry.getSubclassSheetResources(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
   ];
 
   return {
     name: character.name,
     level: character.level,
-    classLevel: primaryClassLevel,
+    classLevel: primaryLevel,
     className: character.className,
     classSource: character.classSource,
     subclassShortName: character.subclassShortName || null,

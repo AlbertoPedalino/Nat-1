@@ -7,7 +7,7 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import { filterOptions } from '../../../shared/content/searchText.js';
 import { findFamiliarBeasts } from '../../../shared/character/forms/beasts.js';
 import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/forms/wildShapeForm.js';
-import { getSheetSlots } from '../spells/spellcasting.js';
+import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import {
   consumeSlot,
   lowestAvailableSlotLevel,
@@ -50,7 +50,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   const [hpStep, setHpStep] = useState('1'); // persistent heal/damage step for the familiar HP tracker
 
   const usesLeft = Number(resources?.[WILD_SHAPE_RESOURCE_KEY] ?? 0);
-  const regularSlots = useMemo(() => getSheetSlots(character)?.regular || [], [character]);
+  const regularSlots = useMemo(() => getSpellSlots(character)?.regular || [], [character]);
   const slotLevel = useMemo(() => lowestAvailableSlotLevel(regularSlots, sheet), [regularSlots, sheet]);
   const canWildShape = usesLeft > 0;
   const canSlot = slotLevel > 0;

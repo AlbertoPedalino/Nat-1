@@ -1,5 +1,4 @@
-import { getPrimaryClassLevel } from '../progression/calculations.js';
-import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
+import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { hasLevelAbove, totalCharacterLevel } from './choiceCleanup.js';
 
 // The builder reducer's class actions beyond the primary class pick
@@ -151,7 +150,7 @@ export function handleExtraSubclassSelect(state, action, { findByNameSource, upd
 export function handleExtraClassLevel(state, action, { findByNameSource, updateCharacter }) {
   const idx = Number(action.index);
   if (!Number.isInteger(idx) || idx < 0) return state;
-  const primaryLevel = getPrimaryClassLevel(state.character);
+  const primaryLevel = primaryClassLevel(state.character);
   const otherExtraLevels = multiclassLevels(state.character.extraClasses, { except: idx });
   const maxLevel = Math.max(1, 20 - primaryLevel - otherExtraLevels);
   const newLevel = Math.min(maxLevel, Math.max(1, Number(action.level) || 1));

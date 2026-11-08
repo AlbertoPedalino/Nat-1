@@ -11,7 +11,7 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { SPELL_ACTION_FILTERS, buildSpellInfo, expandSpellInfoBySlots, getSpellActionFilter } from './spellsTabLogic.js';
 import { SpellPickerDialog } from './SpellPickerDialog.jsx';
 import { getSpellAbility } from './spellAbility.js';
-import { canManageSpells, getSheetSlots, getSpellLimits } from './spellcasting.js';
+import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
 import { addButtonSx, compactInputSx, filterChipSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
@@ -52,7 +52,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   }, [spellDb, spellVersions, C?.spellSnapshots]);
 
   const spellInfo = useMemo(() => buildSpellInfo(C, spellIndex), [C, spellIndex, adapterRevision]);
-  const slots = useMemo(() => getSheetSlots(C), [C, adapterRevision]);
+  const slots = useMemo(() => getSpellSlots(C), [C, adapterRevision]);
   const expandedSpellInfo = useMemo(() => expandSpellInfoBySlots(C, spellInfo, slots), [spellInfo, slots, C]);
   const lockedSourceBySpell = useMemo(() => {
     const map = new Map();

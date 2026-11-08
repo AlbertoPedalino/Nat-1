@@ -2,8 +2,9 @@ import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography
 import { Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
-import { getPrimaryClassLevel } from './calculations.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -20,13 +21,11 @@ export default function SubclassPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
   const isExtra = tab > 0;
   const extraIdx = tab - 1;
-  const extra = isExtra ? character.extraClasses[extraIdx] : null;
-  const cls = isExtra ? extra?.cls : character.cls;
-  const subclasses = isExtra ? (extra?.subclasses || []) : (character.subclasses || []);
-  const allSubFeatures = isExtra ? (extra?.allSubFeatures || []) : (character.allSubFeatures || []);
+  const extra = activeExtraClass(character);
+  const { cls, subclasses = [], allSubFeatures = [] } = activeClassCharacter(character);
   const subclassShortName = isExtra ? (extra?.subclassShortName || '') : (character.subclassShortName || '');
   const unlockLevel = cls?.subclassLevel || 3;
-  const currentLevel = isExtra ? (extra?.level || 1) : getPrimaryClassLevel(character);
+  const currentLevel = isExtra ? (extra?.level || 1) : primaryClassLevel(character);
   if (!cls || !subclasses.length || currentLevel < unlockLevel) return null;
   const subclassFeatures = allSubFeatures.filter(
     (feature) => feature.subclassShortName === subclassShortName

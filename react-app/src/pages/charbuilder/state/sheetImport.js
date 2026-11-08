@@ -1,7 +1,7 @@
-import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 import { stripHeavyFields } from './persistence.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 // Reading a character back into the builder from an exported JSON sheet.
 
@@ -39,7 +39,7 @@ function buildBuilderStateFromSheetPayload(data) {
   const builderState = {
     name: data.name || '',
     level: Number(data.level || 1),
-    classLevel: getPrimaryClassLevel(data),
+    classLevel: primaryClassLevel(data),
     className: data.className || data.clsSnapshot?.name || '',
     classSource: data.classSource || data.clsSnapshot?.source || '',
     subclassShortName: data.subclassShortName || '',

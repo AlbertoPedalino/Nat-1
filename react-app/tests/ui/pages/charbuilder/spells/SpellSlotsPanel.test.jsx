@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { loadClassAdapters, loadCoreAdapters } from '../../../../../src/adapters/index.js';
 import SpellSlotsPanel from '../../../../../src/pages/charbuilder/spells/SpellSlotsPanel.jsx';
 import { theme } from '../../../../../src/app/theme.js';
 
@@ -12,6 +13,12 @@ const character = (activeClassTab) => ({
 const view = (C) => render(<ThemeProvider theme={theme}><SpellSlotsPanel character={C} /></ThemeProvider>);
 
 describe('SpellSlotsPanel', () => {
+  // A class's caster progression comes from its adapter, as on the sheet.
+  beforeAll(async () => {
+    await loadCoreAdapters();
+    await loadClassAdapters(['Artificer', 'Wizard']);
+  });
+
   it('shows only the primary class slots on the first tab', () => {
     view(character(0));
     expect(screen.getByText('Spell Slots — Artificer')).toBeTruthy();

@@ -1,5 +1,4 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
-import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
 import {
@@ -20,6 +19,7 @@ import {
   specPush,
   choiceFromBlock,
 } from './choiceSpecHelpers.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 function asiLevelsFromClass(cls, classFeatures) {
   const out = new Set();
@@ -253,7 +253,7 @@ function buildClassSpecs(cls, classLevel, options) {
 export function classChoiceSpecs(character, context = {}) {
   const cls = character.cls;
   if (!cls) return [];
-  const primaryLv = getPrimaryClassLevel(character);
+  const primaryLv = primaryClassLevel(character);
   const all = [];
   const activeTab = character.activeClassTab || 0;
 
