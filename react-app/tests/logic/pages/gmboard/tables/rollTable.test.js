@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-const { ROLL_TABLES, rollTable, followUpTables, formatDice, describeRoll, summarizeStats } = await import('../../../../../src/pages/gmboard/tables/rollTable.js');
+const { ROLL_TABLES, rollTable, followUpTables, describeRoll, summarizeStats } = await import('../../../../../src/pages/gmboard/tables/rollTable.js');
+const { diceText } = await import('../../../../../src/shared/gmboard/resultText.js');
 const { createDefaultTables } = await import('../../../../../src/shared/gmboard/defaultTables.js');
 const { gmBoardReducer, createInitialState, extractCoreState } = await import('../../../../../src/pages/gmboard/state/reducer.js');
 const { ROLL_HISTORY_LIMIT } = await import('../../../../../src/pages/gmboard/state/constants.js');
@@ -29,7 +30,7 @@ test('rollTable rolls 2d20 on the Event Table and returns the matching row', () 
   assert.equal(roll.sum, 19);
   assert.equal(roll.tier, null);
   assert.equal(roll.data.name, 'Tracks/Clues');
-  assert.equal(formatDice(roll), 'd20(7)+d20(12)=19');
+  assert.equal(diceText(roll), 'd20(7)+d20(12)=19');
   assert.deepEqual(describeRoll(roll), {
     titleLabel: 'Event',
     title: 'Tracks/Clues',
@@ -41,7 +42,7 @@ test('rollTable rolls 1d8+1d12 on the Loot Table', () => {
   const roll = rollTable(tables, 'loot', {}, seqRng([0.99, 0.7, 0, 0.99]));
   assert.deepEqual(roll.dice, [{ sides: 8, value: 8 }, { sides: 12, value: 9 }]);
   assert.equal(roll.sum, 17);
-  assert.equal(formatDice(roll), 'd8(8)+d12(9)=17');
+  assert.equal(diceText(roll), 'd8(8)+d12(9)=17');
   const described = describeRoll(roll);
   assert.equal(described.titleLabel, 'Loot');
   assert.equal(described.title, 'Magic Item');
@@ -56,7 +57,7 @@ test('rollTable rolls 1d8+1d12 on the Loot Table', () => {
     dice: [{ sides: 8, value: 1 }, { sides: 12, value: 12 }],
     sum: 13,
   });
-  assert.equal(formatDice(roll.dc), 'd8(1)+d12(12)=13');
+  assert.equal(diceText(roll.dc), 'd8(1)+d12(12)=13');
 });
 
 test('an empty loot result has no detail line', () => {

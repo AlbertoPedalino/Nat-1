@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { FastForward, Footprints, Map } from 'lucide-react';
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import WeatherPanel from '../session/WeatherPanel.jsx';
@@ -11,11 +11,10 @@ import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function HexcrawlView() {
   const { state, dispatch, proceed, advanceOnly, clockError } = useGmBoard();
-  const theme = useTheme();
   const popContract = SELECTOR_CONTRACTS.pop;
   const terrainContract = SELECTOR_CONTRACTS.terrain;
 
@@ -30,11 +29,7 @@ export default function HexcrawlView() {
       <WeatherPanel />
       <TimePanel />
 
-      <Stack spacing={1.5} sx={panelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-          <Map size={14} color={theme.palette.primary.main} />
-          <Typography sx={titleSx}>Travel</Typography>
-        </Box>
+      <BoardPanel icon={Map} title="Travel">
         <Box sx={gridSx}>
           <SelectorGroup
             label="Population"
@@ -84,28 +79,13 @@ export default function HexcrawlView() {
             <Typography sx={hintSx}>Select {missing.join(', ')} to continue.</Typography>
           ) : null}
         </Stack>
-      </Stack>
+      </BoardPanel>
 
       <HexResultSteps result={state.hexResult} />
       <SessionLog />
     </Stack>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const gridSx = {
   display: 'grid',

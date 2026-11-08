@@ -1,5 +1,8 @@
 import { rollD8D12, rollD20D20 } from '../../../shared/gmboard/tableDice.js';
-import { getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev } from '../../../shared/gmboard/tables.js';
+import {
+  eventDcLabel, eventFollowUps, eventKind, getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev, hasTableValue, isNothingFound,
+} from '../../../shared/gmboard/tables.js';
+import { diceText } from '../../../shared/gmboard/resultText.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 // The tables a GM can roll on directly, in the order the Roll tab shows them.
@@ -38,12 +41,8 @@ function rollDice(notation, rng) {
 // that was found, a camp to spot, an event to interact with. A trap has none
 // here because its row already carries its DC.
 function dcLabel(tableId, data) {
-  if (tableId === 'loot') return data.type !== 'Nothing found' ? 'DC to find it' : null;
-  if (tableId !== 'event') return null;
-  if (data.type === 'camp_nemico') return 'DC to spot the camp';
-  if (data.type === 'encounter' || data.type === 'loot' || data.type === 'nothing') return null;
-  if (data.name === 'Env. Damage/Trap') return null;
-  return 'DC to interact';
+  if (tableId === 'loot') return isNothingFound(data) ? null : 'DC to find it';
+  return tableId === 'event' ? eventDcLabel(eventKind(data)) : null;
 }
 
 export function rollTable(tables, tableId, { tier = 1 } = {}, rng = Math.random) {
@@ -66,13 +65,7 @@ export function rollTable(tables, tableId, { tier = 1 } = {}, rng = Math.random)
 // The tables the generators would roll next for this result. The Roll tab only
 // offers them; the GM decides whether the chain continues.
 export function followUpTables(roll) {
-  if (roll.tableId === 'event') {
-    if (roll.data.type === 'encounter') return ['encounter'];
-    if (roll.data.type === 'loot') return ['loot'];
-    if (roll.data.type === 'camp_nemico') return ['encounter', 'loot'];
-    if (roll.data.name === 'Env. Damage/Trap') return ['trap'];
-    return [];
-  }
+  if (roll.tableId === 'event') return eventFollowUps(eventKind(roll.data));
   if (roll.tableId === 'compl') {
     return Object.prototype.hasOwnProperty.call(COMPL_FOLLOW_UPS, roll.data.type)
       ? [COMPL_FOLLOW_UPS[roll.data.type]]
@@ -81,17 +74,12 @@ export function followUpTables(roll) {
   return [];
 }
 
-// Works for a roll and for its `dc`: both carry `dice` and `sum`.
-export function formatDice(roll) {
-  return `${roll.dice.map((die) => `d${die.sides}(${die.value})`).join('+')}=${roll.sum}`;
-}
-
 // What a result says, split into named fields so a card can show each one under
 // its own label: `title` is the row's headline, `stats` everything else,
 // including the DC rolled with it. `emphasis` marks the numbers a GM reads out.
 function rolledDc(roll) {
   return roll.dc
-    ? [{ label: roll.dc.label, value: String(roll.dc.sum), note: `DC roll: ${formatDice(roll.dc)}`, emphasis: true }]
+    ? [{ label: roll.dc.label, value: String(roll.dc.sum), note: `DC roll: ${diceText(roll.dc)}`, emphasis: true }]
     : [];
 }
 
@@ -113,7 +101,7 @@ function describeRow(roll) {
       return {
         titleLabel: 'Loot',
         title: data.type,
-        stats: data.rarity !== '—' ? [
+        stats: hasTableValue(data.rarity) ? [
           { label: 'Rarity', value: data.rarity },
           { label: 'Quality', value: data.quality },
           { label: 'Value', value: data.value, ...(data.extra ? { note: data.extra } : {}) },

@@ -1,11 +1,11 @@
-import { Box, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import { SEASON_ICONS, WEATHER_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function WeatherPanel() {
   const { state, setSeason, setWeatherOverride } = useGmBoard();
@@ -17,8 +17,7 @@ export default function WeatherPanel() {
   const timerLabel = weatherTimerLabel(state.season, state.nextWeatherIn, state.hoursSinceWeather);
 
   return (
-    <Stack spacing={1.5} sx={panelSx}>
-      <Typography sx={titleSx}>Season &amp; Weather</Typography>
+    <BoardPanel title="Season & Weather">
       <Box sx={gridSx}>
         <SelectorGroup
           label="Season"
@@ -43,24 +42,9 @@ export default function WeatherPanel() {
           {timerLabel}
         </Typography>
       </Box>
-    </Stack>
+    </BoardPanel>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const gridSx = {
   display: 'grid',

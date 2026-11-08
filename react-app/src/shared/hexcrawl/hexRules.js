@@ -2,7 +2,9 @@ import { rollDie } from '../character/dice/dice.js';
 import { rollD8D12, rollD20D20 } from '../gmboard/tableDice.js';
 import { advanceMinutes, formatCampaignDateTime } from '../gmboard/campaignTime.js';
 import { effectiveHours, hasWeatherDisadvantage, runWeatherChecks } from '../gmboard/weather.js';
-import { getEvent, getLoot, getEnc, getTrap } from '../gmboard/tables.js';
+import {
+  eventKind, getEvent, getLoot, getEnc, getTrap, isNothingFound,
+} from '../gmboard/tables.js';
 
 function weatherLogFragment(changes) {
   if (!changes.length) return '';
@@ -39,23 +41,24 @@ function resolveDc(rng) {
 function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
   const steps = [];
   let logSuffix = '';
+  const kind = eventKind(ev);
 
-  if (ev.type === 'encounter') {
+  if (kind === 'encounter') {
     const roll = rollD20D20(rng);
     const enc = getEnc(tables, hexTier, roll.sum);
     steps.push({ kind: 'encounter', label: 'Encounter Table', d1: roll.d1, d2: roll.d2, sum: roll.sum, data: enc });
-  } else if (ev.type === 'loot') {
+  } else if (kind === 'loot') {
     const roll = resolveDc(rng);
     const loot = getLoot(tables, roll.sum);
     steps.push({ kind: 'loot', d8: roll.d8, d12: roll.d12, sum: roll.sum, data: loot });
-    if (loot.type !== 'Nothing found') {
+    if (!isNothingFound(loot)) {
       const dc = resolveDc(rng);
       steps.push({ kind: 'lootDc', d8: dc.d8, d12: dc.d12, sum: dc.sum, disadvantage });
       logSuffix = ` · Loot:${loot.type} · DC=${dc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
     } else {
       logSuffix = ' · Loot:nothing';
     }
-  } else if (ev.type === 'camp_nemico') {
+  } else if (kind === 'camp') {
     const spotDc = resolveDc(rng);
     steps.push({ kind: 'campSpotDc', d8: spotDc.d8, d12: spotDc.d12, sum: spotDc.sum, disadvantage });
     const encRoll = rollD20D20(rng);
@@ -64,21 +67,22 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
     const lootRoll = resolveDc(rng);
     const loot = getLoot(tables, lootRoll.sum);
     steps.push({ kind: 'campLoot', d8: lootRoll.d8, d12: lootRoll.d12, sum: lootRoll.sum, data: loot });
-    if (loot.type !== 'Nothing found') {
+    if (!isNothingFound(loot)) {
       const lootDc = resolveDc(rng);
       steps.push({ kind: 'campLootDc', d8: lootDc.d8, d12: lootDc.d12, sum: lootDc.sum, disadvantage });
       logSuffix = ` · DC=${spotDc.sum} · Loot:${loot.type} · DC=${lootDc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
     } else {
       logSuffix = ` · DC=${spotDc.sum} · Loot:nothing`;
     }
-  } else if (ev.name === 'Env. Damage/Trap') {
+  } else if (kind === 'trap') {
     // A trap has one DC, the one on its table row: the same number finds it
     // and disarms it, so no separate detection DC is rolled.
     const trapRoll = resolveDc(rng);
     const trap = getTrap(tables, hexTier, trapRoll.sum);
     steps.push({ kind: 'trap', d8: trapRoll.d8, d12: trapRoll.d12, sum: trapRoll.sum, data: trap, disadvantage });
     logSuffix = ` · Trap:${trap.type} DC${trap.dc} ${trap.damage}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
-  } else {
+  } else if (kind === 'other') {
+    // Something to interact with; a 'nothing' event asks for no check.
     const dc = resolveDc(rng);
     steps.push({ kind: 'genericDc', d8: dc.d8, d12: dc.d12, sum: dc.sum, disadvantage });
     logSuffix = ` · DC=${dc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;

@@ -1,145 +1,74 @@
-import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { Castle, Coins, Flame, Leaf, Lock, Minus, ShieldCheck, Swords } from 'lucide-react';
+import { Stack, Typography, useTheme } from '@mui/material';
+import { Castle, Coins, Lock, ShieldCheck } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
-import { encounterDetail } from '../../../shared/gmboard/resultText.js';
+import { boardTone, complicationVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
+import { diceText, encounterDetail, lootDetail } from '../../../shared/gmboard/resultText.js';
 import { trapLabel } from '../../../shared/dungeon/roomMarkers.js';
+import { ResultCard, ResultLine, ResultSlot } from '../ui/ResultCard.jsx';
 
-function formatLoot(loot) {
-  const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
-  return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
-}
-
-const SLOT_ICON = { Encounter: Swords, 'Environment Damage': Flame, Environment: Leaf, None: Minus };
-
-function slotTone(result, type) {
-  if (type === 'Encounter') return result.encounter;
-  if (type === 'Environment Damage') return result.trap;
-  if (type === 'Environment') return result.environment;
-  return result.none;
-}
-
-function SlotBlock({ slot, tones }) {
-  const tone = slotTone(tones.result, slot.type);
-  const Icon = SLOT_ICON[slot.type] || Minus;
+function SlotBlock({ slot }) {
+  const theme = useTheme();
+  const visual = complicationVisual(slot.type);
+  const tone = boardTone(theme.palette, 'result', visual.tone);
+  const { extra } = slot;
   return (
-    <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, 0.08) }}>
-      <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-        <Icon size={13} color={tone} />
-        <Typography sx={microLabelSx}>Roll {slot.n}/{slot.thr}</Typography>
-        <ResultBadge tone={tone}>{slot.type}</ResultBadge>
-        <Typography sx={detailSx}>d8({slot.d8})+d12({slot.d12})={slot.sum}</Typography>
-      </Stack>
-      {slot.extra?.kind === 'enc' ? (
-        <Typography sx={lineSx}>
-          <ResultBadge tone={tones.difficulty[slot.extra.data.diff] || tones.fallback}>{slot.extra.data.diff}</ResultBadge>{' '}
-          {encounterDetail(slot.extra.data)}
-        </Typography>
+    <ResultSlot
+      tone={tone}
+      icon={visual.icon}
+      label={`Roll ${slot.n}/${slot.thr}`}
+      badges={<ResultBadge tone={tone}>{slot.type}</ResultBadge>}
+      dice={diceText(slot)}
+    >
+      {extra?.kind === 'enc' ? (
+        <ResultLine>
+          <ResultBadge tone={boardTone(theme.palette, 'difficulty', extra.data.diff)}>{extra.data.diff}</ResultBadge>{' '}
+          {encounterDetail(extra.data)}
+        </ResultLine>
       ) : null}
-      {slot.extra?.kind === 'trap' ? (
-        <Typography sx={lineSx}>{trapLabel(slot.extra.data)}</Typography>
-      ) : null}
-      {slot.extra?.kind === 'env' ? (
-        <Typography sx={lineSx}>Severity: {slot.extra.data.severity}</Typography>
-      ) : null}
-    </Box>
+      {extra?.kind === 'trap' ? <ResultLine>{trapLabel(extra.data)}</ResultLine> : null}
+      {extra?.kind === 'env' ? <ResultLine>Severity: {extra.data.severity}</ResultLine> : null}
+    </ResultSlot>
   );
 }
 
 export default function RoomCard({ room }) {
   const theme = useTheme();
-  const tones = {
-    difficulty: theme.palette.gmboard.difficulty,
-    rarity: theme.palette.gmboard.rarity,
-    result: theme.palette.gmboard.result,
-    fallback: theme.palette.gmboard.rarity.Common,
-  };
   const isSafe = room.slots.every((slot) => slot.type === 'None');
-  const lootTone = tones.rarity[room.loot.data.rarity] || tones.fallback;
+  const lootTone = boardTone(theme.palette, 'rarity', room.loot.data.rarity);
+  const loot = lootDetail(room.loot.data);
 
   return (
-    <Box sx={cardSx}>
-      <Stack
-        direction="row"
-        spacing={0.75}
-        sx={{ alignItems: 'center', flexWrap: 'wrap', ...headerBandSx, bgcolor: theme.palette.gmboard.headerOverlay }}
-      >
-        <Castle size={13} color={theme.palette.primary.main} />
-        <Typography sx={roomChipSx}>ROOM {room.index}</Typography>
-        <ResultBadge tone={theme.palette.text.secondary}>{room.popLabel} · {room.thr} {room.thr > 1 ? 'rolls' : 'roll'}</ResultBadge>
-        {isSafe ? (
-          <ResultBadge tone={theme.palette.gmboard.result.safe} icon={ShieldCheck}>Safe room</ResultBadge>
-        ) : null}
-      </Stack>
-      <Stack spacing={0.75} sx={{ p: 1.25 }}>
-        {room.slots.map((slot) => <SlotBlock key={slot.n} slot={slot} tones={tones} />)}
-        <Box sx={{ ...slotSx, borderLeftColor: lootTone, bgcolor: alpha(lootTone, 0.08) }}>
-          <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-            <Coins size={13} color={lootTone} />
-            <Typography sx={microLabelSx}>Loot</Typography>
-            <ResultBadge tone={lootTone}>{room.loot.data.type}</ResultBadge>
-            <Typography sx={detailSx}>d8({room.loot.d8})+d12({room.loot.d12})={room.loot.sum}</Typography>
-          </Stack>
-          {room.loot.data.rarity !== '—' ? <Typography sx={lineSx}>{formatLoot(room.loot.data)}</Typography> : null}
-          {room.lootDc ? (
-            <Stack direction="row" spacing={0.4} sx={{ alignItems: 'center', mt: 0.3 }}>
-              <Lock size={11} color={theme.palette.text.secondary} />
-              <Typography sx={dcSx}>DC to find it: {room.lootDc.sum}</Typography>
-            </Stack>
+    <ResultCard
+      icon={Castle}
+      title={`ROOM ${room.index}`}
+      header={(
+        <>
+          <ResultBadge tone={theme.palette.text.secondary}>{room.popLabel} · {room.thr} {room.thr > 1 ? 'rolls' : 'roll'}</ResultBadge>
+          {isSafe ? (
+            <ResultBadge tone={theme.palette.gmboard.result.safe} icon={ShieldCheck}>Safe room</ResultBadge>
           ) : null}
-        </Box>
-      </Stack>
-    </Box>
+        </>
+      )}
+    >
+      {room.slots.map((slot) => <SlotBlock key={slot.n} slot={slot} />)}
+      <ResultSlot
+        tone={lootTone}
+        icon={Coins}
+        label="Loot"
+        badges={<ResultBadge tone={lootTone}>{room.loot.data.type}</ResultBadge>}
+        dice={diceText(room.loot)}
+      >
+        {loot ? <ResultLine>{loot}</ResultLine> : null}
+        {room.lootDc ? (
+          <Stack direction="row" spacing={0.4} sx={{ alignItems: 'center', mt: 0.3 }}>
+            <Lock size={11} color={theme.palette.text.secondary} />
+            <Typography sx={dcSx}>DC to find it: {room.lootDc.sum}</Typography>
+          </Stack>
+        ) : null}
+      </ResultSlot>
+    </ResultCard>
   );
 }
-
-const cardSx = {
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  overflow: 'hidden',
-};
-
-const headerBandSx = {
-  px: 1.25,
-  py: 0.75,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
-};
-
-const roomChipSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.78rem',
-  letterSpacing: '0.04em',
-  color: 'primary.main',
-};
-
-const slotSx = {
-  p: 0.75,
-  borderRadius: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderLeftWidth: 3,
-};
-
-const microLabelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-};
-
-const detailSx = {
-  fontSize: '0.68rem',
-  color: 'text.secondary',
-};
-
-const lineSx = {
-  fontSize: '0.76rem',
-  color: 'text.primary',
-  mt: 0.3,
-};
 
 const dcSx = {
   fontSize: '0.7rem',

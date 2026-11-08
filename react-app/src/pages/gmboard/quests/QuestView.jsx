@@ -8,6 +8,7 @@ import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -46,7 +47,6 @@ function QuestCountHeader({ questSet }) {
 
 export default function QuestView() {
   const { state, dispatch, generateQuests } = useGmBoard();
-  const theme = useTheme();
   const qPopContract = SELECTOR_CONTRACTS.qPop;
 
   const canGenerate = Boolean(state.qPop) && Boolean(state.qTier);
@@ -63,11 +63,7 @@ export default function QuestView() {
 
   return (
     <Stack spacing={2}>
-      <Stack spacing={1.5} sx={panelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-          <ScrollText size={14} color={theme.palette.primary.main} />
-          <Typography sx={titleSx}>Quest Generator</Typography>
-        </Box>
+      <BoardPanel icon={ScrollText} title="Quest Generator">
         <SelectorGroup
           label="Scope"
           options={qPopContract.options}
@@ -91,7 +87,7 @@ export default function QuestView() {
             Clear
           </Button>
         </Stack>
-      </Stack>
+      </BoardPanel>
 
       {questSet ? (
         <>
@@ -104,21 +100,6 @@ export default function QuestView() {
     </Stack>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const dividerSx = {
   borderTop: '1px solid',

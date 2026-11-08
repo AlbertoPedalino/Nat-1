@@ -1,4 +1,5 @@
 import { numberOr } from '../numbers.js';
+import { hasTableValue, isNothingFound } from '../gmboard/tables.js';
 // The things in a room that are not creatures: what was rolled as a trap, a
 // hazard or a hoard, as a marker the GM can see on the board.
 //
@@ -70,7 +71,7 @@ export function trapLabel(trap) {
 }
 
 export function lootLabel(loot, lootDc) {
-  const rarity = loot?.rarity && loot.rarity !== '—' ? String(loot.rarity) : null;
+  const rarity = hasTableValue(loot?.rarity) ? String(loot.rarity) : null;
   const dc = numberOr(lootDc?.sum, null);
   return [
     String(loot?.type || 'Loot'),
@@ -103,7 +104,7 @@ export function roomMarkers(keyRoom) {
   }
 
   const loot = keyRoom.loot?.data;
-  if (loot?.type && loot.type !== 'Nothing found') {
+  if (!isNothingFound(loot)) {
     markers.push({
       kind: 'loot',
       iconKey: 'gem',

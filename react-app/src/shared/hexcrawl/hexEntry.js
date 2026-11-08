@@ -12,6 +12,7 @@
 import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS, normalizeMountSpeed } from '../gmboard/boardOptions.js';
 import { resolveAdvanceOnly, resolveProceed } from './hexRules.js';
 import { encounterDetail } from '../gmboard/resultText.js';
+import { hasTableValue } from '../gmboard/tables.js';
 import { trapLabel } from '../dungeon/roomMarkers.js';
 
 export const HEX_STATUSES = Object.freeze(['unexplored', 'frontier', 'settled']);
@@ -169,7 +170,7 @@ export function hexEntrySummary(result) {
     lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}${detail ? ` · ${detail}` : ''}`);
   }
   if (loot?.data?.type) {
-    const rarity = loot.data.rarity && loot.data.rarity !== '—' ? ` · ${loot.data.rarity}` : '';
+    const rarity = hasTableValue(loot.data.rarity) ? ` · ${loot.data.rarity}` : '';
     lines.push(`Loot: ${loot.data.type}${rarity}`);
   }
   if (trap?.data?.type) {

@@ -1,8 +1,8 @@
-import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, Typography, useTheme } from '@mui/material';
 import { ScrollText, Trash2 } from 'lucide-react';
 import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -10,13 +10,12 @@ export default function SessionLog() {
   const entries = state.log.slice(0, LOG_RENDER_LIMIT);
 
   return (
-    <Stack spacing={1} sx={panelSx}>
-      <Box sx={headRowSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-          <ScrollText size={14} color={theme.palette.primary.main} />
-          <Typography sx={titleSx}>Session Log</Typography>
-          {entries.length ? <Typography sx={countSx}>({entries.length})</Typography> : null}
-        </Box>
+    <BoardPanel
+      icon={ScrollText}
+      title="Session Log"
+      titleAdornment={entries.length ? <Typography sx={countSx}>({entries.length})</Typography> : null}
+      spacing={1}
+      actions={(
         <Button
           size="small"
           variant="outlined"
@@ -27,7 +26,8 @@ export default function SessionLog() {
         >
           Clear
         </Button>
-      </Box>
+      )}
+    >
       <Box sx={logBoxSx}>
         {entries.length ? entries.map((entry, index) => (
           <Typography key={index} sx={{ ...entrySx, borderBottom: `1px solid ${theme.palette.gmboard.rowDivider}` }}>{entry}</Typography>
@@ -35,30 +35,9 @@ export default function SessionLog() {
           <Typography sx={emptySx}>No log entries yet.</Typography>
         )}
       </Box>
-    </Stack>
+    </BoardPanel>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const headRowSx = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const countSx = {
   fontSize: '0.7rem',

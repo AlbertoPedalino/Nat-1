@@ -1,6 +1,8 @@
 import { rollDie } from '../character/dice/dice.js';
 import { rollD8D12, rollD20D20 } from '../gmboard/tableDice.js';
-import { getCompl, getEnc, getTrap, getEnvSev, getLoot } from '../gmboard/tables.js';
+import {
+  getCompl, getEnc, getTrap, getEnvSev, getLoot, isNothingFound,
+} from '../gmboard/tables.js';
 import { DUNGEON_ROOM_POP_LABELS } from '../gmboard/boardOptions.js';
 
 export const MIN_ROOM_COUNT = 1;
@@ -40,7 +42,7 @@ function buildRoom(index, { popMode, thr, tier }, tables, rng) {
   const lootRoll = rollD8D12(rng);
   const lootData = getLoot(tables, lootRoll.sum);
   let lootDc = null;
-  if (lootData.type !== 'Nothing found') {
+  if (!isNothingFound(lootData)) {
     const dcRoll = rollD8D12(rng);
     lootDc = { d8: dcRoll.d8, d12: dcRoll.d12, sum: dcRoll.sum };
   }

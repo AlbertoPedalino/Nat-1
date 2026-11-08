@@ -8,7 +8,7 @@ import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { isValidRoomCount, roomCountInputFrom } from '../../../shared/dungeon/dungeon.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -47,11 +47,7 @@ export default function DungeonView() {
 
   return (
     <Stack spacing={2}>
-      <Stack spacing={1.5} sx={panelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-          <Castle size={14} color={theme.palette.primary.main} />
-          <Typography sx={titleSx}>Dungeon Explorer</Typography>
-        </Box>
+      <BoardPanel icon={Castle} title="Dungeon Explorer">
         <TextField
           label="Room count (1–40)"
           size="small"
@@ -87,7 +83,7 @@ export default function DungeonView() {
             Clear
           </Button>
         </Stack>
-      </Stack>
+      </BoardPanel>
 
       {dungeon ? (
         <Box sx={roomsGridSx}>
@@ -104,21 +100,6 @@ export default function DungeonView() {
     </Stack>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const dividerSx = {
   borderTop: '1px solid',

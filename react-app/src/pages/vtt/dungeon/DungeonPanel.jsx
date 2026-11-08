@@ -9,7 +9,8 @@ import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboar
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { MARKER_COLORS, trapLabel } from '../../../shared/dungeon/roomMarkers.js';
+import { MARKER_COLORS, lootLabel, trapLabel } from '../../../shared/dungeon/roomMarkers.js';
+import { isNothingFound } from '../../../shared/gmboard/tables.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -128,14 +129,10 @@ export default function DungeonPanel({
               <SlotLine key={`${keyRoom.id}-${slot.n}`} slot={slot} tones={theme.palette.gmboard} />
             ))}
 
-            {keyRoom.loot?.data?.type && keyRoom.loot.data.type !== 'Nothing found' ? (
+            {!isNothingFound(keyRoom.loot?.data) ? (
               <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
                 <Coins size={13} color={theme.palette.gmboard.result.loot} />
-                <Typography sx={lineSx}>
-                  {keyRoom.loot.data.type}
-                  {keyRoom.loot.data.rarity && keyRoom.loot.data.rarity !== '—' ? ` · ${keyRoom.loot.data.rarity}` : ''}
-                  {keyRoom.lootDc ? ` · DC ${keyRoom.lootDc.sum}` : ''}
-                </Typography>
+                <Typography sx={lineSx}>{lootLabel(keyRoom.loot.data, keyRoom.lootDc)}</Typography>
               </Stack>
             ) : null}
 

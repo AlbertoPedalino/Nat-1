@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { CalendarDays, Check, Clock, Compass, FastForward } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM, parseHM, validateStart } from '../../../shared/gmboard/campaignTime.js';
 import { travelTime } from '../../../shared/gmboard/weather.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BoardPanel from '../ui/BoardPanel.jsx';
 
 export default function TimePanel() {
   const { state, setStart, setTime, advanceManual } = useGmBoard();
-  const theme = useTheme();
   const [day, setDay] = useState(String(state.day));
   const [month, setMonth] = useState(String(state.month));
   const [year, setYear] = useState(String(state.year));
@@ -61,11 +61,7 @@ export default function TimePanel() {
       : `${state.terrain} (${travel.base}h → ${travel.hours}h due to ${travel.reasons.join(' and ')})`;
 
   return (
-    <Stack spacing={1.5} sx={panelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-        <CalendarDays size={14} color={theme.palette.primary.main} />
-        <Typography sx={titleSx}>Date &amp; Time</Typography>
-      </Box>
+    <BoardPanel icon={CalendarDays} title="Date & Time">
       <Box>
         <Box sx={clockDisplaySx}>
           <Box sx={dateBlockSx}>
@@ -110,24 +106,9 @@ export default function TimePanel() {
         <Button size="small" variant="text" onClick={() => advanceManual(1)}>+1h</Button>
         <Button size="small" variant="text" onClick={() => advanceManual(4)}>+4h</Button>
       </Box>
-    </Stack>
+    </BoardPanel>
   );
 }
-
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  letterSpacing: '0.06em',
-  color: 'primary.main',
-};
 
 const dateSx = {
   fontFamily: UI_FONTS.display,

@@ -1,6 +1,8 @@
 import { rollDie } from '../../../shared/character/dice/dice.js';
 import { rollD8D12, rollD20D20 } from '../../../shared/gmboard/tableDice.js';
-import { getEvent, getEnc, getLoot } from '../../../shared/gmboard/tables.js';
+import {
+  eventFollowUps, eventKind, getEvent, getEnc, getLoot, isNothingFound,
+} from '../../../shared/gmboard/tables.js';
 
 const MINIMUM_REWARD_ROLL = 15;
 
@@ -9,7 +11,7 @@ function buildQuest(index, { tier }, tables, rng) {
   const ev = getEvent(tables, evRoll.sum);
 
   let encounter = null;
-  if (ev.type === 'encounter' || ev.type === 'camp_nemico') {
+  if (eventFollowUps(eventKind(ev)).includes('encounter')) {
     const encRoll = rollD20D20(rng);
     encounter = { d1: encRoll.d1, d2: encRoll.d2, sum: encRoll.sum, data: getEnc(tables, tier, encRoll.sum) };
   }
@@ -17,7 +19,7 @@ function buildQuest(index, { tier }, tables, rng) {
   const lootRoll = rollD8D12(rng);
   let lootData = getLoot(tables, lootRoll.sum);
   let isMinimum = false;
-  if (lootData.type === 'Nothing found') {
+  if (isNothingFound(lootData)) {
     lootData = getLoot(tables, MINIMUM_REWARD_ROLL);
     isMinimum = true;
   }

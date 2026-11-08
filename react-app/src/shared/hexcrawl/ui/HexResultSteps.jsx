@@ -3,12 +3,8 @@ import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lu
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
 import { UI_FONTS } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
-import { encounterDetail } from '../../gmboard/resultText.js';
-
-function formatLoot(loot) {
-  const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
-  return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
-}
+import { encounterDetail, lootDetail } from '../../gmboard/resultText.js';
+import { boardTone } from '../../gmboard/ui/resultVisuals.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
@@ -53,7 +49,7 @@ function renderStep(step, index, tones, last) {
     case 'encounter':
       return (
         <StepRow key={index} icon={Swords} iconColor={tones.result.encounter} label={step.label} last={last}>
-          (d20+d20={step.sum}): <ResultBadge tone={tones.difficulty[step.data.diff] || tones.fallback}>{step.data.diff}</ResultBadge>{' '}
+          (d20+d20={step.sum}): <ResultBadge tone={tones.of('difficulty', step.data.diff)}>{step.data.diff}</ResultBadge>{' '}
           {encounterDetail(step.data)}
         </StepRow>
       );
@@ -61,8 +57,8 @@ function renderStep(step, index, tones, last) {
     case 'campLoot':
       return (
         <StepRow key={index} icon={Coins} iconColor={tones.result.loot} label="Loot" last={last}>
-          (d8+d12={step.sum}): <ResultBadge tone={tones.rarity[step.data.rarity] || tones.fallback}>{step.data.type}</ResultBadge>{' '}
-          {step.data.rarity !== '—' ? formatLoot(step.data) : ''}
+          (d8+d12={step.sum}): <ResultBadge tone={tones.of('rarity', step.data.rarity)}>{step.data.type}</ResultBadge>{' '}
+          {lootDetail(step.data)}
         </StepRow>
       );
     case 'lootDc':
@@ -100,9 +96,7 @@ export default function HexResultSteps({ result }) {
   const theme = useTheme();
   if (!result || !result.steps.length) return null;
   const tones = {
-    difficulty: theme.palette.gmboard.difficulty,
-    rarity: theme.palette.gmboard.rarity,
-    fallback: theme.palette.gmboard.rarity.Common,
+    of: (group, key) => boardTone(theme.palette, group, key),
     weather: weatherTone(theme.palette, result.steps.find((s) => s.kind === 'weatherChange')?.weather),
     result: theme.palette.gmboard.result,
     dim: theme.palette.text.secondary,
