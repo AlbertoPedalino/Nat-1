@@ -1,54 +1,24 @@
 import { useRef, useState } from 'react';
 import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
-import { ArrowLeft, Sun, Moon, Dices, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
+import { ArrowLeft, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice/dice.js';
 import IconColorPicker from '../../../shared/ui/IconColorPicker.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/characterArt.js';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import RollLogDialog from './RollLogDialog.jsx';
+import SheetActions from './SheetActions.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.jsx';
-import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
-import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
-import { rollOutcome } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
-
-function cleanFormula(detail) {
-  if (!detail) return '';
-  return detail.replace(/\s*=\s*\d+$/, '');
-}
-
-function splitLabel(label, detail) {
-  const result = { clean: label || '', suffix: '' };
-  if (!label || !detail) return result;
-  const cleaned = cleanFormula(detail);
-  if (!cleaned) return result;
-  const idx = label.toLowerCase().lastIndexOf(cleaned.toLowerCase());
-  if (idx >= 0) {
-    result.clean = label.slice(0, idx).replace(/[\s\-–—]+$/, '');
-    result.suffix = label.slice(idx).trim();
-  }
-  return result;
-}
-
-const ROLL_LOG_SX = {
-  entry: {
-    border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.5, mb: 0.4,
-    bgcolor: uiAlpha(UI_COLORS.headerBg, 0.6),
-  },
-  label: { fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: 'text.primary', fontWeight: 700, letterSpacing: '0.04em', mb: 0.15 },
-  formula: { fontSize: '0.6rem', color: 'text.secondary', fontFamily: UI_FONTS.mono, lineHeight: 1.2 },
-  empty: { fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic', textAlign: 'center', py: 3 },
-};
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
   const [colorAnchor, setColorAnchor] = useState(null);
@@ -214,108 +184,54 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', color: UI_COLORS.goldLight, letterSpacing: '0.08em', fontWeight: 700 }}>
-              XP · Level {level}
-            </Typography>
-            <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
-              {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
-            </Typography>
+        {/* XP and the actions: stacked on a phone, one row from a tablet up. */}
+        <Box sx={{
+          display: 'flex', alignItems: embedded ? 'stretch' : { xs: 'stretch', sm: 'center' },
+          flexDirection: embedded ? 'column' : { xs: 'column', sm: 'row' },
+          gap: embedded ? '0.4rem' : { xs: '0.4rem', sm: '1rem' },
+          width: embedded ? '100%' : { xs: '100%', md: 'auto' },
+        }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', color: UI_COLORS.goldLight, letterSpacing: '0.08em', fontWeight: 700 }}>
+                XP · Level {level}
+              </Typography>
+              <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
+              </Typography>
+            </Box>
+            <Box sx={{ width: '100%', height: 8, bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+              <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
+            </Box>
+            {!readOnly && (
+              <XpDeltaControl
+                currentXp={currentXp}
+                onApply={(total) => onUpdateXp(String(total))}
+                variant="compact"
+                sx={{ width: embedded ? '100%' : { xs: '100%', md: 180 } }}
+              />
+            )}
           </Box>
-          <Box sx={{ width: '100%', height: 8, bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
-            <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
-          </Box>
-          {!readOnly && (
-            <XpDeltaControl
-              currentXp={currentXp}
-              onApply={(total) => onUpdateXp(String(total))}
-              variant="compact"
-              sx={{ width: embedded ? '100%' : { xs: '100%', md: 180 } }}
-            />
-          )}
+
+          <SheetActions
+            readOnly={readOnly}
+            embedded={embedded}
+            rollCount={rollLog?.length || 0}
+            onShortRest={onShortRest}
+            onLongRest={onLongRest}
+            onRoll={() => setCustomRollOpen(true)}
+            onOpenLog={() => setRollLogOpen(true)}
+          />
         </Box>
-
-        <Box sx={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', width: embedded ? '100%' : { xs: '100%', md: 'auto' }, justifyContent: embedded ? 'center' : { xs: 'center', md: 'flex-start' } }}>
-          {!readOnly && (
-            <>
-              <Button size="small" variant="outlined" color="warning" startIcon={<Sun size={14} />}
-                onClick={onShortRest} sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-                SHORT REST
-              </Button>
-              <Button size="small" variant="outlined" color="info" startIcon={<Moon size={14} />}
-                onClick={onLongRest} sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-                LONG REST
-              </Button>
-            </>
-          )}
-          <Button size="small" variant="outlined" startIcon={<Dices size={14} />}
-            onClick={() => setCustomRollOpen(true)}
-            sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em', color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.4) }}>
-            ROLL
-          </Button>
-          <Button size="small" variant="outlined" startIcon={<Dices size={14} />}
-            onClick={() => setRollLogOpen(true)}
-            sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em', color: UI_COLORS.success, borderColor: uiAlpha(UI_COLORS.success, 0.4) }}>
-            LOG ({rollLog?.length || 0})
-          </Button>
-      </Box>
       </Box>
       </Box>
 
-      <SheetDialog
+      <RollLogDialog
         open={rollLogOpen}
         onClose={() => setRollLogOpen(false)}
-        maxWidth="sm"
-        title="Roll Log"
-        icon={<Dices size={20} />}
-        headerRight={rollLog?.length > 0 ? (
-          <Button size="small" variant="text" startIcon={<Trash2 size={12} />}
-            onClick={() => { onClearRollLog?.(); }}
-            sx={{ fontSize: '0.6rem', color: 'text.secondary', minWidth: 0, p: 0.3 }}>
-            Clear
-          </Button>
-        ) : null}
-        actions={(
-          <Button onClick={() => setRollLogOpen(false)} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
-            Close
-          </Button>
-        )}
-      >
-        {!rollLog?.length ? (
-            <Typography sx={ROLL_LOG_SX.empty}>No rolls yet. Make an ability check, save, or attack to see it here.</Typography>
-          ) : (
-            rollLog.slice(0, 50).map((entry, i) => {
-              const formulaText = cleanFormula(entry.detail);
-              const labelParts = splitLabel(entry.label, formulaText);
-              const extra = labelParts.suffix
-                ? labelParts.suffix.replace(formulaText, '').trim()
-                : '';
-              const outcome = rollOutcome(entry);
-              const { isCrit, isFail } = outcome;
-              return (
-              <Box key={entry.timestamp + '-' + i} sx={{
-                ...ROLL_LOG_SX.entry, display: 'flex', gap: 0.5,
-              }}>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <RollActorLabel entry={entry} />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.15 }}>
-                    <Typography sx={{ ...ROLL_LOG_SX.label, mb: 0 }}>{labelParts.clean}</Typography>
-                  </Box>
-                  {(isCrit || isFail) && (
-                    <Typography sx={{ fontSize: '0.55rem', fontWeight: 900, letterSpacing: '0.08em', color: outcome.color, fontFamily: UI_FONTS.display, mb: 0.15 }}>
-                      {isCrit ? 'NATURAL 20!' : 'NATURAL 1'}
-                    </Typography>
-                  )}
-                  <RollCalculation entry={entry} />
-                  {extra ? <Typography sx={ROLL_LOG_SX.formula}>{extra}</Typography> : null}
-                  {entry.note ? <Typography sx={ROLL_LOG_SX.formula}>{entry.note}</Typography> : null}
-                </Box>
-              </Box>
-              );
-            })
-          )}
-      </SheetDialog>
+        rollLog={rollLog}
+        onClear={onClearRollLog}
+      />
 
       <CustomRollDialog
         open={customRollOpen}

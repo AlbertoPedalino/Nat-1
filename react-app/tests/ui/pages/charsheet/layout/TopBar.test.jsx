@@ -18,7 +18,7 @@ test('shared rolls show the monster or player name and note in the player log', 
       }]} />
     </MemoryRouter>,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'LOG (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Roll log, 1 roll' }));
   expect(screen.getByText('Goblin')).toBeInTheDocument();
   expect(screen.getByText('Claw')).toBeInTheDocument();
   expect(screen.getByText('Hit')).toBeInTheDocument();
@@ -43,7 +43,7 @@ test('the sheet roll log omits a zero stat modifier', () => {
     </MemoryRouter>,
   );
 
-  fireEvent.click(screen.getByRole('button', { name: 'LOG (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Roll log, 1 roll' }));
 
   expect(screen.getByRole('img', { name: 'd20 showing 12' })).toBeInTheDocument();
   expect(screen.getByText('=')).toBeInTheDocument();
@@ -68,7 +68,7 @@ test('the sheet roll log does not invent a zero modifier for plain custom dice',
     </MemoryRouter>,
   );
 
-  fireEvent.click(screen.getByRole('button', { name: 'LOG (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Roll log, 1 roll' }));
 
   expect(screen.getByRole('img', { name: 'd6 showing 4' })).toBeInTheDocument();
   expect(screen.getByText('=')).toBeInTheDocument();

@@ -26,7 +26,7 @@ test.each(['encounter', 'map', 'player'])('%s log uses the same result colours a
       </MemoryRouter>
     </ThemeProvider>,
   );
-  if (panel === 'player') fireEvent.click(screen.getByRole('button', { name: 'LOG (3)' }));
+  if (panel === 'player') fireEvent.click(screen.getByRole('button', { name: 'Roll log, 3 rolls' }));
   const log = panel === 'player' ? within(screen.getByRole('dialog')) : screen;
   expect(log.getByText('24')).toHaveStyle({ color: '#edd48a' });
   expect(log.getByText('5')).toHaveStyle({ color: '#de675f' });
@@ -47,7 +47,7 @@ test.each(['encounter', 'map', 'player'])('%s log places dice, modifier and tota
       <TopBar C={{ name: 'Johnny Walker', className: 'Bard', level: 1, extraClasses: [] }} sheet={{ xpStored: 0 }} embedded rollLog={feed} />
     )}
   </MemoryRouter>);
-  if (panel === 'player') fireEvent.click(screen.getByRole('button', { name: 'LOG (2)' }));
+  if (panel === 'player') fireEvent.click(screen.getByRole('button', { name: 'Roll log, 2 rolls' }));
   expect(screen.getByText('2d4 + 3')).toBeInTheDocument();
   expect(screen.getByText('1d10 + 3')).toBeInTheDocument();
   expect(screen.queryByText(/\[5\]/)).not.toBeInTheDocument();
