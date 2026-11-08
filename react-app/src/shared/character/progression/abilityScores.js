@@ -21,9 +21,17 @@ const BASE_SCORE_FIELDS = {
   dice: 'diceAssign',
 };
 
+// The background's split when it names none: +2 and +1.
+export const DEFAULT_BACKGROUND_PATTERN = Object.freeze([2, 1]);
+
+// The character field the base scores of a method live in (point buy when the
+// method is unknown).
+export function baseScoreField(method) {
+  return BASE_SCORE_FIELDS[method] || BASE_SCORE_FIELDS.pointbuy;
+}
+
 export function baseAbilityScore(character, stat) {
-  const field = BASE_SCORE_FIELDS[character?.scoreMethod] || BASE_SCORE_FIELDS.pointbuy;
-  const value = character?.[field]?.[stat];
+  const value = character?.[baseScoreField(character?.scoreMethod)]?.[stat];
   const score = value == null || value === '' ? NaN : Number(value);
   return Number.isFinite(score) ? score : 8;
 }
@@ -31,7 +39,7 @@ export function baseAbilityScore(character, stat) {
 export function backgroundAbilityBonus(character, stat) {
   const index = (character?.backgroundAbilities || []).indexOf(stat);
   if (index < 0) return 0;
-  const pattern = character.backgroundPattern?.length ? character.backgroundPattern : [2, 1];
+  const pattern = character.backgroundPattern?.length ? character.backgroundPattern : DEFAULT_BACKGROUND_PATTERN;
   return Number(pattern[index]) || 0;
 }
 

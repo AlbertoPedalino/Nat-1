@@ -1,5 +1,5 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
-import { builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
+import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 
 /**
  * Multiclass rules validator for 5e 2024
@@ -15,14 +15,7 @@ export function checkMulticlassPrerequisite(character, className) {
   const reqs = getMulticlassPrerequisites(className);
   if (!reqs.length) return { met: true, reason: '' };
   
-  const scores = {
-    str: builtAbilityScore(character, 'str'),
-    dex: builtAbilityScore(character, 'dex'),
-    con: builtAbilityScore(character, 'con'),
-    int: builtAbilityScore(character, 'int'),
-    wis: builtAbilityScore(character, 'wis'),
-    cha: builtAbilityScore(character, 'cha'),
-  };
+  const scores = builtAbilityScores(character);
   
   const metGroups = reqs.map((group) => 
     Object.entries(group).every(([ability, min]) => scores[ability] >= min)

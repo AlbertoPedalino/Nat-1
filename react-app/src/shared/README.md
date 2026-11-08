@@ -13,8 +13,8 @@ See the [source map](../README.md) for the page feature folders.
 | `numbers.js` | `clamp` / `clampInt`, the one way to keep a number in range |
 | `content/` | D&D entry rendering (`entryText.js`, stat-block tag labels in `statBlockTags.js`), `stripMarkup` for labels and keys (`markupText.js`), the rules vocabulary (`rulesVocabulary.js`: abilities, skills, tools, languages, sizes, schools, damage and creature types), 5etools links and loading (`gameData.js`), catalogs built from it (`catalogs/`: classes, species, backgrounds, feats, spells, items, rules, beasts), name keys, source filtering, text search |
 | `dungeon/` | Dungeon generation (`dungeon.js`), room markers, linked encounters |
-| `encounter/` | The combat model: building and snapshotting fights (`combat.js`), initiative and turns (`initiative.js`), combatant vitals (`combatantVitals.js`); combatant labels, fight records, the encounter library, sheet-vitals sync |
-| `gmboard/` | What other pages read of a GM Board: options, storage format, default state and tables, table dice, campaign time, weather (`weather.js` + `ui/WeatherSummary.jsx`), rolled-result text (`resultText.js`), selector UI (`ui/TierSelector.jsx` and others) |
+| `encounter/` | The combat model: building and snapshotting fights (`combat.js`), initiative and turns (`initiative.js`), combatant vitals (`combatantVitals.js`: `hpCommandFields`, the one hit point command rule for the builder and the map, `HP_COMMANDS`/`MARK_COMMANDS`); fight entries and rows (`fightRecord.js`: `makeFightEntry`, `freeId`); combatant labels, fight records, the encounter library, sheet-vitals sync |
+| `gmboard/` | What other pages read of a GM Board: options, storage format, default state and tables, table dice, campaign time, weather (`weather.js` + `ui/WeatherSummary.jsx`), table registry and row rules (`tables.js`: `BOARD_TABLES`, `eventKind`, loot), rolled-result text (`resultText.js`: encounter, loot, dice) and visuals (`ui/resultVisuals.js`), selector UI (`ui/TierSelector.jsx` and others) |
 | `hexcrawl/` | Hex data, hex travel rules (`hexRules.js`), icons, hex result and mount UI |
 | `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
 | `storage/` | Generic localStorage helpers and character registry metadata |
@@ -30,11 +30,11 @@ See the [source map](../README.md) for the page feature folders.
 | `forms/` | Wild Shape, companions, summons, and cannon forms |
 | `inventory/` | Items, crafting, currency, attunement, charges, inventory filtering |
 | `profile/` | Character persistence, export, portraits, class icons |
-| `proficiency/` | Weapon and armor proficiency rules and queries |
+| `proficiency/` | Weapon and armor proficiency rules and queries; the proficiencies a character already holds, per kind (`heldProficiencies.js`) |
 | `progression/` | Levels, ability bonuses, choices, feats, proficiencies, languages, XP |
 | `resources/` | Rest and recharge rules, resource definitions (`restResources.js`) |
 | `sheet/` | The sheet's numbers: stats (`sheetStats.js`), effects, defenses, effect bonuses, runtime adapters, derived state |
-| `spells/` | Spell grants, metadata, slots, caster progression (`casterProgression.js`), attack and DC (`spellcastingNumbers.js`), a class entry's spell picks (`spellBuckets.js`), Pact Magic, free casts, spell references |
+| `spells/` | Spell grants, metadata, slots, caster progression (`casterProgression.js`), a character's spellcasting for the builder and the sheet (`spellcasting.js`: casting entities, adapter profile, `getSpellSlots`, limits), attack and DC (`spellcastingNumbers.js`), a class entry's spell picks (`spellBuckets.js`), Pact Magic, free casts, spell references |
 
 Keep domain UI alongside its rules (for example, `combat/ConditionChips.jsx`).
 General-purpose presentation belongs in `ui/`; shared entry/source handling

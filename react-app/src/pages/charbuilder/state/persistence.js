@@ -18,6 +18,7 @@ import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -216,7 +217,7 @@ export function makeSheetPayload(character, data) {
     backgroundName: character.backgroundName,
     backgroundSource: character.backgroundSource,
     backgroundAbilities: character.backgroundAbilities,
-    backgroundPattern: character.backgroundPattern || [2, 1],
+    backgroundPattern: character.backgroundPattern || [...DEFAULT_BACKGROUND_PATTERN],
     scoreMethod: character.scoreMethod,
     hpMode: character.hpMode || 'average',
     hpManualRolls: { ...(character.hpManualRolls || {}) },

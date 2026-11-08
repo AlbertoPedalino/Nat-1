@@ -4,27 +4,20 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
 import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
-import { getActiveScores } from '../state/state.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
   return signed(abilityModifier(value));
 }
 
-function methodBucket(method) {
-  if (method === 'manual') return 'manualScores';
-  if (method === 'standard') return 'arrAssign';
-  if (method === 'dice') return 'diceAssign';
-  return 'pbScores';
-}
-
 export default function ScoresStep({ state, dispatch }) {
   const { character } = state;
-  const scores = getActiveScores(character);
-  const bucket = methodBucket(character.scoreMethod);
+  const bucket = baseScoreField(character.scoreMethod);
+  const scores = character[bucket];
   const spent = pointBuySpent(character.pbScores);
 
   return (

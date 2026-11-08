@@ -1,5 +1,6 @@
 import { PB_COST } from '../constants.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 export function pointBuySpent(scores) {
   return ABILITIES.reduce((sum, stat) => sum + (PB_COST[scores[stat]] || 0), 0);
@@ -15,11 +16,11 @@ export function getBackgroundPool(background) {
 }
 
 export function getBackgroundPattern(background, index = 0) {
-  if (!background?.ability?.length) return [2, 1];
+  if (!background?.ability?.length) return [...DEFAULT_BACKGROUND_PATTERN];
   const ability = background.ability[Math.min(index, background.ability.length - 1)];
   if (ability?.choose?.weighted?.weights?.length) return ability.choose.weighted.weights;
   const values = Object.values(ability || {}).filter((value) => typeof value === 'number').sort((a, b) => b - a);
-  return values.length ? values : [2, 1];
+  return values.length ? values : [...DEFAULT_BACKGROUND_PATTERN];
 }
 
 

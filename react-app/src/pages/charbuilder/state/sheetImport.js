@@ -2,6 +2,7 @@ import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/i
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 import { stripHeavyFields } from './persistence.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 // Reading a character back into the builder from an exported JSON sheet.
 
@@ -32,7 +33,7 @@ function buildBuilderStateFromSheetPayload(data) {
   const backgroundName = data.backgroundName || backgroundSnapshot?.name || '';
   const backgroundSource = data.backgroundSource || backgroundSnapshot?.source || '';
   const backgroundAbilities = data.backgroundAbilities || [];
-  const backgroundPattern = data.backgroundPattern || [2, 1];
+  const backgroundPattern = data.backgroundPattern || [...DEFAULT_BACKGROUND_PATTERN];
   const speciesName = data.speciesName || data.speciesSnapshot?.name || '';
   const speciesSource = data.speciesSource || data.speciesSnapshot?.source || '';
 

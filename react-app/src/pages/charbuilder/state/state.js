@@ -27,6 +27,7 @@ import {
   handleExtraClassLevel, handleExtraClassSelect, handleExtraSubclassSelect, handleMulticlassAdd,
   handleMulticlassRemove, handleSubclassSelect,
 } from './classHandlers.js';
+import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 function updateCharacter(state, patch) {
   const merged = { ...state.character, ...patch };
@@ -198,7 +199,7 @@ export function builderReducer(state, action) {
     case 'background/ability-toggle': {
       const current = state.character.backgroundAbilities || [];
       const exists = current.includes(action.stat);
-      const max = (state.character.backgroundPattern || [2, 1]).length;
+      const max = (state.character.backgroundPattern || DEFAULT_BACKGROUND_PATTERN).length;
       const backgroundAbilities = exists
         ? current.filter((stat) => stat !== action.stat)
         : [...(current.length >= max ? current.slice(1) : current), action.stat];
@@ -354,9 +355,3 @@ export function builderReducer(state, action) {
   }
 }
 
-export function getActiveScores(character) {
-  if (character.scoreMethod === 'manual') return character.manualScores;
-  if (character.scoreMethod === 'standard') return character.arrAssign;
-  if (character.scoreMethod === 'dice') return character.diceAssign;
-  return character.pbScores;
-}

@@ -11,7 +11,7 @@ import { backgroundOriginFeat } from '../../../shared/character/progression/sele
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
 import { strip5eMarkup } from '../../../shared/content/entryText.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
-import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
+import { backgroundAbilityBonus, DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { asArray } from '../../../shared/lists.js';
@@ -119,7 +119,7 @@ export default function BackgroundStep({ state, dispatch }) {
   const backgrounds = state.data.backgrounds.filter((item) => matchesQuery(search.background, item.name));
   const selectedBackground = character.backgroundObj || backgrounds.find((item) => item.name === character.backgroundName);
   const abilityPool = getBackgroundPool(selectedBackground);
-  const patterns = selectedBackground?.ability?.map((_, index) => getBackgroundPattern(selectedBackground, index)) || [[2, 1]];
+  const patterns = selectedBackground?.ability?.map((_, index) => getBackgroundPattern(selectedBackground, index)) || [[...DEFAULT_BACKGROUND_PATTERN]];
 
   return (
     <Stack spacing={2}>
