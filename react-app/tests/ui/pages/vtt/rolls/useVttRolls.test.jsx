@@ -139,11 +139,23 @@ test('a creature roll stays in the GM log unless shown, and then lands over its 
   expect(result.current.feed[0].visibility).toBe('gm');
   expect(result.current.diceThrows).toHaveLength(0);
 
+  // The GM's switch for the campaign, as set from any screen.
+  localStorage.setItem('gb:gm-rolls-shown:campaign-1', '1');
   act(() => {
-    result.current.handleCreatureRoll({ notation: '1d6+2', type: 'Scimitar (Damage)', actor, visibility: 'public' });
+    result.current.handleCreatureRoll({ notation: '1d6+2', type: 'Scimitar (Damage)', actor });
   });
   const [shown, { visibility: shownVisibility }] = channel.publish.mock.calls[1];
   expect(shownVisibility).toBe('public');
   expect(shown.thrown).toBe(true);
   expect(result.current.diceThrows.map((entry) => entry.token?.id)).toEqual(['gob']);
+});
+
+test('a custom roll from the map: the GM roll follows the switch, a player roll is always shown', () => {
+  localStorage.removeItem('gb:gm-rolls-shown:campaign-1');
+  const gm = openRolls({ role: { isGm: true, ownedCharacterIds: [] } });
+  act(() => { gm.result.current.handleCustomRoll('1d20'); });
+  expect(channel.publish.mock.calls.at(-1)[1]).toEqual({ visibility: 'gm' });
+  const player = openRolls({ role: { isGm: false, ownedCharacterIds: [] } });
+  act(() => { player.result.current.handleCustomRoll('1d20'); });
+  expect(channel.publish.mock.calls.at(-1)[1]).toEqual({ visibility: 'public' });
 });

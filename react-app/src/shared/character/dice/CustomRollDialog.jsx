@@ -21,7 +21,10 @@ const DICE_TYPES = [2, 4, 6, 8, 10, 12, 20, 100];
 const DIE_LABELS = { 2: 'Coin' };
 const dieLabel = (faces) => DIE_LABELS[faces] || `d${faces}`;
 
-export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps }) {
+// `footer`: a line under the dice (who will see the roll, for the GM).
+export default function CustomRollDialog({
+  open, onClose, onRoll, footer = null, ...dialogProps
+}) {
   const [counts, setCounts] = useState(() => Object.fromEntries(DICE_TYPES.map((d) => [d, 0])));
   const [modifier, setModifier] = useState(0);
 
@@ -106,6 +109,7 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
           Maximum {DICE_LIMITS.maxDice} dice per roll.
         </Typography>
       ) : null}
+      {footer ? <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>{footer}</Box> : null}
     </SheetDialog>
   );
 }

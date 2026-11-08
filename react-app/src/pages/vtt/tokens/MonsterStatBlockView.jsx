@@ -1,11 +1,7 @@
-import { useCallback, useState } from 'react';
-import { Box, FormControlLabel, Switch } from '@mui/material';
+import { useCallback } from 'react';
+import { Box } from '@mui/material';
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
-import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
-
-// Per GM device, like the builder's own "show to players": most monster rolls
-// are the GM's business, and the default says so.
-const PUBLIC_KEY = 'gb:vtt:creature-rolls-public';
+import GmRollsShownSwitch from '../../../shared/character/dice/GmRollsShownSwitch.jsx';
 
 // The stat block of a creature of the shown fight, opened by the GM from its
 // piece or its entry in the initiative. Rolls go to the battle map's dice and
@@ -15,18 +11,11 @@ const PUBLIC_KEY = 'gb:vtt:creature-rolls-public';
 // Shown where the character sheets are — the side column beside the board, or
 // the floating sheet in fullscreen — so a creature and a character are looked
 // up in the same place, and the board stays uncovered.
+// Who sees its rolls is the GM's switch for the campaign (rollVisibility.js),
+// the same one as on the map's dice and in the encounter builder.
 export default function MonsterStatBlockView({
-  monster, legendaryGroups, conditions, onRoll, onClose,
+  monster, legendaryGroups, conditions, campaignId, onRoll, onClose,
 }) {
-  const [shown, setShown] = useState(() => getStorageItem(PUBLIC_KEY) === '1');
-  const toggleShown = useCallback((event) => {
-    const next = event.target.checked;
-    setShown(next);
-    setStorageItem(PUBLIC_KEY, next ? '1' : '0');
-  }, []);
-  const handleRoll = useCallback((roll) => {
-    onRoll?.({ ...roll, visibility: shown ? 'public' : 'gm' });
-  }, [onRoll, shown]);
 
   // Escape closes it, unless something inside it (a roll's menu) has its own
   // use for the key.
@@ -45,16 +34,12 @@ export default function MonsterStatBlockView({
         <StatBlockHeader monster={monster} onClose={onClose} />
       </Box>
       <Box sx={bodySx}>
-        <FormControlLabel
-          control={<Switch size="small" checked={shown} onChange={toggleShown} />}
-          label={shown ? 'Rolls shown to players' : 'Rolls for the GM only'}
-          sx={switchSx}
-        />
+        <GmRollsShownSwitch campaignId={campaignId} sx={{ mb: 1 }} />
         <StatBlockSheet
           monster={monster}
           legendaryGroups={legendaryGroups}
           conditions={conditions}
-          onRoll={handleRoll}
+          onRoll={onRoll}
         />
       </Box>
     </Box>
@@ -71,9 +56,4 @@ const headerSx = {
 
 const bodySx = {
   p: 2,
-};
-
-const switchSx = {
-  mb: 1,
-  '& .MuiFormControlLabel-label': { fontSize: '0.8rem', color: 'text.secondary' },
 };

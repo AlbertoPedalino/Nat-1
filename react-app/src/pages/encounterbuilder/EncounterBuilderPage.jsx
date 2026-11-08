@@ -4,6 +4,7 @@ import { BookOpen, Library, Swords, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
 import DiceControl from '../../shared/character/dice/DiceControl.jsx';
+import GmRollsShownSwitch from '../../shared/character/dice/GmRollsShownSwitch.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
 import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
@@ -32,7 +33,9 @@ export default function EncounterBuilderPage() {
 }
 
 function EncounterBuilderShell({ tool }) {
-  const { state, dispatch, roll } = useEncounterBuilder();
+  const {
+    state, dispatch, roll, rollSync,
+  } = useEncounterBuilder();
   const [fumblesOpen, setFumblesOpen] = useState(false);
   const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
@@ -63,6 +66,7 @@ function EncounterBuilderShell({ tool }) {
                   onRoll={handleCustomRoll}
                   onClear={() => dispatch({ type: 'clearRollLog' })}
                   emptyText="No rolls yet. Click statblock dice, attacks, or abilities."
+                  settings={<GmRollsShownSwitch campaignId={rollSync.campaignId} />}
                 />
                 <Button
                   size="small"

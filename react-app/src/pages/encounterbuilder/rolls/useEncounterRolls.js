@@ -3,6 +3,7 @@ import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { makeRollEntry } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { persistRollSettings, readRollSettings } from '../state/storage.js';
+import { readGmRollsShown, rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 
 export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) {
   const [settings, setSettings] = useState(() => readRollSettings(instanceId));
@@ -10,7 +11,6 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   const inferred = partyCampaigns.length === 1 ? partyCampaigns[0] : null;
   const requested = settings.campaignId === undefined ? inferred : settings.campaignId;
   const campaignId = campaigns.some((campaign) => campaign.id === requested) ? requested : null;
-  const showToPlayers = settings.showToPlayers === true;
 
   // Rolls from the campaign land in the log as the channel carries them.
   const receive = useCallback((entry) => dispatch({ type: 'addRoll', entry }), [dispatch]);
@@ -29,8 +29,9 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
     });
   }, [instanceId]);
 
-  // A roll made here: into the log, and out to the campaign unless it is
-  // `localOnly` (a GM-only table roll), in which case it stays GM-only.
+  // A roll made here: into the log, and out to the campaign. A creature or
+  // custom roll is the GM's (shown to players by the campaign's switch); a
+  // `localOnly` one (fumbles) is a table roll, for the GM only.
   const shareRoll = useCallback((result, actor, { localOnly = false } = {}) => {
     const entry = makeRollEntry(buildEncounterDiceToast(result), {
       idPrefix: 'encounter',
@@ -39,11 +40,11 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
       sourceRef: result.sourceRef,
       identity: result,
       note: result.note,
-      visibility: !localOnly && showToPlayers ? 'public' : 'gm',
+      visibility: rollVisibility(localOnly ? 'table' : 'gm', readGmRollsShown(campaignId)),
     });
     dispatch({ type: 'addRoll', entry, local: true });
     if (!localOnly) publish(entry, { visibility: entry.visibility });
-  }, [dispatch, publish, showToPlayers]);
+  }, [campaignId, dispatch, publish]);
 
-  return { campaignId, showToPlayers, updateSettings, shareRoll };
+  return { campaignId, updateSettings, shareRoll };
 }

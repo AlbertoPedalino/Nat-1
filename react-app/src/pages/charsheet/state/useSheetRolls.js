@@ -7,6 +7,7 @@ import {
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getSaveBonus, exhaustionD20Penalty } from '../../../shared/character/sheet/sheetStats.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
+import { rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
 import { addRoll, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
@@ -52,7 +53,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     // reads on the battle map exactly as it read here. Every roll on this sheet
     // goes through this one function, custom rolls included.
     const sharedEntry = { ...entry, characterId: charId, actorName: C?.name || '' };
-    publishRoll(sharedEntry);
+    publishRoll(sharedEntry, { visibility: rollVisibility('player') });
     // Also hand off directly while campaign metadata is still loading.
     // The map deduplicates the shared event by id.
     onRoll?.(sharedEntry);

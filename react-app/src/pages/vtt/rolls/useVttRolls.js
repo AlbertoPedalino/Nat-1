@@ -3,6 +3,7 @@ import {
 } from 'react';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
+import { readGmRollsShown, rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import {
   addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor,
 } from '../../../shared/vtt/rolls/rollFeed.js';
@@ -74,29 +75,31 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
         tokens,
         roster,
       }),
+      // The GM's own roll follows their switch; a player's is the table's.
+      visibility: rollVisibility(role.isGm ? 'gm' : 'player', readGmRollsShown(campaignId)),
     };
     acceptRoll(entry, { local: true });
-    publish(entry);
-  }, [acceptRoll, publish, role.isGm, role.ownedCharacterIds, roster, tokens]);
+    publish(entry, { visibility: entry.visibility });
+  }, [acceptRoll, campaignId, publish, role.isGm, role.ownedCharacterIds, roster, tokens]);
 
   // A roll from a creature's stat block, opened on the map by the GM. Shaped as
   // the encounter builder shares its own, so it lands in every log alike and,
   // when public, its bubble and dice over the creature's piece (`sourceRef`).
-  // `visibility: 'gm'` keeps it in the GM's log: no bubble, no dice, never on
-  // a player's screen or the projector.
+  // A GM roll (rollVisibility.js): while the GM's switch is off it stays in the
+  // GM's log — no bubble, no dice, never on a player's screen or the projector.
   const handleCreatureRoll = useCallback(({
-    notation, type, advantage, note = '', actor = {}, visibility = 'gm',
+    notation, type, advantage, note = '', actor = {},
   }) => {
     const result = rollDice(notation, type, Math.random, { advantage });
     if (!result) return null;
     const actorName = actor.actorName || 'GM';
     const entry = makeRollEntry(buildEncounterDiceToast({ ...result, actor: actorName }), {
-      idPrefix: 'creature', actorName, sourceRef: actor.sourceRef, identity: actor, note, visibility,
+      idPrefix: 'creature', actorName, sourceRef: actor.sourceRef, identity: actor, note, visibility: rollVisibility('gm', readGmRollsShown(campaignId)),
     });
     acceptRoll(entry, { local: true });
     publish(entry, { visibility: entry.visibility });
     return entry;
-  }, [acceptRoll, publish]);
+  }, [acceptRoll, campaignId, publish]);
 
   useEffect(() => {
     if (!feed.length) return undefined;

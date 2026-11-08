@@ -91,7 +91,7 @@ export function persistEncounter(id, state) {
   });
 }
 
-// The roll log's settings ({ campaignId, showToPlayers }); kept on this device.
+// The roll log's settings ({ campaignId }: where its rolls go); kept on this device.
 export function readRollSettings(id) {
   return readJson(id, STORAGE_KEYS.rollSettings, {});
 }

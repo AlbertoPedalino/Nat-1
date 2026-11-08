@@ -18,6 +18,7 @@ import InitiativeStrip from '../initiative/InitiativeStrip.jsx';
 import MonsterStatBlockView from '../tokens/MonsterStatBlockView.jsx';
 import { useSceneContent } from './useSceneContent.js';
 import { useVttRolls } from '../rolls/useVttRolls.js';
+import GmRollsShownSwitch from '../../../shared/character/dice/GmRollsShownSwitch.jsx';
 import {
   showsFight,
 } from '../../../shared/vtt/tokens/initiative.js';
@@ -304,6 +305,7 @@ export default function SceneEditor({
           monster={statBlock.monster}
           legendaryGroups={monsterDb.legendaryGroups}
           conditions={statBlock.combatant.activeConditions || []}
+          campaignId={scene.campaignId}
           onRoll={handleStatBlockRoll}
           onClose={closeStatBlock}
         />
@@ -359,6 +361,7 @@ export default function SceneEditor({
         feed={rollFeed}
         onCustomRoll={handleCustomRoll}
         onClear={clearRollFeed}
+        settings={role.isGm ? <GmRollsShownSwitch campaignId={scene.campaignId} /> : null}
       />
     ),
     controls: (

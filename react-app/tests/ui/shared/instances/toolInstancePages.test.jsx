@@ -55,7 +55,9 @@ vi.mock('../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.js
   function EncounterBuilderProvider({ instanceId, children }) {
     const [state, dispatch] = React.useReducer(encounterReducer, undefined, createInitialState);
     useEncounterPersistence({ instanceId, monsters: [], monsterStatus: 'ready', state, dispatch });
-    const value = React.useMemo(() => ({ state, dispatch, roll: () => null }), [state]);
+    const value = React.useMemo(() => ({
+      state, dispatch, roll: () => null, rollSync: { campaignId: null },
+    }), [state]);
     return <Context.Provider value={value}><div data-testid="editor">{state.party?.count}</div>{children}</Context.Provider>;
   }
   return { EncounterBuilderProvider, useEncounterBuilder: () => React.useContext(Context) };
@@ -66,7 +68,6 @@ vi.mock('../../../../src/pages/encounterbuilder/combat/CombatView.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/library/LibraryView.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/bestiary/StatBlockDialog.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/rolls/RollSharingControls.jsx', stub);
-vi.mock('../../../../src/pages/encounterbuilder/rolls/RollLogLauncher.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/rolls/CriticalFumblesDialog.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/negotiation/NegotiationDialog.jsx', stub);
 vi.mock('../../../../src/shared/character/dice/encounterDiceToast.js', () => ({ buildEncounterDiceToast: () => null }));

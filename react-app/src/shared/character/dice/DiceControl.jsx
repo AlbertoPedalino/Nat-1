@@ -18,9 +18,10 @@ import { UI_FONTS } from '../../ui/fonts.js';
 // corner of the map). `surface` restyles the pieces for a screen with its own
 // chrome — the map, which is often fullscreen: { groupSx, segmentSx,
 // dividerColor, paperSx, dialog } where `dialog` holds CustomRollDialog's
-// style props.
+// style props. `settings` (the GM's GmRollsShownSwitch) is shown where the
+// roll is made and on top of the log.
 export default function DiceControl({
-  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, sx,
+  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, sx,
 }) {
   const [anchor, setAnchor] = useState(null);
   const [rollerOpen, setRollerOpen] = useState(false);
@@ -64,9 +65,16 @@ export default function DiceControl({
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{ paper: { 'aria-label': 'Roll log', sx: { ...paperSx, ...surface.paperSx } } }}
       >
+        {settings ? <Box sx={settingsSx}>{settings}</Box> : null}
         <RollLogList log={log} onClear={onClear} emptyText={emptyText} />
       </Popover>
-      <CustomRollDialog open={rollerOpen} onClose={() => setRollerOpen(false)} onRoll={onRoll} {...surface.dialog} />
+      <CustomRollDialog
+        open={rollerOpen}
+        onClose={() => setRollerOpen(false)}
+        onRoll={onRoll}
+        footer={settings}
+        {...surface.dialog}
+      />
     </>
   );
 }
@@ -108,6 +116,8 @@ function dividerSx(color = 'divider') {
 
 // The half whose popover is open is lit.
 const openSx = { bgcolor: uiAlpha(UI_COLORS.gold, 0.16) };
+
+const settingsSx = { pb: 1, mb: 1, borderBottom: 1, borderColor: 'divider' };
 
 const paperSx = {
   mt: 0.75,

@@ -1,6 +1,9 @@
-import { FormControlLabel, MenuItem, Stack, Switch, TextField, Typography } from '@mui/material';
+import { MenuItem, Stack, TextField, Typography } from '@mui/material';
+import GmRollsShownSwitch from '../../../shared/character/dice/GmRollsShownSwitch.jsx';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
+// Which campaign this builder's rolls go to, and whether the GM's rolls are
+// shown to its players (the same switch as on the battle map).
 export default function RollSharingControls() {
   const { campaignPlayers, rollSync } = useEncounterBuilder();
   return (
@@ -17,15 +20,12 @@ export default function RollSharingControls() {
         ))}
       </TextField>
       <Stack>
-        <FormControlLabel
-          control={<Switch checked={rollSync.showToPlayers} onChange={(_, checked) => rollSync.updateSettings({ showToPlayers: checked })} />}
-          label="Show my rolls to players"
-        />
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {rollSync.campaignId
-            ? 'Applies to new monster sheet and custom rolls. Hidden rolls stay in the GM logs.'
-            : 'Select a campaign to sync with its battle map and player logs.'}
-        </Typography>
+        <GmRollsShownSwitch campaignId={rollSync.campaignId} />
+        {rollSync.campaignId ? (
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Applies to new creature and custom rolls, here and on the campaign's map. Hidden rolls stay in the GM logs.
+          </Typography>
+        ) : null}
       </Stack>
     </Stack>
   );

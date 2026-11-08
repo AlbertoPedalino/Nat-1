@@ -11,8 +11,10 @@ import {
 // The map's dice, in its top-right corner beside the tools toggle: the shared
 // DiceControl as a pill of two icons in the map's chrome. Being on the map,
 // the picker and the log are painted on the map's own surface, so both stay
-// visible in fullscreen.
-export default function RollsButton({ feed, onCustomRoll, onClear }) {
+// visible in fullscreen. `settings`: the GM's GmRollsShownSwitch.
+export default function RollsButton({
+  feed, onCustomRoll, onClear, settings = null,
+}) {
   return (
     <DiceControl
       variant="icon"
@@ -21,6 +23,7 @@ export default function RollsButton({ feed, onCustomRoll, onClear }) {
       onClear={onClear}
       emptyText="Nothing rolled yet. Rolls made on a character sheet in this campaign show up here."
       surface={MAP_SURFACE}
+      settings={settings}
     />
   );
 }

@@ -3,6 +3,7 @@ import { useReducer } from 'react';
 import { useEncounterRolls } from '../../../../../src/pages/encounterbuilder/rolls/useEncounterRolls.js';
 import { encounterReducer, createInitialState } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
 import { encounterRollActor } from '../../../../../src/pages/encounterbuilder/rolls/rollActor.js';
+import { readGmRollsShown, useGmRollsShown } from '../../../../../src/shared/cloud/sync/rollVisibility.js';
 
 const channel = vi.hoisted(() => ({ publish: vi.fn(), onRoll: null, campaignId: null }));
 vi.mock('../../../../../src/shared/cloud/sync/useRollChannel.js', () => ({ useRollChannel: (options) => {
@@ -17,7 +18,8 @@ const monsterRoll = { type: 'Claw', result: 17, mathStr: '1d20 (12) +5', natural
 function openRolls() {
   return renderHook(() => {
     const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
-    return { state, sync: useEncounterRolls({ instanceId: 'enc', players, campaigns, dispatch }) };
+    const [, setShown] = useGmRollsShown('campaign');
+    return { state, setShown, sync: useEncounterRolls({ instanceId: 'enc', players, campaigns, dispatch }) };
   });
 }
 beforeEach(() => { localStorage.clear(); channel.publish.mockReset(); });
@@ -35,15 +37,15 @@ test('infers the imported party campaign and keeps monster/custom rolls private 
   expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({ actorName: 'GM' }), { visibility: 'gm' });
 });
 
-test('visibility affects only future rolls and persists when the builder reopens', () => {
+test('the campaign switch affects only future rolls and persists when the builder reopens', () => {
   const { result, unmount } = openRolls();
   act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin'));
-  act(() => result.current.sync.updateSettings({ showToPlayers: true }));
+  act(() => result.current.setShown(true));
   expect(channel.publish).toHaveBeenCalledTimes(1);
   act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin'));
   expect(channel.publish).toHaveBeenLastCalledWith(expect.anything(), { visibility: 'public' });
   unmount();
-  expect(openRolls().result.current.sync.showToPlayers).toBe(true);
+  expect(readGmRollsShown('campaign')).toBe(true);
 });
 
 test('monster rolls carry the selected combatant reference and the builder visibility', () => {
@@ -57,7 +59,7 @@ test('monster rolls carry the selected combatant reference and the builder visib
     ] },
   });
   for (const shared of [false, true, false]) {
-    act(() => result.current.sync.updateSettings({ showToPlayers: shared }));
+    act(() => result.current.setShown(shared));
     act(() => result.current.sync.shareRoll({ ...monsterRoll, ...identity }, identity.actorName));
     expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({
       characterId: null, sourceRef: 'enc:fight:2', actorName: 'Goblin', thrown: true,
@@ -76,7 +78,7 @@ test('receives player and map rolls once, without rebroadcasting them', () => {
 
 test('a local-only roll goes into the log as GM-only and is not published', () => {
   const { result } = openRolls();
-  act(() => result.current.sync.updateSettings({ showToPlayers: true }));
+  act(() => result.current.setShown(true));
   act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin', { localOnly: true }));
   expect(result.current.state.rollLog[0]).toMatchObject({ actorName: 'Goblin', visibility: 'gm' });
   expect(channel.publish).not.toHaveBeenCalled();
