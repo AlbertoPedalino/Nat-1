@@ -5,9 +5,9 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { asArray } from '../../../shared/lists.js';
-import { capitalize } from '../../../shared/ui/textCase.js';
 import { collectWarlockInvocationFeatures, collectClassBuckets } from './featuresTabData.js';
 import { FeatureSection } from './FeatureSection.jsx';
+import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -43,11 +43,11 @@ export default function FeaturesTab({ C }) {
       });
     }
 
-    const fixedSkills = (backgroundSnapshot.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose' && !k.startsWith('any'))).map((v) => capitalize(v.toLowerCase()));
+    const fixedSkills = extractFixedProficiencyLabels(backgroundSnapshot.skillProficiencies);
     const allSkills = [...new Set([...fixedSkills, ...(backgroundChoices.skills || [])])];
-    const fixedTools = (backgroundSnapshot.toolProficiencies || []).flatMap(tp => Object.keys(tp).filter(k => k !== 'choose' && !k.startsWith('any')));
+    const fixedTools = extractFixedProficiencyLabels(backgroundSnapshot.toolProficiencies);
     const allTools = [...new Set([...fixedTools, ...(backgroundChoices.tools || [])])];
-    const fixedLangs = (backgroundSnapshot.languageProficiencies || []).flatMap(lp => Object.keys(lp).filter(k => k !== 'choose' && !k.startsWith('any')));
+    const fixedLangs = extractFixedProficiencyLabels(backgroundSnapshot.languageProficiencies);
     const allLangs = [...new Set([...fixedLangs, ...(backgroundChoices.languages || [])])];
 
     const grants = [];

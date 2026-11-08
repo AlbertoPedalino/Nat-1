@@ -6,7 +6,7 @@ import { FeatCategorySlot, FeatFixedSlot } from '../choices/FeatSlots.jsx';
 import SearchList from '../choices/SearchList.jsx';
 import { getBackgroundPattern, getBackgroundPool } from '../progression/calculations.js';
 import { backgroundChoiceSpecs } from '../choices/choiceSpecs.js';
-import { fixedKeysFromBlocks } from '../choices/choiceSpecHelpers.js';
+import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
 import { NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
@@ -78,9 +78,9 @@ function extractBackgroundLore(background) {
 
 function BackgroundDetailCard({ background }) {
   if (!background) return null;
-  const fixedSkills = fixedKeysFromBlocks(background.skillProficiencies || []);
-  const fixedTools = fixedKeysFromBlocks(background.toolProficiencies || []);
-  const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || []);
+  const fixedSkills = extractFixedProficiencyLabels(background.skillProficiencies);
+  const fixedTools = extractFixedProficiencyLabels(background.toolProficiencies);
+  const fixedLangs = extractFixedProficiencyLabels(background.languageProficiencies);
   const originFeat = backgroundFeatOptionLabel(background);
   const lore = extractBackgroundLore(background);
   const facts = extractBackgroundFacts(background);

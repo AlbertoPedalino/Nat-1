@@ -6,15 +6,12 @@ import {
   collapseWeaponProficiencies,
   uniqueDisplayLabels,
 } from '../../../shared/character/progression/proficiencyDisplay.js';
-import {
-  parseTypedProficiencyValue,
-  extractFixedProficiencyLabels,
-} from '../../../shared/character/progression/typedProficiencies.js';
+import { parseTypedProficiencyValue } from '../../../shared/character/progression/typedProficiencies.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { buildPreviewSheetCharacter } from './previewSheet.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { asArray } from '../../../shared/lists.js';
-import { characterClassFeatures } from '../../../shared/character/progression/classLevel.js';
+import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
 
 // What the builder preview lists: skill and other proficiencies merged from
 // every source, and the feats the character holds.
@@ -36,9 +33,6 @@ function collectSkillProficiencies(character) {
     if (parsed.kind && parsed.kind !== 'skill') return;
     out.push(parsed.label);
   };
-  const pushFixed = (blocks) => {
-    extractFixedProficiencyLabels(blocks).forEach((label) => out.push(label));
-  };
 
   const fromSelected = Array.isArray(character.selectedSkills)
     ? character.selectedSkills
@@ -48,17 +42,8 @@ function collectSkillProficiencies(character) {
       ...(character.selectedSkills?.expert || []),
     ];
   fromSelected.forEach(pushSkill);
-  (character.normalizedChoices?.skills || []).forEach(pushSkill);
+  out.push(...heldProficiencyLabels(character, 'skill'));
   (character.normalizedChoices?.expertise || []).forEach(pushSkill);
-
-  pushFixed(character.backgroundSnapshot?.skillProficiencies || character.backgroundObj?.skillProficiencies);
-  pushFixed(character.speciesSnapshot?.skillProficiencies || character.speciesObj?.skillProficiencies);
-  [
-    ...characterClassFeatures(character),
-    ...(character.allFeatSnapshots || []),
-  ].forEach((feature) => {
-    pushFixed(feature?.skillProficiencies);
-  });
 
   Object.entries(character.choices || {})
     .filter(([key]) => choiceKeyCanGrantSkill(key))

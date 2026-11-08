@@ -7,11 +7,13 @@ import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMaste
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue, parseTypedProficiencyValue } from '../../../shared/character/progression/typedProficiencies.js';
+import {
+  isChoicePlaceholderValue,
+  parseTypedProficiencyValue,
+} from '../../../shared/character/progression/typedProficiencies.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
-import { asArray } from '../../../shared/lists.js';
-import { characterClassFeatures } from '../../../shared/character/progression/classLevel.js';
+import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -46,22 +48,6 @@ function specProficiencyKind(spec) {
   return null;
 }
 
-function addFixedBlocks(out, blocks, kind) {
-  asArray(blocks).forEach((block) => {
-    if (!block) return;
-    if (typeof block === 'string') {
-      block.split(/[;,]/).forEach((value) => {
-        if (!value.trim() || isChoicePlaceholder(value)) return;
-        addProficiencyBlock(out, value, kind);
-      });
-      return;
-    }
-    Object.keys(block)
-      .filter((key) => !PROFICIENCY_CHOICE_KEYS.includes(key) && block[key] !== false && !isChoicePlaceholder(key))
-      .forEach((key) => addProficiencyBlock(out, key, kind));
-  });
-}
-
 function addChoiceValueToKindSet(out, value, kind) {
   const parsed = parseTypedChoiceValue(value);
   if (parsed.kind && parsed.kind !== kind) return;
@@ -69,46 +55,14 @@ function addChoiceValueToKindSet(out, value, kind) {
   addProficiencyBlock(out, parsed.label, kind);
 }
 
+// What a pick of this kind cannot offer again: every proficiency of the kind the
+// character holds (heldProficiencies.js), and for weapons the masteries too.
 function collectBlockedForKind({ character, kind }) {
   const blocked = new Set();
-  if (!character) return blocked;
-
-  if (kind === 'skill') {
-    (character.normalizedChoices?.skills || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'skill'));
-    addFixedBlocks(blocked, character.backgroundObj?.skillProficiencies || character.backgroundSnapshot?.skillProficiencies, 'skill');
-    addFixedBlocks(blocked, character.speciesObj?.skillProficiencies || character.speciesSnapshot?.skillProficiencies, 'skill');
-  }
-
-  if (kind === 'tool') {
-    (character.normalizedChoices?.tools || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'tool'));
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.tools || character.clsSnapshot?.startingProficiencies?.tools, 'tool');
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.toolProficiencies || character.clsSnapshot?.startingProficiencies?.toolProficiencies, 'tool');
-    addFixedBlocks(blocked, character.backgroundObj?.toolProficiencies || character.backgroundSnapshot?.toolProficiencies, 'tool');
-    addFixedBlocks(blocked, character.speciesObj?.toolProficiencies || character.speciesSnapshot?.toolProficiencies, 'tool');
-  }
-
-  if (kind === 'language') {
-    (character.normalizedChoices?.languages || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'language'));
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.languages || character.clsSnapshot?.startingProficiencies?.languages, 'language');
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.languageProficiencies || character.clsSnapshot?.startingProficiencies?.languageProficiencies, 'language');
-    addFixedBlocks(blocked, character.backgroundObj?.languageProficiencies || character.backgroundSnapshot?.languageProficiencies, 'language');
-    addFixedBlocks(blocked, character.speciesObj?.languageProficiencies || character.speciesSnapshot?.languageProficiencies, 'language');
-  }
-
+  heldProficiencyLabels(character, kind).forEach((label) => addProficiencyBlock(blocked, label, kind));
   if (kind === 'weapon') {
-    (character.normalizedChoices?.weaponMasteries || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'weapon'));
-    (character.normalizedChoices?.weapons || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'weapon'));
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.weapons || character.clsSnapshot?.startingProficiencies?.weapons, 'weapon');
-    addFixedBlocks(blocked, character.cls?.startingProficiencies?.weaponProficiencies || character.clsSnapshot?.startingProficiencies?.weaponProficiencies, 'weapon');
+    (character?.normalizedChoices?.weaponMasteries || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'weapon'));
   }
-
-  characterClassFeatures(character).forEach((feature) => {
-    if (kind === 'skill') addFixedBlocks(blocked, feature.skillProficiencies, 'skill');
-    if (kind === 'tool') addFixedBlocks(blocked, feature.toolProficiencies, 'tool');
-    if (kind === 'language') addFixedBlocks(blocked, feature.languageProficiencies, 'language');
-    if (kind === 'weapon') addFixedBlocks(blocked, feature.weaponProficiencies, 'weapon');
-  });
-
   return blocked;
 }
 
@@ -121,22 +75,7 @@ function collectBlockedProficiencies({ character, kind }) {
 }
 
 function collectCurrentProficientSkills({ character }) {
-  const skills = new Set();
-  const addSkill = (value) => addChoiceValueToKindSet(skills, value, 'skill');
-
-  // Choice-derived and selected skill proficiencies (including expertise, which is
-  // itself a proficiency) all live in normalizedChoices.skills — the single source
-  // of truth, rebuilt by the builder reducer on every change.
-  (character?.normalizedChoices?.skills || []).forEach(addSkill);
-
-  // Fixed proficiencies from background/species/features aren't choice-derived, so
-  // they live outside normalizedChoices and are gathered separately.
-  addFixedBlocks(skills, character?.backgroundObj?.skillProficiencies || character?.backgroundSnapshot?.skillProficiencies, 'skill');
-  addFixedBlocks(skills, character?.speciesObj?.skillProficiencies || character?.speciesSnapshot?.skillProficiencies, 'skill');
-
-  characterClassFeatures(character).forEach((feature) => addFixedBlocks(skills, feature.skillProficiencies, 'skill'));
-
-  return skills;
+  return collectBlockedForKind({ character, kind: 'skill' });
 }
 
 // Skills already given expertise, from every source (any expertise choice block,

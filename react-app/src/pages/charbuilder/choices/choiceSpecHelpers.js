@@ -7,7 +7,6 @@ import {
   SKILL_NAMES,
   STANDARD_LANGUAGES,
 } from '../../../shared/content/rulesVocabulary.js';
-import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
 import { stripMarkup } from '../../../shared/content/markupText.js';
 
 // Building blocks of the builder's choice specs: proficiency choose-blocks
@@ -28,10 +27,6 @@ export function mixedSkillToolOptions() {
       kind: 'tool',
     })),
   ];
-}
-
-export function fixedKeysFromBlocks(blocks, excluded = PROFICIENCY_CHOICE_KEYS) {
-  return (blocks || []).flatMap((block) => Object.keys(block || {}).filter((key) => !excluded.includes(key) && block[key]));
 }
 
 export function specSan(value) {
