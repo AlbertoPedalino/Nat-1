@@ -9,7 +9,7 @@ export const builderRootSx = {
   minHeight: '100vh',
   bgcolor: 'background.default',
   '& .MuiPaper-root, & .MuiCard-root': {
-    bgcolor: UI_COLORS.headerBg,
+    bgcolor: UI_COLORS.surfaceHeader,
     backgroundImage: 'none',
     borderColor: 'divider',
     borderRadius: 1,
@@ -48,8 +48,8 @@ export const builderRootSx = {
     py: 0.35,
     px: 1,
     fontSize: FONT_SIZES.md,
-    bgcolor: UI_COLORS.headerBg,
-    border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.18)}`,
+    bgcolor: UI_COLORS.surfaceHeader,
+    border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.18)}`,
     color: 'text.secondary',
   },
   '& .MuiCardContent-root': {
@@ -63,10 +63,10 @@ export const builderRootSx = {
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
 const BUILDER_SELECTED_SX = {
   color: UI_COLORS.textPrimary,
-  backgroundColor: uiAlpha(UI_COLORS.primary, 0.20),
-  boxShadow: `inset 3px 0 0 ${UI_COLORS.primary}`,
+  backgroundColor: uiAlpha(UI_COLORS.accent, 0.20),
+  boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
 };
-const BUILDER_SELECTED_HOVER_BG = uiAlpha(UI_COLORS.primary, 0.28);
+const BUILDER_SELECTED_HOVER_BG = uiAlpha(UI_COLORS.accent, 0.28);
 export const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
@@ -87,8 +87,8 @@ export const builderTheme = createTheme(theme, {
           fontFamily: UI_FONTS.display,
           fontSize: FONT_SIZES.xxs,
           letterSpacing: LETTER_SPACINGS.sm,
-          backgroundColor: uiAlpha(UI_COLORS.gold, 0.08),
-          borderColor: uiAlpha(UI_COLORS.gold, 0.28),
+          backgroundColor: uiAlpha(UI_COLORS.accent, 0.08),
+          borderColor: uiAlpha(UI_COLORS.accent, 0.28),
         },
       },
     },
@@ -96,7 +96,7 @@ export const builderTheme = createTheme(theme, {
       styleOverrides: {
         root: {
           padding: '4.4px 7.2px',
-          backgroundColor: UI_COLORS.headerBg,
+          backgroundColor: UI_COLORS.surfaceHeader,
           '&.Mui-selected': BUILDER_SELECTED_SX,
           '&.Mui-selected:hover': {
             backgroundColor: BUILDER_SELECTED_HOVER_BG,

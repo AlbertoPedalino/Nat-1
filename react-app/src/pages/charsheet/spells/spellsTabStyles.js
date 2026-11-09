@@ -9,7 +9,7 @@ export const panelRootSx = {
 };
 
 export const panelSurfaceSx = {
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -26,7 +26,7 @@ export const panelToolbarSx = {
 };
 
 export const levelHeaderSx = {
-  ...sheetSectionHeaderSx({ color: UI_COLORS.blue, rule: uiAlpha(UI_COLORS.blue, 0.14) }),
+  ...sheetSectionHeaderSx({ color: UI_COLORS.info, rule: uiAlpha(UI_COLORS.info, 0.14) }),
   mb: 0.55,
 };
 
@@ -36,7 +36,7 @@ export const spellRowSx = {
   gap: '8px',
   px: '10px',
   py: '7px',
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -45,14 +45,14 @@ export const spellRowSx = {
   cursor: 'pointer',
   minWidth: 0,
   transition: 'border-color 120ms ease, background-color 120ms ease',
-  '&:hover': { borderColor: uiAlpha(UI_COLORS.gold, 0.34), bgcolor: UI_COLORS.surfaceHover },
+  '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, 0.34), bgcolor: UI_COLORS.surfaceRaised },
 };
 
 export const spellBodySx = {
   fontSize: FONT_SIZES.md,
   color: 'text.secondary',
   lineHeight: 1.5,
-  bgcolor: UI_COLORS.ink,
+  bgcolor: UI_COLORS.surfaceSunken,
   border: 1,
   borderColor: 'divider',
   borderTop: 'none',
@@ -64,18 +64,18 @@ export const spellBodySx = {
 };
 
 export const addButtonSx = {
-  bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
+  bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
   border: 1,
-  borderColor: UI_COLORS.gold,
+  borderColor: UI_COLORS.accent,
   borderRadius: 1,
-  color: UI_COLORS.gold,
+  color: UI_COLORS.accent,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.md,
   px: '14px',
   py: '5px',
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.2), borderColor: UI_COLORS.goldLight },
+  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.2), borderColor: UI_COLORS.accentText },
 };
 
 export const inlineButtonSx = {
@@ -90,7 +90,7 @@ export const inlineButtonSx = {
 };
 
 export const compactInputSx = {
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
+  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.lg, py: '7px' },
 };
 
@@ -105,7 +105,7 @@ export const levelToggleSx = {
     letterSpacing: LETTER_SPACINGS.lg,
     color: 'text.secondary',
     borderColor: 'divider',
-    '&.Mui-selected': { color: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.gold, 0.12), borderColor: UI_COLORS.gold },
+    '&.Mui-selected': { color: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accent, 0.12), borderColor: UI_COLORS.accent },
   },
 };
 

@@ -16,13 +16,13 @@ import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
 
-const darkChipText = UI_COLORS.primaryContrast;
+const darkChipText = UI_COLORS.onAccent;
 
 export const PROFICIENCY_TONE = NEUTRAL_TONE;
 
 export const SECTION_CARD_SX = {
   minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.goldLight, 0.18),
+  borderColor: uiAlpha(UI_COLORS.accentText, 0.18),
   bgcolor: uiAlpha(UI_COLORS.white, 0.025),
   backgroundImage: 'none',
 };
@@ -96,7 +96,7 @@ export function filledChipSx(bg) {
     backgroundColor: bg,
     color: darkChipText,
     fontWeight: 700,
-    border: `1px solid ${uiAlpha(UI_COLORS.goldPale, 0.65)}`,
+    border: `1px solid ${uiAlpha(UI_COLORS.accentHighlight, 0.65)}`,
     boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, 0.28)} inset`,
     '& .MuiChip-label': { color: darkChipText },
   };

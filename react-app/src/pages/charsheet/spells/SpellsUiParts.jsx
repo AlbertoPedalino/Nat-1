@@ -8,7 +8,7 @@ import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 export function StatBox({ value, label }) {
   return (
     <Box sx={statBoxSx}>
-      <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.body, fontWeight: 700, color: UI_COLORS.goldLight }}>{value}</Box>
+      <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.body, fontWeight: 700, color: UI_COLORS.accentText }}>{value}</Box>
       <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.xl, color: 'text.secondary', textTransform: 'uppercase' }}>{label}</Box>
     </Box>
   );
@@ -39,7 +39,7 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
     <Box sx={panelSurfaceSx}>
       {hasRegular ? (
         <>
-          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.gold, borderColor: uiAlpha(UI_COLORS.gold, 0.18) }}>Spell Slots</Typography>
+          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accent, borderColor: uiAlpha(UI_COLORS.accent, 0.18) }}>Spell Slots</Typography>
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.4 }}>
             {slots.regular.map((total, idx) => {
               const lv = idx + 1;
@@ -51,7 +51,7 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
       ) : null}
       {hasPact ? (
         <Box sx={{ mt: hasRegular ? 1 : 0 }}>
-          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.purple, borderColor: uiAlpha(UI_COLORS.purple, 0.22) }}>Pact Slots ({slots.pact.count}x {slots.pact.level})</Typography>
+          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.spell, borderColor: uiAlpha(UI_COLORS.spell, 0.22) }}>Pact Slots ({slots.pact.count}x {slots.pact.level})</Typography>
           <SlotGroup
             level={slots.pact.level}
             total={slots.pact.count}
@@ -69,7 +69,7 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
 
 function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle, readOnly = false }) {
   const dotCursor = readOnly ? 'default' : 'pointer';
-  const dotHover = readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.goldLight } };
+  const dotHover = readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.accentText } };
   return (
     <Box sx={{ minWidth: 42 }}>
       <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, color: 'text.secondary', textAlign: 'center', mb: '3px', letterSpacing: LETTER_SPACINGS.lg }}>{level}</Box>
@@ -83,8 +83,8 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
               height: 14,
               borderRadius: '50%',
               border: '1.5px solid',
-              borderColor: index < used ? UI_COLORS.blue : uiAlpha(UI_COLORS.textParchment, 0.28),
-              bgcolor: index < used ? UI_COLORS.blue : 'transparent',
+              borderColor: index < used ? UI_COLORS.info : uiAlpha(UI_COLORS.textSecondary, 0.28),
+              bgcolor: index < used ? UI_COLORS.info : 'transparent',
               cursor: dotCursor,
               ...dotHover,
             }}

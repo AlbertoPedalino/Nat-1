@@ -23,6 +23,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Use responsive `sx`; theme radius is 8.
 - Font sizes are steps of `FONT_SIZES`, letter spacing of `LETTER_SPACINGS` (both `shared/ui/fonts.js`, guarded); never a literal rem/px/em. Box-relative clamps (cqmin) and em sizes stay local.
 - Sheet row detail panel + gold title: `detailPanelSx`/`detailTitleSx` in `pages/charsheet/layout/layout.js`.
+- Colours are named by role (`accent`, `accentText`, `textMuted`, `surfaceHeader`, `danger`, `<role>Text`, `on<Role>`), never by hue (guarded in `tests/logic/shared/vtt/colors.test.js`). `VTT_COLORS` interface roles read `UI_COLORS`; theme `gmboard` status groups too. Tiers/rarity/entity/effect colours are data.
 - Radii are multiples of the theme radius (sx numbers; `cornerRadius` in `shared/ui/radius.js` per corner); surface drop shadows are `UI_SHADOWS` (`shared/ui/shadows.js`: raised/float/popup/overlay). Both guarded.
 - `theme.palette.gmboard.badge.cloud` owns cloud-origin badge color.
 - `react-window` is reserved for new lists expected to render hundreds of rows.

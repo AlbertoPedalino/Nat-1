@@ -3,16 +3,16 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Single source of truth for advantage / disadvantage visuals across
 // AbilityScores, SavingThrows and Skills panels.
-export const ADV_COLOR = UI_COLORS.teal;
-export const DISADV_COLOR = UI_COLORS.orange;
-export const BOTH_COLOR = UI_COLORS.textParchment;
+export const ADV_COLOR = UI_COLORS.secondary;
+export const DISADV_COLOR = UI_COLORS.penalty;
+export const BOTH_COLOR = UI_COLORS.textSecondary;
 // Auto-fail (Paralyzed/Stunned/etc.): worse than disadvantage, so red — not the
 // disadvantage amber — to read as "you cannot pass", not "rolled at a penalty".
-export const AUTOFAIL_COLOR = UI_COLORS.dangerBright;
+export const AUTOFAIL_COLOR = UI_COLORS.dangerStrong;
 // Situational (conditional) disadvantage — applies only in a specific case
 // (e.g. Frightened while the fear source is in sight), so it is shown as a hint
 // and never forced onto the roll. Muted amber to read as "maybe", not "active".
-export const CONDITIONAL_COLOR = UI_COLORS.conditional;
+export const CONDITIONAL_COLOR = UI_COLORS.accentMuted;
 
 // Returns the icon + color + short label for a given adv/disadv state,
 // or null when neither applies.

@@ -23,9 +23,9 @@ function PageTab({ page, active, onClick }) {
       onClick={onClick}
       sx={{
         px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, fontWeight: 700, fontFamily: UI_FONTS.display,
-        bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.goldPale, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
+        bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
         border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
-        '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.goldPale, 0.15) },
+        '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.accentHighlight, 0.15) },
       }}
     >
       {page.name}
@@ -129,7 +129,7 @@ export default function NotesTab({ sheet }) {
         value={activePage.content}
         onChange={(e) => changeContent(activeIdx, e.target.value)}
         sx={{
-          '& .MuiInputBase-root': { bgcolor: UI_COLORS.headerBg, color: 'text.primary', fontFamily: UI_FONTS.body, fontSize: FONT_SIZES.xxl },
+          '& .MuiInputBase-root': { bgcolor: UI_COLORS.surfaceHeader, color: 'text.primary', fontFamily: UI_FONTS.body, fontSize: FONT_SIZES.xxl },
           '& fieldset': { borderColor: 'divider' },
           '&:focus-within fieldset': { borderColor: 'primary.main' },
         }}

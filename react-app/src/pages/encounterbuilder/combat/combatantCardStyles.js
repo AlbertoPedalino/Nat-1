@@ -31,7 +31,7 @@ export const identityClusterSx = {
   minWidth: 0,
 };
 
-export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.avatarText, fontSize: FONT_SIZES.sm, fontWeight: 800 };
+export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.sm, fontWeight: 800 };
 
 export const nameButtonSx = { justifyContent: 'flex-start', minWidth: 0, px: 0.5 };
 

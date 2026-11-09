@@ -36,7 +36,7 @@ export default function RangeInputs({
 
 const numberFieldSx = {
   width: 72,
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
+  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.md, py: '6px' },
 };
 

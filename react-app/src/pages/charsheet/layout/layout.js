@@ -51,7 +51,7 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
 export const detailPanelSx = {
   mt: 0.8,
   p: 1,
-  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
+  bgcolor: uiAlpha(UI_COLORS.accentText, 0.04),
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -62,5 +62,5 @@ export const detailTitleSx = {
   fontSize: FONT_SIZES.sm,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.lg,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
 };

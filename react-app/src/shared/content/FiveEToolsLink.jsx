@@ -17,7 +17,7 @@ export function FiveEToolsIcon({ url, size = 14 }) {
         aria-label="Open on 5e.tools"
         onClick={(e) => e.stopPropagation()}
         size="small"
-        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: UI_COLORS.goldLight } }}
+        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: UI_COLORS.accentText } }}
       >
         <ExternalLink size={size} aria-hidden />
       </IconButton>

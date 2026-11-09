@@ -154,7 +154,7 @@ function NextHexLine({ terrain, clock, mountSpeed }) {
 
   return (
     <Box sx={nextHexSx}>
-      <Icon size={16} color={VTT_COLORS.gold} />
+      <Icon size={16} color={VTT_COLORS.accent} />
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography sx={nextHexTitleSx}>Next hex · {formatDuration(travel.hours)}</Typography>
         <Typography sx={effectSx}>
@@ -237,7 +237,7 @@ function LastHexCard({ last, onOpenResult }) {
     <Box sx={lastCardSx}>
       <Typography sx={sectionSx}>Last hex visited</Typography>
       <Stack direction="row" spacing={0.8} sx={{ alignItems: 'flex-start' }}>
-        <Box sx={{ pt: 0.2 }}><TerrainIcon size={16} color={VTT_COLORS.gold} /></Box>
+        <Box sx={{ pt: 0.2 }}><TerrainIcon size={16} color={VTT_COLORS.accent} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={lastHexSx}>
             Hex {last.hex.q}, {last.hex.r}
@@ -271,9 +271,9 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
-const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
-const clockSx = { color: VTT_COLORS.panelText, fontSize: FONT_SIZES.md };
+const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
+const sectionSx = { color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
+const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
 const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: 1.35 };
 
 const cardSx = {
@@ -290,11 +290,11 @@ const nextHexSx = {
   gap: 0.9,
   p: 0.9,
   border: '1px solid',
-  borderColor: vttAlpha(VTT_COLORS.gold, 0.35),
+  borderColor: vttAlpha(VTT_COLORS.accent, 0.35),
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+  bgcolor: vttAlpha(VTT_COLORS.accent, 0.06),
 };
-const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.gold };
+const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.accent };
 
 const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
 
@@ -306,7 +306,7 @@ const chipSx = {
   py: 0.2,
   fontSize: FONT_SIZES.sm,
   lineHeight: 1.4,
-  color: VTT_COLORS.panelText,
+  color: VTT_COLORS.text,
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
@@ -337,10 +337,10 @@ const lastHexSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   letterSpacing: LETTER_SPACINGS.sm,
-  color: VTT_COLORS.panelText,
+  color: VTT_COLORS.text,
 };
 
-const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, color: VTT_COLORS.gold, lineHeight: 1.3 };
+const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, color: VTT_COLORS.accent, lineHeight: 1.3 };
 const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight: 1.4 };
 const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.4 };
 

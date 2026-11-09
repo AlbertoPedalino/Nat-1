@@ -61,7 +61,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
           sx={{
             display: 'flex', alignItems: 'center', gap: '6px', px: '8px', py: '5px',
             border: 1, borderColor: 'divider', borderRadius: open ? '6px 6px 0 0' : 1,
-            bgcolor: uiAlpha(UI_COLORS.headerBg, 0.85), cursor: disabled ? 'default' : 'pointer',
+            bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.85), cursor: disabled ? 'default' : 'pointer',
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: 0.95 }} />
@@ -86,7 +86,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
       )}
       detailsSx={{
         px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
-        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.headerBg, 0.5),
+        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.5),
         fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
@@ -105,13 +105,13 @@ const rulesToggleSx = {
   px: '8px',
   py: '5px',
   border: 1,
-  borderColor: uiAlpha(UI_COLORS.gold, 0.25),
+  borderColor: uiAlpha(UI_COLORS.accent, 0.25),
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.58),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.58),
   cursor: 'pointer',
   '&:hover': {
-    borderColor: uiAlpha(UI_COLORS.gold, 0.45),
-    bgcolor: uiAlpha(UI_COLORS.gold, 0.07),
+    borderColor: uiAlpha(UI_COLORS.accent, 0.45),
+    bgcolor: uiAlpha(UI_COLORS.accent, 0.07),
   },
 };
 
@@ -120,7 +120,7 @@ const rulesToggleTitleSx = {
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.lg,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   textTransform: 'uppercase',
 };
 
@@ -144,7 +144,7 @@ const rulesGroupSx = {
   border: 1,
   borderColor: uiAlpha(UI_COLORS.white, 0.08),
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.42),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.42),
 };
 
 const rulesGroupTitleSx = {
@@ -152,7 +152,7 @@ const rulesGroupTitleSx = {
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.xxl,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   textTransform: 'uppercase',
   mb: 0.25,
 };

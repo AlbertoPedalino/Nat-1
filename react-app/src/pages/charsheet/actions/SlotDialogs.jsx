@@ -64,16 +64,16 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setCreateSlotSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: createSlotSelection === level ? UI_COLORS.goldLight : 'divider',
+                  borderColor: createSlotSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
+                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level}
                 </Typography>
-                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.purple }}>
+                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.spell }}>
                   {cost} SP
                 </Typography>
               </Box>
@@ -106,16 +106,16 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setConvertSlotSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: convertSlotSelection === level ? UI_COLORS.goldLight : 'divider',
+                  borderColor: convertSlotSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
+                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
                 </Typography>
-                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.purple }}>
+                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.spell }}>
                   +{level} SP
                 </Typography>
               </Box>
@@ -142,10 +142,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
                 }}
               >
-                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight }}>{opt.label}</Box>
+                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>
@@ -177,10 +177,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setSpendSlotRecoverSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.goldLight : 'divider',
+                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
+                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
@@ -240,7 +240,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display }}>{value}</Typography>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display }}>{value}</Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
               );

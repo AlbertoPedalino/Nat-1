@@ -16,7 +16,7 @@ import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 // The conditions accent, matching the theme's warning tone.
 export const CONDITION_ACCENT = UI_COLORS.warning;
-const CONDITION_BODY = UI_COLORS.textCondition;
+const CONDITION_BODY = UI_COLORS.textSecondary;
 
 // Body click expands the rules text; the X removes the condition. The chevron
 // advertises the expand affordance and rotates when open, so the two actions on

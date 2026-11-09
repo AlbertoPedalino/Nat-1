@@ -56,7 +56,7 @@ export default function TokenArt({
           : vttAlpha(VTT_COLORS.black, 0.6),
         bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
         outline: token.hiddenFromPlayers || token.layer === 'gm'
-          ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
+          ? `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.9)}`
           : 'none',
         outlineOffset: '-4px',
         // Whose turn it is, readable from across the table and on the
@@ -75,7 +75,7 @@ export default function TokenArt({
       {isMapObject ? (
         <Box sx={{
           ...mapObjectSx,
-          color: token.color || VTT_COLORS.gold,
+          color: token.color || VTT_COLORS.accent,
           transform: `rotate(${Number(token.rotation) || 0}deg)`,
         }}>
           <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />

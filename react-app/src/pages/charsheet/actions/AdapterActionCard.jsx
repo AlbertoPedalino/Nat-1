@@ -144,7 +144,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
         const statusTone = isSuppressed ? CHIP_TONES.negative : (isActive ? CHIP_TONES.positive : CHIP_TONES.info);
         const statusStyle = chipToneStyle(statusTone);
         return (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.blueSoft, 0.06), !hasRes, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.infoText, 0.06), !hasRes, open)}>
           <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>Status</Typography>
           <Chip
             size="small"
@@ -173,7 +173,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       })() : null}
 
       {hasRes ? (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.gold, 0.06), true, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, 0.06), true, open)}>
           <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
@@ -181,10 +181,10 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: LETTER_SPACINGS.md, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
+                sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: LETTER_SPACINGS.md, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
-              <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
+              <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
             )
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
@@ -201,8 +201,8 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                   onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, available ? -1 : 1); }}
                   sx={{
                     border: '1.5px solid',
-                    bgcolor: available ? 'transparent' : UI_COLORS.goldLight,
-                    borderColor: available ? uiAlpha(UI_COLORS.gold, 0.35) : UI_COLORS.goldLight,
+                    bgcolor: available ? 'transparent' : UI_COLORS.accentText,
+                    borderColor: available ? uiAlpha(UI_COLORS.accent, 0.35) : UI_COLORS.accentText,
                   }}
                 />
               );
@@ -282,11 +282,11 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
 
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.gold, 0.14), color: UI_COLORS.goldLight, borderColor: UI_COLORS.gold } } }}
+        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accent, 0.14), color: UI_COLORS.accentText, borderColor: UI_COLORS.accent } } }}
       >
         {options.map((opt) => (
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>

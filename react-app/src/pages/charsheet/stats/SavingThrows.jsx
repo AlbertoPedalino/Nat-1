@@ -87,7 +87,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 600, color: 'text.secondary', letterSpacing: LETTER_SPACINGS.lg, width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
@@ -105,7 +105,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               )}
               {hasContextMenu ? (
                 <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
-                  <ChevronDown size={12} style={{ color: UI_COLORS.goldLight, flexShrink: 0, opacity: 0.6 }} />
+                  <ChevronDown size={12} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: 0.6 }} />
                 </Tooltip>
               ) : null}
             </RollModeArea>
@@ -117,10 +117,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Dice5 size={13} style={{ color: UI_COLORS.goldWarm, flexShrink: 0, marginTop: 2 }} />
+              <Dice5 size={13} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.goldWarm, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentMuted, fontWeight: 700, flexShrink: 0 }}>
                     Min {r.minRoll}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
@@ -137,10 +137,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           ))}
           {concentrationBonus > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Sparkles size={13} style={{ color: UI_COLORS.teal, flexShrink: 0, marginTop: 2 }} />
+              <Sparkles size={13} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.teal, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.secondary, fontWeight: 700, flexShrink: 0 }}>
                     +{concentrationBonus}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
@@ -185,7 +185,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           Normal save
         </MenuItem>
         {saveContexts.map(([target, sources]) => (
-          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: FONT_SIZES.lg, color: UI_COLORS.teal }}>
+          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: FONT_SIZES.lg, color: UI_COLORS.secondary }}>
             vs {target} — Advantage
             <Typography sx={{ ml: 1, fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic' }}>
               ({sources.join(', ')})

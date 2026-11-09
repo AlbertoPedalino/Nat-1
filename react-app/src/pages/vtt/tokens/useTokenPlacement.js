@@ -192,7 +192,7 @@ export function useTokenPlacement({
       layer: targetLayer,
       hiddenFromPlayers: targetLayer === 'gm',
       label: secret ? '' : object.label,
-      color: object.color || VTT_COLORS.gold,
+      color: object.color || VTT_COLORS.accent,
       iconKey: object.key,
       iconStrokeWidth: object.strokeWidth,
       rotation: 0,

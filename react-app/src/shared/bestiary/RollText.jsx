@@ -37,9 +37,9 @@ function RollButton(props) {
 
 const rollableSx = {
   appearance: 'none',
-  border: `1px solid ${uiAlpha(UI_COLORS.teal, 0.45)}`,
-  bgcolor: uiAlpha(UI_COLORS.teal, 0.12),
-  color: UI_COLORS.tealLight,
+  border: `1px solid ${uiAlpha(UI_COLORS.secondary, 0.45)}`,
+  bgcolor: uiAlpha(UI_COLORS.secondary, 0.12),
+  color: UI_COLORS.secondaryText,
   borderRadius: 0.5,
   px: '0.25rem',
   py: 0,
@@ -47,6 +47,6 @@ const rollableSx = {
   font: 'inherit',
   cursor: 'pointer',
   '&:hover': {
-    bgcolor: uiAlpha(UI_COLORS.teal, 0.22),
+    bgcolor: uiAlpha(UI_COLORS.secondary, 0.22),
   },
 };

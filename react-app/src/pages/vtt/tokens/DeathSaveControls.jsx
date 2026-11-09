@@ -24,6 +24,6 @@ const deathSavePanelSx = {
   px: 0.6,
   py: 0.4,
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldTint',
+  borderColor: 'gmboard.vtt.accentTint',
   borderRadius: 1,
 };

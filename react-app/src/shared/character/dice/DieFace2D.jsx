@@ -19,11 +19,11 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
       sx={{ width: size, height: size, display: 'block', flex: '0 0 auto', color, opacity: dimmed ? 0.38 : 1 }}
     >
       {sides === 2 ? (
-        <circle cx="20" cy="20" r="17" fill={uiAlpha(UI_COLORS.goldBright, 0.08)} stroke="currentColor" strokeWidth="2" />
+        <circle cx="20" cy="20" r="17" fill={uiAlpha(UI_COLORS.accentText, 0.08)} stroke="currentColor" strokeWidth="2" />
       ) : (
         <polygon
           points={pointsForDie(sides)}
-          fill={uiAlpha(UI_COLORS.goldBright, 0.08)}
+          fill={uiAlpha(UI_COLORS.accentText, 0.08)}
           stroke="currentColor"
           strokeWidth="2"
           strokeLinejoin="round"

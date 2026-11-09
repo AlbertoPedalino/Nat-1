@@ -100,7 +100,7 @@ export default function HomePage() {
 
 const homeRootSx = {
   minHeight: '100vh',
-  bgcolor: UI_COLORS.inkDeep,
+  bgcolor: UI_COLORS.surfaceDarkest,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -116,8 +116,8 @@ const heroTitleSx = {
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
   fontWeight: 900,
   letterSpacing: LETTER_SPACINGS.md,
-  color: UI_COLORS.goldBright,
-  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.goldDeep, 0.35)}`,
+  color: UI_COLORS.accentText,
+  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, 0.35)}`,
   lineHeight: 1.1,
 };
 
@@ -126,13 +126,13 @@ const heroLogoSx = {
   width: 'clamp(76px, 15vw, 112px)',
   height: 'auto',
   margin: '0 auto 1rem',
-  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.successGlow, 0.35)})`,
+  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.success, 0.35)})`,
 };
 
 const dividerSx = {
   width: '120px',
   height: '1px',
-  background: `linear-gradient(90deg, transparent, ${UI_COLORS.goldDeep}, transparent)`,
+  background: `linear-gradient(90deg, transparent, ${UI_COLORS.accent}, transparent)`,
   margin: '1.4rem auto 0',
 };
 
@@ -160,7 +160,7 @@ function getCardSx(color) {
     borderStyle: 'solid',
     borderColor: (theme) => alpha(paletteValue(theme, color), 0.3),
     borderRadius: 1.5,
-    bgcolor: UI_COLORS.surfaceHome,
+    bgcolor: UI_COLORS.surfaceDeep,
     backgroundImage: 'none',
     transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',
     '&:hover': {
@@ -198,7 +198,7 @@ const cardLabelSx = {
 
 const cardDescSx = {
   fontSize: FONT_SIZES.xl,
-  color: UI_COLORS.textBrown,
+  color: UI_COLORS.textFaint,
   textAlign: 'center',
   lineHeight: 1.4,
   fontStyle: 'italic',

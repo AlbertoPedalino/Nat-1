@@ -41,8 +41,8 @@ const PANEL_SX = {
   maxHeight: { md: 'calc(100vh - 76px)' },
   overflow: 'auto',
   minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.goldLight, 0.22),
-  bgcolor: uiAlpha(UI_COLORS.inkSoft, 0.72),
+  borderColor: uiAlpha(UI_COLORS.accentText, 0.22),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.72),
 };
 
 function PreviewHeader({ character, hp }) {
@@ -57,7 +57,7 @@ function PreviewHeader({ character, hp }) {
   ];
 
   return (
-    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.goldLight, 0.32) }}>
+    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.accentText, 0.32) }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.4} sx={{ minWidth: 0 }}>
           <Typography sx={{ ...SECTION_HEADER_SX, color: 'primary.main' }}>Preview</Typography>
@@ -103,7 +103,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.4 }}>
-        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.22) }} />
         <Chip
           size="small"
           label={`Level ${level}`}
@@ -115,7 +115,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
             letterSpacing: LETTER_SPACINGS.lg,
           }}
         />
-        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.22) }} />
       </Box>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {classFeatures.map((feature) => (

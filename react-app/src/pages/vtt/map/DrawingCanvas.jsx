@@ -148,12 +148,12 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     context.lineWidth = Math.max(2, fontSize / 6);
     context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.85);
     context.strokeText(stroke.text, at.x, at.y);
-    context.fillStyle = stroke.color || VTT_COLORS.gold;
+    context.fillStyle = stroke.color || VTT_COLORS.accent;
     context.fillText(stroke.text, at.x, at.y);
     return;
   }
 
-  context.strokeStyle = stroke.color || VTT_COLORS.gold;
+  context.strokeStyle = stroke.color || VTT_COLORS.accent;
   // Width is in cells so a stroke keeps its thickness relative to the map as you
   // zoom, rather than turning into a hairline.
   context.lineWidth = Math.max(1, ((stroke.width || 3) / 10) * cell * view.zoom);
@@ -163,7 +163,7 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     // A tap is a dot, and a zero-length path draws nothing at all.
     context.beginPath();
     context.arc(first.x, first.y, context.lineWidth / 2, 0, Math.PI * 2);
-    context.fillStyle = stroke.color || VTT_COLORS.gold;
+    context.fillStyle = stroke.color || VTT_COLORS.accent;
     context.fill();
     return;
   }
@@ -194,7 +194,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
   const scale = cell * view.zoom;
   const at = toScreen(geometry.origin);
   const reach = geometry.reach * scale;
-  const color = stroke.color || VTT_COLORS.gold;
+  const color = stroke.color || VTT_COLORS.accent;
   const { shape, filled, effect } = stroke.area;
 
   context.beginPath();
@@ -259,7 +259,7 @@ function drawMapLabel(context, text, at, cellPixels, baseline) {
   context.lineWidth = Math.max(2, fontSize / 5);
   context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
   context.strokeText(text, at.x, at.y);
-  context.fillStyle = VTT_COLORS.parchment;
+  context.fillStyle = VTT_COLORS.text;
   context.fillText(text, at.x, at.y);
 }
 

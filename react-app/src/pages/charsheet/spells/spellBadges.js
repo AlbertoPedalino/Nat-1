@@ -33,5 +33,5 @@ export function getCastBadge(spell) {
   if (unit === 'reaction') return { label: 'RE', color: ACTION_COLORS.reaction };
   if (unit === 'action' || unit === '') return { label: 'A', color: ACTION_COLORS.action };
   // A minute or more: the record's own unit ("minute", "hour").
-  return { label: spell.time[0].unit, color: UI_COLORS.textParchment };
+  return { label: spell.time[0].unit, color: UI_COLORS.textSecondary };
 }

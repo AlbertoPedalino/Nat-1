@@ -135,7 +135,7 @@ export default function TokenComposer({
 const composerSx = {
   mt: 0.75,
   p: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
   borderRadius: 1,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.2),
 };
@@ -146,7 +146,7 @@ const draftSx = {
   gap: 1,
   p: 0.75,
   borderRadius: 1,
-  border: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.55)}`,
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.55)}`,
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',
   userSelect: 'none',

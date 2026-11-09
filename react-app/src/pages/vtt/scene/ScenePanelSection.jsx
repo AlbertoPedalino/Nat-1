@@ -49,7 +49,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
         </Box>
         <Box
           component="span"
-          sx={{ display: 'flex', color: VTT_COLORS.railText, transition: 'transform 150ms', transform: open ? 'rotate(180deg)' : 'none' }}
+          sx={{ display: 'flex', color: VTT_COLORS.textSecondary, transition: 'transform 150ms', transform: open ? 'rotate(180deg)' : 'none' }}
         >
           <ChevronDown size={15} />
         </Box>
@@ -63,8 +63,8 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
 
 const sectionSx = {
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.16)}`,
-  bgcolor: vttAlpha(VTT_COLORS.gold, 0.03),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.16)}`,
+  bgcolor: vttAlpha(VTT_COLORS.accent, 0.03),
   overflow: 'hidden',
 };
 
@@ -75,12 +75,12 @@ const sectionHeaderSx = {
   gap: 0.85,
   px: 1,
   py: 0.75,
-  color: VTT_COLORS.panelText,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
-  '&.Mui-focusVisible': { outline: `1px solid ${VTT_COLORS.gold}`, outlineOffset: -1 },
+  color: VTT_COLORS.text,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
+  '&.Mui-focusVisible': { outline: `1px solid ${VTT_COLORS.accent}`, outlineOffset: -1 },
 };
 
-const sectionIconSx = { display: 'flex', color: VTT_COLORS.gold, flexShrink: 0 };
+const sectionIconSx = { display: 'flex', color: VTT_COLORS.accent, flexShrink: 0 };
 
 const sectionTitleSx = {
   display: 'block',
@@ -92,6 +92,6 @@ const sectionTitleSx = {
 
 const sectionSummarySx = {
   display: 'block',
-  color: VTT_COLORS.panelTextFaint,
+  color: VTT_COLORS.textMuted,
   lineHeight: 1.3,
 };

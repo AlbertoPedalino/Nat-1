@@ -33,10 +33,10 @@ export function goldToggleSx(active) {
     px: '10px',
     py: '3px',
     border: 1,
-    borderColor: active ? UI_COLORS.gold : 'divider',
+    borderColor: active ? UI_COLORS.accent : 'divider',
     borderRadius: 1,
-    bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.12) : 'transparent',
-    color: active ? UI_COLORS.goldLight : 'text.secondary',
+    bgcolor: active ? uiAlpha(UI_COLORS.accent, 0.12) : 'transparent',
+    color: active ? UI_COLORS.accentText : 'text.secondary',
     fontFamily: UI_FONTS.display,
     fontSize: FONT_SIZES.xxs,
     fontWeight: 700,
@@ -44,9 +44,9 @@ export function goldToggleSx(active) {
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
     '&:hover': {
-      borderColor: UI_COLORS.gold,
-      color: UI_COLORS.goldLight,
-      bgcolor: uiAlpha(UI_COLORS.gold, active ? 0.18 : 0.08),
+      borderColor: UI_COLORS.accent,
+      color: UI_COLORS.accentText,
+      bgcolor: uiAlpha(UI_COLORS.accent, active ? 0.18 : 0.08),
     },
   };
 }

@@ -34,19 +34,19 @@ const VARIANTS = {
   },
   sheet: {
     fontFamily: UI_FONTS.display,
-    box: { bgcolor: UI_COLORS.headerBg, p: '4px 3px' },
+    box: { bgcolor: UI_COLORS.surfaceHeader, p: '4px 3px' },
     labelGap: 0.35,
     labelTop: { fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg },
     labelBottom: { fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg },
-    field: { variant: 'standard', fontSize: FONT_SIZES.xxl, color: UI_COLORS.goldLight, py: '2px' },
+    field: { variant: 'standard', fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, py: '2px' },
     stepper: {
       columns: '20px minmax(26px, 1fr) 20px',
       mt: 0.3,
-      bgcolor: UI_COLORS.ink,
+      bgcolor: UI_COLORS.surfaceSunken,
       button: 20,
       icon: 11,
       stepFontSize: FONT_SIZES.xs,
-      stepColor: UI_COLORS.goldLight,
+      stepColor: UI_COLORS.accentText,
     },
   },
 };

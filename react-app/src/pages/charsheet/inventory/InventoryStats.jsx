@@ -12,7 +12,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const statPillSx = {
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -20,7 +20,7 @@ const statPillSx = {
   py: '4px',
   fontSize: FONT_SIZES.xl,
   color: 'text.secondary',
-  '& b': { color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display },
+  '& b': { color: UI_COLORS.accentText, fontFamily: UI_FONTS.display },
 };
 
 // Carried weight against capacity, total value and attuned items, with the
@@ -40,7 +40,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
       <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</b></Box>
       <Box sx={statPillSx}>Value: <b>{totalGp.toFixed(1)} GP</b></Box>
-      <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, 0.12) : UI_COLORS.headerBg, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.goldLight, fontFamily: UI_FONTS.display } }}>
+      <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, 0.12) : UI_COLORS.surfaceHeader, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.accentText, fontFamily: UI_FONTS.display } }}>
         Attuned: <b>{attunedCount} / {attunementLimit}</b>{over ? ' (over limit)' : ''}
       </Box>
       <Box sx={{ width: '100%', mt: 0.3 }}>
@@ -49,7 +49,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: FONT_SIZES.sm, mt: 0.25 }}>
           <Box sx={{ color: 'text.secondary', fontFamily: UI_FONTS.display }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
-          <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs }}>
+          <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.success, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs }}>
             {overloaded ? 'Over Capacity' : 'OK'}
           </Box>
         </Box>

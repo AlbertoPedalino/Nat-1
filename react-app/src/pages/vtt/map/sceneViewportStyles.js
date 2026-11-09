@@ -63,9 +63,9 @@ export const fillViewportSx = {
 };
 
 export const placementTargetSx = {
-  outline: `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.78)}`,
+  outline: `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.78)}`,
   outlineOffset: -5,
-  boxShadow: `inset 0 0 34px ${vttAlpha(VTT_COLORS.gold, 0.12)}`,
+  boxShadow: `inset 0 0 34px ${vttAlpha(VTT_COLORS.accent, 0.12)}`,
 };
 
 export const placementTargetHintSx = {
@@ -77,9 +77,9 @@ export const placementTargetHintSx = {
   px: 1.25,
   py: 0.55,
   borderRadius: 10,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.92),
-  color: VTT_COLORS.gold,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.62)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.92),
+  color: VTT_COLORS.accent,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.62)}`,
   boxShadow: UI_SHADOWS.float,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
@@ -94,8 +94,8 @@ export const selectionMarqueeSx = {
   zIndex: 5,
   pointerEvents: 'none',
   boxSizing: 'border-box',
-  border: `1px solid ${VTT_COLORS.gold}`,
-  bgcolor: vttAlpha(VTT_COLORS.gold, 0.16),
+  border: `1px solid ${VTT_COLORS.accent}`,
+  bgcolor: vttAlpha(VTT_COLORS.accent, 0.16),
   boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.5)}`,
 };
 
@@ -109,13 +109,13 @@ export const selectionToolbarSx = {
   px: 1,
   py: 0.5,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.94),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.45)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.94),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.45)}`,
   boxShadow: 4,
 };
 
 export const selectionCountSx = {
-  color: VTT_COLORS.gold,
+  color: VTT_COLORS.accent,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 700,
@@ -131,7 +131,7 @@ export const playAreaSvgSx = {
 
 export const playAreaStrokeProps = {
   fill: 'none',
-  stroke: vttAlpha(VTT_COLORS.gold, 0.7),
+  stroke: vttAlpha(VTT_COLORS.accent, 0.7),
   strokeWidth: 2,
   strokeDasharray: '7 5',
 };
@@ -140,12 +140,12 @@ export const playAreaStrokeProps = {
 export const fullscreenSheetButtonSx = {
   height: 32,
   minWidth: 88,
-  borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.82),
+  borderColor: vttAlpha(VTT_COLORS.accent, 0.42),
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.82),
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   letterSpacing: LETTER_SPACINGS.lg,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.96) },
 };
 
 // Above the rail (top 48), which hangs just below the tools toggle.
@@ -226,8 +226,8 @@ export const distanceSx = {
   top: 0,
   px: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.9),
-  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.9),
+  color: VTT_COLORS.accent,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   whiteSpace: 'nowrap',
@@ -242,9 +242,9 @@ export const placementCountSx = {
   height: 24,
   px: 0.5,
   borderRadius: 12,
-  bgcolor: VTT_COLORS.gold,
-  color: VTT_COLORS.ink,
-  border: `1px solid ${VTT_COLORS.ink}`,
+  bgcolor: VTT_COLORS.accent,
+  color: VTT_COLORS.surface,
+  border: `1px solid ${VTT_COLORS.surface}`,
   fontSize: FONT_SIZES.md,
   fontWeight: 900,
   lineHeight: '22px',

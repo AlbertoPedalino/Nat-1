@@ -25,4 +25,4 @@ export const XT = Object.freeze([
 ]);
 
 export const DIFFICULTY_LABELS = Object.freeze(['Low', 'Moderate', 'High', 'Deadly']);
-export const DIFFICULTY_COLORS = Object.freeze([UI_COLORS.success, UI_COLORS.warning, UI_COLORS.difficultyHigh, UI_COLORS.danger]);
+export const DIFFICULTY_COLORS = Object.freeze([UI_COLORS.success, UI_COLORS.warning, UI_COLORS.warningStrong, UI_COLORS.danger]);

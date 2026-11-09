@@ -8,7 +8,7 @@ import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js'
 
 export const rootSx = {
   minHeight: '100vh',
-  bgcolor: UI_COLORS.inkDeep,
+  bgcolor: UI_COLORS.surfaceDarkest,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -31,7 +31,7 @@ export const titleSx = {
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',
   fontWeight: 800,
   letterSpacing: LETTER_SPACINGS.md,
-  color: UI_COLORS.goldBright,
+  color: UI_COLORS.accentText,
   flex: 1,
   minWidth: '160px',
 };
@@ -50,7 +50,7 @@ export const sectionHeadSx = {
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.xl,
   textTransform: 'uppercase',
-  color: UI_COLORS.textRail,
+  color: UI_COLORS.textSecondary,
   mb: '0.75rem',
 };
 
@@ -67,10 +67,10 @@ export const rowSx = {
   alignItems: 'center',
   gap: '0.5rem',
   p: '0.6rem 0.75rem',
-  border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
+  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.18)}`,
   borderRadius: 1.25,
-  bgcolor: UI_COLORS.surfaceHome,
-  '&:hover': { borderColor: UI_COLORS.goldDeep },
+  bgcolor: UI_COLORS.surfaceDeep,
+  '&:hover': { borderColor: UI_COLORS.accent },
 };
 
 export const rowInnerSx = {
@@ -98,12 +98,12 @@ export const nameSx = {
 };
 
 export const subtitleSx = {
-  color: UI_COLORS.textBrown,
+  color: UI_COLORS.textFaint,
   fontSize: FONT_SIZES.md,
 };
 
 export const metaSx = {
-  color: UI_COLORS.textBrown,
+  color: UI_COLORS.textFaint,
   fontSize: FONT_SIZES.lg,
   whiteSpace: 'nowrap',
   flexShrink: 0,
@@ -122,22 +122,22 @@ export const iconBtnSx = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
+  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.18)}`,
   borderRadius: 0.75,
   background: uiAlpha(UI_COLORS.black, 0.18),
-  color: UI_COLORS.textBrown,
+  color: UI_COLORS.textFaint,
   cursor: 'pointer',
   p: 0,
-  '&:hover': { borderColor: UI_COLORS.goldDeep, color: UI_COLORS.goldBright },
+  '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accentText },
 };
 
 export const deleteBtnSx = {
   ...iconBtnSx,
-  '&:hover': { borderColor: UI_COLORS.dangerFlat, color: UI_COLORS.dangerFlat },
+  '&:hover': { borderColor: UI_COLORS.dangerStrong, color: UI_COLORS.dangerStrong },
 };
 
 export function badgeSx(kind, theme) {
-  const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : UI_COLORS.textRail;
+  const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : UI_COLORS.textSecondary;
   return {
     height: '18px',
     fontSize: FONT_SIZES.xs,
@@ -156,12 +156,12 @@ export const emptyBoxSx = {
   maxWidth: '640px',
   textAlign: 'center',
   p: '2rem 1rem',
-  border: `1px dashed ${uiAlpha(UI_COLORS.goldDim, 0.25)}`,
+  border: `1px dashed ${uiAlpha(UI_COLORS.accentMuted, 0.25)}`,
   borderRadius: 1.5,
 };
 
 export const emptyTextSx = {
-  color: UI_COLORS.textDim,
+  color: UI_COLORS.textMuted,
   fontSize: FONT_SIZES.xxl,
   fontStyle: 'italic',
   fontFamily: UI_FONTS.prose,

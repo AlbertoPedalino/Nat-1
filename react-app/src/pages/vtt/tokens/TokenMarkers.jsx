@@ -40,7 +40,7 @@ const markerGridSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.08fr)',
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldTint',
+  borderColor: 'gmboard.vtt.accentTint',
   borderRadius: 1,
   overflow: 'hidden',
 };
@@ -55,7 +55,7 @@ const markerSectionSx = {
 
 const reminderSectionSx = {
   borderLeft: '1px solid',
-  borderLeftColor: 'gmboard.vtt.goldTint',
+  borderLeftColor: 'gmboard.vtt.accentTint',
 };
 
 const chipsSx = {

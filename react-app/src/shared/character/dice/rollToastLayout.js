@@ -16,7 +16,7 @@ export function rollDieColor(value, faces) {
   // A coin has no good side and no bad one. Heads is 1, and colouring it like a
   // fumbled roll made the head come up red.
   if ((faces || 20) <= 2) return 'text.primary';
-  if (value >= (faces || 20)) return UI_COLORS.goldLight;
+  if (value >= (faces || 20)) return UI_COLORS.accentText;
   if (value <= 1) return UI_COLORS.danger;
   return 'text.primary';
 }
@@ -43,7 +43,7 @@ export function resolveToastLayout(toast) {
   const isCrit = keptD20?.v >= 20;
   const isFail = keptD20?.v <= 1;
   let totalColor = 'text.primary';
-  if (isCrit) totalColor = UI_COLORS.goldLight;
+  if (isCrit) totalColor = UI_COLORS.accentText;
   else if (isFail) totalColor = UI_COLORS.danger;
 
   return {

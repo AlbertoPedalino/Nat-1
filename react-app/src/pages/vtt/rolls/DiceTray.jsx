@@ -269,7 +269,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
           {Number(die.faces) === 100 ? (
             <D100Orb
               value={die.v}
-              color={VTT_COLORS.goldRoll}
+              color={VTT_COLORS.accent}
               size={thrown.size}
               revealed={false}
               textureRef={(element) => { solidRefs.current[index] = element; }}
@@ -279,7 +279,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
             <Die3D
               value={die.v}
               faces={die.faces}
-              color={VTT_COLORS.goldRoll}
+              color={VTT_COLORS.accent}
               size={thrown.size}
               seed={`${roll.id}:${index}`}
               numbering={die.numbering}

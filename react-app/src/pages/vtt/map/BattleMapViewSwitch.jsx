@@ -70,7 +70,7 @@ const selectSx = {
   width: { xs: 148, sm: 210 },
   '& .MuiInputBase-root': {
     height: 32,
-    bgcolor: vttAlpha(VTT_COLORS.overlaySurface, 0.72),
+    bgcolor: vttAlpha(VTT_COLORS.black, 0.72),
     fontSize: FONT_SIZES.md,
   },
 };

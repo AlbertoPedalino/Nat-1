@@ -180,8 +180,8 @@ const rootSx = {
   alignItems: 'center',
   p: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.88),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
   boxShadow: 6,
   maxWidth: '100%',
   minWidth: 0,
@@ -208,12 +208,12 @@ const thumbSx = (selected) => ({
   height: THUMB_H,
   borderRadius: 1,
   overflow: 'hidden',
-  outline: selected ? `2px solid ${VTT_COLORS.gold}` : `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
+  outline: selected ? `2px solid ${VTT_COLORS.accent}` : `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
   outlineOffset: selected ? 1 : 0,
   opacity: selected ? 1 : 0.72,
   transition: 'opacity 120ms',
   '&:hover': { opacity: 1 },
-  '&.Mui-focusVisible': { outline: `2px solid ${VTT_COLORS.goldBright}` },
+  '&.Mui-focusVisible': { outline: `2px solid ${VTT_COLORS.accentHighlight}` },
 });
 
 const imageSx = {
@@ -230,8 +230,8 @@ const numberSx = {
   bottom: 3,
   px: 0.5,
   borderRadius: 0.5,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
-  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.8),
+  color: VTT_COLORS.accent,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   lineHeight: 1.4,
@@ -245,9 +245,9 @@ const removeSx = (armed) => ({
   height: 22,
   // Shown on hover or focus; always shown once armed so the second click lands.
   opacity: armed ? 1 : 0,
-  color: armed ? VTT_COLORS.parchment : VTT_COLORS.dangerBright,
-  bgcolor: armed ? VTT_COLORS.danger : vttAlpha(VTT_COLORS.ink, 0.85),
-  '&:hover': { bgcolor: armed ? VTT_COLORS.dangerDeep : VTT_COLORS.ink },
+  color: armed ? VTT_COLORS.text : VTT_COLORS.danger,
+  bgcolor: armed ? VTT_COLORS.hpCritical : vttAlpha(VTT_COLORS.surface, 0.85),
+  '&:hover': { bgcolor: armed ? VTT_COLORS.dangerDeep : VTT_COLORS.surface },
   '@media (hover: none)': { opacity: 1 },
 });
 
@@ -256,26 +256,26 @@ const addSx = {
   width: THUMB_H,
   height: THUMB_H,
   borderRadius: 1,
-  color: VTT_COLORS.gold,
-  border: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.5)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
+  color: VTT_COLORS.accent,
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.5)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
 };
 
 const collapsedSx = {
   height: 32,
   px: 1.25,
-  color: VTT_COLORS.gold,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.88),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  color: VTT_COLORS.accent,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
   boxShadow: 6,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   letterSpacing: LETTER_SPACINGS.lg,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.96) },
 };
 
 const arrowSx = {
   flexShrink: 0,
-  color: VTT_COLORS.gold,
-  '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.gold, 0.3) },
+  color: VTT_COLORS.accent,
+  '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.accent, 0.3) },
 };

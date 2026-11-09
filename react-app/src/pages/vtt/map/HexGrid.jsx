@@ -142,7 +142,7 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
 
 function HexGrid({
   grid, view, viewportSize, cells = null, selected = null, opacity = 1,
-  outlined = true, lineColor = vttAlpha(VTT_COLORS.gold, 0.28), lineWidth = 1,
+  outlined = true, lineColor = vttAlpha(VTT_COLORS.accent, 0.28), lineWidth = 1,
   clipRect = null, clipPolygon = null,
 }) {
   // React's ids carry colons, which a `url(#…)` reference cannot: the paint
@@ -227,7 +227,7 @@ function HexGrid({
             <path
               d={geometry.selectedPath}
               fill="none"
-              stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
+              stroke={vttAlpha(VTT_COLORS.accent, 0.95)}
               strokeWidth={2.5}
             />
           ) : null}

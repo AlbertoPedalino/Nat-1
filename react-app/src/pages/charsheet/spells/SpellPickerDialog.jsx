@@ -133,10 +133,10 @@ export function SpellPickerDialog({
       {activePicker ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
           <Box sx={{ ...sheetBoxSx, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.md }}>{activePicker.label}</Typography>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.md }}>{activePicker.label}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>{activePicker.note}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
-            {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}
+            {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.info }}>Spellbook {activeSpellbookSize}</Typography> : null}
           </Box>
           {activeIsWizard ? (
             <ToggleButtonGroup size="small" exclusive value={pickerWizardMode} onChange={(_, next) => next && setPickerWizardMode(next)} sx={levelToggleSx}>

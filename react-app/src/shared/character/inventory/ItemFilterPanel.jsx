@@ -49,7 +49,7 @@ const labelSx = {
 const controlSx = {
   width: '100%',
   fontSize: FONT_SIZES.md,
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   borderRadius: 1,
   '& .MuiSelect-select': { py: '5px' },
 };
@@ -66,7 +66,7 @@ const gridSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.ink, 0.65),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.65),
 };
 
 const placeholderSx = { color: 'text.secondary', opacity: 0.75 };
@@ -117,10 +117,10 @@ function SelectedChips({ values }) {
           sx={{
             px: '5px',
             border: 1,
-            borderColor: uiAlpha(UI_COLORS.gold, 0.45),
+            borderColor: uiAlpha(UI_COLORS.accent, 0.45),
             borderRadius: 0.375,
-            bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
-            color: UI_COLORS.goldLight,
+            bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+            color: UI_COLORS.accentText,
             fontSize: FONT_SIZES.xs,
           }}
         >

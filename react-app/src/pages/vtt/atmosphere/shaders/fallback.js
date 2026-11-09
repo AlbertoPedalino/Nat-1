@@ -6,7 +6,7 @@ export function atmosphereFallbackSx(config) {
   if (config.type === 'fog') {
     return {
       ...common,
-      background: `radial-gradient(ellipse at 30% 70%, ${vttAlpha(VTT_COLORS.white, 0.6)}, transparent 55%), linear-gradient(${vttAlpha(VTT_COLORS.panelTextMuted, 0.25)}, ${vttAlpha(VTT_COLORS.neutralMark, 0.45)})`,
+      background: `radial-gradient(ellipse at 30% 70%, ${vttAlpha(VTT_COLORS.white, 0.6)}, transparent 55%), linear-gradient(${vttAlpha(VTT_COLORS.textSecondary, 0.25)}, ${vttAlpha(VTT_COLORS.neutralMark, 0.45)})`,
     };
   }
   if (config.type === 'wind') {
@@ -45,7 +45,7 @@ export function atmosphereFallbackSx(config) {
     return {
       ...common,
       mixBlendMode: 'overlay',
-      background: `repeating-linear-gradient(0deg, transparent 0 9px, ${vttAlpha(VTT_COLORS.white, 0.5)} 11px 14px, transparent 16px 26px), linear-gradient(to top, ${vttAlpha(VTT_COLORS.warning, 0.85)}, ${vttAlpha(VTT_COLORS.goldBright, 0.3)} 42%, transparent 74%)`,
+      background: `repeating-linear-gradient(0deg, transparent 0 9px, ${vttAlpha(VTT_COLORS.white, 0.5)} 11px 14px, transparent 16px 26px), linear-gradient(to top, ${vttAlpha(VTT_COLORS.warning, 0.85)}, ${vttAlpha(VTT_COLORS.accentHighlight, 0.3)} 42%, transparent 74%)`,
     };
   }
   if (config.type === 'sunrays') {
@@ -58,20 +58,20 @@ export function atmosphereFallbackSx(config) {
     return {
       ...common,
       mixBlendMode: 'normal',
-      background: `radial-gradient(ellipse at 22% 88%, ${vttAlpha(VTT_COLORS.successBright, 0.42)}, transparent 42%), radial-gradient(ellipse at 78% 72%, ${vttAlpha(VTT_COLORS.exploredHex, 0.48)}, transparent 48%), linear-gradient(to top, ${vttAlpha(VTT_COLORS.ink, 0.58)}, ${vttAlpha(VTT_COLORS.success, 0.24)} 68%, transparent)`,
+      background: `radial-gradient(ellipse at 22% 88%, ${vttAlpha(VTT_COLORS.success, 0.42)}, transparent 42%), radial-gradient(ellipse at 78% 72%, ${vttAlpha(VTT_COLORS.exploredHex, 0.48)}, transparent 48%), linear-gradient(to top, ${vttAlpha(VTT_COLORS.surface, 0.58)}, ${vttAlpha(VTT_COLORS.hpHealthy, 0.24)} 68%, transparent)`,
     };
   }
   if (config.type === 'haunted') {
     return {
       ...common,
       mixBlendMode: 'normal',
-      background: `radial-gradient(ellipse at center, transparent 42%, ${vttAlpha(VTT_COLORS.drawingGuide, 0.14)} 72%, ${vttAlpha(VTT_COLORS.overlaySurface, 0.76)} 100%)`,
+      background: `radial-gradient(ellipse at center, transparent 42%, ${vttAlpha(VTT_COLORS.drawingGuide, 0.14)} 72%, ${vttAlpha(VTT_COLORS.black, 0.76)} 100%)`,
     };
   }
   if (config.type === 'goldvault') {
     return {
       ...common,
-      background: `radial-gradient(ellipse at 50% 108%, ${vttAlpha(VTT_COLORS.goldBright, 0.92)}, transparent 62%), radial-gradient(circle at 18% 72%, ${vttAlpha(VTT_COLORS.white, 0.58)} 0 1px, transparent 3px), radial-gradient(circle at 81% 36%, ${vttAlpha(VTT_COLORS.goldRoll, 0.78)} 0 2px, transparent 4px), ${vttAlpha(VTT_COLORS.gold, 0.08)}`,
+      background: `radial-gradient(ellipse at 50% 108%, ${vttAlpha(VTT_COLORS.accentHighlight, 0.92)}, transparent 62%), radial-gradient(circle at 18% 72%, ${vttAlpha(VTT_COLORS.white, 0.58)} 0 1px, transparent 3px), radial-gradient(circle at 81% 36%, ${vttAlpha(VTT_COLORS.accent, 0.78)} 0 2px, transparent 4px), ${vttAlpha(VTT_COLORS.accent, 0.08)}`,
       backgroundSize: 'auto, 83px 71px, 127px 109px',
     };
   }

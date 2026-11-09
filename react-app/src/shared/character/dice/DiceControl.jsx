@@ -50,7 +50,7 @@ export default function DiceControl({
         </Box>
       ) : (
         <ButtonGroup size="small" variant="outlined" aria-label="Dice" sx={sx}>
-          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.goldLight)]}>
+          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.accentText)]}>
             Roll
           </Button>
           <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
@@ -99,7 +99,7 @@ function dividerSx(color = 'divider') {
 }
 
 // The half whose popover is open is lit.
-const openSx = { bgcolor: uiAlpha(UI_COLORS.gold, 0.16) };
+const openSx = { bgcolor: uiAlpha(UI_COLORS.accent, 0.16) };
 
 const settingsSx = { pb: 1, mb: 1, borderBottom: 1, borderColor: 'divider' };
 

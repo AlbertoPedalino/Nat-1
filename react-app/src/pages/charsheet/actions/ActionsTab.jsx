@@ -175,9 +175,9 @@ export default function ActionsTab({ C, sheet, resources }) {
                 const prof = getMod(getFinal(C, 'str')) > getMod(getFinal(C, 'dex')) ? getMod(getFinal(C, 'str')) : getMod(getFinal(C, 'dex'));
                 const hitBonus = signed(prof);
                 return (
-                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.headerBg } }}>
+                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.surfaceHeader } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.goldLight, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
+                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.accentText, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>
                 );

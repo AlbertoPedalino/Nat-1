@@ -121,7 +121,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
-        <PawPrint size={14} color={UI_COLORS.goldLight} />
+        <PawPrint size={14} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
         <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
       </Box>
@@ -200,7 +200,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
         <Box sx={{ mt: 0.6 }}>
           {rules.map((rule) => (
             <Typography key={rule.title} sx={{ ...subSx, mt: 0.3 }}>
-              <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.goldLight }}>{rule.title}.</Box> {rule.text}
+              <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.accentText }}>{rule.title}.</Box> {rule.text}
             </Typography>
           ))}
         </Box>
@@ -230,7 +230,7 @@ function companionRules(rangerLevel) {
 
 const reviveButtonSx = {
   fontSize: FONT_SIZES.sm,
-  borderColor: uiAlpha(UI_COLORS.gold, 0.5),
-  color: UI_COLORS.goldLight,
-  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },
+  borderColor: uiAlpha(UI_COLORS.accent, 0.5),
+  color: UI_COLORS.accentText,
+  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) },
 };

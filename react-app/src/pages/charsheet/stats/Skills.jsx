@@ -99,7 +99,7 @@ export default function Skills({ C, sheet, onRoll }) {
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
             onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
-            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } }}>
+            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.05) } }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>

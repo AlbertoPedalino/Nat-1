@@ -63,7 +63,7 @@ export default function HPBlock({
   const { success: dsSuccess, fail: dsFail } = normalizeDeathSaves(sheet.deathSaves);
   const atZero = sheet.currentHP === 0;
   const dead = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
-  const hpColor = sheet.currentHP > sheet.maxHP / 2 ? UI_COLORS.success : sheet.currentHP > 0 ? UI_COLORS.warning : UI_COLORS.dangerHp;
+  const hpColor = sheet.currentHP > sheet.maxHP / 2 ? UI_COLORS.success : sheet.currentHP > 0 ? UI_COLORS.warning : UI_COLORS.dangerStrong;
 
   const startEdit = (key, current) => {
     setEditVal(String(current));
@@ -106,9 +106,9 @@ export default function HPBlock({
         </Typography>
 
         {dead && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerBright, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerBright, 0.12) }}>
-            <Skull size={12} style={{ color: UI_COLORS.dangerBright }} />
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, 0.12) }}>
+            <Skull size={12} style={{ color: UI_COLORS.dangerStrong }} />
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.dangerStrong }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
             </Typography>
           </Box>
@@ -151,12 +151,12 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <Sparkles size={10} /> TEMP
             {editing === 'temp' ? (
-              editField({ width: 40, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight })
+              editField({ width: 40, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('temp', sheet.tempHP)}
-                sx={{ color: UI_COLORS.goldLight, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {sheet.tempHP}
               </Box>
@@ -178,12 +178,12 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <HeartPulse size={10} /> MAX MOD
             {editing === 'mod' ? (
-              editField({ width: 44, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight })
+              editField({ width: 44, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('mod', sheet.maxHPBonus)}
-                sx={{ color: UI_COLORS.goldLight, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {signed(sheet.maxHPBonus)}
               </Box>

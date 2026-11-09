@@ -128,7 +128,7 @@ const moveBarSx = {
   border: '1px solid',
   borderColor: 'primary.main',
   borderRadius: 2,
-  bgcolor: uiAlpha(UI_COLORS.gold, 0.06),
+  bgcolor: uiAlpha(UI_COLORS.accent, 0.06),
 };
 
 const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };

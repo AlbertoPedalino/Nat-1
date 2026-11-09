@@ -111,7 +111,7 @@ const phoneSurface = {
 };
 
 const phonePillSx = {
-  boxShadow: `${UI_SHADOWS.float}, 0 0 0 4px ${uiAlpha(UI_COLORS.gold, 0.18)}`,
+  boxShadow: `${UI_SHADOWS.float}, 0 0 0 4px ${uiAlpha(UI_COLORS.accent, 0.18)}`,
 };
 
 // The labelled control made into the same pill.

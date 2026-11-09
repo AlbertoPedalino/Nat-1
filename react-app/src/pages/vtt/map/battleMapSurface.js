@@ -9,17 +9,17 @@ export const battleMapSurfaceSx = {
   bgcolor: 'gmboard.vtt.surface',
   backgroundImage: 'none',
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorder',
+  borderColor: 'gmboard.vtt.accentBorder',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 };
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
-  color: VTT_COLORS.gold,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
+  color: VTT_COLORS.accent,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.8),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.95) },
 };
 
 export const battleMapDialogPaperSx = {
@@ -39,7 +39,7 @@ export const battleMapDialogPlacingPaperSx = {
 export const battleMapDialogTitleSx = {
   bgcolor: 'transparent',
   borderBottom: '1px solid',
-  borderBottomColor: 'gmboard.vtt.goldBorder',
+  borderBottomColor: 'gmboard.vtt.accentBorder',
   color: 'primary.main',
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xl,
@@ -49,13 +49,13 @@ export const battleMapDialogTitleSx = {
 
 export const battleMapDialogContentSx = {
   bgcolor: 'transparent',
-  borderColor: 'gmboard.vtt.goldTint',
+  borderColor: 'gmboard.vtt.accentTint',
 };
 
 export const battleMapDialogActionsSx = {
   bgcolor: 'transparent',
   borderTop: '1px solid',
-  borderTopColor: 'gmboard.vtt.goldTint',
+  borderTopColor: 'gmboard.vtt.accentTint',
 };
 
 // Placement dialogs stay open while a piece is dragged, but only their paper

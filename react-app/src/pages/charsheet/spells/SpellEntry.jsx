@@ -300,7 +300,7 @@ export default function SpellEntry({
             {weaponStrike ? (
               <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, 0.16)} />
             ) : null}
-            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color={UI_COLORS.purple} bg={uiAlpha(UI_COLORS.purple, 0.16)} />; })}
+            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color={UI_COLORS.spell} bg={uiAlpha(UI_COLORS.spell, 0.16)} />; })}
             {spellRiders.filter((rider) => rider.tag).map((rider) => (
               <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} bg={alpha(rider.tag.color, 0.16)} />
             ))}
@@ -308,7 +308,7 @@ export default function SpellEntry({
             {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.purple} bg={uiAlpha(UI_COLORS.purple, 0.16)} /> : null}
+            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.spell} bg={uiAlpha(UI_COLORS.spell, 0.16)} /> : null}
             {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} bg={alpha(SPELL_TAG_COLORS.concentration, 0.16)} /> : null}
             {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
             <MiniBadge {...getCastBadge(entry)} />

@@ -13,8 +13,8 @@ import { UI_SHADOWS } from './shadows.js';
 const SEVERITY_COLOR = {
   success: UI_COLORS.success,
   error: UI_COLORS.danger,
-  warning: UI_COLORS.warningToast,
-  info: UI_COLORS.blueLight,
+  warning: UI_COLORS.warning,
+  info: UI_COLORS.infoText,
 };
 
 // Just under the app's top bar on every screen: centred on a phone, at the
@@ -59,7 +59,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               minWidth: 240,
               maxWidth: 360,
               bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
-              color: UI_COLORS.textToast,
+              color: UI_COLORS.textPrimary,
               border: '1px solid',
               borderColor: color,
               borderRadius: 1,

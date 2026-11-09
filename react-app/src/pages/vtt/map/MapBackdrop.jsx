@@ -143,7 +143,7 @@ export default function MapBackdrop({
               transform: `translate(${topLeft.x}px, ${topLeft.y}px)`,
               width: scene.playArea.w * cell,
               height: scene.playArea.h * cell,
-              border: `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.7)}`,
+              border: `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.7)}`,
               boxSizing: 'border-box',
               pointerEvents: 'none',
             }}

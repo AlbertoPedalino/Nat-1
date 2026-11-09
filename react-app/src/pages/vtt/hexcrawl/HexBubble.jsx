@@ -113,7 +113,7 @@ const clickableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
   font: 'inherit',
-  '&:hover': { borderColor: vttAlpha(VTT_COLORS.gold, 0.75) },
+  '&:hover': { borderColor: vttAlpha(VTT_COLORS.accent, 0.75) },
 };
 
 const coordSx = {
@@ -128,7 +128,7 @@ const headlineSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.body,
   fontWeight: 700,
-  color: VTT_COLORS.gold,
+  color: VTT_COLORS.accent,
   lineHeight: 1.25,
 };
 

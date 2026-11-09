@@ -20,7 +20,7 @@ export default function BuilderAppBar({ canUploadDraft, onUploadDraft, onNotify,
           <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
             <Wand2 size={19} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="h1" noWrap sx={{ fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, color: UI_COLORS.goldLight }}>
+              <Typography variant="h1" noWrap sx={{ fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, color: UI_COLORS.accentText }}>
                 Character Builder
               </Typography>
               <Typography variant="body2" noWrap sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs }}>

@@ -17,7 +17,7 @@ export const withIcons = (chips) => chips.map((chip) => ({ ...chip, icon: CHIP_I
 const FILTERS = withIcons(ITEM_GROUP_CHIPS);
 
 export const compactInputSx = {
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
+  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.lg, py: '7px' },
 };
 
@@ -25,7 +25,7 @@ export const inventorySectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.ink, 0.48),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.48),
   p: '8px',
   mb: 1,
 };

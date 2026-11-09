@@ -101,7 +101,7 @@ const playerBodySx = {
 const avatarSx = {
   width: 58,
   height: 58,
-  color: UI_COLORS.avatarText,
+  color: UI_COLORS.surfaceSunken,
   fontSize: FONT_SIZES.xxl,
   fontWeight: 900,
   flex: '0 0 auto',

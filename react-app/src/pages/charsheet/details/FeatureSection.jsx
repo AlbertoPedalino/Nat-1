@@ -22,12 +22,12 @@ export function FeatureSection({ title, color, features }) {
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.blue, 0.14) }), pb: 0.25, mb: 0.4 }}>
+      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.info, 0.14) }), pb: 0.25, mb: 0.4 }}>
         {title}
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.goldLight, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.2), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.2), pb: 0.25, mb: 0.35 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (
@@ -44,13 +44,13 @@ function FeatureItem({ feature, tone }) {
   const sourceKind = feature?.sourceKind || 'class';
   const isSubclass = sourceKind === 'subclass';
   const subclassTone = SOURCE_COLOR.subclass;
-  const borderTone = isSubclass ? subclassTone : (tone || UI_COLORS.blue);
+  const borderTone = isSubclass ? subclassTone : (tone || UI_COLORS.info);
 
   return (
     <Box
       className={open ? 'open' : ''}
       sx={{
-        bgcolor: UI_COLORS.headerBg,
+        bgcolor: UI_COLORS.surfaceHeader,
         border: 1,
         borderColor: 'divider',
         borderLeft: `3px solid ${borderTone}`,

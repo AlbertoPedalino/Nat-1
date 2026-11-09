@@ -24,7 +24,7 @@ export default function InstanceRow({
         {subtitle ? <Typography component="span" sx={{ ...s.subtitleSx, display: 'block' }}>{subtitle}</Typography> : null}
       </Box>
       {opening ? (
-        <CircularProgress size={12} sx={{ color: UI_COLORS.goldDeep, flexShrink: 0 }} />
+        <CircularProgress size={12} sx={{ color: UI_COLORS.accent, flexShrink: 0 }} />
       ) : (
         <Typography component="span" sx={s.metaSx}>{updatedAtLabel}</Typography>
       )}

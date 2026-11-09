@@ -4,97 +4,82 @@
 // an icon's colour, or inside a border, shadow or gradient (via uiAlpha).
 // Selectable palettes (player and label colours, swatches, coins) and stored
 // colours (spell source tones) are data and live with their data.
+// Every colour is named by its role (accent, textMuted, surfaceHeader,
+// danger…), never by its hue, so a new palette changes the values here and
+// every name still says what the colour is for. `<role>Text` is the readable
+// tone of a role on a dark surface; `on<Role>` is the ink on a filled one.
 export const UI_COLORS = Object.freeze({
-  // Gold, the accent family.
-  primary: '#d7ad52',
-  primaryContrast: '#17120d',
-  gold: '#caa550',
-  goldLight: '#edd48a',
-  goldBright: '#e8c96a',
-  goldDeep: '#c8a84b',
-  goldDim: '#b4965a',
-  goldWarm: '#c9a86a',
-  goldAmber: '#d5a84b',
-  goldPale: '#ffe8b0',
-  amber: '#c9923f',
-  amberBright: '#d6a849',
-  conditional: '#b9935a',
+  // Accent: the interface's one highlight colour (gold), its text and line
+  // tones, and the ink written on a filled accent.
+  accent: '#d7ad52',
+  accentText: '#edd48a',
+  accentHighlight: '#ffe8b0',
+  accentMuted: '#b9935a',
+  onAccent: '#17120d',
 
-  // Text.
+  // Text, brightest to faintest, and the strongest neutral outline.
   textPrimary: '#f0e6d4',
   textSecondary: '#bda98a',
-  textParchment: '#c4b393',
-  textParchmentSoft: '#c7b690',
-  textCondition: '#cabd9f',
-  textToast: '#edd9b0',
-  textStone: '#a89882',
-  textRail: '#b8a87a',
   textMuted: '#9a8f7a',
-  textFaint: '#9f947d',
-  textDim: '#9a8a6a',
-  textBrown: '#7a6a4a',
-  borderMuted: '#8a7d66',
+  textFaint: '#7a6a4a',
+  outline: '#8a7d66',
 
-  // Surfaces, lightest to darkest.
+  // Surfaces, lightest to darkest. `surface` is the paper of cards and
+  // dialogs, `page` the page behind them.
   surfaceRaised: '#2e2a22',
-  surfaceHover: '#2a261f',
-  headerBg: '#23201a',
-  surfaceHome: '#1a1815',
+  surfaceHeader: '#23201a',
+  surface: '#211d18',
   surfaceDeep: '#1a1713',
-  surfaceSunken: '#14120f',
-  ink: '#12100e',
-  inkSoft: '#11100e',
-  inkDeep: '#0f0e0d',
-  avatarText: '#101010',
+  page: '#151411',
+  surfaceSunken: '#12100e',
+  surfaceDarkest: '#0f0e0d',
   black: '#000000',
   white: '#ffffff',
 
-  // Danger, from bright to deep.
-  dangerBright: '#e5484d',
-  dangerFlat: '#e74c3c',
+  // Danger: failures, damage, removal.
+  dangerStrong: '#e5484d',
   danger: '#de675f',
-  // An encounter rated High, between warning and danger.
-  difficultyHigh: '#e27b3e',
-  dangerFumble: '#d3473a',
-  dangerHp: '#c54a3f',
-  dangerSoft: '#d99292',
+  dangerText: '#f0958d',
   dangerMuted: '#c98a8a',
-  dangerDim: '#a75d5d',
   dangerDeep: '#a04848',
-  dangerInk: '#220d0b',
+  dangerSurface: '#220d0b',
+
+  // Warning, and the stronger step before danger (a High encounter).
+  warning: '#d69245',
+  warningStrong: '#e27b3e',
+  warningText: '#e9b275',
+
+  // Penalty: disadvantage and reduced values.
+  penalty: '#ff9800',
+  penaltyText: '#ffb74d',
 
   // Success and healing.
-  successLight: '#a9d6ae',
   success: '#58b879',
-  successMuted: '#68aa71',
-  successGlow: '#6eaf5f',
-  successDeep: '#3fa66c',
-  successFlat: '#27ae60',
+  successText: '#a9d6ae',
 
-  // Warning and disadvantage.
-  orangeLight: '#ffb74d',
-  orange: '#ff9800',
-  warningToast: '#e0a33a',
-  warning: '#d69245',
+  // Secondary accent (the theme's secondary): advantage, bonuses.
+  secondary: '#70b7a6',
+  secondaryStrong: '#2ca797',
+  secondaryText: '#96d8c6',
+  onSecondary: '#11201c',
 
-  // Teal (the theme's secondary), blue and purple accents.
-  tealLight: '#96d8c6',
-  tealFlat: '#1abc9c',
-  teal: '#70b7a6',
-  tealDeep: '#2ca797',
-  blueLight: '#9ec5e6',
-  blueSoft: '#81b3e8',
+  // Information and links.
+  info: '#4d95d6',
+  infoText: '#9ec5e6',
+
+  // Spellcasting.
+  spell: '#9d7fb8',
+
+  // The default token colour of a player character.
   pcToken: '#5c8fe0',
-  blue: '#4d95d6',
-  purple: '#9d7fb8',
 });
 
 // The colour of a hit point readout by its tone (vitals.hpTone).
 export const HP_TONE_COLORS = Object.freeze({
-  healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerHp,
+  healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerStrong,
 });
 
-// A colour of the palette at some opacity: uiAlpha(UI_COLORS.gold, 0.4).
+// A colour of the palette at some opacity: uiAlpha(UI_COLORS.accent, 0.4).
 export function uiAlpha(hex, alpha) {
   const value = String(hex).replace('#', '');
   const r = parseInt(value.slice(0, 2), 16);

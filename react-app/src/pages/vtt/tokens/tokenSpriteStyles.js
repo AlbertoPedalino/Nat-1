@@ -17,7 +17,7 @@ export const classIconSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: VTT_COLORS.parchment,
+  color: VTT_COLORS.text,
   filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
   pointerEvents: 'none',
 };
@@ -41,12 +41,12 @@ export const resizeHandleSx = {
   height: 14,
   p: 0,
   borderRadius: 0.375,
-  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.95)}`,
-  bgcolor: VTT_COLORS.gold,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.95)}`,
+  bgcolor: VTT_COLORS.accent,
   boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
   cursor: 'nwse-resize',
   touchAction: 'none',
-  '&:hover': { bgcolor: VTT_COLORS.goldBright },
+  '&:hover': { bgcolor: VTT_COLORS.accentHighlight },
 };
 
 export const rotateHandleSx = {
@@ -58,16 +58,16 @@ export const rotateHandleSx = {
   height: 16,
   p: 0,
   borderRadius: '50%',
-  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.95)}`,
-  bgcolor: VTT_COLORS.gold,
-  color: VTT_COLORS.ink,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.95)}`,
+  bgcolor: VTT_COLORS.accent,
+  color: VTT_COLORS.surface,
   boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
   cursor: 'grab',
   touchAction: 'none',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  '&:hover': { bgcolor: VTT_COLORS.goldBright },
+  '&:hover': { bgcolor: VTT_COLORS.accentHighlight },
 };
 
 // The cell as one column: reminder line, art, name and bars. The art takes
@@ -166,18 +166,18 @@ export const deathDotSx = {
 };
 
 export const deathSuccessSx = {
-  bgcolor: VTT_COLORS.deathSuccess,
-  borderColor: VTT_COLORS.successBright,
-  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.deathSuccess, 0.8)}`,
+  bgcolor: VTT_COLORS.success,
+  borderColor: VTT_COLORS.success,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.success, 0.8)}`,
 };
 
 export const deathFailureSx = {
-  bgcolor: VTT_COLORS.danger,
-  borderColor: VTT_COLORS.dangerBright,
-  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.danger, 0.8)}`,
+  bgcolor: VTT_COLORS.hpCritical,
+  borderColor: VTT_COLORS.danger,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.hpCritical, 0.8)}`,
 };
 
-export const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.gold, 0.34) };
+export const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.accent, 0.34) };
 
 export const hpFillSx = {
   position: 'absolute',
@@ -198,7 +198,7 @@ const textBaseSx = {
   textShadow: `0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)}`,
 };
 
-export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.parchment };
+export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.text };
 
 export const tempBarSx = { ...barBaseSx, height: 'clamp(5px, 10cqmin, 12px)' };
 
@@ -217,8 +217,8 @@ export const plateSx = {
   flex: 'none',
   px: 'clamp(2px, 4cqmin, 5px)',
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
-  color: VTT_COLORS.parchmentMuted,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+  color: VTT_COLORS.text,
   // As large as the cell allows, up to what reads across the table on a
   // projector; zoomed far out it gets small rather than spilling over.
   fontSize: 'clamp(5px, 12cqmin, 11px)',
@@ -230,7 +230,7 @@ export const plateSx = {
 };
 
 export const secretPlateSx = {
-  outline: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`,
+  outline: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.9)}`,
   outlineOffset: '-1px',
 };
 
@@ -245,7 +245,7 @@ export const badgeSx = {
   px: '2px',
   borderRadius: 1,
   bgcolor: VTT_COLORS.warning,
-  color: VTT_COLORS.ink,
+  color: VTT_COLORS.surface,
   fontSize: 'clamp(6px, 14cqmin, 10px)',
   fontWeight: 800,
   lineHeight: 'clamp(10px, 22cqmin, 16px)',
@@ -278,7 +278,7 @@ export const deadBadgeSx = {
   borderRadius: '50%',
   bgcolor: VTT_COLORS.dangerDeep,
   color: VTT_COLORS.deathText,
-  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.92)}`,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.92)}`,
   boxShadow: `0 2px 5px ${vttAlpha(VTT_COLORS.black, 0.75)}`,
   display: 'flex',
   alignItems: 'center',
@@ -336,7 +336,7 @@ export const reminderSx = {
   px: 0.6,
   py: '1px',
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.88),
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
   color: 'info.main',
   border: '1px solid',
   borderColor: 'info.main',
@@ -369,15 +369,15 @@ export const pillSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.55)}`,
 };
 
-export const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.ink };
+export const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.surface };
 
 export const conditionTooltipSx = {
   maxWidth: 360,
   p: 0,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.98),
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.98),
   border: `1px solid ${vttAlpha(VTT_COLORS.warning, 0.55)}`,
   boxShadow: 8,
-  '& .MuiTooltip-arrow': { color: vttAlpha(VTT_COLORS.ink, 0.98) },
+  '& .MuiTooltip-arrow': { color: vttAlpha(VTT_COLORS.surface, 0.98) },
 };
 
 export const conditionTooltipBodySx = { p: 1 };

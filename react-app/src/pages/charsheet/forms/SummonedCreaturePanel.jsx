@@ -138,7 +138,7 @@ export default function SummonedCreaturePanel({
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
-        <PawPrint size={14} color={UI_COLORS.goldLight} />
+        <PawPrint size={14} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
       </Box>
       {versions.length > 1 ? (
@@ -226,12 +226,12 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         fontSize: FONT_SIZES.xxs,
         lineHeight: 1.45,
         textTransform: 'none',
-        color: available ? UI_COLORS.successLight : UI_COLORS.dangerMuted,
-        borderColor: available ? uiAlpha(UI_COLORS.successMuted, 0.55) : uiAlpha(UI_COLORS.dangerMuted, 0.55),
-        bgcolor: available ? uiAlpha(UI_COLORS.successMuted, 0.08) : uiAlpha(UI_COLORS.dangerMuted, 0.08),
+        color: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
+        borderColor: available ? uiAlpha(UI_COLORS.success, 0.55) : uiAlpha(UI_COLORS.dangerMuted, 0.55),
+        bgcolor: available ? uiAlpha(UI_COLORS.success, 0.08) : uiAlpha(UI_COLORS.dangerMuted, 0.08),
         '&:hover': {
-          borderColor: available ? UI_COLORS.successLight : UI_COLORS.dangerMuted,
-          bgcolor: available ? uiAlpha(UI_COLORS.successMuted, 0.16) : uiAlpha(UI_COLORS.dangerMuted, 0.16),
+          borderColor: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
+          bgcolor: available ? uiAlpha(UI_COLORS.success, 0.16) : uiAlpha(UI_COLORS.dangerMuted, 0.16),
         },
       }}
     >

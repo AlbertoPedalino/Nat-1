@@ -163,7 +163,7 @@ const sectionCardSx = {
   p: 1.5,
   borderRadius: 1,
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorder',
+  borderColor: 'gmboard.vtt.accentBorder',
   bgcolor: 'gmboard.vtt.inset',
 };
 
@@ -175,15 +175,15 @@ const sectionTitleSx = {
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.lg,
-  color: 'gmboard.vtt.gold',
+  color: 'gmboard.vtt.accent',
   pb: 0.6,
   borderBottom: '1px solid',
-  borderColor: 'gmboard.vtt.goldTint',
+  borderColor: 'gmboard.vtt.accentTint',
 };
 
 
 
 const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
-const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md };
+const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md };
 const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: 1.4, mb: 1.5 };
 

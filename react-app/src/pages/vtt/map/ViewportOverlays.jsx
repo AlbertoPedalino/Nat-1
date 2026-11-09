@@ -67,7 +67,7 @@ export function PartyHexMarker({
         // than sitting on it.
         transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)`,
         pointerEvents: 'none',
-        color: VTT_COLORS.gold,
+        color: VTT_COLORS.accent,
         filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, 0.85)})`,
         zIndex: fogOnTop ? 3 : 5,
       }}

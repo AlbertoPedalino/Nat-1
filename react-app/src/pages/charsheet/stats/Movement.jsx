@@ -98,16 +98,16 @@ export default function Movement({ C, sheet }) {
       <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : 'primary.main'}>
         {hasPenalty ? (
           <Tooltip title={reason}>
-            <AlertCircle size={12} style={{ color: UI_COLORS.orange, marginLeft: 'auto' }} />
+            <AlertCircle size={12} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />
           </Tooltip>
         ) : null}
       </PanelHeader>
       <Box sx={{ p: '0.55rem 0.8rem', display: 'grid', gap: 0.35 }}>
         {entries.map((entry) => (
-          <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
+          <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>{speedLabel(entry.key)}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: hasPenalty ? UI_COLORS.orangeLight : UI_COLORS.goldLight, lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: hasPenalty ? UI_COLORS.penaltyText : UI_COLORS.accentText, lineHeight: 1 }}>
                 {entry.final}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary' }}>ft</Typography>
@@ -122,13 +122,13 @@ export default function Movement({ C, sheet }) {
                 size="small"
                 label={`${effectTitle(effect)}${effectSummary(effect) ? `: ${effectSummary(effect)}` : ''}`}
                 variant="outlined"
-                sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.38), justifyContent: 'flex-start' }}
+                sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.38), justifyContent: 'flex-start' }}
               />
             ))}
           </Box>
         ) : null}
         {hasPenalty ? (
-          <Chip size="small" label={reason} variant="outlined" sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.orangeLight, borderColor: uiAlpha(UI_COLORS.orangeLight, 0.45), justifyContent: 'flex-start' }} />
+          <Chip size="small" label={reason} variant="outlined" sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.penaltyText, borderColor: uiAlpha(UI_COLORS.penaltyText, 0.45), justifyContent: 'flex-start' }} />
         ) : null}
       </Box>
     </Paper>

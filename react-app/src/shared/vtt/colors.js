@@ -3,57 +3,43 @@ import { UI_COLORS } from '../ui/colors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
 // Components should still prefer `gmboard.vtt.*` in `sx` when a theme token is
-// enough; both APIs are backed by this palette. Colours the map shares with
-// the rest of the interface (its gold, ink, text and status tones) are read
-// from UI_COLORS, so a new interface palette reaches the map too.
+// enough; both APIs are backed by this palette. Interface colours are named
+// by role and read from UI_COLORS, so a new interface palette reaches the map;
+// what is drawn on the board (vitals bars, drawings, effects) keeps its own.
 export const VTT_COLORS = Object.freeze({
+  // The battle map's interface: the same roles as the rest of the app, read
+  // from UI_COLORS. Its accent is the interface's bright accent tone, which
+  // reads better over a map than the base one.
   black: UI_COLORS.black,
-  ink: UI_COLORS.inkDeep,
-  viewport: '#0b0a09',
-  stitchBackground: UI_COLORS.ink,
+  white: UI_COLORS.white,
+  surface: UI_COLORS.surfaceDarkest,
   surfaceRaised: UI_COLORS.surfaceDeep,
-  gold: UI_COLORS.goldBright,
-  goldSoft: '#edc36f',
-  goldRoll: UI_COLORS.goldLight,
-  goldHandle: '#f1d77d',
-  goldPreview: '#f2df9d',
-  goldBright: '#f4dda0',
-  goldUiBright: '#f3df9c',
-  parchment: '#f3ead6',
-  parchmentMuted: '#e8dcc0',
-  panelText: '#d9cfb8',
-  panelTextSoft: '#cdbb83',
-  panelTextMuted: '#b9ad91',
-  panelTextFaint: UI_COLORS.textFaint,
-  railText: UI_COLORS.textRail,
-  rollDetail: '#8a7a5a',
-  selectText: '#eadba9',
-  selectSurface: '#161411',
-  sheetSurface: '#0a0909',
-  overlaySurface: '#050507',
+  accent: UI_COLORS.accentText,
+  accentHighlight: UI_COLORS.accentHighlight,
+  text: UI_COLORS.textPrimary,
+  textSecondary: UI_COLORS.textSecondary,
+  textMuted: UI_COLORS.textMuted,
   warning: UI_COLORS.warning,
-  error: UI_COLORS.danger,
-  danger: '#b3423a',
-  dangerBright: '#df6b62',
-  dangerDeep: '#8f2f34',
-  success: '#4f8a5b',
-  successBright: '#7bc78a',
-  deathSuccess: '#4f9c62',
+  danger: UI_COLORS.danger,
+  dangerDeep: UI_COLORS.dangerDeep,
+  success: UI_COLORS.success,
+
+  // Drawn on the board itself: the empty viewport, the seam behind stitched
+  // tiles, and the darker vitals tones that stay legible over any map.
+  viewport: '#0b0a09',
+  stitchBackground: UI_COLORS.surfaceSunken,
   hpHealthy: '#4f8a5b',
   hpWounded: '#c8973f',
   hpCritical: '#b3423a',
   tempHp: '#4f7fa8',
   tempHpText: '#dff0fb',
+  deathText: '#f7e9dc',
+  neutralMark: '#e2dac6',
   drawingGuide: '#6fd1e8',
   drawingText: '#dff4fb',
   laser: '#ff5046',
   laserCore: '#ffebe6',
   laserText: '#ffd9d4',
-  white: UI_COLORS.white,
-  deathText: '#f7e9dc',
-  neutralMark: '#e2dac6',
-  menuSuccess: '#70b78f',
-  menuDanger: '#d76767',
   dungeon: '#7a5aa8',
   objectDefault: '#6f5b32',
   exploredHex: '#6f8f5a',

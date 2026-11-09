@@ -78,7 +78,7 @@ const appTopBarSx = {
   alignItems: 'center',
   px: { xs: '0.75rem', md: '1rem' },
   py: '0.5rem',
-  bgcolor: uiAlpha(UI_COLORS.inkDeep, 0.95),
-  borderBottom: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.22)}`,
+  bgcolor: uiAlpha(UI_COLORS.surfaceDarkest, 0.95),
+  borderBottom: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.22)}`,
   backdropFilter: 'blur(6px)',
 };

@@ -94,7 +94,7 @@ const TokenNode = memo(function TokenNode({
         width: rect.width * view.zoom,
         height: rect.height * view.zoom,
         transform: `translate(${at.x}px, ${at.y}px)`,
-        outline: selected ? `2px solid ${VTT_COLORS.gold}` : 'none',
+        outline: selected ? `2px solid ${VTT_COLORS.accent}` : 'none',
         outlineOffset: 3,
         boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, 0.72)}` : 'none',
         zIndex: aboveFog ? 4 : selected ? 2 : undefined,

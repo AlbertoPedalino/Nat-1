@@ -16,7 +16,7 @@ import { normalizeHexColor } from '../../ui/colors.js';
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
-  color: VTT_COLORS.gold, lineWidth: 1, hexColor: VTT_COLORS.exploredHex,
+  color: VTT_COLORS.accent, lineWidth: 1, hexColor: VTT_COLORS.exploredHex,
   measureUnit: 'feet', milesPerCell: 6,
 });
 

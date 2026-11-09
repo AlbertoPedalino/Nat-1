@@ -65,7 +65,7 @@ export default function EntryRenderer({ entries, onRoll }) {
   }
   if (entries.type === 'insetReadaloud') {
     return (
-      <Box sx={{ my: 1, p: 1, borderLeft: '3px solid', borderColor: 'primary.main', bgcolor: uiAlpha(UI_COLORS.primary, 0.08), fontStyle: 'italic' }}>
+      <Box sx={{ my: 1, p: 1, borderLeft: '3px solid', borderColor: 'primary.main', bgcolor: uiAlpha(UI_COLORS.accent, 0.08), fontStyle: 'italic' }}>
         <EntryRenderer entries={entries.entries} onRoll={onRoll} />
       </Box>
     );

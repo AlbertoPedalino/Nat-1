@@ -46,8 +46,8 @@ function parseDecimalInput(value) {
 function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
-      containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.gold } }}
-      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
+      containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.accent } }}
+      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (
         <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
@@ -65,7 +65,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   const { visible, listProps } = page;
 
   return (
-    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.ink, 0.65), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.65), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
       {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
@@ -176,7 +176,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
+              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.surfaceHeader, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
               + Add
             </Button>
           </Box>

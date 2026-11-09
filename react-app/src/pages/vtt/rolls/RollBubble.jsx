@@ -63,8 +63,8 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
 
         <Typography sx={labelSx}>{layout.label}</Typography>
 
-        {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.goldRoll }}>NATURAL 20!</Typography>}
-        {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.error }}>NATURAL 1</Typography>}
+        {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.accent }}>NATURAL 20!</Typography>}
+        {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
 
         {layout.modeChip && (
           <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
@@ -137,7 +137,7 @@ const dismissableSx = {
   cursor: 'pointer',
   // Room for the cross, so it never sits on the actor's name.
   px: 2.2,
-  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.gold}`, outlineOffset: 2 },
+  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.accent}`, outlineOffset: 2 },
 };
 
 const closeSx = {
@@ -155,20 +155,20 @@ const closeSx = {
 };
 
 const critSx = {
-  borderColor: VTT_COLORS.goldRoll,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.goldRoll, 0.28)}`,
+  borderColor: VTT_COLORS.accent,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.accent, 0.28)}`,
 };
 
 const failSx = {
-  borderColor: VTT_COLORS.error,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.error, 0.28)}`,
+  borderColor: VTT_COLORS.danger,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.danger, 0.28)}`,
 };
 
 const actorSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  color: VTT_COLORS.gold,
+  color: VTT_COLORS.accent,
   lineHeight: 1.2,
 };
 

@@ -98,9 +98,9 @@ const buttonSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.16)}`,
   borderRadius: 1,
   '&:hover': {
-    color: VTT_COLORS.gold,
-    borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
-    bgcolor: vttAlpha(VTT_COLORS.gold, 0.08),
+    color: VTT_COLORS.accent,
+    borderColor: vttAlpha(VTT_COLORS.accent, 0.42),
+    bgcolor: vttAlpha(VTT_COLORS.accent, 0.08),
   },
 };
 

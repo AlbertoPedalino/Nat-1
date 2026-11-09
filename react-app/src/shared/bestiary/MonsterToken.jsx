@@ -21,8 +21,8 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
       sx={{
         width: size,
         height: size,
-        bgcolor: uiAlpha(UI_COLORS.primary, 0.12),
-        border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.35)}`,
+        bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+        border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.35)}`,
         color: 'primary.main',
         fontSize: size > 40 ? FONT_SIZES.body : FONT_SIZES.lg,
       }}

@@ -129,10 +129,10 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
 }
 
 const compactSwitchSx = {
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-  '& .MuiToggleButton-root': { color: VTT_COLORS.railText, border: 0, px: 1, py: 0.4 },
-  '& .Mui-selected': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  '& .MuiToggleButton-root': { color: VTT_COLORS.textSecondary, border: 0, px: 1, py: 0.4 },
+  '& .Mui-selected': { color: VTT_COLORS.surface, bgcolor: VTT_COLORS.accent },
 };
 
 function HiddenFileInput({ inputRef, onPick }) {

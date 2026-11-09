@@ -12,7 +12,7 @@ export default function DifficultyBar({ encounter, party }) {
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total XP</Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography sx={{ fontWeight: 700 }}>{formatNumber(difficulty.totalXp)} XP</Typography>
-          <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: UI_COLORS.primaryContrast }} />
+          <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: UI_COLORS.onAccent }} />
         </Stack>
       </Stack>
       <LinearProgress
@@ -34,7 +34,7 @@ export default function DifficultyBar({ encounter, party }) {
               borderColor: difficulty.difficultyIndex === index ? difficulty.color : 'divider',
               borderRadius: 1,
               p: 1,
-              bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.primary, 0.10) : uiAlpha(UI_COLORS.white, 0.03),
+              bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.accent, 0.10) : uiAlpha(UI_COLORS.white, 0.03),
             }}
           >
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>

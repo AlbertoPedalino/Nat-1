@@ -28,7 +28,7 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
       header={({ toggle }) => (
         <Box
           onClick={toggle}
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : UI_COLORS.headerBg } }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.success, 0.08) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.success, 0.08) : UI_COLORS.surfaceHeader } }}
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.4 }} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />

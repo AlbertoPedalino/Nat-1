@@ -110,14 +110,14 @@ export default function NegotiationDialog({ open, onClose }) {
             label="Interest"
             value={negotiation.interest}
             max={MAX_INTEREST}
-            color={UI_COLORS.teal}
+            color={UI_COLORS.secondary}
             prominent
           />
           <MeterCard
             label="Patience"
             value={negotiation.patience}
             max={attitude.patience}
-            color={UI_COLORS.goldAmber}
+            color={UI_COLORS.accent}
           />
         </Box>
 
@@ -244,8 +244,8 @@ const meterCardSx = {
 };
 
 const prominentMeterSx = {
-  borderColor: uiAlpha(UI_COLORS.teal, 0.45),
-  bgcolor: uiAlpha(UI_COLORS.teal, 0.055),
+  borderColor: uiAlpha(UI_COLORS.secondary, 0.45),
+  bgcolor: uiAlpha(UI_COLORS.secondary, 0.055),
 };
 
 const meterLabelSx = {
@@ -285,7 +285,7 @@ const finalResultSx = {
   p: { xs: 1.25, sm: 1.5 },
   border: 1,
   borderColor: 'primary.main',
-  bgcolor: uiAlpha(UI_COLORS.goldAmber, 0.08),
+  bgcolor: uiAlpha(UI_COLORS.accent, 0.08),
 };
 
 const finalEyebrowSx = {

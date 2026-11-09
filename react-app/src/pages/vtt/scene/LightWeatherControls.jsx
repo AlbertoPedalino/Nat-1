@@ -125,8 +125,8 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
         onClick={(event) => setAtmosphereAnchor(event.currentTarget)}
         sx={{
           justifyContent: 'flex-start',
-          color: atmosphere.type === 'none' ? VTT_COLORS.panelTextMuted : VTT_COLORS.goldBright,
-          borderColor: vttAlpha(VTT_COLORS.railText, 0.28),
+          color: atmosphere.type === 'none' ? VTT_COLORS.textSecondary : VTT_COLORS.accentHighlight,
+          borderColor: vttAlpha(VTT_COLORS.textSecondary, 0.28),
           textTransform: 'none',
           '& .MuiButton-endIcon': { ml: 'auto' },
         }}

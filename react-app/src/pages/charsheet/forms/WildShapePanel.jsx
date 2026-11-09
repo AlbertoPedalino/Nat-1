@@ -70,7 +70,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-          <PawPrint size={14} color={UI_COLORS.goldLight} />
+          <PawPrint size={14} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Transformed —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -88,7 +88,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-        <PawPrint size={14} color={UI_COLORS.goldLight} />
+        <PawPrint size={14} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
       {!forms.length ? (

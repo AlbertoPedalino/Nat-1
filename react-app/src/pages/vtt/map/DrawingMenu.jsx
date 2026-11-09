@@ -195,7 +195,7 @@ export default function DrawingMenu({
               stutter. */}
           <ColorField
             label="Colour"
-            value={drawing.color || VTT_COLORS.gold}
+            value={drawing.color || VTT_COLORS.accent}
             deferMs={COLOR_DELAY}
             onChange={(color) => onSave(drawing, { color })}
           />

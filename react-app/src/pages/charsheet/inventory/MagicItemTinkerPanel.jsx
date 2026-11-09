@@ -34,13 +34,13 @@ const sectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
 };
 const labelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   letterSpacing: LETTER_SPACINGS.md,
 };
 const selectSx = {

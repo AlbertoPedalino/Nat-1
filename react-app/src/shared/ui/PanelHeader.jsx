@@ -11,7 +11,7 @@ export const panelBarSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   borderBottom: 1,
   borderColor: 'divider',
   borderLeft: 3,
@@ -65,7 +65,7 @@ export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider
 // scores, hit points): the header tint inside a thin border. Its title is
 // sheetBoxTitleSx, the panel title's lettering.
 export const sheetBoxSx = {
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -82,7 +82,7 @@ export const statValueSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.title,
   fontWeight: 700,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   lineHeight: 1,
 };
 

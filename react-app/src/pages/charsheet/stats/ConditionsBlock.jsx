@@ -13,7 +13,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
-const DEAD_ACCENT = UI_COLORS.dangerBright;
+const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
 // The sheet's pills sit in a panel rather than an initiative row, so they run
 // smaller than the encounter's.

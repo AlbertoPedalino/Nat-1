@@ -48,10 +48,10 @@ export default function ConditionTokenPill({ conditionKey, entries, tooltipOpen,
             entries={entries}
             spacing={0.45}
             fontSize={FONT_SIZES.sm}
-            headingColor={VTT_COLORS.goldSoft}
-            bodyColor={VTT_COLORS.parchment}
-            markerColor={VTT_COLORS.goldSoft}
-            strongColor={VTT_COLORS.goldSoft}
+            headingColor={VTT_COLORS.accent}
+            bodyColor={VTT_COLORS.text}
+            markerColor={VTT_COLORS.accent}
+            strongColor={VTT_COLORS.accent}
             emptyText={null}
           />
         </Box>

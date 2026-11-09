@@ -37,7 +37,7 @@ export function BeastNameLink({ name, source, sx }) {
       underline="hover"
       title="Open stat block on 5e.tools"
       onClick={(e) => e.stopPropagation()}
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: UI_COLORS.goldLight, cursor: 'pointer', ...sx }}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
     >
       <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
       <ExternalLink size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
@@ -100,7 +100,7 @@ export function BeastStatBlock({
       <StatLine label="AC" value={b.ac ?? '—'} />
       {onRollFormula && b.hp?.formula ? (
         <Typography sx={subSx}>
-          <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{hpLabel}:</Box>{' '}
+          <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{hpLabel}:</Box>{' '}
           {b.hp.average} (
           <RollChip onClick={() => onRollFormula(b.hp.formula, formatRollTitle(b.name, hpLabel))}>{b.hp.formula}</RollChip>)
         </Typography>
@@ -114,7 +114,7 @@ export function BeastStatBlock({
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md, color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
+              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md, color: UI_COLORS.accentText, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
               {rollable ? (
                 <RollChip
                   sx={{ fontSize: FONT_SIZES.xs }}
@@ -175,7 +175,7 @@ export function BeastPickerRow({
         sx={{
           display: 'flex', alignItems: 'center', gap: '8px', px: '8px', py: '5px',
           cursor: expandable ? 'pointer' : 'default',
-          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.06) } : undefined,
+          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.06) } : undefined,
         }}
       >
         {expandable
@@ -190,7 +190,7 @@ export function BeastPickerRow({
           variant="outlined"
           disabled={actionDisabled}
           onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight }}
+          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.accent, 0.5), color: UI_COLORS.accentText }}
         >
           {actionLabel}
         </Button>
@@ -225,7 +225,7 @@ function RollChip({ onClick, children, sx }) {
 function RollableStatLine({ label, items, onRoll }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{label}:</Box>{' '}
+      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{label}:</Box>{' '}
       {items.map((it, i) => (
         <Box component="span" key={it.key}>
           {i ? ', ' : null}
@@ -239,8 +239,8 @@ function RollableStatLine({ label, items, onRoll }) {
 function StatLine({ label, value, accent }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{label}:</Box>{' '}
-      <Box component="span" sx={accent ? { color: UI_COLORS.goldLight, fontWeight: 700 } : undefined}>{value}</Box>
+      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{label}:</Box>{' '}
+      <Box component="span" sx={accent ? { color: UI_COLORS.accentText, fontWeight: 700 } : undefined}>{value}</Box>
     </Typography>
   );
 }
@@ -278,7 +278,7 @@ function renderEntryToken(tok, key, onRoll, onRollFormula, beastName) {
 const statBlockSx = {
   p: 0.8,
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.6),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.6),
   border: 1,
   borderColor: 'divider',
 };
@@ -289,16 +289,16 @@ const rollChipSx = {
   appearance: 'none',
   display: 'inline-flex',
   alignItems: 'baseline',
-  border: `1px solid ${uiAlpha(UI_COLORS.gold, 0.45)}`,
-  bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
-  color: UI_COLORS.goldLight,
+  border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.45)}`,
+  bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+  color: UI_COLORS.accentText,
   borderRadius: 0.5,
   px: '0.28em',
   py: 0,
   font: 'inherit',
   lineHeight: 1.35,
   cursor: 'pointer',
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.24) },
+  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.24) },
 };
 
 export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
@@ -319,9 +319,9 @@ export const optionToggleSx = {
   py: '3px',
   px: '8px',
   textTransform: 'none',
-  color: UI_COLORS.goldLight,
-  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
-  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
+  color: UI_COLORS.accentText,
+  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText },
 };
 
 // Muted text button for "dismiss / revert" actions on summon-style panels
@@ -354,7 +354,7 @@ export const creatureHpBoxSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
 };
 
 export const rowSx = {
@@ -366,5 +366,5 @@ export const rowSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: UI_COLORS.headerBg,
+  bgcolor: UI_COLORS.surfaceHeader,
 };

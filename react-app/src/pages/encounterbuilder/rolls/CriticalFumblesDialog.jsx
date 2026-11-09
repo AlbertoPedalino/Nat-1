@@ -272,7 +272,7 @@ const countSx = {
   textAlign: 'center',
   fontFamily: UI_FONTS.mono,
   fontSize: FONT_SIZES.lg,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
 };
 
 const stepButtonSx = {
@@ -287,7 +287,7 @@ const formulaSx = {
   fontFamily: UI_FONTS.mono,
   fontSize: FONT_SIZES.lg,
   fontWeight: 700,
-  color: UI_COLORS.teal,
+  color: UI_COLORS.secondary,
 };
 
 const outcomeSx = {
@@ -299,7 +299,7 @@ const outcomeSx = {
   alignItems: 'center',
   border: 1,
   borderColor: 'error.main',
-  bgcolor: uiAlpha(UI_COLORS.dangerFumble, 0.09),
+  bgcolor: uiAlpha(UI_COLORS.dangerStrong, 0.09),
 };
 
 const outcomeNumberSx = {
@@ -309,7 +309,7 @@ const outcomeNumberSx = {
   placeItems: 'center',
   borderRadius: 1,
   bgcolor: 'error.main',
-  color: UI_COLORS.dangerInk,
+  color: UI_COLORS.dangerSurface,
   fontFamily: UI_FONTS.display,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
   fontWeight: 900,
@@ -345,6 +345,6 @@ const resultLabelSx = {
   fontFamily: UI_FONTS.mono,
   fontSize: FONT_SIZES.md,
   fontWeight: 800,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   whiteSpace: 'nowrap',
 };

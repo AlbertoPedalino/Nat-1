@@ -314,7 +314,7 @@ const panelSx = {
   display: 'grid',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.96),
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.96),
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   boxShadow: UI_SHADOWS.overlay,
@@ -329,15 +329,15 @@ const headerSx = {
   minHeight: SHEET_VISIBLE_HEADER,
   px: 1,
   alignItems: 'center',
-  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.22)}`,
-  color: VTT_COLORS.panelTextSoft,
+  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.22)}`,
+  color: VTT_COLORS.textSecondary,
   cursor: 'move',
   touchAction: 'none',
   userSelect: 'none',
 };
 
 const titleSx = {
-  color: VTT_COLORS.gold,
+  color: VTT_COLORS.accent,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
@@ -349,21 +349,21 @@ const selectSx = {
   width: { xs: 145, sm: 220 },
   height: 30,
   px: 0.75,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.28)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.28)}`,
   borderRadius: 1,
   outline: 0,
-  bgcolor: VTT_COLORS.selectSurface,
-  color: VTT_COLORS.selectText,
+  bgcolor: VTT_COLORS.surfaceRaised,
+  color: VTT_COLORS.text,
   fontFamily: 'inherit',
   fontSize: FONT_SIZES.md,
   cursor: 'pointer',
-  '&:focus': { borderColor: vttAlpha(VTT_COLORS.gold, 0.72) },
-  '& option': { bgcolor: VTT_COLORS.selectSurface, color: VTT_COLORS.selectText },
+  '&:focus': { borderColor: vttAlpha(VTT_COLORS.accent, 0.72) },
+  '& option': { bgcolor: VTT_COLORS.surfaceRaised, color: VTT_COLORS.text },
 };
 
 const closeSx = {
-  color: VTT_COLORS.panelTextSoft,
-  '&:hover': { color: VTT_COLORS.goldUiBright, bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
+  color: VTT_COLORS.textSecondary,
+  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
 };
 
 const contentSx = {
@@ -388,9 +388,9 @@ const resizeHandleSx = {
   width: 28,
   height: 28,
   borderRadius: cornerRadius(1, 0, 1, 0),
-  color: VTT_COLORS.panelTextSoft,
-  bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.78),
+  color: VTT_COLORS.textSecondary,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.78),
   cursor: 'nwse-resize',
   touchAction: 'none',
-  '&:hover': { color: VTT_COLORS.goldUiBright, bgcolor: vttAlpha(VTT_COLORS.gold, 0.1) },
+  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, 0.1) },
 };

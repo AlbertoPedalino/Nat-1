@@ -57,12 +57,12 @@ export default function AbilityScores({ C, sheet, onRoll }) {
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xxl, color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
                 {ABILITY_ABBREVIATIONS[s]}
               </Typography>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.heading, fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.heading, fontWeight: 700, color: UI_COLORS.accentText, lineHeight: 1 }}>
                 {signed(shownMod)}
               </Typography>
               <Box sx={{
                 fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, fontWeight: 600, color: 'text.secondary',
-                bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: '50%',
+                bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: 'divider', borderRadius: '50%',
                 width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 0.25,
               }}>
                 {val}

@@ -99,7 +99,7 @@ export default function CharBuilder() {
       />
 
       <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1.1 }, py: 1.1 }}>
-        <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.headerBg, overflow: 'hidden' }}>
+        <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden' }}>
           <Tabs
             value={state.tab}
             onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}

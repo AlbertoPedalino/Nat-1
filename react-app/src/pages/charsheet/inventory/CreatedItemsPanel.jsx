@@ -180,7 +180,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
         <Typography sx={detailTitleSx}>{tagLabel}</Typography>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, color: remaining > 0 ? UI_COLORS.accentText : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
       </Box>
@@ -223,8 +223,8 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
             />
           );
-          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.gold, 0.4) : 'divider';
-          const rowBg = count > 0 ? uiAlpha(UI_COLORS.gold, 0.06) : UI_COLORS.headerBg;
+          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, 0.4) : 'divider';
+          const rowBg = count > 0 ? uiAlpha(UI_COLORS.accent, 0.06) : UI_COLORS.surfaceHeader;
 
           if (!dbItem) {
             return (
@@ -242,7 +242,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             <ExpandableCard
               key={value}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
-              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
+              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>

@@ -16,7 +16,7 @@ const VARIANTS = {
   compact: {
     size: 'small',
     iconSize: 16,
-    inputSx: { fontSize: FONT_SIZES.lg, py: 0.5, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 600 },
+    inputSx: { fontSize: FONT_SIZES.lg, py: 0.5, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 600 },
     fieldSx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } },
   },
 };

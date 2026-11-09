@@ -157,7 +157,7 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         borderWidth: isCharacter || hasUploadedArtworkRing ? 5 : 2,
         borderColor: isCharacter || hasUploadedArtworkRing
           ? (token?.color || vttAlpha(VTT_COLORS.black, 0.6))
-          : vttAlpha(VTT_COLORS.gold, 0.65),
+          : vttAlpha(VTT_COLORS.accent, 0.65),
       }}
     >
       {imageUrl ? <Box component="img" src={imageUrl} alt="" draggable={false} sx={imageSx} /> : null}
@@ -196,7 +196,7 @@ const imageSx = {
 };
 
 const initialsSx = {
-  color: VTT_COLORS.goldPreview,
+  color: VTT_COLORS.accentHighlight,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 800,
@@ -204,7 +204,7 @@ const initialsSx = {
 
 const classIconSx = {
   display: 'flex',
-  color: VTT_COLORS.parchment,
+  color: VTT_COLORS.text,
   filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
   pointerEvents: 'none',
 };
@@ -217,9 +217,9 @@ const countSx = {
   height: 20,
   px: 0.4,
   borderRadius: 10,
-  bgcolor: VTT_COLORS.gold,
-  color: VTT_COLORS.ink,
-  border: `1px solid ${VTT_COLORS.ink}`,
+  bgcolor: VTT_COLORS.accent,
+  color: VTT_COLORS.surface,
+  border: `1px solid ${VTT_COLORS.surface}`,
   fontSize: FONT_SIZES.xs,
   fontWeight: 900,
   lineHeight: '18px',

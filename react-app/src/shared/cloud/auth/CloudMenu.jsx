@@ -96,7 +96,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   }
 
   const dot = status === 'authed'
-    ? (syncState === 'syncing' ? UI_COLORS.amberBright : syncState === 'error' ? UI_COLORS.danger : UI_COLORS.success)
+    ? (syncState === 'syncing' ? UI_COLORS.accent : syncState === 'error' ? UI_COLORS.danger : UI_COLORS.success)
     : null;
 
   return (

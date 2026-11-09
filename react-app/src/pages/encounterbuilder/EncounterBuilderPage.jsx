@@ -117,6 +117,6 @@ const utilityButtonSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   letterSpacing: LETTER_SPACINGS.lg,
-  color: UI_COLORS.goldLight,
-  borderColor: uiAlpha(UI_COLORS.goldLight, 0.4),
+  color: UI_COLORS.accentText,
+  borderColor: uiAlpha(UI_COLORS.accentText, 0.4),
 };

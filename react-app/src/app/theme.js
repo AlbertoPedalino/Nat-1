@@ -1,24 +1,24 @@
-import { createTheme } from '@mui/material';
+import { createTheme, lighten } from '@mui/material';
 import { UI_FONTS, FONT_SIZES } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
-import { UI_COLORS } from '../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha } from '../shared/ui/colors.js';
 
 export const theme = createTheme({
   palette: {
     mode: 'dark',
     background: {
-      default: '#151411',
-      paper: '#211d18',
+      default: UI_COLORS.page,
+      paper: UI_COLORS.surface,
     },
     primary: {
-      main: UI_COLORS.primary,
-      contrastText: UI_COLORS.primaryContrast,
+      main: UI_COLORS.accent,
+      contrastText: UI_COLORS.onAccent,
     },
     secondary: {
-      main: UI_COLORS.teal,
+      main: UI_COLORS.secondary,
     },
     error: {
       main: UI_COLORS.danger,
@@ -29,16 +29,20 @@ export const theme = createTheme({
     success: {
       main: UI_COLORS.success,
     },
+    info: {
+      main: UI_COLORS.info,
+    },
     text: {
       primary: UI_COLORS.textPrimary,
       secondary: UI_COLORS.textSecondary,
     },
-    divider: 'rgba(215, 173, 82, 0.22)',
+    divider: uiAlpha(UI_COLORS.accent, 0.22),
     // Default token color for player-character combatants without a custom color.
     pcToken: UI_COLORS.pcToken,
-    // GM Board semantic tokens: tier/difficulty/rarity distinctions and panel
-    // overlay tints, kept here so components consume theme.sx tokens instead
-    // of scattering literal hex/rgba values.
+    // GM Board semantic tokens, read in sx as 'gmboard.<group>.<key>'. Status
+    // groups (difficulty, results, weather, badges, overlays) are interface
+    // roles from UI_COLORS; treasure tiers and item rarity keep their own
+    // conventional colours, which are game data rather than interface style.
     gmboard: {
       tier: {
         1: { border: '#c04040', color: '#ff8080', dim: '#8b3030' },
@@ -47,9 +51,9 @@ export const theme = createTheme({
         4: { border: '#40a0a0', color: '#a0ffff', dim: '#507878' },
       },
       difficulty: {
-        High: '#e06050',
-        Moderate: '#e0b060',
-        Low: '#7ab870',
+        High: UI_COLORS.danger,
+        Moderate: UI_COLORS.warning,
+        Low: UI_COLORS.success,
       },
       rarity: {
         Legendary: '#e8a030',
@@ -61,42 +65,42 @@ export const theme = createTheme({
       },
       // Origin badges in the instance picker (cloud vs local-only sheets).
       badge: {
-        cloud: '#7ec8e3',
+        cloud: UI_COLORS.infoText,
       },
-      panelOverlay: 'rgba(0,0,0,0.2)',
-      headerOverlay: 'rgba(0,0,0,0.3)',
-      rowDivider: 'rgba(180,150,90,0.12)',
+      panelOverlay: uiAlpha(UI_COLORS.black, 0.2),
+      headerOverlay: uiAlpha(UI_COLORS.black, 0.3),
+      rowDivider: uiAlpha(UI_COLORS.accentMuted, 0.12),
       weather: {
-        Clear: '#d7ad52',
-        Rain: '#70a0ff',
-        Snow: '#a0ffff',
+        Clear: UI_COLORS.accent,
+        Rain: UI_COLORS.info,
+        Snow: UI_COLORS.secondaryText,
       },
       result: {
-        encounter: '#e06050',
-        loot: '#e8a030',
-        camp: '#7ab870',
-        environment: '#d69245',
-        trap: '#c04040',
-        none: '#7a6040',
-        trigger: '#d7ad52',
-        safe: '#58b879',
+        encounter: UI_COLORS.danger,
+        loot: UI_COLORS.accent,
+        camp: UI_COLORS.success,
+        environment: UI_COLORS.warning,
+        trap: UI_COLORS.dangerDeep,
+        none: UI_COLORS.textFaint,
+        trigger: UI_COLORS.accent,
+        safe: UI_COLORS.success,
       },
       // Battle-map chrome. Canvas drawing colours stay next to the rendering
       // code because they are pixels, while reusable surfaces and status
       // colours belong here so every VTT control changes as one theme.
       vtt: {
-        gold: VTT_COLORS.gold,
-        goldBright: VTT_COLORS.goldBright,
-        goldBorder: vttAlpha(VTT_COLORS.gold, 0.25),
-        goldBorderStrong: vttAlpha(VTT_COLORS.gold, 0.42),
-        goldTint: vttAlpha(VTT_COLORS.gold, 0.16),
-        goldWash: vttAlpha(VTT_COLORS.gold, 0.08),
-        surface: vttAlpha(VTT_COLORS.ink, 0.9),
-        surfaceSolid: VTT_COLORS.ink,
+        accent: VTT_COLORS.accent,
+        accentHighlight: VTT_COLORS.accentHighlight,
+        accentBorder: vttAlpha(VTT_COLORS.accent, 0.25),
+        accentBorderStrong: vttAlpha(VTT_COLORS.accent, 0.42),
+        accentTint: vttAlpha(VTT_COLORS.accent, 0.16),
+        accentWash: vttAlpha(VTT_COLORS.accent, 0.08),
+        surface: vttAlpha(VTT_COLORS.surface, 0.9),
+        surfaceSolid: VTT_COLORS.surface,
         backdrop: vttAlpha(VTT_COLORS.black, 0.62),
         inset: vttAlpha(VTT_COLORS.black, 0.3),
-        success: VTT_COLORS.menuSuccess,
-        danger: VTT_COLORS.menuDanger,
+        success: VTT_COLORS.success,
+        danger: VTT_COLORS.danger,
       },
     },
   },
@@ -162,7 +166,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          border: '1px solid rgba(215, 173, 82, 0.18)',
+          border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.18)}`,
         },
       },
     },
@@ -177,16 +181,16 @@ export const theme = createTheme({
           // Clickable colored chips act as toggles: selected state gets a
           // solid fill so it stands apart from the tinted resting style.
           '&.MuiChip-clickable.MuiChip-colorPrimary': {
-            backgroundColor: '#d7ad52',
-            borderColor: '#d7ad52',
-            color: '#17120d',
-            '&:hover': { backgroundColor: '#e2bf70' },
+            backgroundColor: UI_COLORS.accent,
+            borderColor: UI_COLORS.accent,
+            color: UI_COLORS.onAccent,
+            '&:hover': { backgroundColor: lighten(UI_COLORS.accent, 0.18) },
           },
           '&.MuiChip-clickable.MuiChip-colorSecondary': {
-            backgroundColor: '#70b7a6',
-            borderColor: '#70b7a6',
-            color: '#11201c',
-            '&:hover': { backgroundColor: '#8ac8b9' },
+            backgroundColor: UI_COLORS.secondary,
+            borderColor: UI_COLORS.secondary,
+            color: UI_COLORS.onSecondary,
+            '&:hover': { backgroundColor: lighten(UI_COLORS.secondary, 0.18) },
           },
         },
         label: {
@@ -195,12 +199,12 @@ export const theme = createTheme({
           whiteSpace: 'nowrap',
           minWidth: 0,
         },
-        colorDefault: chipTintStyle('#f0e6d4', { bgAlpha: 0.10, borderAlpha: 0.32 }),
-        colorPrimary: chipTintStyle('#d7ad52', { text: '#e8c87a' }),
-        colorSecondary: chipTintStyle('#70b7a6', { text: '#96d8c6' }),
-        colorError: chipTintStyle('#de675f', { text: '#f0958d' }),
-        colorWarning: chipTintStyle('#d69245', { text: '#e9b275' }),
-        colorSuccess: chipTintStyle('#58b879', { text: '#86d8a6' }),
+        colorDefault: chipTintStyle(UI_COLORS.textPrimary, { bgAlpha: 0.10, borderAlpha: 0.32 }),
+        colorPrimary: chipTintStyle(UI_COLORS.accent, { text: UI_COLORS.accentText }),
+        colorSecondary: chipTintStyle(UI_COLORS.secondary, { text: UI_COLORS.secondaryText }),
+        colorError: chipTintStyle(UI_COLORS.danger, { text: UI_COLORS.dangerText }),
+        colorWarning: chipTintStyle(UI_COLORS.warning, { text: UI_COLORS.warningText }),
+        colorSuccess: chipTintStyle(UI_COLORS.success, { text: UI_COLORS.successText }),
       },
     },
     MuiStack: {

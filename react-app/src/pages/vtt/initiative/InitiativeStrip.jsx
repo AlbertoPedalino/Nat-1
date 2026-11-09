@@ -224,7 +224,7 @@ const roundSx = {
   height: 24,
   lineHeight: 1,
   px: 0.75,
-  color: 'gmboard.vtt.gold',
+  color: 'gmboard.vtt.accent',
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
@@ -256,7 +256,7 @@ const entrySx = {
   pr: 0.75,
   borderRadius: 999,
   border: '1px solid transparent',
-  color: VTT_COLORS.panelText,
+  color: VTT_COLORS.text,
   transition: 'background-color 160ms ease, border-color 160ms ease',
 };
 
@@ -278,7 +278,7 @@ const entryButtonSx = {
   textAlign: 'left',
   cursor: 'pointer',
   borderRadius: 999,
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'gmboard.vtt.gold', outlineOffset: 2 },
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'gmboard.vtt.accent', outlineOffset: 2 },
 };
 
 // Dragged onto the board like a piece from the Pieces panel; on touch, after
@@ -292,7 +292,7 @@ const placeableSx = {
 const activeEntrySx = {
   bgcolor: vttAlpha(VTT_COLORS.turnActive, 0.16),
   borderColor: VTT_COLORS.turnActive,
-  color: VTT_COLORS.parchment,
+  color: VTT_COLORS.text,
   boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.turnActive, 0.5)}`,
 };
 
@@ -310,13 +310,13 @@ const avatarSx = {
   display: 'grid',
   placeItems: 'center',
   border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
-  color: VTT_COLORS.parchment,
+  color: VTT_COLORS.text,
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
 };
 
 const offBoardAvatarSx = {
-  border: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.8)}`,
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.8)}`,
 };
 
 const avatarImageSx = {
@@ -341,11 +341,11 @@ const compactNameSx = {
 
 const hiddenBadgeSx = {
   display: 'inline-flex',
-  color: 'gmboard.vtt.gold',
+  color: 'gmboard.vtt.accent',
   flexShrink: 0,
 };
 
 const stepButtonSx = {
   flexShrink: 0,
-  color: 'gmboard.vtt.gold',
+  color: 'gmboard.vtt.accent',
 };

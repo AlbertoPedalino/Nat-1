@@ -25,7 +25,7 @@ export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
-  const tone = sourceInfo.color || UI_COLORS.purple;
+  const tone = sourceInfo.color || UI_COLORS.spell;
   const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, 0.16)} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
@@ -36,7 +36,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.accent, 0.28), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, 0.06), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
@@ -61,9 +61,9 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
                       sx={{
                         border: '1.5px solid',
-                        borderColor: isUsed ? UI_COLORS.goldLight : uiAlpha(UI_COLORS.gold, 0.35),
-                        bgcolor: isUsed ? UI_COLORS.gold : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.goldLight, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.gold, 0.22)}` } : undefined,
+                        borderColor: isUsed ? UI_COLORS.accentText : uiAlpha(UI_COLORS.accent, 0.35),
+                        bgcolor: isUsed ? UI_COLORS.accent : 'transparent',
+                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.accent, 0.22)}` } : undefined,
                       }}
                     />
                   );

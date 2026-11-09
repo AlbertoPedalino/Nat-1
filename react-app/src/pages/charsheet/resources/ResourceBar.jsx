@@ -6,25 +6,25 @@ import { clamp } from '../../../shared/numbers.js';
 
 const btnSx = {
   fontSize: FONT_SIZES.md, fontFamily: UI_FONTS.display, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
-  color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35),
-  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },
+  color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35),
+  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) },
 };
 
 const trackSx = {
   position: 'relative', flex: 1, height: 10,
   bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1,
-  border: '1px solid', borderColor: uiAlpha(UI_COLORS.gold, 0.25),
+  border: '1px solid', borderColor: uiAlpha(UI_COLORS.accent, 0.25),
   overflow: 'hidden', minWidth: 60, cursor: 'pointer', touchAction: 'none',
 };
 
 const fillSx = (pct) => ({
   position: 'absolute', top: 0, left: 0, height: '100%',
-  width: `${pct}%`, bgcolor: UI_COLORS.goldLight, borderRadius: 1, pointerEvents: 'none',
+  width: `${pct}%`, bgcolor: UI_COLORS.accentText, borderRadius: 1, pointerEvents: 'none',
 });
 
 const labelSx = {
   fontSize: FONT_SIZES.sm, fontFamily: UI_FONTS.display, fontWeight: 700,
-  color: UI_COLORS.goldLight, minWidth: 36, textAlign: 'center',
+  color: UI_COLORS.accentText, minWidth: 36, textAlign: 'center',
 };
 
 export default function ResourceBar({ value, max, onChange }) {

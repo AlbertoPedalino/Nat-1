@@ -241,7 +241,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight, '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
+            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, 0.5), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
           >
             Activate Cannon
           </Button>
@@ -273,10 +273,10 @@ const toggleSx = {
   py: '3px',
   px: '10px',
   textTransform: 'none',
-  color: UI_COLORS.goldLight,
-  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
-  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
-  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.24) },
+  color: UI_COLORS.accentText,
+  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText },
+  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.24) },
 };
 
 // AC shield beside the Defenses box, as in the character's header.

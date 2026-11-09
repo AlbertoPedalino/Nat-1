@@ -173,7 +173,7 @@ const rowSx = {
   touchAction: 'pan-y',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: uiAlpha(UI_COLORS.primary, 0.08),
+    bgcolor: uiAlpha(UI_COLORS.accent, 0.08),
   },
 };
 

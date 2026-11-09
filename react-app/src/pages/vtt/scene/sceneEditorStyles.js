@@ -45,7 +45,7 @@ export const scenePresenterActionsSx = {
   alignItems: 'center',
   flexWrap: 'wrap',
   pl: { xs: 0, md: 1.25 },
-  borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.16)}` },
+  borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.16)}` },
   '& .MuiButton-root': {
     minHeight: 30,
     fontSize: FONT_SIZES.sm,
@@ -63,8 +63,8 @@ export const sceneRenameButtonSx = {
   mt: -0.25,
   color: vttAlpha(VTT_COLORS.white, 0.42),
   '&:hover': {
-    color: 'gmboard.vtt.gold',
-    bgcolor: 'gmboard.vtt.goldWash',
+    color: 'gmboard.vtt.accent',
+    bgcolor: 'gmboard.vtt.accentWash',
   },
 };
 
@@ -190,9 +190,9 @@ export const sheetViewSx = {
     contain: 'layout paint',
   },
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorderStrong',
+  borderColor: 'gmboard.vtt.accentBorderStrong',
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.overlaySurface, 0.88),
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.88),
   backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, 0.025)}, transparent 42%)`,
   boxShadow: UI_SHADOWS.overlay,
   isolation: 'isolate',
@@ -211,6 +211,6 @@ export const sheetLoadingSx = {
 
 // Half-transparent version of a stroke colour, for the layers not being edited.
 export function fade(color) {
-  const hex = normalizeHexColor(color, VTT_COLORS.gold);
+  const hex = normalizeHexColor(color, VTT_COLORS.accent);
   return `${hex}55`;
 }

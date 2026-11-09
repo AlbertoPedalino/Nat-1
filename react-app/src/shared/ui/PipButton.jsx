@@ -30,8 +30,8 @@ export default function PipButton({ size = 20, round = false, onClick, sx, ...pr
         transition: 'background-color 0.12s, border-color 0.12s',
         ...(interactive ? {
           '&:disabled': { cursor: 'default' },
-          '&:focus-visible': { outline: `2px solid ${UI_COLORS.goldLight}`, outlineOffset: '1px' },
-          '&:hover:not(:disabled)': { borderColor: UI_COLORS.goldLight },
+          '&:focus-visible': { outline: `2px solid ${UI_COLORS.accentText}`, outlineOffset: '1px' },
+          '&:hover:not(:disabled)': { borderColor: UI_COLORS.accentText },
         } : {}),
         ...sx,
       }}

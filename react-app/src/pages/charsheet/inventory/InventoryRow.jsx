@@ -67,12 +67,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   const chargeMaximum = itemChargeMaximum(item);
   const chargeCurrent = itemChargeCurrent(item);
 
-  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.tealDeep : (!carried ? UI_COLORS.borderMuted : 'divider'));
+  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.secondaryStrong : (!carried ? UI_COLORS.outline : 'divider'));
 
   return (
     <ExpandableCard
       containerSx={{ mb: '4px', overflow: 'hidden' }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.ink, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: '10px', py: '6px', mt: 0, mb: 0 }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: '10px', py: '6px', mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -85,7 +85,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.06) : (!carried ? uiAlpha(UI_COLORS.headerBg, 0.55) : UI_COLORS.headerBg), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : 0.82, '&:hover': { borderColor: uiAlpha(UI_COLORS.gold, 0.34) } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, 0.06) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, 0.55) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : 0.82, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, 0.34) } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
@@ -123,7 +123,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -163,7 +163,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, 0.14), fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -221,15 +221,15 @@ function SlotBtn({ active, onClick, label }) {
       sx={{
         minWidth: 24, height: 24, px: '4px',
         border: 1,
-        borderColor: active ? UI_COLORS.gold : 'divider',
+        borderColor: active ? UI_COLORS.accent : 'divider',
         borderRadius: 0.375,
-        color: active ? UI_COLORS.goldLight : 'text.secondary',
-        bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.14) : 'transparent',
+        color: active ? UI_COLORS.accentText : 'text.secondary',
+        bgcolor: active ? uiAlpha(UI_COLORS.accent, 0.14) : 'transparent',
         fontFamily: UI_FONTS.display,
         fontSize: FONT_SIZES.xxxs,
         fontWeight: 700,
         letterSpacing: LETTER_SPACINGS.sm,
-        '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold },
+        '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent },
       }}
     >
       {label}
@@ -253,7 +253,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
     hasRequirementWarning ? eligibility.reason : null,
     cursedAttuned ? 'A cursed item cannot be unattuned voluntarily' : null,
   ].filter(Boolean).join(' · ');
-  const accent = item.attuned ? ITEM_ATTUNEMENT : (hasRequirementWarning ? UI_COLORS.amber : null);
+  const accent = item.attuned ? ITEM_ATTUNEMENT : (hasRequirementWarning ? UI_COLORS.accent : null);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
       <Tooltip title={tip} arrow>
@@ -268,7 +268,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: 0.375, color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

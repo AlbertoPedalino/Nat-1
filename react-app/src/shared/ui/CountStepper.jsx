@@ -14,7 +14,7 @@ export function stepButtonSx(size = 20, { danger = false } = {}) {
     borderColor: 'divider',
     borderRadius: 0.375,
     color: 'text.secondary',
-    '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.gold, color: danger ? UI_COLORS.danger : UI_COLORS.gold },
+    '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.accent, color: danger ? UI_COLORS.danger : UI_COLORS.accent },
     '&.Mui-disabled': { opacity: 0.4 },
   };
 }
@@ -51,5 +51,5 @@ const countSx = {
   textAlign: 'center',
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
 };

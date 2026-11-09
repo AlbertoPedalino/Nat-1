@@ -44,7 +44,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      ...(layout.isCrit ? { borderColor: UI_COLORS.goldLight, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.goldLight, 0.25)}` } : {}),
+      ...(layout.isCrit ? { borderColor: UI_COLORS.accentText, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.accentText, 0.25)}` } : {}),
       ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, 0.25)}` } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
@@ -56,7 +56,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: LETTER_SPACINGS.xl, color: UI_COLORS.goldLight, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: LETTER_SPACINGS.xl, color: UI_COLORS.accentText, mb: 0.3 }}>
           NATURAL 20!
         </Typography>
       )}

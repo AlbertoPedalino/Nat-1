@@ -69,10 +69,10 @@ const cornerSx = {
 const buttonSx = {
   // The strip around it is click-through; the icon and the panel are not.
   pointerEvents: 'auto',
-  color: VTT_COLORS.gold,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
+  color: VTT_COLORS.accent,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.95) },
 };
 
 // Scrollable rather than tall, for the same reason as the picture panel: in
@@ -90,8 +90,8 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.97),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.3)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.97),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.3)}`,
   boxShadow: 6,
 };
 

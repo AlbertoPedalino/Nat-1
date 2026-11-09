@@ -19,7 +19,7 @@ function getClassLevel(C, className) {
 function FeatureBox({ title, accent, children }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.lg, mb: 0.4 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, color: accent || UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.lg, mb: 0.4 }}>
         {title}
       </Typography>
       {children}
@@ -138,15 +138,15 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>
             {dual && roll.dualNote ? (
-              <Typography sx={{ mt: 0.3, fontSize: FONT_SIZES.xs, color: UI_COLORS.teal, fontStyle: 'italic' }}>
+              <Typography sx={{ mt: 0.3, fontSize: FONT_SIZES.xs, color: UI_COLORS.secondary, fontStyle: 'italic' }}>
                 {roll.dualNote}
               </Typography>
             ) : null}
             {result ? (
-              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06), borderRadius: 1 }}>
+              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
-                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.goldLight, fontWeight: 700, mb: 0.3 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700, mb: 0.3 }}>
                       Choose one:
                     </Typography>
                     {result.rolls.map((r, i) => (
@@ -157,7 +157,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                   </>
                 ) : (
                   <>
-                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.goldLight, fontWeight: 700 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700 }}>
                       d{tableMeta.sides}: {result.rolls[0].value}
                     </Typography>
                     <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mt: 0.2 }}>
@@ -175,7 +175,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.blue, textDecoration: 'underline', cursor: 'pointer' }}
+                  sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.info, textDecoration: 'underline', cursor: 'pointer' }}
                 >
                   {roll.sourceLinkLabel || roll.sourceLink}
                 </Typography>

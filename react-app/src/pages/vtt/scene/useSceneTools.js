@@ -9,7 +9,7 @@ import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 export function useSceneTools() {
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
-  const [drawColor, setDrawColor] = useState(VTT_COLORS.gold);
+  const [drawColor, setDrawColor] = useState(VTT_COLORS.accent);
   const [drawWidth, setDrawWidth] = useState(3);
   const [areaOptions, setAreaOptions] = useState(DEFAULT_AREA_OPTIONS);
   const [measureShape, setMeasureShape] = useState('line');

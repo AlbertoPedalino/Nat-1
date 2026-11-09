@@ -57,16 +57,16 @@ export default function Senses({ C }) {
 function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
   const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2, overflow: 'hidden' }}>
+    <Box sx={{ bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2, overflow: 'hidden' }}>
       <Box
         onClick={clickable ? onToggle : undefined}
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
           cursor: clickable ? 'pointer' : 'default',
-          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } : undefined,
+          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.05) } : undefined,
         }}
       >
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: color || UI_COLORS.accentText, flexShrink: 0 }}>
           {value}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
@@ -81,7 +81,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           {clickable ? (
             <ChevronDown
               size={13}
-              style={{ color: UI_COLORS.gold, flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+              style={{ color: UI_COLORS.accent, flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
             />
           ) : null}
         </Box>

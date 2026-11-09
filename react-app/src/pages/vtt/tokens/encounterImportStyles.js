@@ -7,14 +7,14 @@ export const placementCardSx = {
   gap: 1.25,
   p: 1,
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.22),
   userSelect: 'none',
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',
   '&:hover': {
-    borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
-    bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+    borderColor: vttAlpha(VTT_COLORS.accent, 0.6),
+    bgcolor: vttAlpha(VTT_COLORS.accent, 0.06),
   },
 };
 
@@ -31,8 +31,8 @@ export const cloudBadgeSx = {
   flexShrink: 0,
   px: 0.6,
   fontSize: FONT_SIZES.sm,
-  color: 'gmboard.vtt.gold',
+  color: 'gmboard.vtt.accent',
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorder',
+  borderColor: 'gmboard.vtt.accentBorder',
   borderRadius: 1,
 };

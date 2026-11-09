@@ -51,7 +51,7 @@ const headerSx = {
   px: 2,
   py: 1.5,
   borderBottom: '1px solid',
-  borderBottomColor: 'gmboard.vtt.goldBorder',
+  borderBottomColor: 'gmboard.vtt.accentBorder',
 };
 
 const bodySx = {

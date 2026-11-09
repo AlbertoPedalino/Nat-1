@@ -97,7 +97,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-          <Sparkles size={14} color={UI_COLORS.goldLight} />
+          <Sparkles size={14} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -129,7 +129,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-        <Sparkles size={14} color={UI_COLORS.goldLight} />
+        <Sparkles size={14} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
       <ToggleButtonGroup
@@ -187,8 +187,8 @@ const toggleSx = {
   py: '3px',
   px: '10px',
   textTransform: 'none',
-  color: UI_COLORS.goldLight,
-  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
-  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
-  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.24) },
+  color: UI_COLORS.accentText,
+  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText },
+  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.24) },
 };

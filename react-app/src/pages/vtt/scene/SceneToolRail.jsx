@@ -78,7 +78,7 @@ export default function SceneToolRail({
           <Stack direction="row" sx={{ alignItems: 'center', mb: 1 }}>
             <Typography sx={panelTitleSx}>{open.label}</Typography>
             <Box sx={{ flex: 1 }} />
-            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: VTT_COLORS.railText }}>
+            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: VTT_COLORS.textSecondary }}>
               <X size={14} />
             </IconButton>
           </Stack>
@@ -112,15 +112,15 @@ const railButtonSx = {
   border: 0,
   borderRadius: 1,
   background: 'none',
-  color: VTT_COLORS.railText,
+  color: VTT_COLORS.textSecondary,
   cursor: 'pointer',
-  '&:hover': { color: VTT_COLORS.gold, bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
+  '&:hover': { color: VTT_COLORS.accent, bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
 };
 
 const railButtonActiveSx = {
-  color: VTT_COLORS.ink,
-  bgcolor: VTT_COLORS.gold,
-  '&:hover': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
+  color: VTT_COLORS.surface,
+  bgcolor: VTT_COLORS.accent,
+  '&:hover': { color: VTT_COLORS.surface, bgcolor: VTT_COLORS.accent },
 };
 
 const railLabelSx = {

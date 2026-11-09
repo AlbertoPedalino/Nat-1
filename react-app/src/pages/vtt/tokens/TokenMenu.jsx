@@ -147,7 +147,7 @@ export default function TokenMenu({
               label="Object color"
               title="Object color"
               disabled={!canStyleObject}
-              value={token.color || VTT_COLORS.gold}
+              value={token.color || VTT_COLORS.accent}
               onChange={saveObjectColor}
             />
           </Box>
@@ -213,6 +213,6 @@ const objectStyleSx = {
   gap: 0.6,
   p: 0.6,
   border: '1px solid',
-  borderColor: 'gmboard.vtt.goldTint',
+  borderColor: 'gmboard.vtt.accentTint',
   borderRadius: 1,
 };

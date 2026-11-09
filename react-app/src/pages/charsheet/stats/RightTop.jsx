@@ -121,7 +121,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
           })()}
           {lastInitiativeRoll && (
             <Typography variant="caption" sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
-              Last: <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.goldLight }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
+              Last: <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.accentText }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
             </Typography>
           )}
           {initiativeMessage && (
@@ -146,7 +146,7 @@ function SquareStat({ value, label, clickable }) {
       sx={{
         width: 62, height: 62, borderRadius: 1, border: 2, borderColor: 'divider',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        bgcolor: UI_COLORS.headerBg,
+        bgcolor: UI_COLORS.surfaceHeader,
         ...(clickable ? { cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } } : {}),
       }}>
       <Typography sx={statValueSx}>{value}</Typography>
@@ -158,8 +158,8 @@ function SquareStat({ value, label, clickable }) {
 function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
-    <Box onClick={onToggle} sx={{ minWidth: 90, maxWidth: 110, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: insp ? 'primary.main' : 'divider', borderRadius: 1, p: '0.4rem 0.62rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.25, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' }, ...(insp ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.14) } : {}) }}>
-      <Sparkles size={20} style={{ color: insp ? UI_COLORS.goldLight : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.gold, 0.6)})` : 'none' }} />
+    <Box onClick={onToggle} sx={{ minWidth: 90, maxWidth: 110, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: insp ? 'primary.main' : 'divider', borderRadius: 1, p: '0.4rem 0.62rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.25, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' }, ...(insp ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.14) } : {}) }}>
+      <Sparkles size={20} style={{ color: insp ? UI_COLORS.accentText : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.accent, 0.6)})` : 'none' }} />
       <Typography sx={{ ...sectionLabelSx, color: insp ? 'primary.main' : 'text.secondary', textAlign: 'center' }}>
         {insp ? 'Insp.' : 'No Insp.'}
       </Typography>

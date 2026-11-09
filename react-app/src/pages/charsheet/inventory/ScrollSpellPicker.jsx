@@ -93,7 +93,7 @@ function StatField({ label, value, placeholder, onCommit }) {
 const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' };
 const titleSx = {
   fontSize: FONT_SIZES.xs,
-  color: UI_COLORS.goldLight,
+  color: UI_COLORS.accentText,
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.lg,

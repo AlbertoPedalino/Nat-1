@@ -62,10 +62,10 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
 }
 
 const compactLayerSx = {
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-  '& .MuiToggleButton-root': { color: VTT_COLORS.railText, border: 0, px: 1 },
-  '& .Mui-selected': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
+  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  '& .MuiToggleButton-root': { color: VTT_COLORS.textSecondary, border: 0, px: 1 },
+  '& .Mui-selected': { color: VTT_COLORS.surface, bgcolor: VTT_COLORS.accent },
 };
 
 export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPaintModeChange, onBrushSizeChange, onFogAll }) {

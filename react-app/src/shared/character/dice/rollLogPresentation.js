@@ -6,7 +6,7 @@ import { COMBAT_LABEL_SHAPES } from '../../encounter/combatLabels.js';
 // colour the result; the character icon/monster marker colours the author.
 export const ROLL_LOG_COLORS = Object.freeze({
   normal: 'text.primary',
-  nat20: UI_COLORS.goldLight,
+  nat20: UI_COLORS.accentText,
   nat1: UI_COLORS.danger,
 });
 
