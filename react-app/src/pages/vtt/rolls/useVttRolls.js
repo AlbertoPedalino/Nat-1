@@ -1,13 +1,12 @@
 import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
-import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { readGmRollsShown, rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import {
   addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor,
 } from '../../../shared/vtt/rolls/rollFeed.js';
-import { rollCustomFormula } from '../../../shared/vtt/rolls/customRoll.js';
+import { customRollToast } from '../../../shared/character/dice/customRoll.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { makeId } from '../../../shared/ids.js';
@@ -57,16 +56,11 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   }, [campaignId, role.isGm]);
 
   const handleCustomRoll = useCallback((formula) => {
-    const id = makeId('custom');
-    const thrown = rollCustomFormula(formula);
-    if (!thrown) return;
+    const toast = customRollToast(formula);
+    if (!toast) return;
     const entry = {
-      id,
-      label: formatRollTitle('Custom Roll', formula),
-      detail: thrown.detail,
-      total: thrown.total,
-      rolls: thrown.rolls,
-      ...(thrown.modifier ? { meta: { bonus: thrown.modifier } } : {}),
+      ...toast,
+      id: makeId('custom'),
       thrown: true,
       timestamp: Date.now(),
       ...rollAuthor({

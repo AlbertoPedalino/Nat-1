@@ -16,7 +16,8 @@ import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
+import { appTopBarButtonSx } from '../../shared/ui/appBar.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
 import { TOOL_CATALOG } from './toolCatalog.js';
 
@@ -195,8 +196,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
 
   const button = <Button size="small" variant={groupId ? 'contained' : 'outlined'} color="primary"
     startIcon={<Network size={14} />} onClick={handleOpen}
-    aria-label="Linked tools" sx={LINKED_TOOLS_BUTTON_SX}>
-    <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>LINKS</Box>
+    aria-label="Linked tools" sx={appTopBarButtonSx}>
+    <Box component="span" sx={phoneHiddenLabelSx}>LINKS</Box>
   </Button>;
 
   return <>
@@ -285,9 +286,3 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     </Dialog>
   </>;
 }
-
-export const LINKED_TOOLS_BUTTON_SX = {
-  minWidth: { xs: 32, md: 64 }, px: { xs: 0.75, md: 1.25 },
-  fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em',
-  '& .MuiButton-startIcon': { mr: { xs: 0, md: 1 }, ml: 0 },
-};

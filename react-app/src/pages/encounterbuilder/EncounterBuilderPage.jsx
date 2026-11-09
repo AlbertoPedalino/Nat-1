@@ -14,7 +14,6 @@ import LibraryView from './library/LibraryView.jsx';
 import StatBlockDialog from './bestiary/StatBlockDialog.jsx';
 import RollSharingControls from './rolls/RollSharingControls.jsx';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
-import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
@@ -34,16 +33,15 @@ export default function EncounterBuilderPage() {
 
 function EncounterBuilderShell({ tool }) {
   const {
-    state, dispatch, roll, rollSync,
+    state, dispatch, rollSync,
   } = useEncounterBuilder();
   const [fumblesOpen, setFumblesOpen] = useState(false);
   const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
 
   const handleCustomRoll = (formula) => {
-    // GM roll — generic, no actor attribution.
-    const result = roll(formula, 'Custom Roll', null);
-    if (result) setDiceToast(buildEncounterDiceToast(result));
+    const entry = rollSync.rollCustom(formula);
+    if (entry) setDiceToast(entry);
   };
 
   return (

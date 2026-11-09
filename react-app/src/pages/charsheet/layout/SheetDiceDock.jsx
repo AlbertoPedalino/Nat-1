@@ -1,9 +1,8 @@
 import { Box, Button } from '@mui/material';
 import { ChevronUp, Dices } from 'lucide-react';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
-import { rollFormula, formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
-import { actionButtonTextSx } from '../../../shared/ui/actionButton.js';
+import { actionButtonTextSx, actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { sheetColumnSx } from './layout.js';
 
@@ -20,26 +19,23 @@ const HIDDEN_KEY = 'gb:sheet:dice-dock-hidden';
 // whatever scrolls the sheet (the page, or the panel an embedded sheet sits
 // in) and, at the end of the sheet, settles into its own row after the last
 // panel, so nothing is left under it. Only the pill takes clicks; the band
-// around it lets them through. Its chevron tucks it away into a small tab in
-// the same place, which brings it back.
+// around it lets them through. Its chevron tucks it away into a small handle
+// sitting on the bottom edge, which brings it back.
 export default function SheetDiceDock({
-  embedded, rollLog, onClearLog, onShowToast,
+  embedded, rollLog, onRoll, onClearLog,
 }) {
   const [hidden, setHidden] = useStoredFlag(HIDDEN_KEY);
   return (
-    <Box sx={embedded ? embeddedDockSx : pageDockSx}>
+    <Box sx={[embedded ? embeddedDockSx : pageDockSx, hidden ? flushSx : null]}>
       {hidden ? (
-        <Button size="small" variant="outlined" aria-label="Show dice" onClick={() => setHidden(false)} sx={tabSx}>
+        <Button size="small" variant="outlined" aria-label="Show dice" onClick={() => setHidden(false)} sx={[tabSx, actionButtonToneSx(UI_COLORS.goldLight), solidOnHoverSx]}>
           <ChevronUp size={14} />
           <Dices size={14} />
         </Button>
       ) : (
         <DiceControl
           log={rollLog}
-          onRoll={(formula) => {
-            const { total, rolls } = rollFormula(formula);
-            onShowToast?.(formatRollTitle('Custom Roll', formula), formula, total, rolls);
-          }}
+          onRoll={onRoll}
           onClear={onClearLog}
           onHide={() => setHidden(true)}
           emptyText="No rolls yet. Make an ability check, save, or attack to see it here."
@@ -51,17 +47,21 @@ export default function SheetDiceDock({
   );
 }
 
-// Well clear of the bottom edge, so it does not get lost there; higher on a
-// desktop.
+// The band sits on the bottom edge and carries the space under the pill
+// itself (well clear of the edge, so the pill does not get lost there; more on
+// a desktop). Being the last thing in the sheet, its place while scrolling and
+// its place at the end are the same: nothing jumps, and at the end it has its
+// own room below the last panel.
 const dockSx = {
   position: 'sticky',
-  bottom: {
-    xs: 'calc(24px + env(safe-area-inset-bottom, 0px))',
-    md: 'calc(40px + env(safe-area-inset-bottom, 0px))',
-  },
+  bottom: 0,
   zIndex: 5,
   display: 'flex',
   pt: 1.5,
+  pb: {
+    xs: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+    md: 'calc(40px + env(safe-area-inset-bottom, 0px))',
+  },
   pointerEvents: 'none',
   '& > *': { pointerEvents: 'auto' },
 };
@@ -79,28 +79,38 @@ const pageDockSx = {
   [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0, px: 3 },
 };
 
-const floatingSx = {
+// Tucked away, the handle sits right on the bottom edge (its own padding keeps
+// it above a phone's home indicator), not floating over the sheet.
+const flushSx = { pb: { xs: 0, md: 0 } };
+
+const pillSx = {
   bgcolor: 'background.paper',
   borderRadius: 999,
   boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}`,
-};
-
-const pillSx = {
-  ...floatingSx,
-  '& .MuiButton-root': { px: 2, py: 0.6 },
+  // A little smaller on a phone, where it passes over more of the sheet.
+  '& .MuiButton-root': {
+    px: { xs: 1.25, sm: 2 },
+    py: { xs: 0.35, sm: 0.6 },
+    fontSize: { xs: '0.58rem', sm: '0.625rem' },
+    '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 1 } },
+  },
   '& .MuiButtonGroup-firstButton': { borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
-  '& .MuiButtonGroup-lastButton': { borderTopRightRadius: 999, borderBottomRightRadius: 999, px: 1.25 },
+  '& .MuiButtonGroup-lastButton': { borderTopRightRadius: 999, borderBottomRightRadius: 999, px: { xs: 0.9, sm: 1.25 } },
 };
 
 const tabSx = {
-  ...floatingSx,
   ...actionButtonTextSx,
   flex: 'none',
   gap: 0.5,
   minWidth: 0,
-  px: 1.5,
-  py: 0.6,
-  color: UI_COLORS.goldLight,
-  borderColor: uiAlpha(UI_COLORS.goldLight, 0.4),
-  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: 'background.paper' },
+  px: 2,
+  pt: 0.5,
+  pb: 'calc(4px + env(safe-area-inset-bottom, 0px))',
+  bgcolor: 'background.paper',
+  borderRadius: '10px 10px 0 0',
+  borderBottom: 0,
+  boxShadow: `0 -4px 14px ${uiAlpha(UI_COLORS.black, 0.45)}`,
 };
+
+// MUI's hover tint would replace the handle's fill; it stays solid.
+const solidOnHoverSx = { '&:hover': { bgcolor: 'background.paper' } };

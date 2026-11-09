@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DICE_LIMITS } from '../../../../../src/shared/character/dice/dice.js';
-import { rollCustomFormula } from '../../../../../src/shared/vtt/rolls/customRoll.js';
+import { rollCustomFormula } from '../../../../../src/shared/character/dice/customRoll.js';
 
 const seq = (...values) => { let i = 0; return () => values[i++ % values.length]; };
 

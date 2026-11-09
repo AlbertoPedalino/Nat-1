@@ -15,7 +15,8 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
-import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
+import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
+import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
 

@@ -57,7 +57,7 @@ export default function CharacterSheet({
   const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
   const {
-    diceToast, setDiceToast, rollLog, setRollLog, showDiceToast, showNotice, rollD20, rollSave, rollSkill,
+    diceToast, setDiceToast, rollLog, setRollLog, showDiceToast, showNotice, rollCustom, rollD20, rollSave, rollSkill,
   } = useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast });
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
@@ -120,7 +120,8 @@ export default function CharacterSheet({
   return (
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
-    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', pb: embedded ? 1 : 4, width: '100%' }}>
+    {/* No bottom padding: the dice dock is the sheet's last row and holds it. */}
+    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', width: '100%' }}>
       <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
       <Box sx={{ ...sheetColumnSx(embedded), overflow: 'hidden' }}>
         {sheetConflict ? (
@@ -184,7 +185,7 @@ export default function CharacterSheet({
           </Stack>
         </Box>
       </Box>
-      <SheetDiceDock embedded={embedded} rollLog={rollLog} onClearLog={() => setRollLog([])} onShowToast={showDiceToast} />
+      <SheetDiceDock embedded={embedded} rollLog={rollLog} onRoll={rollCustom} onClearLog={() => setRollLog([])} />
       {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
 
       <RestDialogs C={C} sheet={sheet} rest={rest} />

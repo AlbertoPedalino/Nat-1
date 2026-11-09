@@ -1,7 +1,8 @@
 import { AppBar, Box, Toolbar, Typography } from '@mui/material';
 import { Wand2 } from 'lucide-react';
 import ImportSheetFab from './ImportSheetFab.jsx';
-import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
+import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
+import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // The builder's header: the app's top bar (with sheet import and the cloud

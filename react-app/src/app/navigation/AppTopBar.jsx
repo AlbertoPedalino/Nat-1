@@ -3,10 +3,9 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
-import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
+import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
-import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
+import { APP_TOP_BAR_HEIGHT, appTopBarButtonSx, appTopBarFontSx } from '../../shared/ui/appBar.js';
 
 export { APP_TOP_BAR_HEIGHT };
 
@@ -52,7 +51,7 @@ export default function AppTopBar({
         </Box>
       ) : null}
       {children}
-      {compendium ? <CompendiumButton sx={navFontSx} /> : null}
+      {compendium ? <CompendiumButton sx={appTopBarFontSx} /> : null}
       <CloudMenu {...cloudMenuProps} />
     </Box>
   );
@@ -63,18 +62,6 @@ const leftActionsSx = {
   display: 'flex',
   gap: '0.5rem',
   minWidth: 0,
-};
-
-const navFontSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
-  letterSpacing: '0.08em',
-  whiteSpace: 'nowrap',
-};
-
-export const appTopBarButtonSx = {
-  ...navFontSx,
-  ...iconOnlyOnPhoneButtonSx,
 };
 
 const appTopBarSx = {

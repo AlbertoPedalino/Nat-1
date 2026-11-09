@@ -6,7 +6,7 @@ import { ChevronDown, Dices, ScrollText } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { actionButtonTextSx } from '../../ui/actionButton.js';
+import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -51,14 +51,14 @@ export default function DiceControl({
         </Box>
       ) : (
         <ButtonGroup size="small" variant="outlined" aria-label="Dice" sx={sx}>
-          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, toneSx(UI_COLORS.goldLight)]}>
+          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.goldLight)]}>
             Roll
           </Button>
-          <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[actionButtonTextSx, toneSx(UI_COLORS.success), anchor ? openSx : null]}>
+          <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
             Log{count ? ` · ${count}` : ''}
           </Button>
           {onHide ? (
-            <Button aria-label="Hide dice" onClick={onHide} sx={[hideSx, toneSx(UI_COLORS.textSecondary)]}>
+            <Button aria-label="Hide dice" onClick={onHide} sx={[hideSx, actionButtonToneSx(UI_COLORS.textSecondary)]}>
               <ChevronDown size={14} />
             </Button>
           ) : null}
@@ -84,14 +84,6 @@ export default function DiceControl({
       />
     </>
   );
-}
-
-function toneSx(color) {
-  return {
-    color,
-    borderColor: uiAlpha(color, 0.4),
-    '&:hover': { borderColor: color, bgcolor: uiAlpha(color, 0.08) },
-  };
 }
 
 const iconGroupSx = {

@@ -4,6 +4,7 @@ import {
   formatD20Detail,
   rollD20 as rollD20Dice,
 } from '../../../shared/character/dice/dice.js';
+import { customRollToast } from '../../../shared/character/dice/customRoll.js';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getSaveBonus, exhaustionD20Penalty } from '../../../shared/character/sheet/sheetStats.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
@@ -59,6 +60,12 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     onRoll?.(sharedEntry);
   }, [C?.name, C?.classIconColor, charId, onRoll, publishRoll, showOwnRollToast]);
 
+  // A roll from the custom roll picker (the dice dock), as the map rolls one.
+  const rollCustom = useCallback((formula) => {
+    const toast = customRollToast(formula);
+    if (toast) showDiceToast(toast.label, toast.detail, toast.total, toast.rolls, toast.meta);
+  }, [showDiceToast]);
+
   // Gameplay notices (a rest taken, not enough Sorcery Points, a choice made):
   // shown in the same toast as a roll, but they are not rolls — they stay out of
   // the roll log and off the table's channel. Shown even where the sheet leaves
@@ -101,6 +108,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     setRollLog,
     showDiceToast,
     showNotice,
+    rollCustom,
     rollD20,
     rollSave,
     rollSkill,
