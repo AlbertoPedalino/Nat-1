@@ -147,7 +147,7 @@ function numberSize(size, room, characters) {
   const across = size * (room || 0.15) * 2;
   // A numeral's box, in ems: about 0.6 wide a digit (less when narrowed) and
   // 0.72 tall. Its diagonal is what has to fit across the circle.
-  const width = DIGIT_WIDTH * characters * (characters > 1 ? NARROWED : 1) + 0.1;
+  const width = (DIGIT_WIDTH * characters) - (DIGIT_TIGHTEN * (characters - 1)) + 0.1;
   const fit = across / Math.hypot(width, DIGIT_HEIGHT);
   // The floor follows the face rather than being a flat legibility minimum: on
   // a hundred-sided die a 7px numeral is wider than the triangle holding it, so
@@ -162,12 +162,16 @@ function numberSize(size, room, characters) {
 
 const DIGIT_WIDTH = 0.6;
 const DIGIT_HEIGHT = 0.72;
-// Two digits are drawn a little narrower, as they are printed on a real d10 or
-// d20, so they can stand taller on a face that has no room sideways.
-const NARROWED = 0.82;
+// Two digits are set closer together, as they are printed on a real d10 or
+// d20, so they can stand taller on a face that has no room sideways. Tightened
+// with letter-spacing, not a scaleX transform: a transform on every numeral of
+// every face of a tumbling solid made desktop rolls noticeably heavier. The
+// browser adds the spacing after the last digit too, so the padding gives it
+// back and the number stays centred.
+const DIGIT_TIGHTEN = 0.12;
 
 const numberSx = { position: 'relative' };
-const narrowNumberSx = { position: 'relative', display: 'inline-block', transform: `scaleX(${NARROWED})` };
+const narrowNumberSx = { position: 'relative', letterSpacing: `${-DIGIT_TIGHTEN}em`, paddingRight: `${DIGIT_TIGHTEN}em` };
 
 // Past this many faces a die is too busy to draw in full anywhere it is not the
 // thing being watched, and its numbers are smaller than a legible glyph.

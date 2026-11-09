@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Box, Button, ButtonGroup, IconButton, Popover, Tooltip,
 } from '@mui/material';
-import { Dices, ScrollText } from 'lucide-react';
+import { Dices, History } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
@@ -46,7 +46,7 @@ export default function DiceControl({
           </Tooltip>
           <Tooltip title="Roll log">
             <IconButton size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
-              <ScrollText size={ICON_SIZES.md} />
+              <History size={ICON_SIZES.md} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -55,7 +55,7 @@ export default function DiceControl({
           <Button startIcon={<Dices size={ICON_SIZES.sm} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.accentText)]}>
             Roll
           </Button>
-          <Button startIcon={<ScrollText size={ICON_SIZES.sm} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
+          <Button startIcon={<History size={ICON_SIZES.sm} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
             Log{count ? ` · ${count}` : ''}
           </Button>
         </ButtonGroup>

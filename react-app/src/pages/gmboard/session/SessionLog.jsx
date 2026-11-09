@@ -1,5 +1,5 @@
 import { Box, Button, Typography, useTheme } from '@mui/material';
-import { ScrollText, Trash2 } from 'lucide-react';
+import { History, Trash2 } from 'lucide-react';
 import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
@@ -14,7 +14,7 @@ export default function SessionLog() {
 
   return (
     <BoardPanel
-      icon={ScrollText}
+      icon={History}
       title="Session Log"
       titleAdornment={entries.length ? <Typography sx={countSx}>({entries.length})</Typography> : null}
       spacing={1}
