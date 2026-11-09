@@ -22,3 +22,20 @@ test('a roll is logged and sent to the table as public', () => {
   expect(result.current.rollLog).toHaveLength(1);
   expect(channel.publish).toHaveBeenCalledWith(expect.objectContaining({ label: 'Arcana Check' }), { visibility: 'public' });
 });
+
+test("a roll carries the character's name and colour, and a custom roll is made the map's way", () => {
+  const { result } = renderHook(() => useSheetRolls({
+    C: { name: 'Elara', classIconColor: '#3a7bd5' }, sheet: {}, charId: 'c1', showOwnRollToast: true,
+  }));
+  act(() => result.current.rollCustom('2d6+1'));
+  const [sent] = channel.publish.mock.calls.at(-1);
+  expect(sent).toMatchObject({
+    label: expect.stringContaining('Custom Roll'),
+    actorName: 'Elara',
+    actorColor: '#3a7bd5',
+    characterId: 'c1',
+    thrown: true,
+    meta: { bonus: 1 },
+  });
+  expect(sent.rolls).toHaveLength(2);
+});

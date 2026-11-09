@@ -10,7 +10,7 @@ import { getSaveBonus, exhaustionD20Penalty } from '../../../shared/character/sh
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
-import { addRoll, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
+import { addRoll, makeRollEntry, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { makeId } from '../../../shared/ids.js';
 
@@ -31,33 +31,27 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
   useEffect(() => { setRollLog([]); }, [campaignId, charId]);
 
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
-    const timestamp = Date.now();
-    const entry = {
-      id: makeId('sheet'),
-      label,
-      detail,
-      total,
-      rolls,
-      meta,
-      // A map that is currently open should replay these dice physically. The
-      // published values stay authoritative; DiceTray paints them onto the
-      // faces that naturally land, so there is no final snap or contradiction.
-      thrown: Boolean(rolls?.length),
-      timestamp,
-      characterId: charId,
+    // Thrown (makeRollEntry) whenever it has dice: a map that is open replays
+    // them physically. The published values stay authoritative; DiceTray
+    // paints them onto the faces that naturally land.
+    const entry = makeRollEntry({
+      label, detail, total, rolls, meta,
+    }, {
+      idPrefix: 'sheet',
       actorName: C?.name || '',
-      actorColor: C?.classIconColor || null,
-    };
+      identity: { actorColor: C?.classIconColor },
+      characterId: charId,
+      visibility: rollVisibility('player'),
+    });
     if (showOwnRollToast) setDiceToast(entry);
     setRollLog((prev) => addRoll(prev, entry, { local: true }));
     // Said out loud at the table: the same entry the toast shows, so a roll
     // reads on the battle map exactly as it read here. Every roll on this sheet
     // goes through this one function, custom rolls included.
-    const sharedEntry = { ...entry, characterId: charId, actorName: C?.name || '' };
-    publishRoll(sharedEntry, { visibility: rollVisibility('player') });
+    publishRoll(entry, { visibility: entry.visibility });
     // Also hand off directly while campaign metadata is still loading.
     // The map deduplicates the shared event by id.
-    onRoll?.(sharedEntry);
+    onRoll?.(entry);
   }, [C?.name, C?.classIconColor, charId, onRoll, publishRoll, showOwnRollToast]);
 
   // A roll from the custom roll picker (the dice dock), as the map rolls one.

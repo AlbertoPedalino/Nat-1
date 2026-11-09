@@ -82,16 +82,14 @@ const pageDockSx = {
   [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0, px: 3 },
 };
 
-// Floating over the sheet, either way it is drawn.
-const floatingSx = {
-  bgcolor: 'background.paper',
-  borderRadius: 999,
-  boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}`,
-};
+// Floating over the sheet. The icon pill is already one (DiceControl).
+const floatingSx = { boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}` };
 
-// The labelled control as a pill.
+// The labelled control made into the same pill.
 const labelledPillSx = {
   ...floatingSx,
+  bgcolor: 'background.paper',
+  borderRadius: 999,
   '& .MuiButton-root': { px: 2, py: 0.6 },
   '& .MuiButtonGroup-firstButton': { borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
   '& .MuiButtonGroup-lastButton': { borderTopRightRadius: 999, borderBottomRightRadius: 999 },

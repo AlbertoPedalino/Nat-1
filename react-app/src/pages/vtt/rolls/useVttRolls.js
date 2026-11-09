@@ -9,7 +9,6 @@ import {
 import { customRollToast } from '../../../shared/character/dice/customRoll.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
-import { makeId } from '../../../shared/ids.js';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {
   const [feed, setFeed] = useState([]);
@@ -58,20 +57,20 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   const handleCustomRoll = useCallback((formula) => {
     const toast = customRollToast(formula);
     if (!toast) return;
-    const entry = {
-      ...toast,
-      id: makeId('custom'),
-      thrown: true,
-      timestamp: Date.now(),
-      ...rollAuthor({
-        isGm: role.isGm,
-        ownedCharacterIds: role.ownedCharacterIds,
-        tokens,
-        roster,
-      }),
+    const author = rollAuthor({
+      isGm: role.isGm,
+      ownedCharacterIds: role.ownedCharacterIds,
+      tokens,
+      roster,
+    });
+    const entry = makeRollEntry(toast, {
+      idPrefix: 'custom',
+      actorName: author.actorName,
+      characterId: author.characterId,
+      identity: author,
       // The GM's own roll follows their switch; a player's is the table's.
       visibility: rollVisibility(role.isGm ? 'gm' : 'player', readGmRollsShown(campaignId)),
-    };
+    });
     acceptRoll(entry, { local: true });
     publish(entry, { visibility: entry.visibility });
   }, [acceptRoll, campaignId, publish, role.isGm, role.ownedCharacterIds, roster, tokens]);

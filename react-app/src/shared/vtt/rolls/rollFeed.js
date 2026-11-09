@@ -58,9 +58,10 @@ function normalizeTimestamp(value) {
 }
 
 // A dice roll as it goes out on the table's channel: the toast fields (label,
-// detail, total, dice), who rolled it and for which piece, the creature it
-// names (`identity`, see normalizeRollIdentity), and who may see it. The
-// encounter builder and the map's creature rolls send exactly this.
+// detail, total, dice), who rolled it and for which piece, how the roller is
+// drawn (`identity`: colour, shape, label — see normalizeRollIdentity), and
+// who may see it. Every screen that rolls makes its entries here: the sheet, the map
+// (custom and creature rolls) and the encounter builder.
 export function makeRollEntry(toast, {
   idPrefix = 'roll', actorName = 'GM', characterId = null, sourceRef = null, identity = {}, note = '', visibility = 'gm',
 } = {}) {
