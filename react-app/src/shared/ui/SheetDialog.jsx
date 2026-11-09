@@ -9,6 +9,9 @@ import { panelBarSx } from './PanelHeader.jsx';
 // the sheet rather than like plain MUI popups. Buttons use the sheet's small
 // Cinzel scale. Single source for every sheet dialog; pass `headerRight` for
 // title-bar extras (counts, a Clear button) and `actions` for the button bar.
+// Without a `title` there is no bar, for content that carries its own (a
+// statblock, a compendium entry); `showClose` then puts the close button in
+// the content's corner.
 
 const paperSx = {
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
@@ -50,7 +53,9 @@ export const dialogSectionTitleSx = {
 // `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` rule —
 // a plain `pt` loses to it and is silently ignored. The gap below the title
 // bar is set via the `topPad` prop.
-const contentSx = { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), px: 2.25, pb: 2 };
+const contentSx = { position: 'relative', bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), px: 2.25, pb: 2 };
+
+const cornerCloseSx = { position: 'absolute', top: 8, right: 8, zIndex: 1, color: 'text.secondary' };
 
 const actionsSx = {
   px: 2.25,
@@ -118,7 +123,12 @@ export default function SheetDialog({
           </Stack>
         </DialogTitle>
       ) : null}
-      <DialogContent sx={{ ...contentSx, '&.MuiDialogContent-root': { pt: topPad }, ...contentSxOverride }}>{children}</DialogContent>
+      <DialogContent sx={{ ...contentSx, '&.MuiDialogContent-root': { pt: topPad }, ...contentSxOverride }}>
+        {title == null && showClose ? (
+          <IconButton size="small" aria-label="Close" onClick={onClose} sx={cornerCloseSx}><X size={16} /></IconButton>
+        ) : null}
+        {children}
+      </DialogContent>
       {actions != null ? <DialogActions sx={{ ...actionsSx, ...actionsSxOverride }}>{actions}</DialogActions> : null}
     </Dialog>
   );

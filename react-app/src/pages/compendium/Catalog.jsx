@@ -1,22 +1,12 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { X } from 'lucide-react';
+import { Box, Button, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { List } from 'react-window';
 import SearchField from '../../shared/ui/SearchField.jsx';
 import { SOURCE_LABELS } from '../../shared/bestiary/bestiaryConstants.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
+import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 
 // A compendium catalog: a filter bar of selects over one kind's entries, a
 // virtualized list with columns (one compact line in the panel), and the
@@ -119,14 +109,9 @@ export default function Catalog({
           <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>Nothing matches these filters.</Typography>
         )}
       </Box>
-      <Dialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" fullWidth>
-        <DialogContent sx={{ position: 'relative', pt: 3 }}>
-          <IconButton size="small" aria-label="Close" onClick={() => setOpened(null)} sx={dialogCloseSx}>
-            <X size={16} />
-          </IconButton>
-          {opened ? <CompendiumDetail key={opened.key} entry={opened} legendaryGroups={compendium.legendaryGroups} /> : null}
-        </DialogContent>
-      </Dialog>
+      <SheetDialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" showClose>
+        {opened ? <CompendiumDetail key={opened.key} entry={opened} legendaryGroups={compendium.legendaryGroups} /> : null}
+      </SheetDialog>
     </Box>
   );
 }
@@ -224,4 +209,3 @@ const thumbImageSx = { maxWidth: '100%', maxHeight: '100%', objectFit: 'contain'
 
 const nameSx = { fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
-const dialogCloseSx = { position: 'absolute', top: 8, right: 8, zIndex: 1 };

@@ -35,14 +35,12 @@ function GmBoardShell({ tool }) {
   const { state, dispatch } = useGmBoard();
 
   return (
-    // Narrower than the other tools: its cards and tables read best at 1200.
     <ToolPageShell
       tool={tool}
       sectionKey="gmboard"
       title="GM Board"
       backTo="/library/gmboard"
       backLabel="GM Boards"
-      maxWidth={1200}
     >
       <Tabs
         value={state.tab}

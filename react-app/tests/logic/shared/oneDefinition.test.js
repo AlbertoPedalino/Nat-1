@@ -135,6 +135,14 @@ test('fonts are not aliased', () => {
   assert.deepEqual(sourceLinesMatching(/^const \w+ = UI_FONTS\.\w+;/), []);
 });
 
+// Every dialog is a SheetDialog, or a BattleMapDialog over the map: one
+// surface, one title bar, one close button.
+test('dialogs go through SheetDialog or BattleMapDialog', () => {
+  assert.deepEqual(sourceFilesMatching(/<Dialog\b/, {
+    allow: ['shared/ui/SheetDialog.jsx', 'pages/vtt/map/BattleMapDialog.jsx'],
+  }), []);
+});
+
 // What a database error code means is pgErrors.js's to say.
 test('database error codes are read through pgErrors.js', () => {
   assert.deepEqual(sourceLinesMatching(/code === '(23505|PGRST202|42883|P0002)'/, { allow: ['shared/cloud/pgErrors.js'] }), []);

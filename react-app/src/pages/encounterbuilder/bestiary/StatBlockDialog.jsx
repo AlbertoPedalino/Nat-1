@@ -1,15 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Divider, Paper, Stack, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
@@ -17,6 +7,7 @@ import { buildEncounterDiceToast } from '../../../shared/character/dice/encounte
 import PlayerSheetPanel from '../campaign/PlayerSheetPanel.jsx';
 
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
+import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 
 export default function StatBlockDialog() {
   const { state, dispatch } = useEncounterBuilder();
@@ -24,14 +15,11 @@ export default function StatBlockDialog() {
   if (state.view === 'combat' || !monster) return null;
 
   return (
-    <Dialog open onClose={() => dispatch({ type: 'closeStatblock' })} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ pr: 7, position: 'relative' }}>
-        <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
-      </DialogTitle>
-      <DialogContent dividers>
-        <StatBlockBody monster={monster} allowAdd />
-      </DialogContent>
-    </Dialog>
+    <SheetDialog open onClose={() => dispatch({ type: 'closeStatblock' })} maxWidth="md" topPad={2}>
+      <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
+      <Divider sx={{ my: 1.5 }} />
+      <StatBlockBody monster={monster} allowAdd />
+    </SheetDialog>
   );
 }
 
