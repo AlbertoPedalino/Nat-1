@@ -107,11 +107,22 @@ export const OPACITY = Object.freeze({
 
 // A colour of the palette at some opacity: uiAlpha(UI_COLORS.accent, OPACITY.edge).
 export function uiAlpha(hex, alpha) {
-  const value = String(hex).replace('#', '');
-  const r = parseInt(value.slice(0, 2), 16);
-  const g = parseInt(value.slice(2, 4), 16);
-  const b = parseInt(value.slice(4, 6), 16);
+  const [r, g, b] = hexChannels(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// A colour part way from one palette colour to another, 0 being `from` and 1
+// being `to`: how a die shades its faces between two greens.
+export function uiMix(from, to, amount) {
+  const start = hexChannels(from);
+  const end = hexChannels(to);
+  const mixed = start.map((channel, index) => Math.round(channel + (end[index] - channel) * amount));
+  return `rgb(${mixed.join(', ')})`;
+}
+
+function hexChannels(hex) {
+  const value = String(hex).replace('#', '');
+  return [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16));
 }
 
 // A colour someone saved (a scene grid, a player, a class icon) as '#rrggbb'

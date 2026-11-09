@@ -4,7 +4,7 @@ import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { OPACITY, UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { OPACITY, UI_COLORS, uiAlpha, uiMix } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
@@ -35,7 +35,6 @@ export default function Die3D({
   solid = false,
 }) {
   const geometry = dieGeometry(faces, size / 2);
-  const coin = geometry.shape === 2;
   // A die thrown on the map is numbered like a real one and lands on whichever
   // face the throw left on top, so the caller says which. A die standing for a
   // number that was already rolled simply wears it on the face that faces out.
@@ -90,7 +89,6 @@ export default function Die3D({
                 height: size,
                 fontSize: glyph,
                 lineHeight: LINE_HEIGHTS.none,
-                bgcolor: coin ? COIN_EDGE : UI_COLORS.onDie,
                 // A face is either a polygon cut out of the box, or — on a coin —
                 // a disc the browser rounds off for us.
                 clipPath: face.clipPath,
@@ -99,22 +97,22 @@ export default function Die3D({
                 // Only the face that landed carries the result's colour — red
                 // for a 1, gold for the top of the die — and the rest are
                 // scenery that must not shout "natural 20" at you.
-                color: index === landed ? color : otherFaceInk(coin),
+                color: index === landed ? color : OTHER_FACE_INK,
               }}
             >
               <Box sx={{
                 ...faceFillSx,
                 clipPath: face.clipPath,
                 borderRadius: face.borderRadius,
-                bgcolor: faceTint(face, dimmed, coin),
+                bgcolor: faceTint(face, dimmed),
               }} />
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
                   made of. */}
-              {coin ? (
+              {geometry.shape === 2 ? (
                 <CoinFace kind={values[index] === 2 ? 'tails' : 'heads'} size={size * 0.56} />
               ) : null}
-              {!coin ? (
+              {geometry.shape !== 2 ? (
                 <Box component="span" sx={digits > 1 ? narrowNumberSx : numberSx}>{values[index]}</Box>
               ) : null}
             </Box>
@@ -205,29 +203,17 @@ const solidSx = {
 //
 // A die the mode threw away keeps its shape but loses its colour: it is still
 // shown, because seeing what advantage saved you from is half of why advantage
-// is fun. A coin is metal, not a die, and keeps its own gold.
-function faceTint(face, dimmed, coin) {
+// is fun. The coin is painted like the dice.
+function faceTint(face, dimmed) {
   const lit = Math.max(0, face.towardsViewer);
-  if (coin) {
-    if (dimmed) return `rgb(${Math.round(44 + 16 * lit)},${Math.round(40 + 14 * lit)},${Math.round(33 + 11 * lit)})`;
-    return `rgb(${Math.round(56 + 38 * lit)},${Math.round(48 + 30 * lit)},${Math.round(33 + 18 * lit)})`;
-  }
-  if (dimmed) return mixColors(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
+  if (dimmed) return uiMix(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
   const glow = clamp(1 - Math.abs(lit - 0.7) / 0.4, 0, 1);
-  return mixColors(UI_COLORS.dieFace, UI_COLORS.dieFaceLit, glow);
+  return uiMix(UI_COLORS.dieFace, UI_COLORS.dieFaceLit, glow);
 }
 
 // The numbers on the faces that did not land: cream like the result, but
 // quieter, so the eye goes to the face that counts.
-function otherFaceInk(coin) {
-  return coin ? 'text.secondary' : uiAlpha(UI_COLORS.onDie, OPACITY.strong);
-}
-
-function mixColors(from, to, amount) {
-  const channel = (hex, offset) => parseInt(hex.slice(1 + offset, 3 + offset), 16);
-  const mixed = [0, 2, 4].map((offset) => Math.round(channel(from, offset) + (channel(to, offset) - channel(from, offset)) * amount));
-  return `rgb(${mixed.join(',')})`;
-}
+const OTHER_FACE_INK = uiAlpha(UI_COLORS.onDie, OPACITY.strong);
 
 const faceSx = {
   position: 'absolute',
@@ -236,16 +222,13 @@ const faceSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // The rim (bgcolor, set per die): cream showing around a darker face, so
-  // every edge on the solid is drawn without a border the clip would have
-  // eaten. Opaque, or the board shows through the die and it reads as glass
-  // rather than as a solid thing.
+  // The rim: cream showing around a darker face, so every edge on the solid is
+  // drawn without a border the clip would have eaten. Opaque, or the board
+  // shows through the die and it reads as glass rather than as a solid thing.
+  bgcolor: UI_COLORS.onDie,
   ...TEXT_STYLES.figure,
   backfaceVisibility: 'hidden',
 };
-
-// The gold edge of a coin's faces: a coin is struck metal, not a green die.
-const COIN_EDGE = 'rgb(196,160,78)';
 
 // A panel of the band round a coin's edge. It carries no number and cannot be
 // a result, so it needs no clip and no fill of its own — it is the side of the
@@ -254,7 +237,8 @@ const rimSx = {
   position: 'absolute',
   left: '50%',
   top: '50%',
-  bgcolor: 'rgb(150,120,58)',
+  // The coin's side, in the lighter green of the dice.
+  bgcolor: UI_COLORS.dieFaceLit,
   backfaceVisibility: 'hidden',
 };
 

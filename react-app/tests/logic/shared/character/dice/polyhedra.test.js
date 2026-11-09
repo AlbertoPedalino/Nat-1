@@ -4,6 +4,12 @@ import { dieGeometry, dieShapeFor } from '../../../../../src/shared/character/di
 
 const EXPECTED_SIDES = { 4: 3, 6: 4, 8: 3, 10: 4, 12: 5, 20: 3 };
 
+// A face's corners as [x%, y%] inside the die's box, from its clip-path.
+const cornersOf = (face) => face.clipPath.slice('polygon('.length, -1)
+  .split(', ')
+  .map((corner) => corner.split(' ').map(parseFloat));
+const matrixOf = (face) => face.transform.slice('matrix3d('.length, -1).split(',').map(Number);
+
 test('every die is the solid it should be', () => {
   for (const sides of [4, 6, 8, 10, 12, 20]) {
     const geometry = dieGeometry(sides);
@@ -15,8 +21,7 @@ test('each face is the right polygon', () => {
   for (const [sides, corners] of Object.entries(EXPECTED_SIDES)) {
     const geometry = dieGeometry(Number(sides));
     for (const face of geometry.faces) {
-      const points = face.clipPath.slice('polygon('.length, -1).split(', ');
-      assert.equal(points.length, corners, `a d${sides} face should have ${corners} corners`);
+      assert.equal(cornersOf(face).length, corners, `a d${sides} face should have ${corners} corners`);
     }
   }
 });
@@ -27,7 +32,7 @@ test('every face of a Platonic die sits the same distance from the centre', () =
   for (const sides of [4, 6, 8, 12, 20]) {
     const geometry = dieGeometry(sides, 20);
     const depths = geometry.faces.map((face) => {
-      const parts = face.transform.slice('matrix3d('.length, -1).split(',').map(Number);
+      const parts = matrixOf(face);
       // Columns 12..14 are the translation: how far out the face was pushed.
       return Math.hypot(parts[12], parts[13], parts[14]);
     });
@@ -51,7 +56,7 @@ test('the face that lands looks straight out of the screen', () => {
 
     // Identity but for the push out to the face: the number on it is upright
     // and unrotated, not lying on its side.
-    const matrix = landing.transform.slice('matrix3d('.length, -1).split(',').map(Number);
+    const matrix = matrixOf(landing);
     assert.deepEqual(matrix.slice(0, 3), [1, 0, 0]);
     assert.deepEqual(matrix.slice(4, 7), [0, 1, 0]);
     assert.deepEqual(matrix.slice(8, 11), [0, 0, 1]);
@@ -62,40 +67,21 @@ test('the face that lands looks straight out of the screen', () => {
   }
 });
 
-test('a corner of the landing face points up', () => {
-  const [, y] = dieGeometry(20).faces[dieGeometry(20).landing]
-    .clipPath.slice('polygon('.length, -1)
-    .split(', ')[0]
-    .split(' ')
-    .map(parseFloat);
-  assert.ok(y < 40, `the first corner sits at ${y}% down, not near the top`);
-});
-
-// A d10 face is a kite, read with its long point — the pole — above the number.
-// A bipyramid's triangles made it look like a d8 or a d20 at rest.
-test('a d10 lands on a kite with its pole at the top', () => {
-  const geometry = dieGeometry(10);
-  const corners = geometry.faces[geometry.landing]
-    .clipPath.slice('polygon('.length, -1)
-    .split(', ')
-    .map((corner) => corner.split(' ').map(parseFloat));
-  assert.equal(corners.length, 4);
-  const [poleX, poleY] = corners[0];
-  assert.ok(Math.abs(poleX - 50) < 1e-6, 'the pole sits on the axis of the kite');
-  assert.ok(corners.every(([, y]) => y >= poleY), 'the pole is the highest corner');
-});
-
 // Every face is printed the same way up, not only the one that lands: the map
-// can leave a die resting on any face, and the numbers seen on the others while
-// it tumbles should not lie on their sides.
-test('every d10 number points at its pole', () => {
-  for (const face of dieGeometry(10).faces) {
-    const corners = face.clipPath.slice('polygon('.length, -1)
-      .split(', ')
-      .map((corner) => corner.split(' ').map(parseFloat));
-    const [poleX, poleY] = corners[0];
-    assert.ok(Math.abs(poleX - 50) < 1e-3, `pole off axis at ${poleX}%`);
-    assert.ok(corners.every(([, y]) => y >= poleY), 'the pole is the highest corner');
+// can leave a die resting on any face, and a number lying on its side across a
+// face reads as a different glyph. Each face has a corner straight above its
+// centre, and on a d10's kites that corner is the long point — the pole.
+test('every face has a corner straight above its number', () => {
+  for (const sides of [4, 6, 8, 10, 12, 20]) {
+    for (const face of dieGeometry(sides).faces) {
+      const corners = cornersOf(face);
+      const top = corners.reduce((highest, corner) => (corner[1] < highest[1] ? corner : highest));
+      assert.ok(Math.abs(top[0] - 50) < 1e-3, `d${sides}: top corner at ${top[0]}%, not above the centre`);
+      if (sides === 10) {
+        const bottom = corners.reduce((lowest, corner) => (corner[1] > lowest[1] ? corner : lowest));
+        assert.ok(50 - top[1] > bottom[1] - 50, 'the d10 pole, not the short point, is at the top');
+      }
+    }
   }
 });
 
@@ -121,7 +107,7 @@ test('a d100 really has a hundred faces, numbered one to a hundred', () => {
   assert.equal(dieShapeFor(100), 100);
   assert.equal(geometry.faces.length, 100);
   for (const face of geometry.faces) {
-    assert.equal(face.clipPath.slice('polygon('.length, -1).split(', ').length, 3);
+    assert.equal(cornersOf(face).length, 3);
   }
 });
 

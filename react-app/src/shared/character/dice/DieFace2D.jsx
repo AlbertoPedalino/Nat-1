@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_WEIGHTS } from '../../ui/fonts.js';
 
 // A result, not another roll: roll history uses a quiet, flat silhouette that
@@ -19,17 +19,9 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
       sx={{ width: size, height: size, display: 'block', flex: '0 0 auto', color, opacity: dimmed ? OPACITY.edge : 1 }}
     >
       {sides === 2 ? (
-        <circle cx="20" cy="20" r="17" fill={uiAlpha(UI_COLORS.accentText, OPACITY.soft)} stroke="currentColor" strokeWidth="2" />
+        <circle cx="20" cy="20" r="17" {...DIE_PAINT} />
       ) : (
-        // Painted like the 3D die and the app's icon: deep green with a cream
-        // edge. The number alone carries the result's colour.
-        <polygon
-          points={pointsForDie(sides)}
-          fill={UI_COLORS.dieFace}
-          stroke={UI_COLORS.onDie}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
+        <polygon points={pointsForDie(sides)} strokeLinejoin="round" {...DIE_PAINT} />
       )}
       <text
         x="20"
@@ -46,6 +38,10 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
     </Box>
   );
 }
+
+// Painted like the 3D die and the app's icon, coin included: deep green with a
+// cream edge. The number alone carries the result's colour.
+const DIE_PAINT = { fill: UI_COLORS.dieFace, stroke: UI_COLORS.onDie, strokeWidth: 2 };
 
 // One outline per die, each told apart by its silhouette alone: a d10 is the
 // kite its faces are, with the long point up as on the 3D die, so it no longer
