@@ -25,12 +25,12 @@ import { itemMatchesSearch, byItemName } from './itemSearch.js';
 import {
   CHIP_ICONS,
   InventoryFilterButtons,
-  ShowMoreButton,
   compactInputSx,
   inventorySectionSx,
   withIcons,
 } from './inventoryControls.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
+import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 
 const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
 
@@ -66,12 +66,15 @@ const inventorySectionTitleSx = {
   alignItems: 'center',
   gap: 0.5,
   minWidth: 0,
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
+  ...sheetSectionHeaderSx({ rule: null }),
+};
+
+const inventorySectionRuleSx = {
+  ...inventorySectionTitleSx,
+  ...sheetSectionHeaderSx(),
+  pb: '3px',
+  mt: 0.6,
+  mb: 0.4,
 };
 
 function groupEntriesByType(entries) {
@@ -180,12 +183,12 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
         })}
         {inventoryPage.remaining > 0 ? (
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ShowMoreButton remaining={inventoryPage.remaining} onClick={inventoryPage.showMore} />
+            <ShowMoreButton page={inventoryPage} />
           </Box>
         ) : null}
-        {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
+        {!inv.length && <Typography sx={{ ...emptyTextSx, py: 0.5 }}>Inventory empty.</Typography>}
         {inv.length > 0 && !visibleInventory.length && (
-          <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
+          <Typography sx={{ ...emptyTextSx, py: 0.5 }}>
             No inventory items match this search or filter.
           </Typography>
         )}
@@ -205,7 +208,7 @@ function InventorySectionTitle({ icon: Icon, label }) {
 
 function SectionHeader({ icon: Icon, label }) {
   return (
-    <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', pb: '3px', mt: 0.6, mb: 0.4 }}>
+    <Typography sx={inventorySectionRuleSx}>
       {Icon ? <Icon size={12} /> : null}
       {label}
     </Typography>

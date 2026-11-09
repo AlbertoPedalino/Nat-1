@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -109,13 +110,7 @@ export default function GuideView() {
   );
 }
 
-const cardSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
+const cardSx = boardPanelSx;
 
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,

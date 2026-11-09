@@ -10,7 +10,11 @@ import {
 } from '@mui/material';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { coarsePointer, useMenuPlacement } from '../map/menuPlacement.js';
-import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import {
+  battleMapCheckboxRowSx,
+  battleMapControlLabelSx,
+  battleMapMenuPaperSx,
+} from '../map/battleMapSurface.js';
 import { useTokenMenuState } from './useTokenMenuState.js';
 import TokenHpRow from './TokenHpRow.jsx';
 import DeathSaveControls from './DeathSaveControls.jsx';
@@ -65,16 +69,7 @@ export default function TokenMenu({
       slotProps={{
         transition: placement.transitionProps,
         paper: {
-          sx: {
-            ...battleMapDialogPaperSx,
-            width: menuWidth,
-            maxWidth: 'calc(100vw - 16px)',
-            // Of the visible window, not 100vh: on a phone 100vh is taller than
-            // the screen while the browser bar shows, and a menu that tall gets
-            // pushed up past the top edge. 32px leaves Popover's 16px margins.
-            maxHeight: 'calc(100% - 32px)',
-            '& .MuiMenu-list': { p: 0 },
-          },
+          sx: battleMapMenuPaperSx(menuWidth),
         },
       }}
     >
@@ -93,8 +88,8 @@ export default function TokenMenu({
                   onChange={(event) => onVisibility(token, event.target.checked)}
                 />
               )}
-              label={<Typography sx={controlLabelSx}>Hidden from the players</Typography>}
-              sx={formControlSx}
+              label={<Typography sx={battleMapControlLabelSx}>Hidden from the players</Typography>}
+              sx={battleMapCheckboxRowSx}
             />
             <Divider />
           </>
@@ -127,8 +122,8 @@ export default function TokenMenu({
                 onChange={(event) => fields.changeGmOnly(event.target.checked)}
               />
             )}
-            label={<Typography sx={controlLabelSx}>Label visible to the GM only</Typography>}
-            sx={formControlSx}
+            label={<Typography sx={battleMapControlLabelSx}>Label visible to the GM only</Typography>}
+            sx={battleMapCheckboxRowSx}
           />
 
           {!isMapObject ? <Divider /> : null}
@@ -154,7 +149,6 @@ export default function TokenMenu({
               disabled={!canStyleObject}
               value={token.color || VTT_COLORS.gold}
               onChange={saveObjectColor}
-              sx={objectColorInputSx}
             />
           </Box>
         ) : null}
@@ -170,8 +164,8 @@ export default function TokenMenu({
                 onChange={(event) => fields.changeShowHp(event.target.checked)}
               />
             )}
-            label={<Typography sx={controlLabelSx}>Show the hit point bar</Typography>}
-            sx={formControlSx}
+            label={<Typography sx={battleMapControlLabelSx}>Show the hit point bar</Typography>}
+            sx={battleMapCheckboxRowSx}
           />
         ) : null}
 
@@ -212,15 +206,6 @@ export default function TokenMenu({
 
 const OBJECT_STYLE_DELAY = 180;
 
-const formControlSx = {
-  m: 0,
-  minHeight: 24,
-  '& .MuiCheckbox-root': { p: 0.35, mr: 0.25 },
-  '& .MuiSvgIcon-root': { fontSize: 17 },
-};
-
-const controlLabelSx = { fontSize: '0.68rem', lineHeight: 1.2 };
-
 const objectStyleSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) 34px',
@@ -230,15 +215,4 @@ const objectStyleSx = {
   border: '1px solid',
   borderColor: 'gmboard.vtt.goldTint',
   borderRadius: 1,
-};
-const objectColorInputSx = {
-  width: 32,
-  height: 32,
-  p: '2px',
-  border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorderStrong',
-  borderRadius: 1,
-  bgcolor: 'gmboard.vtt.inset',
-  cursor: 'pointer',
-  '&:disabled': { cursor: 'default', opacity: 0.45 },
 };

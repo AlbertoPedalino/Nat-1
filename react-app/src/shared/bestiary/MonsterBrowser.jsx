@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import {
   Box,
-  Button,
   Chip,
-  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -24,6 +22,8 @@ import { formatNumber } from '../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 import { crKey, crXP } from './challengeRating.js';
 import { usePagedList } from '../ui/usePagedList.js';
+import ShowMoreButton from '../ui/ShowMoreButton.jsx';
+import { LoadingLine } from '../ui/LoadStatus.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -48,10 +48,7 @@ export default function MonsterBrowser({
 
   if (monsterDb.status === 'loading' || monsterDb.status === 'idle') {
     return (
-      <Stack spacing={2} sx={{ alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
-        <CircularProgress size={28} />
-        <Typography sx={{ color: 'text.secondary' }}>Loading 2024 bestiary...</Typography>
-      </Stack>
+      <LoadingLine centered label="Loading 2024 bestiary…" sx={{ minHeight: 220 }} />
     );
   }
 
@@ -151,11 +148,7 @@ export default function MonsterBrowser({
         )}
       </Stack>
 
-      {page.remaining > 0 ? (
-        <Button variant="outlined" onClick={page.showMore}>
-          Show more ({formatNumber(page.remaining)})
-        </Button>
-      ) : null}
+      <ShowMoreButton page={page} />
     </Stack>
   );
 }

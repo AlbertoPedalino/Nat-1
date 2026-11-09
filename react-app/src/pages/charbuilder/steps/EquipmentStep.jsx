@@ -22,6 +22,7 @@ import { byName } from '../../../shared/lists.js';
 import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
+import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -55,16 +56,6 @@ function FilterChips({ filters, value, onChange }) {
         />
       ))}
     </Stack>
-  );
-}
-
-function ShowMoreRow({ remaining, onClick }) {
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-      <Button size="small" variant="outlined" onClick={onClick}>
-        Show more ({remaining})
-      </Button>
-    </Box>
   );
 }
 
@@ -247,7 +238,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 <AddItemRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
               ))}
             </List>
-            {addPage.remaining > 0 ? <ShowMoreRow remaining={addPage.remaining} onClick={addPage.showMore} /> : null}
+            <ShowMoreButton page={addPage} sx={{ py: 1 }} />
           </Paper>
 
           <Divider />
@@ -280,7 +271,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 </Typography>
               ) : null}
             </List>
-            {currentPage.remaining > 0 ? <ShowMoreRow remaining={currentPage.remaining} onClick={currentPage.showMore} /> : null}
+            <ShowMoreButton page={currentPage} sx={{ py: 1 }} />
           </Paper>
         </Stack>
       </BuilderPanel>

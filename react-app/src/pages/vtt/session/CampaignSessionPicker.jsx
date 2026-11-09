@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -23,7 +24,7 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
     })),
   };
 
-  if (state.loading) return <CircularProgress size={24} />;
+  if (state.loading) return <LoadingLine centered label="Loading campaigns…" />;
 
   // Nothing to say to someone who only runs campaigns: they are not waiting for
   // an invite code, and telling them to ask their GM for one is nonsense when

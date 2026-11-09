@@ -1,24 +1,13 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { LoadingLine } from '../ui/LoadStatus.jsx';
 
 // Shown by a tool page while useToolInstance looks the instance up in the
 // cloud; the editor is not mounted yet, so nothing can be seeded or saved.
 export default function CloudInstanceLoading({ label }) {
   return (
-    <Box role="status" sx={rootSx}>
-      <CircularProgress size={24} />
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        {label ? `Loading ${label}…` : 'Loading…'}
-      </Typography>
-    </Box>
+    <LoadingLine
+      centered
+      label={label ? `Loading ${label}…` : 'Loading…'}
+      sx={{ minHeight: '100vh', bgcolor: 'background.default' }}
+    />
   );
 }
-
-const rootSx = {
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 1.5,
-  bgcolor: 'background.default',
-};

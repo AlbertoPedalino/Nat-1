@@ -5,6 +5,8 @@ import { UI_FONTS } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
 import { encounterDetail, lootDetail } from '../../gmboard/resultText.js';
 import { boardTone } from '../../gmboard/ui/resultVisuals.js';
+import { microLabelSx } from '../../ui/PanelHeader.jsx';
+import { boardInsetSx } from '../../gmboard/ui/surfaces.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
@@ -13,7 +15,7 @@ function StepRow({ icon: Icon, iconColor, label, children, last }) {
         <Icon size={15} color={iconColor} />
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {label ? <Typography sx={microLabelSx}>{label}</Typography> : null}
+        {label ? <Typography sx={stepLabelSx}>{label}</Typography> : null}
         <Typography sx={lineSx}>{children}</Typography>
       </Box>
     </Box>
@@ -112,12 +114,7 @@ export default function HexResultSteps({ result }) {
   );
 }
 
-const boxSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-};
+const boxSx = { ...boardInsetSx, p: 1.5 };
 
 const headerSx = {
   fontFamily: UI_FONTS.display,
@@ -142,14 +139,7 @@ const stepIconColSx = {
   flexShrink: 0,
 };
 
-const microLabelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-  lineHeight: 1.4,
-};
+const stepLabelSx = { ...microLabelSx, lineHeight: 1.4 };
 
 const lineSx = {
   fontSize: '0.8rem',

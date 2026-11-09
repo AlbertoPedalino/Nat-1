@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Button, Stack, Tab, Tabs } from '@mui/material';
 import { BookOpen, Library, Swords, Handshake, Skull } from 'lucide-react';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
+import ToolPageShell from '../../app/navigation/ToolPageShell.jsx';
 import DiceControl from '../../shared/character/dice/DiceControl.jsx';
 import GmRollsShownSwitch from '../../shared/character/dice/GmRollsShownSwitch.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
-import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import BuilderView from './builder/BuilderView.jsx';
 import CombatView from './combat/CombatView.jsx';
 import LibraryView from './library/LibraryView.jsx';
@@ -45,89 +43,74 @@ function EncounterBuilderShell({ tool }) {
   };
 
   return (
-    <Box sx={pageSx}>
-      <AppTopBar home backTo="/library/encounters" backLabel="Encounters">
-        <LinkedToolsMenu sectionKey="encounters" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
-      </AppTopBar>
-      <Box sx={contentSx}>
-        <Stack spacing={2}>
-          <InstanceConflictBanner tool={tool} />
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
-            <Box>
-              <Typography variant="h1">Encounter Builder</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Instance {tool.id}</Typography>
-            </Box>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
-              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                <DiceControl
-                  log={state.rollLog}
-                  onRoll={handleCustomRoll}
-                  onClear={() => dispatch({ type: 'clearRollLog' })}
-                  emptyText="No rolls yet. Click statblock dice, attacks, or abilities."
-                  settings={<GmRollsShownSwitch campaignId={rollSync.campaignId} />}
-                />
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<Skull size={14} />}
-                  onClick={() => setFumblesOpen(true)}
-                  sx={utilityButtonSx}
-                >
-                  Fumbles
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<Handshake size={14} />}
-                  onClick={() => setNegotiationOpen(true)}
-                  sx={utilityButtonSx}
-                >
-                  Negotiate
-                </Button>
-              </Stack>
-              <Tabs
-                value={state.view}
-                onChange={(_, value) => dispatch({ type: 'setView', view: value })}
-                variant="scrollable"
-                allowScrollButtonsMobile
-              >
-                <Tab icon={<BookOpen size={15} />} iconPosition="start" value="builder" label="Builder" />
-                <Tab icon={<Library size={15} />} iconPosition="start" value="library" label="Library" />
-                <Tab icon={<Swords size={15} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
-              </Tabs>
-            </Stack>
-          </Stack>
-          <RollSharingControls />
-          {state.view === 'builder' ? <BuilderView /> : null}
-          {state.view === 'library' ? <LibraryView /> : null}
-          {state.view === 'combat' ? <CombatView /> : null}
-          {state.view !== 'combat' && state.combat ? (
-            <Button variant="outlined" startIcon={<Swords size={15} />} onClick={() => dispatch({ type: 'setView', view: 'combat' })} sx={{ alignSelf: 'flex-start' }}>
-              Return to active encounter
+    <ToolPageShell
+      tool={tool}
+      sectionKey="encounters"
+      title="Encounter Builder"
+      backTo="/library/encounters"
+      backLabel="Encounters"
+      actions={(
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
+          <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
+            <DiceControl
+              log={state.rollLog}
+              onRoll={handleCustomRoll}
+              onClear={() => dispatch({ type: 'clearRollLog' })}
+              emptyText="No rolls yet. Click statblock dice, attacks, or abilities."
+              settings={<GmRollsShownSwitch campaignId={rollSync.campaignId} />}
+            />
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<Skull size={14} />}
+              onClick={() => setFumblesOpen(true)}
+              sx={utilityButtonSx}
+            >
+              Fumbles
             </Button>
-          ) : null}
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<Handshake size={14} />}
+              onClick={() => setNegotiationOpen(true)}
+              sx={utilityButtonSx}
+            >
+              Negotiate
+            </Button>
+          </Stack>
+          <Tabs
+            value={state.view}
+            onChange={(_, value) => dispatch({ type: 'setView', view: value })}
+            variant="scrollable"
+            allowScrollButtonsMobile
+          >
+            <Tab icon={<BookOpen size={15} />} iconPosition="start" value="builder" label="Builder" />
+            <Tab icon={<Library size={15} />} iconPosition="start" value="library" label="Library" />
+            <Tab icon={<Swords size={15} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
+          </Tabs>
         </Stack>
-      </Box>
-      <StatBlockDialog />
-      <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
-      <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
-      {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
-    </Box>
+      )}
+      after={(
+        <>
+          <StatBlockDialog />
+          <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
+          <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
+          {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+        </>
+      )}
+    >
+      <RollSharingControls />
+      {state.view === 'builder' ? <BuilderView /> : null}
+      {state.view === 'library' ? <LibraryView /> : null}
+      {state.view === 'combat' ? <CombatView /> : null}
+      {state.view !== 'combat' && state.combat ? (
+        <Button variant="outlined" startIcon={<Swords size={15} />} onClick={() => dispatch({ type: 'setView', view: 'combat' })} sx={{ alignSelf: 'flex-start' }}>
+          Return to active encounter
+        </Button>
+      ) : null}
+    </ToolPageShell>
   );
 }
-
-const pageSx = {
-  minHeight: '100vh',
-  bgcolor: 'background.default',
-  pt: APP_TOP_BAR_HEIGHT,
-};
-
-const contentSx = {
-  maxWidth: 1500,
-  mx: 'auto',
-  px: { xs: 1.25, md: 2 },
-  py: 2,
-};
 
 const utilityButtonSx = {
   flexShrink: 0,

@@ -11,6 +11,7 @@ import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -36,7 +37,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   const interactive = typeof onToggleFreeCast === 'function';
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: '5px', bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
-      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
         {freeCasts.map((fc) => {

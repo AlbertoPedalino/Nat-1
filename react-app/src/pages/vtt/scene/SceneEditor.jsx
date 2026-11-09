@@ -1,9 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import {
-  Box,
-  CircularProgress,
-  Stack,
-} from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import {
@@ -73,6 +69,7 @@ import { useMapFullscreen } from './useMapFullscreen.js';
 import SceneHexcrawlCorner from './SceneHexcrawlCorner.jsx';
 import SceneTokenMenu from './SceneTokenMenu.jsx';
 import SpectatorSceneView from './SpectatorSceneView.jsx';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // The hub of a scene: it reads the scene's sources, wires the editing hooks to
 // them and hands the result to the board. Each concern lives in its own hook;
@@ -383,7 +380,7 @@ export default function SceneEditor({
     } : null,
   });
 
-  if (loading || role.loading) return <CircularProgress size={24} />;
+  if (loading || role.loading) return <LoadingLine centered label="Loading scene…" />;
 
   if (spectator) {
     return (

@@ -68,3 +68,36 @@ export const battleMapDropBackdropSx = {
   pointerEvents: 'none',
   bgcolor: vttAlpha(VTT_COLORS.black, 0.16),
 };
+
+// The paper of a menu opened over the map (the piece menu, the drawing menu):
+// the dialog surface at `width`, inside the visible window. Of the visible
+// window, not 100vh: on a phone 100vh is taller than the screen while the
+// browser bar shows, and a menu that tall gets pushed up past the top edge.
+// 32px leaves Popover's 16px margins.
+export function battleMapMenuPaperSx(width) {
+  return {
+    ...battleMapDialogPaperSx,
+    width,
+    maxWidth: 'calc(100vw - 16px)',
+    maxHeight: 'calc(100% - 32px)',
+    '& .MuiMenu-list': { p: 0 },
+  };
+}
+
+// The compact controls of those menus: a short text field, a checkbox row and
+// its label.
+export const battleMapCompactFieldSx = {
+  '& .MuiInputBase-root': { height: 34, fontSize: '0.72rem' },
+  '& .MuiInputLabel-root': { fontSize: '0.68rem' },
+  '& .MuiInputLabel-shrink': { transform: 'translate(14px, -7px) scale(0.75)' },
+};
+
+export const battleMapCheckboxRowSx = {
+  m: 0,
+  minHeight: 24,
+  '& .MuiCheckbox-root': { p: 0.35, mr: 0.25 },
+  '& .MuiSvgIcon-root': { fontSize: 17 },
+};
+
+export const battleMapControlLabelSx = { fontSize: '0.68rem', lineHeight: 1.2 };
+

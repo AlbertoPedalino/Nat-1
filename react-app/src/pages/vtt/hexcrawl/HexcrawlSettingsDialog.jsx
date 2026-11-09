@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, TextField,
-  Tooltip, Typography,
-} from '@mui/material';
+import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import {
   CalendarDays, FastForward, Hexagon, Palette, Settings,
 } from 'lucide-react';
@@ -18,11 +15,10 @@ import {
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import {
-  battleMapDialogActionsSx, battleMapDialogContentSx, battleMapDialogPaperSx, battleMapDialogTitleSx,
-} from '../map/battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import BattleMapDialog from '../map/BattleMapDialog.jsx';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -46,137 +42,132 @@ export default function HexcrawlSettingsDialog({
   const weatherContract = SELECTOR_CONTRACTS.weatherOverride;
 
   return (
-    <Dialog
+    <BattleMapDialog
       open={open}
       onClose={onClose}
       maxWidth="md"
-      fullWidth
-      slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
+      titleSx={titleSx}
+      title={(
+        <>
+          <Settings size={15} />
+          Hexcrawl settings
+        </>
+      )}
+      contentProps={{ dividers: true }}
+      actions={<Button onClick={onClose}>Done</Button>}
     >
-      <DialogTitle sx={[battleMapDialogTitleSx, titleSx]}>
-        <Settings size={15} />
-        Hexcrawl settings
-      </DialogTitle>
+      {!board ? (
+        <Typography sx={warnSx}>
+          No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
+          campaign under Links.
+        </Typography>
+      ) : null}
+      {board && !clockLinked ? (
+        <Typography sx={warnSx}>
+          The campaign clock is not readable from here, so changes will not be saved.
+        </Typography>
+      ) : null}
+      {error ? <Typography sx={warnSx}>{error}</Typography> : null}
 
-      <DialogContent dividers sx={battleMapDialogContentSx}>
-        {!board ? (
-          <Typography sx={warnSx}>
-            No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
-            campaign under Links.
-          </Typography>
-        ) : null}
-        {board && !clockLinked ? (
-          <Typography sx={warnSx}>
-            The campaign clock is not readable from here, so changes will not be saved.
-          </Typography>
-        ) : null}
-        {error ? <Typography sx={warnSx}>{error}</Typography> : null}
+      <Box sx={columnsSx}>
+        <Stack spacing={2} sx={sectionCardSx}>
+          <Typography sx={sectionTitleSx}><CalendarDays size={13} />Calendar</Typography>
+          {sky ? (
+            <DateTimeForm clock={sky} disabled={locked} onChange={onClockChange} />
+          ) : null}
+          {onClockAdvance ? <AdvanceForm disabled={locked} onAdvance={onClockAdvance} /> : null}
+          <SelectorGroup
+            label="Season"
+            options={seasonContract.options}
+            getId={seasonContract.getId}
+            value={boardState?.season || null}
+            // Picking the season it is already in clears it.
+            onChange={(option) => onSeasonChange?.(option.id === boardState?.season ? null : option.id)}
+            getIcon={(option) => SEASON_ICONS[option.id]}
+            disabled={locked}
+          />
+          {sky && onClockChange ? (
+            <SelectorGroup
+              label="Weather"
+              options={weatherContract.options}
+              getId={weatherContract.getId}
+              value={weatherContract.deriveValue({ weather: sky.weather || 'Clear', intensity: sky.intensity || '' })}
+              onChange={(option) => onClockChange({ weather: option.weather, intensity: option.intensity })}
+              getIcon={(option) => WEATHER_ICONS[option.weather]}
+              disabled={locked}
+            />
+          ) : null}
+        </Stack>
 
-        <Box sx={columnsSx}>
-          <Stack spacing={2} sx={sectionCardSx}>
-            <Typography sx={sectionTitleSx}><CalendarDays size={13} />Calendar</Typography>
-            {sky ? (
-              <DateTimeForm clock={sky} disabled={locked} onChange={onClockChange} />
+        <Stack spacing={2} sx={sectionCardSx}>
+          <Typography sx={sectionTitleSx}><Hexagon size={13} />A hex is, unless it says otherwise</Typography>
+          <SelectorGroup
+            label="Terrain"
+            options={TERRAIN_OPTIONS}
+            getId={(option) => option.label}
+            value={defaults?.terrain || null}
+            onChange={(option) => onDefaultsChange?.({
+              terrain: option.label === defaults?.terrain ? null : option.label,
+            })}
+            getIcon={(option) => TERRAIN_ICONS[option.id]}
+            disabled={locked}
+          />
+          <SelectorGroup
+            label="Population"
+            options={HEX_POPULATION_OPTIONS}
+            value={defaults?.pop || null}
+            onChange={(option) => onDefaultsChange?.({
+              pop: option.id === defaults?.pop ? null : option.id,
+            })}
+            getIcon={(option) => POPULATION_ICONS[option.id]}
+            disabled={locked}
+          />
+          {/* The tier keeps the GM Board's colours: it is how the board says
+              how hard the hex is about to be. */}
+          {/* Clearable, so a map can be laid out without claiming a
+              difficulty it has not been given. */}
+          <TierSelector
+            label="Encounter tier"
+            value={defaults?.tier ?? null}
+            disabled={locked}
+            clearable
+            onChange={(tier) => onDefaultsChange?.({ tier })}
+          />
+          {/* The party's speed is shared with the GM Board across every map. */}
+          <MountSelector
+            label="Mount"
+            disabled={locked}
+            value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
+            onChange={(mountSpeed) => onDefaultsChange?.({ mountSpeed })}
+          />
+        </Stack>
+      </Box>
+
+      {/* The colour of the country the party has walked. It is the GM's to
+          pick, and kept on the scene, where the players and the projector
+          read it too. */}
+      {onHexColorChange ? (
+        <Box sx={[sectionCardSx, { mt: 2 }]}>
+          <Typography sx={[sectionTitleSx, { mb: 1.25 }]}><Palette size={13} />Map</Typography>
+          <Typography sx={groupLabelSx}>Explored hex colour</Typography>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+            {/* Deferred, as the grid's own colour is: a controlled colour
+                input re-renders on every move inside the picker and snaps
+                the widget away from the pointer. */}
+            <ColorField
+              value={hexColor || DEFAULT_HEX_COLOR}
+              onChange={onHexColorChange}
+              deferMs={180}
+              label="Explored hex colour"
+            />
+            <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
+            {(hexColor || DEFAULT_HEX_COLOR) !== DEFAULT_HEX_COLOR ? (
+              <Button size="small" onClick={() => onHexColorChange(DEFAULT_HEX_COLOR)}>Reset</Button>
             ) : null}
-            {onClockAdvance ? <AdvanceForm disabled={locked} onAdvance={onClockAdvance} /> : null}
-            <SelectorGroup
-              label="Season"
-              options={seasonContract.options}
-              getId={seasonContract.getId}
-              value={boardState?.season || null}
-              // Picking the season it is already in clears it.
-              onChange={(option) => onSeasonChange?.(option.id === boardState?.season ? null : option.id)}
-              getIcon={(option) => SEASON_ICONS[option.id]}
-              disabled={locked}
-            />
-            {sky && onClockChange ? (
-              <SelectorGroup
-                label="Weather"
-                options={weatherContract.options}
-                getId={weatherContract.getId}
-                value={weatherContract.deriveValue({ weather: sky.weather || 'Clear', intensity: sky.intensity || '' })}
-                onChange={(option) => onClockChange({ weather: option.weather, intensity: option.intensity })}
-                getIcon={(option) => WEATHER_ICONS[option.weather]}
-                disabled={locked}
-              />
-            ) : null}
-          </Stack>
-
-          <Stack spacing={2} sx={sectionCardSx}>
-            <Typography sx={sectionTitleSx}><Hexagon size={13} />A hex is, unless it says otherwise</Typography>
-            <SelectorGroup
-              label="Terrain"
-              options={TERRAIN_OPTIONS}
-              getId={(option) => option.label}
-              value={defaults?.terrain || null}
-              onChange={(option) => onDefaultsChange?.({
-                terrain: option.label === defaults?.terrain ? null : option.label,
-              })}
-              getIcon={(option) => TERRAIN_ICONS[option.id]}
-              disabled={locked}
-            />
-            <SelectorGroup
-              label="Population"
-              options={HEX_POPULATION_OPTIONS}
-              value={defaults?.pop || null}
-              onChange={(option) => onDefaultsChange?.({
-                pop: option.id === defaults?.pop ? null : option.id,
-              })}
-              getIcon={(option) => POPULATION_ICONS[option.id]}
-              disabled={locked}
-            />
-            {/* The tier keeps the GM Board's colours: it is how the board says
-                how hard the hex is about to be. */}
-            {/* Clearable, so a map can be laid out without claiming a
-                difficulty it has not been given. */}
-            <TierSelector
-              label="Encounter tier"
-              value={defaults?.tier ?? null}
-              disabled={locked}
-              clearable
-              onChange={(tier) => onDefaultsChange?.({ tier })}
-            />
-            {/* The party's speed is shared with the GM Board across every map. */}
-            <MountSelector
-              label="Mount"
-              disabled={locked}
-              value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
-              onChange={(mountSpeed) => onDefaultsChange?.({ mountSpeed })}
-            />
           </Stack>
         </Box>
-
-        {/* The colour of the country the party has walked. It is the GM's to
-            pick, and kept on the scene, where the players and the projector
-            read it too. */}
-        {onHexColorChange ? (
-          <Box sx={[sectionCardSx, { mt: 2 }]}>
-            <Typography sx={[sectionTitleSx, { mb: 1.25 }]}><Palette size={13} />Map</Typography>
-            <Typography sx={groupLabelSx}>Explored hex colour</Typography>
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-              {/* Deferred, as the grid's own colour is: a controlled colour
-                  input re-renders on every move inside the picker and snaps
-                  the widget away from the pointer. */}
-              <ColorField
-                value={hexColor || DEFAULT_HEX_COLOR}
-                onChange={onHexColorChange}
-                deferMs={180}
-                label="Explored hex colour"
-                sx={swatchSx}
-              />
-              <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
-              {(hexColor || DEFAULT_HEX_COLOR) !== DEFAULT_HEX_COLOR ? (
-                <Button size="small" onClick={() => onHexColorChange(DEFAULT_HEX_COLOR)}>Reset</Button>
-              ) : null}
-            </Stack>
-          </Box>
-        ) : null}
-      </DialogContent>
-
-      <DialogActions sx={battleMapDialogActionsSx}>
-        <Button onClick={onClose}>Done</Button>
-      </DialogActions>
-    </Dialog>
+      ) : null}
+    </BattleMapDialog>
   );
 }
 
@@ -344,15 +335,7 @@ const sectionTitleSx = {
   borderColor: 'gmboard.vtt.goldTint',
 };
 
-// Matches SelectorGroup's own label, so every row in the dialog reads alike.
-const groupLabelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-  mb: 0.5,
-};
+const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 
 const dateRowSx = {
   display: 'grid',
@@ -366,16 +349,4 @@ const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem' };
 const warnSx = { color: 'warning.main', fontSize: '0.75rem', lineHeight: 1.4, mb: 1.5 };
 const errorSx = { color: 'error.main', fontSize: '0.7rem', mt: 0.5 };
 const quickButtonSx = { minWidth: 0, px: 1, fontSize: '0.72rem', textTransform: 'none' };
-
-const swatchSx = {
-  width: 40,
-  height: 28,
-  p: 0,
-  border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorderStrong',
-  borderRadius: 1,
-  bgcolor: 'transparent',
-  cursor: 'pointer',
-  flexShrink: 0,
-};
 

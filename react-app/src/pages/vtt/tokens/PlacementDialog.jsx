@@ -1,10 +1,6 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import {
-  battleMapDialogActionsSx,
-  battleMapDialogContentSx,
-  battleMapDialogPaperSx,
   battleMapDialogPlacingPaperSx,
-  battleMapDialogTitleSx,
   battleMapDropBackdropSx,
   battleMapDropDialogSx,
 } from '../map/battleMapSurface.js';
@@ -14,20 +10,18 @@ import {
 // shows and the pointer sequence is not disturbed.
 export default function PlacementDialog({ open, onClose, placing, title, maxWidth = 'sm', actions, children }) {
   return (
-    <Dialog
+    <BattleMapDialog
       open={open}
       onClose={onClose}
-      fullWidth
       maxWidth={maxWidth}
       sx={battleMapDropDialogSx}
-      slotProps={{
-        paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },
-        backdrop: { sx: battleMapDropBackdropSx },
-      }}
+      paperSx={placing ? battleMapDialogPlacingPaperSx : null}
+      slotProps={{ backdrop: { sx: battleMapDropBackdropSx } }}
+      title={title}
+      contentProps={{ dividers: true }}
+      actions={actions}
     >
-      <DialogTitle sx={battleMapDialogTitleSx}>{title}</DialogTitle>
-      <DialogContent dividers sx={battleMapDialogContentSx}>{children}</DialogContent>
-      <DialogActions sx={battleMapDialogActionsSx}>{actions}</DialogActions>
-    </Dialog>
+      {children}
+    </BattleMapDialog>
   );
 }

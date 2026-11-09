@@ -1,50 +1,43 @@
-import {
-  Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-} from '@mui/material';
+import { Alert, Button, DialogContentText } from '@mui/material';
 import { Trash2 } from 'lucide-react';
-import {
-  battleMapDialogActionsSx, battleMapDialogContentSx,
-  battleMapDialogPaperSx, battleMapDialogTitleSx,
-} from '../map/battleMapSurface.js';
+import BattleMapDialog from '../map/BattleMapDialog.jsx';
 
 export default function DeletePiecesDialog({
   open, pieces, busy, error, container, onCancel, onConfirm,
 }) {
   return (
-    <Dialog
+    <BattleMapDialog
       open={open}
       onClose={onCancel}
       container={container}
-      fullWidth
       maxWidth="xs"
       aria-labelledby="delete-pieces-title"
       aria-describedby="delete-pieces-description"
-      slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
+      titleId="delete-pieces-title"
+      title="Delete selected pieces?"
+      contentProps={{ 'aria-busy': busy }}
+      actions={(
+        <>
+          <Button autoFocus disabled={busy} onClick={onCancel}>Cancel</Button>
+          <Button
+            color="error"
+            variant="contained"
+            startIcon={<Trash2 size={16} />}
+            disabled={busy}
+            onClick={onConfirm}
+          >
+            {busy ? 'Deleting…' : 'Delete'}
+          </Button>
+        </>
+      )}
     >
-      <DialogTitle id="delete-pieces-title" sx={battleMapDialogTitleSx}>
-        Delete selected pieces?
-      </DialogTitle>
-      <DialogContent sx={battleMapDialogContentSx} aria-busy={busy}>
-        <DialogContentText id="delete-pieces-description" sx={{ pt: 2 }}>
-          {pieces.length === 1
-            ? `Remove ${pieces[0]?.label || 'this piece'} from the map?`
-            : `Remove ${pieces.length} selected pieces from the map?`}
-          {' '}This cannot be undone.
-        </DialogContentText>
-        {error ? <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert> : null}
-      </DialogContent>
-      <DialogActions sx={battleMapDialogActionsSx}>
-        <Button autoFocus disabled={busy} onClick={onCancel}>Cancel</Button>
-        <Button
-          color="error"
-          variant="contained"
-          startIcon={<Trash2 size={16} />}
-          disabled={busy}
-          onClick={onConfirm}
-        >
-          {busy ? 'Deleting…' : 'Delete'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <DialogContentText id="delete-pieces-description" sx={{ pt: 2 }}>
+        {pieces.length === 1
+          ? `Remove ${pieces[0]?.label || 'this piece'} from the map?`
+          : `Remove ${pieces.length} selected pieces from the map?`}
+        {' '}This cannot be undone.
+      </DialogContentText>
+      {error ? <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert> : null}
+    </BattleMapDialog>
   );
 }

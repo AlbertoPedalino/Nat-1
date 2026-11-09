@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 
 export default function SelectorGroup({
   label,
@@ -64,14 +64,7 @@ export default function SelectorGroup({
   );
 }
 
-const groupLabelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-  mb: 0.5,
-};
+const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 
 const groupRowSx = {
   display: 'flex',

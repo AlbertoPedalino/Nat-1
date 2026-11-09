@@ -9,6 +9,8 @@ import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -112,20 +114,9 @@ const gridSx = {
   gap: 1.25,
 };
 
-const headerSx = {
-  p: 1.25,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-};
+const headerSx = boardInsetSx;
 
-const headerLabelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-};
+const headerLabelSx = captionLabelSx;
 
 const headerTextSx = {
   fontSize: '0.82rem',

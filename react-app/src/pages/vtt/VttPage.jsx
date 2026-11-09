@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { toRoster } from '../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../shared/campaign/useGmCampaigns.js';
@@ -21,6 +21,7 @@ import SessionGate from './session/SessionGate.jsx';
 import * as s from './styles.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
+import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -203,7 +204,7 @@ export default function VttPage() {
         sx={spectator.requested ? spectatorContentSx : [contentSx, mapMode && contentMapSx]}
       >
         {gate ? <Typography sx={s.noticeSx}>{gate}</Typography> : null}
-        {!gate && busy ? <CircularProgress size={24} /> : null}
+        {!gate && busy ? <LoadingLine centered /> : null}
         {!gate && !busy && error && (requestedScene || joinedCampaign) ? (
           <Typography sx={s.errorSx}>{error}</Typography>
         ) : null}

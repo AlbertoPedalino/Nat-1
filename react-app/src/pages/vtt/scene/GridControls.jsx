@@ -12,7 +12,7 @@ import { Grid3x3, Hexagon } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { numberSx, pillLabelSx, colorInputSx } from './panelStyles.js';
+import { numberSx, pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
@@ -98,7 +98,7 @@ export function GridControls({ grid, onGridChange }) {
           onChange={(color) => setGrid({ color })}
           deferMs={180}
           label="Grid colour"
-          sx={colorInputSx}
+          size={34}
         />
         <TextField
           label="Line"

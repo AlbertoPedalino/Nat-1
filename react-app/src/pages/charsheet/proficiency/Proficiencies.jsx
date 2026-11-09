@@ -3,6 +3,7 @@ import { ScrollText } from 'lucide-react';
 import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
 import { useProficiencySets } from './ProficiencySetsContext.jsx';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 
 export default function Proficiencies({ C }) {
   const profSets = useProficiencySets();
@@ -12,7 +13,7 @@ export default function Proficiencies({ C }) {
       <PanelHeader icon={ScrollText} title="Proficiencies" />
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {sections.length === 0 && (
-          <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic' }}>No proficiencies loaded.</Typography>
+          <Typography sx={emptyTextSx}>No proficiencies loaded.</Typography>
         )}
         {sections.map(sec => (
           <Box key={sec.title} sx={{ mb: '0.7rem' }}>

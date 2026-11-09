@@ -1,10 +1,8 @@
-import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 import { Map, Castle, ScrollText, Dices, Table, BookOpen } from 'lucide-react';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
+import ToolPageShell from '../../app/navigation/ToolPageShell.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
-import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import { GmBoardProvider, useGmBoard } from './state/GmBoardContext.jsx';
 import HexcrawlView from './hexcrawl/HexcrawlView.jsx';
 import DungeonView from './dungeon/DungeonView.jsx';
@@ -37,68 +35,51 @@ function GmBoardShell({ tool }) {
   const { state, dispatch } = useGmBoard();
 
   return (
-    <Box sx={pageSx}>
-      <AppTopBar home backTo="/library/gmboard" backLabel="GM Boards">
-        <LinkedToolsMenu sectionKey="gmboard" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
-      </AppTopBar>
-      <Box sx={contentSx}>
-        <Stack spacing={2}>
-          <InstanceConflictBanner tool={tool} />
-          <Box>
-            <Typography variant="h1">GM Board</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Instance {tool.id}</Typography>
-          </Box>
-          <Tabs
-            value={state.tab}
-            onChange={(_, value) => dispatch({ type: 'setTab', tab: value })}
-            variant="scrollable"
-            allowScrollButtonsMobile
-            aria-label="GM Board sections"
-          >
-            {TABS.map((t) => (
-              <Tab
-                key={t.value}
-                icon={<t.Icon size={15} />}
-                iconPosition="start"
-                value={t.value}
-                label={t.label}
-                id={`gmboard-tab-${t.value}`}
-                aria-controls={`gmboard-tabpanel-${t.value}`}
-              />
-            ))}
-          </Tabs>
-          <Box
-            role="tabpanel"
-            id={`gmboard-tabpanel-${state.tab}`}
-            aria-labelledby={`gmboard-tab-${state.tab}`}
-            tabIndex={0}
-            sx={tabPanelSx}
-          >
-            {state.tab === 'hex' ? <HexcrawlView /> : null}
-            {state.tab === 'dungeon' ? <DungeonView /> : null}
-            {state.tab === 'quest' ? <QuestView /> : null}
-            {state.tab === 'roll' ? <RollView /> : null}
-            {state.tab === 'editor' ? <TablesView /> : null}
-            {state.tab === 'guide' ? <GuideView /> : null}
-          </Box>
-        </Stack>
+    // Narrower than the other tools: its cards and tables read best at 1200.
+    <ToolPageShell
+      tool={tool}
+      sectionKey="gmboard"
+      title="GM Board"
+      backTo="/library/gmboard"
+      backLabel="GM Boards"
+      maxWidth={1200}
+    >
+      <Tabs
+        value={state.tab}
+        onChange={(_, value) => dispatch({ type: 'setTab', tab: value })}
+        variant="scrollable"
+        allowScrollButtonsMobile
+        aria-label="GM Board sections"
+      >
+        {TABS.map((t) => (
+          <Tab
+            key={t.value}
+            icon={<t.Icon size={15} />}
+            iconPosition="start"
+            value={t.value}
+            label={t.label}
+            id={`gmboard-tab-${t.value}`}
+            aria-controls={`gmboard-tabpanel-${t.value}`}
+          />
+        ))}
+      </Tabs>
+      <Box
+        role="tabpanel"
+        id={`gmboard-tabpanel-${state.tab}`}
+        aria-labelledby={`gmboard-tab-${state.tab}`}
+        tabIndex={0}
+        sx={tabPanelSx}
+      >
+        {state.tab === 'hex' ? <HexcrawlView /> : null}
+        {state.tab === 'dungeon' ? <DungeonView /> : null}
+        {state.tab === 'quest' ? <QuestView /> : null}
+        {state.tab === 'roll' ? <RollView /> : null}
+        {state.tab === 'editor' ? <TablesView /> : null}
+        {state.tab === 'guide' ? <GuideView /> : null}
       </Box>
-    </Box>
+    </ToolPageShell>
   );
 }
-
-const pageSx = {
-  minHeight: '100vh',
-  bgcolor: 'background.default',
-  pt: APP_TOP_BAR_HEIGHT,
-};
-
-const contentSx = {
-  maxWidth: 1200,
-  mx: 'auto',
-  px: { xs: 1.25, md: 2 },
-  py: 2,
-};
 
 const tabPanelSx = {
   '&:focus-visible': {

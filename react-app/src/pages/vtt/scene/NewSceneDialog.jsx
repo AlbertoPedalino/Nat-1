@@ -24,6 +24,8 @@ import {
 import { stitchImages } from './stitch.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { pillLabelSx } from './panelStyles.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -180,11 +182,11 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             >
               <ToggleButton value="scenes" aria-label="A scene each">
                 <Layers size={14} />
-                <Box component="span" sx={pillSx}>A scene each</Box>
+                <Box component="span" sx={pillLabelSx}>A scene each</Box>
               </ToggleButton>
               <ToggleButton value="joined" aria-label="One map, side by side">
                 <Columns2 size={14} />
-                <Box component="span" sx={pillSx}>One map, side by side</Box>
+                <Box component="span" sx={pillLabelSx}>One map, side by side</Box>
               </ToggleButton>
             </ToggleButtonGroup>
 
@@ -285,25 +287,13 @@ const cardTitleSx = {
 
 const cardBlurbSx = { fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.4 };
 
-const sectionSx = {
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-};
+const sectionSx = captionLabelSx;
 
 const creditSx = { fontSize: '0.7rem', color: 'text.secondary' };
 
 const stepsSx = { fontSize: '0.75rem', color: 'text.secondary' };
 
 const openSx = { fontSize: '0.72rem' };
-
-const pillSx = {
-  ml: 0.5,
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
-  letterSpacing: '0.04em',
-};
 
 const frameSx = {
   width: '100%',

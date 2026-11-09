@@ -6,8 +6,6 @@ import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 
-const FONT = UI_FONTS.display;
-
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
 // shared too so they cannot drift apart.
@@ -52,17 +50,17 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={14} />
       </IconButton>
 
-      <Typography sx={{ fontFamily: FONT, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
         {layout.label}
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
           NATURAL 1
         </Typography>
       )}
@@ -89,7 +87,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
 
       {layout.total != null && (
         <Typography sx={{
-          fontFamily: FONT, fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3,
+          fontFamily: UI_FONTS.display, fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3,
           fontSize: (layout.isCrit || layout.isFail) ? '2rem' : '1.5rem',
           color: layout.totalColor,
         }}>

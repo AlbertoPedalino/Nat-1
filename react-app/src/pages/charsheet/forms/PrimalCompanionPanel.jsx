@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Box, Button, CircularProgress, ToggleButton, ToggleButtonGroup, Typography,
-} from '@mui/material';
+import { Box, Button, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getPB } from '../../../shared/character/sheet/sheetStats.js';
@@ -45,6 +43,7 @@ import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -104,9 +103,8 @@ export default function PrimalCompanionPanel({ character, sheet }) {
 
   if (status === 'loading') {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={{ ...panelSx, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <CircularProgress size={16} />
-        <Typography sx={subSx}>Loading primal beast…</Typography>
+      <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
+        <LoadingLine label="Loading primal beast…" />
       </Box>
     );
   }

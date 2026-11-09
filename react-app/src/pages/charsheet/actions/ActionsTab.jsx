@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { getAllResourceDefs } from '../../../shared/character/resources/restResources.js';
 import { resolveActionFormulas, collectAdapterActions } from '../../../shared/character/sheet/adapterActions.js';
@@ -10,7 +10,6 @@ import { makeWeaponActions } from './weaponActions.js';
 import { loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
 import {
   compactInputSx,
-  filterChipSx,
   levelHeaderSx,
   panelRootSx,
   panelToolbarSx,
@@ -33,6 +32,8 @@ import { ensureClassAdapters } from '../../../shared/character/sheet/sheetRuntim
 import { useItemsDb } from '../inventory/useItemsDb.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { useMasteryEntries } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
+import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -52,6 +53,7 @@ function actionLabel(value) {
   return capitalize(value);
 }
 
+const FILTER_OPTIONS = FILTERS.map((key) => ({ key, label: actionLabel(key) }));
 const NO_RULES = [];
 
 export default function ActionsTab({ C, sheet, resources }) {
@@ -147,17 +149,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   return (
     <Box sx={panelRootSx}>
       <Box sx={panelToolbarSx}>
-        {FILTERS.map(f => (
-          <Chip
-            key={f}
-            size="small"
-            label={actionLabel(f)}
-            variant={filter === f ? 'filled' : 'outlined'}
-            color={filter === f ? 'primary' : 'default'}
-            onClick={() => setFilter(f)}
-            sx={filterChipSx}
-          />
-        ))}
+        <FilterToggles options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
         <SearchField
           placeholder="Search actions..."
           value={search}
@@ -172,7 +164,7 @@ export default function ActionsTab({ C, sheet, resources }) {
           <Typography sx={levelHeaderSx}>Attacks</Typography>
           <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
             <Box component="thead">
-              <Box component="tr" sx={{ '& th': { fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
+              <Box component="tr" sx={{ '& th': { ...sectionLabelSx, color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
                 <Box component="th">Name</Box>
                 <Box component="th">Hit</Box>
                 <Box component="th">Damage</Box>

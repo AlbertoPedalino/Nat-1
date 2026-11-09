@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { Circle } from 'lucide-react';
 import { TIER_OPTIONS } from '../boardOptions.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 
 // `clearable`: clicking the tier already picked clears it (onChange(null)).
 export default function TierSelector({ value, onChange, label = 'Tier', disabled = false, clearable = false }) {
@@ -51,14 +51,7 @@ export default function TierSelector({ value, onChange, label = 'Tier', disabled
   );
 }
 
-const labelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-  mb: 0.5,
-};
+const labelSx = { ...captionLabelSx, mb: 0.5 };
 
 const rowSx = {
   display: 'flex',

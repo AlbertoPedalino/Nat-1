@@ -18,7 +18,12 @@ import {
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
 import { useMenuPlacement } from './menuPlacement.js';
-import { battleMapDialogPaperSx } from './battleMapSurface.js';
+import {
+  battleMapCheckboxRowSx,
+  battleMapCompactFieldSx,
+  battleMapControlLabelSx,
+  battleMapMenuPaperSx,
+} from './battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
@@ -134,13 +139,7 @@ export default function DrawingMenu({
       slotProps={{
         transition: placement.transitionProps,
         paper: {
-          sx: {
-            ...battleMapDialogPaperSx,
-            width: MENU_WIDTH,
-            maxWidth: 'calc(100vw - 16px)',
-            maxHeight: 'calc(100% - 32px)',
-            '& .MuiMenu-list': { p: 0 },
-          },
+          sx: battleMapMenuPaperSx(MENU_WIDTH),
         },
       }}
     >
@@ -156,8 +155,8 @@ export default function DrawingMenu({
                 onChange={(event) => onVisibility(drawing, event.target.checked)}
               />
             )}
-            label={<Typography sx={controlLabelSx}>Hidden from the players</Typography>}
-            sx={formControlSx}
+            label={<Typography sx={battleMapControlLabelSx}>Hidden from the players</Typography>}
+            sx={battleMapCheckboxRowSx}
           />
         ) : null}
 
@@ -185,12 +184,12 @@ export default function DrawingMenu({
               }
             }}
             slotProps={{ htmlInput: { maxLength: 120 } }}
-            sx={compactFieldSx}
+            sx={battleMapCompactFieldSx}
           />
         ) : null}
 
         <Box sx={colorRowSx}>
-          <Typography sx={controlLabelSx}>Colour</Typography>
+          <Typography sx={battleMapControlLabelSx}>Colour</Typography>
           {/* Nothing reaches the board until the hand rests: redrawing the
               scene for every step of the native palette is what made it
               stutter. */}
@@ -199,7 +198,6 @@ export default function DrawingMenu({
             value={drawing.color || VTT_COLORS.gold}
             deferMs={COLOR_DELAY}
             onChange={(color) => onSave(drawing, { color })}
-            sx={colorInputSx}
           />
         </Box>
 
@@ -211,7 +209,7 @@ export default function DrawingMenu({
               const colour = effect ? areaEffect(effect)?.color : null;
               onSave(drawing, { area: { ...area, effect }, ...(colour ? { color: colour } : null) });
             }}
-            sx={compactFieldSx}
+            sx={battleMapCompactFieldSx}
           />
         ) : null}
 
@@ -224,8 +222,8 @@ export default function DrawingMenu({
                 onChange={(event) => onSave(drawing, { area: { ...area, filled: event.target.checked } })}
               />
             )}
-            label={<Typography sx={controlLabelSx}>Filled</Typography>}
-            sx={formControlSx}
+            label={<Typography sx={battleMapControlLabelSx}>Filled</Typography>}
+            sx={battleMapCheckboxRowSx}
           />
         ) : null}
 
@@ -246,7 +244,7 @@ export default function DrawingMenu({
               }}
               onKeyDown={(event) => event.stopPropagation()}
               slotProps={{ htmlInput: { min: feetPerCell, step: feetPerCell } }}
-              sx={{ ...compactFieldSx, flex: 1 }}
+              sx={{ ...battleMapCompactFieldSx, flex: 1 }}
             />
             {area.shape === 'line' ? (
               <TextField
@@ -264,13 +262,13 @@ export default function DrawingMenu({
                 }}
                 onKeyDown={(event) => event.stopPropagation()}
                 slotProps={{ htmlInput: { min: feetPerCell, step: feetPerCell } }}
-                sx={{ ...compactFieldSx, flex: 1 }}
+                sx={{ ...battleMapCompactFieldSx, flex: 1 }}
               />
             ) : null}
           </Stack>
         ) : (
           <Box>
-            <Typography sx={controlLabelSx}>{`Size ×${scale.toFixed(2).replace(/\.?0+$/, '')}`}</Typography>
+            <Typography sx={battleMapControlLabelSx}>{`Size ×${scale.toFixed(2).replace(/\.?0+$/, '')}`}</Typography>
             <Slider
               size="small"
               aria-label="Size"
@@ -322,20 +320,6 @@ const sectionTitleSx = {
   color: 'primary.main',
 };
 
-const compactFieldSx = {
-  '& .MuiInputBase-root': { height: 34, fontSize: '0.72rem' },
-  '& .MuiInputLabel-root': { fontSize: '0.68rem' },
-  '& .MuiInputLabel-shrink': { transform: 'translate(14px, -7px) scale(0.75)' },
-};
-
-const formControlSx = {
-  m: 0,
-  minHeight: 24,
-  '& .MuiCheckbox-root': { p: 0.35, mr: 0.25 },
-  '& .MuiSvgIcon-root': { fontSize: 17 },
-};
-
-const controlLabelSx = { fontSize: '0.68rem', lineHeight: 1.2 };
 const helperSx = { color: 'text.secondary', fontSize: '0.57rem', lineHeight: 1.25 };
 
 const colorRowSx = {
@@ -343,17 +327,6 @@ const colorRowSx = {
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: 0.6,
-};
-
-const colorInputSx = {
-  width: 32,
-  height: 32,
-  p: '2px',
-  border: '1px solid',
-  borderColor: 'gmboard.vtt.goldBorderStrong',
-  borderRadius: 1,
-  bgcolor: 'gmboard.vtt.inset',
-  cursor: 'pointer',
 };
 
 const menuButtonSx = { fontSize: '0.68rem', py: 0.35 };

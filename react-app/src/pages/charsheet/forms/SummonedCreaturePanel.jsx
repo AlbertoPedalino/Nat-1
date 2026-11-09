@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
-  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -35,6 +34,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -119,9 +119,8 @@ export default function SummonedCreaturePanel({
 
   if (status === 'loading') {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={{ ...panelSx, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <CircularProgress size={16} />
-        <Typography sx={subSx}>Loading summoned statblock…</Typography>
+      <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
+        <LoadingLine label="Loading summoned statblock…" />
       </Box>
     );
   }

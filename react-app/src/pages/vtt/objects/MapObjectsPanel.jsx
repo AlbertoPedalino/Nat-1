@@ -83,7 +83,7 @@ export default function MapObjectsPanel({
           value={color}
           commitOnBlur
           onChange={setColor}
-          sx={colorInputSx}
+          size={34}
         />
       </Box>
 
@@ -161,17 +161,6 @@ const strokeControlSx = {
 const strokeLabelSx = { color: VTT_COLORS.panelText, fontSize: '0.65rem' };
 const strokeSliderSx = { py: 0.6, color: VTT_COLORS.gold };
 const strokeValueSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.62rem', textAlign: 'right' };
-
-const colorInputSx = {
-  width: 34,
-  height: 34,
-  flexShrink: 0,
-  p: '2px',
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.42)}`,
-  borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.3),
-  cursor: 'pointer',
-};
 
 const gridSx = {
   display: 'grid',

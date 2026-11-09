@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Alert, Button, Chip, Typography } from '@mui/material';
+import { Box, Alert, Button, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
@@ -12,7 +12,7 @@ import { SPELL_ACTION_FILTERS, buildSpellInfo, expandSpellInfoBySlots, getSpellA
 import { SpellPickerDialog } from './SpellPickerDialog.jsx';
 import { getSpellAbility } from './spellAbility.js';
 import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
-import { addButtonSx, compactInputSx, filterChipSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
+import { addButtonSx, compactInputSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -24,6 +24,7 @@ import { classNames } from '../../../shared/character/progression/classLevel.js'
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { useSpellCatalog } from './useSpellCatalog.js';
 import { useSpellSlotState } from './useSpellSlotState.js';
+import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -95,17 +96,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       </Box>
 
       <Box sx={panelToolbarSx}>
-        {SPELL_ACTION_FILTERS.map((option) => (
-          <Chip
-            key={option.key}
-            size="small"
-            label={option.label}
-            variant={spellFilter === option.key ? 'filled' : 'outlined'}
-            color={spellFilter === option.key ? 'primary' : 'default'}
-            onClick={() => setSpellFilter(option.key)}
-            sx={filterChipSx}
-          />
-        ))}
+        <FilterToggles options={SPELL_ACTION_FILTERS} value={spellFilter} onChange={setSpellFilter} />
         <SearchField
           placeholder="Search spells..."
           value={spellSearch}

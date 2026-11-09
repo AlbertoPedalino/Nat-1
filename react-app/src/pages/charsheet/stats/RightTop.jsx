@@ -29,8 +29,7 @@ import { rollD20 } from '../../../shared/character/dice/dice.js';
 import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
-import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { sectionLabelSx, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -149,8 +148,8 @@ function SquareStat({ value, label, clickable }) {
         bgcolor: UI_COLORS.headerBg,
         ...(clickable ? { cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } } : {}),
       }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.25rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>{value}</Typography>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mt: 0.15 }}>{label}</Typography>
+      <Typography sx={statValueSx}>{value}</Typography>
+      <Typography sx={{ ...statLabelSx, mt: 0.15 }}>{label}</Typography>
     </Box>
   );
 }

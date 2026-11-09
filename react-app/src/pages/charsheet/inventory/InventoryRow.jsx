@@ -25,6 +25,7 @@ import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
+import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -164,15 +165,11 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-              <QtyButton onClick={() => actions.qty(index, -1)}><Minus size={12} /></QtyButton>
-              <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.8125rem', fontWeight: 700, color: UI_COLORS.goldLight, minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
-              <QtyButton onClick={() => actions.qty(index, 1)}><Plus size={12} /></QtyButton>
-            </Box>
+            <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
             <Tooltip title="Remove">
-              <Box component="span" sx={{ display: 'inline-flex' }}>
-                <QtyButton danger onClick={() => actions.remove(index)}><Trash2 size={12} /></QtyButton>
-              </Box>
+              <IconButton size="small" aria-label={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
+                <Trash2 size={12} />
+              </IconButton>
             </Tooltip>
           </Box>
         </Box>
@@ -192,15 +189,6 @@ function ItemFlagButton({ def, active, onClick }) {
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
-  );
-}
-
-function QtyButton({ children, danger = false, disabled = false, ariaLabel, onClick }) {
-  return (
-    <IconButton size="small" disabled={disabled} aria-label={ariaLabel} onClick={onClick}
-      sx={{ width: 20, height: 20, border: 1, borderColor: 'divider', borderRadius: '3px', color: 'text.secondary', '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.gold, color: danger ? UI_COLORS.danger : UI_COLORS.gold } }}>
-      {children}
-    </IconButton>
   );
 }
 

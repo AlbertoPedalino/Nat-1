@@ -9,6 +9,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -17,7 +18,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
 
   return (
     <Box sx={{
-      height: '100%', bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.45rem',
+      ...sheetBoxSx, height: '100%', p: '0.45rem',
     }}>
       <Box sx={{
         display: 'grid', gridTemplateColumns: { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' },

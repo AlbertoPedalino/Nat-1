@@ -3,6 +3,7 @@ import { levelHeaderSx, panelSurfaceSx, statBoxSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 
 export function StatBox({ value, label }) {
   return (
@@ -16,7 +17,7 @@ export function StatBox({ value, label }) {
 export function Empty({ text }) {
   return (
     <Box sx={{ ...panelSurfaceSx, py: 0.9 }}>
-      <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic' }}>{text}</Typography>
+      <Typography sx={emptyTextSx}>{text}</Typography>
     </Box>
   );
 }

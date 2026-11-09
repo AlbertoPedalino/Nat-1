@@ -2,7 +2,7 @@ import {
   Autocomplete, Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { Minus, Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-react';
+import { Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../../../shared/encounter/library.js';
@@ -11,6 +11,7 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
 import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -84,17 +85,12 @@ export default function EncounterList() {
                 {formatNumber(item.xp * item.qty)} XP
               </Typography>
               <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                <Tooltip title="Decrease quantity">
-                  <IconButton size="small" onClick={() => dispatch({ type: 'changeMonsterQty', id: item.id, delta: -1 })}>
-                    <Minus size={15} />
-                  </IconButton>
-                </Tooltip>
-                <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700 }}>{item.qty}</Typography>
-                <Tooltip title="Increase quantity">
-                  <IconButton size="small" onClick={() => dispatch({ type: 'changeMonsterQty', id: item.id, delta: 1 })}>
-                    <Plus size={15} />
-                  </IconButton>
-                </Tooltip>
+                <CountStepper
+                  value={item.qty}
+                  size={24}
+                  label="quantity"
+                  onStep={(delta) => dispatch({ type: 'changeMonsterQty', id: item.id, delta })}
+                />
                 <Tooltip title="Remove">
                   <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removeEncounterItem', id: item.id })}>
                     <Trash2 size={15} />

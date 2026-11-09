@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  CircularProgress,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  Switch,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Button, FormControlLabel, MenuItem, Stack, Switch, TextField, Typography } from '@mui/material';
 import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
@@ -23,6 +14,7 @@ import {
 import EncounterSaveSelect from './EncounterSaveSelect.jsx';
 import EncounterGroupCard from './EncounterGroupCard.jsx';
 import { noticeSx } from './encounterImportStyles.js';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
@@ -111,10 +103,7 @@ export default function EncounterImportDialog({
       <Stack spacing={2} sx={{ pt: 0.5 }}>
         {listNotice ? <Typography sx={noticeSx}>{listNotice}</Typography> : null}
         {!instances.length && listing ? (
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <CircularProgress size={16} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Loading your encounter saves…</Typography>
-          </Stack>
+          <LoadingLine label="Loading your encounter saves…" />
         ) : null}
         {!instances.length && !listing ? (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>

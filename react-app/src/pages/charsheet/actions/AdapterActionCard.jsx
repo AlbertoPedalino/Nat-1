@@ -24,6 +24,7 @@ import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -144,7 +145,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
         const statusStyle = chipToneStyle(statusTone);
         return (
         <Box sx={persistentRowSx(uiAlpha(UI_COLORS.blueSoft, 0.06), !hasRes, open)}>
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
+          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>Status</Typography>
           <Chip
             size="small"
             label={label}
@@ -173,7 +174,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
 
       {hasRes ? (
         <Box sx={persistentRowSx(uiAlpha(UI_COLORS.gold, 0.06), true, open)}>
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
+          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
               <Button

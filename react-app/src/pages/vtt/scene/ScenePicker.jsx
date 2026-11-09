@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -26,6 +16,7 @@ import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -143,7 +134,7 @@ export default function ScenePicker({
     }
   };
 
-  if (loadingCampaigns) return <CircularProgress size={24} />;
+  if (loadingCampaigns) return <LoadingLine centered label="Loading campaigns…" />;
 
   return (
     <Stack spacing={2}>

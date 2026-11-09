@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
-import { Minus, Plus } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -20,6 +19,8 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -43,17 +44,6 @@ function resolveDetail(action, character, sheet) {
     return {};
   }
 }
-
-const stepBtnSx = (disabled) => ({
-  width: 22,
-  height: 22,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: '3px',
-  color: 'text.secondary',
-  opacity: disabled ? 0.35 : 1,
-  '&:hover': disabled ? {} : { borderColor: UI_COLORS.gold, color: UI_COLORS.gold },
-});
 
 export default function CreatedItemsPanel({ action, character, sheet }) {
   const { onUpdateInventory } = useSheetActions();
@@ -223,15 +213,14 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           const addDisabled = remaining <= 0 || count >= maxPerItem || unavailable || !canAddItem(value, dbItem);
           const removeDisabled = count <= 0;
           const stepper = (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-              <IconButton size="small" aria-label={`Remove ${label}`} disabled={removeDisabled} onClick={() => handleRemove(value)} sx={stepBtnSx(removeDisabled)}>
-                <Minus size={13} />
-              </IconButton>
-              <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: UI_FONTS.display, fontWeight: 700, fontSize: '0.78rem', color: UI_COLORS.goldLight }}>{count}</Box>
-              <IconButton size="small" aria-label={`Add ${label}`} disabled={addDisabled} onClick={() => handleAdd(value)} sx={stepBtnSx(addDisabled)}>
-                <Plus size={13} />
-              </IconButton>
-            </Box>
+            <CountStepper
+              value={count}
+              size={22}
+              label={label}
+              canDecrease={!removeDisabled}
+              canIncrease={!addDisabled}
+              onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
+            />
           );
           const rowBorder = count > 0 ? uiAlpha(UI_COLORS.gold, 0.4) : 'divider';
           const rowBg = count > 0 ? uiAlpha(UI_COLORS.gold, 0.06) : UI_COLORS.headerBg;
@@ -266,7 +255,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             />
           );
         }) : (
-          <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
+          <Typography sx={{ ...emptyTextSx, py: 0.5 }}>
             No items match “{query.trim()}”.
           </Typography>
         )}

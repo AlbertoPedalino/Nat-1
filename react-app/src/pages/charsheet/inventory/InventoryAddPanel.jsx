@@ -18,12 +18,14 @@ import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { compareItemsBySearch, itemMatchesPreparedSearch } from './itemSearch.js';
 import {
   InventoryFilterButtons,
-  ShowMoreButton,
   compactInputSx,
   inventorySectionSx,
 } from './inventoryControls.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -32,28 +34,6 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 // 120 rows a page: the old hard cap rendered that many at once, so the DOM cost
 // is known to be fine, and it takes fewer scrolls to cross a ~2500-item DB.
 const SEARCH_PAGE = 120;
-
-const addPanelToggleSx = (open) => ({
-  minHeight: 0,
-  px: '12px',
-  py: '4px',
-  border: 1,
-  borderColor: open ? UI_COLORS.gold : 'divider',
-  borderRadius: 1,
-  bgcolor: open ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
-  color: open ? UI_COLORS.goldLight : 'text.secondary',
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  whiteSpace: 'nowrap',
-  '&:hover': {
-    borderColor: UI_COLORS.gold,
-    color: UI_COLORS.goldLight,
-    bgcolor: open ? uiAlpha(UI_COLORS.gold, 0.18) : uiAlpha(UI_COLORS.gold, 0.08),
-  },
-});
 
 function parseDecimalInput(value) {
   const parsed = Number(String(value ?? '').trim().replace(',', '.'));
@@ -81,16 +61,17 @@ function AddResultRow({ item, onAdd }) {
 }
 
 const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem, resetKey }) {
-  const { visible, remaining, showMore, listProps } = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
+  const page = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
+  const { visible, listProps } = page;
 
   return (
     <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.ink, 0.65), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
       {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
-      {remaining > 0 ? <ShowMoreButton remaining={remaining} onClick={showMore} /> : null}
+      <ShowMoreButton page={page} />
       {!items.length && (
-        <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.75, px: 1 }}>
+        <Typography sx={{ ...emptyTextSx, py: 0.75, px: 1 }}>
           {itemsDbCount ? 'No items found.' : 'Loading items.'}
         </Typography>
       )}
@@ -159,7 +140,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
           onClick={() => setAddPanelOpen((prev) => !prev)}
           startIcon={addPanelOpen ? null : <Plus size={12} />}
           endIcon={addPanelOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          sx={addPanelToggleSx(addPanelOpen)}
+          sx={goldToggleSx(addPanelOpen)}
         >
           {addPanelOpen ? 'Close' : 'Add Item'}
         </Button>

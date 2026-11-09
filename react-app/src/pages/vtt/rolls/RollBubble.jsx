@@ -6,8 +6,6 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 
-const FONT = UI_FONTS.display;
-
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
 // is never written anywhere.
@@ -166,7 +164,7 @@ const failSx = {
 };
 
 const actorSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   fontWeight: 700,
   color: VTT_COLORS.gold,
@@ -174,7 +172,7 @@ const actorSx = {
 };
 
 const labelSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.12em',
@@ -184,7 +182,7 @@ const labelSx = {
 };
 
 const natSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   fontWeight: 900,
   letterSpacing: '0.1em',
@@ -206,7 +204,7 @@ const modeChipSx = (chip) => ({
 
 
 const totalSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontWeight: 900,
   lineHeight: 1,
   my: 0.2,

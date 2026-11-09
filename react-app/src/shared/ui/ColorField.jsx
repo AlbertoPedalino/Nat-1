@@ -14,8 +14,15 @@ import { useDebouncedCallback } from './useDebouncedCallback.js';
 // When the colour reaches `onChange`: at every step of the picker (default),
 // once the steps rest for `deferMs`, or only when the picker closes
 // (`commitOnBlur`). Other props (`disabled`, `title`) go to the input.
+//
+// It looks the same everywhere: a `size`-pixel square swatch, on the battle
+// map's gold-bordered inset (`tone="map"`) or on the app's plain border
+// (`tone="app"`), `round` for a circle. `bare` drops the look for a caller
+// that hides the well (a swatch grid's invisible custom-colour input); `sx`
+// adds to it.
 export default function ColorField({
-  value, onChange, label, sx, deferMs = 0, commitOnBlur = false, ...inputProps
+  value, onChange, label, sx, deferMs = 0, commitOnBlur = false,
+  size = 32, tone = 'map', round = false, bare = false, ...inputProps
 }) {
   const inputRef = useRef(null);
   const editing = useRef(false);
@@ -49,7 +56,34 @@ export default function ColorField({
         const next = event.currentTarget.value;
         if (commitOnBlur && next !== shown) onChange?.(next);
       }}
-      sx={sx}
+      sx={bare ? sx : [swatchSx(size, tone), round ? roundSx : null, sx]}
     />
   );
 }
+
+function swatchSx(size, tone) {
+  const map = tone === 'map';
+  return {
+    width: size,
+    height: size,
+    flexShrink: 0,
+    p: '2px',
+    border: '1px solid',
+    borderColor: map ? 'gmboard.vtt.goldBorderStrong' : 'divider',
+    borderRadius: 1,
+    bgcolor: map ? 'gmboard.vtt.inset' : 'transparent',
+    cursor: 'pointer',
+    '&:disabled': { cursor: 'default', opacity: 0.45 },
+  };
+}
+
+// A circle: the native swatch filling it edge to edge.
+const roundSx = {
+  p: 0,
+  borderRadius: '50%',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  '&::-webkit-color-swatch-wrapper': { p: 0 },
+  '&::-webkit-color-swatch': { border: 'none', borderRadius: '50%' },
+  '&::-moz-color-swatch': { border: 'none', borderRadius: '50%' },
+};

@@ -10,6 +10,8 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -287,20 +289,9 @@ const followUpSx = {
   textTransform: 'none',
 };
 
-const historySx = {
-  p: 1.25,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-};
+const historySx = boardInsetSx;
 
-const historyTitleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-};
+const historyTitleSx = captionLabelSx;
 
 const historyNoteSx = {
   fontSize: '0.68rem',

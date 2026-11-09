@@ -1,7 +1,6 @@
 import { Box, Chip, Typography } from '@mui/material';
 import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { emptyTextSx, sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -10,9 +9,9 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 // (the Eldritch Cannon), so both read the same.
 export default function DefensesPanel({ items = [], emptyText = 'No resistances detected.', sx }) {
   return (
-    <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem', ...sx }}>
-      <Typography sx={titleSx}>Defenses</Typography>
-      {items.length === 0 && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic' }}>{emptyText}</Typography>}
+    <Box sx={{ ...sheetBoxSx, p: '0.4rem 0.62rem', ...sx }}>
+      <Typography sx={sheetBoxTitleSx}>Defenses</Typography>
+      {items.length === 0 && <Typography sx={emptyTextSx}>{emptyText}</Typography>}
       {items.map((d, i) => {
         const tone = d.kind === 'Resist' || d.kind === 'Immune' ? damageTypeTone(d.type) : null;
         const tint = tone ? chipTintStyle(tone, { bgAlpha: d.kind === 'Immune' ? 0.3 : 0.12 }) : null;
@@ -30,12 +29,4 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
   );
 }
 
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
-  fontWeight: 700,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: 'primary.main',
-  mb: 0.4,
-};
+

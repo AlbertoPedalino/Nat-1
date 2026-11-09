@@ -6,8 +6,6 @@ import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const FONT = UI_FONTS.display;
-
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
 // answers, and a modal for each one turns walking across a map into paperwork.
@@ -118,7 +116,7 @@ const clickableSx = {
 };
 
 const coordSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -126,7 +124,7 @@ const coordSx = {
 };
 
 const headlineSx = {
-  fontFamily: FONT,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.95rem',
   fontWeight: 700,
   color: VTT_COLORS.gold,

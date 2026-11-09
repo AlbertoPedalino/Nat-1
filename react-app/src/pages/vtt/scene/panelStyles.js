@@ -12,14 +12,3 @@ export const pillLabelSx = {
   letterSpacing: '0.04em',
 };
 
-export const colorInputSx = {
-  width: 34,
-  height: 34,
-  p: 0,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: 'transparent',
-  cursor: 'pointer',
-  flexShrink: 0,
-};

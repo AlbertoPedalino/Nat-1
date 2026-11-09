@@ -1,6 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Typography, Stack, TextField, MenuItem, Chip, CircularProgress, IconButton, Divider } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  TextField,
+  MenuItem,
+  Chip,
+  IconButton,
+  Divider,
+} from '@mui/material';
 import { Cloud, Flag, Users, Plus, ScrollText, Copy, LogIn, LogOut, X, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
@@ -19,6 +29,9 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
+import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
+import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import StatePanel from '../../shared/ui/StatePanel.jsx';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -126,25 +139,23 @@ export default function CampaignsPage() {
         </Box>
 
         {pageState === 'unconfigured' ? (
-          <Box sx={statePanelSx}>
-            <Box component={Cloud} size={28} aria-hidden sx={stateIconSx} />
-            <Typography sx={stateTitleSx}>Online features not configured.</Typography>
-            <Typography sx={msgSx}>Campaigns require the cloud connection to be configured for this app.</Typography>
-          </Box>
+          <StatePanel icon={Cloud} title="Online features not configured.">
+            Campaigns require the cloud connection to be configured for this app.
+          </StatePanel>
         ) : pageState === 'loading' ? (
-          <Box sx={statePanelSx}>
-            <CircularProgress size={26} />
-            <Typography sx={msgSx}>Restoring your session…</Typography>
-          </Box>
+          <StatePanel loading>Restoring your session…</StatePanel>
         ) : pageState === 'signedOut' ? (
-          <Box sx={statePanelSx}>
-            <Box component={Users} size={30} aria-hidden sx={stateIconSx} />
-            <Typography sx={stateTitleSx}>Campaigns live online</Typography>
-            <Typography sx={msgSx}>Log in or create an account to create, join, and manage campaigns.</Typography>
-            <Button variant="contained" startIcon={<LogIn size={16} />} onClick={() => setAuthOpen(true)}>
-              Log in / Sign up
-            </Button>
-          </Box>
+          <StatePanel
+            icon={Users}
+            title="Campaigns live online"
+            action={(
+              <Button variant="contained" startIcon={<LogIn size={16} />} onClick={() => setAuthOpen(true)}>
+                Log in / Sign up
+              </Button>
+            )}
+          >
+            Log in or create an account to create, join, and manage campaigns.
+          </StatePanel>
         ) : (
           <>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={setupStackSx}>
@@ -164,7 +175,7 @@ export default function CampaignsPage() {
               </Box>
             </Stack>
 
-            {loading ? <Box sx={listLoadingSx}><CircularProgress size={22} /></Box> : null}
+            {loading ? <LoadingLine centered label="Loading campaigns…" sx={{ py: 2 }} /> : null}
             {!loading && campaigns.length === 0 ? (
               <Box sx={emptyPanelSx}>
                 <Typography sx={msgSx}>No campaigns yet. Create one or join with a code.</Typography>
@@ -305,29 +316,12 @@ const headerSx = { display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.5 };
 const headerIconSx = { color: 'primary.main', flexShrink: 0 };
 const titleSx = { fontFamily: UI_FONTS.display, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', fontWeight: 800, color: 'primary.main', letterSpacing: '0.06em' };
 
-const statePanelSx = {
-  minHeight: 220,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 1.25,
-  textAlign: 'center',
-  p: { xs: 2.5, sm: 4 },
-  border: '1px dashed',
-  borderColor: 'divider',
-  bgcolor: 'background.paper',
-};
-
-const stateIconSx = { color: 'primary.main' };
-const stateTitleSx = { fontFamily: UI_FONTS.display, color: 'text.primary', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.05em' };
 const msgSx = { color: 'text.secondary', fontSize: '0.9rem', maxWidth: 520 };
 
 const setupStackSx = { mb: 2.5 };
 const setupPanelSx = { flex: 1, minWidth: 0, p: 1.5, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
-const sectionTitleSx = { fontFamily: UI_FONTS.display, fontSize: '0.72rem', letterSpacing: '0.08em', color: 'text.secondary', mb: 1, textTransform: 'uppercase' };
+const sectionTitleSx = { ...captionLabelSx, mb: 1 };
 const setupActionSx = { width: { xs: '100%', sm: 'auto' }, flexShrink: 0 };
-const listLoadingSx = { display: 'flex', justifyContent: 'center', py: 2 };
 const emptyPanelSx = { textAlign: 'center', p: 3, mb: 2, border: '1px dashed', borderColor: 'divider' };
 
 const campaignCardSx = { p: { xs: 1.25, sm: 1.75 }, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };

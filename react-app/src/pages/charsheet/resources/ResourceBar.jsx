@@ -4,10 +4,8 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 
-const FONT = UI_FONTS.display;
-
 const btnSx = {
-  fontSize: '0.7rem', fontFamily: FONT, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
+  fontSize: '0.7rem', fontFamily: UI_FONTS.display, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
   color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35),
   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },
 };
@@ -25,7 +23,7 @@ const fillSx = (pct) => ({
 });
 
 const labelSx = {
-  fontSize: '0.65rem', fontFamily: FONT, fontWeight: 700,
+  fontSize: '0.65rem', fontFamily: UI_FONTS.display, fontWeight: 700,
   color: UI_COLORS.goldLight, minWidth: 36, textAlign: 'center',
 };
 

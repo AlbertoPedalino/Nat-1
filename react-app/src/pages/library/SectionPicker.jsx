@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listInstances, renameInstance } from '../../shared/instances/instanceStore.js';
 import {
@@ -17,6 +17,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { failureMessage } from '../../shared/ui/busyAction.js';
+import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -73,7 +74,7 @@ export default function SectionPicker({ meta }) {
   return (
     <>
       {error ? <Typography sx={s.errorTextSx}>{error}</Typography> : null}
-      {loading && !rows.length ? <CircularProgress size={22} /> : null}
+      {loading && !rows.length ? <LoadingLine label="Loading saves…" /> : null}
       {!loading && !rows.length ? (
         <Box sx={s.emptyBoxSx}>
           <Typography sx={s.emptyTextSx}>No saved {meta.label.toLowerCase()} sessions yet.</Typography>

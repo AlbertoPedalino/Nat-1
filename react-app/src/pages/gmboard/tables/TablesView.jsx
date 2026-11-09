@@ -8,6 +8,7 @@ import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 export default function TablesView() {
   const { state, dispatch } = useGmBoard();
@@ -119,13 +120,11 @@ const tabNameSx = {
 };
 
 const activeHeaderSx = {
+  ...boardInsetSx,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
   p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
 };
 
 const activeNameSx = {

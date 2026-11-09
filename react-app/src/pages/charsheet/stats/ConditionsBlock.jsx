@@ -11,6 +11,7 @@ import {
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 const DEAD_ACCENT = UI_COLORS.dangerBright;
 
@@ -59,8 +60,8 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
   const openCards = active.filter((c) => expanded.includes(c.key) && conditionEntries?.[c.key]?.length);
 
   return (
-    <Box sx={{ flex: 1, minWidth: 140, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Conditions</Typography>
+    <Box sx={{ ...sheetBoxSx, flex: 1, minWidth: 140, p: '0.4rem 0.62rem' }}>
+      <Typography sx={sheetBoxTitleSx}>Conditions</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: '0.5rem', borderStyle: 'dashed' }} />}

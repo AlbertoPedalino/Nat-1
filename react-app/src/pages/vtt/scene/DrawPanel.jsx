@@ -20,7 +20,6 @@ import {
   Undo2,
 } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import { colorInputSx } from './panelStyles.js';
 import AreaEffectSelect from '../map/AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 
@@ -72,7 +71,7 @@ export function DrawPanel({
           onChange={onDrawColorChange}
           deferMs={180}
           label="Ink colour"
-          sx={colorInputSx}
+          size={34}
         />
         <TextField
           label="Size"

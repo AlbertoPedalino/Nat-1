@@ -5,7 +5,7 @@ import {
 import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/boardOptions.js';
 import { UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
@@ -89,14 +89,7 @@ function ordinal(value) {
   return words[value] || `${value}th`;
 }
 
-const labelSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'text.secondary',
-  mb: 0.5,
-};
+const labelSx = { ...captionLabelSx, mb: 0.5 };
 
 const denseLabelSx = {
   color: UI_COLORS.textFaint,

@@ -1,10 +1,11 @@
 import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
+import { ExternalLink, Trash2 } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -43,7 +44,7 @@ export default function PartyConfig() {
                   value={player.color || UI_COLORS.pcToken}
                   onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { color: value } })}
                   label={`${player.name} color`}
-                  sx={colorSwatchSx}
+                  size={28} tone="app" round
                 />
               )}
               {player.sourceId ? (
@@ -105,36 +106,19 @@ export default function PartyConfig() {
 }
 
 // Shared −/value/+ controls. Renders 3 grid cells; parent owns the grid + label.
-function StepperControls({ label, value, min, max, onChange }) {
-  return (
-    <>
-      <Tooltip title={`Decrease ${label}`}>
-        <span>
-          <IconButton size="small" disabled={value <= min} onClick={() => onChange(value - 1)}>
-            <Minus size={14} />
-          </IconButton>
-        </span>
-      </Tooltip>
-      <Typography sx={{ fontWeight: 700, width: 34, textAlign: 'center' }}>
-        {value}
-      </Typography>
-      <Tooltip title={`Increase ${label}`}>
-        <span>
-          <IconButton size="small" disabled={value >= max} onClick={() => onChange(value + 1)}>
-            <Plus size={14} />
-          </IconButton>
-        </span>
-      </Tooltip>
-    </>
-  );
-}
-
 // Boxed pill, uppercase label inline left. For top-level party knobs (PCs, Level).
 function Stepper(props) {
   return (
-    <Box sx={{ ...stepperGroupSx, display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: 0.5, alignItems: 'center' }}>
+    <Box sx={{ ...stepperGroupSx, display: 'flex', gap: 0.5, alignItems: 'center' }}>
       <Typography variant="caption" sx={stepperLabelSx}>{props.label}</Typography>
-      <StepperControls {...props} />
+      <CountStepper
+        value={props.value}
+        size={24}
+        label={props.label}
+        canDecrease={props.value > props.min}
+        canIncrease={props.value < props.max}
+        onStep={(delta) => props.onChange(props.value + delta)}
+      />
     </Box>
   );
 }
@@ -169,19 +153,3 @@ const stepperLabelSx = {
   letterSpacing: 0.5,
 };
 
-const colorSwatchSx = (theme) => ({
-  width: 28,
-  height: 28,
-  flexShrink: 0,
-  p: 0,
-  bgcolor: 'transparent',
-  border: 'none',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  appearance: 'none',
-  WebkitAppearance: 'none',
-  boxShadow: `0 0 0 1px ${theme.palette.divider}, inset 0 0 0 2px ${theme.palette.background.paper}`,
-  '&::-webkit-color-swatch-wrapper': { p: 0 },
-  '&::-webkit-color-swatch': { border: 'none', borderRadius: '50%' },
-  '&::-moz-color-swatch': { border: 'none', borderRadius: '50%' },
-});

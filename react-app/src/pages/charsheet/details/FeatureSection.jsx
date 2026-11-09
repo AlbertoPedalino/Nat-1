@@ -6,6 +6,7 @@ import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.j
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
+import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -21,7 +22,7 @@ export function FeatureSection({ title, color, features }) {
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.blue, 0.14), pb: 0.25, mb: 0.4 }}>
+      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.blue, 0.14) }), pb: 0.25, mb: 0.4 }}>
         {title}
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (

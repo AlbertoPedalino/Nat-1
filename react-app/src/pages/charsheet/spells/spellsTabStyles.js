@@ -1,7 +1,6 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
-const FONT_TITLE = UI_FONTS.display;
-
+import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 export const panelRootSx = {
   display: 'grid',
   gap: 1,
@@ -26,15 +25,7 @@ export const panelToolbarSx = {
 };
 
 export const levelHeaderSx = {
-  fontFamily: FONT_TITLE,
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  letterSpacing: '0.12em',
-  color: UI_COLORS.blue,
-  textTransform: 'uppercase',
-  borderBottom: 1,
-  borderColor: uiAlpha(UI_COLORS.blue, 0.14),
-  pb: '4px',
+  ...sheetSectionHeaderSx({ color: UI_COLORS.blue, rule: uiAlpha(UI_COLORS.blue, 0.14) }),
   mb: 0.55,
 };
 
@@ -77,7 +68,7 @@ export const addButtonSx = {
   borderColor: UI_COLORS.gold,
   borderRadius: 1,
   color: UI_COLORS.gold,
-  fontFamily: FONT_TITLE,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.7rem',
   fontWeight: 700,
   letterSpacing: '0.06em',
@@ -93,7 +84,7 @@ export const inlineButtonSx = {
   px: 0.8,
   lineHeight: 1.3,
   borderRadius: 1,
-  fontFamily: FONT_TITLE,
+  fontFamily: UI_FONTS.display,
   letterSpacing: '0.04em',
 };
 
@@ -108,23 +99,13 @@ export const levelToggleSx = {
     minHeight: 0,
     px: '9px',
     py: '4px',
-    fontFamily: FONT_TITLE,
+    fontFamily: UI_FONTS.display,
     fontSize: '0.58rem',
     letterSpacing: '0.08em',
     color: 'text.secondary',
     borderColor: 'divider',
     '&.Mui-selected': { color: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.gold, 0.12), borderColor: UI_COLORS.gold },
   },
-};
-
-export const filterChipSx = {
-  height: 22,
-  fontFamily: FONT_TITLE,
-  fontSize: '0.56rem',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '0.09em',
-  borderRadius: 1,
 };
 
 export const statBoxSx = {

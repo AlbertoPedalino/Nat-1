@@ -99,7 +99,6 @@ export default function TokenComposer({
               value={color}
               onChange={setColor}
               label="Token color"
-              sx={colorSx}
             />
             <Button component="label" size="small" startIcon={<ImagePlus size={14} />}>
               {image ? 'Change image' : 'Image'}
@@ -157,12 +156,3 @@ const draftDisabledSx = { opacity: 0.5, cursor: 'default' };
 
 const draftNameSx = { minWidth: 0, fontSize: '0.82rem', color: 'text.primary' };
 
-const colorSx = {
-  width: 38,
-  height: 30,
-  p: 0.25,
-  borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.4)}`,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.3),
-  cursor: 'pointer',
-};

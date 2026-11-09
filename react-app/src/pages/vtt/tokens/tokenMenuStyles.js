@@ -1,10 +1,7 @@
+import { battleMapCompactFieldSx } from '../map/battleMapSurface.js';
 // Looks shared by the piece menu (TokenMenu) and its sections.
 
-export const compactFieldSx = {
-  '& .MuiInputBase-root': { height: 34, fontSize: '0.72rem' },
-  '& .MuiInputLabel-root': { fontSize: '0.68rem' },
-  '& .MuiInputLabel-shrink': { transform: 'translate(14px, -7px) scale(0.75)' },
-};
+export const compactFieldSx = battleMapCompactFieldSx;
 
 export const sectionTitleSx = {
   color: 'text.secondary',

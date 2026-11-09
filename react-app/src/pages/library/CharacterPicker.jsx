@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Download, Save } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -21,6 +21,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
+import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -131,7 +132,7 @@ export default function CharacterPicker() {
       <Typography sx={s.sectionHeadSx}>{isGm ? 'Players sheets' : 'My sheets'}</Typography>
 
       {error ? <Typography sx={s.errorTextSx}>{error}</Typography> : null}
-      {loading && !rows.length ? <CircularProgress size={22} /> : null}
+      {loading && !rows.length ? <LoadingLine label="Loading sheets…" /> : null}
 
       {!loading && rows.length === 0 ? (
         <Box sx={s.emptyBoxSx}>

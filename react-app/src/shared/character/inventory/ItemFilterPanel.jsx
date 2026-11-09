@@ -10,6 +10,7 @@ import {
 } from './itemFilters.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
+import { goldToggleSx } from '../../ui/actionButton.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -19,24 +20,6 @@ import { UI_FONTS } from '../../ui/fonts.js';
 // A dropdown row hides itself when the pool offers no values for it — a wizard's
 // inventory shows no Damage or Mastery row. Ranges always show: "no item weighs
 // anything" is not a case worth special-casing.
-
-const toggleSx = (open, active) => ({
-  minHeight: 0,
-  px: '12px',
-  py: '4px',
-  border: 1,
-  borderColor: open || active ? UI_COLORS.gold : 'divider',
-  borderRadius: 1,
-  bgcolor: open || active ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
-  color: open || active ? UI_COLORS.goldLight : 'text.secondary',
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  whiteSpace: 'nowrap',
-  '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.goldLight },
-});
 
 const clearButtonSx = {
   minHeight: 0,
@@ -220,7 +203,7 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
           onClick={() => setOpen((prev) => !prev)}
           startIcon={<SlidersHorizontal size={12} />}
           endIcon={open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          sx={toggleSx(open, activeCount > 0)}
+          sx={goldToggleSx(open || activeCount > 0)}
         >
           {activeCount > 0 ? `Filters (${activeCount})` : 'Filters'}
         </Button>

@@ -34,8 +34,6 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
 import { clamp } from '../../../shared/numbers.js';
 
-const CINZEL = UI_FONTS.display;
-
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
 // (spending the Long Rest use or a spell slot), and each active cannon renders a
@@ -192,7 +190,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 if (!group.length) return null;
                 return (
                   <Box key={cat}>
-                    <Typography sx={{ fontFamily: CINZEL, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
+                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
                       {cat === 'bonus' ? 'Bonus Action' : 'Reaction'}
                     </Typography>
                     <Stack spacing={0.4}>

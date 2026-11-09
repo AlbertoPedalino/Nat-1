@@ -1,6 +1,4 @@
-import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography,
-} from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Clock } from 'lucide-react';
 import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
@@ -9,6 +7,7 @@ import { weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import BattleMapDialog from '../map/BattleMapDialog.jsx';
 
 // What the party walked into. A dialog rather than a panel because it is the
 // answer to a click and wants reading once, not living on the map.
@@ -25,50 +24,47 @@ export default function HexResultDialog({ result, onClose }) {
   const WeatherIcon = weatherIcon(clock?.weather);
 
   return (
-    <Dialog
+    <BattleMapDialog
       open={open}
       onClose={onClose}
       maxWidth="sm"
-      fullWidth
-    >
-      {/* The weather rides in the corner of the title rather than in the body:
-          it is the standing condition every roll below was made under, and it is
-          the first thing the table asks about. */}
-      <DialogTitle sx={titleRowSx}>
-        <Box component="span" sx={titleSx}>
-          {hex ? `Hex ${hex.q}, ${hex.r}` : 'Hex'}
-          {/* The hours the leg actually cost, which is the terrain's own only
-              when the party is walking it in fair weather. */}
-          {terrain ? ` · ${terrain.label} (${result?.travelHours ?? terrain.hours}h)` : ''}
-        </Box>
-        {clock ? (
-          <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>
-            <WeatherIcon size={13} />
-            <Typography component="span" sx={weatherTextSx}>
-              {weatherName(clock.weather, clock.intensity)}
-              {disadvantage ? ' · disadvantage' : ''}
-            </Typography>
+      // The weather rides in the corner of the title rather than in the body:
+      // it is the standing condition every roll below was made under, and it is
+      // the first thing the table asks about.
+      titleSx={titleRowSx}
+      title={(
+        <>
+          <Box component="span" sx={titleSx}>
+            {hex ? `Hex ${hex.q}, ${hex.r}` : 'Hex'}
+            {/* The hours the leg actually cost, which is the terrain's own only
+                when the party is walking it in fair weather. */}
+            {terrain ? ` · ${terrain.label} (${result?.travelHours ?? terrain.hours}h)` : ''}
           </Box>
-        ) : null}
-      </DialogTitle>
-
-      <DialogContent dividers>
-        <Stack spacing={0.6} sx={{ mb: 1.25 }}>
           {clock ? (
-            <Box sx={lineSx}>
-              <Clock size={14} />
-              <Typography sx={lineTextSx}>{formatCampaignDateTime(clock)}</Typography>
+            <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>
+              <WeatherIcon size={13} />
+              <Typography component="span" sx={weatherTextSx}>
+                {weatherName(clock.weather, clock.intensity)}
+                {disadvantage ? ' · disadvantage' : ''}
+              </Typography>
             </Box>
           ) : null}
-        </Stack>
+        </>
+      )}
+      contentProps={{ dividers: true }}
+      actions={<Button onClick={onClose}>Close</Button>}
+    >
+      <Stack spacing={0.6} sx={{ mb: 1.25 }}>
+        {clock ? (
+          <Box sx={lineSx}>
+            <Clock size={14} />
+            <Typography sx={lineTextSx}>{formatCampaignDateTime(clock)}</Typography>
+          </Box>
+        ) : null}
+      </Stack>
 
-        {result ? <HexResultSteps result={{ steps: result.steps }} /> : null}
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-      </DialogActions>
-    </Dialog>
+      {result ? <HexResultSteps result={{ steps: result.steps }} /> : null}
+    </BattleMapDialog>
   );
 }
 

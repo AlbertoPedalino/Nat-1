@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import {
-  Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogTitle, IconButton, MenuItem, Stack, TextField, Tooltip, Typography,
-} from '@mui/material';
+import { Box, Button, IconButton, MenuItem, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Network, Plus, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
@@ -21,6 +18,8 @@ import { appTopBarButtonSx } from '../../shared/ui/appBar.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
 import { TOOL_CATALOG } from './toolCatalog.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
+import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -203,10 +202,15 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
 
   return <>
     {button}
-    <Dialog open={open} onClose={() => !working && setOpen(false)} fullWidth maxWidth="sm">
-      <DialogTitle>Linked tools</DialogTitle>
-      <DialogContent dividers>
-        {loading ? <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box> : <Stack spacing={2}>
+    <SheetDialog
+      open={open}
+      onClose={() => !working && setOpen(false)}
+      maxWidth="sm"
+      title="Linked tools"
+      icon={<Network size={18} />}
+      actions={<Button disabled={working} onClick={() => setOpen(false)}>Close</Button>}
+    >
+        {loading ? <LoadingLine centered label="Loading linked tools…" /> : <Stack spacing={2}>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Tools in this list are connected to each other. Removing one keeps the others connected.
           </Typography>
@@ -282,8 +286,6 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
             {candidates.map((row) => <MenuItem key={rowKey(row)} value={rowKey(row)}>{row.name} · {TOOL_UI[row.sectionKey].label}</MenuItem>)}
           </TextField> : <Button startIcon={<Plus size={16} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
         </Stack>}
-      </DialogContent>
-      <DialogActions><Button disabled={working} onClick={() => setOpen(false)}>Close</Button></DialogActions>
-    </Dialog>
+    </SheetDialog>
   </>;
 }

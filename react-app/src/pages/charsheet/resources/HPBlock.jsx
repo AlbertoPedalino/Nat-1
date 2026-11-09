@@ -7,8 +7,8 @@ import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
-const CINZEL = UI_FONTS.display;
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
 // wider than the panel. The extra room goes between each value and its stepper.
@@ -21,7 +21,7 @@ const chipSx = {
   borderRadius: 1,
   bgcolor: 'background.paper',
   color: 'text.secondary',
-  fontFamily: CINZEL,
+  fontFamily: UI_FONTS.display,
   fontSize: '0.56rem',
   letterSpacing: '0.04em',
   display: 'inline-flex',
@@ -92,23 +92,23 @@ export default function HPBlock({
       onBlur={commitEdit}
       onKeyDown={onEditKey}
       slotProps={{ htmlInput: { inputMode: 'numeric', style: { textAlign: 'center', padding: '1px 3px' } } }}
-      sx={{ ...sx, '& input': { fontFamily: CINZEL, fontWeight: 700, ...inputSx } }}
+      sx={{ ...sx, '& input': { fontFamily: UI_FONTS.display, fontWeight: 700, ...inputSx } }}
     />
   );
 
   const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.3 };
 
   return (
-    <Box sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+    <Box sx={{ ...sheetBoxSx, width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
-        <Typography sx={{ fontFamily: CINZEL, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
           HP
         </Typography>
 
         {dead && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerBright, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerBright, 0.12) }}>
             <Skull size={12} style={{ color: UI_COLORS.dangerBright }} />
-            <Typography sx={{ fontFamily: CINZEL, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
             </Typography>
           </Box>
@@ -123,13 +123,13 @@ export default function HPBlock({
               <Typography
                 component="span"
                 onClick={() => startEdit('hp', sheet.currentHP)}
-                sx={{ fontFamily: CINZEL, fontSize: '1.5rem', fontWeight: 700, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ fontFamily: UI_FONTS.display, fontSize: '1.5rem', fontWeight: 700, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {sheet.currentHP}
               </Typography>
             )}
-            <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.9rem', color: 'text.secondary' }}>/</Typography>
-            <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.9rem', fontWeight: 600, color: 'text.secondary' }}>
+            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: '0.9rem', color: 'text.secondary' }}>/</Typography>
+            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: '0.9rem', fontWeight: 600, color: 'text.secondary' }}>
               {sheet.maxHP}
             </Typography>
           </Box>
@@ -203,7 +203,7 @@ export default function HPBlock({
         {atZero && !dead && (
           <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <Typography sx={{ fontFamily: CINZEL, fontSize: '0.56rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.56rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
                 Death Saves
               </Typography>
               <Tooltip title="Click to set successes">
@@ -232,7 +232,7 @@ export default function HPBlock({
                 size="small"
                 variant="outlined"
                 onClick={onDeathSave}
-                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: '0.5rem', fontFamily: CINZEL, fontWeight: 600, letterSpacing: '0.06em', color: 'text.secondary', borderColor: 'divider' }}
+                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: '0.5rem', fontFamily: UI_FONTS.display, fontWeight: 600, letterSpacing: '0.06em', color: 'text.secondary', borderColor: 'divider' }}
               >
                 Roll
               </Button>

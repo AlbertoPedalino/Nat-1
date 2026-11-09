@@ -61,7 +61,6 @@ export const builderRootSx = {
 // Builder-scoped component defaults use theme overrides instead of descendant
 // selectors in `builderRootSx`. This keeps component `sx` authoritative for
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
-const CINZEL = UI_FONTS.display;
 const BUILDER_SELECTED_SX = {
   color: UI_COLORS.textPrimary,
   backgroundColor: uiAlpha(UI_COLORS.primary, 0.20),
@@ -72,12 +71,12 @@ export const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
       styleOverrides: {
-        h1: { fontFamily: CINZEL, fontSize: '1.08rem', lineHeight: 1.15, fontWeight: 800 },
-        h2: { fontFamily: CINZEL, fontSize: '0.82rem', lineHeight: 1.2, fontWeight: 800 },
+        h1: { fontFamily: UI_FONTS.display, fontSize: '1.08rem', lineHeight: 1.15, fontWeight: 800 },
+        h2: { fontFamily: UI_FONTS.display, fontSize: '0.82rem', lineHeight: 1.2, fontWeight: 800 },
         body1: { fontSize: '0.8rem' },
         body2: { fontSize: '0.72rem' },
         caption: { fontSize: '0.62rem' },
-        overline: { fontFamily: CINZEL, fontSize: '0.56rem', lineHeight: 1.6, fontWeight: 800 },
+        overline: { fontFamily: UI_FONTS.display, fontSize: '0.56rem', lineHeight: 1.6, fontWeight: 800 },
       },
     },
     MuiChip: {
@@ -85,7 +84,7 @@ export const builderTheme = createTheme(theme, {
         root: {
           height: 19,
           borderRadius: '3px',
-          fontFamily: CINZEL,
+          fontFamily: UI_FONTS.display,
           fontSize: '0.54rem',
           letterSpacing: '0.04em',
           backgroundColor: uiAlpha(UI_COLORS.gold, 0.08),

@@ -79,6 +79,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             label={`${title}: custom`}
             value={localColor || '#4d95d6'}
             onChange={setLocalColor}
+            bare
             sx={{
               position: 'absolute', left: -40, top: -40, width: 100, height: 100,
               cursor: 'pointer', border: 'none', padding: 0,

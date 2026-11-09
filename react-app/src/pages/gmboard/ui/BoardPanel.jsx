@@ -1,5 +1,6 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 // A panel of the GM Board (Travel, Date & Time, Dungeon Explorer, Quest
 // Generator…): a bordered paper box whose first row is the icon and title,
@@ -24,13 +25,7 @@ export default function BoardPanel({
   );
 }
 
-const panelSx = {
-  p: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-};
+const panelSx = boardPanelSx;
 
 const headRowSx = {
   display: 'flex',
