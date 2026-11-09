@@ -1,13 +1,21 @@
-import { Box } from '@mui/material';
+import { Box, alpha } from '@mui/material';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { OPACITY } from './colors.js';
 
-// Shared mini chip/badge: a small bordered, tinted label. One look for every
-// spell-row tag — cast time, Concentration/Ritual, source, modifiers — across
-// the sheet spell card and the builder/dialog/spellbook rows. Callers vary only
-// `label`/`color`/`bg`; the shape lives here so the chip reads identically
-// everywhere. `bg` defaults to transparent; `sx` allows rare per-use tweaks.
-export default function MiniBadge({ label, color, bg = 'transparent', title, sx }) {
+// The badge's wash: its own colour, faint. A colour MUI cannot read (a theme
+// path) gets no wash.
+function tint(color) {
+  try { return alpha(color, OPACITY.fill); } catch { return 'transparent'; }
+}
+
+// The badge: a small bordered, tinted label for an attribute of a row — a
+// source, a level, a cast time, Concentration/Ritual, an item or action tag —
+// on the sheet and in the builder alike. Something that stands on its own or
+// is clicked (a counter, a filter, a condition, a state) is a Chip instead.
+// Callers vary only `label`/`color` (and `bg` for a different wash); the shape
+// lives here so every badge reads the same. `sx` allows rare per-use tweaks.
+export default function MiniBadge({ label, color, bg, title, sx }) {
   return (
     <Box
       component="span"
@@ -17,7 +25,7 @@ export default function MiniBadge({ label, color, bg = 'transparent', title, sx 
         border: 1,
         borderColor: color,
         color,
-        bgcolor: bg,
+        bgcolor: bg ?? tint(color),
         borderRadius: 0.375,
         px: 0.75,
         py: 0.25,

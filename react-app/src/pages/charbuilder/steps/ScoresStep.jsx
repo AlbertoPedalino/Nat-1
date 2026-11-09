@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Chip, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dice5, Dumbbell } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
@@ -10,6 +10,8 @@ import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesV
 import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -72,14 +74,12 @@ export default function ScoresStep({ state, dispatch }) {
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography variant="h2" sx={{ lineHeight: LINE_HEIGHTS.tight }}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
                       <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1 }}>
-                        <Chip size="small" label={`Base ${baseScore}`} variant="outlined" />
+                        <MiniBadge label={`Base ${baseScore}`} color={UI_COLORS.textSecondary} />
                         {bonusBreakdown.map((bonus, index) => (
-                          <Chip
+                          <MiniBadge
                             key={`${bonus.source}-${index}`}
-                            size="small"
-                            variant="outlined"
-                            color="primary"
                             label={`${bonus.source} +${bonus.value}`}
+                            color={UI_COLORS.accent}
                           />
                         ))}
                       </Stack>

@@ -1,6 +1,8 @@
-import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function SearchList({ value, onSearch, placeholder, items, selectedName, onSelect, meta }) {
   return (
@@ -29,7 +31,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
                   secondary={meta?.(item)}
                   slotProps={{ secondary: { component: 'div' } }}
                 />
-                <Chip size="small" label={item.source} />
+                <MiniBadge label={item.source} color={UI_COLORS.textSecondary} />
               </ListItemButton>
             );
           })}

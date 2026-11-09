@@ -1,12 +1,11 @@
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-import { alpha } from '@mui/material';
 import {
   ACTION_COLORS,
   CHIP_TONES,
   ENTITY_COLORS,
   ITEM_ATTUNEMENT,
 } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
 
@@ -38,7 +37,7 @@ const TAG_TONES = {
 // A MiniBadge descriptor ({ key, label, color, bg }) for a semantic tone.
 function tagBadge(key, tone, label) {
   const color = TAG_TONES[tone];
-  return { key, label, color, bg: alpha(color, OPACITY.fill) };
+  return { key, label, color };
 }
 
 export function buildActionTags(action, C) {

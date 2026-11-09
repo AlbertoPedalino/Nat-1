@@ -15,13 +15,13 @@ import {
 } from '../../../shared/character/inventory/weight.js';
 import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wildShapeForm.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { chipTintStyle } from '../../../shared/ui/entityColors.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -125,13 +125,13 @@ export default function Movement({ C, sheet }) {
                 size="small"
                 label={`${effectTitle(effect)}${effectSummary(effect) ? `: ${effectSummary(effect)}` : ''}`}
                 variant="outlined"
-                sx={{ height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.edge), justifyContent: 'flex-start' }}
+                sx={{ ...chipTintStyle(UI_COLORS.accentText), fontSize: FONT_SIZES.xxxs, justifyContent: 'flex-start' }}
               />
             ))}
           </Box>
         ) : null}
         {hasPenalty ? (
-          <Chip size="small" label={reason} variant="outlined" sx={{ height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.penaltyText, borderColor: uiAlpha(UI_COLORS.penaltyText, OPACITY.edge), justifyContent: 'flex-start' }} />
+          <Chip size="small" label={reason} variant="outlined" sx={{ ...chipTintStyle(UI_COLORS.penaltyText), fontSize: FONT_SIZES.xxxs, justifyContent: 'flex-start' }} />
         ) : null}
       </Box>
     </Paper>

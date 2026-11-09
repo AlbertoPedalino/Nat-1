@@ -2,6 +2,7 @@ import { Box, Chip, Typography } from '@mui/material';
 import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
 import { emptyTextSx, sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -15,7 +16,7 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
       {items.length === 0 && <Typography sx={emptyTextSx}>{emptyText}</Typography>}
       {items.map((d, i) => {
         const tone = d.kind === 'Resist' || d.kind === 'Immune' ? damageTypeTone(d.type) : null;
-        const tint = tone ? chipTintStyle(tone, { bgAlpha: d.kind === 'Immune' ? 0.3 : 0.12 }) : null;
+        const tint = tone ? chipTintStyle(tone, { bgAlpha: d.kind === 'Immune' ? OPACITY.line : OPACITY.tint }) : null;
         return (
           <Chip
             key={`${d.kind}-${d.type}-${i}`}

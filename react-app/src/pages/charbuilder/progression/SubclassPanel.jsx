@@ -1,10 +1,12 @@
-import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -12,7 +14,7 @@ function SubclassFeatureRow({ feature }) {
       title={feature.name}
       entries={feature.entries}
       tone={ENTITY_COLORS.subclass}
-      leading={<Chip size="small" label={`Lv ${feature.level}`} />}
+      leading={<MiniBadge label={`Lv ${feature.level}`} color={UI_COLORS.textSecondary} />}
     />
   );
 }

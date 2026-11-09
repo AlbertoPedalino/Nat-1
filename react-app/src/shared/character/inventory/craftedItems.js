@@ -1,4 +1,3 @@
-import { alpha } from '@mui/material';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../ui/entityColors.js';
 import { featOriginKind } from '../progression/selectedFeats.js';
 import { CRAFTED_FLAG_META, craftedFlagOf } from './craftedItemState.js';
@@ -29,13 +28,13 @@ export function buildItemTags(item, character) {
   const flag = craftedFlagOf(item);
   if (flag && item?.craftedLabel) {
     const color = craftedTagColor(flag, character);
-    if (color) tags.push({ key: flag, label: item.craftedLabel, color, bg: alpha(color, OPACITY.fill) });
+    if (color) tags.push({ key: flag, label: item.craftedLabel, color });
   }
   // The plan a replicated weapon was made from (Repeating Shot): its row is
   // named after the weapon, as its card in the Actions tab is.
   const property = replicatedItemProperty(item);
   if (property) {
-    tags.push({ key: `plan-${property.key}`, label: property.tag, color: ITEM_ATTUNEMENT, bg: alpha(ITEM_ATTUNEMENT, OPACITY.fill) });
+    tags.push({ key: `plan-${property.key}`, label: property.tag, color: ITEM_ATTUNEMENT });
   }
   return tags;
 }

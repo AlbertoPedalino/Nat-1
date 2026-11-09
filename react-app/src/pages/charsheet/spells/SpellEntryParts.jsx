@@ -1,11 +1,4 @@
-import {
-  alpha,
-  Box,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
@@ -27,7 +20,7 @@ export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
   const tone = sourceInfo.color || UI_COLORS.spell;
-  const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, OPACITY.fill)} />;
+  const badge = <MiniBadge label={label} color={tone} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
   return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;

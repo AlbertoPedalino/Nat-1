@@ -52,7 +52,7 @@ function ItemTagsRow({ item, character }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
       {item.custom ? <Box component="span" sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>[custom]</Box> : null}
-      {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />)}
+      {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} />)}
     </Box>
   );
 }

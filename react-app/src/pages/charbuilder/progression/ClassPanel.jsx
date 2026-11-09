@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Chip, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -13,8 +13,10 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -67,14 +69,14 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                 primary={<Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.lg }}>{cls.name}</Typography>}
                 secondary={(
                   <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.25 }}>
-                    <Chip size="small" label={`Hit Die ${hitDie}`} />
-                    {cls.primary ? <Chip size="small" label={`Primary ${cls.primary}`} /> : null}
-                    {saves ? <Chip size="small" label={`Saves ${saves}`} /> : null}
+                    <MiniBadge label={`Hit Die ${hitDie}`} color={ENTITY_COLORS.class} />
+                    {cls.primary ? <MiniBadge label={`Primary ${cls.primary}`} color={ENTITY_COLORS.class} /> : null}
+                    {saves ? <MiniBadge label={`Saves ${saves}`} color={ENTITY_COLORS.class} /> : null}
                   </Stack>
                 )}
                 slotProps={{ secondary: { component: 'div' } }}
               />
-              <Chip size="small" label={cls.source} />
+              <MiniBadge label={cls.source} color={UI_COLORS.textSecondary} />
             </Box>
             {prereqReason && (
               <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, mb: 0.5 }}>

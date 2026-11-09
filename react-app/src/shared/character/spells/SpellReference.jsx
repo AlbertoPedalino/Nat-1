@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { alpha, Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { RichInline } from '../../content/RichText.jsx';
 import { entriesToHigherLevelBlocks } from '../../content/entryText.js';
@@ -75,14 +75,14 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
 // Shared by every spell row (builder list + sheet picker dialog).
 export function SpellMiniTags({ spell, sx }) {
   const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, bg: alpha(SPELL_TAG_COLORS.concentration, OPACITY.fill), title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, bg: alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill), title: 'Ritual' } : null,
+    isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, title: 'Concentration' } : null,
+    isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, title: 'Ritual' } : null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0, ...sx }}>
       {tags.map((tag) => (
-        <MiniBadge key={tag.label} label={tag.label} color={tag.color} bg={tag.bg} title={tag.title} />
+        <MiniBadge key={tag.label} label={tag.label} color={tag.color} title={tag.title} />
       ))}
     </Box>
   );

@@ -17,6 +17,8 @@ import { asArray } from '../../../shared/lists.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -91,7 +93,7 @@ function BackgroundDetailCard({ background }) {
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0, color: 'primary.main' }}>{background.name}</Typography>
-          <Chip size="small" label={background.source || ''} />
+          <MiniBadge label={background.source || ''} color={UI_COLORS.textSecondary} />
         </Stack>
         {lore ? (
           <Typography variant="body2" sx={{ ...TEXT_STYLES.note, lineHeight: LINE_HEIGHTS.relaxed }}>
@@ -141,9 +143,9 @@ export default function BackgroundStep({ state, dispatch }) {
             return (
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1.5 }}>
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (
-                  <Chip key={ability} size="small" label={ABILITY_ABBREVIATIONS[ability]} />
+                  <MiniBadge key={ability} label={ABILITY_ABBREVIATIONS[ability]} color={ENTITY_COLORS.background} />
                 ))}
-                {featLabel ? <Chip size="small" label={featLabel} /> : null}
+                {featLabel ? <MiniBadge label={featLabel} color={ENTITY_COLORS.background} /> : null}
               </Stack>
             );
           }}

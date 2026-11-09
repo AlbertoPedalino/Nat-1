@@ -7,11 +7,12 @@ import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { entityChipSx } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -176,7 +177,7 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind
           <SpellRowLabel spell={spell} selected={selected} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoSelected ? (
-            <Chip size="small" label={autoLabel} sx={{ ...entityChipSx(autoKind), flexShrink: 0 }} />
+            <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} />
           ) : (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
           )}

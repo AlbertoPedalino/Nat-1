@@ -9,7 +9,7 @@ import {
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
-import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -19,7 +19,6 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
 
-const darkChipText = UI_COLORS.onAccent;
 
 export const PROFICIENCY_TONE = UI_COLORS.accentText;
 
@@ -92,26 +91,6 @@ export function InlineMetadata({ items }) {
   );
 }
 
-export function filledChipSx(bg) {
-  return {
-    backgroundColor: bg,
-    color: darkChipText,
-    fontWeight: FONT_WEIGHTS.bold,
-    border: `1px solid ${uiAlpha(UI_COLORS.accentHighlight, OPACITY.heavy)}`,
-    boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, OPACITY.line)} inset`,
-    '& .MuiChip-label': { color: darkChipText },
-  };
-}
-
-function outlinedChipSx(color) {
-  return {
-    color,
-    borderColor: color,
-    fontWeight: FONT_WEIGHTS.bold,
-    '& .MuiChip-label': { color },
-  };
-}
-
 export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item) => item, getLabel = (item) => item }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
@@ -122,7 +101,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
           variant="outlined"
           label={getLabel(item)}
           sx={{
-            ...outlinedChipSx(tone),
+            ...chipTintStyle(tone),
             flex: '0 1 auto',
             minWidth: 0,
             height: CONTROL_HEIGHTS.sm,

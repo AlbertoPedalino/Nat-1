@@ -19,7 +19,7 @@ import {
 } from '../../../shared/character/combat/ac.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
-import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -29,8 +29,7 @@ import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { collectPreviewProficiencies, collectPreviewFeats } from './previewData.js';
 import {
-  PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, filledChipSx,
-  PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
+  PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -110,7 +109,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           size="small"
           label={`Level ${level}`}
           sx={{
-            ...filledChipSx(UI_COLORS.accentText),
+            ...chipTintStyle(UI_COLORS.accentText),
             height: CONTROL_HEIGHTS.sm,
             fontSize: FONT_SIZES.xxs,
             ...TEXT_STYLES.label,

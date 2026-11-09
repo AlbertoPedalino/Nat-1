@@ -1,10 +1,5 @@
 import { useMemo } from 'react';
-import {
-  alpha,
-  Box,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import {
@@ -49,7 +44,7 @@ import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
 import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
@@ -254,7 +249,7 @@ export default function SpellEntry({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
-          {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, OPACITY.fill)} /> : null}
+          {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -299,19 +294,19 @@ export default function SpellEntry({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
             <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${signed(beamBonus)}` : ''} />
             {weaponStrike ? (
-              <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, OPACITY.fill)} />
+              <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} />
             ) : null}
-            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color={UI_COLORS.spell} bg={uiAlpha(UI_COLORS.spell, OPACITY.fill)} />; })}
+            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color={UI_COLORS.spell} />; })}
             {spellRiders.filter((rider) => rider.tag).map((rider) => (
-              <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} bg={alpha(rider.tag.color, OPACITY.fill)} />
+              <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} />
             ))}
-            {getSpellStatusChips(entry).map((chip) => <MiniBadge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
-            {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill)} /> : null}
+            {getSpellStatusChips(entry).map((chip) => <MiniBadge key={chip.key} label={chip.label} color={chip.color} />)}
+            {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} /> : null}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
-            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.spell} bg={uiAlpha(UI_COLORS.spell, OPACITY.fill)} /> : null}
-            {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} bg={alpha(SPELL_TAG_COLORS.concentration, OPACITY.fill)} /> : null}
-            {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill)} /> : null}
+            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.spell} /> : null}
+            {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} /> : null}
+            {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} /> : null}
             <MiniBadge {...getCastBadge(entry)} />
           </Box>
         </Box>

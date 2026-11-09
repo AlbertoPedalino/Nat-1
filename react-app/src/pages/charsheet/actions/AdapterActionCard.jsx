@@ -123,7 +123,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
               {(action.tags || []).length ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
                   {action.tags.map((tag) => (
-                    <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />
+                    <MiniBadge key={tag.key} label={tag.label} color={tag.color} />
                   ))}
                 </Box>
               ) : null}

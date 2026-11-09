@@ -1,4 +1,4 @@
-import { Box, Chip, Divider, Stack, Typography } from '@mui/material';
+import { Box, Divider, Stack, Typography } from '@mui/material';
 import { ScrollText, Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceSpec from '../choices/ChoiceSpec.jsx';
@@ -7,6 +7,8 @@ import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import SearchList from '../choices/SearchList.jsx';
 import { speciesChoiceSpecs } from '../choices/choiceSpecs.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
@@ -18,7 +20,7 @@ function SpeciesDetailCard({ species }) {
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{species.name}</Typography>
-          <Chip size="small" label={species.source || ''} />
+          <MiniBadge label={species.source || ''} color={UI_COLORS.textSecondary} />
         </Stack>
         <Divider />
         {rows.length ? (
