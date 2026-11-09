@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { Compass, FastForward, Footprints, Hexagon } from 'lucide-react';
+import { FastForward, Footprints, Hexagon } from 'lucide-react';
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import ClockBar from '../session/ClockBar.jsx';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
@@ -58,13 +58,8 @@ export default function HexcrawlView() {
         <MountSelector
           value={state.mountSpeed}
           onChange={(mountSpeed) => dispatch({ type: 'setMountSpeed', mountSpeed })}
+          note={state.terrain ? travelLine(state.terrain, travel) : null}
         />
-        {state.terrain ? (
-          <Box sx={travelSx}>
-            <Compass size={12} />
-            <Typography sx={travelTextSx}>{travelLine(state.terrain, travel)}</Typography>
-          </Box>
-        ) : null}
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
           <Button
@@ -105,15 +100,6 @@ const dividerSx = {
   borderTop: '1px solid',
   borderColor: 'divider',
 };
-
-const travelSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0.5,
-  color: 'text.secondary',
-};
-
-const travelTextSx = { fontSize: '0.75rem', color: 'text.secondary' };
 
 const hintSx = {
   fontSize: '0.72rem',

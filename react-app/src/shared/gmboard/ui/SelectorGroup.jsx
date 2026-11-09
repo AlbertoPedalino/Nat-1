@@ -1,7 +1,15 @@
 import { useId } from 'react';
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 
+// The one choice row of the GM Board and the map's hexcrawl (terrain,
+// population, tier, mount, season, weather, dungeon and quest options): a
+// caption, then a button per option, the chosen one lit in its tone.
+//
+// `getTone(option)` gives an option its own colour ({ color, dim }: the tier
+// colours); without it the theme's gold. `dim` also tints the option while it
+// is not chosen. `getIcon` and `getSub` add an icon and a second line;
+// `dense` is the smaller size of the map's corner panel.
 export default function SelectorGroup({
   label,
   options,
@@ -11,10 +19,13 @@ export default function SelectorGroup({
   getLabel = (o) => o.label,
   getSub = (o) => o.sub,
   getIcon,
+  getTone,
+  dense = false,
   disabled = false,
 }) {
   const theme = useTheme();
   const labelId = useId();
+  const gold = { color: theme.palette.primary.main };
 
   return (
     <Box>
@@ -24,44 +35,47 @@ export default function SelectorGroup({
           const id = getId(option);
           const selected = value === id;
           const Icon = getIcon ? getIcon(option) : null;
+          const sub = getSub(option);
           return (
             <Button
               key={id}
               size="small"
-              variant={selected ? 'contained' : 'outlined'}
-              color={selected ? 'primary' : 'inherit'}
+              variant="outlined"
               aria-pressed={selected}
               disabled={disabled}
               onClick={() => onChange(option)}
-              sx={{
-                ...optionBtnSx,
-                ...(selected
-                  ? {}
-                  : {
-                      '&:focus-visible': {
-                        outline: `2px solid ${theme.palette.primary.main}`,
-                        outlineOffset: '1px',
-                      },
-                    }),
-              }}
+              sx={optionSx(getTone ? getTone(option) : gold, selected, dense)}
             >
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2, gap: 0.25 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
-                  {Icon ? <Icon size={13} /> : null}
-                  <span>{getLabel(option)}</span>
-                </Box>
-                {getSub(option) ? (
-                  <Typography component="span" sx={selected ? selectedSubLabelSx : subLabelSx}>
-                    {getSub(option)}
-                  </Typography>
-                ) : null}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                {Icon ? <Icon size={dense ? 12 : 13} /> : null}
+                <span>{getLabel(option)}</span>
               </Box>
+              {sub ? <Typography component="span" sx={subLabelSx}>{sub}</Typography> : null}
             </Button>
           );
         })}
       </Box>
     </Box>
   );
+}
+
+function optionSx(tone, selected, dense) {
+  return {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 0.15,
+    minWidth: dense ? 54 : 72,
+    py: 0.4,
+    px: 0.75,
+    fontSize: dense ? '0.68rem' : '0.72rem',
+    lineHeight: 1.2,
+    textTransform: 'none',
+    borderColor: selected ? tone.color : (tone.dim || 'divider'),
+    color: selected ? tone.color : (tone.dim || 'text.secondary'),
+    bgcolor: selected ? alpha(tone.color, 0.16) : 'transparent',
+    '&:hover': { borderColor: tone.color, bgcolor: alpha(tone.color, 0.1) },
+    '&:focus-visible': { outline: `2px solid ${tone.color}`, outlineOffset: '1px' },
+  };
 }
 
 const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
@@ -72,22 +86,4 @@ const groupRowSx = {
   gap: 0.75,
 };
 
-const optionBtnSx = {
-  fontSize: '0.72rem',
-  textTransform: 'none',
-  minWidth: '72px',
-};
-
-const subLabelSx = {
-  fontSize: '0.6rem',
-  color: 'text.secondary',
-  opacity: 0.8,
-};
-
-// On a contained button the gold background swallows text.secondary; inherit
-// the button's contrastText instead and dim it with opacity only.
-const selectedSubLabelSx = {
-  fontSize: '0.6rem',
-  color: 'inherit',
-  opacity: 0.75,
-};
+const subLabelSx = { fontSize: '0.58rem', opacity: 0.85 };

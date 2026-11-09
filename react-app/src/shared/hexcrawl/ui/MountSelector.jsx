@@ -1,59 +1,38 @@
-import { useId } from 'react';
-import {
-  Box, Button, Stack, TextField, Typography, alpha, useTheme,
-} from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/boardOptions.js';
-import { UI_COLORS } from '../../ui/colors.js';
-import { captionLabelSx } from '../../ui/PanelHeader.jsx';
+import SelectorGroup from '../../gmboard/ui/SelectorGroup.jsx';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
 // The presets are the ones a table reaches for; the number beside them is free,
 // because every setting has its own beasts and the one somebody is riding is
 // never on a list of four. Shared by the board and the map's own hexcrawl
-// corner, so the two cannot disagree about what ×3 means.
+// corner, so the two cannot disagree about what ×3 means. `note` follows the
+// line that says what the speed does (the board adds the crossing time).
 export default function MountSelector({
-  value, onChange, label = 'Mount', dense = false, disabled = false,
+  value, onChange, label = 'Mount', dense = false, disabled = false, note = null,
 }) {
-  const theme = useTheme();
-  const labelId = useId();
   const speed = normalizeMountSpeed(value);
   const preset = MOUNT_OPTIONS.find((option) => option.speed === speed) || null;
+  const effect = speed === 1
+    ? `${preset?.label || 'On foot'}: a hex takes its full time.`
+    : `${preset ? `${preset.label}: ` : ''}a hex takes ${fraction(speed)} of its time.`;
 
   return (
     <Box>
-      <Typography id={labelId} sx={dense ? denseLabelSx : labelSx}>{label}</Typography>
-      <Box role="group" aria-labelledby={labelId} sx={rowSx}>
-        {MOUNT_OPTIONS.map((option) => {
-          const selected = speed === option.speed;
-          return (
-            <Button
-              key={option.id}
-              size="small"
-              variant="outlined"
-              disabled={disabled}
-              aria-pressed={selected}
-              onClick={() => onChange(option.speed)}
-              sx={{
-                ...buttonSx,
-                ...(dense ? denseButtonSx : null),
-                borderColor: selected ? 'primary.main' : 'divider',
-                color: selected ? 'primary.main' : 'text.secondary',
-                bgcolor: selected ? alpha(theme.palette.primary.main, 0.16) : 'transparent',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
-                {option.speed === 1 ? <Footprints size={12} /> : <Rabbit size={12} />}
-                <span>×{option.speed}</span>
-              </Box>
-              <Typography component="span" sx={subSx}>{option.label}</Typography>
-            </Button>
-          );
-        })}
-      </Box>
-
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mt: 0.75 }}>
+      <Box sx={rowSx}>
+        <SelectorGroup
+          label={label}
+          options={MOUNT_OPTIONS}
+          getLabel={(option) => `×${option.speed}`}
+          getSub={(option) => option.label}
+          getIcon={(option) => (option.speed === 1 ? Footprints : Rabbit)}
+          value={preset?.id ?? null}
+          onChange={(option) => onChange(option.speed)}
+          dense={dense}
+          disabled={disabled}
+        />
         <TextField
           label="Speed ×"
           size="small"
@@ -64,12 +43,11 @@ export default function MountSelector({
           slotProps={{ htmlInput: { min: MIN_MOUNT_SPEED, max: MAX_MOUNT_SPEED, step: 0.25 } }}
           sx={numberSx}
         />
-        <Typography sx={hintSx}>
-          {speed === 1
-            ? (preset?.label || 'On foot') + ': a hex takes its full time.'
-            : `${preset ? `${preset.label}: ` : ''}a hex takes ${fraction(speed)} of its time.`}
-        </Typography>
-      </Stack>
+      </Box>
+      <Typography sx={hintSx}>
+        {effect}
+        {note ? <> · {note}</> : null}
+      </Typography>
     </Box>
   );
 }
@@ -89,34 +67,14 @@ function ordinal(value) {
   return words[value] || `${value}th`;
 }
 
-const labelSx = { ...captionLabelSx, mb: 0.5 };
-
-const denseLabelSx = {
-  color: UI_COLORS.textFaint,
-  fontSize: '0.62rem',
-  letterSpacing: '0.04em',
-  mb: 0.5,
-};
-
-const rowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.6 };
-
-const buttonSx = {
+// The free number sits at the end of the presets' row, level with them.
+const rowSx = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: 0.15,
-  minWidth: '62px',
-  flex: '1 1 62px',
-  py: 0.4,
-  px: 0.6,
-  fontSize: '0.72rem',
-  textTransform: 'none',
-  lineHeight: 1.2,
+  alignItems: 'flex-end',
+  flexWrap: 'wrap',
+  gap: 0.75,
 };
-
-const denseButtonSx = { minWidth: '54px', flex: '1 1 54px', fontSize: '0.68rem' };
-
-const subSx = { fontSize: '0.56rem', opacity: 0.85 };
 
 const numberSx = { width: 92, flexShrink: 0 };
 
-const hintSx = { fontSize: '0.66rem', color: 'text.secondary', lineHeight: 1.35 };
+const hintSx = { fontSize: '0.66rem', color: 'text.secondary', lineHeight: 1.35, mt: 0.75 };
