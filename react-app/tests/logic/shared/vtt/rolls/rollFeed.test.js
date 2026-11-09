@@ -9,6 +9,7 @@ import {
   currentBubbles,
   currentThrows,
   isPrivateRoll,
+  nextRollExpiry,
   rollAuthor,
   normalizeRoll,
 } from '../../../../../src/shared/vtt/rolls/rollFeed.js';
@@ -244,4 +245,12 @@ test('dice are cleared once the roll is history', () => {
   const now = Date.now();
   const feed = [normalizeRoll(roll({ thrown: true, timestamp: now - ROLL_TTL_MS - 1 }))];
   assert.equal(currentThrows(feed, { now }).length, 0);
+});
+
+test('nextRollExpiry: the earliest live roll to run out, none once all are gone', () => {
+  const feed = [{ id: 'b', at: 5000 }, { id: 'a', at: 1000 }, { id: 'old', at: -ROLL_TTL_MS }];
+  assert.equal(nextRollExpiry(feed, { now: 2000 }), 1000 + ROLL_TTL_MS);
+  assert.equal(nextRollExpiry(feed, { now: 1000 + ROLL_TTL_MS }), 5000 + ROLL_TTL_MS);
+  assert.equal(nextRollExpiry(feed, { now: 5000 + ROLL_TTL_MS }), null);
+  assert.equal(nextRollExpiry([], { now: 0 }), null);
 });

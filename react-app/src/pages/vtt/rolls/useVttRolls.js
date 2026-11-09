@@ -4,11 +4,15 @@ import {
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { readGmRollsShown, rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import {
-  addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor, rollToast,
+  addRoll, currentBubbles, currentThrows, makeRollEntry, nextRollExpiry, normalizeRoll, rollAuthor, rollToast,
 } from '../../../shared/vtt/rolls/rollFeed.js';
 import { customRollToast } from '../../../shared/character/dice/customRoll.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
+
+// A timer can fire a hair early; past the expiry by this much, the roll is
+// surely gone when the lists are read again.
+const EXPIRY_SLACK_MS = 20;
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {
   const [feed, setFeed] = useState([]);
@@ -87,11 +91,15 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     return entry;
   }, [acceptRoll, campaignId, publish]);
 
+  // Re-read bubbles and dice when the next one expires, not every second: a
+  // standing interval re-rendered the whole scene once a second for as long
+  // as the log held a roll, and that render made throws stutter.
   useEffect(() => {
-    if (!feed.length) return undefined;
-    const timer = setInterval(() => setTick((current) => current + 1), 1000);
-    return () => clearInterval(timer);
-  }, [feed.length]);
+    const next = nextRollExpiry(feed);
+    if (next === null) return undefined;
+    const timer = setTimeout(() => setTick((current) => current + 1), Math.max(0, next - Date.now()) + EXPIRY_SLACK_MS);
+    return () => clearTimeout(timer);
+  }, [feed, tick]);
 
   const tokenByCharacter = useMemo(() => new Map(
     tokens.filter((token) => token.characterId).map((token) => [token.characterId, token]),

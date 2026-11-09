@@ -198,6 +198,20 @@ function latestPerRoller(feed, { now = Date.now(), ttl = ROLL_TTL_MS, includePri
   return current;
 }
 
+// When the next roll on screen runs out, so whoever shows bubbles and dice
+// re-reads them exactly then and not on a clock. A one-second tick did the
+// same job by re-rendering the whole map every second for as long as the log
+// held a roll — which, the log being the feed, was forever — and that render
+// landed in the middle of throws as a stutter. Null when nothing is live.
+export function nextRollExpiry(feed, { now = Date.now(), ttl = ROLL_TTL_MS } = {}) {
+  let next = null;
+  for (const roll of feed || []) {
+    const expires = roll.at + ttl;
+    if (expires > now && (next === null || expires < next)) next = expires;
+  }
+  return next;
+}
+
 function pieceKey(roll) {
   if (roll.characterId) return `character:${roll.characterId}`;
   return roll.sourceRef ? `encounter:${roll.sourceRef}` : null;
