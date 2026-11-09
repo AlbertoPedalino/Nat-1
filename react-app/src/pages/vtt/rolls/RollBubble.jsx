@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
@@ -176,7 +176,7 @@ const labelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.12em',
+  letterSpacing: LETTER_SPACINGS.xxl,
   textTransform: 'uppercase',
   color: 'text.secondary',
   mb: 0.3,
@@ -186,7 +186,7 @@ const natSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 900,
-  letterSpacing: '0.1em',
+  letterSpacing: LETTER_SPACINGS.xl,
   mb: 0.3,
 };
 
@@ -194,7 +194,7 @@ const modeChipSx = (chip) => ({
   height: 18,
   fontSize: FONT_SIZES.xxxs,
   fontWeight: 700,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1,
   mb: 0.3,
   color: chip.color,

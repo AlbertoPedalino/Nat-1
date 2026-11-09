@@ -7,7 +7,7 @@ import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
 import { TABLE_ICONS } from './tableCatalog.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -231,7 +231,7 @@ const statSx = {
 const statLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'text.secondary',
   lineHeight: 1.5,
@@ -312,7 +312,7 @@ const historyRowSx = {
 const historyTableSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   textTransform: 'uppercase',
   color: 'text.secondary',
   minWidth: 104,

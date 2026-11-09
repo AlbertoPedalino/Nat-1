@@ -19,7 +19,7 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
@@ -272,7 +272,7 @@ function LastHexCard({ last, onOpenResult }) {
 }
 
 const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
-const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.xs, letterSpacing: '0.04em', mb: 0.5 };
+const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
 const clockSx = { color: VTT_COLORS.panelText, fontSize: FONT_SIZES.md };
 const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: 1.35 };
 
@@ -336,7 +336,7 @@ const lastCardSx = {
 const lastHexSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
-  letterSpacing: '0.04em',
+  letterSpacing: LETTER_SPACINGS.sm,
   color: VTT_COLORS.panelText,
 };
 

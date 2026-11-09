@@ -26,7 +26,7 @@ import {
   setReplicatedItemCharges,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { useItemsDb } from './useItemsDb.js';
 
 const sectionSx = {
@@ -41,7 +41,7 @@ const labelSx = {
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   color: UI_COLORS.goldLight,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
 };
 const selectSx = {
   flex: 1,

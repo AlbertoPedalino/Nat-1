@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
 
 // The title bar of a sheet panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies) and of SheetDialog: a dark bar with a gold left accent, an
@@ -22,7 +22,7 @@ export const panelTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.14em',
+  letterSpacing: LETTER_SPACINGS.xxl,
   textTransform: 'uppercase',
   color: 'primary.main',
 };
@@ -32,7 +32,7 @@ export const panelTitleSx = {
 export const captionLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'text.secondary',
 };
@@ -41,7 +41,7 @@ export const captionLabelSx = {
 export const microLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   textTransform: 'uppercase',
   color: 'text.secondary',
 };
@@ -54,7 +54,7 @@ export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider
     fontFamily: UI_FONTS.display,
     fontSize: FONT_SIZES.sm,
     fontWeight: 700,
-    letterSpacing: '0.12em',
+    letterSpacing: LETTER_SPACINGS.xxl,
     textTransform: 'uppercase',
     color,
     ...(rule ? { borderBottom: 1, borderColor: rule, pb: '4px' } : {}),
@@ -90,7 +90,7 @@ export const statLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.micro,
   fontWeight: 700,
-  letterSpacing: '0.1em',
+  letterSpacing: LETTER_SPACINGS.xl,
   textTransform: 'uppercase',
   color: 'text.secondary',
 };
@@ -101,7 +101,7 @@ export const inlineMetaLabelSx = {
   fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
   fontFamily: UI_FONTS.display,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
 };
 
@@ -110,7 +110,7 @@ export const sectionLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxxs,
   fontWeight: 700,
-  letterSpacing: '0.12em',
+  letterSpacing: LETTER_SPACINGS.xxl,
   textTransform: 'uppercase',
 };
 

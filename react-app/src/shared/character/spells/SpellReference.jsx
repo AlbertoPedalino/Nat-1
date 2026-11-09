@@ -8,12 +8,12 @@ import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 const META_LABEL_SX = {
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   textTransform: 'uppercase',
   color: RICH_TEXT_ACCENT,
   fontSize: FONT_SIZES.xxs,
@@ -24,7 +24,7 @@ const SECTION_HEADING_SX = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   color: RICH_TEXT_ACCENT,
   mb: 0.5,
 };

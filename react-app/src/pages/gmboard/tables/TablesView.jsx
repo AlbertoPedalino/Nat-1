@@ -7,7 +7,7 @@ import { tableRows } from '../../../shared/gmboard/tables.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 export default function TablesView() {
@@ -109,7 +109,7 @@ const tabLabelSx = {
 
 const tabGroupSx = {
   fontSize: FONT_SIZES.xxs,
-  letterSpacing: '0.05em',
+  letterSpacing: LETTER_SPACINGS.md,
   textTransform: 'uppercase',
   color: 'text.secondary',
 };

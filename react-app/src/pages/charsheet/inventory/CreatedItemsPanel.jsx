@@ -21,6 +21,7 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -167,7 +168,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
   if (!items.length) {
     return (
-      <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', fontStyle: 'italic' }}>
           {emptyHint}
         </Typography>
@@ -176,9 +177,9 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   }
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
-        <Typography sx={headerSx}>{tagLabel}</Typography>
+        <Typography sx={detailTitleSx}>{tagLabel}</Typography>
         <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
@@ -274,19 +275,3 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   );
 }
 
-const panelSx = {
-  mt: 0.8,
-  p: 1,
-  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-};
-
-const headerSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: FONT_SIZES.sm,
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-  color: UI_COLORS.goldLight,
-};

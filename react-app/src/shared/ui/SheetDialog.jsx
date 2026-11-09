@@ -1,7 +1,7 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from './colors.js';
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 
@@ -34,7 +34,7 @@ const titleTextSx = {
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
   fontSize: FONT_SIZES.md,
-  letterSpacing: '0.12em',
+  letterSpacing: LETTER_SPACINGS.xxl,
   textTransform: 'uppercase',
   lineHeight: 1.3,
 };
@@ -44,7 +44,7 @@ export const dialogSectionTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
   fontWeight: 800,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'primary.main',
 };
@@ -70,7 +70,7 @@ const actionsSx = {
     fontFamily: UI_FONTS.display,
     fontSize: FONT_SIZES.xs,
     fontWeight: 700,
-    letterSpacing: '0.08em',
+    letterSpacing: LETTER_SPACINGS.lg,
     textTransform: 'uppercase',
     minWidth: 0,
     px: 1.4,

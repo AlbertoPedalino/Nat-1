@@ -11,7 +11,7 @@ import {
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import ACDisplay from '../stats/ACDisplay.jsx';
 import DefensesPanel from '../stats/DefensesPanel.jsx';
-import { panelSx, headerSx, subSx, creatureHpBoxSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { subSx, creatureHpBoxSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import {
   CANNON_AC,
@@ -28,11 +28,12 @@ import {
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
 import { clamp } from '../../../shared/numbers.js';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -139,9 +140,9 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   };
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-        <Typography sx={headerSx} component="span">Eldritch Cannon</Typography>
+        <Typography sx={detailTitleSx} component="span">Eldritch Cannon</Typography>
         <Typography sx={{ ...subSx, ml: 'auto' }}>{cannons.length}/{capacity} active</Typography>
       </Box>
 
@@ -154,7 +155,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
           return (
             <Box key={index} sx={cannonBoardSx}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                <Typography sx={{ ...headerSx, fontSize: FONT_SIZES.xs }}>
+                <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xs }}>
                   {SIZE_NAMES[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
                 </Typography>
                 <Button
@@ -190,7 +191,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 if (!group.length) return null;
                 return (
                   <Box key={cat}>
-                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
+                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xxl, textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
                       {cat === 'bonus' ? 'Bonus Action' : 'Reaction'}
                     </Typography>
                     <Stack spacing={0.4}>

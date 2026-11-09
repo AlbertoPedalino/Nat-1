@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material';
 import { theme } from '../../../app/theme.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 // The character builder's denser look: the page root's descendant defaults and
 // the theme the builder renders under (CharBuilder's ThemeProvider).
@@ -21,7 +21,7 @@ export const builderRootSx = {
     borderRadius: 1,
     fontFamily: UI_FONTS.display,
     fontSize: FONT_SIZES.xs,
-    letterSpacing: '0.04em',
+    letterSpacing: LETTER_SPACINGS.sm,
     px: 1,
     py: 0.38,
   },
@@ -31,7 +31,7 @@ export const builderRootSx = {
     px: 1.05,
     fontFamily: UI_FONTS.display,
     fontSize: FONT_SIZES.xs,
-    letterSpacing: '0.06em',
+    letterSpacing: LETTER_SPACINGS.md,
     color: 'text.secondary',
   },
   '& .MuiTabs-indicator': { bgcolor: 'primary.main' },
@@ -86,7 +86,7 @@ export const builderTheme = createTheme(theme, {
           borderRadius: 0.375,
           fontFamily: UI_FONTS.display,
           fontSize: FONT_SIZES.xxs,
-          letterSpacing: '0.04em',
+          letterSpacing: LETTER_SPACINGS.sm,
           backgroundColor: uiAlpha(UI_COLORS.gold, 0.08),
           borderColor: uiAlpha(UI_COLORS.gold, 0.28),
         },

@@ -34,9 +34,7 @@ import {
   BeastStatBlock,
   CreatureOptionRow,
   creatureHpBoxSx,
-  headerSx,
   optionToggleSx,
-  panelSx,
   subSx,
 } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
@@ -45,6 +43,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -104,14 +103,14 @@ export default function PrimalCompanionPanel({ character, sheet }) {
 
   if (status === 'loading') {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
+      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
         <LoadingLine label="Loading primal beast…" />
       </Box>
     );
   }
   if (!creature) {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
+      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
         <Typography sx={[subSx, { color: status === 'error' ? 'error.main' : 'text.secondary' }]}>
           Primal beast stat block unavailable.
         </Typography>
@@ -120,10 +119,10 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   }
 
   return (
-    <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
+    <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
         <PawPrint size={14} color={UI_COLORS.goldLight} />
-        <BeastNameLink name={creature.name} source={creature.source} sx={headerSx} />
+        <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
         <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
       </Box>
 

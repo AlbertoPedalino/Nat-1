@@ -15,7 +15,7 @@ import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
@@ -89,7 +89,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 600, color: 'text.secondary', letterSpacing: LETTER_SPACINGS.lg, width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>

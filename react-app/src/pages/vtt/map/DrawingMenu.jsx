@@ -24,7 +24,7 @@ import {
   battleMapControlLabelSx,
   battleMapMenuPaperSx,
 } from './battleMapSurface.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
@@ -316,7 +316,7 @@ const sectionTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
   fontWeight: 800,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };
 

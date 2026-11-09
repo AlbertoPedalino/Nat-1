@@ -31,3 +31,13 @@ export const FONT_SIZES = Object.freeze({
   display: '1.75rem',
   hero: '2rem',
 });
+
+// Letter spacing of spaced-out text (Cinzel labels, uppercase captions), in
+// steps like the type scale. Ordinary text keeps the font's own spacing.
+export const LETTER_SPACINGS = Object.freeze({
+  sm: '0.04em',
+  md: '0.06em',
+  lg: '0.08em',
+  xl: '0.1em',
+  xxl: '0.12em',
+});

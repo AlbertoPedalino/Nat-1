@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
@@ -20,7 +20,7 @@ const toastRootSx = {
 };
 
 const modeChipSx = (chip) => ({
-  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.06em',
+  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1, mb: 0.3, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
@@ -51,17 +51,17 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={14} />
       </IconButton>
 
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xxl, textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
         {layout.label}
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: LETTER_SPACINGS.xl, color: UI_COLORS.goldLight, mb: 0.3 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: LETTER_SPACINGS.xl, color: UI_COLORS.danger, mb: 0.3 }}>
           NATURAL 1
         </Typography>
       )}

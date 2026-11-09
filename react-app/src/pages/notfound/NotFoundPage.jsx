@@ -3,7 +3,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { Compass, Home } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { composeMissingPath } from './notFoundPath.js';
-import { FONT_SIZES } from '../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -86,7 +86,7 @@ const messageSx = {
 const statusSx = {
   color: 'primary.main',
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   lineHeight: 1.4,
 };
 

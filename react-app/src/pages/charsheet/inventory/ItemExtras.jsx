@@ -7,7 +7,7 @@ import {
 } from '../../../shared/character/inventory/itemEffects.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
@@ -32,7 +32,7 @@ function TomeConsumePanel({ item, onConsume }) {
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.goldLight }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
-        sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, letterSpacing: '0.06em', borderColor: UI_COLORS.goldLight, color: UI_COLORS.goldLight, '&:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08), borderColor: UI_COLORS.goldLight } }}>
+        sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.md, borderColor: UI_COLORS.goldLight, color: UI_COLORS.goldLight, '&:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08), borderColor: UI_COLORS.goldLight } }}>
         Read & Consume
       </Button>
     </Box>
@@ -46,7 +46,7 @@ function AbilityChoicePanel({ item, onPick }) {
 
   return (
     <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
         Ability Choice
       </Typography>
       {groups.map((group, groupIdx) => {

@@ -13,7 +13,7 @@ import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
 import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
@@ -174,12 +174,12 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, fontWeight: 700, color: UI_COLORS.goldLight, letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, fontWeight: 700, color: UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.sm, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, letterSpacing: '0.08em', color: UI_COLORS.blueLight, borderColor: uiAlpha(UI_COLORS.blueLight, 0.45), bgcolor: uiAlpha(UI_COLORS.blueLight, 0.08), '& .MuiChip-icon': { color: UI_COLORS.blueLight, ml: '4px' } }}
+                  sx={{ flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg, color: UI_COLORS.blueLight, borderColor: uiAlpha(UI_COLORS.blueLight, 0.45), bgcolor: uiAlpha(UI_COLORS.blueLight, 0.08), '& .MuiChip-icon': { color: UI_COLORS.blueLight, ml: '4px' } }}
                   variant="outlined" />
               )}
             </Box>
@@ -200,7 +200,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
         }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, letterSpacing: '0.08em', fontWeight: 700 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.lg, fontWeight: 700 }}>
                 XP · Level {level}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', whiteSpace: 'nowrap' }}>

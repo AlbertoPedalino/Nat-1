@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
 import { encounterDetail, lootDetail } from '../../gmboard/resultText.js';
 import { boardTone } from '../../gmboard/ui/resultVisuals.js';
@@ -119,7 +119,7 @@ const boxSx = { ...boardInsetSx, p: 1.5 };
 const headerSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'primary.main',
   mb: 0.75,

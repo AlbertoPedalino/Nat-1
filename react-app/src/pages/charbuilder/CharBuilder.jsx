@@ -31,7 +31,7 @@ import SpeciesStep from './steps/SpeciesStep.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -128,7 +128,7 @@ export default function CharBuilder() {
             ) : null}
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={16} />
-              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.xxl, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'primary.main' }}>{activeStep.label}</Typography>
+              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.xxl, textTransform: 'uppercase', letterSpacing: LETTER_SPACINGS.xl, color: 'primary.main' }}>{activeStep.label}</Typography>
               <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
             </Stack>
 

@@ -1,6 +1,6 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 function StepMarker({ n }) {
@@ -115,7 +115,7 @@ const cardSx = boardPanelSx;
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxl,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };
 

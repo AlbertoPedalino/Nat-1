@@ -9,7 +9,7 @@ import {
   rangeFilterKeys,
 } from './itemFilters.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 
@@ -31,14 +31,14 @@ const clearButtonSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
   textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   '&:hover': { color: UI_COLORS.danger },
 };
 
 const labelSx = {
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   textTransform: 'uppercase',
   color: RICH_TEXT_ACCENT,
   fontSize: FONT_SIZES.xxs,

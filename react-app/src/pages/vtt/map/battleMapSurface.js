@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // Shared glass surface for every control floating over the battle map. Keeping
@@ -44,7 +44,7 @@ export const battleMapDialogTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xl,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
 };
 
 export const battleMapDialogContentSx = {

@@ -13,7 +13,7 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
@@ -223,7 +223,7 @@ const attitudeButtonSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 800,
-  letterSpacing: '0.05em',
+  letterSpacing: LETTER_SPACINGS.md,
   '& small': {
     fontFamily: UI_FONTS.mono,
     fontSize: FONT_SIZES.xs,
@@ -252,7 +252,7 @@ const meterLabelSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 800,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
 };
 
@@ -292,7 +292,7 @@ const finalEyebrowSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 800,
-  letterSpacing: '0.1em',
+  letterSpacing: LETTER_SPACINGS.xl,
   textTransform: 'uppercase',
   color: 'primary.main',
 };

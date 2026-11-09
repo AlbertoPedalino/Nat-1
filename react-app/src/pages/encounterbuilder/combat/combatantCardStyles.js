@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -60,7 +60,7 @@ export const acBadgeSx = {
   lineHeight: 1,
 };
 
-export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.1em' };
+export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xl };
 
 export const acValueSx = { fontSize: FONT_SIZES.body, fontWeight: 800, color: 'text.primary' };
 
@@ -97,7 +97,7 @@ export const hpToggleSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   '& .MuiButton-startIcon': { mr: 0.4 },
   '&:hover': { color: 'text.primary' },

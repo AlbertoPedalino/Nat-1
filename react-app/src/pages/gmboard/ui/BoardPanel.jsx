@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 // A panel of the GM Board (Travel, Date & Time, Dungeon Explorer, Quest
@@ -43,6 +43,6 @@ const titleRowSx = {
 const titleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xl,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };

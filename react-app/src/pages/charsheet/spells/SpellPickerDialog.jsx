@@ -16,7 +16,7 @@ import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import {
   bucketCounts,
   isInWizardBook,
@@ -124,7 +124,7 @@ export function SpellPickerDialog({
               variant={pickerClassIndex === index ? 'filled' : 'outlined'}
               color={pickerClassIndex === index ? 'primary' : 'default'}
               onClick={() => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
-              sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: '0.06em' }}
+              sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.md }}
             />
           ))}
         </Box>
@@ -133,7 +133,7 @@ export function SpellPickerDialog({
       {activePicker ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
           <Box sx={{ ...sheetBoxSx, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.md }}>{activePicker.label}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>{activePicker.note}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
             {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}

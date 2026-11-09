@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
@@ -75,7 +75,7 @@ const headerBandSx = {
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.lg,
-  letterSpacing: '0.04em',
+  letterSpacing: LETTER_SPACINGS.sm,
   color: 'primary.main',
 };
 

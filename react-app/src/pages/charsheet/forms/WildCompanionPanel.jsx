@@ -17,8 +17,6 @@ import {
   BeastStatBlock,
   BeastPickerRow,
   creatureHpBoxSx,
-  panelSx,
-  headerSx,
   subSx,
   dismissButtonSx,
 } from './BeastStatBlock.jsx';
@@ -33,6 +31,7 @@ import {
 } from '../../../shared/character/forms/wildCompanionForm.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -96,11 +95,11 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     const b = active.beast;
     const hp = getWildCompanionHp(character);
     return (
-      <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
           <Sparkles size={14} color={UI_COLORS.goldLight} />
-          <Typography sx={headerSx} component="span">Familiar —</Typography>
-          <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
+          <Typography sx={detailTitleSx} component="span">Familiar —</Typography>
+          <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
             Dismiss familiar
           </Button>
@@ -128,10 +127,10 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   }
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
         <Sparkles size={14} color={UI_COLORS.goldLight} />
-        <Typography sx={headerSx}>Summon Familiar — CR 0 Beast</Typography>
+        <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
       <ToggleButtonGroup
         size="small"

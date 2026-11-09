@@ -1,6 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
@@ -84,7 +84,7 @@ export const placementTargetHintSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.05em',
+  letterSpacing: LETTER_SPACINGS.md,
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
 };
@@ -144,7 +144,7 @@ export const fullscreenSheetButtonSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.82),
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: '0.07em',
+  letterSpacing: LETTER_SPACINGS.lg,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
 };
 

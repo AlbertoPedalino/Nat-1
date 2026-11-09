@@ -7,7 +7,7 @@ import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
@@ -54,7 +54,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 cursor: 'pointer', transition: 'border-color 0.15s',
                 '&:hover': { borderColor: 'primary.main' },
               }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: '0.14em', color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xxl, color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
                 {ABILITY_ABBREVIATIONS[s]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.heading, fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>

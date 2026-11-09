@@ -4,8 +4,9 @@ import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollT
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { detailPanelSx } from '../layout/layout.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -18,7 +19,7 @@ function getClassLevel(C, className) {
 function FeatureBox({ title, accent, children }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: '0.08em', mb: 0.4 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: LETTER_SPACINGS.lg, mb: 0.4 }}>
         {title}
       </Typography>
       {children}
@@ -113,7 +114,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
   return (
     <Box
       onClick={(e) => e.stopPropagation()}
-      sx={{ mt: 0.8, p: 1, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04), border: 1, borderColor: 'divider', borderRadius: 1 }}
+      sx={detailPanelSx}
     >
       <Stack spacing={1.2}>
         {sections.map((s, i) => (
@@ -132,7 +133,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               size="small"
               variant="outlined"
               onClick={doRoll}
-              sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}
+              sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: LETTER_SPACINGS.md }}
             >
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>

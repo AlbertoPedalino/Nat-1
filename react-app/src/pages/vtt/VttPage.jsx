@@ -19,7 +19,7 @@ import SceneEditor from './scene/SceneEditor.jsx';
 import ScenePicker from './scene/ScenePicker.jsx';
 import SessionGate from './session/SessionGate.jsx';
 import * as s from './styles.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 
@@ -320,5 +320,5 @@ const spectatorWaitingSx = {
   placeItems: 'center',
   color: vttAlpha(VTT_COLORS.white, 0.58),
   fontFamily: UI_FONTS.display,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
 };

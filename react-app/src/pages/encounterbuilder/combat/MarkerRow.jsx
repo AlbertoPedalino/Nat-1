@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Collapse } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -64,7 +64,7 @@ const toggleSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   '& .MuiButton-startIcon': { mr: 0.4 },
   '&:hover': { color: 'text.primary' },
@@ -78,7 +78,7 @@ const clearSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
   textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   '&:hover': { color: 'error.main' },
 };
 

@@ -6,7 +6,7 @@ import { hasWeatherDisadvantage, weatherName } from '../../../shared/gmboard/wea
 import { weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 
 // What the party walked into. A dialog rather than a panel because it is the
@@ -79,7 +79,7 @@ const titleRowSx = {
 const titleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxl,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };
 
@@ -98,7 +98,7 @@ const weatherBadgeSx = {
 
 const weatherWarnSx = { borderColor: 'warning.main', color: 'warning.main' };
 
-const weatherTextSx = { fontSize: FONT_SIZES.sm, letterSpacing: '0.03em' };
+const weatherTextSx = { fontSize: FONT_SIZES.sm, letterSpacing: LETTER_SPACINGS.sm };
 
 const lineSx = { display: 'flex', alignItems: 'center', gap: 0.6, color: 'text.secondary' };
 const lineTextSx = { fontSize: FONT_SIZES.lg };

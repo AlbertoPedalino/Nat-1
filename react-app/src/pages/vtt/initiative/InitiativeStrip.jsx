@@ -5,7 +5,7 @@ import {
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
@@ -228,7 +228,7 @@ const roundSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   whiteSpace: 'nowrap',
 };
 

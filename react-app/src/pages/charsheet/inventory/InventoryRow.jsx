@@ -24,7 +24,7 @@ import { isItemCarried, itemQty as qty } from '../../../shared/character/invento
 import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 
@@ -228,7 +228,7 @@ function SlotBtn({ active, onClick, label }) {
         fontFamily: UI_FONTS.display,
         fontSize: FONT_SIZES.xxxs,
         fontWeight: 700,
-        letterSpacing: '0.04em',
+        letterSpacing: LETTER_SPACINGS.sm,
         '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold },
       }}
     >

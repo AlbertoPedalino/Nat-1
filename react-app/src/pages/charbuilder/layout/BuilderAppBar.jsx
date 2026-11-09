@@ -4,7 +4,7 @@ import ImportSheetFab from './ImportSheetFab.jsx';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
 import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 // The builder's header: the app's top bar (with sheet import and the cloud
 // menu's draft upload) and, under it, the sticky page title.
@@ -20,7 +20,7 @@ export default function BuilderAppBar({ canUploadDraft, onUploadDraft, onNotify,
           <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
             <Wand2 size={19} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="h1" noWrap sx={{ fontSize: FONT_SIZES.lead, letterSpacing: '0.04em', color: UI_COLORS.goldLight }}>
+              <Typography variant="h1" noWrap sx={{ fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, color: UI_COLORS.goldLight }}>
                 Character Builder
               </Typography>
               <Typography variant="body2" noWrap sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs }}>

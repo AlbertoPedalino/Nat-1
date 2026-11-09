@@ -8,7 +8,7 @@ import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIco
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
@@ -174,7 +174,7 @@ const sectionTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   color: 'gmboard.vtt.gold',
   pb: 0.6,
   borderBottom: '1px solid',

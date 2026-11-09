@@ -4,7 +4,7 @@ import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../share
 import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
@@ -119,7 +119,7 @@ const clickableSx = {
 const coordSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'text.secondary',
 };

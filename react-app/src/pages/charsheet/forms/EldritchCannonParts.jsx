@@ -9,7 +9,7 @@ import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -119,7 +119,7 @@ const rulesToggleTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   color: UI_COLORS.goldLight,
   textTransform: 'uppercase',
 };
@@ -151,7 +151,7 @@ const rulesGroupTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
-  letterSpacing: '0.12em',
+  letterSpacing: LETTER_SPACINGS.xxl,
   color: UI_COLORS.goldLight,
   textTransform: 'uppercase',
   mb: 0.25,
@@ -173,7 +173,7 @@ const rulesLabelSx = {
   fontWeight: 700,
   color: UI_COLORS.textMuted,
   textTransform: 'uppercase',
-  letterSpacing: '0.04em',
+  letterSpacing: LETTER_SPACINGS.sm,
 };
 
 const rulesValueSx = {

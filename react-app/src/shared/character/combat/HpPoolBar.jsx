@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
 import { HP_TONE_COLORS, UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 import { hpToneColor } from './vitals.js';
 
 
@@ -19,7 +19,7 @@ export default function HpPoolBar({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
-        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mr: 0.4 }}>HP</Typography>
+        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: LETTER_SPACINGS.xl, textTransform: 'uppercase', color: 'text.secondary', mr: 0.4 }}>HP</Typography>
         <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.title, fontWeight: 700, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: 1 }}>{current}</Typography>
         <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
         <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, fontWeight: 600, color: 'text.secondary' }}>{max}</Typography>

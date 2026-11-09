@@ -30,7 +30,7 @@ import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { sectionLabelSx, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -115,7 +115,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                 <Icon size={11} color={v.color} />
-                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: 700, letterSpacing: '0.06em' }}>{v.label}</Typography>
+                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md }}>{v.label}</Typography>
               </Box>
             );
           })()}

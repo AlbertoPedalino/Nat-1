@@ -15,14 +15,14 @@ import { backgroundAbilityBonus, DEFAULT_BACKGROUND_PATTERN } from '../../../sha
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { asArray } from '../../../shared/lists.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
   if (!values?.length) return null;
   return (
     <>
-      <Typography variant="body2" sx={{ color: NEUTRAL_TONE, fontWeight: 700, fontSize: FONT_SIZES.md, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{label}</Typography>
+      <Typography variant="body2" sx={{ color: NEUTRAL_TONE, fontWeight: 700, fontSize: FONT_SIZES.md, textTransform: 'uppercase', letterSpacing: LETTER_SPACINGS.md, whiteSpace: 'nowrap' }}>{label}</Typography>
       <Typography variant="body2" sx={{ color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
     </>
   );

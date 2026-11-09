@@ -6,6 +6,7 @@ import { campaignSheetUrl } from '../../../shared/character/profile/characterRou
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import { LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -150,6 +151,6 @@ const stepperLabelSx = {
   fontWeight: 700,
   color: 'text.primary',
   textTransform: 'uppercase',
-  letterSpacing: 0.5,
+  letterSpacing: LETTER_SPACINGS.sm,
 };
 

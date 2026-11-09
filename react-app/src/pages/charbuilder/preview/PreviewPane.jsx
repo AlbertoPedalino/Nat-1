@@ -32,7 +32,7 @@ import {
   PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, filledChipSx,
   PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -82,7 +82,7 @@ function AbilityScoreGrid({ scores }) {
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: '0.04em' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.sm }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
               <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: 1.15, color: 'text.primary' }}>
@@ -112,7 +112,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
             height: 20,
             fontSize: FONT_SIZES.xxs,
             textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+            letterSpacing: LETTER_SPACINGS.lg,
           }}
         />
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }} />
@@ -170,7 +170,7 @@ function ProficiencySection({ sections }) {
                 color: PROFICIENCY_TONE,
                 fontSize: FONT_SIZES.xs,
                 fontWeight: 800,
-                letterSpacing: '0.05em',
+                letterSpacing: LETTER_SPACINGS.md,
                 textTransform: 'uppercase',
               }}
             >

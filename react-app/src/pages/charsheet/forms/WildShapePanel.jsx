@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { findBeast, parseBeastRef } from '../../../shared/character/forms/beasts.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from './useBeastsDb.js';
 import {
   getActiveWildShape,
@@ -13,6 +13,7 @@ import {
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -67,11 +68,11 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   if (active) {
     const b = active.beast;
     return (
-      <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
           <PawPrint size={14} color={UI_COLORS.goldLight} />
-          <Typography sx={headerSx} component="span">Transformed —</Typography>
-          <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
+          <Typography sx={detailTitleSx} component="span">Transformed —</Typography>
+          <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
             Revert to normal form
           </Button>
@@ -85,10 +86,10 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   }
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
+    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
         <PawPrint size={14} color={UI_COLORS.goldLight} />
-        <Typography sx={headerSx}>Known Beast Forms</Typography>
+        <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
       {!forms.length ? (
         <Typography sx={{ ...subSx, fontStyle: 'italic' }}>

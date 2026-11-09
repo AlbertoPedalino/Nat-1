@@ -4,7 +4,7 @@ import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { asArray } from '../../lists.js';
-import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -92,7 +92,7 @@ const cardTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,
-  letterSpacing: '0.06em',
+  letterSpacing: LETTER_SPACINGS.md,
   color: CONDITION_ACCENT,
 };
 

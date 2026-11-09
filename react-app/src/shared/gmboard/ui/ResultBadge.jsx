@@ -1,5 +1,5 @@
 import { Box, useTheme } from '@mui/material';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 export default function ResultBadge({ children, tone, icon: Icon }) {
   const theme = useTheme();
@@ -17,7 +17,7 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
         borderRadius: 999,
         fontSize: FONT_SIZES.sm,
         fontWeight: 700,
-        letterSpacing: '0.03em',
+        letterSpacing: LETTER_SPACINGS.sm,
         color: resolvedTone,
         border: `1px solid ${resolvedTone}`,
         bgcolor: theme.palette.gmboard.panelOverlay,

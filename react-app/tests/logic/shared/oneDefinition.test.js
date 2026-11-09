@@ -239,6 +239,12 @@ test('font sizes come from FONT_SIZES', () => {
   }).filter((hit) => !hit.startsWith('data/')), []);
 });
 
+// Spaced-out text takes a step of LETTER_SPACINGS (shared/ui/fonts.js).
+test('letter spacing comes from LETTER_SPACINGS', () => {
+  assert.deepEqual(sourceLinesMatching(/letterSpacing:\s*(['"`][^'"`]*\d|[1-9]|0\.\d)/, { allow: ['shared/ui/fonts.js'] })
+    .filter((hit) => !hit.startsWith('data/')), []);
+});
+
 // Corners are multiples of theme.shape.borderRadius (numbers in sx, or
 // cornerRadius for per-corner shapes), so a restyle changes them with the theme.
 // Pills (999px) and circles (50%) are shapes, not a radius.

@@ -50,7 +50,7 @@ import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
@@ -368,7 +368,7 @@ export default function SpellEntry({
                       fontFamily: UI_FONTS.display,
                       fontSize: FONT_SIZES.xs,
                       fontWeight: 700,
-                      letterSpacing: '0.08em',
+                      letterSpacing: LETTER_SPACINGS.lg,
                       color: RICH_TEXT_ACCENT,
                       lineHeight: 1.15,
                     }}

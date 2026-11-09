@@ -6,9 +6,10 @@ import { parseBeastActions, parseBeastActionsRich } from '../../../shared/charac
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
+import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -113,7 +114,7 @@ export function BeastStatBlock({
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.06em', color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
+              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md, color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
               {rollable ? (
                 <RollChip
                   sx={{ fontSize: FONT_SIZES.xs }}
@@ -247,7 +248,7 @@ function StatLine({ label, value, accent }) {
 function StatSection({ title, items, onRoll, onRollFormula, beastName, itemAccessory }) {
   return (
     <Box sx={{ mt: 0.5 }}>
-      <Typography sx={{ ...headerSx, fontSize: FONT_SIZES.xxs, mb: 0.2 }}>{title}</Typography>
+      <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xxs, mb: 0.2 }}>{title}</Typography>
       {items.map((it, i) => (
         <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.2 }}>
           <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>
@@ -282,7 +283,7 @@ const statBlockSx = {
   borderColor: 'divider',
 };
 
-const metaSx = { fontSize: FONT_SIZES.xs, fontStyle: 'italic', color: 'text.secondary', letterSpacing: '0.03em' };
+const metaSx = { fontSize: FONT_SIZES.xs, fontStyle: 'italic', color: 'text.secondary', letterSpacing: LETTER_SPACINGS.sm };
 
 const rollChipSx = {
   appearance: 'none',
@@ -298,23 +299,6 @@ const rollChipSx = {
   lineHeight: 1.35,
   cursor: 'pointer',
   '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.24) },
-};
-
-export const panelSx = {
-  mt: 0.8,
-  p: 1,
-  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-};
-
-export const headerSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: FONT_SIZES.sm,
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-  color: UI_COLORS.goldLight,
 };
 
 export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
@@ -350,7 +334,7 @@ export const dismissButtonSx = {
   py: 0.1,
   fontSize: FONT_SIZES.xxs,
   fontFamily: UI_FONTS.display,
-  letterSpacing: '0.04em',
+  letterSpacing: LETTER_SPACINGS.sm,
   color: UI_COLORS.dangerMuted,
   border: 1,
   borderColor: uiAlpha(UI_COLORS.dangerMuted, 0.45),

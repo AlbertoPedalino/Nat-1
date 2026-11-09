@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { ExpandableCard } from './ExpandableCard.jsx';
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
 
 // Nested "click to reveal" disclosure for secondary prose — e.g. an action's
 // description tucked under its interactive controls, so the text stays available
@@ -21,7 +21,7 @@ export default function CollapsibleNote({ label = 'Description', children, sx })
           }}
         >
           {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: UI_FONTS.display }}>
+          <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', fontFamily: UI_FONTS.display }}>
             {label}
           </Typography>
         </Box>

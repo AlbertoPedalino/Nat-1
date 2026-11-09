@@ -10,7 +10,7 @@ import { characterItemBonuses } from '../../../shared/character/inventory/itemBo
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 
@@ -106,7 +106,7 @@ export default function Skills({ C, sheet, onRoll }) {
               {sk.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', letterSpacing: '0.06em' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', letterSpacing: LETTER_SPACINGS.md }}>
                 {ABILITY_ABBREVIATIONS[sk.ability]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>

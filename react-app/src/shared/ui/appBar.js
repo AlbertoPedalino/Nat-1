@@ -1,4 +1,4 @@
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
 import { iconOnlyOnPhoneButtonSx } from './iconOnlyOnPhone.js';
 
 // The height of the app's top bar (app/navigation/AppTopBar.jsx), for anything
@@ -10,7 +10,7 @@ export const APP_TOP_BAR_HEIGHT = '48px';
 export const appTopBarFontSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   whiteSpace: 'nowrap',
 };
 

@@ -6,7 +6,7 @@ import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js'
 import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
@@ -23,7 +23,7 @@ const chipSx = {
   color: 'text.secondary',
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
-  letterSpacing: '0.04em',
+  letterSpacing: LETTER_SPACINGS.sm,
   display: 'inline-flex',
   alignItems: 'center',
   gap: 0.5,
@@ -101,14 +101,14 @@ export default function HPBlock({
   return (
     <Box sx={{ ...sheetBoxSx, width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: LETTER_SPACINGS.xxl, textTransform: 'uppercase', color: 'text.secondary' }}>
           HP
         </Typography>
 
         {dead && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerBright, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerBright, 0.12) }}>
             <Skull size={12} style={{ color: UI_COLORS.dangerBright }} />
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
             </Typography>
           </Box>
@@ -203,7 +203,7 @@ export default function HPBlock({
         {atZero && !dead && (
           <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.md, textTransform: 'uppercase', color: 'text.secondary' }}>
                 Death Saves
               </Typography>
               <Tooltip title="Click to set successes">
@@ -232,7 +232,7 @@ export default function HPBlock({
                 size="small"
                 variant="outlined"
                 onClick={onDeathSave}
-                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: FONT_SIZES.xxxs, fontFamily: UI_FONTS.display, fontWeight: 600, letterSpacing: '0.06em', color: 'text.secondary', borderColor: 'divider' }}
+                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: FONT_SIZES.xxxs, fontFamily: UI_FONTS.display, fontWeight: 600, letterSpacing: LETTER_SPACINGS.md, color: 'text.secondary', borderColor: 'divider' }}
               >
                 Roll
               </Button>

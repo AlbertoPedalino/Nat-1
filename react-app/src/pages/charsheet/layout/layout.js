@@ -1,3 +1,6 @@
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+
 export const SHEET_AREAS = {
   saves: 'saves',
   senses: 'senses',
@@ -42,3 +45,22 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
     px: embedded ? embeddedPx : SHEET_COLUMN_PX,
   };
 }
+
+// The panel that opens under a sheet row (an action's details, a beast form, a
+// created item) and its gold title.
+export const detailPanelSx = {
+  mt: 0.8,
+  p: 1,
+  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+};
+
+export const detailTitleSx = {
+  fontFamily: UI_FONTS.display,
+  fontSize: FONT_SIZES.sm,
+  fontWeight: 700,
+  letterSpacing: LETTER_SPACINGS.lg,
+  color: UI_COLORS.goldLight,
+};

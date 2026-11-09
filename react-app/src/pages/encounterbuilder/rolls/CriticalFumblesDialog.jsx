@@ -12,7 +12,7 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
@@ -319,7 +319,7 @@ const outcomeTitleSx = {
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.sm,
   fontWeight: 800,
-  letterSpacing: '0.08em',
+  letterSpacing: LETTER_SPACINGS.lg,
   textTransform: 'uppercase',
   color: 'error.light',
 };
