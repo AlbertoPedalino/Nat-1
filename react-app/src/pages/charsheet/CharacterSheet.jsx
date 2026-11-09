@@ -99,7 +99,7 @@ export default function CharacterSheet({
     clearConditions,
     effectActions,
     toggleInspiration,
-  } = useSheetVitals({ C, sheet, setSheet, persist, showDiceToast, showNotice });
+  } = useSheetVitals({ sheet, setSheet, persist, showDiceToast, showNotice });
 
   const readOnlyEffectActions = useMemo(() => ({
     add: noopEffect, remove: noopEffect, readOnly: true,

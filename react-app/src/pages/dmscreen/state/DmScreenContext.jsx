@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 import { createNote } from '../notes/notes.js';
-import { makeNoteId } from './storage.js';
+import { makeId } from '../../../shared/ids.js';
 import { useDmScreenPersistence } from './useDmScreenPersistence.js';
 import { createInitialState, dmScreenReducer } from './reducer.js';
 
@@ -11,7 +11,7 @@ export function DmScreenProvider({ instanceId, children }) {
   useDmScreenPersistence({ instanceId, notes: state.notes, dispatch });
 
   const addNewNote = useCallback(() => {
-    const note = createNote(makeNoteId());
+    const note = createNote(makeId('note'));
     dispatch({ type: 'addNote', note });
     return note.id;
   }, []);

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { commitFightCombatantVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { setTokenHp } from '../../../shared/cloud/api/vttTokens.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
@@ -10,6 +10,7 @@ import {
   newerFightRow,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { patchById } from '../../../shared/vtt/session/liveScene.js';
+import { createKeyedQueue } from '../../../shared/cloud/sync/keyed.js';
 
 // The hit points of any piece, from its menu: damage, healing, temporary and
 // maximum hit points as one intent (a character health command's name)
@@ -26,7 +27,8 @@ export function useTokenVitalCommands({
   const fightsRef = useRef(gmVitals.fights);
   fightsRef.current = gmVitals.fights;
   const answeredFightsRef = useRef({});
-  const queueRef = useRef(Promise.resolve());
+  // Commands run one at a time, in call order.
+  const [queue] = useState(createKeyedQueue);
 
   const commitCreature = useCallback((ref, command) => {
     const fightId = String(ref.fightId);
@@ -55,8 +57,7 @@ export function useTokenVitalCommands({
       }
       refreshVisibleTokens();
     };
-    queueRef.current = queueRef.current.then(run, run);
-    return queueRef.current;
+    return queue.run('vitals', run);
   }, [gmVitals, notify, refreshVisibleTokens]);
 
   // A loose piece starts from what the menu showed (`shown`) when it has it:

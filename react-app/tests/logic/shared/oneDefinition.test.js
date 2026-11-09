@@ -68,8 +68,10 @@ test('capitalizing is done only by shared/ui/textCase.js', () => {
   ), []);
 });
 
+// Also in disguise: an injected `random()` turned into base 36, or the time
+// alone put into an id (two made in the same millisecond collide).
 test('new ids are made only by makeId in shared/ids.js', () => {
-  assert.deepEqual(sourceFilesMatching(/Math\.random\(\)\.toString\(36\)|randomUUID/, {
+  assert.deepEqual(sourceFilesMatching(/\brandom\(\)\.toString\(36\)|randomUUID|\$\{Date\.now\(\)\}/, {
     allow: ['shared/ids.js'],
   }), []);
 });
@@ -109,9 +111,10 @@ test('every confirmation goes through confirmAction', () => {
 });
 
 // Waiting for a previous task before starting the next (a per-key queue) is
-// createKeyedQueue's job (shared/cloud/sync/keyed.js).
+// createKeyedQueue's job (shared/cloud/sync/keyed.js), however the chain is
+// spelled: `.catch(() => {}|null).then(task)` or `ref.current.then(run, run)`.
 test('task chains go through createKeyedQueue', () => {
-  assert.deepEqual(sourceFilesMatching(/\.catch\(\(\) => \{\}\)\.then\(/, { allow: ['shared/cloud/sync/keyed.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/\.catch\(\(\) => (\{\}|null|undefined)\)\.then\(|\.current\.then\((\w+), \2\)/, { allow: ['shared/cloud/sync/keyed.js'] }), []);
 });
 
 // A native colour input jumps under the pointer unless it holds its own value

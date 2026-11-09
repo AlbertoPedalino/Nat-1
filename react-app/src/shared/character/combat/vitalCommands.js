@@ -1,12 +1,18 @@
-import { clampCharacterVitals } from './vitals.js';
+import { clampCharacterVitals, maxHpFor } from './vitals.js';
+import { clickedDeathSaveCount, markDead, revive, withDeathSave } from './mortality.js';
 import { setConditionActive, toggleCondition } from './conditions.js';
 import { addReminder, effectId, normalizeEffects, removeEffect } from './combatEffects.js';
 
 // Apply an intent to the vitals a command starts from — the character digest
 // the caller follows (or, rarely, the sheet) — never to an encounter snapshot.
-// The result is committed only if that digest is still current.
+// The result is committed only if that digest is still current. The sheet
+// applies the same function to its own state, so what it shows at once is what
+// the digest then confirms.
+//
+// Dead, revived and the death-save count go through mortality.js, the rule the
+// encounter builder and the map follow for every creature.
 export function applyVitalCommand(data, command, baseMaxHP) {
-  const maxFor = (bonus) => Math.max(1, baseMaxHP + bonus);
+  const maxFor = (bonus) => maxHpFor(baseMaxHP, bonus);
   const maxHP = maxFor(Number(data.maxHPBonus) || 0);
   let v = clampCharacterVitals(data, { maxHP, fallback: { currentHP: maxHP } });
   const n = Math.trunc(Number(command.value ?? command.delta) || 0);
@@ -35,9 +41,8 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     case 'setDeathSave': {
       const key = command.saveType;
       if (!['success', 'fail'].includes(key)) throw new Error('Invalid death save.');
-      v.deathSaves[key] = command.toggle && v.deathSaves[key] === n ? n - 1 : n;
-      v.activeConditions = setConditionActive(v.activeConditions, 'dead', v.deathSaves.fail >= 3);
-      if (v.deathSaves.fail >= 3) v.currentHP = 0;
+      const count = command.toggle ? clickedDeathSaveCount(v.deathSaves[key], n) : n;
+      v = withMortality(v, withDeathSave(mortalityOf(v), key, count));
       break;
     }
     case 'deathSaveRoll':
@@ -45,14 +50,12 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       if (command.roll === 20) { v.currentHP = 1; recover = true; }
       else if (command.roll === 1) v.deathSaves.fail += 2;
       else v.deathSaves[command.total >= 10 ? 'success' : 'fail'] += 1;
-      if (v.deathSaves.fail >= 3) v.activeConditions = setConditionActive(v.activeConditions, 'dead', true);
+      if (v.deathSaves.fail >= 3) v = withMortality(v, markDead(mortalityOf(v)));
       break;
     case 'toggleCombatantCondition':
       if (command.key === 'dead') {
         const dead = !v.activeConditions.includes('dead');
-        v.currentHP = dead ? 0 : 1;
-        v.deathSaves = { success: 0, fail: dead ? 3 : 0 };
-        v.activeConditions = setConditionActive(v.activeConditions, 'dead', dead);
+        v = withMortality(v, (dead ? markDead : revive)(mortalityOf(v)));
       } else v.activeConditions = toggleCondition(v.activeConditions, command.key);
       break;
     case 'clearCombatantConditions':
@@ -70,11 +73,8 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       break;
     case 'setExhaustion':
       v.activeConditions = setConditionActive(v.activeConditions, 'exhaustion', n > 0);
-      if (n >= 6) {
-        v.currentHP = 0;
-        v.deathSaves.fail = 3;
-        v.activeConditions = setConditionActive(v.activeConditions, 'dead', true);
-      }
+      // Level 6 is death (XPHB 2024).
+      if (n >= 6) v = withMortality(v, markDead(mortalityOf(v)));
       break;
     case 'editToken':
       if (Object.hasOwn(command.patch, 'currentHP')) { v.currentHP = command.patch.currentHP; recover = true; }
@@ -92,9 +92,7 @@ export function applyVitalCommand(data, command, baseMaxHP) {
         recover = true;
       }
       if (command.addConditions?.includes('dead') || Number(command.deathSaves?.fail) >= 3) {
-        v.currentHP = 0;
-        v.deathSaves.fail = 3;
-        v.activeConditions = setConditionActive(v.activeConditions, 'dead', true);
+        v = withMortality(v, markDead(mortalityOf(v)));
       }
       break;
     default: throw new Error('Unknown character health command.');
@@ -105,4 +103,13 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     v.activeConditions = setConditionActive(v.activeConditions, 'dead', false);
   }
   return v;
+}
+
+// A character's vitals in mortality.js's shape, and its answer written back.
+function mortalityOf(v) {
+  return { player: true, hp: v.currentHP, deathSaves: v.deathSaves, conditions: v.activeConditions };
+}
+
+function withMortality(v, { hp, deathSaves, conditions }) {
+  return { ...v, currentHP: hp, deathSaves, activeConditions: conditions };
 }

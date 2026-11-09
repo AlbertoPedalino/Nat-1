@@ -24,6 +24,7 @@ import {
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
+import { makeId } from '../../../shared/ids.js';
 import {
   DEFAULT_PARTY, MAX_PARTY_LEVEL, createDefaultPlayers, setPartyCount, updatePlayer, removePlayer, importCampaignPlayers,
 } from './partyState.js';
@@ -338,7 +339,7 @@ function addMonster(state, monster) {
   }
   return {
     ...state,
-    encounter: [...state.encounter, toEncounterMonster(monster, `enc-${Date.now()}-${state.encounter.length}`)],
+    encounter: [...state.encounter, toEncounterMonster(monster, makeId('enc'))],
   };
 }
 

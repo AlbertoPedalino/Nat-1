@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../cloud/sync/syncKeys.js';
+import { createKeyedQueue } from '../cloud/sync/keyed.js';
 
 // The campaign's travelling clock, shared by the GM Board and the map.
 //
@@ -34,7 +35,8 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
   const scopeRef = useRef(null);
   // Date, weather and map movement can be changed within the same render tick.
   // Preserve the order the GM made those changes instead of racing two upserts.
-  const saveQueueRef = useRef(Promise.resolve(null));
+  // Saves run one at a time, in call order.
+  const [saveQueue] = useState(createKeyedQueue);
 
   const active = Boolean(cloudEnabled && campaignId && status === 'authed');
 
@@ -159,9 +161,7 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
       }
       return saved;
     };
-    const queued = saveQueueRef.current.catch(() => null).then(save);
-    saveQueueRef.current = queued;
-    return queued;
+    return saveQueue.run(campaignId, save);
   }, [acceptClock, active, campaignId, withLog]);
 
   return {

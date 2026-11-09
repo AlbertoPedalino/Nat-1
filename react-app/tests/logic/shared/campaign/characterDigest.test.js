@@ -1,3 +1,4 @@
+import { sheetVitals } from '../../../../src/shared/character/combat/vitals.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -80,4 +81,12 @@ test('the roster is sorted and shows hit points only once the base maximum is kn
   );
   assert.equal(roster[1].hpMax, null);
   assert.deepEqual(roster[1].conditions, ['prone']);
+});
+
+// The digest's vitals are the sheet's own (sheetVitals): the same clamps, so a
+// roster entry and the sheet never disagree on a number.
+test('digest vitals are clamped exactly as the sheet clamps them', () => {
+  const raw = { currentHP: 7.6, tempHP: -2, maxHPBonus: 1.4, deathSaves: { success: 5, fail: -1 } };
+  assert.deepEqual(sheetVitalsFromDigest(raw, 20), sheetVitals(raw, 20));
+  assert.equal(sheetVitalsFromDigest(raw, undefined).currentHP, null);
 });

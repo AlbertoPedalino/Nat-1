@@ -4,6 +4,7 @@ import { Plus, Minus, PencilLine, Check } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { makeId } from '../../../shared/ids.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -11,7 +12,7 @@ function normalizePages(raw) {
     try { const p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch {}
     return [{ id: 'page_1', name: 'Notes', content: raw }];
   }
-  if (Array.isArray(raw) && raw.length) return raw.map((p) => ({ id: p.id || `page_${Date.now()}`, name: p.name || 'Untitled', content: p.content || '' }));
+  if (Array.isArray(raw) && raw.length) return raw.map((p) => ({ id: p.id || makeId('page'), name: p.name || 'Untitled', content: p.content || '' }));
   return [{ id: 'page_1', name: 'General', content: '' }];
 }
 
@@ -53,8 +54,7 @@ export default function NotesTab({ sheet }) {
 
   const addPage = useCallback(() => {
     setPages((prev) => {
-      const id = `page_${Date.now()}`;
-      return [...prev, { id, name: `Page ${prev.length + 1}`, content: '' }];
+      return [...prev, { id: makeId('page'), name: `Page ${prev.length + 1}`, content: '' }];
     });
     setActiveIdx(pages.length);
   }, [pages.length]);

@@ -5,7 +5,7 @@ import { useSheetVitals } from '../../../../../src/pages/charsheet/state/useShee
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
 
 const BASE_SHEET = {
-  currentHP: 10, maxHP: 20, tempHP: 3, maxHPBonus: 0,
+  currentHP: 10, maxHP: 20, baseMaxHP: 20, tempHP: 3, maxHPBonus: 0,
   deathSaves: { success: 0, fail: 0 }, activeConditions: [], exhaustionLevel: 0, activeEffects: [],
 };
 
@@ -15,7 +15,7 @@ function setup(sheetOverrides = {}) {
   const showNotice = vi.fn();
   const { result } = renderHook(() => {
     const [sheet, setSheet] = useState({ ...BASE_SHEET, ...sheetOverrides });
-    const vitals = useSheetVitals({ C: { name: 'Hero' }, sheet, setSheet, persist, showDiceToast, showNotice });
+    const vitals = useSheetVitals({ sheet, setSheet, persist, showDiceToast, showNotice });
     return { sheet, vitals };
   });
   return { result, persist, showDiceToast, showNotice };
@@ -72,4 +72,19 @@ test('reminders are added and removed through named commands', () => {
   expect(persist).toHaveBeenLastCalledWith(expect.anything(), { command: { type: 'addCombatantEffect', payload: { text: 'Bless' } } });
   act(() => result.current.vitals.effectActions.remove(effectId(reminder)));
   expect(result.current.sheet.activeEffects).toEqual([]);
+});
+
+// The sheet applies the same command the cloud does: Exhaustion 6 is death,
+// three failed saves included, exactly as the map and the builder see it.
+test('Exhaustion 6 kills: 0 HP, three failed saves and Dead, as the shared command has it', () => {
+  const { result, persist } = setup();
+  act(() => result.current.vitals.setExhaustion(6));
+  expect(result.current.sheet).toMatchObject({
+    currentHP: 0, exhaustionLevel: 6, deathSaves: { success: 0, fail: 3 },
+  });
+  expect(result.current.sheet.activeConditions).toEqual(expect.arrayContaining(['exhaustion', 'dead']));
+  expect(persist).toHaveBeenLastCalledWith(
+    expect.objectContaining({ exhaustionLevel: 6, currentHP: 0 }),
+    { command: { type: 'setExhaustion', value: 6 } },
+  );
 });

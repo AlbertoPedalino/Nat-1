@@ -11,7 +11,7 @@
 
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
-import { normalizeDeathSaves, pickCharacterVitals } from '../character/combat/vitals.js';
+import { clampCharacterVitals, maxHpFor, normalizeDeathSaves, pickCharacterVitals, sheetVitals } from '../character/combat/vitals.js';
 import { normalizeHexColor } from '../ui/colors.js';
 import { byName, compareText } from '../lists.js';
 import { numberOrNull } from '../numbers.js';
@@ -85,29 +85,18 @@ export function isNewerDigest(incoming, held) {
   return incoming.source === 'server' && held.source !== 'server';
 }
 
-// Max HP as the sheet derives it: the rules' base maximum plus the bonus.
+// Max HP as the sheet derives it (maxHpFor); null until the base is known.
 export function digestMaxHp(digest, baseMax) {
-  if (!Number.isFinite(baseMax)) return null;
-  return Math.max(1, Math.max(1, baseMax) + Math.round(digest?.maxHPBonus || 0));
+  return Number.isFinite(baseMax) ? maxHpFor(baseMax, digest?.maxHPBonus) : null;
 }
 
-// The synced vitals, clamped the way deriveSheetState clamps them: an absent
-// current HP means undamaged.
+// The synced vitals exactly as the sheet shows them (sheetVitals). Until the
+// base max HP is known, hit points stay null and the rest is still clamped.
 export function sheetVitalsFromDigest(digest, baseMax) {
-  const maxHP = digestMaxHp(digest, baseMax);
-  const stored = digest?.currentHP;
-  const currentHP = maxHP == null
-    ? null
-    : Math.max(0, Math.min(maxHP, stored == null ? maxHP : Math.round(stored)));
-  return {
-    currentHP,
-    tempHP: Math.max(0, Math.round(digest?.tempHP || 0)),
-    maxHPBonus: Math.round(digest?.maxHPBonus || 0),
-    deathSaves: digest?.deathSaves || { success: 0, fail: 0 },
-    activeConditions: digest?.activeConditions || [],
-    activeEffects: digest?.activeEffects || [],
-    maxHP,
-  };
+  if (!Number.isFinite(baseMax)) {
+    return { ...clampCharacterVitals(digest || {}), currentHP: null, maxHP: null };
+  }
+  return sheetVitals(digest || {}, baseMax);
 }
 
 // One roster entry for the battle map. Hit points stay null until the base

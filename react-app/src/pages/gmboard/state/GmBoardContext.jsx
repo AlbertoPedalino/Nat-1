@@ -10,6 +10,7 @@ import { useBoardCampaign } from '../../../shared/hexcrawl/useBoardCampaign.js';
 import { createDungeon, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { createQuests } from '../quests/quest.js';
 import { rollTable } from '../tables/rollTable.js';
+import { makeId } from '../../../shared/ids.js';
 
 const GmBoardContext = createContext(null);
 
@@ -127,12 +128,10 @@ export function GmBoardProvider({ instanceId, children }) {
     return true;
   }, [state.tables]);
 
-  const rollSeqRef = useRef(0);
   const rollOnTable = useCallback((tableId) => {
     const roll = rollTable(state.tables, tableId, { tier: state.rollTier }, Math.random);
     if (!roll) return;
-    rollSeqRef.current += 1;
-    dispatch({ type: 'addRoll', roll: { ...roll, id: `roll_${rollSeqRef.current}` } });
+    dispatch({ type: 'addRoll', roll: { ...roll, id: makeId('roll') } });
   }, [state.tables, state.rollTier]);
 
   const value = useMemo(() => ({

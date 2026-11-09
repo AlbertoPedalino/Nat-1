@@ -12,10 +12,6 @@ export const LEGACY_NOTES_STORAGE_KEY = 'notes:v1';
 export const NOTES_VERSION = 2;
 export const LEGACY_NOTES_VERSION = 1;
 
-export function makeNoteId(now = Date.now(), random = Math.random) {
-  return `note_${now.toString(36)}_${random().toString(36).slice(2, 8)}`;
-}
-
 export function scopeKey(id, key = NOTES_STORAGE_KEY) {
   return `gb:dmscreen:${id}:${key}`;
 }

@@ -135,6 +135,20 @@ export const SYNCED_VITALS = [
 
 export const SYNCED_DATA_KEYS = SYNCED_VITALS.map((field) => field.data);
 
+// Max HP: the rules' base maximum (computeMaxHp) plus the synced bonus, never
+// below 1. The one formula the sheet, the digest and the health commands use.
+export function maxHpFor(baseMax, bonus) {
+  return Math.max(1, Math.max(1, Math.round(Number(baseMax) || 0)) + clampInt(bonus, -999, 999, 0));
+}
+
+// A character's synced vitals as every view shows them: clamped to valid
+// ranges against its max HP (an absent current HP means undamaged), with that
+// max HP alongside.
+export function sheetVitals(raw = {}, baseMax) {
+  const maxHP = maxHpFor(baseMax, raw?.maxHPBonus);
+  return { ...clampCharacterVitals(raw || {}, { maxHP, fallback: { currentHP: maxHP } }), maxHP };
+}
+
 // Extract the raw synced-vitals subset from a stored character `data` object.
 export function pickCharacterVitals(data = {}) {
   const out = {};

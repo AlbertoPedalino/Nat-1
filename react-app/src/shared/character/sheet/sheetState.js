@@ -1,19 +1,15 @@
 import { computeMaxHp } from '../combat/hp.js';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '../inventory/currency.js';
-import { normalizeEffects } from '../combat/combatEffects.js';
-import { normalizeDeathSaves } from '../combat/vitals.js';
+import { sheetVitals } from '../combat/vitals.js';
 
 export function deriveSheetState(C) {
-  const baseMax = Math.max(1, computeMaxHp(C));
-  const maxHPBonus = Number(C?.maxHPBonus || 0);
   // RAW 2024: Wild Shape keeps your own Hit Points (no beast HP pool), so maxHP
   // is always your class-based max — transforming only adds Temporary HP.
-  const maxHP = Math.max(1, baseMax + maxHPBonus);
-  const storedCurrent = C?.currentHP;
-  const currentHP = Math.max(0, Math.min(maxHP, typeof storedCurrent === 'number' ? storedCurrent : maxHP));
-  const tempHP = Math.max(0, Number(C?.tempHP || 0));
-
-  const deathSaves = normalizeDeathSaves(C?.deathSaves);
+  // baseMaxHP stays on the sheet: every vitals change is computed from it.
+  const baseMaxHP = Math.max(1, computeMaxHp(C));
+  const {
+    currentHP, maxHP, maxHPBonus, tempHP, deathSaves, activeConditions, activeEffects,
+  } = sheetVitals(C || {}, baseMaxHP);
 
   const usedHD = Number(C?.usedHD || 0);
   const usedHDPoolsRaw = C?.usedHDPools;
@@ -29,15 +25,12 @@ export function deriveSheetState(C) {
   );
 
   const sheetInspiration = Boolean(C?.inspiration);
-  const activeConditions = Array.isArray(C?.activeConditions) ? C.activeConditions : [];
-  // Reminders (combatEffects.js), a synced vital.
-  const activeEffects = normalizeEffects(C?.activeEffects);
   const exhaustionLevel = Math.max(0, Math.min(6, Math.floor(Number(C?.exhaustionLevel) || 0)));
   const xpStored = Number(C?.xp || 0);
   const notes = C?.notes ?? '';
 
   return {
-    currentHP, maxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
+    currentHP, maxHP, baseMaxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
     sheetInventory, sheetCurrency, sheetInspiration, activeConditions, activeEffects, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
   };
 }

@@ -8,7 +8,7 @@ const C = {
   scoreMethod: 'manual', manualScores: { str: 14, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
 };
 const SHEET = {
-  currentHP: 4, maxHP: 28, tempHP: 5, maxHPBonus: 0, usedHD: 2, usedHDPools: { Fighter: 2 },
+  currentHP: 4, maxHP: 28, baseMaxHP: 28, tempHP: 5, maxHPBonus: 0, usedHD: 2, usedHDPools: { Fighter: 2 },
   deathSaves: { success: 1, fail: 1 }, spellSlotUsed: { 1: 1 }, createdSpellSlots: {},
   exhaustionLevel: 2, activeConditions: ['exhaustion', 'dead'], sheetInventory: [],
 };

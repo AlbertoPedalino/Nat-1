@@ -1,9 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getMod, getFinal, clampExhaustion } from '../../../shared/character/sheet/sheetStats.js';
-import {
-  DEAD_CONDITION_KEY,
-  setConditionActive,
-} from '../../../shared/character/combat/conditions.js';
+import { applyVitalCommand } from '../../../shared/character/combat/vitalCommands.js';
 import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../../shared/character/inventory/craftedItemState.js';
 import { longRestCharacterPatch } from '../../../shared/character/resources/longRest.js';
 import {
@@ -18,16 +15,6 @@ import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { rollDie } from '../../../shared/character/dice/dice.js';
 
-// A long rest reduces Exhaustion by 1 (XPHB 2024). Returns the patch fields that
-// lower the level and drop the pill once it reaches 0. Shared by both rest paths.
-function longRestExhaustionPatch(sheet) {
-  const exhaustionLevel = clampExhaustion((sheet.exhaustionLevel || 0) - 1);
-  const activeConditions = exhaustionLevel === 0
-    ? (sheet.activeConditions || []).filter((k) => k !== 'exhaustion')
-    : (sheet.activeConditions || []);
-  return { exhaustionLevel, activeConditions };
-}
-
 // Short and Long Rest: the dialogs' state and what confirming each one does to
 // HP, Hit Dice, slots, resources, free casts, toggles and rest-bound features.
 export function useRests({ C, sheet, setSheet, resources, setResources, freeCastUses, setFreeCastUses, persist, showDiceToast, showNotice }) {
@@ -41,7 +28,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
   }, []);
 
   const confirmShortRest = useCallback(() => {
-    const s = { ...sheet };
+    let s = { ...sheet };
     let res = { ...resources };
     const conMod = getMod(getFinal(C, 'con'));
     const pools = getHitDicePools(C, s.usedHDPools, s.usedHD);
@@ -62,18 +49,18 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     const totalSpent = getUsedHitDiceTotal(spendByPool);
 
     const patch = {};
+    // The healing is the shared modifyHp command, as the cloud applies it.
+    const heal = { type: 'modifyHp', delta: Math.max(0, totalHeal) };
     if (totalSpent > 0) {
-      s.currentHP = Math.min(s.maxHP, s.currentHP + totalHeal);
+      const vitals = applyVitalCommand(s, heal, s.baseMaxHP);
+      s = { ...s, ...vitals };
       const nextUsedPools = {};
       pools.forEach((pool) => {
         nextUsedPools[pool.key] = pool.used + (spendByPool[pool.key] || 0);
       });
       s.usedHDPools = nextUsedPools;
       s.usedHD = getUsedHitDiceTotal(nextUsedPools);
-      Object.assign(patch, {
-        currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
-        usedHD: s.usedHD, usedHDPools: s.usedHDPools,
-      });
+      Object.assign(patch, vitals, { usedHD: s.usedHD, usedHDPools: s.usedHDPools });
     }
 
     if (C) {
@@ -86,7 +73,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     }
 
     setSheet(s);
-    if (Object.keys(patch).length) persist(patch, { command: { type: 'modifyHp', delta: Math.max(0, totalHeal) } });
+    if (Object.keys(patch).length) persist(patch, { command: heal });
     setShortRestOpen(false);
     if (totalSpent > 0) {
       showDiceToast('Short Rest', `Healed ${totalHeal} HP (${totalSpent} HD spent)`, totalHeal, rolls);
@@ -100,18 +87,22 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
   }, []);
 
   const confirmLongRest = useCallback(() => {
-    const s = { ...sheet };
     let res = { ...resources };
-    s.currentHP = s.maxHP;
-    s.tempHP = 0;
-    s.usedHD = 0;
-    s.usedHDPools = {};
-    s.deathSaves = { success: 0, fail: 0 };
-    s.spellSlotUsed = {};
-    s.createdSpellSlots = {};
-    const exRest = longRestExhaustionPatch(s);
-    s.exhaustionLevel = exRest.exhaustionLevel;
-    s.activeConditions = setConditionActive(exRest.activeConditions, DEAD_CONDITION_KEY, false);
+    // A long rest lowers Exhaustion by 1 (XPHB 2024). Hit points, temporary HP,
+    // death saves and the conditions are the shared longRest command's, as the
+    // cloud applies it.
+    const exhaustionLevel = clampExhaustion((sheet.exhaustionLevel || 0) - 1);
+    const command = { type: 'longRest', exhaustionLevel };
+    const vitals = applyVitalCommand(sheet, command, sheet.baseMaxHP);
+    const s = {
+      ...sheet,
+      ...vitals,
+      exhaustionLevel,
+      usedHD: 0,
+      usedHDPools: {},
+      spellSlotUsed: {},
+      createdSpellSlots: {},
+    };
 
     // Crafted items that last only until a Long Rest (Tinker's Magic, Fast
     // Crafting) vanish now. Replicate Magic Item items persist and are untouched.
@@ -120,11 +111,10 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     if (inventoryVanished) s.sheetInventory = prunedInv;
 
     const patch = {
-      currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
+      ...vitals,
       usedHD: 0, usedHDPools: {},
-      deathSaves: s.deathSaves,
       spellSlotsUsed: {}, createdSpellSlots: {},
-      exhaustionLevel: exRest.exhaustionLevel, activeConditions: s.activeConditions,
+      exhaustionLevel,
     };
     if (inventoryVanished) patch.inventory = prunedInv;
 
@@ -148,7 +138,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     }
 
     setSheet(s);
-    persist(patch, { command: { type: 'longRest', exhaustionLevel: exRest.exhaustionLevel } });
+    persist(patch, { command });
     setLongRestOpen(false);
     showNotice('Long Rest', 'Fully restored!');
   }, [sheet, resources, freeCastUses, C, persist, showNotice]);

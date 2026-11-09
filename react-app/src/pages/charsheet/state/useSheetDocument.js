@@ -13,8 +13,8 @@ import { isSyncExcluded } from '../../../shared/cloud/sync/cloudSyncExclude.js';
 import { withRuntimeOnlyCharacterFields } from '../../../shared/character/profile/runtimeFields.js';
 import {
   SYNCED_VITALS,
-  clampCharacterVitals,
   pickCharacterVitals,
+  sheetVitals,
 } from '../../../shared/character/combat/vitals.js';
 import {
   getActiveCharId,
@@ -131,7 +131,7 @@ export function useSheetDocument({
       // read first. The answer (applied or not) comes back through the digest.
       const digest = incomingDigestRef.current;
       const base = digest && confirmed
-        ? { hpBasis: digest.hpBasis, baseMax: Math.max(1, (Number(confirmed.maxHP) || 1) - (Number(confirmed.maxHPBonus) || 0)) }
+        ? { hpBasis: digest.hpBasis, baseMax: confirmed.baseMaxHP }
         : null;
       commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch }, { digest, base })
         .catch((error) => notify('error', `Could not update hit points: ${error.message}`));
@@ -166,10 +166,7 @@ export function useSheetDocument({
     if (!s) return;
     // Max HP is derived (this sheet's base + the synced bonus). A digest with
     // no current HP means undamaged.
-    const raw = pickCharacterVitals(incomingDigest);
-    const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
-    const maxHP = Math.max(1, baseMax + clampCharacterVitals(raw).maxHPBonus);
-    const next = clampCharacterVitals(raw, { maxHP, fallback: { currentHP: maxHP } });
+    const { maxHP, ...next } = sheetVitals(pickCharacterVitals(incomingDigest), s.baseMaxHP);
     // Compared field by field through the registry's own normalizer, so a newly
     // synced field is covered the moment it is declared instead of needing a
     // clause here — the omission that let combat conditions arrive and be

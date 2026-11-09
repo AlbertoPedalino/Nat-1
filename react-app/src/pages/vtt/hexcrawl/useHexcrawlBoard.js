@@ -8,6 +8,7 @@ import {
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
+import { createKeyedQueue } from '../../../shared/cloud/sync/keyed.js';
 
 // The board whose tables the map's rolls come from, followed for as long as
 // this browser may run the crawl.
@@ -22,7 +23,8 @@ export function useHexcrawlBoard({ campaignId, enabled }) {
   const [board, setBoard] = useState(null);
   const boardRef = useRef(null);
   const boardScopeRef = useRef(enabled && campaignId ? campaignId : null);
-  const boardRefreshQueueRef = useRef(Promise.resolve(null));
+  // Refreshes run one at a time, in call order.
+  const [refreshQueue] = useState(createKeyedQueue);
 
   const refreshBoard = useCallback(({ force = false } = {}) => {
     const refresh = async () => {
@@ -47,9 +49,7 @@ export function useHexcrawlBoard({ campaignId, enabled }) {
       setBoard(loaded);
       return loaded;
     };
-    const queued = boardRefreshQueueRef.current.catch(() => null).then(refresh);
-    boardRefreshQueueRef.current = queued;
-    return queued;
+    return refreshQueue.run(campaignId, refresh);
   }, [campaignId, enabled]);
 
   useEffect(() => {

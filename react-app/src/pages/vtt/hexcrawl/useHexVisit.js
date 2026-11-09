@@ -5,6 +5,7 @@ import { saveHexCell } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexEntrySummary, mergeBoardClock, runHexEntry } from '../../../shared/hexcrawl/hexEntry.js';
 import { hexKey } from '../../../shared/vtt/map/hexGeometry.js';
 import { runBusy } from '../../../shared/ui/busyAction.js';
+import { makeId } from '../../../shared/ids.js';
 
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
@@ -80,7 +81,7 @@ export function useHexVisit({
       setResult({ ...entry.result, hex: filled, clock: entry.clock });
       const summary = hexEntrySummary(entry.result);
       const spoken = {
-        id: `${filled.q}:${filled.r}:${Date.now()}`,
+        id: makeId('visit'),
         hex: filled,
         // The hours the leg cost, so the bubble is not still quoting the
         // terrain's own while the party rides.
