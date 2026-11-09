@@ -3,6 +3,7 @@ import { withSheetVitals } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
 import { resolveTokens } from '../../../shared/vtt/session/liveScene.js';
 import { projectPlayerTokens } from '../../../shared/vtt/session/spectator.js';
+import { isPrivateRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { fade } from './sceneEditorStyles.js';
 
 // What this viewer may see of the board. The GM gets everything, with the
@@ -78,16 +79,18 @@ export function useViewerProjection({
     [projectedTokens],
   );
 
+  // What the table sees never carries the GM's private rolls (rollFeed.js).
   const projectedRollBubbles = useMemo(() => (
     spectator || gmPlayerPreview
       ? rollBubbles
+        .filter((entry) => !isPrivateRoll(entry.roll))
         .map((entry) => ({ ...entry, token: projectedTokenById.get(entry.token?.id) || null }))
         .filter((entry) => entry.token)
       : rollBubbles
   ), [gmPlayerPreview, projectedTokenById, rollBubbles, spectator]);
   const projectedDiceThrows = useMemo(() => (
     spectator || gmPlayerPreview
-      ? diceThrows.map((entry) => ({
+      ? diceThrows.filter((entry) => !isPrivateRoll(entry.roll)).map((entry) => ({
         ...entry,
         token: entry.token ? (projectedTokenById.get(entry.token.id) || null) : null,
       }))

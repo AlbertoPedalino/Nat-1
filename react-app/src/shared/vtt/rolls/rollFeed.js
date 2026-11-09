@@ -162,12 +162,20 @@ export function rollAuthor({ isGm, ownedCharacterIds = [], tokens = [], roster =
 //
 // One per roller, because a flurry of rolls would otherwise stack bubbles on
 // top of each other over a single piece and bury the board in dice.
-function latestPerRoller(feed, now, ttl, keyOf) {
+//
+// A private roll (visibility 'gm': the GM's own while their switch is off) is
+// left out unless `includePrivate` — the GM's own screen, which still sees the
+// dice it threw. Whatever the table sees (a player's screen, the projector, the
+// GM's player preview) drops them again: isPrivateRoll.
+export function isPrivateRoll(roll) {
+  return roll?.visibility === 'gm';
+}
+
+function latestPerRoller(feed, { now = Date.now(), ttl = ROLL_TTL_MS, includePrivate = false }, keyOf) {
   const seen = new Set();
   const current = [];
   for (const roll of feed || []) {
-    // Private encounter rolls belong in the GM log, never on the map.
-    if (roll.visibility === 'gm' || now - roll.at > ttl) continue;
+    if ((!includePrivate && isPrivateRoll(roll)) || now - roll.at > ttl) continue;
     const key = keyOf(roll);
     if (key === null || seen.has(key)) continue;
     seen.add(key);
@@ -182,11 +190,10 @@ function pieceKey(roll) {
 }
 
 // A bubble belongs over a character or a linked encounter combatant.
-export function currentBubbles(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
+export function currentBubbles(feed, options = {}) {
   return latestPerRoller(
     feed,
-    now,
-    ttl,
+    options,
     (roll) => (!roll.localOrigin ? pieceKey(roll) : null),
   );
 }
@@ -196,11 +203,10 @@ export function currentBubbles(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
 // while keeping those values on the faces that naturally land.
 //
 // Whoever threw them, including the GM, who has no piece for a bubble.
-export function currentThrows(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
+export function currentThrows(feed, options = {}) {
   return latestPerRoller(
     feed,
-    now,
-    ttl,
+    options,
     (roll) => (roll.thrown && roll.rolls?.length ? pieceKey(roll) || `actor:${roll.actorName}` : null),
   );
 }

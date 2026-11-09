@@ -8,6 +8,7 @@ import {
   addRoll,
   currentBubbles,
   currentThrows,
+  isPrivateRoll,
   rollAuthor,
   normalizeRoll,
 } from '../../../../../src/shared/vtt/rolls/rollFeed.js';
@@ -76,8 +77,8 @@ test('the feed is capped so a long session cannot grow it without bound', () => 
 // the log rather than floating over the board.
 test('only fresh rolls float over a piece', () => {
   const feed = [normalizeRoll(roll({ timestamp: 1000 }))];
-  assert.equal(currentBubbles(feed, 1000 + ROLL_TTL_MS - 1).length, 1);
-  assert.equal(currentBubbles(feed, 1000 + ROLL_TTL_MS + 1).length, 0);
+  assert.equal(currentBubbles(feed, { now: 1000 + ROLL_TTL_MS - 1 }).length, 1);
+  assert.equal(currentBubbles(feed, { now: 1000 + ROLL_TTL_MS + 1 }).length, 0);
 });
 
 test('a flurry from one character shows one bubble, not a stack', () => {
@@ -86,7 +87,7 @@ test('a flurry from one character shows one bubble, not a stack', () => {
     normalizeRoll(roll({ timestamp: 2000 })),
     normalizeRoll(roll({ timestamp: 2500, characterId: 'char-2', actorName: 'Brom' })),
   ];
-  const bubbles = currentBubbles(feed, 3000);
+  const bubbles = currentBubbles(feed, { now: 3000 });
   assert.equal(bubbles.length, 2);
   assert.equal(bubbles[0].label, 'Damage', 'the latest wins for that character');
   assert.deepEqual(bubbles.map((item) => item.characterId), ['char-1', 'char-2']);
@@ -94,23 +95,23 @@ test('a flurry from one character shows one bubble, not a stack', () => {
 
 test('a roll from nobody in particular never floats over a piece', () => {
   const feed = [normalizeRoll(roll({ characterId: null, timestamp: 1000 }))];
-  assert.deepEqual(currentBubbles(feed, 1000), []);
+  assert.deepEqual(currentBubbles(feed, { now: 1000 }), []);
 });
 
 test('the screen that made a roll does not show its own bubble', () => {
   const localFeed = addRoll([], roll(), { local: true });
   const remoteFeed = addRoll([], roll());
 
-  assert.equal(currentBubbles(localFeed, 1000).length, 0);
-  assert.equal(currentThrows(localFeed, 1000).length, 0, 'only the bubble is suppressed');
+  assert.equal(currentBubbles(localFeed, { now: 1000 }).length, 0);
+  assert.equal(currentThrows(localFeed, { now: 1000 }).length, 0, 'only the bubble is suppressed');
   assert.equal(localFeed.length, 1, 'the local roll remains in the log');
-  assert.equal(currentBubbles(remoteFeed, 1000).length, 1, 'other screens still show it');
+  assert.equal(currentBubbles(remoteFeed, { now: 1000 }).length, 1, 'other screens still show it');
 });
 
 test('a local physical roll still throws its dice without a bubble', () => {
   const feed = addRoll([], roll({ thrown: true }), { local: true });
-  assert.equal(currentBubbles(feed, 1000).length, 0);
-  assert.equal(currentThrows(feed, 1000).length, 1);
+  assert.equal(currentBubbles(feed, { now: 1000 }).length, 0);
+  assert.equal(currentThrows(feed, { now: 1000 }).length, 1);
 });
 
 // A roll made from the map's own roller has to be attributed to somebody before
@@ -203,8 +204,15 @@ test('shared roll payloads bound identifiers and discard impossible dice and num
 test('private rolls stay in the log without bubbles or dice on the map', () => {
   const feed = addRoll([], roll({ visibility: 'gm', thrown: true, sourceRef: 'enc:fight:1' }));
   assert.equal(feed.length, 1);
-  assert.deepEqual(currentBubbles(feed, 1000), []);
-  assert.deepEqual(currentThrows(feed, 1000), []);
+  assert.deepEqual(currentBubbles(feed, { now: 1000 }), []);
+  assert.deepEqual(currentThrows(feed, { now: 1000 }), []);
+});
+
+test("the GM's own screen still shows the dice of a private roll, the table does not", () => {
+  const feed = addRoll([], roll({ visibility: 'gm', thrown: true, characterId: null, actorName: 'GM' }));
+  assert.equal(currentThrows(feed, { now: 1000, includePrivate: true }).length, 1);
+  assert.equal(currentThrows(feed, { now: 1000 }).length, 0);
+  assert.equal(isPrivateRoll(feed[0]), true);
 });
 
 test('same-name monsters in different encounters have separate bubbles and dice', () => {
@@ -212,8 +220,8 @@ test('same-name monsters in different encounters have separate bubbles and dice'
   for (const sourceRef of ['enc:fight:1', 'other:fight:1']) {
     feed = addRoll(feed, roll({ id: sourceRef, characterId: null, sourceRef, actorName: 'Goblin', thrown: true }));
   }
-  assert.equal(currentBubbles(feed, 1000).length, 2);
-  assert.equal(currentThrows(feed, 1000).length, 2);
+  assert.equal(currentBubbles(feed, { now: 1000 }).length, 2);
+  assert.equal(currentThrows(feed, { now: 1000 }).length, 2);
   assert.equal(normalizeRoll(feed[0]).sourceRef, 'other:fight:1');
 });
 
@@ -235,5 +243,5 @@ test('a shared roll preserves a bounded valid pool and never throws an unsafe se
 test('dice are cleared once the roll is history', () => {
   const now = Date.now();
   const feed = [normalizeRoll(roll({ thrown: true, timestamp: now - ROLL_TTL_MS - 1 }))];
-  assert.equal(currentThrows(feed, now).length, 0);
+  assert.equal(currentThrows(feed, { now }).length, 0);
 });

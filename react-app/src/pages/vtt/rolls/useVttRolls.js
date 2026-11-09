@@ -111,10 +111,10 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     tokenByCharacter.get(roll.characterId) || tokenBySource.get(roll.sourceRef) || null
   ), [tokenByCharacter, tokenBySource]);
 
-  const bubbles = useMemo(() => currentBubbles(feed)
+  const bubbles = useMemo(() => currentBubbles(feed, { includePrivate: role.isGm })
     .filter((roll) => !dismissedBubbleIds.has(roll.id))
     .map((roll) => ({ roll, token: tokenForRoll(roll) }))
-    .filter((entry) => entry.token), [dismissedBubbleIds, feed, tick, tokenForRoll]);
+    .filter((entry) => entry.token), [dismissedBubbleIds, feed, role.isGm, tick, tokenForRoll]);
 
   // Only ids still in the feed are kept, so the set never outgrows it.
   const dismissRollBubble = useCallback((rollId) => {
@@ -124,8 +124,8 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     });
   }, [feed]);
 
-  const throws = useMemo(() => currentThrows(feed)
-    .map((roll) => ({ roll, token: tokenForRoll(roll) })), [feed, tick, tokenForRoll]);
+  const throws = useMemo(() => currentThrows(feed, { includePrivate: role.isGm })
+    .map((roll) => ({ roll, token: tokenForRoll(roll) })), [feed, role.isGm, tick, tokenForRoll]);
 
   return {
     clearFeed,

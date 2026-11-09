@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 import { useVttRolls } from '../../../../../src/pages/vtt/rolls/useVttRolls.js';
+import { isPrivateRoll } from '../../../../../src/shared/vtt/rolls/rollFeed.js';
 
 const channel = vi.hoisted(() => ({ onRoll: null, publish: vi.fn() }));
 
@@ -90,12 +91,13 @@ test.each([false, true])('monster map feedback follows encounter sharing (public
   })));
   expect(result.current.toast).toBeNull();
   expect(result.current.feed).toHaveLength(1);
-  expect(result.current.rollBubbles).toHaveLength(shared ? 1 : 0);
-  expect(result.current.diceThrows).toHaveLength(shared ? 1 : 0);
-  if (shared) {
-    expect(result.current.rollBubbles[0].token).toBe(token);
-    expect(result.current.diceThrows[0].token).toBe(token);
-  }
+  // The GM's own screen shows it either way; a private one is marked so the
+  // table's views (projector, player preview) drop it (useViewerProjection).
+  expect(result.current.rollBubbles).toHaveLength(1);
+  expect(result.current.diceThrows).toHaveLength(1);
+  expect(result.current.rollBubbles[0].token).toBe(token);
+  expect(result.current.diceThrows[0].token).toBe(token);
+  expect(isPrivateRoll(result.current.diceThrows[0].roll)).toBe(!shared);
 });
 
 test('the embedded-sheet handoff deduplicates a local channel delivery and suppresses its own bubble', () => {
@@ -124,7 +126,7 @@ test('a roll bubble closed by hand stays closed while the roll is still in the f
 });
 
 // A GM rolling from a creature's stat block on the map.
-test('a creature roll stays in the GM log unless shown, and then lands over its piece', () => {
+test('a creature roll is private unless shown; the GM sees its dice either way', () => {
   const { result } = openRolls({
     role: { isGm: true, ownedCharacterIds: [] },
     tokens: [{ id: 'gob', sourceRef: 'inst:77:0' }],
@@ -137,7 +139,7 @@ test('a creature roll stays in the GM log unless shown, and then lands over its 
   expect(secret).toMatchObject({ actorName: 'Goblin', actorLabel: 'A', sourceRef: 'inst:77:0', visibility: 'gm' });
   expect(result.current.toast).toMatchObject({ total: secret.total });
   expect(result.current.feed[0].visibility).toBe('gm');
-  expect(result.current.diceThrows).toHaveLength(0);
+  expect(result.current.diceThrows.map((entry) => entry.roll.visibility)).toEqual(['gm']);
 
   // The GM's switch for the campaign, as set from any screen.
   localStorage.setItem('gb:gm-rolls-shown:campaign-1', '1');
