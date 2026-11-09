@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Box, Button, ButtonGroup, IconButton, Popover, Tooltip,
 } from '@mui/material';
-import { ChevronDown, Dices, ScrollText } from 'lucide-react';
+import { ChevronLeft, Dices, ScrollText } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
@@ -21,7 +21,7 @@ import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js
 // dividerColor, paperSx, dialog } where `dialog` holds CustomRollDialog's
 // style props. `settings` (the GM's GmRollsShownSwitch) is shown where the
 // roll is made and on top of the log. `onHide` adds a last segment that tucks
-// a floating control away (the sheet's dock).
+// a floating control away to the left edge (the sheet's dock, on a phone).
 export default function DiceControl({
   log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, placement = 'down', onHide = null, sx,
 }) {
@@ -59,7 +59,7 @@ export default function DiceControl({
           </Button>
           {onHide ? (
             <Button aria-label="Hide dice" onClick={onHide} sx={[hideSx, actionButtonToneSx(UI_COLORS.textSecondary)]}>
-              <ChevronDown size={14} />
+              <ChevronLeft size={14} />
             </Button>
           ) : null}
         </ButtonGroup>

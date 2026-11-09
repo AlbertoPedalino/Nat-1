@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import SheetDiceDock from '../../../../../src/pages/charsheet/layout/SheetDiceDock.jsx';
@@ -73,22 +74,40 @@ test('it floats at the bottom without taking clicks from what passes under it', 
   expect(log).toHaveAccessibleName('Roll log, 0 rolls');
 });
 
-test('its chevron tucks it into a tab that brings it back, and the choice is kept', () => {
+// A phone as MUI asks for one: the breakpoint below `sm`.
+function asPhone() {
+  return vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+    matches: query.includes('max-width'),
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+  }));
+}
+
+test('on a phone its chevron tucks it into a handle that brings it back, and the choice is kept', () => {
   localStorage.clear();
-  const { unmount } = render(<SheetDiceDock rollLog={[]} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Hide dice' }));
-  expect(screen.queryByRole('group', { name: 'Dice' })).not.toBeInTheDocument();
-  unmount();
-  render(<SheetDiceDock rollLog={[]} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Show dice' }));
-  expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+  const matchMedia = asPhone();
+  try {
+    const { unmount } = render(<SheetDiceDock rollLog={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Hide dice' }));
+    expect(screen.queryByRole('group', { name: 'Dice' })).not.toBeInTheDocument();
+    unmount();
+    render(<SheetDiceDock rollLog={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Show dice' }));
+    expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+  } finally {
+    matchMedia.mockRestore();
+  }
 });
 
-test('the tab opens as the finger lifts, even if the click that follows is lost', () => {
+test('from a tablet up it is always out, with nothing to tuck it away', () => {
   localStorage.setItem('gb:sheet:dice-dock-hidden', '1');
   render(<SheetDiceDock rollLog={[]} />);
-  fireEvent.pointerUp(screen.getByRole('button', { name: 'Show dice' }));
   expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Hide dice' })).not.toBeInTheDocument();
+  localStorage.clear();
 });
 
 test('on its own page the end-of-scroll stretch is off while the sheet is open', () => {
