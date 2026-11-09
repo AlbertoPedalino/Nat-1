@@ -318,15 +318,15 @@ const bodySx = {
   willChange: 'transform',
 };
 
-// What puts a die on the table rather than in front of it.
+// What puts a die on the table rather than in front of it. Soft-edged by a
+// gradient, not a blur filter: the shadow moves and fades every frame of the
+// throw, and a filter would be re-blurred on each of them.
 const shadowSx = {
   position: 'absolute',
-  left: '10%',
-  right: '10%',
-  bottom: -4,
-  height: 8,
-  borderRadius: '50%',
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.strong),
-  filter: 'blur(3px)',
+  left: '4%',
+  right: '4%',
+  bottom: -7,
+  height: 14,
+  background: `radial-gradient(closest-side, ${vttAlpha(VTT_COLORS.black, OPACITY.strong)} 45%, transparent)`,
   opacity: 0,
 };

@@ -82,5 +82,4 @@ const appTopBarSx = {
   py: '0.5rem',
   bgcolor: uiAlpha(UI_COLORS.surfaceDarkest, OPACITY.solid),
   borderBottom: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.shade)}`,
-  backdropFilter: 'blur(6px)',
 };

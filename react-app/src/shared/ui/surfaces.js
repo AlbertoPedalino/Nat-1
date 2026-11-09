@@ -27,13 +27,14 @@ export const SURFACES = Object.freeze({
     borderRadius: 1,
   }),
   // The battle map's glass: every panel and dialog floating over the board.
+  // No backdrop blur: the surface is 95% opaque, so a blur behind it cannot be
+  // seen, and over a map where something always moves it is redone every
+  // frame — measured at ~100ms a frame on desktop under the roll toast.
   map: Object.freeze({
     bgcolor: 'gmboard.vtt.surface',
     backgroundImage: 'none',
     border: '1px solid',
     borderColor: 'gmboard.vtt.accentBorder',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
   }),
   // A small control on the map (round icon buttons, corner toggles).
   mapControl: Object.freeze({

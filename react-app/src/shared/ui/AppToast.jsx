@@ -34,7 +34,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
   return (
     // Portal to <body>: Snackbar is position:fixed but MUI doesn't portal it, so
     // it's positioned against the nearest ancestor that forms a containing block
-    // (any `transform`/`filter`/`backdropFilter` — e.g. AppTopBar) instead of the
+    // (any `transform`/`filter`/`backdropFilter`) instead of the
     // viewport. The Portal makes the fixed positioning viewport-relative no matter
     // where the toast is triggered from. Into the fullscreen element when there
     // is one (the battle map), or the browser would not paint it at all.
