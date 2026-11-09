@@ -1,7 +1,11 @@
+import { SWATCH_COLORS } from '../ui/swatches.js';
+
 // How combatants are told apart: label shapes and colours for monsters,
-// colours for players.
-export const PLAYER_COLORS = Object.freeze(['#e05c5c', '#5c8fe0', '#5ce07a', '#e0b85c', '#b05ce0', '#5ce0d8', '#e07c5c', '#9de05c', '#e05cb0', '#5ca8e0']);
+// colours for players, both from the shared swatches.
+export const PLAYER_COLORS = Object.freeze(SWATCH_COLORS.slice(0, 10));
 
 export const COMBAT_LABEL_SHAPES = Object.freeze(['■', '●', '⬟', '⬢', '▲', '◆', '★', '◉', '▼', '◈']);
 
-export const COMBAT_LABEL_COLORS = Object.freeze(['#3498db', '#e74c3c', '#f1c40f', '#27ae60', '#9b59b6', '#e67e22', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722']);
+// Offset from the player colours, so the first monster label is not the
+// first player's colour.
+export const COMBAT_LABEL_COLORS = Object.freeze([...SWATCH_COLORS.slice(1), SWATCH_COLORS[0]].slice(0, 10));

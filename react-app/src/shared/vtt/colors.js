@@ -1,5 +1,7 @@
 import { clamp } from '../numbers.js';
+import { darken, rgbToHex } from '@mui/material';
 import { UI_COLORS } from '../ui/colors.js';
+import { DAMAGE_TYPE_COLORS } from '../ui/entityColors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
 // Components should still prefer `gmboard.vtt.*` in `sx` when a theme token is
@@ -28,10 +30,12 @@ export const VTT_COLORS = Object.freeze({
   // tiles, and the darker vitals tones that stay legible over any map.
   viewport: '#0b0a09',
   stitchBackground: UI_COLORS.surfaceSunken,
-  hpHealthy: '#4f8a5b',
-  hpWounded: '#c8973f',
-  hpCritical: '#b3423a',
-  tempHp: '#4f7fa8',
+  // The interface's vitals tones, a step darker so bars stay legible over
+  // any map while following the palette.
+  hpHealthy: rgbToHex(darken(UI_COLORS.success, 0.2)),
+  hpWounded: rgbToHex(darken(UI_COLORS.warning, 0.1)),
+  hpCritical: rgbToHex(darken(UI_COLORS.danger, 0.2)),
+  tempHp: rgbToHex(darken(UI_COLORS.info, 0.2)),
   tempHpText: '#dff0fb',
   deathText: '#f7e9dc',
   neutralMark: '#e2dac6',
@@ -44,14 +48,15 @@ export const VTT_COLORS = Object.freeze({
   objectDefault: '#6f5b32',
   exploredHex: '#6f8f5a',
   // Areas of effect: the outline each effect suggests, and the hue its
-  // animation is built around.
-  areaFire: '#ff7a2a',
-  areaPoison: '#7cc444',
-  areaCold: '#86d4ff',
-  areaAcid: '#cde04a',
-  areaLightning: '#a9c4ff',
-  areaNecrotic: '#9a6ad8',
-  areaRadiant: '#ffd86a',
+  // animation is built around — a damage type's own colour, the same as on
+  // the sheet's defenses.
+  areaFire: DAMAGE_TYPE_COLORS.fire,
+  areaPoison: DAMAGE_TYPE_COLORS.poison,
+  areaCold: DAMAGE_TYPE_COLORS.cold,
+  areaAcid: DAMAGE_TYPE_COLORS.acid,
+  areaLightning: DAMAGE_TYPE_COLORS.lightning,
+  areaNecrotic: DAMAGE_TYPE_COLORS.necrotic,
+  areaRadiant: DAMAGE_TYPE_COLORS.radiant,
   areaDarkness: '#7a6a9a',
   areaThorns: '#8f9a45',
   // Whose turn it is: a colour nothing else on the board uses (gold already

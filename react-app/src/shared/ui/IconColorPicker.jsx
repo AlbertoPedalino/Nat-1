@@ -2,14 +2,10 @@ import { useState, useEffect } from 'react';
 import { Box, Popover, Typography } from '@mui/material';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import ColorField from './ColorField.jsx';
+import { SWATCH_COLORS } from './swatches.js';
+import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { SURFACES } from './surfaces.js';
 import { TEXT_STYLES } from './textStyles.js';
-
-export const ICON_COLORS = [
-  '#de675f', '#d69245', '#caa550', '#e9c46a',
-  '#58b879', '#2a9d8f', '#70b7a6', '#4d95d6',
-  '#8ecae6', '#9d7fb8', '#b58fd9', '#e8a87c',
-  '#f4a261', '#e76f51', '#a8adb8', '#264653',
-];
 
 export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
@@ -22,7 +18,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
     onClose();
   };
 
-  const displayColor = localColor || 'rgba(46,42,34,1)';
+  const displayColor = localColor || UI_COLORS.surfaceRaised;
   return (
     <Popover
       open={open}
@@ -30,21 +26,21 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       onClose={() => { if (localColor !== currentColor) onSelect(localColor); onClose(); }}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, p: 1 } } }}
+      slotProps={{ paper: { sx: { ...SURFACES.panel, bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), p: 1 } } }}
     >
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5, ...TEXT_STYLES.label }}>
         {title}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.5 }}>
-        {ICON_COLORS.map((color) => (
+        {SWATCH_COLORS.map((color) => (
           <Box
             key={color}
             onClick={() => pick(color)}
             sx={{
               width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
               bgcolor: color, border: 2,
-              borderColor: (localColor || currentColor) === color ? '#fff' : 'transparent',
-              boxShadow: (localColor || currentColor) === color ? '0 0 6px rgba(255,255,255,0.4)' : 'none',
+              borderColor: (localColor || currentColor) === color ? UI_COLORS.white : 'transparent',
+              boxShadow: (localColor || currentColor) === color ? `0 0 6px ${uiAlpha(UI_COLORS.white, OPACITY.edge)}` : 'none',
               '&:hover': { transform: 'scale(1.2)', transition: 'transform 0.12s' },
             }}
           />
@@ -53,8 +49,8 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           onClick={() => pick(null)}
           sx={{
             width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-            bgcolor: 'rgba(46,42,34,1)', border: 2,
-            borderColor: localColor == null && currentColor == null ? '#fff' : 'divider',
+            bgcolor: UI_COLORS.surfaceRaised, border: 2,
+            borderColor: localColor == null && currentColor == null ? UI_COLORS.white : 'divider',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: FONT_SIZES.xs, color: 'text.secondary',
             '&:hover': { transform: 'scale(1.2)', transition: 'transform 0.12s' },
@@ -78,7 +74,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
         >
           <ColorField
             label={`${title}: custom`}
-            value={localColor || '#4d95d6'}
+            value={localColor || SWATCH_COLORS[1]}
             onChange={setLocalColor}
             bare
             sx={{

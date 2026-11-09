@@ -7,6 +7,7 @@
 import { getHP, getMonsterTokenUrls } from '../../bestiary/monsterUtils.js';
 import { makeSourceRef } from './encounterSync.js';
 import { clamp, numberOrNull } from '../../numbers.js';
+import { SWATCH_COLORS } from '../../ui/swatches.js';
 
 // D&D creature sizes in squares. A Large creature is the first that stops
 // fitting in one, and Tiny still gets a whole square: two goblins sharing a
@@ -14,8 +15,7 @@ import { clamp, numberOrNull } from '../../numbers.js';
 const SIZE_SPANS = { T: 1, S: 1, M: 1, L: 2, H: 3, G: 4 };
 
 // Distinct enough to tell apart at token size, and stable per name so the same
-// creature keeps its colour across imports.
-const PALETTE = ['#b3423a', '#7a5aa8', '#3f7a55', '#a8762f', '#3d6a94', '#8d4a70'];
+// creature keeps its colour across imports: the shared swatches.
 
 // A snapshotted combatant keeps `monsterRef` — the name and source — even when
 // the stat block itself was not re-linked. Art only needs those two, so the
@@ -40,7 +40,7 @@ export function colorForName(name) {
   for (let index = 0; index < text.length; index += 1) {
     hash = (hash * 31 + text.charCodeAt(index)) % 100000;
   }
-  return PALETTE[hash % PALETTE.length];
+  return SWATCH_COLORS[hash % SWATCH_COLORS.length];
 }
 
 // Combatants already carry a per-name letter (Goblin A, Goblin B) from the

@@ -29,8 +29,8 @@ export function complicationVisual(type) {
 }
 
 // A colour from one of the board's tone groups (`result`, `difficulty`,
-// `rarity`, …) by row value; Common's colour when the value has none.
+// `rarity`, …) by row value; the neutral `result.none` when it has none.
 export function boardTone(palette, group, key) {
   const tones = palette.gmboard[group] || {};
-  return Object.hasOwn(tones, key) ? tones[key] : palette.gmboard.rarity.Common;
+  return Object.hasOwn(tones, key) ? tones[key] : palette.gmboard.result.none;
 }

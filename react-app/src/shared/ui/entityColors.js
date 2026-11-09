@@ -1,8 +1,12 @@
 import { alpha } from '@mui/material';
-import { OPACITY } from './colors.js';
+import { UI_COLORS, OPACITY } from './colors.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
+// These are colours of meaning, not of style: each says "class", "feat",
+// "fire"… and stays the same whatever the interface palette (UI_COLORS) is,
+// even where a value happens to match one of its roles. Something that is not
+// an entity (a heading, a neutral highlight) takes UI_COLORS.accentText.
 export const ENTITY_COLORS = {
   class: '#d7ad52',
   subclass: '#70b7a6',
@@ -14,9 +18,6 @@ export const ENTITY_COLORS = {
   language: '#8ecae6',
 };
 
-// Neutral gold accent for headings/titles that are not tied to an entity kind
-// (section headers, entry titles inside descriptions, generic highlights).
-export const NEUTRAL_TONE = '#edd48a';
 
 // Bordeaux accent for everything item/attunement related: item source chips on
 // spells and the attune button/attuned state. Items are not an entity kind, so
@@ -64,7 +65,7 @@ export const DAMAGE_TYPE_COLORS = {
   bludgeoning: PHYSICAL_DAMAGE_TONE,
   piercing: PHYSICAL_DAMAGE_TONE,
   slashing: PHYSICAL_DAMAGE_TONE,
-  all: NEUTRAL_TONE,
+  all: UI_COLORS.accentText,
 };
 
 // The hue of the first damage type named in a defense label ("Fire",
@@ -110,7 +111,7 @@ export const COMPENDIUM_KIND_COLORS = {
   monster: ROLL_TONES.damage,
   condition: SPELL_TAG_COLORS.concentration,
   action: ACTION_COLORS.action,
-  rule: NEUTRAL_TONE,
+  rule: UI_COLORS.accentText,
   feat: ENTITY_COLORS.feat,
   species: ENTITY_COLORS.species,
   background: ENTITY_COLORS.background,

@@ -6,7 +6,6 @@ import SearchList from '../choices/SearchList.jsx';
 import { getBackgroundPattern, getBackgroundPool } from '../progression/calculations.js';
 import { backgroundChoiceSpecs } from '../choices/choiceSpecs.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
-import { NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
 import { strip5eMarkup } from '../../../shared/content/entryText.js';
@@ -17,13 +16,14 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { asArray } from '../../../shared/lists.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
   if (!values?.length) return null;
   return (
     <>
-      <Typography variant="body2" sx={{ color: NEUTRAL_TONE, ...TEXT_STYLES.label, fontSize: FONT_SIZES.md, whiteSpace: 'nowrap' }}>{label}</Typography>
+      <Typography variant="body2" sx={{ color: UI_COLORS.accentText, ...TEXT_STYLES.label, fontSize: FONT_SIZES.md, whiteSpace: 'nowrap' }}>{label}</Typography>
       <Typography variant="body2" sx={{ color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
     </>
   );

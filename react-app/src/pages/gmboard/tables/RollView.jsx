@@ -25,7 +25,7 @@ function rollTone(roll, palette) {
     case 'trap': return palette.gmboard.result.trap;
     case 'compl': return boardTone(palette, 'result', complicationVisual(roll.data.type).tone);
     case 'env': return boardTone(palette, 'rarity', roll.data.severity);
-    default: return palette.gmboard.rarity.Common;
+    default: return palette.gmboard.result.none;
   }
 }
 

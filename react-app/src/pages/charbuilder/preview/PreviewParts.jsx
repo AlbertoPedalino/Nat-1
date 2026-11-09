@@ -9,7 +9,7 @@ import {
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
-import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -20,7 +20,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const darkChipText = UI_COLORS.onAccent;
 
-export const PROFICIENCY_TONE = NEUTRAL_TONE;
+export const PROFICIENCY_TONE = UI_COLORS.accentText;
 
 export const SECTION_CARD_SX = {
   minWidth: 0,
@@ -43,7 +43,7 @@ function EmptyCaption({ children }) {
   );
 }
 
-export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TONE, children, emptyText }) {
+export function PreviewSection({ icon: Icon, title, subtitle, tone = UI_COLORS.accentText, children, emptyText }) {
   const hasContent = Boolean(children);
   return (
     <Card variant="outlined" sx={SECTION_CARD_SX}>

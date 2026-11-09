@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DAMAGE_TYPE_COLORS, NEUTRAL_TONE, ROLL_TONES, attackRollerToneSx, damageTypeTone, rollerToneSx } from '../../../../src/shared/ui/entityColors.js';
+import { DAMAGE_TYPE_COLORS, ROLL_TONES, attackRollerToneSx, damageTypeTone, rollerToneSx } from '../../../../src/shared/ui/entityColors.js';
+import { UI_COLORS } from '../../../../src/shared/ui/colors.js';
 
 test('a roll-button tint is its tone plus a translucent border of the same hue', () => {
   const sx = rollerToneSx(ROLL_TONES.damage);
@@ -37,7 +38,7 @@ test('a defense label takes the hue of the damage type it names', () => {
   assert.equal(damageTypeTone('Fire'), DAMAGE_TYPE_COLORS.fire);
   assert.equal(damageTypeTone('cold'), DAMAGE_TYPE_COLORS.cold);
   assert.equal(damageTypeTone('Bludgeoning (nonmagical)'), DAMAGE_TYPE_COLORS.bludgeoning);
-  assert.equal(damageTypeTone('All damage'), NEUTRAL_TONE);
+  assert.equal(damageTypeTone('All damage'), UI_COLORS.accentText);
 });
 
 test('a label naming no damage type has no hue', () => {

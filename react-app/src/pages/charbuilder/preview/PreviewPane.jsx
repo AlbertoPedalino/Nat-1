@@ -19,7 +19,7 @@ import {
 } from '../../../shared/character/combat/ac.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
-import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -54,7 +54,7 @@ function PreviewHeader({ character, hp }) {
   ].filter(Boolean).join(' ');
   const metadata = [
     { key: 'identity', value: subtitle || 'No class selected' },
-    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: NEUTRAL_TONE, fontWeight: FONT_WEIGHTS.heavy } },
+    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.heavy } },
   ];
 
   return (
@@ -65,7 +65,7 @@ function PreviewHeader({ character, hp }) {
           <Typography
             variant="h2"
             noWrap
-            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight, fontWeight: FONT_WEIGHTS.heavy }}
+            sx={{ color: UI_COLORS.accentText, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight, fontWeight: FONT_WEIGHTS.heavy }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -109,7 +109,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           size="small"
           label={`Level ${level}`}
           sx={{
-            ...filledChipSx(NEUTRAL_TONE),
+            ...filledChipSx(UI_COLORS.accentText),
             height: 20,
             fontSize: FONT_SIZES.xxs,
             ...TEXT_STYLES.label,

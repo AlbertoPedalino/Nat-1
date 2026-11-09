@@ -4,7 +4,7 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 export default function ResultBadge({ children, tone, icon: Icon }) {
   const theme = useTheme();
-  const resolvedTone = tone || theme.palette.gmboard.rarity.Common;
+  const resolvedTone = tone || theme.palette.gmboard.result.none;
 
   return (
     <Box
