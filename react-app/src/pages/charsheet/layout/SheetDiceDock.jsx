@@ -6,10 +6,13 @@ import { sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
-// bottom of the sheet, centred on every screen, so a roll never needs a scroll
-// back to the top. On a phone it is a compact pill of two icons in solid gold:
+// bottom of the sheet, so a roll never needs a scroll back to the top.
+// On a phone a compact pill of two icons in solid gold in the bottom right:
 // small enough to cover little, bright enough to be found without looking for
-// it. From a tablet up, the labelled control.
+// it. On a tablet the labelled control, centred; on a desktop at the left,
+// clear of the toasts in the bottom right, and out in the empty margin beside
+// the sheet when the screen leaves room for it. In a corner it sits as far
+// from the side as from the bottom (DOCK_INSET).
 //
 // Sticky to the sheet, not fixed to the window: it rides the bottom edge of
 // whatever scrolls the sheet (the page, or the panel an embedded sheet sits
@@ -54,23 +57,44 @@ export default function SheetDiceDock({
 // a desktop). Being the last thing in the sheet, its place while scrolling and
 // its place at the end are the same: nothing jumps, and at the end it has its
 // own room below the last panel.
+// The pill's distance from the bottom, and from the side when it sits in a
+// corner: the same on both, so it reads as placed rather than pushed there.
+const DOCK_INSET = { xs: '24px', md: '40px' };
+const inset = (size, edge) => `calc(${DOCK_INSET[size]} + env(safe-area-inset-${edge}, 0px))`;
+
 const dockSx = {
   position: 'sticky',
   bottom: 0,
   zIndex: 5,
   display: 'flex',
   pt: 1.5,
-  pb: {
-    xs: 'calc(24px + env(safe-area-inset-bottom, 0px))',
-    md: 'calc(40px + env(safe-area-inset-bottom, 0px))',
-  },
+  pb: { xs: inset('xs', 'bottom'), md: inset('md', 'bottom') },
   pointerEvents: 'none',
   '& > *': { pointerEvents: 'auto' },
 };
 
-// Centred in the sheet's own column, or in the panel an embedded sheet sits in.
-const embeddedDockSx = { ...dockSx, justifyContent: 'center' };
-const pageDockSx = { ...dockSx, ...sheetColumnSx(false), justifyContent: 'center' };
+// An embedded sheet: bottom right on a phone, centred in its panel on
+// anything larger.
+const embeddedDockSx = {
+  ...dockSx,
+  justifyContent: { xs: 'flex-end', sm: 'center' },
+  pr: { xs: inset('xs', 'right'), sm: 0 },
+};
+
+// On its own page: bottom right on a phone, centred on a tablet, at the left of
+// the sheet's column on a desktop, and out in the margin left of the column
+// where that margin holds it.
+const SIDE_MARGIN_FITS = '@media (min-width: 1680px)';
+const pageDockSx = {
+  ...dockSx,
+  ...sheetColumnSx(false),
+  justifyContent: { xs: 'flex-end', sm: 'center', md: 'flex-start' },
+  // The phone's corner on the right, the desktop's on the left; centred on a
+  // tablet, with the column's own padding on both sides.
+  pr: { xs: inset('xs', 'right'), sm: '0.6rem', md: '1.1rem' },
+  pl: { md: inset('md', 'left') },
+  [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0 },
+};
 
 // Floating over the sheet.
 const floatingSx = { boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}` };
