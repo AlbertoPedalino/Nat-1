@@ -7,6 +7,7 @@ import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
+import { SURFACES } from '../../ui/surfaces.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -81,13 +82,11 @@ export default function DiceControl({
 }
 
 const iconGroupSx = {
+  ...SURFACES.panel,
   display: 'inline-flex',
   alignItems: 'stretch',
   borderRadius: 999,
   overflow: 'hidden',
-  border: 1,
-  borderColor: 'divider',
-  bgcolor: 'background.paper',
 };
 
 const iconSegmentSx = { borderRadius: 0, px: 0.9 };

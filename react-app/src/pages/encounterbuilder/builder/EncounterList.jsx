@@ -12,6 +12,7 @@ import DifficultyBar from './DifficultyBar.jsx';
 import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -158,13 +159,10 @@ export default function EncounterList() {
 }
 
 const rowSx = {
+  ...SURFACES.wash,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
   p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
   minWidth: 0,
 };

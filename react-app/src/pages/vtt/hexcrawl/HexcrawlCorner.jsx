@@ -10,6 +10,7 @@ import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Top left, beside the picture settings: the hexcrawl is how this map is played
 // rather than a tool you pick up, so it belongs with the scene's own settings
@@ -70,10 +71,9 @@ const cornerSx = {
 
 const buttonSx = {
   // The strip around it is click-through; the icon and the panel are not.
+  ...SURFACES.mapControl,
   pointerEvents: 'auto',
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
@@ -81,6 +81,7 @@ const buttonSx = {
 // fullscreen there is no page behind it to scroll, and the map is shorter than
 // the window anyway.
 const panelSx = {
+  ...SURFACES.mapControl,
   pointerEvents: 'auto',
   position: 'absolute',
   top: ICON_STRIP,
@@ -92,8 +93,6 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
 };
 

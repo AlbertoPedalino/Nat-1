@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { MousePointer2, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -92,7 +92,7 @@ export default function SceneToolRail({
 }
 
 const railSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   position: 'absolute',
   top: 48,
   right: 8,
@@ -135,7 +135,7 @@ const railLabelSx = {
 // Immediately to the left of the rail, and scrollable rather than tall: a panel
 // that runs past the bottom of the map would be unreachable in fullscreen.
 const panelSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   position: 'absolute',
   top: 48,
   right: 80,

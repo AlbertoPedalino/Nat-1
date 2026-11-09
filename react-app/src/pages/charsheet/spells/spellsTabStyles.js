@@ -3,6 +3,7 @@ import { cornerRadius } from '../../../shared/ui/radius.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 export const panelRootSx = {
   display: 'grid',
   gap: 1,
@@ -10,10 +11,7 @@ export const panelRootSx = {
 };
 
 export const panelSurfaceSx = {
-  bgcolor: UI_COLORS.surfaceHeader,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
+  ...SURFACES.panel,
   p: 1,
   minWidth: 0,
 };
@@ -32,15 +30,12 @@ export const levelHeaderSx = {
 };
 
 export const spellRowSx = {
+  ...SURFACES.panel,
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
   px: '10px',
   py: '7px',
-  bgcolor: UI_COLORS.surfaceHeader,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
   mb: '4px',
   color: 'text.primary',
   cursor: 'pointer',
@@ -50,12 +45,10 @@ export const spellRowSx = {
 };
 
 export const spellBodySx = {
+  ...SURFACES.inset,
   fontSize: FONT_SIZES.md,
   color: 'text.secondary',
   lineHeight: 1.5,
-  bgcolor: UI_COLORS.surfaceSunken,
-  border: 1,
-  borderColor: 'divider',
   borderTop: 'none',
   borderRadius: cornerRadius(0, 0, 1, 1),
   px: '10px',
@@ -85,7 +78,6 @@ export const inlineButtonSx = {
   lineHeight: 1.3,
   borderRadius: 1,
   ...TEXT_STYLES.title,
-  
 };
 
 export const compactInputSx = {
@@ -107,11 +99,8 @@ export const levelToggleSx = {
 };
 
 export const statBoxSx = {
+  ...SURFACES.inset,
   minWidth: 92,
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
   px: 1,
   py: 0.65,
   textAlign: 'center',

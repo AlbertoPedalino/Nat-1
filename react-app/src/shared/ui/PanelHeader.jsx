@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { SURFACES } from './surfaces.js';
 
 // The title bar of a sheet panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies) and of SheetDialog: a dark bar with a gold left accent, an
@@ -56,10 +57,7 @@ export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider
 // scores, hit points): the header tint inside a thin border. Its title is
 // sheetBoxTitleSx, the panel title's lettering.
 export const sheetBoxSx = {
-  bgcolor: UI_COLORS.surfaceHeader,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
+  ...SURFACES.panel, 
 };
 
 export const sheetBoxTitleSx = { ...panelTitleSx, mb: 0.4 };
@@ -88,14 +86,12 @@ export const inlineMetaLabelSx = {
   fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
   ...TEXT_STYLES.label,
-  
 };
 
 // The small uppercase label of a section inside a panel.
 export const sectionLabelSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxxs,
-  
 };
 
 export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', children }) {

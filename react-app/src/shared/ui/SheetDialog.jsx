@@ -5,6 +5,7 @@ import { FONT_SIZES } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { SURFACES } from './surfaces.js';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -16,10 +17,7 @@ import { TEXT_STYLES } from './textStyles.js';
 // the content's corner.
 
 const paperSx = {
-  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 2,
+  ...SURFACES.panel,
   backgroundImage: 'none',
   boxShadow: UI_SHADOWS.overlay,
 };

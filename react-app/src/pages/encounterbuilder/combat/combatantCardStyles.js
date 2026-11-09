@@ -3,6 +3,7 @@ import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -47,16 +48,13 @@ export const sheetLinkButtonSx = {
 // badge instead of a caption: prominence comes from size and framing, not from
 // a new accent color that would fight the gold active-turn highlight.
 export const acBadgeSx = {
+  ...SURFACES.wash,
   display: 'inline-flex',
   alignItems: 'center',
   gap: 0.4,
   mt: 0.3,
   px: 0.7,
   py: '1px',
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.wash),
   color: 'text.secondary',
   lineHeight: 1,
 };

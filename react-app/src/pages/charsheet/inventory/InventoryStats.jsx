@@ -11,12 +11,10 @@ import {
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 const statPillSx = {
-  bgcolor: UI_COLORS.surfaceHeader,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
+  ...SURFACES.panel,
   px: '10px',
   py: '4px',
   fontSize: FONT_SIZES.xl,
@@ -45,7 +43,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
         Attuned: <b>{attunedCount} / {attunementLimit}</b>{over ? ' (over limit)' : ''}
       </Box>
       <Box sx={{ width: '100%', mt: 0.3 }}>
-        <Box sx={{ height: 6, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft), overflow: 'hidden', border: 1, borderColor: 'divider' }}>
+        <Box sx={{ ...SURFACES.wash, height: 6, overflow: 'hidden' }}>
           <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? UI_COLORS.danger : UI_COLORS.success }} />
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: FONT_SIZES.sm, mt: 0.25 }}>

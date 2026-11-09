@@ -3,29 +3,17 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
-
-// Shared glass surface for every control floating over the battle map. Keeping
-// the rail and its dialogs on the same tokens prevents ordinary MUI paper from
-// appearing as a solid block beside the translucent toolbar.
-export const battleMapSurfaceSx = {
-  bgcolor: 'gmboard.vtt.surface',
-  backgroundImage: 'none',
-  border: '1px solid',
-  borderColor: 'gmboard.vtt.accentBorder',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-};
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
+  ...SURFACES.mapControl,
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 export const battleMapDialogPaperSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   borderRadius: 1,
   boxShadow: UI_SHADOWS.overlay,
   transition: 'opacity 140ms ease',
@@ -45,7 +33,6 @@ export const battleMapDialogTitleSx = {
   color: 'primary.main',
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xl,
-  
 };
 
 export const battleMapDialogContentSx = {

@@ -8,6 +8,7 @@ import PanelHeader from '../../shared/ui/PanelHeader.jsx';
 import { activePortalContainer } from '../../shared/ui/portalContainer.js';
 import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -40,6 +41,7 @@ function OpenPanel({ onClose }) {
 
 // Below the app's top bar and under menus, like the stat block panel.
 const panelSx = {
+  ...SURFACES.panel,
   position: 'fixed',
   zIndex: 1250,
   top: `calc(${APP_TOP_BAR_HEIGHT} + 8px)`,
@@ -49,9 +51,6 @@ const panelSx = {
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  bgcolor: 'background.paper',
   backgroundImage: 'none',
-  border: '1px solid',
-  borderColor: 'divider',
   boxShadow: 12,
 };

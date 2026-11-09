@@ -1,6 +1,7 @@
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export const SHEET_AREAS = {
   saves: 'saves',
@@ -50,12 +51,9 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
 // The panel that opens under a sheet row (an action's details, a beast form, a
 // created item) and its gold title.
 export const detailPanelSx = {
+  ...SURFACES.wash,
   mt: 0.8,
   p: 1,
-  bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash),
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
 };
 
 export const detailTitleSx = {

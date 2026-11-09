@@ -11,6 +11,7 @@ import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldrit
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -60,9 +61,10 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
         <Box
           onClick={disabled ? undefined : toggle}
           sx={{
+            ...SURFACES.panel,
             display: 'flex', alignItems: 'center', gap: '6px', px: '8px', py: '5px',
-            border: 1, borderColor: 'divider', borderRadius: open ? '6px 6px 0 0' : 1,
-            bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.veil), cursor: disabled ? 'default' : 'pointer',
+            borderRadius: open ? '6px 6px 0 0' : 1,
+            cursor: disabled ? 'default' : 'pointer',
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: OPACITY.solid }} />
@@ -86,9 +88,8 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
         </Box>
       )}
       detailsSx={{
-        px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
-        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
-        fontSize: FONT_SIZES.xs, color: 'text.secondary',
+        ...SURFACES.panel,
+        px: '8px', py: '6px', borderTop: 'none', borderRadius: cornerRadius(0, 0, 0.75, 0.75), fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
     />
@@ -120,7 +121,6 @@ const rulesToggleTitleSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxs,
   color: UI_COLORS.accentText,
-  
 };
 
 const rulesToggleMetaSx = {
@@ -168,7 +168,6 @@ const rulesLabelSx = {
   fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.label,
   color: UI_COLORS.textMuted,
-  
 };
 
 const rulesValueSx = {

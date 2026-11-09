@@ -8,6 +8,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -51,11 +52,8 @@ function FeatureItem({ feature, tone }) {
     <Box
       className={open ? 'open' : ''}
       sx={{
-        bgcolor: UI_COLORS.surfaceHeader,
-        border: 1,
-        borderColor: 'divider',
+        ...SURFACES.panel,
         borderLeft: `3px solid ${borderTone}`,
-        borderRadius: 1,
         mb: 0.25,
         overflow: 'hidden',
       }}

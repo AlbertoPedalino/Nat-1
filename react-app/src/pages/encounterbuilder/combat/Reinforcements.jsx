@@ -12,6 +12,7 @@ import {
 import { ChevronDown, Plus, Search } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -24,7 +25,7 @@ export default function Reinforcements() {
   };
 
   return (
-    <Accordion disableGutters sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', '&:before': { display: 'none' } }}>
+    <Accordion disableGutters sx={{ ...SURFACES.panel, '&:before': { display: 'none' } }}>
       <AccordionSummary expandIcon={<ChevronDown size={18} />}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Plus size={17} />

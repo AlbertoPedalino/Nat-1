@@ -9,6 +9,7 @@ import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -41,10 +42,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
 
         <Box
           sx={{
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-            bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.heavy),
+            ...SURFACES.panel,
             px: 1.4,
             py: 1.25,
             display: 'flex',

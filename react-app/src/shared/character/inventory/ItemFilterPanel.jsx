@@ -13,6 +13,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { SURFACES } from '../../ui/surfaces.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -52,6 +53,7 @@ const controlSx = {
 
 
 const gridSx = {
+  ...SURFACES.inset,
   display: 'grid',
   gridTemplateColumns: 'auto minmax(0, 1fr)',
   columnGap: '8px',
@@ -59,10 +61,6 @@ const gridSx = {
   alignItems: 'center',
   mt: 0.6,
   p: '8px',
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
 };
 
 const placeholderSx = { color: 'text.secondary', opacity: OPACITY.heavy };

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { pillLabelSx } from './panelStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -63,8 +64,7 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
 }
 
 const compactLayerSx = {
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
+  ...SURFACES.mapControl,
   '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
   '& .MuiToggleButton-root': { border: 0, px: 1 },
 };

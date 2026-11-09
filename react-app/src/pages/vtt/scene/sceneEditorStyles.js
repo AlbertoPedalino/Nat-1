@@ -1,4 +1,4 @@
-import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
@@ -11,7 +11,7 @@ export const GM_FOG_OPACITY = 0.55;
 export const PLAYER_FOG_OPACITY = 1;
 
 export const sceneTopbarSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',

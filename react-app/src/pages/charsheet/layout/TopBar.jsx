@@ -21,6 +21,7 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -208,7 +209,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
               </Typography>
             </Box>
-            <Box sx={{ width: '100%', height: 8, bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+            <Box sx={{ ...SURFACES.panel, width: '100%', height: 8, overflow: 'hidden' }}>
               <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
             </Box>
             {!readOnly && (

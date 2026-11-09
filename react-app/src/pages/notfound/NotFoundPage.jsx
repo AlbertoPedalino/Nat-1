@@ -4,6 +4,7 @@ import { Compass, Home } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { composeMissingPath } from './notFoundPath.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -91,15 +92,13 @@ const statusSx = {
 };
 
 const compassSx = {
+  ...SURFACES.inset,
   width: { xs: 72, sm: 80 },
   height: { xs: 72, sm: 80 },
   display: 'grid',
   placeItems: 'center',
   color: 'primary.main',
-  border: 1,
-  borderColor: 'divider',
   borderRadius: '50%',
-  bgcolor: 'background.default',
 };
 
 const titleSx = {
@@ -107,12 +106,10 @@ const titleSx = {
 };
 
 const pathBoxSx = {
+  ...SURFACES.inset,
   width: 1,
   minWidth: 0,
   p: 1.5,
-  border: 1,
-  borderColor: 'divider',
-  bgcolor: 'background.default',
 };
 
 const pathTextSx = {

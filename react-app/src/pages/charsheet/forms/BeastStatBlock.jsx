@@ -11,6 +11,7 @@ import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -277,11 +278,8 @@ function renderEntryToken(tok, key, onRoll, onRollFormula, beastName) {
 }
 
 const statBlockSx = {
+  ...SURFACES.panel,
   p: 0.8,
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
-  border: 1,
-  borderColor: 'divider',
 };
 
 const metaSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm };
@@ -344,26 +342,20 @@ export const dismissButtonSx = {
 // The box holding a summon's HP bar (and, at 0 HP, what brings it back):
 // a row panel stacked vertically, set off from the stat block below it.
 export const creatureHpBoxSx = {
+  ...SURFACES.panel,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
   gap: 0.6,
   p: 0.8,
   mb: 0.8,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: UI_COLORS.surfaceHeader,
 };
 
 export const rowSx = {
+  ...SURFACES.panel,
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
   px: '8px',
   py: '5px',
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: UI_COLORS.surfaceHeader,
 };

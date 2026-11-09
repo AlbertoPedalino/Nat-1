@@ -25,6 +25,7 @@ import {
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { ATMOSPHERE_PRESETS } from '../../../shared/vtt/scene/atmosphere.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -60,14 +61,13 @@ function AtmosphereOption({ type, selected, onSelect }) {
       onClick={() => onSelect(type)}
       aria-label={preset.label}
       sx={{
+        ...SURFACES.mapControl,
         minWidth: 0,
         justifyContent: 'flex-start',
         gap: 0.75,
         px: 1,
         py: 0.7,
-        border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
         borderRadius: (theme) => `${theme.shape.borderRadius * 0.875}px !important`,
-        bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
         color: VTT_COLORS.textSecondary,
         textTransform: 'none',
         '&:hover': {

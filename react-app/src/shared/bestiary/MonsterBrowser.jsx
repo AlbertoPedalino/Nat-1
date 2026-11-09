@@ -23,6 +23,7 @@ import { crKey, crXP } from './challengeRating.js';
 import { usePagedList } from '../ui/usePagedList.js';
 import ShowMoreButton from '../ui/ShowMoreButton.jsx';
 import { LoadingLine } from '../ui/LoadStatus.jsx';
+import { SURFACES } from '../ui/surfaces.js';
 
 const PAGE_SIZE = 50;
 
@@ -159,14 +160,11 @@ const defaultListSx = {
 };
 
 const rowSx = {
+  ...SURFACES.wash,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
   p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
   cursor: 'pointer',
   minWidth: 0,
   userSelect: 'none',

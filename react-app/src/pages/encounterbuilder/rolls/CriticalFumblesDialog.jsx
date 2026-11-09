@@ -16,6 +16,7 @@ import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -237,12 +238,9 @@ const tabsSx = {
 };
 
 const sectionSx = {
+  ...SURFACES.wash,
   mt: 1.5,
   p: { xs: 1, sm: 1.25 },
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1.5,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const diceGridSx = {
@@ -265,7 +263,6 @@ const dieControlSx = {
 const dieLabelSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.md,
-  
 };
 
 const countSx = {
@@ -313,7 +310,6 @@ const outcomeNumberSx = {
   color: UI_COLORS.dangerSurface,
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
-  
 };
 
 const outcomeTitleSx = {

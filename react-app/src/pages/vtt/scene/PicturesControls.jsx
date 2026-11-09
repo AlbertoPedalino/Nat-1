@@ -13,6 +13,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // The scene panel's Pictures section: which picture is on show, the battlemap,
 // the backgrounds, and images placed on the map as pieces.
@@ -130,8 +131,7 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
 }
 
 const compactSwitchSx = {
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
+  ...SURFACES.mapControl,
   '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
   '& .MuiToggleButton-root': { border: 0, px: 1, py: 0.4 },
 };

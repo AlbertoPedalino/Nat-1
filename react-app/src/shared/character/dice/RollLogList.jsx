@@ -7,6 +7,7 @@ import { formatClockTime } from '../../ui/dateFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { SURFACES } from '../../ui/surfaces.js';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -71,12 +72,9 @@ function splitTitle(label, detail) {
 const clearSx = { alignSelf: 'flex-end', color: 'text.secondary' };
 
 const rowSx = {
+  ...SURFACES.wash,
   px: 0.75,
   py: 0.5,
-  borderRadius: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const labelSx = {

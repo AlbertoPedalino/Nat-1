@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
@@ -207,7 +207,7 @@ const stripRootSx = {
 };
 
 const stripSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   borderRadius: 1,
   px: 0.5,
   py: 0.375,

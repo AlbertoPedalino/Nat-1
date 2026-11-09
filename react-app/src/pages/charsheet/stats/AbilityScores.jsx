@@ -11,6 +11,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -62,8 +63,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 {signed(shownMod)}
               </Typography>
               <Box sx={{
+                ...SURFACES.panel,
                 ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs, color: 'text.secondary',
-                bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: 'divider', borderRadius: '50%',
+                borderRadius: '50%',
                 width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 0.25,
               }}>
                 {val}

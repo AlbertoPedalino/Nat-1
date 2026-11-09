@@ -29,19 +29,16 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useItemsDb } from './useItemsDb.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 const sectionSx = {
+  ...SURFACES.panel,
   p: 0.8,
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: UI_COLORS.surfaceHeader,
 };
 const labelSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,
-  
 };
 const selectSx = {
   flex: 1,

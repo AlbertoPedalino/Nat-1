@@ -7,6 +7,7 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -126,30 +127,23 @@ function Stepper(props) {
 
 // Circular swatch wrapping the native color input (MUI ships no color picker).
 const playerRowSx = {
+  ...SURFACES.wash,
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: 1,
   p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const stepperGroupSx = {
+  ...SURFACES.wash,
   px: 1,
   py: 0.5,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const stepperLabelSx = {
   mr: 0.75,
   ...TEXT_STYLES.label,
   color: 'text.primary',
-  
 };
 

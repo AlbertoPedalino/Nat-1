@@ -33,6 +33,7 @@ import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -320,12 +321,12 @@ const titleSx = { ...TEXT_STYLES.title, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', 
 const msgSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxl, maxWidth: 520 };
 
 const setupStackSx = { mb: 2.5 };
-const setupPanelSx = { flex: 1, minWidth: 0, p: 1.5, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
+const setupPanelSx = { ...SURFACES.panel, flex: 1, minWidth: 0, p: 1.5 };
 const sectionTitleSx = { ...captionLabelSx, mb: 1 };
 const setupActionSx = { width: { xs: '100%', sm: 'auto' }, flexShrink: 0 };
 const emptyPanelSx = { textAlign: 'center', p: 3, mb: 2, border: '1px dashed', borderColor: 'divider' };
 
-const campaignCardSx = { p: { xs: 1.25, sm: 1.75 }, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
+const campaignCardSx = { ...SURFACES.panel, p: { xs: 1.25, sm: 1.75 } };
 const campaignHeaderSx = { display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' };
 const campaignTitleRowSx = { minWidth: 0, flex: '1 1 320px', display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' };
 const campaignNameSx = { minWidth: 0, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: 'text.primary', overflowWrap: 'anywhere' };
@@ -336,13 +337,11 @@ const inviteChipSx = { ...smallChipSx, cursor: 'pointer', '&:focus-visible': foc
 const dangerActionSx = { color: 'error.main', flexShrink: 0, '&:focus-visible': focusVisibleSx };
 
 const characterRowSx = {
+  ...SURFACES.inset,
   display: 'flex',
   alignItems: 'center',
   gap: 0.5,
   minWidth: 0,
-  border: '1px solid',
-  borderColor: 'divider',
-  bgcolor: 'background.default',
   transition: 'border-color 0.15s, background-color 0.15s',
   '&:hover, &:focus-within': { borderColor: 'primary.main' },
 };

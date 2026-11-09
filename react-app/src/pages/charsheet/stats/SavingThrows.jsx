@@ -19,6 +19,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -181,7 +182,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       )}
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
-        slotProps={{ paper: { sx: { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 1, borderColor: 'divider' } } }}>
+        slotProps={{ paper: { sx: { ...SURFACES.panel } } }}>
         <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: FONT_SIZES.lg }}>
           Normal save
         </MenuItem>

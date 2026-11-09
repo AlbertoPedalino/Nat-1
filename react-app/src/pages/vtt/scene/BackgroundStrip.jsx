@@ -9,6 +9,7 @@ import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -179,11 +180,10 @@ const THUMB_W = 92;
 const THUMB_H = 52;
 
 const rootSx = {
+  ...SURFACES.mapControl,
   alignItems: 'center',
   p: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
   maxWidth: '100%',
   minWidth: 0,
@@ -264,11 +264,10 @@ const addSx = {
 };
 
 const collapsedSx = {
+  ...SURFACES.mapControl,
   height: 32,
   px: 1.25,
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,

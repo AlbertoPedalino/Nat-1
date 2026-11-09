@@ -6,6 +6,7 @@ import { campaignSheetUrl } from '../../../shared/character/profile/characterRou
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
   const { state, characterDigests } = useEncounterBuilder();
@@ -114,19 +115,13 @@ const closeButtonSx = {
 };
 
 const sheetFrameSx = {
+  ...SURFACES.inset,
   mt: 1.5,
   overflow: 'hidden',
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: 'background.default',
 };
 
 const fallbackSx = {
+  ...SURFACES.wash,
   mt: 1.5,
   p: 2,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };

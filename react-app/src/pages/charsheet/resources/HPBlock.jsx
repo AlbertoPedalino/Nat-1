@@ -9,6 +9,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -17,10 +18,7 @@ const FILL_CONTENT_WIDTH = 'min(100%, clamp(260px, 90%, 680px))';
 const FILL_COLUMN_GAP = 'clamp(0.4rem, 12%, 5rem)';
 
 const chipSx = {
-  border: 1,
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: 'background.paper',
+  ...SURFACES.panel,
   color: 'text.secondary',
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,

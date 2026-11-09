@@ -5,6 +5,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
 // the old standalone Hit Dice panel: hollow pips are dice already used,
@@ -15,7 +16,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
   const setCount = (n) => onChange(clamp(n, 0, pool.remaining));
 
   return (
-    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.heavy) }}>
+    <Box sx={{ ...SURFACES.panel, p: 1 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}

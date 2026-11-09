@@ -14,7 +14,7 @@ import {
   readSheetFrame,
   writeSheetFrame,
 } from '../../../shared/vtt/sheets/sheetFrame.js';
-import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { clamp } from '../../../shared/numbers.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
@@ -303,7 +303,7 @@ export default function FloatingSheetPanel({
 }
 
 const panelSx = {
-  ...battleMapSurfaceSx,
+  ...SURFACES.map,
   position: 'absolute',
   top: 50,
   right: 12,
