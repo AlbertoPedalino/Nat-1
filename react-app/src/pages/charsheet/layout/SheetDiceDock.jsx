@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { sheetColumnSx } from './layout.js';
+import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
@@ -52,16 +52,15 @@ export default function SheetDiceDock({
   );
 }
 
-// The band sits on the bottom edge and carries the space under the pill
-// itself (well clear of the edge, so the pill does not get lost there; more on
-// a desktop). Being the last thing in the sheet, its place while scrolling and
-// its place at the end are the same: nothing jumps, and at the end it has its
-// own room below the last panel.
 // The pill's distance from the bottom, and from the side when it sits in a
 // corner: the same on both, so it reads as placed rather than pushed there.
 const DOCK_INSET = { xs: '24px', md: '40px' };
 const inset = (size, edge) => `calc(${DOCK_INSET[size]} + env(safe-area-inset-${edge}, 0px))`;
 
+// The band sits on the bottom edge and carries the space under the pill
+// itself. Being the last thing in the sheet, its place while scrolling and its
+// place at the end are the same: nothing jumps, and at the end it has its own
+// room below the last panel.
 const dockSx = {
   position: 'sticky',
   bottom: 0,
@@ -91,13 +90,13 @@ const pageDockSx = {
   justifyContent: { xs: 'flex-end', sm: 'center', md: 'flex-start' },
   // The phone's corner on the right, the desktop's on the left; centred on a
   // tablet, with the column's own padding on both sides.
-  pr: { xs: inset('xs', 'right'), sm: '0.6rem', md: '1.1rem' },
+  pr: { xs: inset('xs', 'right'), sm: SHEET_COLUMN_PX.xs, md: SHEET_COLUMN_PX.md },
   pl: { md: inset('md', 'left') },
   [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0 },
 };
 
 // Floating over the sheet.
-const floatingSx = { boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}` };
+const FLOAT_SHADOW = `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}`;
 
 // The phone's pill: solid gold with dark icons and a faint gold halo, the one
 // bright thing at the bottom of a dark sheet; a touch larger to tap.
@@ -113,12 +112,12 @@ const phoneSurface = {
 };
 
 const phonePillSx = {
-  boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}, 0 0 0 4px ${uiAlpha(UI_COLORS.gold, 0.18)}`,
+  boxShadow: `${FLOAT_SHADOW}, 0 0 0 4px ${uiAlpha(UI_COLORS.gold, 0.18)}`,
 };
 
 // The labelled control made into the same pill.
 const labelledPillSx = {
-  ...floatingSx,
+  boxShadow: FLOAT_SHADOW,
   bgcolor: 'background.paper',
   borderRadius: 999,
   '& .MuiButton-root': { px: 2, py: 0.6 },

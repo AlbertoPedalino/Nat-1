@@ -32,10 +32,13 @@ export const SHEET_GRID = {
 // The sheet's column: centred at 1280px on its own page, the full width of the
 // panel it sits in when embedded. The header, the panels and the floating dice
 // share it, so they line up. `embeddedPx` is the side padding when embedded.
+// The sheet column's side padding on its own page.
+export const SHEET_COLUMN_PX = Object.freeze({ xs: '0.6rem', md: '1.1rem' });
+
 export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
   return {
     maxWidth: embedded ? 'none' : 1280,
     mx: embedded ? 0 : { md: 'auto' },
-    px: embedded ? embeddedPx : { xs: '0.6rem', md: '1.1rem' },
+    px: embedded ? embeddedPx : SHEET_COLUMN_PX,
   };
 }
