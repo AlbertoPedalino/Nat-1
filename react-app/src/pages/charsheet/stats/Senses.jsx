@@ -7,7 +7,7 @@ import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptio
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 
@@ -66,14 +66,14 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } : undefined,
         }}
       >
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.15rem', fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
           {value}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
-            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
             {source ? (
-              <Typography sx={{ fontSize: '0.56rem', color: 'text.secondary', fontStyle: 'italic', opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
+              <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontStyle: 'italic', opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
                 {source}
               </Typography>
             ) : null}
@@ -91,13 +91,13 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           <Box sx={{
             px: 1, pb: 0.6, pt: 0.1,
             // Scale 5etools EntryBlocks (body2) down to the compact panel size.
-            '& .MuiTypography-root': { fontSize: '0.62rem', lineHeight: 1.45 },
-            '& th, & td': { fontSize: '0.62rem' },
+            '& .MuiTypography-root': { fontSize: FONT_SIZES.xs, lineHeight: 1.45 },
+            '& th, & td': { fontSize: FONT_SIZES.xs },
           }}>
             {entries?.length ? (
               <EntryBlocks entries={entries} spacing={0.4} emptyText="" />
             ) : (
-              <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
+              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
             )}
           </Box>
         </CollapsibleBody>

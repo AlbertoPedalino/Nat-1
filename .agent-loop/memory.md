@@ -21,6 +21,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Toasts: `ToastProvider` / `AppToast`.
 - Application routes/theme: `src/app/`; navigation: `src/app/navigation/`; reusable presentation primitives/hooks: `src/shared/ui/`; page-specific UI: page feature folder.
 - Use responsive `sx`; theme radius is 8.
+- Font sizes are steps of `FONT_SIZES` (`shared/ui/fonts.js`, guarded); never a literal rem/px. Box-relative clamps (cqmin) and em stay local.
 - `theme.palette.gmboard.badge.cloud` owns cloud-origin badge color.
 - `react-window` is reserved for new lists expected to render hundreds of rows.
 

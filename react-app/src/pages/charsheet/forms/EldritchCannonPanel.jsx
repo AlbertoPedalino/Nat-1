@@ -28,7 +28,7 @@ import {
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
@@ -154,7 +154,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
           return (
             <Box key={index} sx={cannonBoardSx}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                <Typography sx={{ ...headerSx, fontSize: '0.62rem' }}>
+                <Typography sx={{ ...headerSx, fontSize: FONT_SIZES.xs }}>
                   {SIZE_NAMES[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
                 </Typography>
                 <Button
@@ -190,7 +190,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 if (!group.length) return null;
                 return (
                   <Box key={cat}>
-                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
+                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
                       {cat === 'bonus' ? 'Bonus Action' : 'Reaction'}
                     </Typography>
                     <Stack spacing={0.4}>
@@ -240,7 +240,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: '0.72rem', borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight, '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
+            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight, '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
           >
             Activate Cannon
           </Button>
@@ -268,7 +268,7 @@ const cannonBoardSx = {
 };
 
 const toggleSx = {
-  fontSize: '0.64rem',
+  fontSize: FONT_SIZES.xs,
   py: '3px',
   px: '10px',
   textTransform: 'none',

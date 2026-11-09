@@ -12,6 +12,7 @@ import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -61,7 +62,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                 <Icon size={15} />
               </Box>
               <ListItemText
-                primary={<Typography sx={{ fontWeight: 500, fontSize: '0.76rem' }}>{cls.name}</Typography>}
+                primary={<Typography sx={{ fontWeight: 500, fontSize: FONT_SIZES.lg }}>{cls.name}</Typography>}
                 secondary={(
                   <Stack direction="row" spacing={0.45} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.35 }}>
                     <Chip size="small" label={`Hit Die ${hitDie}`} />

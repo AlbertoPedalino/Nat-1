@@ -8,6 +8,7 @@ import { classLevel } from '../../../shared/character/progression/classLevel.js'
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -61,7 +62,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
 
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={limit} countLabel={`${selected.length}/${limit} known`}>
-      <Typography sx={{ color: 'text.secondary', fontSize: '0.62rem', fontStyle: 'italic' }}>
+      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs, fontStyle: 'italic' }}>
         {lv < 2
           ? 'Wild Shape unlocks at Druid level 2.'
           : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}
@@ -77,12 +78,12 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
                   <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.65, px: 1, gap: 0.75 }}>
                     <ListItemText
                       primary={(
-                        <Typography noWrap sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}>
+                        <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}>
                           {beast.name}
                         </Typography>
                       )}
                       secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
-                      slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
+                      slotProps={{ secondary: { noWrap: true, sx: { fontSize: FONT_SIZES.xxs } } }}
                     />
                     {active ? <Check size={16} color="currentColor" /> : null}
                   </ListItemButton>
@@ -92,7 +93,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
           </List>
         ) : (
           <Box sx={{ px: 1, py: 0.75 }}>
-            <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.lg }}>
               {options.length ? 'No matches.' : (lv < 2 ? 'Reach Druid level 2 to learn beast forms.' : 'No beasts available.')}
             </Typography>
           </Box>

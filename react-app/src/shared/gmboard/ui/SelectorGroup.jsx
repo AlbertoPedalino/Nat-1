@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -67,7 +68,7 @@ function optionSx(tone, selected, dense) {
     minWidth: dense ? 54 : 72,
     py: 0.4,
     px: 0.75,
-    fontSize: dense ? '0.68rem' : '0.72rem',
+    fontSize: dense ? FONT_SIZES.sm : FONT_SIZES.md,
     lineHeight: 1.2,
     textTransform: 'none',
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
@@ -86,4 +87,4 @@ const groupRowSx = {
   gap: 0.75,
 };
 
-const subLabelSx = { fontSize: '0.58rem', opacity: 0.85 };
+const subLabelSx = { fontSize: FONT_SIZES.xxs, opacity: 0.85 };

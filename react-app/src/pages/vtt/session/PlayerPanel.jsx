@@ -4,6 +4,7 @@ import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import TokenComposer from '../tokens/TokenComposer.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // What a player can do to the board. Deliberately short: place their own
 // character, add a token piece of their own (name, colour, picture), and move
@@ -130,5 +131,5 @@ const nameSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.85rem',
+  fontSize: FONT_SIZES.xxl,
 };

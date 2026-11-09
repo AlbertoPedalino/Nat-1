@@ -1,4 +1,4 @@
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { UI_COLORS, uiAlpha } from './colors.js';
 
 // The label of a compact action button in a button group (the sheet's Rest
@@ -8,7 +8,7 @@ export const actionButtonTextSx = {
   flex: 1,
   whiteSpace: 'nowrap',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
 };
@@ -38,7 +38,7 @@ export function goldToggleSx(active) {
     bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.12) : 'transparent',
     color: active ? UI_COLORS.goldLight : 'text.secondary',
     fontFamily: UI_FONTS.display,
-    fontSize: '0.58rem',
+    fontSize: FONT_SIZES.xxs,
     fontWeight: 700,
     letterSpacing: '0.08em',
     textTransform: 'uppercase',

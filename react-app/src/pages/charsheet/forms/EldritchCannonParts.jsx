@@ -8,7 +8,7 @@ import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -64,7 +64,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: 0.95 }} />
-          <Typography sx={{ flex: 1, minWidth: 0, fontSize: '0.72rem', fontWeight: 700, color: 'text.primary' }}>{mode.name}</Typography>
+          <Typography sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.md, fontWeight: 700, color: 'text.primary' }}>{mode.name}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
             {mode.attackBonus != null ? (
               <AttackRollButton
@@ -86,7 +86,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
       detailsSx={{
         px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
         borderRadius: '0 0 6px 6px', bgcolor: uiAlpha(UI_COLORS.headerBg, 0.5),
-        fontSize: '0.62rem', color: 'text.secondary',
+        fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
     />
@@ -116,7 +116,7 @@ const rulesToggleSx = {
 
 const rulesToggleTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   letterSpacing: '0.08em',
   color: UI_COLORS.goldLight,
@@ -126,7 +126,7 @@ const rulesToggleTitleSx = {
 const rulesToggleMetaSx = {
   ml: 'auto',
   minWidth: 0,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
 };
 
@@ -148,7 +148,7 @@ const rulesGroupSx = {
 
 const rulesGroupTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.54rem',
+  fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   letterSpacing: '0.12em',
   color: UI_COLORS.goldLight,
@@ -168,7 +168,7 @@ const rulesRowSx = {
 
 const rulesLabelSx = {
   minWidth: 0,
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   color: UI_COLORS.textMuted,
   textTransform: 'uppercase',
@@ -177,7 +177,7 @@ const rulesLabelSx = {
 
 const rulesValueSx = {
   minWidth: 0,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   lineHeight: 1.35,
   color: 'text.secondary',
 };

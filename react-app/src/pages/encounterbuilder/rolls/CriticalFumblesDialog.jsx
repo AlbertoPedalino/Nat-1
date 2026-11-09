@@ -12,7 +12,7 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
@@ -231,7 +231,7 @@ const tabsSx = {
     minHeight: 42,
     minWidth: 'auto',
     px: 1.5,
-    fontSize: { xs: '0.62rem', sm: '0.68rem' },
+    fontSize: { xs: FONT_SIZES.xs, sm: FONT_SIZES.sm },
   },
 };
 
@@ -263,7 +263,7 @@ const dieControlSx = {
 
 const dieLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 800,
 };
 
@@ -271,7 +271,7 @@ const countSx = {
   minWidth: 18,
   textAlign: 'center',
   fontFamily: UI_FONTS.mono,
-  fontSize: '0.76rem',
+  fontSize: FONT_SIZES.lg,
   color: UI_COLORS.goldLight,
 };
 
@@ -285,7 +285,7 @@ const stepButtonSx = {
 
 const formulaSx = {
   fontFamily: UI_FONTS.mono,
-  fontSize: '0.78rem',
+  fontSize: FONT_SIZES.lg,
   fontWeight: 700,
   color: UI_COLORS.teal,
 };
@@ -311,13 +311,13 @@ const outcomeNumberSx = {
   bgcolor: 'error.main',
   color: UI_COLORS.dangerInk,
   fontFamily: UI_FONTS.display,
-  fontSize: { xs: '1rem', sm: '1.2rem' },
+  fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
   fontWeight: 900,
 };
 
 const outcomeTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.65rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 800,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -326,7 +326,7 @@ const outcomeTitleSx = {
 
 const outcomeTextSx = {
   my: 0.25,
-  fontSize: { xs: '0.9rem', sm: '0.96rem' },
+  fontSize: { xs: FONT_SIZES.xxl, sm: FONT_SIZES.body },
   fontWeight: 700,
   lineHeight: 1.4,
   overflowWrap: 'anywhere',
@@ -343,7 +343,7 @@ const entryRowSx = {
 
 const resultLabelSx = {
   fontFamily: UI_FONTS.mono,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 800,
   color: UI_COLORS.goldLight,
   whiteSpace: 'nowrap',

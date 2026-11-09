@@ -4,6 +4,7 @@ import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import TokenComposer from './TokenComposer.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -156,5 +157,5 @@ const nameSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.85rem',
+  fontSize: FONT_SIZES.xxl,
 };

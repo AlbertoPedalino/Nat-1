@@ -1,4 +1,5 @@
 import { Box, useTheme } from '@mui/material';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 export default function ResultBadge({ children, tone, icon: Icon }) {
   const theme = useTheme();
@@ -14,7 +15,7 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
         px: 0.9,
         py: 0.25,
         borderRadius: '999px',
-        fontSize: '0.68rem',
+        fontSize: FONT_SIZES.sm,
         fontWeight: 700,
         letterSpacing: '0.03em',
         color: resolvedTone,

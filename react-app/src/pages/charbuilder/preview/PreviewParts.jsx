@@ -11,6 +11,7 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
@@ -29,14 +30,14 @@ export const SECTION_CARD_SX = {
 export const SECTION_HEADER_SX = {
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 800,
   lineHeight: 1.2,
 };
 
 function EmptyCaption({ children }) {
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.72rem', lineHeight: 1.45 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.md, lineHeight: 1.45 }}>
       {children}
     </Typography>
   );
@@ -55,7 +56,7 @@ export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TON
                 {title}
               </Typography>
               {subtitle ? (
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem', lineHeight: 1.2 }} noWrap>
+                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm, lineHeight: 1.2 }} noWrap>
                   {subtitle}
                 </Typography>
               ) : null}
@@ -73,7 +74,7 @@ export function InlineMetadata({ items }) {
   if (!visibleItems.length) return null;
 
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem', lineHeight: 1.2 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: 1.2 }}>
       {visibleItems.map((item, index) => (
         <Box component="span" key={item.key}>
           {index > 0 ? (
@@ -130,7 +131,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontSize: '0.61rem',
+              fontSize: FONT_SIZES.xs,
               fontWeight: 700,
             },
           }}
@@ -143,7 +144,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
 // Shared 5etools entry renderer at the preview's compact type scale.
 export function PreviewEntryText({ entries }) {
   return (
-    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: '0.75rem', lineHeight: 1.45 } }}>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: FONT_SIZES.lg, lineHeight: 1.45 } }}>
       <EntryBlocks entries={entries} emptyText="" />
     </Box>
   );

@@ -17,6 +17,7 @@ import {
 } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -53,12 +54,12 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
             {item ? <ItemNameIcon item={item} /> : null}
             <ListItemText
               primary={(
-                <Typography noWrap sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}>
+                <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}>
                   {name}
                 </Typography>
               )}
               secondary={source || null}
-              slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
+              slotProps={{ secondary: { noWrap: true, sx: { fontSize: FONT_SIZES.xxs } } }}
             />
             {active ? <Check size={16} color="currentColor" /> : null}
           </ListItemButton>
@@ -93,11 +94,11 @@ function ItemPlanPanel({
   );
   return (
     <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-      <Typography sx={{ color: 'text.secondary', fontSize: '0.68rem', fontWeight: 700 }}>
+      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.sm, fontWeight: 700 }}>
         {title}
       </Typography>
       {note ? (
-        <Typography sx={{ color: 'text.secondary', fontSize: '0.62rem', fontStyle: 'italic' }}>
+        <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs, fontStyle: 'italic' }}>
           {note}
         </Typography>
       ) : null}
@@ -124,7 +125,7 @@ function ItemPlanPanel({
           </List>
         ) : (
           <Box sx={{ px: 1, py: 0.75 }}>
-            <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.lg }}>
               {options.length ? 'No matches.' : emptyText}
             </Typography>
           </Box>

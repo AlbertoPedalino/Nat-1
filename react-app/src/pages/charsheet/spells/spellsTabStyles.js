@@ -1,5 +1,5 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 export const panelRootSx = {
   display: 'grid',
@@ -48,7 +48,7 @@ export const spellRowSx = {
 };
 
 export const spellBodySx = {
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
   lineHeight: 1.5,
   bgcolor: UI_COLORS.ink,
@@ -69,7 +69,7 @@ export const addButtonSx = {
   borderRadius: 1,
   color: UI_COLORS.gold,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 700,
   letterSpacing: '0.06em',
   px: '14px',
@@ -78,7 +78,7 @@ export const addButtonSx = {
 };
 
 export const inlineButtonSx = {
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   minWidth: 0,
   py: 0.2,
   px: 0.8,
@@ -90,7 +90,7 @@ export const inlineButtonSx = {
 
 export const compactInputSx = {
   '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
-  '& input': { fontSize: '0.75rem', py: '7px' },
+  '& input': { fontSize: FONT_SIZES.lg, py: '7px' },
 };
 
 export const levelToggleSx = {
@@ -100,7 +100,7 @@ export const levelToggleSx = {
     px: '9px',
     py: '4px',
     fontFamily: UI_FONTS.display,
-    fontSize: '0.58rem',
+    fontSize: FONT_SIZES.xxs,
     letterSpacing: '0.08em',
     color: 'text.secondary',
     borderColor: 'divider',

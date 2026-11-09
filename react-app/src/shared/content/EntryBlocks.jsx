@@ -2,6 +2,7 @@ import { Box, Stack, Typography } from '@mui/material';
 import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
+import { FONT_SIZES } from '../ui/fonts.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -72,7 +73,7 @@ export function EntryBlocks({
                   {block.caption}
                 </Typography>
               ) : null}
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: fontSize || '0.72rem' }}>
+              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: fontSize || FONT_SIZES.md }}>
                 {block.headers?.length ? (
                   <Box component="thead">
                     <Box component="tr">

@@ -2,6 +2,7 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import { AlertCircle, Shield } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The shield-shaped Armor Class readout: the character's header uses it, and so
 // do creature panels (the Eldritch Cannon), so an AC reads the same everywhere.
@@ -26,7 +27,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
         </Box>
       </Tooltip>
       {showBadge && badgeLabel ? (
-        <Typography sx={{ fontSize: '0.45rem', color: UI_COLORS.teal, fontWeight: 700, textAlign: 'center', lineHeight: 1.1, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.micro, color: UI_COLORS.teal, fontWeight: 700, textAlign: 'center', lineHeight: 1.1, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
           {badgeLabel}
         </Typography>
       ) : null}

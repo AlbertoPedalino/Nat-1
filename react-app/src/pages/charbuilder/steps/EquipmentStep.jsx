@@ -23,6 +23,7 @@ import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -91,7 +92,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1 }}>
             <ItemNameIcon item={item} />
-            <Typography sx={{ fontWeight: 500, fontSize: '0.875rem', minWidth: 0 }} noWrap>{item.name}</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: FONT_SIZES.xxl, minWidth: 0 }} noWrap>{item.name}</Typography>
           </Box>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>

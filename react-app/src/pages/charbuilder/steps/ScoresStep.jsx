@@ -8,6 +8,7 @@ import { abilityModifier } from '../../../shared/character/progression/abilityMo
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -94,8 +95,8 @@ export default function ScoresStep({ state, dispatch }) {
                         textAlign: 'center',
                       }}
                     >
-                      <Typography sx={{ fontSize: '1.15rem', fontWeight: 800, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
-                      <Typography sx={{ color: 'text.secondary', fontSize: '0.72rem', mt: 0.35 }}>
+                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: 800, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
+                      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.35 }}>
                         {scoreMod(finalScore)}
                       </Typography>
                     </Box>
@@ -132,7 +133,7 @@ export default function ScoresStep({ state, dispatch }) {
                         onChange={(_, value) => dispatch({ type: 'score/set', bucket, stat, value })}
                         sx={{
                           '& .MuiSlider-markLabel': {
-                            fontSize: '0.68rem',
+                            fontSize: FONT_SIZES.sm,
                             color: 'text.secondary',
                           },
                         }}

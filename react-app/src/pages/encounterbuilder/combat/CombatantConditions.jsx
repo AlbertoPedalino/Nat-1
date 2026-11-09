@@ -13,6 +13,7 @@ import {
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Conditions on a combatant. Active ones are always visible so a GM can scan the
 // initiative list and see who is prone without opening anything; the grid to
@@ -24,7 +25,7 @@ import MarkerRow from './MarkerRow.jsx';
 // toggle would let a GM strip the condition and leave the level behind.
 
 // Denser than the sheet's: these sit inside an initiative row, not a panel.
-const pillSx = { height: 20, fontSize: '0.62rem' };
+const pillSx = { height: 20, fontSize: FONT_SIZES.xs };
 
 export default function CombatantConditions({ combatant }) {
   const { dispatch } = useEncounterBuilder();
@@ -68,7 +69,7 @@ export default function CombatantConditions({ combatant }) {
               label={conditionLabel(key)}
               entries={conditionEntries[key]}
               onClose={() => toggleCard(key)}
-              fontSize="0.66rem"
+              fontSize={FONT_SIZES.sm}
             />
           ))}
         </Box>
@@ -79,7 +80,7 @@ export default function CombatantConditions({ combatant }) {
   );
 }
 
-const gridChipSx = { height: 20, fontSize: '0.6rem' };
+const gridChipSx = { height: 20, fontSize: FONT_SIZES.xs };
 
 const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.4, mt: 0.5 };
 

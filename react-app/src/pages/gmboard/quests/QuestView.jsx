@@ -6,7 +6,7 @@ import QuestCard from './QuestCard.jsx';
 import { QUEST_SCOPE_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
@@ -95,7 +95,7 @@ const headerSx = boardInsetSx;
 const headerLabelSx = captionLabelSx;
 
 const headerTextSx = {
-  fontSize: '0.82rem',
+  fontSize: FONT_SIZES.xl,
   color: 'text.secondary',
 };
 
@@ -108,13 +108,13 @@ const dieSx = {
   borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
-  fontSize: '0.78rem',
+  fontSize: FONT_SIZES.lg,
   color: 'text.primary',
 };
 
 const maxSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '1.15rem',
+  fontSize: FONT_SIZES.lead,
   fontWeight: 900,
   color: 'primary.main',
 };

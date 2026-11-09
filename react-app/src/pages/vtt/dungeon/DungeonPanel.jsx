@@ -13,7 +13,7 @@ import { MARKER_COLORS, lootLabel, trapLabel } from '../../../shared/dungeon/roo
 import { isNothingFound } from '../../../shared/gmboard/tables.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 
 // The dungeon this map is being played as.
@@ -267,9 +267,9 @@ function SlotLine({ slot, tones }) {
   );
 }
 
-const hintSx = { fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45 };
-const warnSx = { fontSize: '0.7rem', color: 'warning.main', lineHeight: 1.4 };
-const lineSx = { fontSize: '0.72rem', color: 'text.primary' };
+const hintSx = { fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45 };
+const warnSx = { fontSize: FONT_SIZES.md, color: 'warning.main', lineHeight: 1.4 };
+const lineSx = { fontSize: FONT_SIZES.md, color: 'text.primary' };
 
 const roomSx = {
   p: 0.9,
@@ -283,12 +283,12 @@ const roomSx = {
 
 const numberSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.95rem',
+  fontSize: FONT_SIZES.body,
   color: 'primary.main',
   minWidth: 20,
 };
 
-const roomMetaSx = { fontSize: '0.66rem', color: 'text.secondary' };
+const roomMetaSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary' };
 
 
 const dragSx = {
@@ -309,7 +309,7 @@ const markerSx = {
   borderRadius: 1,
   border: '1px dashed',
   borderColor: 'divider',
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   cursor: 'grab',
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, IconButton, TextField } from '@mui/material';
 import { Plus, Minus } from 'lucide-react';
 import { UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 // Styling for the two known call sites. Add a key here to introduce a new look
 // instead of leaking `sx` for the inner input/fieldset through props.
@@ -16,7 +16,7 @@ const VARIANTS = {
   compact: {
     size: 'small',
     iconSize: 16,
-    inputSx: { fontSize: '0.75rem', py: 0.5, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 600 },
+    inputSx: { fontSize: FONT_SIZES.lg, py: 0.5, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 600 },
     fieldSx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } },
   },
 };

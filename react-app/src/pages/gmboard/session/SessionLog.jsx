@@ -3,6 +3,7 @@ import { ScrollText, Trash2 } from 'lucide-react';
 import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -40,7 +41,7 @@ export default function SessionLog() {
 }
 
 const countSx = {
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
 };
 
@@ -53,13 +54,13 @@ const logBoxSx = {
 };
 
 const entrySx = {
-  fontSize: '0.74rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
   pb: 0.4,
 };
 
 const emptySx = {
-  fontSize: '0.78rem',
+  fontSize: FONT_SIZES.lg,
   color: 'text.secondary',
   fontStyle: 'italic',
 };

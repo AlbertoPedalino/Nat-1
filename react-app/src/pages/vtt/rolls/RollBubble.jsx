@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
@@ -80,7 +80,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {layout.total != null && (
           <Typography sx={{
             ...totalSx,
-            fontSize: (layout.isCrit || layout.isFail) ? '1.7rem' : '1.3rem',
+            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.title,
             color: layout.totalColor,
           }}>
             {layout.total}
@@ -165,7 +165,7 @@ const failSx = {
 
 const actorSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   color: VTT_COLORS.gold,
   lineHeight: 1.2,
@@ -173,7 +173,7 @@ const actorSx = {
 
 const labelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
@@ -183,7 +183,7 @@ const labelSx = {
 
 const natSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 900,
   letterSpacing: '0.1em',
   mb: 0.3,
@@ -191,7 +191,7 @@ const natSx = {
 
 const modeChipSx = (chip) => ({
   height: 18,
-  fontSize: '0.52rem',
+  fontSize: FONT_SIZES.xxxs,
   fontWeight: 700,
   letterSpacing: '0.06em',
   borderRadius: 1,
@@ -211,7 +211,7 @@ const totalSx = {
 };
 
 const detailSx = {
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   color: 'text.primary',
   lineHeight: 1.35,
 };

@@ -5,13 +5,14 @@ import { ItemPropertyTable } from './ItemPropertyTable.jsx';
 import { WeaponMasteryBlock } from '../combat/WeaponMasteryBlock.jsx';
 import { clampInt } from '../../numbers.js';
 import CountStepper from '../../ui/CountStepper.jsx';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
 // inventory rows so the expanded view stays identical everywhere.
 // A weapon's mastery is always shown here as reference (unlike the Actions tab,
 // which only surfaces it when the character actually has that mastery).
-export function ItemReferenceBody({ item, fontSize = '0.72rem', sx }) {
+export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, sx }) {
   const hasEntries = Array.isArray(item?.entries) && item.entries.length > 0;
   return (
     <Box sx={sx}>
@@ -20,7 +21,7 @@ export function ItemReferenceBody({ item, fontSize = '0.72rem', sx }) {
         <EntryBlocks
           entries={item.entries}
           fontSize={fontSize}
-          headingFontSize="0.66rem"
+          headingFontSize={FONT_SIZES.sm}
           emptyText=""
         />
       ) : null}
@@ -38,7 +39,7 @@ export function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.35, flexShrink: 0, ...sx }} onClick={(event) => event.stopPropagation()}>
       <CountStepper value={qty} size={17} onStep={(delta) => setQty((value) => clampQty(value + delta))} />
-      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: '8px', py: '1px', fontSize: '0.62rem', lineHeight: 1.5 }}>Add</Button>
+      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: '8px', py: '1px', fontSize: FONT_SIZES.xs, lineHeight: 1.5 }}>Add</Button>
     </Box>
   );
 }

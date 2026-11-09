@@ -1,3 +1,4 @@
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
 // The looks the compendium's parts share (search, catalogs, books).
 
 // An entry's name on one line, cut with an ellipsis.
@@ -17,4 +18,4 @@ export const fillColumnSx = {
 };
 
 // The small chip beside a row (a result's kind, a book's id).
-export const rowChipSx = { height: 20, fontSize: '0.65rem', flexShrink: 0 };
+export const rowChipSx = { height: 20, fontSize: FONT_SIZES.sm, flexShrink: 0 };

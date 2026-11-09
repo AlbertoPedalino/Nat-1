@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material';
 import { theme } from '../../../app/theme.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The character builder's denser look: the page root's descendant defaults and
 // the theme the builder renders under (CharBuilder's ThemeProvider).
@@ -20,7 +20,7 @@ export const builderRootSx = {
     minHeight: 0,
     borderRadius: 1,
     fontFamily: UI_FONTS.display,
-    fontSize: '0.62rem',
+    fontSize: FONT_SIZES.xs,
     letterSpacing: '0.04em',
     px: 1,
     py: 0.38,
@@ -30,7 +30,7 @@ export const builderRootSx = {
     py: 0.75,
     px: 1.05,
     fontFamily: UI_FONTS.display,
-    fontSize: '0.6rem',
+    fontSize: FONT_SIZES.xs,
     letterSpacing: '0.06em',
     color: 'text.secondary',
   },
@@ -38,16 +38,16 @@ export const builderRootSx = {
   '& .MuiInputBase-root': {
     bgcolor: UI_COLORS.surfaceDeep,
     borderRadius: 1,
-    fontSize: '0.74rem',
+    fontSize: FONT_SIZES.md,
   },
   '& .MuiInputBase-input': {
     py: '7px',
-    fontSize: '0.74rem',
+    fontSize: FONT_SIZES.md,
   },
   '& .MuiAlert-root': {
     py: 0.35,
     px: 1,
-    fontSize: '0.7rem',
+    fontSize: FONT_SIZES.md,
     bgcolor: UI_COLORS.headerBg,
     border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.18)}`,
     color: 'text.secondary',
@@ -71,12 +71,12 @@ export const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
       styleOverrides: {
-        h1: { fontFamily: UI_FONTS.display, fontSize: '1.08rem', lineHeight: 1.15, fontWeight: 800 },
-        h2: { fontFamily: UI_FONTS.display, fontSize: '0.82rem', lineHeight: 1.2, fontWeight: 800 },
-        body1: { fontSize: '0.8rem' },
-        body2: { fontSize: '0.72rem' },
-        caption: { fontSize: '0.62rem' },
-        overline: { fontFamily: UI_FONTS.display, fontSize: '0.56rem', lineHeight: 1.6, fontWeight: 800 },
+        h1: { fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, lineHeight: 1.15, fontWeight: 800 },
+        h2: { fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xl, lineHeight: 1.2, fontWeight: 800 },
+        body1: { fontSize: FONT_SIZES.xl },
+        body2: { fontSize: FONT_SIZES.md },
+        caption: { fontSize: FONT_SIZES.xs },
+        overline: { fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, lineHeight: 1.6, fontWeight: 800 },
       },
     },
     MuiChip: {
@@ -85,7 +85,7 @@ export const builderTheme = createTheme(theme, {
           height: 19,
           borderRadius: '3px',
           fontFamily: UI_FONTS.display,
-          fontSize: '0.54rem',
+          fontSize: FONT_SIZES.xxs,
           letterSpacing: '0.04em',
           backgroundColor: uiAlpha(UI_COLORS.gold, 0.08),
           borderColor: uiAlpha(UI_COLORS.gold, 0.28),

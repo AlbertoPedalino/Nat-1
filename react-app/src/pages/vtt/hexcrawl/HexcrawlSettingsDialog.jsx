@@ -8,7 +8,7 @@ import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIco
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
@@ -172,7 +172,7 @@ const sectionTitleSx = {
   alignItems: 'center',
   gap: 0.6,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 700,
   letterSpacing: '0.08em',
   color: 'gmboard.vtt.gold',
@@ -184,6 +184,6 @@ const sectionTitleSx = {
 
 
 const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
-const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem' };
-const warnSx = { color: 'warning.main', fontSize: '0.75rem', lineHeight: 1.4, mb: 1.5 };
+const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md };
+const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: 1.4, mb: 1.5 };
 

@@ -23,7 +23,7 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
@@ -162,7 +162,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       {showAttacks && (
         <Box sx={{ overflow: 'auto' }}>
           <Typography sx={levelHeaderSx}>Attacks</Typography>
-          <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+          <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: FONT_SIZES.lg }}>
             <Box component="thead">
               <Box component="tr" sx={{ '& th': { ...sectionLabelSx, color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
                 <Box component="th">Name</Box>
@@ -177,7 +177,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 return (
                   <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.headerBg } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.goldLight, fontSize: '0.875rem' }}>{hitBonus}</Typography></Box>
+                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.goldLight, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>
                 );

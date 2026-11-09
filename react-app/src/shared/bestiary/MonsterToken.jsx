@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Avatar } from '@mui/material';
 import { getMonsterTokenUrls } from './monsterUtils.js';
 import { UI_COLORS, uiAlpha } from '../ui/colors.js';
+import { FONT_SIZES } from '../ui/fonts.js';
 
 export default function MonsterToken({ monster, size = 32, fallbackText = '?' }) {
   const urls = getMonsterTokenUrls(monster);
@@ -23,7 +24,7 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
         bgcolor: uiAlpha(UI_COLORS.primary, 0.12),
         border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.35)}`,
         color: 'primary.main',
-        fontSize: size > 40 ? '1rem' : '0.75rem',
+        fontSize: size > 40 ? FONT_SIZES.body : FONT_SIZES.lg,
       }}
     >
       {fallbackText}

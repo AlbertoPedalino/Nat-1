@@ -32,6 +32,7 @@ import {
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -151,7 +152,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         onChange={setQuery}
         placeholder="Search beasts…"
         stopPropagation
-        sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: '0.74rem', py: '6px' } }}
+        sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: FONT_SIZES.md, py: '6px' } }}
       />
       {!familiars.length ? (
         <Typography sx={{ ...subSx, fontStyle: 'italic' }}>Loading beasts…</Typography>
@@ -183,7 +184,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
 }
 
 const toggleSx = {
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   py: '3px',
   px: '10px',
   textTransform: 'none',

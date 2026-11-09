@@ -7,7 +7,7 @@ import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
 import { TABLE_ICONS } from './tableCatalog.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -191,7 +191,7 @@ export default function RollView() {
 }
 
 const hintSx = {
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
 };
 
@@ -230,7 +230,7 @@ const statSx = {
 
 const statLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -247,7 +247,7 @@ const statBodySx = {
 // One size for every value, so a row of fields shares a baseline; the numbers
 // a GM reads out differ by weight and colour only.
 const statValueSx = {
-  fontSize: '0.95rem',
+  fontSize: FONT_SIZES.body,
   lineHeight: 1.45,
   color: 'text.primary',
 };
@@ -259,7 +259,7 @@ const statEmphasisSx = {
 };
 
 const statNoteSx = {
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   lineHeight: 1.3,
   color: 'text.secondary',
 };
@@ -269,12 +269,12 @@ const diceSx = {
   pt: 0.5,
   borderTop: '1px solid',
   borderColor: 'divider',
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   color: 'text.secondary',
 };
 
 const emptySx = {
-  fontSize: '0.74rem',
+  fontSize: FONT_SIZES.md,
   fontStyle: 'italic',
   color: 'text.secondary',
 };
@@ -288,7 +288,7 @@ const historySx = boardInsetSx;
 const historyTitleSx = captionLabelSx;
 
 const historyNoteSx = {
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   color: 'text.secondary',
   flexGrow: 1,
 };
@@ -311,7 +311,7 @@ const historyRowSx = {
 
 const historyTableSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.64rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -319,6 +319,6 @@ const historyTableSx = {
 };
 
 const historyDetailSx = {
-  fontSize: '0.76rem',
+  fontSize: FONT_SIZES.lg,
   color: 'text.primary',
 };

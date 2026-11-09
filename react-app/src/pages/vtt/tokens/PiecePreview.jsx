@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { initials } from '../../../shared/ui/textCase.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
@@ -198,7 +198,7 @@ const imageSx = {
 const initialsSx = {
   color: VTT_COLORS.goldPreview,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 800,
 };
 
@@ -220,7 +220,7 @@ const countSx = {
   bgcolor: VTT_COLORS.gold,
   color: VTT_COLORS.ink,
   border: `1px solid ${VTT_COLORS.ink}`,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 900,
   lineHeight: '18px',
   textAlign: 'center',

@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import D100Orb from './D100Orb.jsx';
 import Die3D from './Die3D.jsx';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 // The dice a roll landed on, then whatever was added to them. Shared so a roll
 // looks the same wherever it is shown: the sheet's toast, the bubble over a
@@ -51,7 +51,7 @@ const rowSx = {
 
 const modifierSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.875rem',
+  fontSize: FONT_SIZES.xxl,
   fontWeight: 700,
   color: 'text.secondary',
   ml: 0.3,

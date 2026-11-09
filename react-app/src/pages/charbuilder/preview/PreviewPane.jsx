@@ -32,6 +32,7 @@ import {
   PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, filledChipSx,
   PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -63,7 +64,7 @@ function PreviewHeader({ character, hp }) {
           <Typography
             variant="h2"
             noWrap
-            sx={{ color: NEUTRAL_TONE, fontSize: '1.15rem', lineHeight: 1.15, fontWeight: 800 }}
+            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: 1.15, fontWeight: 800 }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -81,13 +82,13 @@ function AbilityScoreGrid({ scores }) {
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.61rem', fontWeight: 700, letterSpacing: '0.04em' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: '0.04em' }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
-              <Typography variant="h2" sx={{ fontSize: '1rem', lineHeight: 1.15, color: 'text.primary' }}>
+              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: 1.15, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm }}>
                 {signed(abilityModifier(scores[stat]))}
               </Typography>
             </CardContent>
@@ -109,7 +110,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           sx={{
             ...filledChipSx(NEUTRAL_TONE),
             height: 20,
-            fontSize: '0.58rem',
+            fontSize: FONT_SIZES.xxs,
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
           }}
@@ -141,10 +142,10 @@ function AcFormulasSection({ character }) {
           const blocked = (f.requiresNoArmor && hasArmor) ? 'Blocked: wearing armor' : '';
           return (
             <Box key={f.key} sx={{ minWidth: 0 }}>
-              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.78rem', fontWeight: 700, lineHeight: 1.25 }}>
+              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: 700, lineHeight: 1.25 }}>
                 {f.label}: {val}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', lineHeight: 1.35 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: 1.35 }}>
                 {f.base} + {abils.join(' + ')}{blocked ? ` — ${blocked}` : ''}
               </Typography>
             </Box>
@@ -167,7 +168,7 @@ function ProficiencySection({ sections }) {
               sx={{
                 display: 'block',
                 color: PROFICIENCY_TONE,
-                fontSize: '0.64rem',
+                fontSize: FONT_SIZES.xs,
                 fontWeight: 800,
                 letterSpacing: '0.05em',
                 textTransform: 'uppercase',

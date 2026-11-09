@@ -6,7 +6,7 @@ import { parseBeastActions, parseBeastActionsRich } from '../../../shared/charac
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 
@@ -113,16 +113,16 @@ export function BeastStatBlock({
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography component="span" sx={{ fontSize: '0.56rem', fontWeight: 700, letterSpacing: '0.06em', color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
+              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.06em', color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
               {rollable ? (
                 <RollChip
-                  sx={{ fontSize: '0.64rem' }}
+                  sx={{ fontSize: FONT_SIZES.xs }}
                   onClick={() => onRoll(getMod(Number(b.abilities[k]) || 10) + (Number(b.checkBonus) || 0), formatRollTitle(b.name, `${k.toUpperCase()} Check`))}
                 >
                   {scoreText}
                 </RollChip>
               ) : (
-                <Typography component="span" sx={{ fontSize: '0.64rem', color: 'text.primary' }}>{scoreText}</Typography>
+                <Typography component="span" sx={{ fontSize: FONT_SIZES.xs, color: 'text.primary' }}>{scoreText}</Typography>
               )}
             </Box>
           );
@@ -181,7 +181,7 @@ export function BeastPickerRow({
           ? <Chevron size={14} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />
           : <Box sx={{ width: 14, flexShrink: 0 }} />}
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <BeastNameLink name={name} source={source} sx={{ fontSize: '0.8rem' }} />
+          <BeastNameLink name={name} source={source} sx={{ fontSize: FONT_SIZES.xl }} />
           <Typography noWrap sx={summaryColor ? { ...subSx, color: summaryColor } : subSx}>{summary}</Typography>
         </Box>
         <Button
@@ -189,7 +189,7 @@ export function BeastPickerRow({
           variant="outlined"
           disabled={actionDisabled}
           onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight }}
+          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight }}
         >
           {actionLabel}
         </Button>
@@ -247,7 +247,7 @@ function StatLine({ label, value, accent }) {
 function StatSection({ title, items, onRoll, onRollFormula, beastName, itemAccessory }) {
   return (
     <Box sx={{ mt: 0.5 }}>
-      <Typography sx={{ ...headerSx, fontSize: '0.58rem', mb: 0.2 }}>{title}</Typography>
+      <Typography sx={{ ...headerSx, fontSize: FONT_SIZES.xxs, mb: 0.2 }}>{title}</Typography>
       {items.map((it, i) => (
         <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.2 }}>
           <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>
@@ -282,7 +282,7 @@ const statBlockSx = {
   borderColor: 'divider',
 };
 
-const metaSx = { fontSize: '0.6rem', fontStyle: 'italic', color: 'text.secondary', letterSpacing: '0.03em' };
+const metaSx = { fontSize: FONT_SIZES.xs, fontStyle: 'italic', color: 'text.secondary', letterSpacing: '0.03em' };
 
 const rollChipSx = {
   appearance: 'none',
@@ -311,13 +311,13 @@ export const panelSx = {
 
 export const headerSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 700,
   letterSpacing: '0.08em',
   color: UI_COLORS.goldLight,
 };
 
-export const subSx = { fontSize: '0.62rem', color: 'text.secondary' };
+export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
 
 // A labelled row of choices above a summon's stat block (form, creature type,
 // damage type…), and the toggle look its buttons share.
@@ -331,7 +331,7 @@ export function CreatureOptionRow({ label, children }) {
 }
 
 export const optionToggleSx = {
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   py: '3px',
   px: '8px',
   textTransform: 'none',
@@ -348,7 +348,7 @@ export const dismissButtonSx = {
   flexShrink: 0,
   px: 0.8,
   py: 0.1,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   fontFamily: UI_FONTS.display,
   letterSpacing: '0.04em',
   color: UI_COLORS.dangerMuted,

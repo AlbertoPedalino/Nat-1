@@ -3,6 +3,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { Compass, Home } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { composeMissingPath } from './notFoundPath.js';
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -102,7 +103,7 @@ const compassSx = {
 };
 
 const titleSx = {
-  fontSize: { xs: '1.65rem', sm: '2rem' },
+  fontSize: { xs: FONT_SIZES.display, sm: FONT_SIZES.hero },
 };
 
 const pathBoxSx = {

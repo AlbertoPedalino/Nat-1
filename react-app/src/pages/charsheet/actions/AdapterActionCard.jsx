@@ -23,7 +23,7 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
@@ -91,7 +91,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
 
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {displayName || action.name}
                 </Typography>
                 {hasRollers ? (
@@ -160,7 +160,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
             }}
             sx={{
               cursor: isActive || canToggleOn ? 'pointer' : 'not-allowed',
-              fontSize: '0.58rem',
+              fontSize: FONT_SIZES.xxs,
               fontFamily: UI_FONTS.display,
               fontWeight: 700,
               letterSpacing: '0.06em',
@@ -181,10 +181,10 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: '0.6rem', fontFamily: UI_FONTS.display, letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
+                sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
-              <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
+              <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
             )
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
@@ -282,17 +282,17 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
 
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: '0.65rem', px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.gold, 0.14), color: UI_COLORS.goldLight, borderColor: UI_COLORS.gold } } }}
+        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.gold, 0.14), color: UI_COLORS.goldLight, borderColor: UI_COLORS.gold } } }}
       >
         {options.map((opt) => (
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Typography component="div" sx={{ fontSize: '0.55rem', color: 'text.secondary', mt: 0.2, fontStyle: 'italic' }}>
+      <Typography component="div" sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', mt: 0.2, fontStyle: 'italic' }}>
         <RichInline text={action.choiceRestNote || "Change when you finish a Short or Long Rest (Smith's Tools required)."} keyPrefix={`choice-${action.choiceKey || 'note'}`} />
       </Typography>
     </Box>

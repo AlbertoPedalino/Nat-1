@@ -4,6 +4,7 @@ import { collectAllProficiencies } from '../../../shared/character/proficiency/a
 import { useProficiencySets } from './ProficiencySetsContext.jsx';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function Proficiencies({ C }) {
   const profSets = useProficiencySets();
@@ -20,7 +21,7 @@ export default function Proficiencies({ C }) {
             <Typography sx={{ ...sectionLabelSx, color: 'text.secondary', mb: 0.25 }}>
               {sec.title}
             </Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.5 }}>
+            <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: 1.5 }}>
               {sec.items.join(', ')}
             </Typography>
           </Box>

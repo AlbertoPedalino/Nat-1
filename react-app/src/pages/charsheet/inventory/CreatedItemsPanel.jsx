@@ -16,7 +16,7 @@ import {
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
@@ -168,7 +168,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   if (!items.length) {
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
-        <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', fontStyle: 'italic' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', fontStyle: 'italic' }}>
           {emptyHint}
         </Typography>
       </Box>
@@ -179,7 +179,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
         <Typography sx={headerSx}>{tagLabel}</Typography>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
       </Box>
@@ -191,7 +191,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           placeholder="Search items…"
           iconSize={14}
           stopPropagation
-          sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: '0.78rem', py: '5px' } }}
+          sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: FONT_SIZES.lg, py: '5px' } }}
         />
       ) : null}
 
@@ -228,9 +228,9 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           if (!dbItem) {
             return (
               <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
-                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{label}</Typography>
+                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                 {unavailable ? (
-                  <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary' }}>Unavailable</Typography>
+                  <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
                 ) : null}
                 {stepper}
               </Box>
@@ -241,13 +241,13 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             <ExpandableCard
               key={value}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
-              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: '0.7rem', color: 'text.secondary' }}
+              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>
                   <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: '7px', flex: 1, minWidth: 0, cursor: 'pointer' }}>
                     <ItemNameIcon item={dbItem} />
-                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{label}</Typography>
+                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                   </Box>
                   {stepper}
                 </Box>
@@ -262,7 +262,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
       </Box>
 
       {noneAddable ? (
-        <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
           {remaining <= 0
             ? 'Active limit reached. Remove one to make another.'
             : (requireResolvedItem && items.every((value) => !resolveItem(value))
@@ -285,7 +285,7 @@ const panelSx = {
 
 const headerSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 700,
   letterSpacing: '0.08em',
   color: UI_COLORS.goldLight,

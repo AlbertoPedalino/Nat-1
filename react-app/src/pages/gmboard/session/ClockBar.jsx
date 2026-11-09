@@ -9,7 +9,7 @@ import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import CampaignCalendarFields, { QUICK_HOURS, quickButtonSx } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 
 // The campaign's clock at a glance: date, time and weather in one strip, with
@@ -85,7 +85,7 @@ const stripSx = {
 
 const dateSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: { xs: '1.05rem', sm: '1.25rem' },
+  fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
   fontWeight: 700,
   lineHeight: 1.25,
   color: 'primary.main',
@@ -93,7 +93,7 @@ const dateSx = {
 
 const timeSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: { xs: '1.5rem', sm: '1.8rem' },
+  fontSize: { xs: FONT_SIZES.heading, sm: FONT_SIZES.display },
   fontWeight: 700,
   lineHeight: 1.1,
 };
@@ -110,4 +110,4 @@ const weatherSx = {
   minWidth: { sm: 280 },
 };
 
-const timerSx = { fontSize: '0.72rem' };
+const timerSx = { fontSize: FONT_SIZES.md };

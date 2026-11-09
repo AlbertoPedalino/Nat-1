@@ -9,7 +9,7 @@ import {
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const statPillSx = {
   bgcolor: UI_COLORS.headerBg,
@@ -18,7 +18,7 @@ const statPillSx = {
   borderRadius: 1,
   px: '10px',
   py: '4px',
-  fontSize: '0.8125rem',
+  fontSize: FONT_SIZES.xl,
   color: 'text.secondary',
   '& b': { color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display },
 };
@@ -47,9 +47,9 @@ export default function InventoryStats({ inv, currency, character: C, attunement
         <Box sx={{ height: 6, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.white, 0.08), overflow: 'hidden', border: 1, borderColor: 'divider' }}>
           <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? UI_COLORS.danger : UI_COLORS.success }} />
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', mt: 0.25 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: FONT_SIZES.sm, mt: 0.25 }}>
           <Box sx={{ color: 'text.secondary', fontFamily: UI_FONTS.display }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
-          <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: UI_FONTS.display, fontSize: '0.6rem' }}>
+          <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs }}>
             {overloaded ? 'Over Capacity' : 'OK'}
           </Box>
         </Box>

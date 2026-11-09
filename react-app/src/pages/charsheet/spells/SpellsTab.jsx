@@ -25,6 +25,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { useSpellCatalog } from './useSpellCatalog.js';
 import { useSpellSlotState } from './useSpellSlotState.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -107,7 +108,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       </Box>
 
       {armorPenalties.cannotCastSpells ? (
-        <Alert severity="warning" sx={{ mb: 0.75, py: 0.25, '& .MuiAlert-message': { fontSize: '0.75rem' } }}>
+        <Alert severity="warning" sx={{ mb: 0.75, py: 0.25, '& .MuiAlert-message': { fontSize: FONT_SIZES.lg } }}>
           Equipped armor without training: cannot cast spells.
         </Alert>
       ) : null}

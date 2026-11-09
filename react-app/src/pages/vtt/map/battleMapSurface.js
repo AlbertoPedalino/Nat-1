@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Shared glass surface for every control floating over the battle map. Keeping
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
@@ -41,7 +41,7 @@ export const battleMapDialogTitleSx = {
   borderBottomColor: 'gmboard.vtt.goldBorder',
   color: 'primary.main',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
+  fontSize: FONT_SIZES.xl,
   fontWeight: 700,
   letterSpacing: '0.08em',
 };
@@ -87,8 +87,8 @@ export function battleMapMenuPaperSx(width) {
 // The compact controls of those menus: a short text field, a checkbox row and
 // its label.
 export const battleMapCompactFieldSx = {
-  '& .MuiInputBase-root': { height: 34, fontSize: '0.72rem' },
-  '& .MuiInputLabel-root': { fontSize: '0.68rem' },
+  '& .MuiInputBase-root': { height: 34, fontSize: FONT_SIZES.md },
+  '& .MuiInputLabel-root': { fontSize: FONT_SIZES.sm },
   '& .MuiInputLabel-shrink': { transform: 'translate(14px, -7px) scale(0.75)' },
 };
 
@@ -96,8 +96,8 @@ export const battleMapCheckboxRowSx = {
   m: 0,
   minHeight: 24,
   '& .MuiCheckbox-root': { p: 0.35, mr: 0.25 },
-  '& .MuiSvgIcon-root': { fontSize: 17 },
+  '& .MuiSvgIcon-root': { width: 17, height: 17 },
 };
 
-export const battleMapControlLabelSx = { fontSize: '0.68rem', lineHeight: 1.2 };
+export const battleMapControlLabelSx = { fontSize: FONT_SIZES.sm, lineHeight: 1.2 };
 

@@ -31,6 +31,7 @@ import {
 } from './inventoryControls.jsx';
 import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
 
@@ -162,7 +163,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
             <Box key={group.key}>
               <SectionHeader icon={group.icon} label={group.label} />
               {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
-                <Alert key={i} severity="warning" sx={{ fontSize: '0.65rem', py: '2px', px: '8px', mb: '3px' }}>
+                <Alert key={i} severity="warning" sx={{ fontSize: FONT_SIZES.sm, py: '2px', px: '8px', mb: '3px' }}>
                   {w}
                 </Alert>
               )) : null}

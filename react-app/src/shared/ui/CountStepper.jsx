@@ -1,7 +1,7 @@
 import { Box, IconButton } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import { UI_COLORS } from './colors.js';
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 
 // The small square button of a −/+ stepper (and its neighbours, such as an
 // item's remove button): bordered, quiet, gold on hover — red when `danger`.
@@ -32,7 +32,7 @@ export default function CountStepper({
       <IconButton size="small" aria-label={`Decrease ${label}`} disabled={!canDecrease} onClick={() => onStep(-1)} sx={stepButtonSx(size)}>
         <Minus size={icon} />
       </IconButton>
-      <Box sx={{ ...countSx, minWidth: Math.round(size * 0.85), fontSize: size >= 20 ? '0.8rem' : '0.7rem' }}>{value}</Box>
+      <Box sx={{ ...countSx, minWidth: Math.round(size * 0.85), fontSize: size >= 20 ? FONT_SIZES.xl : FONT_SIZES.md }}>{value}</Box>
       <IconButton size="small" aria-label={`Increase ${label}`} disabled={!canIncrease} onClick={() => onStep(1)} sx={stepButtonSx(size)}>
         <Plus size={icon} />
       </IconButton>

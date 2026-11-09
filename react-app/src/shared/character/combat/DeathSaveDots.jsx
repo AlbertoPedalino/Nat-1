@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 const TRACKS = [
   { type: 'success', label: 'Success', short: 'S' },
@@ -19,8 +20,8 @@ export default function DeathSaveDots({
           <Typography
             component="span"
             sx={shortLabels
-              ? { fontSize: '0.7rem', color: colors[type], mr: 0.2 }
-              : { fontSize: '0.55rem', color: 'text.secondary', mr: 0.1 }}
+              ? { fontSize: FONT_SIZES.md, color: colors[type], mr: 0.2 }
+              : { fontSize: FONT_SIZES.xxs, color: 'text.secondary', mr: 0.1 }}
           >
             {shortLabels ? short : label}
           </Typography>

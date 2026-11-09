@@ -3,7 +3,7 @@ import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // Several campaigns can be running at the same time, so a player picks the table
@@ -98,6 +98,6 @@ const rowButtonSx = {
 
 const chipSx = {
   height: 20,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontFamily: UI_FONTS.display,
 };

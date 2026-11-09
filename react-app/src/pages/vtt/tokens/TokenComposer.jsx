@@ -6,6 +6,7 @@ import { ImagePlus, Plus, X } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -154,5 +155,5 @@ const draftSx = {
 
 const draftDisabledSx = { opacity: 0.5, cursor: 'default' };
 
-const draftNameSx = { minWidth: 0, fontSize: '0.82rem', color: 'text.primary' };
+const draftNameSx = { minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' };
 

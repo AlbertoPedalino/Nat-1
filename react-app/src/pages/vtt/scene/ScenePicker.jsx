@@ -13,7 +13,7 @@ import {
 import { uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
@@ -232,7 +232,7 @@ const emptySx = {
 
 const liveChipSx = {
   height: 18,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   fontFamily: UI_FONTS.display,
   letterSpacing: '0.06em',
   flexShrink: 0,

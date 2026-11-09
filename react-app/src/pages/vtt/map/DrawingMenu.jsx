@@ -24,7 +24,7 @@ import {
   battleMapControlLabelSx,
   battleMapMenuPaperSx,
 } from './battleMapSurface.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
@@ -314,13 +314,13 @@ const COLOR_DELAY = 180;
 
 const sectionTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 800,
   letterSpacing: '0.06em',
   color: 'primary.main',
 };
 
-const helperSx = { color: 'text.secondary', fontSize: '0.57rem', lineHeight: 1.25 };
+const helperSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxs, lineHeight: 1.25 };
 
 const colorRowSx = {
   display: 'flex',
@@ -329,5 +329,5 @@ const colorRowSx = {
   gap: 0.6,
 };
 
-const menuButtonSx = { fontSize: '0.68rem', py: 0.35 };
+const menuButtonSx = { fontSize: FONT_SIZES.sm, py: 0.35 };
 

@@ -10,7 +10,7 @@ import { characterItemBonuses } from '../../../shared/character/inventory/itemBo
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 
@@ -102,14 +102,14 @@ export default function Skills({ C, sheet, onRoll }) {
             sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } }}>
             <Box />
             <SkillProficiencyDot training={training} />
-            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
               {sk.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', color: 'text.secondary', letterSpacing: '0.06em' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', letterSpacing: '0.06em' }}>
                 {ABILITY_ABBREVIATIONS[sk.ability]}
               </Typography>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
                 {signed(shownBonus)}
               </Typography>
               {visual && (

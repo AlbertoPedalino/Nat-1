@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
@@ -16,10 +16,10 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.headerBg, 0.72) }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: 'primary.main', flex: 1 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}
         </Typography>
-        <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>
           {pool.remaining}/{pool.total} left
         </Typography>
       </Box>
@@ -34,7 +34,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
               aria-label={`${pool.label}: spend ${i + 1} of ${pool.remaining}`}
               title={used ? 'Already used' : spending ? 'Will spend' : 'Available'}
               sx={{
-                fontSize: '0.66rem',
+                fontSize: FONT_SIZES.sm,
                 borderColor: spending ? UI_COLORS.gold : used ? 'divider' : uiAlpha(UI_COLORS.gold, 0.5),
                 color: spending ? UI_COLORS.surfaceDeep : used ? 'text.disabled' : 'primary.main',
                 bgcolor: spending ? UI_COLORS.gold : used ? UI_COLORS.headerBg : uiAlpha(UI_COLORS.gold, 0.14),
@@ -46,7 +46,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
           );
         })}
       </Box>
-      <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
         Spend: {withModifier(`${value}d${pool.faces}`, conMod)} each
       </Typography>
     </Box>

@@ -6,7 +6,7 @@ import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js'
 import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
@@ -22,7 +22,7 @@ const chipSx = {
   bgcolor: 'background.paper',
   color: 'text.secondary',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.56rem',
+  fontSize: FONT_SIZES.xxs,
   letterSpacing: '0.04em',
   display: 'inline-flex',
   alignItems: 'center',
@@ -101,14 +101,14 @@ export default function HPBlock({
   return (
     <Box sx={{ ...sheetBoxSx, width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
           HP
         </Typography>
 
         {dead && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerBright, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerBright, 0.12) }}>
             <Skull size={12} style={{ color: UI_COLORS.dangerBright }} />
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
             </Typography>
           </Box>
@@ -118,18 +118,18 @@ export default function HPBlock({
         <Box sx={rowSx}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
             {editing === 'hp' ? (
-              editField({ width: 64 }, { fontSize: '1.4rem', color: hpColor })
+              editField({ width: 64 }, { fontSize: FONT_SIZES.heading, color: hpColor })
             ) : (
               <Typography
                 component="span"
                 onClick={() => startEdit('hp', sheet.currentHP)}
-                sx={{ fontFamily: UI_FONTS.display, fontSize: '1.5rem', fontWeight: 700, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.heading, fontWeight: 700, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {sheet.currentHP}
               </Typography>
             )}
-            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: '0.9rem', color: 'text.secondary' }}>/</Typography>
-            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: '0.9rem', fontWeight: 600, color: 'text.secondary' }}>
+            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
+            <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, fontWeight: 600, color: 'text.secondary' }}>
               {sheet.maxHP}
             </Typography>
           </Box>
@@ -151,7 +151,7 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <Sparkles size={10} /> TEMP
             {editing === 'temp' ? (
-              editField({ width: 40, ml: 'auto' }, { fontSize: '0.7rem', color: UI_COLORS.goldLight })
+              editField({ width: 40, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight })
             ) : (
               <Box
                 component="b"
@@ -178,7 +178,7 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <HeartPulse size={10} /> MAX MOD
             {editing === 'mod' ? (
-              editField({ width: 44, ml: 'auto' }, { fontSize: '0.7rem', color: UI_COLORS.goldLight })
+              editField({ width: 44, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight })
             ) : (
               <Box
                 component="b"
@@ -203,7 +203,7 @@ export default function HPBlock({
         {atZero && !dead && (
           <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.56rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
                 Death Saves
               </Typography>
               <Tooltip title="Click to set successes">
@@ -232,7 +232,7 @@ export default function HPBlock({
                 size="small"
                 variant="outlined"
                 onClick={onDeathSave}
-                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: '0.5rem', fontFamily: UI_FONTS.display, fontWeight: 600, letterSpacing: '0.06em', color: 'text.secondary', borderColor: 'divider' }}
+                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: FONT_SIZES.xxxs, fontFamily: UI_FONTS.display, fontWeight: 600, letterSpacing: '0.06em', color: 'text.secondary', borderColor: 'divider' }}
               >
                 Roll
               </Button>

@@ -3,7 +3,7 @@ import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { MousePointer2, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -125,7 +125,7 @@ const railButtonActiveSx = {
 
 const railLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   letterSpacing: '0.04em',
   lineHeight: 1.1,
   textAlign: 'center',
@@ -158,7 +158,7 @@ const panelPlacingSx = {
 
 const panelTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   letterSpacing: '0.08em',
   color: 'primary.main',
 };

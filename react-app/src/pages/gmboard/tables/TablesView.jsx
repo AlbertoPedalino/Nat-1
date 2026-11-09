@@ -7,7 +7,7 @@ import { tableRows } from '../../../shared/gmboard/tables.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 export default function TablesView() {
@@ -108,14 +108,14 @@ const tabLabelSx = {
 };
 
 const tabGroupSx = {
-  fontSize: '0.56rem',
+  fontSize: FONT_SIZES.xxs,
   letterSpacing: '0.05em',
   textTransform: 'uppercase',
   color: 'text.secondary',
 };
 
 const tabNameSx = {
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   color: 'inherit',
 };
 
@@ -129,17 +129,17 @@ const activeHeaderSx = {
 
 const activeNameSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
+  fontSize: FONT_SIZES.xl,
   color: 'primary.main',
 };
 
 const activeMetaSx = {
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   color: 'text.secondary',
 };
 
 const saveHintSx = {
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
   flexBasis: '100%',
 };

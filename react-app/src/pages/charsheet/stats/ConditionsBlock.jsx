@@ -10,14 +10,14 @@ import {
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 const DEAD_ACCENT = UI_COLORS.dangerBright;
 
 // The sheet's pills sit in a panel rather than an initiative row, so they run
 // smaller than the encounter's.
-const pillSx = { fontSize: '0.5rem' };
+const pillSx = { fontSize: FONT_SIZES.xxxs };
 
 // Exhaustion is graded 1–6: a stepper pill instead of a plain toggle. − at level
 // 1 removes it (level 0); + caps at 6 (death, shown red). The label still expands
@@ -36,7 +36,7 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: '11px', bgcolor: alpha(accent, isOpen ? 0.3 : 0.14), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
       <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
-        sx={{ fontSize: '0.5rem', fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
         {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
       </Typography>
       <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={11} /></StepButton>
@@ -64,7 +64,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
       <Typography sx={sheetBoxTitleSx}>Conditions</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
-          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: '0.5rem', borderStyle: 'dashed' }} />}
+          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs, borderStyle: 'dashed' }} />}
           {active.map((c) => (
             c.key === 'exhaustion' ? (
               <ExhaustionPill
@@ -102,7 +102,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             component="button"
             type="button"
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: UI_FONTS.display, fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
+            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
           >
             <ListChecks size={12} /> Manage ({active.length})
             <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
@@ -114,7 +114,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 active={sheet.activeConditions}
                 onToggle={onToggle}
                 sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(108px,1fr))', gap: 0.25, mt: 0.5 }}
-                chipSx={{ fontSize: '0.5rem' }}
+                chipSx={{ fontSize: FONT_SIZES.xxxs }}
               />
               {active.length > 0 && (
                 <Button
@@ -122,7 +122,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   variant="outlined"
                   startIcon={<X size={12} />}
                   onClick={onClear}
-                  sx={{ mt: 0.6, fontSize: '0.5rem', py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, 0.08) } }}
+                  sx={{ mt: 0.6, fontSize: FONT_SIZES.xxxs, py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, 0.08) } }}
                 >
                   Clear all
                 </Button>

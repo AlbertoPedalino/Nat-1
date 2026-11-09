@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
 // the slot to create, convert or spend, the Wild Resurgence option, the Pact
@@ -55,7 +55,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {createSlotDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Choose a spell slot level to create.
             </Typography>
             {createSlotDialog.levels.map(({ level, cost }) => (
@@ -70,10 +70,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level}
                 </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.purple }}>
+                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.purple }}>
                   {cost} SP
                 </Typography>
               </Box>
@@ -97,7 +97,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {convertSlotDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Choose an expended spell slot to convert into Sorcery Points.
             </Typography>
             {convertSlotDialog.levels.map(({ level, available, hasCreated }) => (
@@ -112,10 +112,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
                 </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.purple }}>
+                <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.purple }}>
                   +{level} SP
                 </Typography>
               </Box>
@@ -132,7 +132,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {wildResurgenceDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Choose an option (Wild Shape remaining: {wildResurgenceDialog.currentWS}).
             </Typography>
             {wildResurgenceDialog.options.map((opt) => (
@@ -145,7 +145,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: UI_COLORS.goldLight }}>{opt.label}</Box>
+                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>
@@ -167,7 +167,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {spendSlotRecoverDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Spend one spell slot to recover {resNameMap[spendSlotRecoverDialog.targetKey] || spendSlotRecoverDialog.targetKey}.
               {spendSlotRecoverDialog.note ? ` ${spendSlotRecoverDialog.note}` : ''}
             </Typography>
@@ -183,7 +183,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   {SPELL_LEVEL_LABELS[level] || `Level ${level}`} · {available} available
                 </Typography>
               </Box>
@@ -207,7 +207,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {consumePactSlotDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Expend one Pact Magic slot (level {consumePactSlotDialog.slotLevel}) to power this feature.
             </Typography>
           </Box>
@@ -229,23 +229,23 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
       >
         {slotRecovery ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Recover expended spell slots. Budget {slotRecoverySpent}/{slotRecovery.budget}.
             </Typography>
             {slotRecovery.levels.map((entry) => {
               const value = Number(slotRecoverySelection[String(entry.level)] || 0);
               return (
                 <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.8, py: 0.6 }}>
-                  <Typography sx={{ flex: 1, fontSize: '0.72rem', color: 'text.primary' }}>
+                  <Typography sx={{ flex: 1, fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display }}>{value}</Typography>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display }}>{value}</Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
               );
             })}
-            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               Remaining budget: {slotRecoveryRemaining}
             </Typography>
           </Box>

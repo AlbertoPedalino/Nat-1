@@ -5,6 +5,7 @@ import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
   const { state, characterDigests } = useEncounterBuilder();
@@ -101,7 +102,7 @@ const avatarSx = {
   width: 58,
   height: 58,
   color: UI_COLORS.avatarText,
-  fontSize: 14,
+  fontSize: FONT_SIZES.xxl,
   fontWeight: 900,
   flex: '0 0 auto',
 };

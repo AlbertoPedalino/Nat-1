@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
@@ -38,7 +38,7 @@ export const titleSx = {
 
 export const newBtnSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.06em',
 };
 
@@ -46,7 +46,7 @@ export const sectionHeadSx = {
   width: '100%',
   maxWidth: '640px',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.86rem',
+  fontSize: FONT_SIZES.xxl,
   fontWeight: 700,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
@@ -94,17 +94,17 @@ export const nameSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.92rem',
+  fontSize: FONT_SIZES.xxl,
 };
 
 export const subtitleSx = {
   color: UI_COLORS.textBrown,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
 };
 
 export const metaSx = {
   color: UI_COLORS.textBrown,
-  fontSize: '0.76rem',
+  fontSize: FONT_SIZES.lg,
   whiteSpace: 'nowrap',
   flexShrink: 0,
 };
@@ -140,7 +140,7 @@ export function badgeSx(kind, theme) {
   const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : UI_COLORS.textRail;
   return {
     height: '18px',
-    fontSize: '0.62rem',
+    fontSize: FONT_SIZES.xs,
     fontFamily: UI_FONTS.display,
     letterSpacing: '0.04em',
     borderRadius: '4px',
@@ -162,7 +162,7 @@ export const emptyBoxSx = {
 
 export const emptyTextSx = {
   color: UI_COLORS.textDim,
-  fontSize: '0.9rem',
+  fontSize: FONT_SIZES.xxl,
   fontStyle: 'italic',
   fontFamily: UI_FONTS.prose,
 };
@@ -171,6 +171,6 @@ export const errorTextSx = {
   width: '100%',
   maxWidth: '640px',
   color: UI_COLORS.danger,
-  fontSize: '0.82rem',
+  fontSize: FONT_SIZES.xl,
   mb: '0.75rem',
 };

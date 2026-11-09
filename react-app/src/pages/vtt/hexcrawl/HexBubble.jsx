@@ -4,7 +4,7 @@ import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../share
 import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -117,7 +117,7 @@ const clickableSx = {
 
 const coordSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -125,13 +125,13 @@ const coordSx = {
 
 const headlineSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.95rem',
+  fontSize: FONT_SIZES.body,
   fontWeight: 700,
   color: VTT_COLORS.gold,
   lineHeight: 1.25,
 };
 
-const lineSx = { fontSize: '0.78rem', color: 'text.primary', lineHeight: 1.4 };
+const lineSx = { fontSize: FONT_SIZES.lg, color: 'text.primary', lineHeight: 1.4 };
 
 const footerSx = {
   alignItems: 'center',
@@ -140,7 +140,7 @@ const footerSx = {
   borderTop: '1px solid',
 };
 
-const footerTextSx = { fontSize: '0.68rem', color: 'text.secondary', whiteSpace: 'nowrap' };
+const footerTextSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', whiteSpace: 'nowrap' };
 
 const tailSx = {
   position: 'absolute',

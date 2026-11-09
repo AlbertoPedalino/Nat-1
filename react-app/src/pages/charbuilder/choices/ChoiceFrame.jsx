@@ -1,4 +1,5 @@
 import { Chip, Paper, Stack, Typography } from '@mui/material';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The frame every builder choice sits in: its label and how many of the
 // allowed picks are taken ("2/3", or `countLabel` for a count that says more),
@@ -33,7 +34,7 @@ const labelSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   color: 'text.secondary',
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 800,
   lineHeight: 1.25,
 };

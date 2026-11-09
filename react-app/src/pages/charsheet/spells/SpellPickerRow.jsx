@@ -8,7 +8,7 @@ import {
   SpellSelectButton,
 } from '../../../shared/character/spells/SpellReference.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // One spell in the sheet's spell picker, with its add/remove control.
 
@@ -30,12 +30,12 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
           onClick={toggle}
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : UI_COLORS.headerBg } }}
         >
-          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
+          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.4 }} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoGranted ? (
             sourceInfo
               ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
-              : <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
+              : <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
           ) : null}
           {!locked ? (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />

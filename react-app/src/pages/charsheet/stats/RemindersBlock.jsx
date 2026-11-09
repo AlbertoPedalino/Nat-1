@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // What the character has going right now — Bardic Inspiration, Guidance, Bless —
 // by name, always in view, framed like Conditions above it. The same list
@@ -15,7 +16,7 @@ export default function RemindersBlock({ sheet, actions }) {
       <ReminderEditor
         effects={sheet.activeEffects}
         disabled={Boolean(actions.readOnly)}
-        fontSize="0.56rem"
+        fontSize={FONT_SIZES.xxs}
         onAdd={actions.add}
         onRemove={actions.remove}
       />

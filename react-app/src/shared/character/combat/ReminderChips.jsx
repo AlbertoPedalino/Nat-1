@@ -15,6 +15,7 @@ import {
   subscribeReminderHistory,
   suggestReminders,
 } from './reminderHistory.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -26,7 +27,7 @@ import {
 
 // A creature's reminders by name, each removable, and the field that adds one.
 // `effects` is the list; the caller owns the writes.
-export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, fontSize = '0.6rem' }) {
+export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, fontSize = FONT_SIZES.xs }) {
   const reminders = normalizeEffects(effects);
   return (
     <Box sx={editorSx}>
@@ -48,7 +49,7 @@ export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, fon
 }
 
 // `fontSize` is the one thing the surfaces size differently.
-export function ReminderChip({ effect, onRemove, fontSize = '0.62rem' }) {
+export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
   return (
     <Chip
       size="small"
@@ -146,7 +147,7 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
         const accent = theme.palette.info.main;
         return {
           height: 18,
-          fontSize: '0.56rem',
+          fontSize: FONT_SIZES.xxs,
           maxWidth: '100%',
           color: alpha(accent, 0.8),
           borderStyle: 'dashed',
@@ -167,7 +168,7 @@ const fieldRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 const fieldSx = {
   flex: '1 1 auto',
   minWidth: 0,
-  '& .MuiInputBase-input': { py: 0.4, fontSize: '0.68rem' },
+  '& .MuiInputBase-input': { py: 0.4, fontSize: FONT_SIZES.sm },
 };
 
 const addSx = {
@@ -175,7 +176,7 @@ const addSx = {
   minWidth: 0,
   px: 0.8,
   py: 0,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

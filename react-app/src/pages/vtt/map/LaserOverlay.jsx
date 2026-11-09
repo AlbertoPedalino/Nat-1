@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
@@ -221,7 +221,7 @@ const labelSx = {
   transform: 'translateX(-50%)',
   color: VTT_COLORS.laserText,
   fontFamily: UI_FONTS.display,
-  fontSize: 11,
+  fontSize: FONT_SIZES.sm,
   fontWeight: 700,
   lineHeight: 1,
   whiteSpace: 'nowrap',

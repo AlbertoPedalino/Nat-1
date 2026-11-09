@@ -15,7 +15,7 @@ import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
@@ -89,13 +89,13 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
               </Typography>
-              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+              <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
                 {ABILITY_NAMES[st]}
               </Typography>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
                 {signed(shownBonus)}
               </Typography>
               {visual && (
@@ -120,15 +120,15 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               <Dice5 size={13} style={{ color: UI_COLORS.goldWarm, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: UI_COLORS.goldWarm, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.goldWarm, fontWeight: 700, flexShrink: 0 }}>
                     Min {r.minRoll}
                   </Typography>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     Concentration saves (treat d20 of {r.minRoll - 1} or lower as {r.minRoll})
                   </Typography>
                 </Box>
                 {r.note && (
-                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
                     {r.note}
                   </Typography>
                 )}
@@ -140,14 +140,14 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               <Sparkles size={13} style={{ color: UI_COLORS.teal, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: UI_COLORS.teal, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.teal, fontWeight: 700, flexShrink: 0 }}>
                     +{concentrationBonus}
                   </Typography>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     Concentration saves
                   </Typography>
                 </Box>
-                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
                   Bladesong
                 </Typography>
               </Box>
@@ -162,14 +162,14 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                 <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                    <Typography component="span" sx={{ fontSize: '0.7rem', color, fontWeight: 700, flexShrink: 0 }}>
+                    <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color, fontWeight: 700, flexShrink: 0 }}>
                       {kindLabel}
                     </Typography>
-                    <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                    <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                       {mod.label}
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
                     {mod.source}
                   </Typography>
                 </Box>
@@ -181,13 +181,13 @@ export default function SavingThrows({ C, sheet, onRoll }) {
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
         slotProps={{ paper: { sx: { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), border: 1, borderColor: 'divider' } } }}>
-        <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: '0.75rem' }}>
+        <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: FONT_SIZES.lg }}>
           Normal save
         </MenuItem>
         {saveContexts.map(([target, sources]) => (
-          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: '0.75rem', color: UI_COLORS.teal }}>
+          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: FONT_SIZES.lg, color: UI_COLORS.teal }}>
             vs {target} — Advantage
-            <Typography sx={{ ml: 1, fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic' }}>
+            <Typography sx={{ ml: 1, fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic' }}>
               ({sources.join(', ')})
             </Typography>
           </MenuItem>

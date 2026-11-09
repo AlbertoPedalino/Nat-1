@@ -4,6 +4,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { STEP_TARGETS } from './useTokenMenuState.js';
 import { compactFieldSx } from './tokenMenuStyles.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The piece menu's `HP / Max / Temp` row and its one "+ 5 -" stepper. `fields`
 // is the menu's state (useTokenMenuState); `withVitals` is set for the GM, whose
@@ -94,7 +95,7 @@ export default function TokenHpRow({ fields, withVitals, onClose }) {
   );
 }
 
-const slashSx = { color: 'text.secondary', fontSize: '0.68rem' };
+const slashSx = { color: 'text.secondary', fontSize: FONT_SIZES.sm };
 const tempFieldSx = { '& .MuiInputBase-input': { color: VTT_COLORS.tempHpText } };
 const stepperSlotSx = { ml: 'auto !important', display: 'flex' };
 const maxSlotSx = { position: 'relative', display: 'flex' };
@@ -106,7 +107,7 @@ const maxBonusSx = {
   right: 4,
   px: 0.3,
   bgcolor: 'gmboard.vtt.surfaceSolid',
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   lineHeight: 1.2,
   pointerEvents: 'none',

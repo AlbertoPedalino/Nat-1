@@ -4,7 +4,7 @@ import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { asArray } from '../../lists.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -56,7 +56,7 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
 
 // Accent-titled card over the XPHB description. EntryBlocks is tuned with accent
 // effect names over warm body text so each effect reads distinctly.
-export function ConditionCard({ label, entries, onClose, fontSize = '0.62rem' }) {
+export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.xs }) {
   return (
     <Box sx={cardSx}>
       <Box sx={cardHeaderSx}>
@@ -90,7 +90,7 @@ const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 's
 
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.06em',
   color: CONDITION_ACCENT,

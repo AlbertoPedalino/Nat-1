@@ -9,7 +9,7 @@ import {
   rangeFilterKeys,
 } from './itemFilters.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 
@@ -29,7 +29,7 @@ const clearButtonSx = {
   borderRadius: 1,
   color: 'text.secondary',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
   '&:hover': { color: UI_COLORS.danger },
@@ -41,14 +41,14 @@ const labelSx = {
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
   color: RICH_TEXT_ACCENT,
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   alignSelf: 'center',
   whiteSpace: 'nowrap',
 };
 
 const controlSx = {
   width: '100%',
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   bgcolor: UI_COLORS.headerBg,
   borderRadius: 1,
   '& .MuiSelect-select': { py: '5px' },
@@ -71,7 +71,7 @@ const gridSx = {
 
 const placeholderSx = { color: 'text.secondary', opacity: 0.75 };
 const menuProps = { PaperProps: { sx: { maxHeight: 320 } } };
-const menuItemSx = { fontSize: '0.75rem' };
+const menuItemSx = { fontSize: FONT_SIZES.lg };
 
 const ANY = 'Any';
 
@@ -121,7 +121,7 @@ function SelectedChips({ values }) {
             borderRadius: '3px',
             bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
             color: UI_COLORS.goldLight,
-            fontSize: '0.6rem',
+            fontSize: FONT_SIZES.xs,
           }}
         >
           {value}

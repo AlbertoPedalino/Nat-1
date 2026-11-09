@@ -231,6 +231,14 @@ test('font stacks come from UI_FONTS', () => {
   }).filter((hit) => !hit.startsWith('data/')), []);
 });
 
+// Type sizes are steps of FONT_SIZES (shared/ui/fonts.js), so a restyle
+// changes the scale in one place. Icon sizes and box-relative clamps are not type.
+test('font sizes come from FONT_SIZES', () => {
+  assert.deepEqual(sourceLinesMatching(/[fF]ontSize\s*[:=]\s*[^,;]*['"]\d*\.?\d+(rem|px)['"]|fontSize:\s*\d+\s*[,}]/, {
+    allow: ['shared/ui/fonts.js'],
+  }).filter((hit) => !hit.startsWith('data/')), []);
+});
+
 test('panel title bars are PanelHeader (or SheetDialog, built on its bar)', () => {
   assert.deepEqual(sourceFilesMatching(/headerBg[^\n]*borderLeft: 3|borderLeft: 3[^\n]*headerBg/, {
     allow: ['shared/ui/PanelHeader.jsx'],

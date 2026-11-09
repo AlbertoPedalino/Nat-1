@@ -1,5 +1,6 @@
 import { FormControlLabel, Switch, Typography } from '@mui/material';
 import { useGmRollsShown } from '../../cloud/sync/rollVisibility.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // Whether the players see the creatures' rolls — and the GM's own custom
 // rolls with them — for a campaign (rollVisibility.js): the same switch
@@ -23,5 +24,5 @@ export default function GmRollsShownSwitch({ campaignId, sx }) {
 const labelSx = {
   m: 0,
   gap: 0.5,
-  '& .MuiFormControlLabel-label': { fontSize: '0.78rem', color: 'text.secondary' },
+  '& .MuiFormControlLabel-label': { fontSize: FONT_SIZES.lg, color: 'text.secondary' },
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Popover, Typography } from '@mui/material';
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import ColorField from './ColorField.jsx';
 
 export const ICON_COLORS = [
@@ -31,7 +31,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       transformOrigin={{ vertical: 'top', horizontal: 'center' }}
       slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, p: 1 } } }}
     >
-      <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', mb: 0.5, fontFamily: UI_FONTS.display, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5, fontFamily: UI_FONTS.display, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         {title}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
@@ -55,7 +55,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             bgcolor: 'rgba(46,42,34,1)', border: 2,
             borderColor: localColor == null && currentColor == null ? '#fff' : 'divider',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.6rem', color: 'text.secondary',
+            fontSize: FONT_SIZES.xs, color: 'text.secondary',
             '&:hover': { transform: 'scale(1.2)', transition: 'transform 0.12s' },
           }}
           title="Default"
@@ -64,7 +64,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, pt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}>
           Custom
         </Typography>
         {/* The well's input fills the swatch, so a click on it opens the picker. */}
@@ -87,7 +87,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           />
         </Box>
         {currentColor ? (
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.mono }}>
+          <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontFamily: UI_FONTS.mono }}>
             {currentColor}
           </Typography>
         ) : null}

@@ -8,7 +8,7 @@ import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 const META_LABEL_SX = {
   fontFamily: UI_FONTS.display,
@@ -16,13 +16,13 @@ const META_LABEL_SX = {
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
   color: RICH_TEXT_ACCENT,
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   alignSelf: 'center',
 };
 
 const SECTION_HEADING_SX = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.08em',
   color: RICH_TEXT_ACCENT,
@@ -32,7 +32,7 @@ const SECTION_HEADING_SX = {
 // Casting Time / Range / Components / Duration as a two-column grid.
 // Shared by the sheet spell card and the builder expanded body so the meta
 // presentation stays identical. Renders nothing when the spell has no meta.
-export function SpellMetaGrid({ spell, fontSize = '0.65rem', sx }) {
+export function SpellMetaGrid({ spell, fontSize = FONT_SIZES.sm, sx }) {
   const segments = getSpellMetaSegments(spell);
   if (!segments.length) return null;
   return (
@@ -116,7 +116,7 @@ export function SpellSelectButton({ selected, disabled, onToggle, addColor = 'pr
       color={selected ? 'error' : addColor}
       disabled={disabled}
       onClick={(event) => { event.stopPropagation(); onToggle(); }}
-      sx={{ flexShrink: 0, minWidth: 56, px: '8px', py: '1px', fontSize: '0.62rem', lineHeight: 1.5, ...sx }}
+      sx={{ flexShrink: 0, minWidth: 56, px: '8px', py: '1px', fontSize: FONT_SIZES.xs, lineHeight: 1.5, ...sx }}
     >
       {selected ? 'Remove' : 'Add'}
     </Button>
@@ -127,7 +127,7 @@ export function SpellSelectButton({ selected, disabled, onToggle, addColor = 'pr
 // Used by the builder where there's no roll/interaction layer. (The sheet card
 // composes SpellMetaGrid/HigherLevelBlock directly since it interleaves
 // modifier groups and roll buttons between them.)
-export function SpellReferenceBody({ spell, fontSize = '0.78rem' }) {
+export function SpellReferenceBody({ spell, fontSize = FONT_SIZES.lg }) {
   const entries = spell?.descriptionEntries || spell?.entries;
   const higher = spell?.higherLevelEntries || spell?.entriesHigherLevel;
   return (

@@ -44,6 +44,7 @@ import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -229,7 +230,7 @@ function companionRules(rangerLevel) {
 }
 
 const reviveButtonSx = {
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   borderColor: uiAlpha(UI_COLORS.gold, 0.5),
   color: UI_COLORS.goldLight,
   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },

@@ -10,6 +10,7 @@ import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBl
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { compendiumKind } from '../search/compendiumIndex.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // One compendium entry, shown the way the rest of the app shows that kind: a
 // spell as on the sheet, a monster as the encounter builder's stat block (its
@@ -75,7 +76,7 @@ const pictureSx = {
 };
 
 const titleSx = {
-  fontSize: '1.15rem',
+  fontSize: FONT_SIZES.lead,
 };
 
 const monsterHeaderSx = {

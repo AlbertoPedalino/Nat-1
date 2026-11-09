@@ -4,7 +4,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeMarkMatches from '../search/rehypeMarkMatches.js';
 import { MARK_SX } from '../search/HighlightedText.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // GFM without any raw-HTML plugin: note bodies are user text, so markup stays
 // markdown-only and anything HTML-like renders as inert characters.
@@ -63,7 +63,7 @@ export default function NoteMarkdown({ children, tokens }) {
 const rootSx = {
   minWidth: 0,
   color: 'text.primary',
-  fontSize: '0.875rem',
+  fontSize: FONT_SIZES.xxl,
   overflowWrap: 'anywhere',
   '& > :first-of-type': { mt: 0 },
   '& > :last-child': { mb: 0 },
@@ -82,7 +82,7 @@ const linkSx = { color: 'secondary.main' };
 
 const listSx = { my: 0.75, pl: 2.5, '& ul, & ol': { my: 0.25 } };
 
-const listItemSx = { fontSize: '0.875rem', mb: 0.25, '& p': { my: 0 } };
+const listItemSx = { fontSize: FONT_SIZES.xxl, mb: 0.25, '& p': { my: 0 } };
 
 const quoteSx = {
   my: 0.75,
@@ -95,7 +95,7 @@ const quoteSx = {
 
 const codeSx = {
   fontFamily: UI_FONTS.mono,
-  fontSize: '0.8125rem',
+  fontSize: FONT_SIZES.xl,
   bgcolor: 'action.hover',
   borderRadius: 1,
   px: 0.5,
@@ -118,7 +118,7 @@ const tableWrapSx = { my: 0.75, overflowX: 'auto' };
 const tableSx = {
   borderCollapse: 'collapse',
   width: '100%',
-  fontSize: '0.8125rem',
+  fontSize: FONT_SIZES.xl,
 };
 
 const cellSx = {

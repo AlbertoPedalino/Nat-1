@@ -35,6 +35,7 @@ import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -223,7 +224,7 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         px: 0.65,
         py: 0,
         verticalAlign: 'baseline',
-        fontSize: '0.54rem',
+        fontSize: FONT_SIZES.xxs,
         lineHeight: 1.45,
         textTransform: 'none',
         color: available ? UI_COLORS.successLight : UI_COLORS.dangerMuted,

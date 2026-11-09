@@ -3,6 +3,7 @@ import { Backpack, Check, Shield, Sparkles, Swords } from 'lucide-react';
 import { ITEM_GROUP_CHIPS } from '../../../shared/character/inventory/itemGroups.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Controls and looks shared by the inventory tab's two sections: the add-item
 // search and the owned inventory list.
@@ -17,7 +18,7 @@ const FILTERS = withIcons(ITEM_GROUP_CHIPS);
 
 export const compactInputSx = {
   '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
-  '& input': { fontSize: '0.75rem', py: '7px' },
+  '& input': { fontSize: FONT_SIZES.lg, py: '7px' },
 };
 
 export const inventorySectionSx = {

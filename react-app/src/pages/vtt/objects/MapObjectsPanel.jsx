@@ -15,6 +15,7 @@ import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.gold;
@@ -148,9 +149,9 @@ export default function MapObjectsPanel({
   );
 }
 
-const hintSx = { mb: 1, color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem', lineHeight: 1.45 };
+const hintSx = { mb: 1, color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
 const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.6 };
-const countSx = { mb: 0.7, color: VTT_COLORS.panelTextFaint, fontSize: '0.6rem' };
+const countSx = { mb: 0.7, color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.xs };
 const strokeControlSx = {
   display: 'grid',
   gridTemplateColumns: '42px minmax(0, 1fr) 26px',
@@ -158,9 +159,9 @@ const strokeControlSx = {
   gap: 0.7,
   mb: 0.55,
 };
-const strokeLabelSx = { color: VTT_COLORS.panelText, fontSize: '0.65rem' };
+const strokeLabelSx = { color: VTT_COLORS.panelText, fontSize: FONT_SIZES.sm };
 const strokeSliderSx = { py: 0.6, color: VTT_COLORS.gold };
-const strokeValueSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.62rem', textAlign: 'right' };
+const strokeValueSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.xs, textAlign: 'right' };
 
 const gridSx = {
   display: 'grid',
@@ -199,14 +200,14 @@ const labelSx = {
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   color: VTT_COLORS.panelText,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   lineHeight: 1.2,
 };
 
-const emptySx = { py: 3, textAlign: 'center', color: VTT_COLORS.panelTextFaint, fontSize: '0.72rem' };
+const emptySx = { py: 3, textAlign: 'center', color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.md };
 const paginationSx = {
   mt: 1,
   display: 'flex',
   justifyContent: 'center',
-  '& .MuiPaginationItem-root': { minWidth: 25, height: 25, fontSize: '0.65rem' },
+  '& .MuiPaginationItem-root': { minWidth: 25, height: 25, fontSize: FONT_SIZES.sm },
 };

@@ -1,5 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -29,7 +30,7 @@ export const identityClusterSx = {
   minWidth: 0,
 };
 
-export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.avatarText, fontSize: 11, fontWeight: 800 };
+export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.avatarText, fontSize: FONT_SIZES.sm, fontWeight: 800 };
 
 export const nameButtonSx = { justifyContent: 'flex-start', minWidth: 0, px: 0.5 };
 
@@ -58,9 +59,9 @@ export const acBadgeSx = {
   lineHeight: 1,
 };
 
-export const acLabelSx = { fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em' };
+export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.1em' };
 
-export const acValueSx = { fontSize: '1rem', fontWeight: 800, color: 'text.primary' };
+export const acValueSx = { fontSize: FONT_SIZES.body, fontWeight: 800, color: 'text.primary' };
 
 export const conditionsRowSx = {
   flex: '1 1 100%',
@@ -93,7 +94,7 @@ export const hpToggleSx = {
   px: 0.5,
   py: 0,
   color: 'text.secondary',
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -111,7 +112,7 @@ export const hpFlagSx = {
   borderColor: 'divider',
   borderRadius: 1,
   color: 'primary.main',
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   lineHeight: 1,
   flex: '0 0 auto',
 };
@@ -137,7 +138,7 @@ export const hpValueRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 
 export const hpFieldSx = { width: 72, flex: '0 0 auto' };
 
-export const hpMaxSx = { whiteSpace: 'nowrap', fontSize: '0.82rem' };
+export const hpMaxSx = { whiteSpace: 'nowrap', fontSize: FONT_SIZES.xl };
 
 export const hpBarSx = {
   width: '100%',
@@ -163,10 +164,10 @@ export const hpRowSx = {
   minWidth: 0,
   '& .MuiInputBase-input': {
     py: 0.6,
-    fontSize: '0.85rem',
+    fontSize: FONT_SIZES.xxl,
   },
   '& .MuiInputLabel-root': {
-    fontSize: '0.78rem',
+    fontSize: FONT_SIZES.lg,
   },
 };
 

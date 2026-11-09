@@ -2,6 +2,7 @@ import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -32,7 +33,7 @@ export const sceneIdentitySx = {
 
 export const sceneTitleSx = {
   color: 'primary.main',
-  fontSize: { xs: '0.98rem', md: '1.08rem' },
+  fontSize: { xs: FONT_SIZES.body, md: FONT_SIZES.lead },
   lineHeight: 1.2,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -46,7 +47,7 @@ export const scenePresenterActionsSx = {
   borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.16)}` },
   '& .MuiButton-root': {
     minHeight: 30,
-    fontSize: '0.67rem',
+    fontSize: FONT_SIZES.sm,
     whiteSpace: 'nowrap',
   },
 };
@@ -89,7 +90,7 @@ export const sceneGmControlsSx = (theme) => ({
     '&& .MuiButton-root': {
       minWidth: 0,
       px: 0.75,
-      fontSize: '0.6rem',
+      fontSize: FONT_SIZES.xs,
     },
     '& .MuiButton-startIcon': {
       display: 'none',
@@ -106,7 +107,7 @@ export const sceneControlsPassThroughSx = {
 // two read as one pair of view controls.
 export const viewButtonSx = {
   height: 32,
-  fontSize: '0.67rem',
+  fontSize: FONT_SIZES.sm,
   whiteSpace: 'nowrap',
 };
 

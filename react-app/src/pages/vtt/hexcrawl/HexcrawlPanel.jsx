@@ -19,7 +19,7 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
@@ -271,10 +271,10 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem', lineHeight: 1.45 };
-const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: '0.62rem', letterSpacing: '0.04em', mb: 0.5 };
-const clockSx = { color: VTT_COLORS.panelText, fontSize: '0.72rem' };
-const warnSx = { color: 'warning.main', fontSize: '0.66rem', lineHeight: 1.35 };
+const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
+const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: FONT_SIZES.xs, letterSpacing: '0.04em', mb: 0.5 };
+const clockSx = { color: VTT_COLORS.panelText, fontSize: FONT_SIZES.md };
+const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: 1.35 };
 
 const cardSx = {
   p: 0.9,
@@ -282,7 +282,7 @@ const cardSx = {
   borderRadius: 1.5,
 };
 
-const effectSx = { color: 'text.secondary', fontSize: '0.66rem' };
+const effectSx = { color: 'text.secondary', fontSize: FONT_SIZES.sm };
 
 const nextHexSx = {
   display: 'flex',
@@ -294,7 +294,7 @@ const nextHexSx = {
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
 };
-const nextHexTitleSx = { fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.gold };
+const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.gold };
 
 const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
 
@@ -304,7 +304,7 @@ const chipSx = {
   gap: 0.4,
   px: 0.75,
   py: 0.2,
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   lineHeight: 1.4,
   color: VTT_COLORS.panelText,
   border: '1px solid',
@@ -321,7 +321,7 @@ const missingChipSx = {
 const linkButtonSx = {
   px: 0.75,
   minWidth: 0,
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   textTransform: 'none',
 };
 
@@ -335,19 +335,19 @@ const lastCardSx = {
 
 const lastHexSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.04em',
   color: VTT_COLORS.panelText,
 };
 
-const lastHeadlineSx = { fontSize: '0.8rem', fontWeight: 700, color: VTT_COLORS.gold, lineHeight: 1.3 };
-const lastLineSx = { fontSize: '0.7rem', color: 'text.primary', lineHeight: 1.4 };
-const lastMetaSx = { fontSize: '0.64rem', color: 'text.secondary', lineHeight: 1.4 };
+const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, color: VTT_COLORS.gold, lineHeight: 1.3 };
+const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight: 1.4 };
+const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.4 };
 
 const lastButtonSx = {
   mt: 0.4,
   px: 0.75,
   minWidth: 0,
-  fontSize: '0.66rem',
+  fontSize: FONT_SIZES.sm,
   textTransform: 'none',
 };

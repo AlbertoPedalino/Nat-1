@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -85,7 +85,7 @@ const sectionIconSx = { display: 'flex', color: VTT_COLORS.gold, flexShrink: 0 }
 const sectionTitleSx = {
   display: 'block',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.06em',
   lineHeight: 1.4,
 };

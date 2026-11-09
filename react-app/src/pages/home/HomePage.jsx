@@ -8,7 +8,7 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.js
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 
@@ -188,7 +188,7 @@ const cardContentSx = {
 
 const cardLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.9rem',
+  fontSize: FONT_SIZES.xxl,
   fontWeight: 700,
   letterSpacing: '0.08em',
   textAlign: 'center',
@@ -197,7 +197,7 @@ const cardLabelSx = {
 };
 
 const cardDescSx = {
-  fontSize: '0.8rem',
+  fontSize: FONT_SIZES.xl,
   color: UI_COLORS.textBrown,
   textAlign: 'center',
   lineHeight: 1.4,
@@ -218,7 +218,7 @@ const clearDataButtonSx = {
   borderColor: uiAlpha(UI_COLORS.danger, 0.42),
   color: UI_COLORS.danger,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.64rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.08em',
   '&:hover': {
     borderColor: UI_COLORS.danger,

@@ -8,7 +8,7 @@ import { CLOUD_SYNC_EVENT, reportCloudSyncState } from '../sync/cloudSyncState.j
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 import { failureMessage } from '../../ui/busyAction.js';
@@ -24,7 +24,7 @@ function resolveActiveCharId() {
 
 const loginBtnSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.08em',
 };
 
@@ -119,7 +119,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
       <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={close}>
         {status === 'authed' ? [
           <Box key="hdr" sx={{ px: 2, py: 0.5 }}>
-            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               {username} · {role === 'gm' ? 'GM' : 'Player'}
             </Typography>
           </Box>,

@@ -1,5 +1,6 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function BuilderPanel({ id, title, icon: Icon, note, action, children, sx }) {
   return (
@@ -9,7 +10,7 @@ export default function BuilderPanel({ id, title, icon: Icon, note, action, chil
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography variant="h2" sx={{ color: 'primary.main', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{title}</Typography>
           {note ? (
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.15, fontSize: '0.65rem' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.15, fontSize: FONT_SIZES.sm }}>
               {note}
             </Typography>
           ) : null}

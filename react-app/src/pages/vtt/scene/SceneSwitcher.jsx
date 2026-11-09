@@ -7,6 +7,7 @@ import { listScenes } from '../../../shared/cloud/api/vttScenes.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -112,12 +113,12 @@ const menuPaperSx = {
 
 const noticeSx = {
   color: 'text.secondary',
-  fontSize: '0.8rem',
+  fontSize: FONT_SIZES.xl,
 };
 
 const errorSx = {
   color: 'error.main',
-  fontSize: '0.8rem',
+  fontSize: FONT_SIZES.xl,
   whiteSpace: 'normal',
 };
 
@@ -130,5 +131,5 @@ const iconSx = {
 
 const nameSx = {
   minWidth: 0,
-  fontSize: '0.85rem',
+  fontSize: FONT_SIZES.xxl,
 };

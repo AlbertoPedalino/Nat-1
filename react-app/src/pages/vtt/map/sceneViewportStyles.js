@@ -1,6 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -81,7 +81,7 @@ export const placementTargetHintSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.62)}`,
   boxShadow: `0 4px 14px ${vttAlpha(VTT_COLORS.black, 0.55)}`,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.05em',
   whiteSpace: 'nowrap',
@@ -116,7 +116,7 @@ export const selectionToolbarSx = {
 export const selectionCountSx = {
   color: VTT_COLORS.gold,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 700,
   whiteSpace: 'nowrap',
 };
@@ -142,7 +142,7 @@ export const fullscreenSheetButtonSx = {
   borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.82),
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.07em',
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
 };
@@ -228,7 +228,7 @@ export const distanceSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.9),
   color: VTT_COLORS.gold,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.65rem',
+  fontSize: FONT_SIZES.sm,
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
 };
@@ -244,7 +244,7 @@ export const placementCountSx = {
   bgcolor: VTT_COLORS.gold,
   color: VTT_COLORS.ink,
   border: `1px solid ${VTT_COLORS.ink}`,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 900,
   lineHeight: '22px',
   textAlign: 'center',

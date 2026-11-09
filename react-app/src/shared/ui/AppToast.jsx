@@ -1,6 +1,6 @@
 import { Snackbar, Alert, Portal } from '@mui/material';
 import { UI_COLORS, uiAlpha } from './colors.js';
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
@@ -53,7 +53,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
             onClose={onClose}
             sx={{
               fontFamily: UI_FONTS.prose,
-              fontSize: '0.84rem',
+              fontSize: FONT_SIZES.xl,
               alignItems: 'center',
               minWidth: 240,
               maxWidth: 360,

@@ -1,7 +1,7 @@
 import { Button, MenuItem, Stack, TextField } from '@mui/material';
 import { PanelRightClose, ScrollText } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -71,7 +71,7 @@ const selectSx = {
   '& .MuiInputBase-root': {
     height: 32,
     bgcolor: vttAlpha(VTT_COLORS.overlaySurface, 0.72),
-    fontSize: '0.73rem',
+    fontSize: FONT_SIZES.md,
   },
 };
 
@@ -79,6 +79,6 @@ const buttonSx = {
   minWidth: 92,
   height: 32,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.65rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.08em',
 };

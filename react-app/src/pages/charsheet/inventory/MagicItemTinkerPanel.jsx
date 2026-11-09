@@ -26,7 +26,7 @@ import {
   setReplicatedItemCharges,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useItemsDb } from './useItemsDb.js';
 
 const sectionSx = {
@@ -38,7 +38,7 @@ const sectionSx = {
 };
 const labelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   color: UI_COLORS.goldLight,
   letterSpacing: '0.06em',
@@ -46,7 +46,7 @@ const labelSx = {
 const selectSx = {
   flex: 1,
   minWidth: 150,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   '& .MuiSelect-select': { py: 0.65 },
 };
 
@@ -189,7 +189,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     <Stack spacing={0.7} onClick={(event) => event.stopPropagation()}>
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Charge Magic Item · Bonus Action</Typography>
-        <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
           Spend a level 1+ spell slot; the replicated item regains charges equal to the slot level.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
@@ -221,7 +221,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
 
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Drain Magic Item · Bonus Action · {drainUses}/1</Typography>
-        <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
           Destroy a Common item for a level 1 slot, or an Uncommon/Rare item for a level 2 slot. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5}>
@@ -235,7 +235,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
 
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Transmute Magic Item · Magic Action · {transmuteUses}/1</Typography>
-        <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
           Transform one replicated item into a different item based on another plan you know. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>

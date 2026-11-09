@@ -15,6 +15,7 @@ import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -132,9 +133,9 @@ const moveBarSx = {
 
 const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };
 
-const moveSummarySx = { fontSize: '0.8rem', color: 'text.primary', mt: 0.25 };
+const moveSummarySx = { fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 };
 
 const hintSx = {
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   color: 'warning.main',
 };

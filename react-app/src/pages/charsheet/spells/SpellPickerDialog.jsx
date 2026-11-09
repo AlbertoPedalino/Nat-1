@@ -16,7 +16,7 @@ import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import {
   bucketCounts,
   isInWizardBook,
@@ -109,7 +109,7 @@ export function SpellPickerDialog({
       showClose
       topPad={2}
       headerRight={(
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
           {activePicker ? `${activePicker.label} - Cantrips ${activeCounts.cantrips}/${activeLimits.cantrips ?? '-'} - Spells ${activeCounts.spells}/${activeLimits.spells ?? '-'}` : 'No caster class'}
         </Typography>
       )}
@@ -124,7 +124,7 @@ export function SpellPickerDialog({
               variant={pickerClassIndex === index ? 'filled' : 'outlined'}
               color={pickerClassIndex === index ? 'primary' : 'default'}
               onClick={() => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
-              sx={{ fontFamily: UI_FONTS.display, fontSize: '0.58rem', letterSpacing: '0.06em' }}
+              sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: '0.06em' }}
             />
           ))}
         </Box>
@@ -133,10 +133,10 @@ export function SpellPickerDialog({
       {activePicker ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
           <Box sx={{ ...sheetBoxSx, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>{activePicker.note}</Typography>
-            <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
-            {activeIsWizard ? <Typography sx={{ fontSize: '0.68rem', color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
+            <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>{activePicker.note}</Typography>
+            <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
+            {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}
           </Box>
           {activeIsWizard ? (
             <ToggleButtonGroup size="small" exclusive value={pickerWizardMode} onChange={(_, next) => next && setPickerWizardMode(next)} sx={levelToggleSx}>

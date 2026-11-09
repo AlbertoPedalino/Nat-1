@@ -50,7 +50,7 @@ import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
@@ -252,7 +252,7 @@ export default function SpellEntry({
           sx={{ ...spellRowSx, mb: 0, borderRadius: open || hasFreeCasts ? '8px 8px 0 0' : 1, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
-          <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
+          <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, 0.14)} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
@@ -366,7 +366,7 @@ export default function SpellEntry({
                   <Typography
                     sx={{
                       fontFamily: UI_FONTS.display,
-                      fontSize: '0.6rem',
+                      fontSize: FONT_SIZES.xs,
                       fontWeight: 700,
                       letterSpacing: '0.08em',
                       color: RICH_TEXT_ACCENT,
@@ -378,7 +378,7 @@ export default function SpellEntry({
                   <Stack spacing={0.55} sx={{ mt: 0.45 }}>
                     {group.items.map((modifier) => (
                       <Box key={modifier.key || modifier.label}>
-                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, lineHeight: 1.2 }}>
+                        <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: 700, lineHeight: 1.2 }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.3, mt: 0.1 }}>

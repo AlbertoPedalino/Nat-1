@@ -9,6 +9,7 @@ import {
   conditionTooltipBodySx,
   conditionTooltipTitleSx,
 } from './tokenSpriteStyles.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // One condition above a piece, with its rules in a tooltip when they are known.
 // `tooltipOpen` is set only while another client presents this piece, so the
@@ -46,7 +47,7 @@ export default function ConditionTokenPill({ conditionKey, entries, tooltipOpen,
           <EntryBlocks
             entries={entries}
             spacing={0.45}
-            fontSize="0.68rem"
+            fontSize={FONT_SIZES.sm}
             headingColor={VTT_COLORS.goldSoft}
             bodyColor={VTT_COLORS.parchment}
             markerColor={VTT_COLORS.goldSoft}

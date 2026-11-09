@@ -10,6 +10,7 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { boardCardGridSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -102,7 +103,7 @@ const emptyStateSx = {
 };
 
 const emptyTextSx = {
-  fontSize: '0.78rem',
+  fontSize: FONT_SIZES.lg,
   color: 'text.secondary',
   maxWidth: 360,
 };

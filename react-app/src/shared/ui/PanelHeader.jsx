@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 
 // The title bar of a sheet panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies) and of SheetDialog: a dark bar with a gold left accent, an
@@ -20,7 +20,7 @@ export const panelBarSx = {
 
 export const panelTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.14em',
   textTransform: 'uppercase',
@@ -31,7 +31,7 @@ export const panelTitleSx = {
 // history's title): small, uppercase, quiet.
 export const captionLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -40,7 +40,7 @@ export const captionLabelSx = {
 // The smallest caption, inside a result line (a step's kind, a field name).
 export const microLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -52,7 +52,7 @@ export const microLabelSx = {
 export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider' } = {}) {
   return {
     fontFamily: UI_FONTS.display,
-    fontSize: '0.65rem',
+    fontSize: FONT_SIZES.sm,
     fontWeight: 700,
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
@@ -74,13 +74,13 @@ export const sheetBoxSx = {
 export const sheetBoxTitleSx = { ...panelTitleSx, mb: 0.4 };
 
 // The line a list or panel shows when it has nothing in it.
-export const emptyTextSx = { fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic' };
+export const emptyTextSx = { fontSize: FONT_SIZES.xl, color: 'text.secondary', fontStyle: 'italic' };
 
 // A sheet readout: a big gold number over its tiny uppercase name (AC,
 // Initiative, Speed).
 export const statValueSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '1.25rem',
+  fontSize: FONT_SIZES.title,
   fontWeight: 700,
   color: UI_COLORS.goldLight,
   lineHeight: 1,
@@ -88,7 +88,7 @@ export const statValueSx = {
 
 export const statLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.44rem',
+  fontSize: FONT_SIZES.micro,
   fontWeight: 700,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
@@ -98,7 +98,7 @@ export const statLabelSx = {
 // The name at the start of a row of values on a card (Status, Uses, Free
 // Cast).
 export const inlineMetaLabelSx = {
-  fontSize: '0.55rem',
+  fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
   fontFamily: UI_FONTS.display,
   letterSpacing: '0.08em',
@@ -108,7 +108,7 @@ export const inlineMetaLabelSx = {
 // The small uppercase label of a section inside a panel.
 export const sectionLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.5rem',
+  fontSize: FONT_SIZES.xxxs,
   fontWeight: 700,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',

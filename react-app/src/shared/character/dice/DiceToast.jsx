@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -19,7 +19,7 @@ const toastRootSx = {
 };
 
 const modeChipSx = (chip) => ({
-  height: 20, fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.06em',
+  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.06em',
   borderRadius: 1, mb: 0.3, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
@@ -50,17 +50,17 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={14} />
       </IconButton>
 
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
         {layout.label}
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
           NATURAL 1
         </Typography>
       )}
@@ -88,7 +88,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       {layout.total != null && (
         <Typography sx={{
           fontFamily: UI_FONTS.display, fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3,
-          fontSize: (layout.isCrit || layout.isFail) ? '2rem' : '1.5rem',
+          fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
           color: layout.totalColor,
         }}>
           {layout.total}
@@ -96,7 +96,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.total == null && layout.dice.length === 0 && layout.detail && (
-        <Typography sx={{ fontSize: '0.8rem', color: 'text.primary', mt: 0.2 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.2 }}>
           {layout.detail}
         </Typography>
       )}

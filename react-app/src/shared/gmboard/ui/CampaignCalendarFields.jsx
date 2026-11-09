@@ -8,6 +8,7 @@ import { SELECTOR_CONTRACTS } from './selectorContracts.js';
 import { MONTH_NAMES, formatHM, validateStart } from '../campaignTime.js';
 import { SEASON_ICONS, WEATHER_ICONS } from '../../hexcrawl/hexIcons.js';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -198,6 +199,6 @@ const dateRowSx = {
   '& > :nth-of-type(4)': { gridColumn: { xs: '1 / 3', sm: 'auto' } },
 };
 
-const errorSx = { color: 'error.main', fontSize: '0.7rem', mt: 0.5 };
+const errorSx = { color: 'error.main', fontSize: FONT_SIZES.md, mt: 0.5 };
 
-export const quickButtonSx = { minWidth: 0, px: 1, fontSize: '0.72rem', textTransform: 'none' };
+export const quickButtonSx = { minWidth: 0, px: 1, fontSize: FONT_SIZES.md, textTransform: 'none' };

@@ -18,7 +18,7 @@ import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from './generators.js';
 import { stitchImages } from './stitch.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { pillLabelSx } from './panelStyles.js';
@@ -270,19 +270,19 @@ const freshSx = { ...cardSx, borderColor: 'primary.main' };
 
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.82rem',
+  fontSize: FONT_SIZES.xl,
   color: 'primary.main',
 };
 
-const cardBlurbSx = { fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.4 };
+const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: 1.4 };
 
 const sectionSx = captionLabelSx;
 
-const creditSx = { fontSize: '0.7rem', color: 'text.secondary' };
+const creditSx = { fontSize: FONT_SIZES.md, color: 'text.secondary' };
 
-const stepsSx = { fontSize: '0.75rem', color: 'text.secondary' };
+const stepsSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary' };
 
-const openSx = { fontSize: '0.72rem' };
+const openSx = { fontSize: FONT_SIZES.md };
 
 const frameSx = {
   width: '100%',
@@ -293,5 +293,5 @@ const frameSx = {
   bgcolor: VTT_COLORS.white,
 };
 
-const errorSx = { mt: 1, fontSize: '0.75rem', color: 'error.main' };
+const errorSx = { mt: 1, fontSize: FONT_SIZES.lg, color: 'error.main' };
 

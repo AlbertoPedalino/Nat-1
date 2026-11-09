@@ -2,6 +2,7 @@ import { Box, TextField, Typography } from '@mui/material';
 import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/boardOptions.js';
 import SelectorGroup from '../../gmboard/ui/SelectorGroup.jsx';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
@@ -73,4 +74,4 @@ const rowSx = {
 
 const numberSx = { width: 92, flexShrink: 0 };
 
-const hintSx = { fontSize: '0.66rem', color: 'text.secondary', lineHeight: 1.35, mt: 0.75 };
+const hintSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', lineHeight: 1.35, mt: 0.75 };

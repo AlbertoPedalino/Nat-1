@@ -30,6 +30,7 @@ import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { sectionLabelSx, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -114,17 +115,17 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                 <Icon size={11} color={v.color} />
-                <Typography sx={{ fontSize: '0.5rem', color: v.color, fontWeight: 700, letterSpacing: '0.06em' }}>{v.label}</Typography>
+                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: 700, letterSpacing: '0.06em' }}>{v.label}</Typography>
               </Box>
             );
           })()}
           {lastInitiativeRoll && (
-            <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
+            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
               Last: <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.goldLight }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
             </Typography>
           )}
           {initiativeMessage && (
-            <Typography variant="caption" sx={{ fontSize: '0.48rem', color: UI_COLORS.success, textAlign: 'center', lineHeight: 1.15, maxWidth: 90, wordBreak: 'break-word' }}>
+            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.xxxs, color: UI_COLORS.success, textAlign: 'center', lineHeight: 1.15, maxWidth: 90, wordBreak: 'break-word' }}>
               {initiativeMessage}
             </Typography>
           )}

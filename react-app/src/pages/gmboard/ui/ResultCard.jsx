@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
@@ -52,7 +52,7 @@ export function ResultLine({ children }) {
 
 // Small secondary text (the dice, a table's notation).
 export const resultDetailSx = {
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   color: 'text.secondary',
 };
 
@@ -74,7 +74,7 @@ const headerBandSx = {
 
 const cardTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.78rem',
+  fontSize: FONT_SIZES.lg,
   letterSpacing: '0.04em',
   color: 'primary.main',
 };
@@ -88,7 +88,7 @@ const slotSx = {
 };
 
 const lineSx = {
-  fontSize: '0.76rem',
+  fontSize: FONT_SIZES.lg,
   color: 'text.primary',
   mt: 0.3,
 };

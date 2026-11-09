@@ -6,7 +6,7 @@ import {
 import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -233,7 +233,7 @@ const numberSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
   color: VTT_COLORS.gold,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   lineHeight: 1.4,
 };
 
@@ -269,7 +269,7 @@ const collapsedSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
   boxShadow: 6,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.65rem',
+  fontSize: FONT_SIZES.sm,
   letterSpacing: '0.08em',
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
 };

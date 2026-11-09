@@ -3,7 +3,7 @@ import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { byName } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
@@ -92,7 +92,7 @@ function StatField({ label, value, placeholder, onCommit }) {
 
 const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' };
 const titleSx = {
-  fontSize: '0.6rem',
+  fontSize: FONT_SIZES.xs,
   color: UI_COLORS.goldLight,
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
@@ -101,9 +101,9 @@ const titleSx = {
 };
 const fieldSx = {
   maxWidth: 280,
-  '& .MuiInputBase-root': { fontSize: '0.75rem' },
+  '& .MuiInputBase-root': { fontSize: FONT_SIZES.lg },
 };
 const statFieldSx = {
   width: 72,
-  '& .MuiInputBase-root': { fontSize: '0.75rem' },
+  '& .MuiInputBase-root': { fontSize: FONT_SIZES.lg },
 };

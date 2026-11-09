@@ -15,7 +15,7 @@ import {
 } from '../../../shared/vtt/sheets/sheetFrame.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { clamp } from '../../../shared/numbers.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -337,7 +337,7 @@ const headerSx = {
 const titleSx = {
   color: VTT_COLORS.gold,
   fontFamily: UI_FONTS.display,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 700,
   letterSpacing: '0.09em',
   textTransform: 'uppercase',
@@ -353,7 +353,7 @@ const selectSx = {
   bgcolor: VTT_COLORS.selectSurface,
   color: VTT_COLORS.selectText,
   fontFamily: 'inherit',
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   cursor: 'pointer',
   '&:focus': { borderColor: vttAlpha(VTT_COLORS.gold, 0.72) },
   '& option': { bgcolor: VTT_COLORS.selectSurface, color: VTT_COLORS.selectText },

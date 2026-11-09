@@ -1,7 +1,7 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from './colors.js';
-import { UI_FONTS } from './fonts.js';
+import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
@@ -32,7 +32,7 @@ const titleSx = {
 const titleTextSx = {
   fontFamily: UI_FONTS.display,
   fontWeight: 700,
-  fontSize: '0.74rem',
+  fontSize: FONT_SIZES.md,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   lineHeight: 1.3,
@@ -41,7 +41,7 @@ const titleTextSx = {
 // The title of a section inside a dialog's content.
 export const dialogSectionTitleSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 800,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -67,7 +67,7 @@ const actionsSx = {
   // Small Cinzel buttons matching the sheet's button scale.
   '& .MuiButton-root': {
     fontFamily: UI_FONTS.display,
-    fontSize: '0.62rem',
+    fontSize: FONT_SIZES.xs,
     fontWeight: 700,
     letterSpacing: '0.08em',
     textTransform: 'uppercase',

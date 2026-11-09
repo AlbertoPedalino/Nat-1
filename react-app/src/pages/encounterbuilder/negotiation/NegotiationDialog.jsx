@@ -13,7 +13,7 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
@@ -221,12 +221,12 @@ const attitudeButtonSx = {
   justifyContent: 'center',
   gap: { xs: 1, sm: 0.15 },
   fontFamily: UI_FONTS.display,
-  fontSize: '0.68rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 800,
   letterSpacing: '0.05em',
   '& small': {
     fontFamily: UI_FONTS.mono,
-    fontSize: '0.62rem',
+    fontSize: FONT_SIZES.xs,
     fontWeight: 600,
     opacity: 0.8,
   },
@@ -250,7 +250,7 @@ const prominentMeterSx = {
 
 const meterLabelSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.69rem',
+  fontSize: FONT_SIZES.sm,
   fontWeight: 800,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -258,14 +258,14 @@ const meterLabelSx = {
 
 const meterValueSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '1.55rem',
+  fontSize: FONT_SIZES.heading,
   fontWeight: 900,
   lineHeight: 1,
 };
 
 const meterMaxSx = {
   ml: 0.2,
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   color: 'text.secondary',
 };
 
@@ -276,7 +276,7 @@ const currentStateSx = {
 
 const currentResultSx = {
   mt: 0.2,
-  fontSize: '0.86rem',
+  fontSize: FONT_SIZES.xxl,
   fontWeight: 700,
   lineHeight: 1.35,
 };
@@ -290,7 +290,7 @@ const finalResultSx = {
 
 const finalEyebrowSx = {
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 800,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
@@ -300,7 +300,7 @@ const finalEyebrowSx = {
 const finalResultTextSx = {
   my: 0.35,
   fontFamily: UI_FONTS.display,
-  fontSize: { xs: '1rem', sm: '1.1rem' },
+  fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.lead },
   fontWeight: 800,
   lineHeight: 1.35,
 };
@@ -320,12 +320,12 @@ const actionButtonSx = {
   flexDirection: 'column',
   gap: 0.25,
   fontFamily: UI_FONTS.display,
-  fontSize: { xs: '0.61rem', sm: '0.66rem' },
+  fontSize: { xs: FONT_SIZES.xs, sm: FONT_SIZES.sm },
   fontWeight: 800,
   lineHeight: 1.25,
   '& small': {
     fontFamily: UI_FONTS.mono,
-    fontSize: { xs: '0.54rem', sm: '0.58rem' },
+    fontSize: { xs: FONT_SIZES.xxs, sm: FONT_SIZES.xxs },
     fontWeight: 600,
     opacity: 0.75,
     lineHeight: 1.25,

@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material';
-import { UI_FONTS } from '../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
@@ -106,12 +106,12 @@ export const theme = createTheme({
   typography: {
     fontFamily: UI_FONTS.body,
     h1: {
-      fontSize: '2rem',
+      fontSize: FONT_SIZES.hero,
       fontWeight: 700,
       letterSpacing: 0,
     },
     h2: {
-      fontSize: '1.25rem',
+      fontSize: FONT_SIZES.title,
       fontWeight: 700,
       letterSpacing: 0,
     },
@@ -153,7 +153,7 @@ export const theme = createTheme({
           minHeight: 0,
           minWidth: 0,
           padding: '6px 10px',
-          fontSize: '0.62rem',
+          fontSize: FONT_SIZES.xs,
           lineHeight: 1.2,
         },
       },

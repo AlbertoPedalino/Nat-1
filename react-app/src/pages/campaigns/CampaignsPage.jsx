@@ -26,7 +26,7 @@ import { resolveCampaignsPageState } from './campaignsPageState.js';
 import { ensureSheetRuntimeAdapters } from '../../shared/character/sheet/sheetRuntimeAdapters.js';
 import { signed } from '../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
@@ -316,7 +316,7 @@ const headerSx = { display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.5 };
 const headerIconSx = { color: 'primary.main', flexShrink: 0 };
 const titleSx = { fontFamily: UI_FONTS.display, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', fontWeight: 800, color: 'primary.main', letterSpacing: '0.06em' };
 
-const msgSx = { color: 'text.secondary', fontSize: '0.9rem', maxWidth: 520 };
+const msgSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxl, maxWidth: 520 };
 
 const setupStackSx = { mb: 2.5 };
 const setupPanelSx = { flex: 1, minWidth: 0, p: 1.5, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
@@ -327,10 +327,10 @@ const emptyPanelSx = { textAlign: 'center', p: 3, mb: 2, border: '1px dashed', b
 const campaignCardSx = { p: { xs: 1.25, sm: 1.75 }, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
 const campaignHeaderSx = { display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' };
 const campaignTitleRowSx = { minWidth: 0, flex: '1 1 320px', display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' };
-const campaignNameSx = { minWidth: 0, fontFamily: UI_FONTS.display, fontSize: '1rem', fontWeight: 700, color: 'text.primary', overflowWrap: 'anywhere' };
+const campaignNameSx = { minWidth: 0, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.body, fontWeight: 700, color: 'text.primary', overflowWrap: 'anywhere' };
 const campaignActionsSx = { ml: { xs: 0, sm: 'auto' }, display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 };
 const campaignDividerSx = { my: 1.25 };
-const smallChipSx = { height: 22, fontSize: '0.62rem', flexShrink: 0 };
+const smallChipSx = { height: 22, fontSize: FONT_SIZES.xs, flexShrink: 0 };
 const inviteChipSx = { ...smallChipSx, cursor: 'pointer', '&:focus-visible': focusVisibleSx };
 const dangerActionSx = { color: 'error.main', flexShrink: 0, '&:focus-visible': focusVisibleSx };
 
@@ -366,11 +366,11 @@ const characterOpenButtonSx = {
 const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboard.badge.cloud', flexShrink: 0, mt: 0.25 });
 const characterInfoSx = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' };
 const characterNameRowSx = { display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flexWrap: 'wrap' };
-const characterNameSx = { fontFamily: UI_FONTS.display, fontSize: '0.85rem', color: 'text.primary', overflowWrap: 'anywhere' };
-const metaSx = { display: 'block', fontSize: '0.72rem', color: 'text.secondary' };
-const readOnlyChipSx = { flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: '0.5rem', letterSpacing: '0.08em', color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
+const characterNameSx = { fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
+const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
+const readOnlyChipSx = { flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, letterSpacing: '0.08em', color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.4 };
-const statSx = { fontSize: '0.68rem', color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
+const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
 const hpStatSx = { color: 'error.main' };
 const acStatSx = { color: 'primary.main' };
 const ppStatSx = { color: 'success.main' };

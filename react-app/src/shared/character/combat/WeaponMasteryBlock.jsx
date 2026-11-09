@@ -9,6 +9,7 @@ import {
   loadMasteryEntries,
 } from './weaponMastery.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 
 // First mastery code stripped of its source suffix ("Graze|XPHB" -> "Graze").
 // Accepts the raw item.mastery array, a single tagged string, or a clean name.
@@ -46,7 +47,7 @@ export function WeaponMasteryBlock({ mastery, variant = 'tag', fontSize, sx }) {
       {variant === 'title' ? (
         <Typography variant="h2" sx={{ color: RICH_TEXT_ACCENT }}>{name}</Typography>
       ) : (
-        <Typography sx={{ fontSize: '0.66rem', color: RICH_TEXT_ACCENT, fontWeight: 700 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.sm, color: RICH_TEXT_ACCENT, fontWeight: 700 }}>
           Weapon Mastery — {name}
         </Typography>
       )}

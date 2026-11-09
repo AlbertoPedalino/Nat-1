@@ -22,7 +22,7 @@ import {
   inventorySectionSx,
 } from './inventoryControls.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -47,12 +47,12 @@ function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
       containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.gold } }}
-      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: '0.7rem', color: 'text.secondary' }}
+      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (
         <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
           <ItemNameIcon item={item} />
-          <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
+          <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{item.name}</Typography>
           <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
         </Box>
       )}
@@ -160,7 +160,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
 
           <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.6 }} />
 
-          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
+          <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
             {deferredSearch !== search
               ? 'Updating results...'
               : `${searchResults.length} of ${itemsDb.length} items`}
@@ -176,7 +176,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
+              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
               + Add
             </Button>
           </Box>

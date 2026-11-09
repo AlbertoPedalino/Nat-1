@@ -22,6 +22,7 @@ import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetDocument } from './state/useSheetDocument.js';
 import { useSheetEditors } from './state/useSheetEditors.js';
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
 
 const noopEffect = () => {};
 
@@ -109,7 +110,7 @@ export default function CharacterSheet({
 
   if (!C || !sheet) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary', fontSize: '1.1rem' }}>
+      <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary', fontSize: FONT_SIZES.lead }}>
         No character found. Go back to the builder to create a character.
       </Box>
     );

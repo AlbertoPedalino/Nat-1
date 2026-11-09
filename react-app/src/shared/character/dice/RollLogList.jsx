@@ -5,7 +5,7 @@ import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
 import { formatClockTime } from '../../ui/dateFormat.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -79,8 +79,8 @@ const rowSx = {
 };
 
 const labelSx = {
-  fontFamily: UI_FONTS.display, fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.04em', color: 'text.primary', minWidth: 0, flex: 1,
+  fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, fontWeight: 700, letterSpacing: '0.04em', color: 'text.primary', minWidth: 0, flex: 1,
 };
-const tagSx = { fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', fontFamily: UI_FONTS.display };
-const timeSx = { fontSize: '0.56rem', color: 'text.secondary', flexShrink: 0 };
-const detailSx = { fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1.35 };
+const tagSx = { fontSize: FONT_SIZES.xxxs, fontWeight: 800, letterSpacing: '0.06em', fontFamily: UI_FONTS.display };
+const timeSx = { fontSize: FONT_SIZES.xxs, color: 'text.secondary', flexShrink: 0 };
+const detailSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.35 };

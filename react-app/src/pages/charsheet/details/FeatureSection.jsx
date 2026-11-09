@@ -4,7 +4,7 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 
@@ -27,7 +27,7 @@ export function FeatureSection({ title, color, features }) {
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.goldLight, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.2), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.goldLight, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.2), pb: 0.25, mb: 0.35 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (
@@ -69,10 +69,10 @@ function FeatureItem({ feature, tone }) {
           cursor: 'pointer',
           '&:hover': { bgcolor: UI_COLORS.surfaceRaised },
         }}>
-        <Typography sx={{ fontSize: '0.8125rem', color: 'text.primary', fontWeight: 600 }}>{feature.name}</Typography>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: 600 }}>{feature.name}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {feature.source && <Typography sx={{ fontSize: '0.56rem', color: isSubclass ? subclassTone : 'text.secondary', fontStyle: 'italic' }}>{feature.source}</Typography>}
-          {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: '0.44rem', height: 16, color: 'text.secondary' }} />}
+          {feature.source && <Typography sx={{ fontSize: FONT_SIZES.xxs, color: isSubclass ? subclassTone : 'text.secondary', fontStyle: 'italic' }}>{feature.source}</Typography>}
+          {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: FONT_SIZES.micro, height: 16, color: 'text.secondary' }} />}
         </Box>
       </Box>
       <CollapsibleBody open={open}>

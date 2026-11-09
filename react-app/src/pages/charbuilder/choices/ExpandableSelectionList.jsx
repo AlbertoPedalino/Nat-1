@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -67,7 +68,7 @@ export default function ExpandableSelectionList({
                           primary={(
                             <Typography
                               noWrap
-                              sx={{ color: 'text.primary', fontSize: '0.84rem', fontWeight: 500 }}
+                              sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}
                             >
                               {option.label}
                             </Typography>
@@ -75,7 +76,7 @@ export default function ExpandableSelectionList({
                           secondary={option.secondary || null}
                           slotProps={{ secondary: {
                             noWrap: true,
-                            sx: { mt: 0.15, fontSize: '0.72rem' },
+                            sx: { mt: 0.15, fontSize: FONT_SIZES.md },
                           } }}
                         />
                       </ListItemButton>

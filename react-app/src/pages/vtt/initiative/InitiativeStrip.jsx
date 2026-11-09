@@ -5,7 +5,7 @@ import {
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 
 // The turn order over the battle map. What it lists is decided by the caller:
@@ -225,7 +225,7 @@ const roundSx = {
   px: 0.75,
   color: 'gmboard.vtt.gold',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.62rem',
+  fontSize: FONT_SIZES.xs,
   fontWeight: 700,
   letterSpacing: '0.06em',
   whiteSpace: 'nowrap',
@@ -310,7 +310,7 @@ const avatarSx = {
   placeItems: 'center',
   border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
   color: VTT_COLORS.parchment,
-  fontSize: '0.7rem',
+  fontSize: FONT_SIZES.md,
   fontWeight: 700,
 };
 
@@ -329,7 +329,7 @@ const nameSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.72rem',
+  fontSize: FONT_SIZES.md,
   lineHeight: 1.2,
 };
 

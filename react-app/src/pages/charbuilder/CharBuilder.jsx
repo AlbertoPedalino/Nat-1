@@ -31,12 +31,13 @@ import SpeciesStep from './steps/SpeciesStep.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
     <Stack direction="row" spacing={0.65} sx={{ alignItems: 'center', minWidth: 0 }}>
-      <Chip size="small" label={index + 1} sx={{ height: 18, fontSize: '0.56rem' }} />
+      <Chip size="small" label={index + 1} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
       <Icon size={14} />
       <span>{step.label}</span>
     </Stack>
@@ -127,8 +128,8 @@ export default function CharBuilder() {
             ) : null}
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={16} />
-              <Typography variant="h2" sx={{ fontSize: '0.86rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'primary.main' }}>{activeStep.label}</Typography>
-              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: '0.54rem' }} />
+              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.xxl, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'primary.main' }}>{activeStep.label}</Typography>
+              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
             </Stack>
 
             <ActiveStep
@@ -172,7 +173,7 @@ export default function CharBuilder() {
           </Box>
         </Box>
 
-        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.4, textAlign: 'center', fontSize: '0.58rem' }}>
+        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.4, textAlign: 'center', fontSize: FONT_SIZES.xxs }}>
           Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
         </Typography>
       </Box>

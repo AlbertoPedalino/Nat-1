@@ -5,6 +5,7 @@ import HitDiceSpendControl from './HitDiceSpendControl.jsx';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/resources/restResources.js';
 import { clamp } from '../../../shared/numbers.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // The Short Rest dialog (Hit Dice to spend, per pool) and the Long Rest
 // confirmation. `rest` is the state and handlers from useRests.
@@ -30,10 +31,10 @@ export default function RestDialogs({ C, sheet, rest }) {
           </>
         )}
       >
-        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.secondary', mb: 2 }}>
           Optionally spend Hit Dice to recover HP. Each die adds CON mod ({conMod}). Resources that recharge on a Short Rest will still recover even if you spend no Hit Dice.
         </Typography>
-        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mb: 1 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', mb: 1 }}>
           Available: {totalHitDiceRemaining} HD
         </Typography>
         <Stack spacing={1.25}>
@@ -50,7 +51,7 @@ export default function RestDialogs({ C, sheet, rest }) {
             );
           })}
         </Stack>
-        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'center', mt: 1.25 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'center', mt: 1.25 }}>
           {totalHitDiceToSpend > 0 ? `Spending ${totalHitDiceToSpend} HD` : 'No Hit Dice will be spent'}
         </Typography>
       </SheetDialog>
@@ -67,7 +68,7 @@ export default function RestDialogs({ C, sheet, rest }) {
           </>
         )}
       >
-        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.secondary' }}>
           This will restore all HP, Hit Dice, spell slots, and class resources.
         </Typography>
       </SheetDialog>

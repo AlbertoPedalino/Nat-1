@@ -23,7 +23,7 @@ import { isItemCarried, itemQty as qty } from '../../../shared/character/invento
 import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 
@@ -34,7 +34,7 @@ const itemStateChipBaseSx = {
   border: 1,
   borderRadius: '3px',
   fontFamily: UI_FONTS.display,
-  fontSize: '0.58rem',
+  fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
   lineHeight: 1.75,
   letterSpacing: 0,
@@ -49,7 +49,7 @@ function ItemTagsRow({ item, character }) {
   if (!item.custom && tags.length === 0) return null;
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', mt: '3px' }}>
-      {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
+      {item.custom ? <Box component="span" sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>[custom]</Box> : null}
       {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />)}
     </Box>
   );
@@ -71,7 +71,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   return (
     <ExpandableCard
       containerSx={{ mb: '4px', overflow: 'hidden' }}
-      detailsSx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.ink, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: '0 0 8px 8px', px: '10px', py: '6px', mt: 0, mb: 0 }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.ink, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: '0 0 8px 8px', px: '10px', py: '6px', mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -89,16 +89,16 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
+              <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
-              <Typography sx={{ fontSize: '0.56rem', color: UI_COLORS.textMuted, mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Typography sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.textMuted, mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Archive size={10} /> Owned, not carried
               </Typography>
             ) : null}
             {penaltyMsg && (
-              <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <AlertTriangle size={10} /> {penaltyMsg}
               </Typography>
             )}
@@ -122,7 +122,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: '3px', color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: '3px', color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -162,7 +162,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -184,7 +184,7 @@ function ItemFlagButton({ def, active, onClick }) {
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
       sx={{
-        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: UI_FONTS.display, fontSize: '0.58rem',
+        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs,
         ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
@@ -225,7 +225,7 @@ function SlotBtn({ active, onClick, label }) {
         color: active ? UI_COLORS.goldLight : 'text.secondary',
         bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.14) : 'transparent',
         fontFamily: UI_FONTS.display,
-        fontSize: '0.48rem',
+        fontSize: FONT_SIZES.xxxs,
         fontWeight: 700,
         letterSpacing: '0.04em',
         '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold },
@@ -267,7 +267,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: '3px', color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: '3px', color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>
