@@ -28,7 +28,7 @@ function TomeConsumePanel({ item, onConsume }) {
   const bonus = extractTomeBonus(item);
   if (!bonus) return null;
   return (
-    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ flex: 1, fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.accentText }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
@@ -46,8 +46,8 @@ function AbilityChoicePanel({ item, onPick }) {
   const stored = (item.abilityChoice && typeof item.abilityChoice === 'object') ? item.abilityChoice : {};
 
   return (
-    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.3 }}>
+    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
         Ability Choice
       </Typography>
       {groups.map((group, groupIdx) => {
@@ -65,17 +65,17 @@ function AbilityChoicePanel({ item, onPick }) {
         };
 
         return (
-          <Box key={groupIdx} sx={{ mb: 0.4 }}>
+          <Box key={groupIdx} sx={{ mb: 0.5 }}>
             <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', mb: 0.25 }}>
               Pick {count} (+{amount} each)
             </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
               {from.map((abil) => {
                 const isOn = current.includes(abil);
                 return (
                   <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
                     onClick={() => togglePick(abil)}
-                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: FONT_SIZES.xs, ...TEXT_STYLES.figure,
+                    sx={{ minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, ...TEXT_STYLES.figure,
                       ...(isOn ? { bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.fill), color: UI_COLORS.accentText, borderColor: UI_COLORS.accentText } : { color: 'text.secondary' }) }}>
                     {ABILITY_ABBREVIATIONS[abil] || abil.toUpperCase()}
                   </Button>

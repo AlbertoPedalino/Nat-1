@@ -67,7 +67,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
   const entryKey = `${slotKey}_entry`;
   const listLabel = feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`;
   return (
-    <Stack spacing={0.6}>
+    <Stack spacing={0.5}>
       <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 700 }}>
         {listLabel}
       </Typography>

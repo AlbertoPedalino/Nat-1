@@ -26,7 +26,7 @@ const chipSx = {
   alignItems: 'center',
   gap: 0.5,
   px: 0.5,
-  py: 0.15,
+  py: 0.25,
   whiteSpace: 'nowrap',
 };
 
@@ -94,7 +94,7 @@ export default function HPBlock({
     />
   );
 
-  const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.3 };
+  const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.25 };
 
   return (
     <Box sx={{ ...sheetBoxSx, width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }}>
@@ -104,7 +104,7 @@ export default function HPBlock({
         </Typography>
 
         {dead && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.tint) }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.25, py: 0.25, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.tint) }}>
             <Skull size={12} style={{ color: UI_COLORS.dangerStrong }} />
             <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerStrong }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
@@ -205,7 +205,7 @@ export default function HPBlock({
                 Death Saves
               </Typography>
               <Tooltip title="Click to set successes">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                   {Array.from({ length: 3 }, (_, i) => (
                     <Box
                       key={`s${i}`}
@@ -216,7 +216,7 @@ export default function HPBlock({
                 </Box>
               </Tooltip>
               <Tooltip title="Click to set failures">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                   {Array.from({ length: 3 }, (_, i) => (
                     <Box
                       key={`f${i}`}

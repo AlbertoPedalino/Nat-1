@@ -24,14 +24,14 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
   return (
     <ExpandableCard
       containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? UI_COLORS.success : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? OPACITY.strong : 1, '&:hover': { borderColor: selected ? UI_COLORS.success : 'divider' } }}
-      bodySx={{ px: '9px', pt: '2px', pb: '8px' }}
+      bodySx={{ px: 1.25, pt: 0.25, pb: 1 }}
       body={<SpellReferenceBody spell={spell} />}
       header={({ toggle }) => (
         <Box
           onClick={toggle}
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : UI_COLORS.surfaceHeader } }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.75, cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : UI_COLORS.surfaceHeader } }}
         >
-          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.4 }} />
+          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.5 }} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoGranted ? (
             sourceInfo

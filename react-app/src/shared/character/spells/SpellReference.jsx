@@ -33,7 +33,7 @@ export function SpellMetaGrid({ spell, fontSize = FONT_SIZES.sm, sx }) {
   const segments = getSpellMetaSegments(spell);
   if (!segments.length) return null;
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '8px', rowGap: '2px', fontSize, ...sx }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 1, rowGap: 0.25, fontSize, ...sx }}>
       {segments.map((segment) => (
         <Fragment key={segment.label}>
           <Box sx={META_LABEL_SX}>{segment.label}</Box>
@@ -80,7 +80,7 @@ export function SpellMiniTags({ spell, sx }) {
   ].filter(Boolean);
   if (!tags.length) return null;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0, ...sx }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0, ...sx }}>
       {tags.map((tag) => (
         <MiniBadge key={tag.label} label={tag.label} color={tag.color} bg={tag.bg} title={tag.title} />
       ))}
@@ -113,7 +113,7 @@ export function SpellSelectButton({ selected, disabled, onToggle, addColor = 'pr
       color={selected ? 'error' : addColor}
       disabled={disabled}
       onClick={(event) => { event.stopPropagation(); onToggle(); }}
-      sx={{ flexShrink: 0, minWidth: 56, px: '8px', py: '1px', fontSize: FONT_SIZES.xs, lineHeight: 1.5, ...sx }}
+      sx={{ flexShrink: 0, minWidth: 56, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: 1.5, ...sx }}
     >
       {selected ? 'Remove' : 'Add'}
     </Button>
@@ -129,7 +129,7 @@ export function SpellReferenceBody({ spell, fontSize = FONT_SIZES.lg }) {
   const higher = spell?.higherLevelEntries || spell?.entriesHigherLevel;
   return (
     <>
-      <SpellMetaGrid spell={spell} sx={{ mb: '6px' }} />
+      <SpellMetaGrid spell={spell} sx={{ mb: 0.75 }} />
       <EntryBlocks entries={entries} fontSize={fontSize} emptyText="" />
       <HigherLevelBlock entries={higher} fontSize={fontSize} />
     </>

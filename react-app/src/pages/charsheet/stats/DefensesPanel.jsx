@@ -22,7 +22,7 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
             size="small"
             label={`${d.kind} ${d.type}${d.source ? ` · ${d.source}` : ''}`}
             variant="outlined"
-            sx={{ fontSize: FONT_SIZES.xxxs, m: 0.15, ...tint }}
+            sx={{ fontSize: FONT_SIZES.xxxs, m: 0.25, ...tint }}
           />
         );
       })}

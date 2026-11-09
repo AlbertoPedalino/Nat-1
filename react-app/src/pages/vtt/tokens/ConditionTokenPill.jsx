@@ -46,7 +46,7 @@ export default function ConditionTokenPill({ conditionKey, entries, tooltipOpen,
           <Typography sx={conditionTooltipTitleSx}>{label}</Typography>
           <EntryBlocks
             entries={entries}
-            spacing={0.45}
+            spacing={0.5}
             fontSize={FONT_SIZES.sm}
             headingColor={VTT_COLORS.accent}
             bodyColor={VTT_COLORS.text}

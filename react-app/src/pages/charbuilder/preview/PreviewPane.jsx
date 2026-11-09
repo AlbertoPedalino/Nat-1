@@ -60,7 +60,7 @@ function PreviewHeader({ character, hp }) {
   return (
     <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line) }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.4} sx={{ minWidth: 0 }}>
+        <Stack spacing={0.5} sx={{ minWidth: 0 }}>
           <Typography sx={{ ...SECTION_HEADER_SX, color: 'primary.main' }}>Preview</Typography>
           <Typography
             variant="h2"
@@ -78,11 +78,11 @@ function PreviewHeader({ character, hp }) {
 
 function AbilityScoreGrid({ scores }) {
   return (
-    <Grid container spacing={0.6}>
+    <Grid container spacing={0.5}>
       {ABILITIES.map((stat) => (
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
-            <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
+            <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 } }}>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.sm }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
@@ -103,7 +103,7 @@ function AbilityScoreGrid({ scores }) {
 function LevelGroup({ level, classFeatures, subFeatures }) {
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
         <Chip
           size="small"
@@ -161,7 +161,7 @@ function ProficiencySection({ sections }) {
   if (!sections.length) return null;
   return (
     <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages" tone={PROFICIENCY_TONE}>
-      <Stack spacing={0.85} sx={{ minWidth: 0 }}>
+      <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
             <Typography
@@ -220,7 +220,7 @@ function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures,
   return (
     <PreviewSection icon={Icon} title={title} subtitle={subtitle} tone={SOURCE_COLOR.class} emptyText="No class features yet.">
       {levels.length ? (
-        <Stack spacing={0.85} sx={{ minWidth: 0 }}>
+        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
           {levels.map((lv) => (
             <LevelGroup
               key={`lvg-${lv}`}
@@ -327,7 +327,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
           emptyText="No species description yet."
         >
           {hasDescriptionEntries(species?.entries) ? (
-            <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               <EntryAccordions source="species" entries={species.entries} />
             </Stack>
           ) : null}
@@ -341,7 +341,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
           emptyText="No background description yet."
         >
           {hasDescriptionEntries(background?.entries) ? (
-            <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               <EntryAccordions source="background" entries={background.entries} />
             </Stack>
           ) : null}
@@ -349,7 +349,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
 
         {previewFeats.length ? (
           <PreviewSection icon={Layers} title="Feats" tone={SOURCE_COLOR.feat}>
-            <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               {previewFeats.map((feat, index) => (
                 <PreviewFeat key={`${matchKey(feat.name)}-${index}`} feat={feat} />
               ))}

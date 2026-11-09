@@ -210,7 +210,7 @@ const stripSx = {
   ...SURFACES.map,
   borderRadius: 1,
   px: 0.5,
-  py: 0.375,
+  py: 0.5,
   minWidth: 0,
   maxWidth: '100%',
   boxShadow: UI_SHADOWS.float,

@@ -66,7 +66,7 @@ function AtmosphereOption({ type, selected, onSelect }) {
         justifyContent: 'flex-start',
         gap: 0.75,
         px: 1,
-        py: 0.7,
+        py: 0.75,
         borderRadius: (theme) => `${theme.shape.borderRadius * 0.875}px !important`,
         color: VTT_COLORS.textSecondary,
         textTransform: 'none',
@@ -100,7 +100,7 @@ export function AtmospherePicker({ value, onSelect }) {
   ));
 
   return (
-    <Stack spacing={0.85} role="group" aria-label="Atmosphere">
+    <Stack spacing={0.75} role="group" aria-label="Atmosphere">
       <TextField
         size="small"
         type="search"
@@ -110,7 +110,7 @@ export function AtmospherePicker({ value, onSelect }) {
         slotProps={{ htmlInput: { 'aria-label': 'Search atmospheres' } }}
         autoFocus
       />
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 0.55 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 0.5 }}>
         {visiblePresets.map((preset) => (
           <AtmosphereOption
             key={preset.value}

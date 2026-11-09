@@ -62,7 +62,7 @@ export default function RoomCard({ room }) {
       >
         {loot ? <ResultLine>{loot}</ResultLine> : null}
         {room.lootDc ? (
-          <Stack direction="row" spacing={0.4} sx={{ alignItems: 'center', mt: 0.3 }}>
+          <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 0.25 }}>
             <Lock size={11} color={theme.palette.text.secondary} />
             <Typography sx={dcSx}>DC to find it: {room.lootDc.sum}</Typography>
           </Stack>

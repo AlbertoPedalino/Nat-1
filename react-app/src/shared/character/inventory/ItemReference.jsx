@@ -16,7 +16,7 @@ export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, sx }) {
   const hasEntries = Array.isArray(item?.entries) && item.entries.length > 0;
   return (
     <Box sx={sx}>
-      <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
+      <ItemPropertyTable item={item} sx={{ mb: hasEntries ? 0.75 : 0 }} />
       {hasEntries ? (
         <EntryBlocks
           entries={item.entries}
@@ -37,9 +37,9 @@ export function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
   const [qty, setQty] = useState(1);
   const clampQty = (value) => clampInt(value, 1, max, 1);
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.35, flexShrink: 0, ...sx }} onClick={(event) => event.stopPropagation()}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, ...sx }} onClick={(event) => event.stopPropagation()}>
       <CountStepper value={qty} size={17} onStep={(delta) => setQty((value) => clampQty(value + delta))} />
-      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: '8px', py: '1px', fontSize: FONT_SIZES.xs, lineHeight: 1.5 }}>Add</Button>
+      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: 1.5 }}>Add</Button>
     </Box>
   );
 }

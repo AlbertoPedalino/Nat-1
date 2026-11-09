@@ -30,8 +30,8 @@ export function actionButtonToneSx(color) {
 export function goldToggleSx(active) {
   return {
     minHeight: 0,
-    px: '10px',
-    py: '3px',
+    px: 1.25,
+    py: 0.5,
     border: 1,
     borderColor: active ? UI_COLORS.accent : 'divider',
     borderRadius: 1,

@@ -49,10 +49,10 @@ function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
       containerSx={{ ...SURFACES.panel, flexShrink: 0, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.accent } }}
-      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
+      detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (
-        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
+        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.75, cursor: 'pointer' }}>
           <ItemNameIcon item={item} />
           <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{item.name}</Typography>
           <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
@@ -67,7 +67,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   const { visible, listProps } = page;
 
   return (
-    <Box {...listProps} sx={{ ...SURFACES.inset, maxHeight: 320, overflowY: 'auto', mb: 0.75, p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <Box {...listProps} sx={{ ...SURFACES.inset, maxHeight: 320, overflowY: 'auto', mb: 0.75, p: 0.25, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
       {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
@@ -160,16 +160,16 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
 
           <InventoryFilterButtons value={filter} onChange={setFilter} />
 
-          <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.6 }} />
+          <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.5 }} />
 
-          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm, mb: 0.3 }}>
+          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm, mb: 0.25 }}>
             {deferredSearch !== search
               ? 'Updating results...'
               : `${searchResults.length} of ${itemsDb.length} items`}
           </Typography>
           <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={onAddItem} resetKey={searchResetKey} />
 
-          <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
             <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
               sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
@@ -178,7 +178,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ ...SURFACES.panel, px: '14px', color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
+              sx={{ ...SURFACES.panel, px: 1.75, color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
               + Add
             </Button>
           </Box>

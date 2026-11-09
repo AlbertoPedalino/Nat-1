@@ -24,12 +24,12 @@ export function FeatureSection({ title, color, features }) {
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.info, OPACITY.fill) }), pb: 0.25, mb: 0.4 }}>
+      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.info, OPACITY.fill) }), pb: 0.25, mb: 0.5 }}>
         {title}
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade), pb: 0.25, mb: 0.25 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (
@@ -63,8 +63,8 @@ function FeatureItem({ feature, tone }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: '9px',
-          py: '6px',
+          px: 1.25,
+          py: 0.75,
           cursor: 'pointer',
           '&:hover': { bgcolor: UI_COLORS.surfaceRaised },
         }}>
@@ -76,7 +76,7 @@ function FeatureItem({ feature, tone }) {
       </Box>
       <CollapsibleBody open={open}>
         {feature.entries ? (
-          <Box sx={{ px: '12px', py: '8px', borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{ px: 1.5, py: 1, borderTop: 1, borderColor: 'divider' }}>
             <EntryBlocks entries={feature.entries} emptyText="" />
           </Box>
         ) : null}

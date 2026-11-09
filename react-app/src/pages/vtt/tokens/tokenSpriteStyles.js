@@ -101,7 +101,7 @@ export const stackInsideSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '1px',
+  gap: 0.25,
   pointerEvents: 'none',
 };
 
@@ -122,7 +122,7 @@ export const inlineRemindersSx = {
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
-  gap: '2px',
+  gap: 0.25,
   pointerEvents: 'none',
 };
 
@@ -244,7 +244,7 @@ export const badgeSx = {
   right: '-2px',
   minWidth: 'clamp(10px, 22cqmin, 16px)',
   height: 'clamp(10px, 22cqmin, 16px)',
-  px: '2px',
+  px: 0.25,
   borderRadius: 1,
   bgcolor: VTT_COLORS.warning,
   color: VTT_COLORS.surface,
@@ -301,7 +301,7 @@ export const aboveSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '3px',
+  gap: 0.5,
   width: 'max-content',
   maxWidth: 230,
   // Invisible hover bridge across the visual gap between disc and pills.
@@ -319,7 +319,7 @@ export const pillsSx = {
   display: 'flex',
   flexWrap: 'wrap',
   justifyContent: 'center',
-  gap: '3px',
+  gap: 0.5,
 };
 
 // Nearest the piece, under the marks.
@@ -327,7 +327,7 @@ export const remindersSx = {
   display: 'flex',
   flexWrap: 'wrap',
   justifyContent: 'center',
-  gap: '2px',
+  gap: 0.25,
 };
 
 // The light blue of the reminder chips on the sheet and in the token menu, so
@@ -335,8 +335,8 @@ export const remindersSx = {
 // tint, because it has to stay legible over any map.
 export const reminderSx = {
   maxWidth: 170,
-  px: 0.6,
-  py: '1px',
+  px: 0.5,
+  py: 0.25,
   borderRadius: 1.25,
   bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   color: 'info.main',
@@ -361,8 +361,8 @@ export const reminderInlineSx = {
 };
 
 export const pillSx = {
-  px: 0.6,
-  py: '1px',
+  px: 0.5,
+  py: 0.25,
   borderRadius: 1.25,
   fontSize: FONT_SIZES.lg,
   fontWeight: 700,
@@ -385,7 +385,7 @@ export const conditionTooltipSx = {
 export const conditionTooltipBodySx = { p: 1 };
 
 export const conditionTooltipTitleSx = {
-  mb: 0.55,
+  mb: 0.5,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
   color: VTT_COLORS.warning,

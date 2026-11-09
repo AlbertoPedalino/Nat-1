@@ -16,7 +16,7 @@ export default function BuilderAppBar({ canUploadDraft, onUploadDraft, onNotify,
       </AppTopBar>
       <Box sx={{ height: APP_TOP_BAR_HEIGHT }} />
       <AppBar position="sticky" color="default" elevation={0} sx={{ top: APP_TOP_BAR_HEIGHT, borderBottom: 1, borderColor: 'divider', bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), backgroundImage: 'none' }}>
-        <Box sx={{ maxWidth: 1360, width: '100%', mx: 'auto', px: { xs: 0.75, md: 1.1 } }}>
+        <Box sx={{ maxWidth: 1360, width: '100%', mx: 'auto', px: { xs: 0.75, md: 1 } }}>
           <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
             <Wand2 size={19} />
             <Box sx={{ flex: 1, minWidth: 0 }}>

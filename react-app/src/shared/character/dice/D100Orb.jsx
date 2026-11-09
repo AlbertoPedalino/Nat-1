@@ -95,7 +95,7 @@ const resultSx = {
   top: '50%',
   minWidth: '68%',
   height: '42%',
-  px: 0.35,
+  px: 0.25,
   transform: 'translate(-50%, -50%) scale(0.82)',
   opacity: 0,
   display: 'grid',

@@ -96,7 +96,7 @@ export default function ScoresStep({ state, dispatch }) {
                       }}
                     >
                       <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: 800, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
-                      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.35 }}>
+                      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
                         {scoreMod(finalScore)}
                       </Typography>
                     </Box>

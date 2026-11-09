@@ -43,7 +43,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
         <Box
           sx={{
             ...SURFACES.panel,
-            px: 1.4,
+            px: 1.5,
             py: 1.25,
             display: 'flex',
             alignItems: { xs: 'stretch', sm: 'center' },
@@ -55,13 +55,13 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Typography variant="h2" sx={{ color: ready ? 'primary.main' : 'text.secondary' }}>
               {ready ? 'Character sheet ready' : 'Character sheet not ready'}
             </Typography>
-            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.35 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
               {ready
                 ? 'Download JSON without local storage, save a local copy, or open the local sheet.'
                 : 'The character is missing minimum data.'}
             </Typography>
           </Box>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.65} sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.75} sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}>
             <Button
               variant="outlined"
               disabled={!ready}

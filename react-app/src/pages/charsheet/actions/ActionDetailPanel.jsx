@@ -19,8 +19,8 @@ function getClassLevel(C, className) {
 
 function FeatureBox({ title, accent, children }) {
   return (
-    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.sm, color: accent || UI_COLORS.accentText, mb: 0.4 }}>
+    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
+      <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.sm, color: accent || UI_COLORS.accentText, mb: 0.5 }}>
         {title}
       </Typography>
       {children}
@@ -117,7 +117,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
       onClick={(e) => e.stopPropagation()}
       sx={detailPanelSx}
     >
-      <Stack spacing={1.2}>
+      <Stack spacing={1.25}>
         {sections.map((s, i) => (
           <FeatureBox key={`sec-${i}`} title={s.title} accent={s.accent}>
             <SectionBody html={s.body} accent={s.accent} />
@@ -139,19 +139,19 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>
             {dual && roll.dualNote ? (
-              <Typography sx={{ ...TEXT_STYLES.note, mt: 0.3, fontSize: FONT_SIZES.xs, color: UI_COLORS.secondary }}>
+              <Typography sx={{ ...TEXT_STYLES.note, mt: 0.25, fontSize: FONT_SIZES.xs, color: UI_COLORS.secondary }}>
                 {roll.dualNote}
               </Typography>
             ) : null}
             {result ? (
-              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash), borderRadius: 1 }}>
+              <Box sx={{ mt: 0.5, p: 0.5, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
-                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700, mb: 0.3 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700, mb: 0.25 }}>
                       Choose one:
                     </Typography>
                     {result.rolls.map((r, i) => (
-                      <Typography key={`d-${i}`} sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.2 }}>
+                      <Typography key={`d-${i}`} sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.25 }}>
                         #{i + 1} [{r.range}] {r.effect}
                       </Typography>
                     ))}
@@ -161,7 +161,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                     <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700 }}>
                       d{tableMeta.sides}: {result.rolls[0].value}
                     </Typography>
-                    <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mt: 0.2 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mt: 0.25 }}>
                       [{result.rolls[0].range}] {result.rolls[0].effect}
                     </Typography>
                   </>

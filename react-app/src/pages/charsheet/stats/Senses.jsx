@@ -59,7 +59,7 @@ export default function Senses({ C }) {
 function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
   const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ ...SURFACES.panel, mb: 0.2, overflow: 'hidden' }}>
+    <Box sx={{ ...SURFACES.panel, mb: 0.25, overflow: 'hidden' }}>
       <Box
         onClick={clickable ? onToggle : undefined}
         sx={{
@@ -71,7 +71,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: color || UI_COLORS.accentText, flexShrink: 0 }}>
           {value}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
             {source ? (
@@ -91,13 +91,13 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
       {clickable ? (
         <CollapsibleBody open={expanded}>
           <Box sx={{
-            px: 1, pb: 0.6, pt: 0.1,
+            px: 1, pb: 0.5, pt: 0.25,
             // Scale 5etools EntryBlocks (body2) down to the compact panel size.
             '& .MuiTypography-root': { fontSize: FONT_SIZES.xs, lineHeight: 1.45 },
             '& th, & td': { fontSize: FONT_SIZES.xs },
           }}>
             {entries?.length ? (
-              <EntryBlocks entries={entries} spacing={0.4} emptyText="" />
+              <EntryBlocks entries={entries} spacing={0.5} emptyText="" />
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
             )}

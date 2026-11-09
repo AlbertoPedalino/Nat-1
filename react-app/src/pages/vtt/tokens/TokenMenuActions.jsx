@@ -8,7 +8,7 @@ export default function TokenMenuActions({
   token, canRemove, onClose, onSheet, onStatBlock, onDelete,
 }) {
   return (
-    <Stack direction="row" spacing={0.6}>
+    <Stack direction="row" spacing={0.5}>
       <Button size="small" variant="outlined" onClick={onClose} sx={{ ...menuButtonSx, flex: 1 }}>Done</Button>
       {onSheet ? (
         <Button

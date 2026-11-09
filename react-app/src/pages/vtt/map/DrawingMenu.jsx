@@ -229,7 +229,7 @@ export default function DrawingMenu({
         ) : null}
 
         {area ? (
-          <Stack direction="row" spacing={0.6}>
+          <Stack direction="row" spacing={0.5}>
             <TextField
               label={sizeLabel}
               size="small"
@@ -292,7 +292,7 @@ export default function DrawingMenu({
 
         <Divider />
 
-        <Stack direction="row" spacing={0.6}>
+        <Stack direction="row" spacing={0.5}>
           <Button size="small" variant="outlined" onClick={onClose} sx={{ ...menuButtonSx, flex: 1 }}>Done</Button>
           <Button
             size="small"
@@ -325,8 +325,8 @@ const colorRowSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: 0.6,
+  gap: 0.5,
 };
 
-const menuButtonSx = { fontSize: FONT_SIZES.sm, py: 0.35 };
+const menuButtonSx = { fontSize: FONT_SIZES.sm, py: 0.25 };
 

@@ -11,14 +11,14 @@ const VARIANTS = {
     btnSize: 22,
     iconSize: 12,
     amountWidth: 46,
-    gap: 0.3,
+    gap: 0.25,
     amountInputSx: { py: 0.25, fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure },
   },
   combat: {
     btnSize: 26,
     iconSize: 14,
     amountWidth: 52,
-    gap: 0.4,
+    gap: 0.5,
     amountInputSx: undefined, // input font is inherited from the card's HP row
   },
 };

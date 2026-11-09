@@ -193,7 +193,7 @@ export default function ActionsTab({ C, sheet, resources }) {
           <Typography sx={{ ...levelHeaderSx, color: 'primary.main' }}>
             {section.title}
           </Typography>
-          <Box sx={{ display: 'grid', gap: '4px', minWidth: 0 }}>
+          <Box sx={{ display: 'grid', gap: 0.5, minWidth: 0 }}>
             {section.actions.map((action, i) => (
               <AdapterActionCard
                 key={`${section.key}-${i}`}

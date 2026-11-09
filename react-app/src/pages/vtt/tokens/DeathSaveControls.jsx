@@ -20,9 +20,9 @@ export default function DeathSaveControls({ deathSaves, disabled, onChange }) {
 const deathSavePanelSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 0.8,
-  px: 0.6,
-  py: 0.4,
+  gap: 0.75,
+  px: 0.5,
+  py: 0.5,
   border: '1px solid',
   borderColor: 'gmboard.vtt.accentTint',
   borderRadius: 1,

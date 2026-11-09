@@ -27,10 +27,10 @@ export const instanceNameSx = { minWidth: 0, overflow: 'hidden', textOverflow: '
 export const cloudBadgeSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 0.4,
+  gap: 0.5,
   ml: 'auto',
   flexShrink: 0,
-  px: 0.6,
+  px: 0.5,
   fontSize: FONT_SIZES.sm,
   color: 'gmboard.vtt.accent',
   border: '1px solid',

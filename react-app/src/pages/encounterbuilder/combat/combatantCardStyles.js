@@ -12,7 +12,7 @@ export const rowSx = {
   flexWrap: 'wrap',
   alignItems: 'center',
   columnGap: { xs: 1.5, sm: 3 },
-  rowGap: 1.2,
+  rowGap: 1.25,
   pr: 3,
 };
 
@@ -51,10 +51,10 @@ export const acBadgeSx = {
   ...SURFACES.wash,
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 0.4,
-  mt: 0.3,
-  px: 0.7,
-  py: '1px',
+  gap: 0.5,
+  mt: 0.25,
+  px: 0.75,
+  py: 0.25,
   color: 'text.secondary',
   lineHeight: 1,
 };
@@ -66,7 +66,7 @@ export const acValueSx = { fontSize: FONT_SIZES.body, fontWeight: 800, color: 't
 export const conditionsRowSx = {
   flex: '1 1 100%',
   minWidth: 0,
-  pt: 0.4,
+  pt: 0.5,
   borderTop: 1,
   borderColor: 'divider',
 };
@@ -96,16 +96,16 @@ export const hpToggleSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
   ...TEXT_STYLES.label,
-  '& .MuiButton-startIcon': { mr: 0.4 },
+  '& .MuiButton-startIcon': { mr: 0.5 },
   '&:hover': { color: 'text.primary' },
 };
 
 export const hpFlagSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 0.3,
+  gap: 0.25,
   px: 0.5,
-  py: '1px',
+  py: 0.25,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -115,7 +115,7 @@ export const hpFlagSx = {
   flex: '0 0 auto',
 };
 
-export const hpDetailsSx = { display: 'flex', flexDirection: 'column', gap: 0.7 };
+export const hpDetailsSx = { display: 'flex', flexDirection: 'column', gap: 0.75 };
 
 // A fully collapsed Collapse still renders a zero-height box, which keeps
 // earning a slot in the parent's flex gap. MUI tags that state with
@@ -129,7 +129,7 @@ export const hpPanelRowSx = {
   justifyContent: 'space-between',
   gap: 1,
   flexWrap: 'wrap',
-  rowGap: 0.6,
+  rowGap: 0.5,
 };
 
 export const hpValueRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
@@ -147,7 +147,7 @@ export const hpBarSx = {
 
 export const cardSx = {
   position: 'relative',
-  p: 0.9,
+  p: 1,
   bgcolor: 'background.paper',
   border: '2px solid transparent',
   borderRadius: 1.5,
@@ -157,11 +157,11 @@ export const cardSx = {
 export const hpRowSx = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 0.7,
+  gap: 0.75,
   flex: '1 1 300px',
   minWidth: 0,
   '& .MuiInputBase-input': {
-    py: 0.6,
+    py: 0.5,
     fontSize: FONT_SIZES.xxl,
   },
   '& .MuiInputLabel-root': {

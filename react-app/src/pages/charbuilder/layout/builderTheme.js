@@ -23,12 +23,12 @@ export const builderRootSx = {
     ...TEXT_STYLES.title,
     fontSize: FONT_SIZES.xs,
     px: 1,
-    py: 0.38,
+    py: 0.5,
   },
   '& .MuiTab-root': {
     minHeight: 0,
     py: 0.75,
-    px: 1.05,
+    px: 1,
     ...TEXT_STYLES.title,
     fontSize: FONT_SIZES.xs,
     color: 'text.secondary',
@@ -40,11 +40,11 @@ export const builderRootSx = {
     fontSize: FONT_SIZES.md,
   },
   '& .MuiInputBase-input': {
-    py: '7px',
+    py: 1,
     fontSize: FONT_SIZES.md,
   },
   '& .MuiAlert-root': {
-    py: 0.35,
+    py: 0.25,
     px: 1,
     fontSize: FONT_SIZES.md,
     bgcolor: UI_COLORS.surfaceHeader,

@@ -127,14 +127,14 @@ const headerSx = {
 const stepRowSx = {
   display: 'flex',
   alignItems: 'flex-start',
-  gap: 0.9,
-  py: 0.6,
+  gap: 1,
+  py: 0.5,
 };
 
 const stepIconColSx = {
   display: 'flex',
   alignItems: 'center',
-  pt: 0.15,
+  pt: 0.25,
   flexShrink: 0,
 };
 

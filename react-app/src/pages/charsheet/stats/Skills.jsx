@@ -59,7 +59,7 @@ export default function Skills({ C, sheet, onRoll }) {
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
       <PanelHeader title="Skills" />
-      <Box sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
         <span></span>
         <span>Prof.</span>
         <span>Skill</span>
@@ -100,7 +100,7 @@ export default function Skills({ C, sheet, onRoll }) {
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
             onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
-            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
+            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', py: 0.5, alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>

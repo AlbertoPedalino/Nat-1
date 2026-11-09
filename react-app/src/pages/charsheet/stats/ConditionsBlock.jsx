@@ -34,10 +34,10 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
     </Box>
   );
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: 20, px: 0.5, border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
       <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
-        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
         {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
       </Typography>
       <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={11} /></StepButton>
@@ -64,7 +64,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
     <Box sx={{ ...sheetBoxSx, flex: 1, minWidth: 140, p: '0.4rem 0.62rem' }}>
       <Typography sx={sheetBoxTitleSx}>Conditions</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs, borderStyle: 'dashed' }} />}
           {active.map((c) => (
             c.key === 'exhaustion' ? (
@@ -91,7 +91,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
         </Box>
 
         {openCards.length > 0 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             {openCards.map((c) => (
               <ConditionCard key={c.key} label={c.label} entries={conditionEntries[c.key]} onClose={() => toggleCard(c.key)} />
             ))}
@@ -123,7 +123,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   variant="outlined"
                   startIcon={<X size={12} />}
                   onClick={onClear}
-                  sx={{ mt: 0.6, fontSize: FONT_SIZES.xxxs, py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, OPACITY.soft) } }}
+                  sx={{ mt: 0.5, fontSize: FONT_SIZES.xxxs, py: 0.25, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, OPACITY.soft) } }}
                 >
                   Clear all
                 </Button>

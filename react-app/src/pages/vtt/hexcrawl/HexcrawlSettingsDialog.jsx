@@ -171,11 +171,11 @@ const sectionCardSx = {
 const sectionTitleSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 0.6,
+  gap: 0.5,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
   color: 'gmboard.vtt.accent',
-  pb: 0.6,
+  pb: 0.5,
   borderBottom: '1px solid',
   borderColor: 'gmboard.vtt.accentTint',
 };

@@ -97,7 +97,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     const hp = getWildCompanionHp(character);
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
           <Sparkles size={14} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
@@ -120,7 +120,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           </Box>
         ) : null}
         <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" onRoll={rollCheck} onRollFormula={rollFormulaToast} />
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
           A Fey spirit; rolls its own Initiative and acts on its own turn. It can't attack, but takes other actions normally. Vanishes when you finish a Long Rest.
         </Typography>
       </Box>
@@ -129,7 +129,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
 
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <Sparkles size={14} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
@@ -138,7 +138,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         exclusive
         value={canSummon ? effectiveCost : null}
         onChange={(e, v) => { e.stopPropagation(); if (v) setCostMode(v); }}
-        sx={{ mb: 0.6 }}
+        sx={{ mb: 0.5 }}
       >
         <ToggleButton value="ws" disabled={!canWildShape} sx={toggleSx}>
           {canWildShape ? `Wild Shape (${usesLeft})` : 'Wild Shape'}
@@ -152,7 +152,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         onChange={setQuery}
         placeholder="Search beasts…"
         stopPropagation
-        sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: FONT_SIZES.md, py: '6px' } }}
+        sx={{ mb: 0.5, '& .MuiInputBase-input': { fontSize: FONT_SIZES.md, py: 0.75 } }}
       />
       {!familiars.length ? (
         <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>Loading beasts…</Typography>
@@ -174,7 +174,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           {!visible.length ? <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>No matches.</Typography> : null}
         </Stack>
       )}
-      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
         {!canSummon
           ? 'No Wild Shape uses or spell slots left — finish a rest.'
           : `Summoning spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'one Wild Shape use'}; the familiar is Fey and lasts until a Long Rest.`}
@@ -185,8 +185,8 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
 
 const toggleSx = {
   fontSize: FONT_SIZES.sm,
-  py: '3px',
-  px: '10px',
+  py: 0.5,
+  px: 1.25,
   textTransform: 'none',
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),

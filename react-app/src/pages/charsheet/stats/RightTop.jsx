@@ -99,7 +99,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', gap: '0.45rem', mb: '0.4rem', flexWrap: 'wrap' }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
           <Tooltip title={initTooltip}>
             <RollModeArea
               sources={{ adv: initHasAdv, disadv: false }}
@@ -150,7 +150,7 @@ function SquareStat({ value, label, clickable }) {
         ...(clickable ? { cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } } : {}),
       }}>
       <Typography sx={statValueSx}>{value}</Typography>
-      <Typography sx={{ ...statLabelSx, mt: 0.15 }}>{label}</Typography>
+      <Typography sx={{ ...statLabelSx, mt: 0.25 }}>{label}</Typography>
     </Box>
   );
 }

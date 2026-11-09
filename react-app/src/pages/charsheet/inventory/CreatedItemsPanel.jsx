@@ -179,7 +179,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.5 }}>
         <Typography sx={detailTitleSx}>{tagLabel}</Typography>
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xs, color: remaining > 0 ? UI_COLORS.accentText : UI_COLORS.danger }}>
           {total} / {max} active
@@ -193,7 +193,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           placeholder="Search items…"
           iconSize={14}
           stopPropagation
-          sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: FONT_SIZES.lg, py: '5px' } }}
+          sx={{ mb: 0.5, '& .MuiInputBase-input': { fontSize: FONT_SIZES.lg, py: 0.75 } }}
         />
       ) : null}
 
@@ -201,10 +201,10 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '4px',
+          gap: 0.5,
           // Rows must not flex-shrink, else they collapse to thin lines when
           // their total height exceeds maxHeight — they should scroll instead.
-          ...(maxHeight ? { maxHeight, overflowY: 'auto', pr: '4px', '& > *': { flexShrink: 0 } } : {}),
+          ...(maxHeight ? { maxHeight, overflowY: 'auto', pr: 0.5, '& > *': { flexShrink: 0 } } : {}),
         }}
       >
         {visibleItems.length ? visibleItems.map((value) => {
@@ -229,7 +229,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
           if (!dbItem) {
             return (
-              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
+              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
                 <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                 {unavailable ? (
                   <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
@@ -243,11 +243,11 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             <ExpandableCard
               key={value}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
-              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
+              detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>
-                  <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: '7px', flex: 1, minWidth: 0, cursor: 'pointer' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75 }}>
+                  <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0, cursor: 'pointer' }}>
                     <ItemNameIcon item={dbItem} />
                     <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                   </Box>

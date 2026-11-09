@@ -58,7 +58,7 @@ const inventorySectionHeaderSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '8px',
+  gap: 1,
   flexWrap: 'wrap',
 };
 
@@ -73,9 +73,9 @@ const inventorySectionTitleSx = {
 const inventorySectionRuleSx = {
   ...inventorySectionTitleSx,
   ...sheetSectionHeaderSx(),
-  pb: '3px',
-  mt: 0.6,
-  mb: 0.4,
+  pb: 0.5,
+  mt: 0.5,
+  mb: 0.5,
 };
 
 function groupEntriesByType(entries) {
@@ -153,7 +153,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
 
       <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} filters={INVENTORY_FILTERS} />
 
-      <ItemFilterPanel {...inventoryList.panelProps} sx={{ mb: 0.6 }} />
+      <ItemFilterPanel {...inventoryList.panelProps} sx={{ mb: 0.5 }} />
 
       <Box {...inventoryPage.listProps} sx={inventoryListSx}>
         {GROUPS.map((group) => {
@@ -163,7 +163,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
             <Box key={group.key}>
               <SectionHeader icon={group.icon} label={group.label} />
               {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
-                <Alert key={i} severity="warning" sx={{ fontSize: FONT_SIZES.sm, py: '2px', px: '8px', mb: '3px' }}>
+                <Alert key={i} severity="warning" sx={{ fontSize: FONT_SIZES.sm, py: 0.25, px: 1, mb: 0.5 }}>
                   {w}
                 </Alert>
               )) : null}

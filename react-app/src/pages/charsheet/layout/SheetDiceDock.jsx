@@ -103,8 +103,8 @@ const phoneSurface = {
   groupSx: { bgcolor: 'primary.main', borderColor: 'primary.main' },
   segmentSx: {
     color: 'primary.contrastText',
-    px: 1.4,
-    py: 0.85,
+    px: 1.5,
+    py: 0.75,
     '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint) },
   },
   dividerColor: uiAlpha(UI_COLORS.black, OPACITY.line),
@@ -119,7 +119,7 @@ const labelledPillSx = {
   boxShadow: UI_SHADOWS.float,
   bgcolor: 'background.paper',
   borderRadius: 999,
-  '& .MuiButton-root': { px: 2, py: 0.6 },
+  '& .MuiButton-root': { px: 2, py: 0.5 },
   '& .MuiButtonGroup-firstButton': { borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
   '& .MuiButtonGroup-lastButton': { borderTopRightRadius: 999, borderBottomRightRadius: 999 },
 };

@@ -48,7 +48,7 @@ export default function SelectorGroup({
               onClick={() => onChange(option)}
               sx={optionSx(getTone ? getTone(option) : gold, selected, dense)}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 {Icon ? <Icon size={dense ? 12 : 13} /> : null}
                 <span>{getLabel(option)}</span>
               </Box>
@@ -65,9 +65,9 @@ function optionSx(tone, selected, dense) {
   return {
     display: 'flex',
     flexDirection: 'column',
-    gap: 0.15,
+    gap: 0.25,
     minWidth: dense ? 54 : 72,
-    py: 0.4,
+    py: 0.5,
     px: 0.75,
     fontSize: dense ? FONT_SIZES.sm : FONT_SIZES.md,
     lineHeight: 1.2,

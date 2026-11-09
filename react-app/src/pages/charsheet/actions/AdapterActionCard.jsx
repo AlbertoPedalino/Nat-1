@@ -60,9 +60,9 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
   const persistentRowSx = (bgcolor, isLast, open) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
-    px: '10px',
-    py: '5px',
+    gap: 0.5,
+    px: 1.25,
+    py: 0.75,
     border: 1,
     borderTop: 'none',
     borderColor: 'divider',
@@ -85,18 +85,18 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       containerSx={{ overflow: 'hidden' }}
       disabled={!hasActionDetails}
       summary={({ toggle, disabled, open }) => (
-          <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: '7px', borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
+          <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: 1, borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
             {barCat && CAT_COLORS[barCat] && (
               <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: OPACITY.solid }} />
             )}
 
-            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {displayName || action.name}
                 </Typography>
                 {hasRollers ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'wrap', flexShrink: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, flexWrap: 'wrap', flexShrink: 0 }}>
                     {Number.isFinite(action.attackBonus) ? (
                       <AttackRollButton
                         rawBonus={action.attackBonus}
@@ -121,7 +121,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 ) : null}
               </Box>
               {(action.tags || []).length ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
                   {action.tags.map((tag) => (
                     <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />
                   ))}
@@ -180,7 +180,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
+                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.25, px: 0.5, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>
@@ -214,7 +214,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
       details={hasActionDetails ? (
         <>
-          {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
+          {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: 0.75 }} /> : null}
           {descriptionNode
             ? (cardInteractive ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode)
             : null}
@@ -280,18 +280,18 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
   };
 
   return (
-    <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.3 }}>
+    <Box sx={{ mt: 0.75, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderRadius: '999px !important' }, '& .MuiToggleButton-root:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' } }}
+        sx={{ flexWrap: 'wrap', gap: 0.5, '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: 1, py: 0.5, border: 1, borderRadius: '999px !important' }, '& .MuiToggleButton-root:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' } }}
       >
         {options.map((opt) => (
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.2 }}>
+      <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.25 }}>
         <RichInline text={action.choiceRestNote || "Change when you finish a Short or Long Rest (Smith's Tools required)."} keyPrefix={`choice-${action.choiceKey || 'note'}`} />
       </Typography>
     </Box>

@@ -246,18 +246,18 @@ export default function SpellEntry({
 
   return (
     <ExpandableCard
-      containerSx={{ mb: '4px', overflow: 'hidden' }}
+      containerSx={{ mb: 0.5, overflow: 'hidden' }}
       detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
       summary={({ toggle, open }) => (
         <Box onClick={toggle}
-          sx={{ ...spellRowSx, mb: 0, borderRadius: open || hasFreeCasts ? '8px 8px 0 0' : 1, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+          sx={{ ...spellRowSx, mb: 0, borderRadius: open || hasFreeCasts ? '8px 8px 0 0' : 1, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, OPACITY.fill)} /> : null}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 {weaponStrike ? (
                   <AttackRollButton
                     rawBonus={weaponStrike.attackBonus}
@@ -295,8 +295,8 @@ export default function SpellEntry({
             ) : null}
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
             <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${signed(beamBonus)}` : ''} />
             {weaponStrike ? (
               <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, OPACITY.fill)} />
@@ -308,7 +308,7 @@ export default function SpellEntry({
             {getSpellStatusChips(entry).map((chip) => <MiniBadge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
             {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill)} /> : null}
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
             {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.spell} bg={uiAlpha(UI_COLORS.spell, OPACITY.fill)} /> : null}
             {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} bg={alpha(SPELL_TAG_COLORS.concentration, OPACITY.fill)} /> : null}
             {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill)} /> : null}
@@ -332,7 +332,7 @@ export default function SpellEntry({
       )}
       details={(
         <>
-          <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
+          <SpellMetaGrid spell={entry} sx={{ mb: 0.75 }} />
           {hasInteractiveContent ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode}
           {weaponAttack ? (
             <SpellWeaponPicker
@@ -353,13 +353,13 @@ export default function SpellEntry({
             />
           ) : null}
           {modifierDetailGroups.length ? (
-            <Stack spacing={0.8} sx={{ mt: 1 }}>
+            <Stack spacing={0.75} sx={{ mt: 1 }}>
               {modifierDetailGroups.map((group) => (
                 <Box
                   key={group.label}
                   sx={{
-                    pt: 0.8,
-                    mt: 0.2,
+                    pt: 0.75,
+                    mt: 0.25,
                     borderTop: '1px dashed',
                     borderColor: 'divider',
                   }}
@@ -374,13 +374,13 @@ export default function SpellEntry({
                   >
                     {group.label}
                   </Typography>
-                  <Stack spacing={0.55} sx={{ mt: 0.45 }}>
+                  <Stack spacing={0.5} sx={{ mt: 0.5 }}>
                     {group.items.map((modifier) => (
                       <Box key={modifier.key || modifier.label}>
                         <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: 700, lineHeight: 1.2 }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.3, mt: 0.1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.3, mt: 0.25 }}>
                           {modifier.detailText || modifier.description}
                         </Typography>
                       </Box>

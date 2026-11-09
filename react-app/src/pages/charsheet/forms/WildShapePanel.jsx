@@ -70,7 +70,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     const b = active.beast;
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
           <PawPrint size={14} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Transformed —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
@@ -79,7 +79,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
           </Button>
         </Box>
         <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
         </Typography>
       </Box>
@@ -88,7 +88,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
 
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <PawPrint size={14} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
@@ -118,7 +118,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         </Stack>
       )}
       {lv >= 2 ? (
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
           {usesLeft <= 0
             ? 'No Wild Shape uses left — finish a Short or Long Rest.'
             : `Transform spends one Wild Shape use (${usesLeft} left).`}

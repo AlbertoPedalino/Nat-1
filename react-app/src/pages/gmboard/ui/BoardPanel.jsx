@@ -38,7 +38,7 @@ const headRowSx = {
 const titleRowSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: 0.6,
+  gap: 0.5,
 };
 
 const titleSx = {

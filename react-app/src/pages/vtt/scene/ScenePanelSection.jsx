@@ -57,7 +57,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
         </Box>
       </ButtonBase>
       <CollapsibleBody open={open} id={bodyId}>
-        <Stack spacing={1} sx={{ px: 1, pt: 0.25, pb: 1.1 }}>{children}</Stack>
+        <Stack spacing={1} sx={{ px: 1, pt: 0.25, pb: 1 }}>{children}</Stack>
       </CollapsibleBody>
     </Box>
   );
@@ -74,7 +74,7 @@ const sectionHeaderSx = {
   width: '100%',
   display: 'flex',
   alignItems: 'center',
-  gap: 0.85,
+  gap: 0.75,
   px: 1,
   py: 0.75,
   color: VTT_COLORS.text,

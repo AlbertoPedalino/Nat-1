@@ -56,7 +56,7 @@ export default function HexResultDialog({ result, onClose }) {
       contentProps={{ dividers: true }}
       actions={<Button onClick={onClose}>Close</Button>}
     >
-      <Stack spacing={0.6} sx={{ mb: 1.25 }}>
+      <Stack spacing={0.5} sx={{ mb: 1.25 }}>
         {clock ? (
           <Box sx={lineSx}>
             <Clock size={14} />
@@ -88,8 +88,8 @@ const weatherBadgeSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 0.5,
-  px: 0.9,
-  py: 0.3,
+  px: 1,
+  py: 0.25,
   borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
@@ -101,5 +101,5 @@ const weatherWarnSx = { borderColor: 'warning.main', color: 'warning.main' };
 
 const weatherTextSx = { fontSize: FONT_SIZES.sm, letterSpacing: LETTER_SPACINGS.sm };
 
-const lineSx = { display: 'flex', alignItems: 'center', gap: 0.6, color: 'text.secondary' };
+const lineSx = { display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' };
 const lineTextSx = { fontSize: FONT_SIZES.lg };

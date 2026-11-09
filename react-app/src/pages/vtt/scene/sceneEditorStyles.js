@@ -17,7 +17,7 @@ export const sceneTopbarSx = {
   flexWrap: 'wrap',
   gap: 1,
   px: { xs: 1, md: 1.25 },
-  py: 0.85,
+  py: 0.75,
   borderRadius: 1,
   boxShadow: UI_SHADOWS.raised,
 };

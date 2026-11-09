@@ -66,7 +66,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: createSlotSelection === level ? UI_COLORS.accentText : 'divider',
-                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
@@ -108,7 +108,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: convertSlotSelection === level ? UI_COLORS.accentText : 'divider',
-                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
@@ -142,7 +142,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => { confirmWildResurgence(opt.key); }}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  borderColor: 'divider', borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
@@ -179,7 +179,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : 'divider',
-                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
@@ -236,13 +236,13 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
             {slotRecovery.levels.map((entry) => {
               const value = Number(slotRecoverySelection[String(entry.level)] || 0);
               return (
-                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.8, py: 0.6 }}>
+                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.75, py: 0.5 }}>
                   <Typography sx={{ flex: 1, fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
-                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
+                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.75 }}>-</Button>
                   <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>{value}</Typography>
-                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
+                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.75 }}>+</Button>
                 </Box>
               );
             })}

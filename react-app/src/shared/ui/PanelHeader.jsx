@@ -49,7 +49,7 @@ export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider
     ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.sm,
     color,
-    ...(rule ? { borderBottom: 1, borderColor: rule, pb: '4px' } : {}),
+    ...(rule ? { borderBottom: 1, borderColor: rule, pb: 0.5 } : {}),
   };
 }
 
@@ -60,7 +60,7 @@ export const sheetBoxSx = {
   ...SURFACES.panel, 
 };
 
-export const sheetBoxTitleSx = { ...panelTitleSx, mb: 0.4 };
+export const sheetBoxTitleSx = { ...panelTitleSx, mb: 0.5 };
 
 // The line a list or panel shows when it has nothing in it.
 export const emptyTextSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xl };

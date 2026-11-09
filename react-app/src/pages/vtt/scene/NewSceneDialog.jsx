@@ -254,8 +254,8 @@ const gridSx = {
 const cardSx = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 0.35,
-  p: 1.1,
+  gap: 0.25,
+  p: 1,
   textAlign: 'left',
   border: '1px solid',
   borderColor: 'divider',

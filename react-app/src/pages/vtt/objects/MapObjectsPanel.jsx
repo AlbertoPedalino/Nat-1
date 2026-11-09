@@ -151,28 +151,28 @@ export default function MapObjectsPanel({
 }
 
 const hintSx = { mb: 1, color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
-const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.6 };
-const countSx = { mb: 0.7, color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs };
+const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 };
+const countSx = { mb: 0.75, color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs };
 const strokeControlSx = {
   display: 'grid',
   gridTemplateColumns: '42px minmax(0, 1fr) 26px',
   alignItems: 'center',
-  gap: 0.7,
-  mb: 0.55,
+  gap: 0.75,
+  mb: 0.5,
 };
 const strokeLabelSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.sm };
-const strokeSliderSx = { py: 0.6, color: VTT_COLORS.accent };
+const strokeSliderSx = { py: 0.5, color: VTT_COLORS.accent };
 const strokeValueSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.xs, textAlign: 'right' };
 
 const gridSx = {
   display: 'grid',
   gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-  gap: 0.6,
+  gap: 0.5,
 };
 
 const objectButtonSx = {
   minWidth: 0,
-  p: 0.55,
+  p: 0.5,
   borderRadius: 1,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),

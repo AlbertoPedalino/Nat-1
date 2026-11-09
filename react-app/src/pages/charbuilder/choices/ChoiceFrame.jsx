@@ -10,8 +10,8 @@ export default function ChoiceFrame({
   const full = max > 0 && count >= max;
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
-      <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+      <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+        <Stack direction="row" spacing={0.75} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography sx={labelSx}>{label}</Typography>
           {max != null ? (
             <Chip

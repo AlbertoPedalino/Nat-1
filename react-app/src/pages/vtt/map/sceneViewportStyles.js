@@ -77,7 +77,7 @@ export const placementTargetHintSx = {
   zIndex: 9,
   transform: 'translateX(-50%)',
   px: 1.25,
-  py: 0.55,
+  py: 0.5,
   borderRadius: 10,
   bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
   color: VTT_COLORS.accent,

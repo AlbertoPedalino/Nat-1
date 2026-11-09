@@ -76,7 +76,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
               const active = selected.includes(value);
               return (
                 <Box key={value} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.65, px: 1, gap: 0.75 }}>
+                  <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.75, px: 1, gap: 0.75 }}>
                     <ListItemText
                       primary={(
                         <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}>

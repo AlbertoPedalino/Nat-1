@@ -39,7 +39,7 @@ export function BeastNameLink({ name, source, sx }) {
       underline="hover"
       title="Open stat block on 5e.tools"
       onClick={(e) => e.stopPropagation()}
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
     >
       <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
       <ExternalLink size={11} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
@@ -98,7 +98,7 @@ export function BeastStatBlock({
 
   return (
     <Box sx={statBlockSx}>
-      <Typography sx={{ ...metaSx, mb: 0.4 }}>{meta}</Typography>
+      <Typography sx={{ ...metaSx, mb: 0.5 }}>{meta}</Typography>
       <StatLine label="AC" value={b.ac ?? '—'} />
       {onRollFormula && b.hp?.formula ? (
         <Typography sx={subSx}>
@@ -175,7 +175,7 @@ export function BeastPickerRow({
       <Box
         onClick={expandable ? () => setOpen((o) => !o) : undefined}
         sx={{
-          display: 'flex', alignItems: 'center', gap: '8px', px: '8px', py: '5px',
+          display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75,
           cursor: expandable ? 'pointer' : 'default',
           '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } : undefined,
         }}
@@ -199,7 +199,7 @@ export function BeastPickerRow({
       </Box>
       {expandable ? (
         <Collapse in={open} unmountOnExit>
-          <Box sx={{ px: '8px', pb: '8px', pt: '2px' }}>
+          <Box sx={{ px: 1, pb: 1, pt: 0.25 }}>
             <BeastStatBlock b={beast} typeLabel={typeLabel} hpLabel={hpLabel} />
           </Box>
         </Collapse>
@@ -250,9 +250,9 @@ function StatLine({ label, value, accent }) {
 function StatSection({ title, items, onRoll, onRollFormula, beastName, itemAccessory }) {
   return (
     <Box sx={{ mt: 0.5 }}>
-      <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xxs, mb: 0.2 }}>{title}</Typography>
+      <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xxs, mb: 0.25 }}>{title}</Typography>
       {items.map((it, i) => (
-        <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.2 }}>
+        <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.25 }}>
           <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>
           {typeof itemAccessory === 'function' ? itemAccessory(it) : null}{' '}
           {it.tokens
@@ -279,7 +279,7 @@ function renderEntryToken(tok, key, onRoll, onRollFormula, beastName) {
 
 const statBlockSx = {
   ...SURFACES.panel,
-  p: 0.8,
+  p: 0.75,
 };
 
 const metaSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm };
@@ -306,8 +306,8 @@ export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
 // damage type…), and the toggle look its buttons share.
 export function CreatureOptionRow({ label, children }) {
   return (
-    <Box sx={{ mb: 0.8 }}>
-      <Typography sx={{ ...subSx, mb: 0.3, fontWeight: 700 }}>{label}</Typography>
+    <Box sx={{ mb: 0.75 }}>
+      <Typography sx={{ ...subSx, mb: 0.25, fontWeight: 700 }}>{label}</Typography>
       {children}
     </Box>
   );
@@ -315,8 +315,8 @@ export function CreatureOptionRow({ label, children }) {
 
 export const optionToggleSx = {
   fontSize: FONT_SIZES.xs,
-  py: '3px',
-  px: '8px',
+  py: 0.5,
+  px: 1,
   textTransform: 'none',
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
@@ -328,8 +328,8 @@ export const optionToggleSx = {
 export const dismissButtonSx = {
   minWidth: 0,
   flexShrink: 0,
-  px: 0.8,
-  py: 0.1,
+  px: 0.75,
+  py: 0.25,
   fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.title,
   color: UI_COLORS.dangerMuted,
@@ -346,16 +346,16 @@ export const creatureHpBoxSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
-  gap: 0.6,
-  p: 0.8,
-  mb: 0.8,
+  gap: 0.5,
+  p: 0.75,
+  mb: 0.75,
 };
 
 export const rowSx = {
   ...SURFACES.panel,
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
-  px: '8px',
-  py: '5px',
+  gap: 1,
+  px: 1,
+  py: 0.75,
 };

@@ -26,8 +26,8 @@ import { SURFACES } from '../../ui/surfaces.js';
 
 const clearButtonSx = {
   minHeight: 0,
-  px: '8px',
-  py: '3px',
+  px: 1,
+  py: 0.5,
   borderRadius: 1,
   color: 'text.secondary',
   ...TEXT_STYLES.label,
@@ -48,7 +48,7 @@ const controlSx = {
   fontSize: FONT_SIZES.md,
   bgcolor: UI_COLORS.surfaceHeader,
   borderRadius: 1,
-  '& .MuiSelect-select': { py: '5px' },
+  '& .MuiSelect-select': { py: 0.75 },
 };
 
 
@@ -56,11 +56,11 @@ const gridSx = {
   ...SURFACES.inset,
   display: 'grid',
   gridTemplateColumns: 'auto minmax(0, 1fr)',
-  columnGap: '8px',
-  rowGap: '6px',
+  columnGap: 1,
+  rowGap: 0.75,
   alignItems: 'center',
-  mt: 0.6,
-  p: '8px',
+  mt: 0.5,
+  p: 1,
 };
 
 const placeholderSx = { color: 'text.secondary', opacity: OPACITY.heavy };
@@ -77,7 +77,7 @@ function FilterRow({ label, children }) {
   return (
     <>
       <Box sx={labelSx}>{label}</Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>{children}</Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>{children}</Box>
     </>
   );
 }
@@ -103,13 +103,13 @@ function ChoiceSelect({ value, options, onChange }) {
 
 function SelectedChips({ values }) {
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
       {values.map((value) => (
         <Box
           key={value}
           component="span"
           sx={{
-            px: '5px',
+            px: 0.75,
             border: 1,
             borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
             borderRadius: 0.375,
@@ -172,7 +172,7 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
 
   return (
     <Box sx={sx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
         <Button
           size="small"
           aria-expanded={open}

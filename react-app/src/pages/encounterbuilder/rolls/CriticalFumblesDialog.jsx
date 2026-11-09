@@ -130,7 +130,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       </Tabs>
 
       <Box sx={sectionSx}>
-        <Stack spacing={0.4}>
+        <Stack spacing={0.5}>
           <Typography sx={dialogSectionTitleSx}>Dice combination</Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Choose any combination. At least one die is always kept.
@@ -142,7 +142,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
             return (
               <Paper key={faces} variant="outlined" sx={dieControlSx}>
                 <Typography sx={dieLabelSx}>d{faces}</Typography>
-                <Stack direction="row" spacing={0.35} sx={{ alignItems: 'center' }}>
+                <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -170,7 +170,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
         </Box>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={{ xs: 0.35, sm: 1 }}
+          spacing={{ xs: 0.25, sm: 1 }}
           sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}
         >
           <Typography sx={formulaSx}>{formula}</Typography>
@@ -191,7 +191,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
         </Paper>
       ) : null}
 
-      <Stack spacing={0.4} sx={{ mt: 1.75, mb: 1 }}>
+      <Stack spacing={0.5} sx={{ mt: 1.75, mb: 1 }}>
         <Typography sx={dialogSectionTitleSx}>Result table</Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Entries outside the current range are preserved when you change dice.
@@ -246,13 +246,13 @@ const sectionSx = {
 const diceGridSx = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 1fr))',
-  gap: 0.65,
+  gap: 0.75,
   my: 1,
 };
 
 const dieControlSx = {
-  px: 0.65,
-  py: 0.55,
+  px: 0.75,
+  py: 0.5,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -290,7 +290,7 @@ const formulaSx = {
 
 const outcomeSx = {
   mt: 1.5,
-  p: { xs: 1.1, sm: 1.4 },
+  p: { xs: 1, sm: 1.5 },
   display: 'grid',
   gridTemplateColumns: { xs: '48px minmax(0,1fr)', sm: '58px minmax(0,1fr)' },
   gap: 1.25,
@@ -327,10 +327,10 @@ const outcomeTextSx = {
 };
 
 const entryRowSx = {
-  p: { xs: 0.85, sm: 0.7 },
+  p: { xs: 0.75, sm: 0.75 },
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', sm: '76px minmax(0,1fr)' },
-  gap: { xs: 0.55, sm: 1 },
+  gap: { xs: 0.5, sm: 1 },
   alignItems: 'center',
   bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };

@@ -103,9 +103,9 @@ export default function Movement({ C, sheet }) {
           </Tooltip>
         ) : null}
       </PanelHeader>
-      <Box sx={{ p: '0.55rem 0.8rem', display: 'grid', gap: 0.35 }}>
+      <Box sx={{ p: '0.55rem 0.8rem', display: 'grid', gap: 0.25 }}>
         {entries.map((entry) => (
-          <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
+          <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.25, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>{speedLabel(entry.key)}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
               <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: hasPenalty ? UI_COLORS.penaltyText : UI_COLORS.accentText, lineHeight: 1 }}>

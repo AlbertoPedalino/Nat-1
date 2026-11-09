@@ -17,7 +17,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
 
   return (
     <Box sx={{ ...SURFACES.panel, p: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}
         </Typography>
@@ -25,7 +25,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
           {pool.remaining}/{pool.total} left
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
         {Array.from({ length: pool.total }, (_, i) => {
           const used = i >= pool.remaining;
           const spending = !used && i < value;

@@ -114,8 +114,8 @@ const underFogSx = { zIndex: 3 };
 
 const bubbleSx = {
   position: 'relative',
-  px: 1.2,
-  py: 0.9,
+  px: 1.25,
+  py: 1,
   minWidth: 150,
   maxWidth: 260,
   textAlign: 'center',
@@ -138,7 +138,7 @@ const dismissableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
   // Room for the cross, so it never sits on the actor's name.
-  px: 2.2,
+  px: 2.25,
   '&:focus-visible': { outline: `2px solid ${VTT_COLORS.accent}`, outlineOffset: 2 },
 };
 
@@ -177,13 +177,13 @@ const labelSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
   color: 'text.secondary',
-  mb: 0.3,
+  mb: 0.25,
 };
 
 const natSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  mb: 0.3,
+  mb: 0.25,
 };
 
 const modeChipSx = (chip) => ({
@@ -192,7 +192,7 @@ const modeChipSx = (chip) => ({
   fontWeight: 700,
   letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1,
-  mb: 0.3,
+  mb: 0.25,
   color: chip.color,
   borderColor: chip.borderColor,
   bgcolor: chip.bgColor,
@@ -203,7 +203,7 @@ const modeChipSx = (chip) => ({
 const totalSx = {
   ...TEXT_STYLES.figure,
   lineHeight: 1,
-  my: 0.2,
+  my: 0.25,
 };
 
 const detailSx = {
@@ -218,7 +218,7 @@ const tailSx = {
   position: 'absolute',
   left: '50%',
   bottom: -8,
-  ml: '-7px',
+  ml: -1,
   width: 0,
   height: 0,
   borderLeft: '7px solid transparent',

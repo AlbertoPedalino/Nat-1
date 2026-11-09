@@ -36,7 +36,7 @@ export function RichText({ text, sx, variant = 'body2', color = 'text.secondary'
   const paragraphs = raw.split(/\n+/).map((line) => line.trim()).filter(Boolean);
   if (!paragraphs.length) return null;
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', ...sx }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, ...sx }}>
       {paragraphs.map((paragraph, index) => (
         <Typography key={`rt-${index}`} variant={variant} sx={{ lineHeight, color }}>
           <RichInline text={paragraph} keyPrefix={`rt-${index}`} />

@@ -12,7 +12,7 @@ export default function WeatherSummary({ weather, intensity, dense = false }) {
   const Icon = weatherIcon(weather);
   const disadvantage = hasWeatherDisadvantage(weather, intensity);
   return (
-    <Stack direction="row" spacing={dense ? 0.9 : 0.75} sx={{ alignItems: 'center' }}>
+    <Stack direction="row" spacing={dense ? 1 : 0.75} sx={{ alignItems: 'center' }}>
       <Icon size={20} color={tone} />
       <Box sx={{ minWidth: 0 }}>
         <Typography sx={{ fontSize: dense ? FONT_SIZES.xl : FONT_SIZES.xxl, fontWeight: 700, lineHeight: 1.2, color: tone }}>

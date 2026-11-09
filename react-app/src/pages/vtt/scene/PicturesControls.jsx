@@ -133,7 +133,7 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
 const compactSwitchSx = {
   ...SURFACES.mapControl,
   '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
-  '& .MuiToggleButton-root': { border: 0, px: 1, py: 0.4 },
+  '& .MuiToggleButton-root': { border: 0, px: 1, py: 0.5 },
 };
 
 function HiddenFileInput({ inputRef, onPick }) {

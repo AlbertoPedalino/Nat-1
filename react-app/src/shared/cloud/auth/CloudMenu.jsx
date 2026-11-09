@@ -114,7 +114,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         {status === 'authed'
           ? <Box component="span" sx={usernameLabelSx}>{username || 'ACCOUNT'}</Box>
           : 'LOGIN'}
-        {dot ? <Box component="span" sx={{ ml: 0.6, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
+        {dot ? <Box component="span" sx={{ ml: 0.5, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>
 
       <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={close}>

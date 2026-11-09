@@ -23,7 +23,7 @@ function PageTab({ page, active, onClick }) {
     <Box
       onClick={onClick}
       sx={{
-        px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure, bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft), color: active ? 'primary.contrastText' : 'text.secondary',
+        px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure, bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft), color: active ? 'primary.contrastText' : 'text.secondary',
         border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
         '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.fill) },
       }}
@@ -87,7 +87,7 @@ export default function NotesTab({ sheet }) {
         {pages.map((page, i) => (
           <PageTab key={page.id} page={page} active={i === activeIdx} onClick={() => setActiveIdx(i)} />
         ))}
-        <IconButton size="small" onClick={addPage} sx={{ color: 'primary.main', p: 0.3 }}>
+        <IconButton size="small" onClick={addPage} sx={{ color: 'primary.main', p: 0.25 }}>
           <Plus size={14} />
         </IconButton>
       </Box>
@@ -113,11 +113,11 @@ export default function NotesTab({ sheet }) {
             {activePage.name}
           </Typography>
         )}
-        <IconButton size="small" onClick={() => setEditingName(editingName === activeIdx ? null : activeIdx)} sx={{ color: 'text.secondary', p: 0.3 }}>
+        <IconButton size="small" onClick={() => setEditingName(editingName === activeIdx ? null : activeIdx)} sx={{ color: 'text.secondary', p: 0.25 }}>
           {editingName === activeIdx ? <Check size={13} /> : <PencilLine size={13} />}
         </IconButton>
         {pages.length > 1 && (
-          <IconButton size="small" onClick={() => deletePage(activeIdx)} sx={{ color: 'error.main', p: 0.3, ml: 'auto' }}>
+          <IconButton size="small" onClick={() => deletePage(activeIdx)} sx={{ color: 'error.main', p: 0.25, ml: 'auto' }}>
             <Minus size={14} />
           </IconButton>
         )}

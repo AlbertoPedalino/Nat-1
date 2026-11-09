@@ -73,7 +73,7 @@ export default function TokenMenu({
         },
       }}
     >
-      <Stack spacing={0.65} sx={{ px: 1, py: 0.75 }}>
+      <Stack spacing={0.75} sx={{ px: 1, py: 0.75 }}>
         {/* Whether the table sees the piece at all. A trap, hoard or hidden map
             prop arrives with this already ticked; clearing it is how the GM
             reveals it. Normal map/token layers stay intact, while a legacy GM
@@ -210,8 +210,8 @@ const objectStyleSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) 34px',
   alignItems: 'center',
-  gap: 0.6,
-  p: 0.6,
+  gap: 0.5,
+  p: 0.5,
   border: '1px solid',
   borderColor: 'gmboard.vtt.accentTint',
   borderRadius: 1,

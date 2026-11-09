@@ -217,7 +217,7 @@ const countSx = {
   bottom: -5,
   minWidth: 20,
   height: 20,
-  px: 0.4,
+  px: 0.5,
   borderRadius: 10,
   bgcolor: VTT_COLORS.accent,
   color: VTT_COLORS.surface,

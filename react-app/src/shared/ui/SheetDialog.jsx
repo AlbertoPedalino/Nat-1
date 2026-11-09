@@ -26,7 +26,7 @@ const titleSx = {
   ...panelBarSx,
   color: 'primary.main',
   px: 2,
-  py: 1.1,
+  py: 1,
 };
 
 const titleTextSx = {
@@ -63,8 +63,8 @@ const actionsSx = {
     ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.xs,
     minWidth: 0,
-    px: 1.4,
-    py: 0.35,
+    px: 1.5,
+    py: 0.25,
     borderRadius: 1,
   },
 };

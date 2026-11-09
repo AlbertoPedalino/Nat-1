@@ -99,7 +99,7 @@ const codeSx = {
   bgcolor: 'action.hover',
   borderRadius: 1,
   px: 0.5,
-  py: 0.125,
+  py: 0.25,
 };
 
 const preSx = {

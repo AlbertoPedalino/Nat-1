@@ -84,7 +84,7 @@ export const battleMapCompactFieldSx = {
 export const battleMapCheckboxRowSx = {
   m: 0,
   minHeight: 24,
-  '& .MuiCheckbox-root': { p: 0.35, mr: 0.25 },
+  '& .MuiCheckbox-root': { p: 0.25, mr: 0.25 },
   '& .MuiSvgIcon-root': { width: 17, height: 17 },
 };
 

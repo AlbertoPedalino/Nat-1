@@ -21,7 +21,7 @@ const VARIANTS = {
     labelGap: 0.6,
     labelTop: { fontSize: FONT_SIZES.sm, letterSpacing: LETTER_SPACINGS.sm },
     labelBottom: { fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.sm },
-    field: { variant: 'outlined', fontSize: FONT_SIZES.xxl, color: 'text.primary', py: '6px' },
+    field: { variant: 'outlined', fontSize: FONT_SIZES.xxl, color: 'text.primary', py: 0.75 },
     stepper: {
       columns: '24px minmax(34px, 1fr) 24px',
       mt: 0.5,
@@ -38,10 +38,10 @@ const VARIANTS = {
     labelGap: 0.35,
     labelTop: { fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg },
     labelBottom: { fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg },
-    field: { variant: 'standard', fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, py: '2px' },
+    field: { variant: 'standard', fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, py: 0.25 },
     stepper: {
       columns: '20px minmax(26px, 1fr) 20px',
-      mt: 0.3,
+      mt: 0.25,
       bgcolor: UI_COLORS.surfaceSunken,
       button: 20,
       icon: 11,

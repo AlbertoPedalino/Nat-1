@@ -103,7 +103,7 @@ export default function PlayerPanel({
         />
 
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
-          <Box sx={{ color: 'text.secondary', mt: '2px' }}><MapPin size={13} /></Box>
+          <Box sx={{ color: 'text.secondary', mt: 0.25 }}><MapPin size={13} /></Box>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Right-click any creature to flag a condition on it — that works on enemies too.
           </Typography>

@@ -18,7 +18,7 @@ export default function TokenHpRow({ fields, withVitals, onClose }) {
   const hpFieldWidth = withVitals ? 60 : 82;
 
   return (
-    <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
       <TextField
         label="HP"
         size="small"
@@ -105,7 +105,7 @@ const maxBonusSx = {
   position: 'absolute',
   top: -7,
   right: 4,
-  px: 0.3,
+  px: 0.25,
   bgcolor: 'gmboard.vtt.surfaceSolid',
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,

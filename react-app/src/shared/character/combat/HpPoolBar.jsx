@@ -20,7 +20,7 @@ export default function HpPoolBar({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
-        <Typography component="span" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mr: 0.4 }}>HP</Typography>
+        <Typography component="span" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mr: 0.5 }}>HP</Typography>
         <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.title, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: 1 }}>{current}</Typography>
         <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
         <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>{max}</Typography>

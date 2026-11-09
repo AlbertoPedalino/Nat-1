@@ -48,7 +48,7 @@ export default function HexcrawlPanel({
   const mountSpeed = normalizeMountSpeed(defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1);
 
   return (
-    <Stack spacing={1.1}>
+    <Stack spacing={1}>
       {sky ? <WeatherCard clock={sky} /> : null}
 
       <NextHexLine terrain={defaults?.terrain} clock={sky} mountSpeed={mountSpeed} />
@@ -128,7 +128,7 @@ function WeatherCard({ clock }) {
   return (
     <Box sx={{ ...cardSx, borderColor: alpha(tone, OPACITY.strong), bgcolor: alpha(tone, OPACITY.soft) }}>
       <WeatherSummary weather={clock.weather} intensity={clock.intensity} dense />
-      <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.6 }}>
+      <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.5 }}>
         <Typography sx={clockSx}>{formatCampaignDateTime(clock)}</Typography>
         {timed ? (
           <Typography sx={effectSx}>
@@ -238,8 +238,8 @@ function LastHexCard({ last, onOpenResult }) {
   return (
     <Box sx={lastCardSx}>
       <Typography sx={sectionSx}>Last hex visited</Typography>
-      <Stack direction="row" spacing={0.8} sx={{ alignItems: 'flex-start' }}>
-        <Box sx={{ pt: 0.2 }}><TerrainIcon size={16} color={VTT_COLORS.accent} /></Box>
+      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
+        <Box sx={{ pt: 0.25 }}><TerrainIcon size={16} color={VTT_COLORS.accent} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={lastHexSx}>
             Hex {last.hex.q}, {last.hex.r}
@@ -279,7 +279,7 @@ const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
 const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: 1.35 };
 
 const cardSx = {
-  p: 0.9,
+  p: 1,
   border: '1px solid',
   borderRadius: 1.5,
 };
@@ -289,8 +289,8 @@ const effectSx = { color: 'text.secondary', fontSize: FONT_SIZES.sm };
 const nextHexSx = {
   display: 'flex',
   alignItems: 'flex-start',
-  gap: 0.9,
-  p: 0.9,
+  gap: 1,
+  p: 1,
   border: '1px solid',
   borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
   borderRadius: 1.5,
@@ -303,9 +303,9 @@ const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
 const chipSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 0.4,
+  gap: 0.5,
   px: 0.75,
-  py: 0.2,
+  py: 0.25,
   fontSize: FONT_SIZES.sm,
   lineHeight: 1.4,
   color: VTT_COLORS.text,
@@ -328,7 +328,7 @@ const linkButtonSx = {
 };
 
 const lastCardSx = {
-  p: 0.9,
+  p: 1,
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1.5,
@@ -346,7 +346,7 @@ const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight:
 const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.4 };
 
 const lastButtonSx = {
-  mt: 0.4,
+  mt: 0.5,
   px: 0.75,
   minWidth: 0,
   fontSize: FONT_SIZES.sm,

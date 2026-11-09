@@ -59,11 +59,11 @@ export default function AuthDialog({ open, onClose }) {
         variant="fullWidth"
         sx={{ mb: 1.5, minHeight: 0 }}
       >
-        <Tab value="login" label="Log in" sx={{ minHeight: 0, py: 0.6 }} />
-        <Tab value="register" label="Sign up" sx={{ minHeight: 0, py: 0.6 }} />
+        <Tab value="login" label="Log in" sx={{ minHeight: 0, py: 0.5 }} />
+        <Tab value="register" label="Sign up" sx={{ minHeight: 0, py: 0.5 }} />
       </Tabs>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}
         component="form"
         onSubmit={(e) => { e.preventDefault(); submit(); }}
       >
@@ -86,7 +86,7 @@ export default function AuthDialog({ open, onClose }) {
         <button type="submit" hidden aria-hidden />
       </Box>
 
-      {error ? <Alert severity="error" sx={{ mt: 1.2 }}>{error}</Alert> : null}
+      {error ? <Alert severity="error" sx={{ mt: 1.25 }}>{error}</Alert> : null}
     </SheetDialog>
   );
 }

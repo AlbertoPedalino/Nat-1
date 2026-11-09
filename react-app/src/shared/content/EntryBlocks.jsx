@@ -56,7 +56,7 @@ export function EntryBlocks({
         }
         if (block.kind === 'listGroup') {
           return (
-            <Box key={`lg-${index}`} component="ul" sx={{ m: 0, pl: 2.2, color: bodyColor }}>
+            <Box key={`lg-${index}`} component="ul" sx={{ m: 0, pl: 2.25, color: bodyColor }}>
               {block.items.map((item, itemIndex) => (
                 <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: 1.38, fontSize, ...(markerColor ? { '&::marker': { color: markerColor } } : null) }}>
                   {item.tokens?.length ? <RichInline tokens={item.tokens} keyPrefix={`li-${index}-${itemIndex}`} strongColor={strongColor} /> : item.text}
@@ -69,7 +69,7 @@ export function EntryBlocks({
           return (
             <Box key={`tbl-${index}`} sx={{ overflowX: 'auto' }}>
               {block.caption ? (
-                <Typography variant="body2" sx={{ fontWeight: 800, color: headingColor, mb: 0.35, fontSize: headingFontSize }}>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: headingColor, mb: 0.25, fontSize: headingFontSize }}>
                   {block.caption}
                 </Typography>
               ) : null}

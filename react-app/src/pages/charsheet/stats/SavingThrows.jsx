@@ -89,7 +89,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5, cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
@@ -116,12 +116,12 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       </Box>
 
       {(modifierRows.length > 0 || concentrationBonus > 0 || d20FloorReminders.length > 0) && (
-        <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: 0.75 }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
               <Dice5 size={13} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentMuted, fontWeight: 700, flexShrink: 0 }}>
                     Min {r.minRoll}
                   </Typography>
@@ -130,7 +130,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                   </Typography>
                 </Box>
                 {r.note && (
-                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
+                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: 0.25 }}>
                     {r.note}
                   </Typography>
                 )}
@@ -141,7 +141,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
               <Sparkles size={13} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.secondary, fontWeight: 700, flexShrink: 0 }}>
                     +{concentrationBonus}
                   </Typography>
@@ -149,7 +149,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                     Concentration saves
                   </Typography>
                 </Box>
-                <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
+                <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: 0.25 }}>
                   Bladesong
                 </Typography>
               </Box>
@@ -163,7 +163,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
                 <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color, fontWeight: 700, flexShrink: 0 }}>
                       {kindLabel}
                     </Typography>
@@ -171,7 +171,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                       {mod.label}
                     </Typography>
                   </Box>
-                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
+                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: 0.25 }}>
                     {mod.source}
                   </Typography>
                 </Box>

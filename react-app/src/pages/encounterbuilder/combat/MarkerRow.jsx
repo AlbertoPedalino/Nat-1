@@ -65,7 +65,7 @@ const toggleSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
   ...TEXT_STYLES.label,
-  '& .MuiButton-startIcon': { mr: 0.4 },
+  '& .MuiButton-startIcon': { mr: 0.5 },
   '&:hover': { color: 'text.primary' },
 };
 

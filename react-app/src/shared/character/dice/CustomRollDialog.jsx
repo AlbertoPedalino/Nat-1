@@ -81,7 +81,7 @@ export default function CustomRollDialog({
       {DICE_TYPES.map((faces) => (
         <Box key={faces} sx={CUSTOM_ROLL_SX.diceRow}>
           <Typography sx={CUSTOM_ROLL_SX.diceLabel}>{dieLabel(faces)}</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Button size="small" variant="outlined" onClick={() => adjustDie(faces, -1)} disabled={!counts[faces]} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
             <Typography sx={CUSTOM_ROLL_SX.countLabel}>{counts[faces] || 0}</Typography>
             <Button
@@ -96,7 +96,7 @@ export default function CustomRollDialog({
           </Box>
         </Box>
       ))}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, py: 0.8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, py: 0.75 }}>
         <Typography sx={CUSTOM_ROLL_SX.modLabel}>Modifier</Typography>
         <Button size="small" variant="outlined" onClick={() => setModifier((m) => m - 1)} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
         <Typography sx={CUSTOM_ROLL_SX.countLabel}>{signed(modifier)}</Typography>
@@ -120,10 +120,10 @@ export default function CustomRollDialog({
 }
 
 const CUSTOM_ROLL_SX = {
-  diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.4, borderBottom: 1, borderColor: 'divider' },
+  diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.5, borderBottom: 1, borderColor: 'divider' },
   diceLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary', minWidth: 42 },
   countLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, minWidth: 24, textAlign: 'center' },
-  stepBtn: { minWidth: 28, px: 0.4, py: 0.2, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } },
+  stepBtn: { minWidth: 28, px: 0.5, py: 0.25, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } },
   modLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'text.secondary', mr: 0.5 },
   formula: { fontFamily: UI_FONTS.mono, fontSize: FONT_SIZES.lg, color: UI_COLORS.secondary, textAlign: 'center', py: 0.5 },
 };

@@ -31,8 +31,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
-  px: '7px',
-  py: '2px',
+  px: 1,
+  py: 0.25,
   border: 1,
   borderRadius: 0.375,
   ...TEXT_STYLES.title,
@@ -48,7 +48,7 @@ function ItemTagsRow({ item, character }) {
   const tags = buildItemTags(item, character);
   if (!item.custom && tags.length === 0) return null;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', mt: '3px' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
       {item.custom ? <Box component="span" sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>[custom]</Box> : null}
       {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />)}
     </Box>
@@ -70,8 +70,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
 
   return (
     <ExpandableCard
-      containerSx={{ mb: '4px', overflow: 'hidden' }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: '10px', py: '6px', mt: 0, mb: 0 }}
+      containerSx={{ mb: 0.5, overflow: 'hidden' }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: 1.25, py: 0.75, mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -84,29 +84,29 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : OPACITY.veil, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line) } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : OPACITY.veil, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line) } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               <ItemNameIcon item={item} />
               <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
-              <Typography sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.textMuted, mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Typography sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.textMuted, mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Archive size={10} /> Owned, not carried
               </Typography>
             ) : null}
             {penaltyMsg && (
-              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'warning.main', mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <AlertTriangle size={10} /> {penaltyMsg}
               </Typography>
             )}
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 0.75, flexWrap: 'wrap' }}>
           {carried && isWeaponItem(item) ? (
-            <Box sx={{ display: 'flex', gap: '2px' }}>
+            <Box sx={{ display: 'flex', gap: 0.25 }}>
               {canOneHand(item) ? (
                 <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => actions.equipSlot(index, 'mainHand')} label="MH" />
               ) : null}
@@ -122,7 +122,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -139,7 +139,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
                 ...itemStateChipBaseSx,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: 0.5,
                 borderColor: ITEM_ATTUNEMENT,
                 color: ITEM_ATTUNEMENT,
                 bgcolor: alpha(ITEM_ATTUNEMENT, OPACITY.fill),
@@ -160,9 +160,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : null}
           {/* Where the item is and how many, apart from how it is being used. */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -184,7 +184,7 @@ function ItemFlagButton({ def, active, onClick }) {
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
       sx={{
-        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
+        minWidth: 0, px: 1, py: 0.25, border: 1, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
         ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
@@ -218,7 +218,7 @@ function SlotBtn({ active, onClick, label }) {
   return (
     <IconButton size="small" onClick={onClick}
       sx={{
-        minWidth: 24, height: 24, px: '4px',
+        minWidth: 24, height: 24, px: 0.5,
         border: 1,
         borderColor: active ? UI_COLORS.accent : 'divider',
         borderRadius: 0.375,
@@ -252,7 +252,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
   ].filter(Boolean).join(' · ');
   const accent = item.attuned ? ITEM_ATTUNEMENT : (hasRequirementWarning ? UI_COLORS.accent : null);
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       <Tooltip title={tip} arrow>
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
@@ -265,7 +265,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+            sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

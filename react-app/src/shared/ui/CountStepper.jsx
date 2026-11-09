@@ -44,7 +44,7 @@ export default function CountStepper({
 const rowSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: 0.5,
   flexShrink: 0,
 };
 

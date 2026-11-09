@@ -37,7 +37,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 1, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
@@ -45,11 +45,11 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
           const used = Math.max(0, Number(freeCastUses?.[fc.id] || 0));
           const max = Math.max(1, Number(fc.max) || 1);
           return (
-            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.55, flexWrap: 'wrap' }}>
+            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
               <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700, lineHeight: 1.1 }}>
                 {fc.label}
               </Typography>
-              <Box sx={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+              <Box sx={{ display: 'inline-flex', gap: 0.5, alignItems: 'center' }}>
                 {Array.from({ length: max }).map((_, i) => {
                   const isUsed = i < used;
                   return (
@@ -87,14 +87,14 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
 export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
   if (!options.length) {
     return (
-      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.7 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.75 }}>
         No weapon you are proficient with in your inventory.
       </Typography>
     );
   }
   return (
-    <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.3 }}>
+    <Box sx={{ mt: 0.75, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.25 }}>
         Weapon
       </Typography>
       <ToggleButtonGroup
@@ -110,11 +110,11 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
         }}
         sx={{
           flexWrap: 'wrap',
-          gap: '3px',
+          gap: 0.5,
           '& .MuiToggleButton-root': {
             fontSize: FONT_SIZES.sm,
-            px: '8px',
-            py: '3px',
+            px: 1,
+            py: 0.5,
             border: 1,
             borderRadius: '999px !important',
             '&:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' },

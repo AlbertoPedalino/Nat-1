@@ -82,11 +82,11 @@ export default function CombatantConditions({ combatant }) {
 
 const gridChipSx = { height: 20, fontSize: FONT_SIZES.xs };
 
-const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.4, mt: 0.5 };
+const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 };
 
 const gridSx = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(104px, 1fr))',
-  gap: 0.4,
-  mt: 0.6,
+  gap: 0.5,
+  mt: 0.5,
 };

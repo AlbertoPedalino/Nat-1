@@ -102,6 +102,6 @@ const titleSx = {
   color: 'primary.main',
 };
 
-const settingsButtonSx = { color: 'text.secondary', p: 0.4, '&:hover': { color: 'primary.main' } };
+const settingsButtonSx = { color: 'text.secondary', p: 0.5, '&:hover': { color: 'primary.main' } };
 
 const titleRowSx = { alignItems: 'center', justifyContent: 'space-between', mb: 0.75 };

@@ -52,7 +52,7 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
 // created item) and its gold title.
 export const detailPanelSx = {
   ...SURFACES.wash,
-  mt: 0.8,
+  mt: 0.75,
   p: 1,
 };
 

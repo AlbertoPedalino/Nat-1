@@ -173,6 +173,6 @@ export default function RollModeArea({
   );
 }
 
-const menuItemSx = { minHeight: 0, py: 0.4 };
+const menuItemSx = { minHeight: 0, py: 0.5 };
 const primarySx = { fontSize: FONT_SIZES.lg, fontWeight: 700 };
 const secondarySx = { fontSize: FONT_SIZES.sm };

@@ -62,7 +62,7 @@ export default function ExpandableSelectionList({
                         disabled={option.disabled}
                         alignItems="flex-start"
                         onClick={() => onSelect(option)}
-                        sx={{ flex: 1, minWidth: 0, px: 1, py: 0.8 }}
+                        sx={{ flex: 1, minWidth: 0, px: 1, py: 0.75 }}
                       >
                         <ListItemText
                           primary={(
@@ -76,7 +76,7 @@ export default function ExpandableSelectionList({
                           secondary={option.secondary || null}
                           slotProps={{ secondary: {
                             noWrap: true,
-                            sx: { mt: 0.15, fontSize: FONT_SIZES.md },
+                            sx: { mt: 0.25, fontSize: FONT_SIZES.md },
                           } }}
                         />
                       </ListItemButton>
@@ -85,7 +85,7 @@ export default function ExpandableSelectionList({
                         disabled={disabled}
                         aria-label={open ? `Collapse ${option.label}` : `Expand ${option.label}`}
                         onClick={toggle}
-                        sx={{ borderRadius: 0, px: 1.1, color: 'text.secondary' }}
+                        sx={{ borderRadius: 0, px: 1, color: 'text.secondary' }}
                       >
                         {open ? <ChevronUp size={17} /> : <ChevronDown size={17} />}
                       </IconButton>

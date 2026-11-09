@@ -47,7 +47,7 @@ export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TON
   return (
     <Card variant="outlined" sx={SECTION_CARD_SX}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.85} sx={{ minWidth: 0 }}>
+        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
             {Icon ? <Icon size={15} color={tone} /> : null}
             <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -77,7 +77,7 @@ export function InlineMetadata({ items }) {
       {visibleItems.map((item, index) => (
         <Box component="span" key={item.key}>
           {index > 0 ? (
-            <Box component="span" aria-hidden="true" sx={{ mx: 0.65, color: 'text.disabled' }}>
+            <Box component="span" aria-hidden="true" sx={{ mx: 0.75, color: 'text.disabled' }}>
               ·
             </Box>
           ) : null}
@@ -112,7 +112,7 @@ function outlinedChipSx(color) {
 
 export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item) => item, getLabel = (item) => item }) {
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.45, mt: 0.45, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
       {items.map((item) => (
         <Chip
           key={getKey(item)}

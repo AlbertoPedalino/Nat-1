@@ -33,7 +33,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 const sectionSx = {
   ...SURFACES.panel,
-  p: 0.8,
+  p: 0.75,
 };
 const labelSx = {
   ...TEXT_STYLES.title,
@@ -44,7 +44,7 @@ const selectSx = {
   flex: 1,
   minWidth: 150,
   fontSize: FONT_SIZES.md,
-  '& .MuiSelect-select': { py: 0.65 },
+  '& .MuiSelect-select': { py: 0.75 },
 };
 
 function availableSlotOptions(regularSlots, pactSlots, sheet) {
@@ -183,10 +183,10 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
   }));
 
   return (
-    <Stack spacing={0.7} onClick={(event) => event.stopPropagation()}>
+    <Stack spacing={0.75} onClick={(event) => event.stopPropagation()}>
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Charge Magic Item · Bonus Action</Typography>
-        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5 }}>
           Spend a level 1+ spell slot; the replicated item regains charges equal to the slot level.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
@@ -218,7 +218,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
 
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Drain Magic Item · Bonus Action · {drainUses}/1</Typography>
-        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5 }}>
           Destroy a Common item for a level 1 slot, or an Uncommon/Rare item for a level 2 slot. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5}>
@@ -232,7 +232,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
 
       <Box sx={sectionSx}>
         <Typography sx={labelSx}>Transmute Magic Item · Magic Action · {transmuteUses}/1</Typography>
-        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.55 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5 }}>
           Transform one replicated item into a different item based on another plan you know. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>

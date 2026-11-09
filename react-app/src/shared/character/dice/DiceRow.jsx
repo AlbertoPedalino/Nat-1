@@ -45,8 +45,8 @@ export default function DiceRow({ dice, modifier, seed, size, solid = false, jus
 const rowSx = {
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 0.4,
-  my: 0.4,
+  gap: 0.5,
+  my: 0.5,
   alignItems: 'center',
 };
 
@@ -54,5 +54,5 @@ const modifierSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xxl,
   color: 'text.secondary',
-  ml: 0.3,
+  ml: 0.25,
 };

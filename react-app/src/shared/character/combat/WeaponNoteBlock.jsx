@@ -9,7 +9,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 export function WeaponNoteBlock({ notes, fontSize, sx }) {
   if (!notes?.length) return null;
   return notes.map((note) => (
-    <Box key={note.key} sx={{ mt: 0.7, ...sx }}>
+    <Box key={note.key} sx={{ mt: 0.75, ...sx }}>
       <Typography sx={{ fontSize: FONT_SIZES.sm, color: RICH_TEXT_ACCENT, fontWeight: 700 }}>
         {note.source && note.source !== note.title ? `${note.source} — ${note.title}` : note.title}
       </Typography>

@@ -37,7 +37,7 @@ import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
-    <Stack direction="row" spacing={0.65} sx={{ alignItems: 'center', minWidth: 0 }}>
+    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
       <Chip size="small" label={index + 1} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
       <Icon size={14} />
       <span>{step.label}</span>
@@ -99,7 +99,7 @@ export default function CharBuilder() {
         onImportFile={handleImportSheetFile}
       />
 
-      <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1.1 }, py: 1.1 }}>
+      <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1 }, py: 1 }}>
         <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden' }}>
           <Tabs
             value={state.tab}
@@ -174,7 +174,7 @@ export default function CharBuilder() {
           </Box>
         </Box>
 
-        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.4, textAlign: 'center', fontSize: FONT_SIZES.xxs }}>
+        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.5, textAlign: 'center', fontSize: FONT_SIZES.xxs }}>
           Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
         </Typography>
       </Box>

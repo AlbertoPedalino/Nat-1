@@ -6,12 +6,12 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 export default function BuilderPanel({ id, title, icon: Icon, note, action, children, sx }) {
   return (
     <Paper id={id} variant="outlined" sx={{ p: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden', ...sx }}>
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start', mb: 0.85, pb: 0.55, borderBottom: 1, borderColor: 'divider' }}>
+      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start', mb: 0.75, pb: 0.5, borderBottom: 1, borderColor: 'divider' }}>
         {Icon ? <Icon size={15} color={UI_COLORS.accent} /> : null}
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography variant="h2" sx={{ color: 'primary.main', ...TEXT_STYLES.label }}>{title}</Typography>
           {note ? (
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.15, fontSize: FONT_SIZES.sm }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25, fontSize: FONT_SIZES.sm }}>
               {note}
             </Typography>
           ) : null}

@@ -30,7 +30,7 @@ export function CannonRulesSummary({ maxHp, level }) {
           </Box>
         );
       }}
-      detailsSx={{ pt: 0.6 }}
+      detailsSx={{ pt: 0.5 }}
       details={(
         <Box sx={rulesSummarySx}>
           {groups.map((group) => (
@@ -62,14 +62,14 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
           onClick={disabled ? undefined : toggle}
           sx={{
             ...SURFACES.panel,
-            display: 'flex', alignItems: 'center', gap: '6px', px: '8px', py: '5px',
+            display: 'flex', alignItems: 'center', gap: 0.75, px: 1, py: 0.75,
             borderRadius: open ? '6px 6px 0 0' : 1,
             cursor: disabled ? 'default' : 'pointer',
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: OPACITY.solid }} />
           <Typography sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.md, fontWeight: 700, color: 'text.primary' }}>{mode.name}</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
             {mode.attackBonus != null ? (
               <AttackRollButton
                 rawBonus={mode.attackBonus}
@@ -89,7 +89,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
       )}
       detailsSx={{
         ...SURFACES.panel,
-        px: '8px', py: '6px', borderTop: 'none', borderRadius: cornerRadius(0, 0, 0.75, 0.75), fontSize: FONT_SIZES.xs, color: 'text.secondary',
+        px: 1, py: 0.75, borderTop: 'none', borderRadius: cornerRadius(0, 0, 0.75, 0.75), fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
     />
@@ -97,15 +97,15 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
 }
 
 const rulesPanelSx = {
-  mb: 0.8,
+  mb: 0.75,
 };
 
 const rulesToggleSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: '6px',
-  px: '8px',
-  py: '5px',
+  gap: 0.75,
+  px: 1,
+  py: 0.75,
   border: 1,
   borderColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
   borderRadius: 1,
@@ -133,13 +133,13 @@ const rulesToggleMetaSx = {
 const rulesSummarySx = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-  gap: '6px',
+  gap: 0.75,
 };
 
 const rulesGroupSx = {
   minWidth: 0,
-  px: '8px',
-  py: '6px',
+  px: 1,
+  py: 0.75,
   border: 1,
   borderColor: uiAlpha(UI_COLORS.white, OPACITY.soft),
   borderRadius: 1,
@@ -156,9 +156,9 @@ const rulesGroupTitleSx = {
 const rulesRowSx = {
   display: 'grid',
   gridTemplateColumns: '58px minmax(0, 1fr)',
-  gap: '6px',
+  gap: 0.75,
   alignItems: 'baseline',
-  py: '3px',
+  py: 0.5,
   borderTop: `1px solid ${uiAlpha(UI_COLORS.white, OPACITY.wash)}`,
   '&:first-of-type': { borderTop: 0 },
 };

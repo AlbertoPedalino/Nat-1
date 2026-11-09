@@ -43,7 +43,7 @@ export function WeaponMasteryBlock({ mastery, variant = 'tag', fontSize, sx }) {
   const name = getWeaponMasteryName(code) || code;
   const entries = getWeaponMasteryEntries(code);
   return (
-    <Box sx={{ mt: variant === 'tag' ? 0.7 : 0, ...sx }}>
+    <Box sx={{ mt: variant === 'tag' ? 0.75 : 0, ...sx }}>
       {variant === 'title' ? (
         <Typography variant="h2" sx={{ color: RICH_TEXT_ACCENT }}>{name}</Typography>
       ) : (

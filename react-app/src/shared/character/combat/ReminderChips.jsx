@@ -163,20 +163,20 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
 
 const editorSx = { display: 'flex', flexDirection: 'column', gap: 0.5 };
 
-const chipsSx = { display: 'flex', flexWrap: 'wrap', gap: 0.3 };
+const chipsSx = { display: 'flex', flexWrap: 'wrap', gap: 0.25 };
 
 const fieldRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 
 const fieldSx = {
   flex: '1 1 auto',
   minWidth: 0,
-  '& .MuiInputBase-input': { py: 0.4, fontSize: FONT_SIZES.sm },
+  '& .MuiInputBase-input': { py: 0.5, fontSize: FONT_SIZES.sm },
 };
 
 const addSx = {
   flex: '0 0 auto',
   minWidth: 0,
-  px: 0.8,
+  px: 0.75,
   py: 0,
   fontSize: FONT_SIZES.xs,
   ...TEXT_STYLES.label,

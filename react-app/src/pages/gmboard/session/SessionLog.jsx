@@ -57,7 +57,7 @@ const logBoxSx = {
 const entrySx = {
   fontSize: FONT_SIZES.md,
   color: 'text.secondary',
-  pb: 0.4,
+  pb: 0.5,
 };
 
 const emptySx = {

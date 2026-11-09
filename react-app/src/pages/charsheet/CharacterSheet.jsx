@@ -128,7 +128,7 @@ export default function CharacterSheet({
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
-        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.8} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
+        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.75} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
           <HPBlock sheet={sheet} fillWidth={embedded}
             onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
             onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
@@ -173,7 +173,7 @@ export default function CharacterSheet({
           <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.skills }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
-          <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
+          <Stack spacing={0.5} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
               effectActions={readOnly ? readOnlyEffectActions : effectActions}

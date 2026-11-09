@@ -142,7 +142,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
 
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <Typography sx={detailTitleSx} component="span">Eldritch Cannon</Typography>
         <Typography sx={{ ...subSx, ml: 'auto' }}>{cannons.length}/{capacity} active</Typography>
       </Box>
@@ -150,12 +150,12 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
       <CannonRulesSummary maxHp={maxHp} level={lv} />
 
       {/* Active cannon boards */}
-      <Stack spacing={0.8}>
+      <Stack spacing={0.75}>
         {cannons.map((cannon, index) => {
           const cur = Math.min(Number(cannon?.hpCurrent ?? maxHp), maxHp);
           return (
             <Box key={index} sx={cannonBoardSx}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xs }}>
                   {SIZE_NAMES[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
                 </Typography>
@@ -192,10 +192,10 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 if (!group.length) return null;
                 return (
                   <Box key={cat}>
-                    <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: ACTION_COLORS[cat], mb: 0.3 }}>
+                    <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: ACTION_COLORS[cat], mb: 0.25 }}>
                       {cat === 'bonus' ? 'Bonus Action' : 'Reaction'}
                     </Typography>
-                    <Stack spacing={0.4}>
+                    <Stack spacing={0.5}>
                       {group.map((mode) => (
                         <CannonActionRow
                           key={mode.key}
@@ -216,8 +216,8 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
 
       {/* Activation control */}
       {canAddMore ? (
-        <Box sx={{ mt: cannons.length ? 0.8 : 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'wrap', mb: 0.5 }}>
+        <Box sx={{ mt: cannons.length ? 0.75 : 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
             <ToggleButtonGroup size="small" exclusive value={size} onChange={(e, v) => { e.stopPropagation(); if (v) setSize(v); }}>
               <ToggleButton value="S" sx={toggleSx}>Small</ToggleButton>
               <ToggleButton value="T" sx={toggleSx}>Tiny</ToggleButton>
@@ -262,8 +262,8 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
 const cannonBoardSx = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 0.6,
-  p: 0.8,
+  gap: 0.5,
+  p: 0.75,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -271,8 +271,8 @@ const cannonBoardSx = {
 
 const toggleSx = {
   fontSize: FONT_SIZES.xs,
-  py: '3px',
-  px: '10px',
+  py: 0.5,
+  px: 1.25,
   textTransform: 'none',
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),

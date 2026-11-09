@@ -56,7 +56,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 cursor: 'pointer', transition: 'border-color 0.15s',
                 '&:hover': { borderColor: 'primary.main' },
               }}>
-              <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mb: 0.1 }}>
+              <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mb: 0.25 }}>
                 {ABILITY_ABBREVIATIONS[s]}
               </Typography>
               <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: UI_COLORS.accentText, lineHeight: 1 }}>

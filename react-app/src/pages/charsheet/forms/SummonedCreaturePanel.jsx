@@ -138,7 +138,7 @@ export default function SummonedCreaturePanel({
   const hasFixedChoice = Boolean(choiceMatch);
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <PawPrint size={14} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
       </Box>
@@ -175,7 +175,7 @@ export default function SummonedCreaturePanel({
         </CreatureOptionRow>
       ) : null}
       {!config.levelClass && config.minimumSpellLevel ? (
-        <FormControl size="small" sx={{ mb: 0.8, minWidth: 130 }}>
+        <FormControl size="small" sx={{ mb: 0.75, minWidth: 130 }}>
           <InputLabel>Spell Slot</InputLabel>
           <Select
             label="Spell Slot"
@@ -198,7 +198,7 @@ export default function SummonedCreaturePanel({
         onRollFormula={rollFormulaToast}
         bonusActionAccessory={divinePowerAccessory}
       />
-      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
+      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
         {config.levelClass
           ? `Scaled for ${config.levelClass} level ${resolvedClassLevel}.`
           : `Scaled for a level ${resolvedSpellLevel} spell slot.`}
@@ -220,8 +220,8 @@ export function DivinePowerStatusButton({ available, onToggle }) {
       onClick={onToggle ? (event) => { event.stopPropagation(); onToggle(); } : undefined}
       sx={{
         minWidth: 0,
-        ml: 0.6,
-        px: 0.65,
+        ml: 0.5,
+        px: 0.75,
         py: 0,
         verticalAlign: 'baseline',
         fontSize: FONT_SIZES.xxs,

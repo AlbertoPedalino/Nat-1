@@ -208,7 +208,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                     sx={{
                       flex: 1,
                       minWidth: 0,
-                      py: 0.65,
+                      py: 0.75,
                       px: 1,
                     }}
                   >

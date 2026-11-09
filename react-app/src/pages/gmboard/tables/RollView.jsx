@@ -303,7 +303,7 @@ const historyRowSx = {
   alignItems: 'center',
   flexWrap: 'wrap',
   columnGap: 0.75,
-  rowGap: 0.3,
+  rowGap: 0.25,
   py: 0.5,
 };
 

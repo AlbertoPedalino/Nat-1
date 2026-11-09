@@ -10,7 +10,7 @@ export default function SelectionSearch({ value, onChange, placeholder = 'Search
       onChange={onChange}
       placeholder={placeholder}
       iconSize={15}
-      sx={{ '& .MuiInputBase-input': { fontSize: FONT_SIZES.xl, py: 0.55 } }}
+      sx={{ '& .MuiInputBase-input': { fontSize: FONT_SIZES.xl, py: 0.5 } }}
     />
   );
 }

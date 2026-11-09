@@ -91,7 +91,7 @@ function StatField({ label, value, placeholder, onCommit }) {
   );
 }
 
-const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' };
+const panelSx = { mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' };
 const titleSx = {
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,

@@ -47,10 +47,10 @@ const markerGridSx = {
 
 const markerSectionSx = {
   minWidth: 0,
-  p: 0.6,
+  p: 0.5,
   display: 'flex',
   flexDirection: 'column',
-  gap: 0.35,
+  gap: 0.25,
 };
 
 const reminderSectionSx = {
@@ -62,12 +62,12 @@ const chipsSx = {
   display: 'flex',
   flexWrap: 'wrap',
   alignContent: 'flex-start',
-  gap: 0.3,
+  gap: 0.25,
   maxHeight: 150,
   overflowY: 'auto',
 };
 
 const compactChipSx = {
   height: 20,
-  '& .MuiChip-label': { px: 0.55, fontSize: FONT_SIZES.xxs, lineHeight: 1 },
+  '& .MuiChip-label': { px: 0.5, fontSize: FONT_SIZES.xxs, lineHeight: 1 },
 };

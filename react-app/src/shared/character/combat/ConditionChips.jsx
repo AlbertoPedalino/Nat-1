@@ -68,7 +68,7 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
       </Box>
       <EntryBlocks
         entries={entries}
-        spacing={0.4}
+        spacing={0.5}
         fontSize={fontSize}
         headingColor={CONDITION_ACCENT}
         bodyColor={CONDITION_BODY}
@@ -87,7 +87,7 @@ const cardSx = {
   bgcolor: alpha(CONDITION_ACCENT, OPACITY.wash),
 };
 
-const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 };
+const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 };
 
 const cardTitleSx = {
   ...TEXT_STYLES.title,
@@ -97,7 +97,7 @@ const cardTitleSx = {
 
 const cardCloseSx = {
   display: 'inline-flex',
-  p: '1px',
+  p: 0.25,
   border: 0,
   bgcolor: 'transparent',
   cursor: 'pointer',

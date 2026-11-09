@@ -17,8 +17,8 @@ export default function CollapsibleNote({ label = 'Description', children, sx })
         <Box
           onClick={toggle}
           sx={{
-            display: 'inline-flex', alignItems: 'center', gap: 0.4, cursor: 'pointer',
-            color: 'text.secondary', py: 0.2, '&:hover': { color: 'text.primary' },
+            display: 'inline-flex', alignItems: 'center', gap: 0.5, cursor: 'pointer',
+            color: 'text.secondary', py: 0.25, '&:hover': { color: 'text.primary' },
           }}
         >
           {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
@@ -27,7 +27,7 @@ export default function CollapsibleNote({ label = 'Description', children, sx })
           </Typography>
         </Box>
       )}
-      details={<Box sx={{ mt: 0.4 }}>{children}</Box>}
+      details={<Box sx={{ mt: 0.5 }}>{children}</Box>}
     />
   );
 }

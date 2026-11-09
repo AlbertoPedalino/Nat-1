@@ -19,18 +19,18 @@ const FILTERS = withIcons(ITEM_GROUP_CHIPS);
 
 export const compactInputSx = {
   '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
-  '& input': { fontSize: FONT_SIZES.lg, py: '7px' },
+  '& input': { fontSize: FONT_SIZES.lg, py: 1 },
 };
 
 export const inventorySectionSx = {
   ...SURFACES.inset,
-  p: '8px',
+  p: 1,
   mb: 1,
 };
 
 export function InventoryFilterButtons({ value, onChange, filters = FILTERS }) {
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
       <FilterToggles options={filters} value={value} onChange={onChange} />
     </Box>
   );

@@ -116,5 +116,5 @@ const combatantListSx = {
   // The Roll Log launcher is fixed over the bottom-left corner and sits above
   // this list, so the roster needs to scroll far enough for the last card to
   // clear it. Sized to the button's height plus its viewport offset.
-  pb: { xs: '58px', sm: '66px' },
+  pb: { xs: 7.5, sm: 8.5 },
 };

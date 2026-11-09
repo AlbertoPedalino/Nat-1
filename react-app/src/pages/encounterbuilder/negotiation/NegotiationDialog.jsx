@@ -173,7 +173,7 @@ function MeterCard({ label, value, max, color, prominent = false }) {
           {value}<Box component="span" sx={meterMaxSx}>/{max}</Box>
         </Typography>
       </Stack>
-      <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${max}, 1fr)`, gap: 0.45, mt: 0.85 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${max}, 1fr)`, gap: 0.5, mt: 0.75 }}>
         {Array.from({ length: max }, (_, index) => (
           <Box
             key={index}
@@ -211,7 +211,7 @@ const contentSx = {
 const attitudeGridSx = {
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-  gap: 0.65,
+  gap: 0.75,
   mt: 1,
 };
 
@@ -220,7 +220,7 @@ const attitudeButtonSx = {
   display: 'flex',
   flexDirection: { xs: 'row', sm: 'column' },
   justifyContent: 'center',
-  gap: { xs: 1, sm: 0.15 },
+  gap: { xs: 1, sm: 0.25 },
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
   '& small': {
@@ -260,18 +260,18 @@ const meterValueSx = {
 };
 
 const meterMaxSx = {
-  ml: 0.2,
+  ml: 0.25,
   fontSize: FONT_SIZES.md,
   color: 'text.secondary',
 };
 
 const currentStateSx = {
-  p: 1.1,
+  p: 1,
   bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const currentResultSx = {
-  mt: 0.2,
+  mt: 0.25,
   fontSize: FONT_SIZES.xxl,
   fontWeight: 700,
   lineHeight: 1.35,
@@ -291,7 +291,7 @@ const finalEyebrowSx = {
 };
 
 const finalResultTextSx = {
-  my: 0.35,
+  my: 0.25,
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.lead },
   lineHeight: 1.35,
@@ -306,8 +306,8 @@ const actionGridSx = {
 
 const actionButtonSx = {
   minHeight: { xs: 84, sm: 78 },
-  px: { xs: 0.65, sm: 1 },
-  py: 0.8,
+  px: { xs: 0.75, sm: 1 },
+  py: 0.75,
   display: 'flex',
   flexDirection: 'column',
   gap: 0.25,

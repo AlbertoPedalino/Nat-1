@@ -194,7 +194,7 @@ const trackSx = {
   overflowX: 'auto',
   overflowY: 'hidden',
   // Room for the selected outline, which a scrolling box would clip.
-  p: '3px',
+  p: 0.5,
   scrollbarWidth: 'thin',
 };
 

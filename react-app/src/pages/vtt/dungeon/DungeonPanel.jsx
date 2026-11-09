@@ -39,7 +39,7 @@ export default function DungeonPanel({
   const roomCount = Number(rooms);
 
   return (
-    <Stack spacing={1.1}>
+    <Stack spacing={1}>
       <Stack direction="row" spacing={0.75}>
         <TextField
           label="Rooms"
@@ -131,7 +131,7 @@ export default function DungeonPanel({
             ))}
 
             {!isNothingFound(keyRoom.loot?.data) ? (
-              <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Coins size={13} color={theme.palette.gmboard.result.loot} />
                 <Typography sx={lineSx}>{lootLabel(keyRoom.loot.data, keyRoom.lootDc)}</Typography>
               </Stack>
@@ -139,7 +139,7 @@ export default function DungeonPanel({
 
             {chosen?.groups?.length ? (
               <>
-                <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                   <Users size={13} color={theme.palette.gmboard.result.encounter} />
                   <Typography sx={lineSx}>{describeGroups(chosen.groups, chosen.budget)}</Typography>
                 </Stack>
@@ -154,7 +154,7 @@ export default function DungeonPanel({
                     nothing. */}
                 <Stack
                   direction="row"
-                  spacing={0.6}
+                  spacing={0.5}
                   sx={dragSx}
                   onPointerDown={busy ? undefined : (event) => beginPiecePointerDrag(event, {
                     kind: 'encounter',
@@ -240,7 +240,7 @@ function SlotLine({ slot, tones }) {
   if (!extra) return <Typography sx={lineSx}>{slot.type}</Typography>;
   if (extra.kind === 'enc') {
     return (
-      <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
         <Swords size={13} color={tones.result.encounter} />
         <Typography sx={lineSx}>
           {[extra.data.diff, encounterDetail(extra.data)].filter(Boolean).join(' · ')}
@@ -250,7 +250,7 @@ function SlotLine({ slot, tones }) {
   }
   if (extra.kind === 'trap') {
     return (
-      <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
         <Flame size={13} color={tones.result.trap} />
         <Typography sx={lineSx}>
           {trapLabel(extra.data)}
@@ -259,7 +259,7 @@ function SlotLine({ slot, tones }) {
     );
   }
   return (
-    <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
       <Leaf size={13} color={tones.result.none} />
       <Typography sx={lineSx}>
         {slot.type}{extra.data?.severity ? ` · ${extra.data.severity}` : ''}
@@ -273,13 +273,13 @@ const warnSx = { fontSize: FONT_SIZES.md, color: 'warning.main', lineHeight: 1.4
 const lineSx = { fontSize: FONT_SIZES.md, color: 'text.primary' };
 
 const roomSx = {
-  p: 0.9,
+  p: 1,
   borderRadius: 1.5,
   border: '1px solid',
   borderColor: 'divider',
   display: 'flex',
   flexDirection: 'column',
-  gap: 0.35,
+  gap: 0.25,
 };
 
 const numberSx = {
@@ -294,7 +294,7 @@ const roomMetaSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary' };
 
 const dragSx = {
   alignItems: 'center',
-  p: 0.4,
+  p: 0.5,
   borderRadius: 1,
   border: '1px dashed',
   borderColor: 'primary.main',
@@ -305,7 +305,7 @@ const dragSx = {
 };
 
 const markerSx = {
-  px: 0.6,
+  px: 0.5,
   py: 0.25,
   borderRadius: 1,
   border: '1px dashed',

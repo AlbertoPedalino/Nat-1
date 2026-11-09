@@ -35,7 +35,7 @@ export function ResultSlot({
   return (
     <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, OPACITY.soft) }}>
       {label ? (
-        <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           {Icon ? <Icon size={13} color={tone} /> : null}
           <Typography sx={microLabelSx}>{label}</Typography>
           {badges}
@@ -91,5 +91,5 @@ const slotSx = {
 const lineSx = {
   fontSize: FONT_SIZES.lg,
   color: 'text.primary',
-  mt: 0.3,
+  mt: 0.25,
 };

@@ -89,7 +89,7 @@ const iconGroupSx = {
   overflow: 'hidden',
 };
 
-const iconSegmentSx = { borderRadius: 0, px: 0.9 };
+const iconSegmentSx = { borderRadius: 0, px: 1 };
 
 // The rule between the two halves, on the log half itself: a rule set from the
 // group would lose to the buttons' own `border: 0`.

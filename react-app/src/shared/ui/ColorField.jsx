@@ -68,7 +68,7 @@ function swatchSx(size, tone) {
     width: size,
     height: size,
     flexShrink: 0,
-    p: '2px',
+    p: 0.25,
     border: '1px solid',
     borderColor: map ? 'gmboard.vtt.accentBorderStrong' : 'divider',
     borderRadius: 1,

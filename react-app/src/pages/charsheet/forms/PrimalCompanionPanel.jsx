@@ -121,7 +121,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
 
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <PawPrint size={14} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
         <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
@@ -180,7 +180,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
             >
               {reviveSlot ? `Revive (level ${reviveSlot} slot)` : 'Revive'}
             </Button>
-            <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.4, color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+            <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
               {reviveSlot
                 ? 'Within an hour of its death: Magic action, touch it, expend a spell slot. It returns after 1 minute with all its HP.'
                 : 'No spell slot to expend — it can be summoned again after a Long Rest.'}
@@ -198,9 +198,9 @@ export default function PrimalCompanionPanel({ character, sheet }) {
       />
 
       {rules.length ? (
-        <Box sx={{ mt: 0.6 }}>
+        <Box sx={{ mt: 0.5 }}>
           {rules.map((rule) => (
-            <Typography key={rule.title} sx={{ ...subSx, mt: 0.3 }}>
+            <Typography key={rule.title} sx={{ ...subSx, mt: 0.25 }}>
               <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.accentText }}>{rule.title}.</Box> {rule.text}
             </Typography>
           ))}

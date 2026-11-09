@@ -50,7 +50,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
             selected={active}
             disabled={selectionDisabled}
             onClick={onSelect}
-            sx={{ flex: 1, minWidth: 0, gap: 0.75, py: 0.65, px: 1 }}
+            sx={{ flex: 1, minWidth: 0, gap: 0.75, py: 0.75, px: 1 }}
           >
             {item ? <ItemNameIcon item={item} /> : null}
             <ListItemText
@@ -94,7 +94,7 @@ function ItemPlanPanel({
     { getText: (option) => `${option.name} ${option.source || ''}` },
   );
   return (
-    <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+    <Stack spacing={0.5} sx={{ minWidth: 0 }}>
       <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.sm, fontWeight: 700 }}>
         {title}
       </Typography>

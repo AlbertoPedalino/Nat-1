@@ -35,7 +35,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5, ...TEXT_STYLES.label }}>
         {title}
       </Typography>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.5 }}>
         {ICON_COLORS.map((color) => (
           <Box
             key={color}

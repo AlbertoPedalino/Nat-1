@@ -108,7 +108,7 @@ const railButtonSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '2px',
+  gap: 0.25,
   px: 0.5,
   py: 0.75,
   border: 0,

@@ -11,8 +11,8 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: Icon ? 0.4 : 0,
-        px: 0.9,
+        gap: Icon ? 0.5 : 0,
+        px: 1,
         py: 0.25,
         borderRadius: 999,
         fontSize: FONT_SIZES.sm,

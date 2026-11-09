@@ -22,7 +22,7 @@ const toastRootSx = {
 
 const modeChipSx = (chip) => ({
   height: 20, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md,
-  borderRadius: 1, mb: 0.3, color: chip.color, borderColor: chip.borderColor,
+  borderRadius: 1, mb: 0.25, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
 
@@ -52,17 +52,17 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={14} />
       </IconButton>
 
-      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: 'text.secondary', mb: 0.3 }}>
+      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: 'text.secondary', mb: 0.25 }}>
         {layout.label}
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, mb: 0.3 }}>
+        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, mb: 0.25 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.danger, mb: 0.3 }}>
+        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.danger, mb: 0.25 }}>
           NATURAL 1
         </Typography>
       )}
@@ -89,7 +89,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
 
       {layout.total != null && (
         <Typography sx={{
-          ...TEXT_STYLES.figure, lineHeight: 1, textAlign: 'center', my: 0.3,
+          ...TEXT_STYLES.figure, lineHeight: 1, textAlign: 'center', my: 0.25,
           fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
           color: layout.totalColor,
         }}>
@@ -98,7 +98,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.total == null && layout.dice.length === 0 && layout.detail && (
-        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.2 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 }}>
           {layout.detail}
         </Typography>
       )}

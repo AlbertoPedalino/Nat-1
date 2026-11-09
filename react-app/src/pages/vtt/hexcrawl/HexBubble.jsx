@@ -39,7 +39,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
         aria-label={onClose ? `${bubble.headline} — close` : undefined}
         sx={{ ...bubbleSx, ...(onClose ? clickableSx : null) }}
       >
-        <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', mb: 0.35 }}>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25 }}>
           {TerrainIcon ? <TerrainIcon size={12} color={theme.palette.text.secondary} /> : null}
           <Typography sx={coordSx}>
             Hex {bubble.hex.q}, {bubble.hex.r}
@@ -51,7 +51,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
 
         <Typography sx={headlineSx}>{bubble.headline}</Typography>
 
-        <Stack spacing={0.15} sx={{ mt: 0.5 }}>
+        <Stack spacing={0.25} sx={{ mt: 0.5 }}>
           {(bubble.lines || []).map((line) => (
             <Typography key={line} sx={lineSx}>{line}</Typography>
           ))}
@@ -60,7 +60,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
         {clock ? (
           <Stack
             direction="row"
-            spacing={0.8}
+            spacing={0.75}
             sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, OPACITY.edge) }}
           >
             {WeatherIcon ? <WeatherIcon size={13} color={tone} /> : null}
@@ -92,7 +92,7 @@ const bubbleSx = {
   position: 'relative',
   display: 'block',
   px: 1.5,
-  py: 1.1,
+  py: 1,
   minWidth: 210,
   maxWidth: 340,
   textAlign: 'left',
@@ -135,7 +135,7 @@ const lineSx = { fontSize: FONT_SIZES.lg, color: 'text.primary', lineHeight: 1.4
 
 const footerSx = {
   alignItems: 'center',
-  mt: 0.7,
+  mt: 0.75,
   pt: 0.5,
   borderTop: '1px solid',
 };
@@ -146,7 +146,7 @@ const tailSx = {
   position: 'absolute',
   left: '50%',
   bottom: -8,
-  ml: '-7px',
+  ml: -1,
   width: 0,
   height: 0,
   borderLeft: '7px solid transparent',

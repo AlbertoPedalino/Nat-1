@@ -175,13 +175,13 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
             onSelect={(color) => onUpdateCharacter?.(prev => ({ ...prev, classIconColor: color }))}
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, color: UI_COLORS.accentText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: '4px' } }}
+                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}
                   variant="outlined" />
               )}
             </Box>
@@ -200,7 +200,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           gap: embedded ? '0.4rem' : { xs: '0.4rem', sm: '1rem' },
           width: embedded ? '100%' : { xs: '100%', md: 'auto' },
         }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText }}>
                 XP · Level {level}

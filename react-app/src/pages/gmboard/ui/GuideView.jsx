@@ -121,7 +121,7 @@ const cardTitleSx = {
 
 const rowWrapSx = {
   display: 'flex',
-  gap: 0.6,
+  gap: 0.5,
   alignItems: 'flex-start',
 };
 
@@ -138,7 +138,7 @@ const stepMarkerSx = {
   width: 18,
   height: 18,
   flexShrink: 0,
-  mt: 0.3,
+  mt: 0.25,
   borderRadius: '50%',
   border: '1px solid',
   borderColor: 'primary.main',
@@ -150,8 +150,8 @@ const stepMarkerSx = {
 const kwSx = {
   display: 'inline-block',
   px: 0.5,
-  py: 0.05,
-  mx: 0.1,
+  py: 0.25,
+  mx: 0.25,
   borderRadius: 0.75,
   border: '1px solid',
   borderColor: 'divider',

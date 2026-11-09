@@ -133,7 +133,7 @@ export function SpellPickerDialog({
 
       {activePicker ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
-          <Box sx={{ ...sheetBoxSx, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Box sx={{ ...sheetBoxSx, px: 1, py: 0.75, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
             <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{activePicker.label}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>{activePicker.note}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
@@ -156,7 +156,7 @@ export function SpellPickerDialog({
           iconSize={14}
           sx={compactInputSx}
         />
-        <Box sx={{ overflowX: 'auto', pb: 0.2 }}>
+        <Box sx={{ overflowX: 'auto', pb: 0.25 }}>
           <ToggleButtonGroup
             size="small"
             exclusive
@@ -172,7 +172,7 @@ export function SpellPickerDialog({
           </ToggleButtonGroup>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '58vh', overflowY: 'auto' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, maxHeight: '58vh', overflowY: 'auto' }}>
         {pickerList.map((spell) => {
           const manualSelected = selectedManualNames.has(spell.name);
           // `autoGranted` = the spell is granted by a source (class/subclass/feat/…),
