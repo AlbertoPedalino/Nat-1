@@ -8,14 +8,18 @@ import MountSelector from '../../../shared/hexcrawl/ui/MountSelector.jsx';
 import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
-import { travelLine, travelTime } from '../../../shared/gmboard/weather.js';
+import { travelLine, travelTime, weatherName } from '../../../shared/gmboard/weather.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { canAdvanceHex, missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { formatDate, formatHM } from '../../../shared/gmboard/campaignTime.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
-// the weather; the next hex (what it is, then how the party crosses it) and
-// the step into it; what the step turned up; the log.
+// the weather; the next hex (what it is, then how the party crosses it); the
+// step into it, with everything it will use said back; what the step turned
+// up; the log.
 export default function HexcrawlView() {
   const { state, dispatch, proceed, advanceOnly, clockError } = useGmBoard();
   const popContract = SELECTOR_CONTRACTS.pop;
@@ -26,6 +30,7 @@ export default function HexcrawlView() {
   const missing = missingHexSetup({ terrain: state.terrain, pop: state.pop, tier: state.hexTier }, state);
   const canProceed = missing.length === 0;
   const travel = travelTime(state.terrainH, state.weather, state.intensity, state.mountSpeed);
+  const popOption = popContract.options.find((option) => popContract.getId(option) === popContract.deriveValue(state));
 
   return (
     <Stack spacing={2}>
@@ -58,10 +63,29 @@ export default function HexcrawlView() {
         <MountSelector
           value={state.mountSpeed}
           onChange={(mountSpeed) => dispatch({ type: 'setMountSpeed', mountSpeed })}
-          note={state.terrain ? travelLine(state.terrain, travel) : null}
         />
+      </BoardPanel>
 
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
+      {/* The step itself, apart from any one setting: it uses the clock, the
+          weather and every pick above together. */}
+      <Box sx={moveBarSx}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={moveTitleSx}>Move the party</Typography>
+          <Typography sx={moveSummarySx}>
+            {[
+              `${formatDate(state)}, ${formatHM(state.min)}`,
+              weatherName(state.weather, state.intensity),
+              state.terrain ? travelLine(state.terrain, travel) : null,
+              popOption?.label,
+              state.hexTier ? `Tier ${state.hexTier}` : null,
+              `Mount ×${state.mountSpeed}`,
+            ].filter(Boolean).join(' · ')}
+          </Typography>
+          {missing.length ? (
+            <Typography sx={hintSx}>Select {missing.join(', ')} to continue.</Typography>
+          ) : null}
+        </Box>
+        <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
           <Button
             variant="contained"
             startIcon={<Footprints size={15} />}
@@ -78,11 +102,8 @@ export default function HexcrawlView() {
           >
             Advance Only
           </Button>
-          {missing.length ? (
-            <Typography sx={hintSx}>Select {missing.join(', ')} to continue.</Typography>
-          ) : null}
         </Stack>
-      </BoardPanel>
+      </Box>
 
       <HexResultSteps result={state.hexResult} />
       <SessionLog />
@@ -100,6 +121,23 @@ const dividerSx = {
   borderTop: '1px solid',
   borderColor: 'divider',
 };
+
+const moveBarSx = {
+  display: 'flex',
+  flexDirection: { xs: 'column', sm: 'row' },
+  alignItems: { xs: 'stretch', sm: 'center' },
+  justifyContent: 'space-between',
+  gap: 1.5,
+  p: 1.5,
+  border: '1px solid',
+  borderColor: 'primary.main',
+  borderRadius: 2,
+  bgcolor: uiAlpha(UI_COLORS.gold, 0.06),
+};
+
+const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };
+
+const moveSummarySx = { fontSize: '0.8rem', color: 'text.primary', mt: 0.25 };
 
 const hintSx = {
   fontSize: '0.72rem',

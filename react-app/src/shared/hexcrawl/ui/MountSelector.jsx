@@ -8,10 +8,9 @@ import SelectorGroup from '../../gmboard/ui/SelectorGroup.jsx';
 // The presets are the ones a table reaches for; the number beside them is free,
 // because every setting has its own beasts and the one somebody is riding is
 // never on a list of four. Shared by the board and the map's own hexcrawl
-// corner, so the two cannot disagree about what ×3 means. `note` follows the
-// line that says what the speed does (the board adds the crossing time).
+// corner, so the two cannot disagree about what ×3 means.
 export default function MountSelector({
-  value, onChange, label = 'Mount', dense = false, disabled = false, note = null,
+  value, onChange, label = 'Mount', dense = false, disabled = false,
 }) {
   const speed = normalizeMountSpeed(value);
   const preset = MOUNT_OPTIONS.find((option) => option.speed === speed) || null;
@@ -44,10 +43,7 @@ export default function MountSelector({
           sx={numberSx}
         />
       </Box>
-      <Typography sx={hintSx}>
-        {effect}
-        {note ? <> · {note}</> : null}
-      </Typography>
+      <Typography sx={hintSx}>{effect}</Typography>
     </Box>
   );
 }
