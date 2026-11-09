@@ -24,7 +24,7 @@ import { isItemCarried, itemQty as qty } from '../../../shared/character/invento
 import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -38,7 +38,7 @@ const itemStateChipBaseSx = {
   borderRadius: 0.375,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
-  lineHeight: 1.75,
+  lineHeight: LINE_HEIGHTS.relaxed,
   textTransform: 'none',
 };
 
@@ -72,7 +72,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   return (
     <ExpandableCard
       containerSx={{ mb: 0.5, overflow: 'hidden' }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: 1.25, py: 0.75, mt: 0, mb: 0 }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: 1.25, py: 0.75, mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />

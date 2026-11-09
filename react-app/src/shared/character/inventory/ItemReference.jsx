@@ -5,7 +5,7 @@ import { ItemPropertyTable } from './ItemPropertyTable.jsx';
 import { WeaponMasteryBlock } from '../combat/WeaponMasteryBlock.jsx';
 import { clampInt } from '../../numbers.js';
 import CountStepper from '../../ui/CountStepper.jsx';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
@@ -39,7 +39,7 @@ export function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, ...sx }} onClick={(event) => event.stopPropagation()}>
       <CountStepper value={qty} size={17} onStep={(delta) => setQty((value) => clampQty(value + delta))} />
-      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: 1.5 }}>Add</Button>
+      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: LINE_HEIGHTS.normal }}>Add</Button>
     </Box>
   );
 }

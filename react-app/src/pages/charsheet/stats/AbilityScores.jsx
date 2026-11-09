@@ -7,7 +7,7 @@ import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -60,7 +60,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
               <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mb: 0.25 }}>
                 {ABILITY_ABBREVIATIONS[s]}
               </Typography>
-              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: UI_COLORS.accentText, lineHeight: 1 }}>
+              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: UI_COLORS.accentText, lineHeight: LINE_HEIGHTS.none }}>
                 {signed(shownMod)}
               </Typography>
               <Box sx={{

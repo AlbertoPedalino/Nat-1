@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { tokenizeInlineMarkup } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
-import { FONT_WEIGHTS } from '../ui/fonts.js';
+import { FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
 
 function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {
   return tokens.map((token, index) => {
@@ -31,7 +31,7 @@ export function RichInline({
   return renderTokens(resolved, keyPrefix, { strongColor, refColor });
 }
 
-export function RichText({ text, sx, variant = 'body2', color = 'text.secondary', lineHeight = 1.42 }) {
+export function RichText({ text, sx, variant = 'body2', color = 'text.secondary', lineHeight = LINE_HEIGHTS.normal }) {
   const raw = String(text ?? '');
   if (!raw.trim()) return null;
   const paragraphs = raw.split(/\n+/).map((line) => line.trim()).filter(Boolean);

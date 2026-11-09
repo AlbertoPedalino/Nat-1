@@ -9,7 +9,7 @@ import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 
@@ -173,6 +173,6 @@ const rulesLabelSx = {
 const rulesValueSx = {
   minWidth: 0,
   fontSize: FONT_SIZES.xs,
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
   color: 'text.secondary',
 };

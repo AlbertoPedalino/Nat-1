@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 
@@ -56,7 +56,7 @@ export const acBadgeSx = {
   px: 0.75,
   py: 0.25,
   color: 'text.secondary',
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
 };
 
 export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.xl };
@@ -111,7 +111,7 @@ export const hpFlagSx = {
   borderRadius: 1,
   color: 'primary.main',
   fontSize: FONT_SIZES.md,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
   flex: '0 0 auto',
 };
 

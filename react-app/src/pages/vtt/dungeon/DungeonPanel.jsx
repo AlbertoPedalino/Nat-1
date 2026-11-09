@@ -13,7 +13,7 @@ import { MARKER_COLORS, lootLabel, trapLabel } from '../../../shared/dungeon/roo
 import { isNothingFound } from '../../../shared/gmboard/tables.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -269,8 +269,8 @@ function SlotLine({ slot, tones }) {
   );
 }
 
-const hintSx = { fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45 };
-const warnSx = { fontSize: FONT_SIZES.md, color: 'warning.main', lineHeight: 1.4 };
+const hintSx = { fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };
+const warnSx = { fontSize: FONT_SIZES.md, color: 'warning.main', lineHeight: LINE_HEIGHTS.normal };
 const lineSx = { fontSize: FONT_SIZES.md, color: 'text.primary' };
 
 const roomSx = {

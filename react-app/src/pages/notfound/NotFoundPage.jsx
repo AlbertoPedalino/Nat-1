@@ -3,7 +3,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { Compass, Home } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { composeMissingPath } from './notFoundPath.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
@@ -89,7 +89,7 @@ const statusSx = {
   color: 'primary.main',
   fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.lg,
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const compassSx = {

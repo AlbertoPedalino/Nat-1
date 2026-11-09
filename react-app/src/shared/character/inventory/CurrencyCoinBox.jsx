@@ -11,7 +11,7 @@ import { CUSTOM_CURRENCY_TONE, normalizeCoinAmount, sanitizeCoinInput } from './
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { currencyVariant, HOVER_SUBTRACT, HOVER_ADD, buttonBaseSx } from './currencyVariants.js';
-import { FONT_WEIGHTS } from '../../ui/fonts.js';
+import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 
 export function CurrencyCoinBox({
   coin,
@@ -39,7 +39,7 @@ export function CurrencyCoinBox({
   const labelBaseSx = {
     fontFamily: v.fontFamily,
     fontWeight: FONT_WEIGHTS.bold,
-    lineHeight: 1.1,
+    lineHeight: LINE_HEIGHTS.tight,
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

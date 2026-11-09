@@ -7,7 +7,7 @@ import { tableRows } from '../../../shared/gmboard/tables.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -106,7 +106,7 @@ const tabLabelSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
 };
 
 const tabGroupSx = {

@@ -1,4 +1,5 @@
 import { Box, Button } from '@mui/material';
+import { LAYERS } from '../../shared/ui/layers.js';
 import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
@@ -70,7 +71,7 @@ const appTopBarSx = {
   top: 0,
   left: 0,
   right: 0,
-  zIndex: 1300,
+  zIndex: LAYERS.topBar,
   minHeight: APP_TOP_BAR_HEIGHT,
   boxSizing: 'border-box',
   display: 'flex',

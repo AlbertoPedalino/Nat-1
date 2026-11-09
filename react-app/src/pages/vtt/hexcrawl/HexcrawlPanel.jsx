@@ -19,7 +19,7 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -274,10 +274,10 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
+const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal };
 const sectionSx = { color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
 const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
-const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: 1.35 };
+const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.normal };
 
 const cardSx = {
   p: 1,
@@ -297,7 +297,7 @@ const nextHexSx = {
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
 };
-const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.2, color: VTT_COLORS.accent };
+const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight, color: VTT_COLORS.accent };
 
 const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
 
@@ -308,7 +308,7 @@ const chipSx = {
   px: 0.75,
   py: 0.25,
   fontSize: FONT_SIZES.sm,
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
   color: VTT_COLORS.text,
   border: '1px solid',
   borderColor: 'divider',
@@ -342,9 +342,9 @@ const lastHexSx = {
   color: VTT_COLORS.text,
 };
 
-const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, color: VTT_COLORS.accent, lineHeight: 1.3 };
-const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight: 1.4 };
-const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.4 };
+const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, color: VTT_COLORS.accent, lineHeight: LINE_HEIGHTS.snug };
+const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight: LINE_HEIGHTS.normal };
+const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };
 
 const lastButtonSx = {
   mt: 0.5,

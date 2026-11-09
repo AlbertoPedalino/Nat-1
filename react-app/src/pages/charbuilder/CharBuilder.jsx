@@ -9,7 +9,6 @@ import {
   Tab,
   Tabs,
   Typography,
-  ThemeProvider,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BuilderAppBar from './layout/BuilderAppBar.jsx';
@@ -20,7 +19,7 @@ import { useBuilderAdapters } from './state/useBuilderAdapters.js';
 import { useBuilderPersistence } from './state/useBuilderPersistence.js';
 import { createInitialBuilderState } from './state/builderStartup.js';
 import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
-import { builderRootSx, builderTheme } from './layout/builderTheme.js';
+import { builderRootSx } from './layout/builderDensity.js';
 import { builderReducer } from './state/state.js';
 import BackgroundStep from './steps/BackgroundStep.jsx';
 import ClassStep from './steps/ClassStep.jsx';
@@ -91,7 +90,6 @@ export default function CharBuilder() {
   // each load and each restored character.
 
   return (
-    <ThemeProvider theme={builderTheme}>
     <Box sx={builderRootSx}>
       <BuilderAppBar
         canUploadDraft={importDraft && cloudActive}
@@ -181,6 +179,5 @@ export default function CharBuilder() {
       </Box>
 
     </Box>
-    </ThemeProvider>
   );
 }

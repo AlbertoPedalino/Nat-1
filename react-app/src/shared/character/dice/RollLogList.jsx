@@ -5,7 +5,7 @@ import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
 import { formatClockTime } from '../../ui/dateFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
@@ -83,4 +83,4 @@ const labelSx = {
 };
 const tagSx = { fontSize: FONT_SIZES.xxxs, ...TEXT_STYLES.title };
 const timeSx = { fontSize: FONT_SIZES.xxs, color: 'text.secondary', flexShrink: 0 };
-const detailSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.35 };
+const detailSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };

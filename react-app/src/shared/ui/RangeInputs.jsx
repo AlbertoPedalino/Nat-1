@@ -1,5 +1,4 @@
 import { Box, TextField } from '@mui/material';
-import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 
 // A range typed by hand: "min – max unit" (the item filters' weight and value,
@@ -36,7 +35,6 @@ export default function RangeInputs({
 
 const numberFieldSx = {
   width: 72,
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.md, py: 0.75 },
 };
 

@@ -4,7 +4,7 @@ import { CUSTOM_CURRENCY_TONE, orderedCurrencyEntries } from './currency.js';
 import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
 import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
 import { useIsPhone } from '../../ui/useIsPhone.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 
@@ -90,7 +90,7 @@ export function AddCurrencyTile({ onClick, mode = 'builder' }) {
           fontWeight: FONT_WEIGHTS.bold,
           textTransform: 'uppercase',
           letterSpacing: LETTER_SPACINGS.sm,
-          lineHeight: 1.1,
+          lineHeight: LINE_HEIGHTS.tight,
         }}
       >
         Custom

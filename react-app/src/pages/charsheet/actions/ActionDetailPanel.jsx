@@ -4,7 +4,7 @@ import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollT
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { detailPanelSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -60,7 +60,7 @@ function renderSafeInlineBody(value) {
 function SectionBody({ html, accent }) {
   return (
     <Typography
-      sx={{ fontSize: FONT_SIZES.sm, color: accent || 'text.secondary', lineHeight: 1.5 }}
+      sx={{ fontSize: FONT_SIZES.sm, color: accent || 'text.secondary', lineHeight: LINE_HEIGHTS.normal }}
     >
       {renderSafeInlineBody(html)}
     </Typography>

@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -171,7 +171,7 @@ const actorSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xs,
   color: VTT_COLORS.accent,
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 const labelSx = {
@@ -203,14 +203,14 @@ const modeChipSx = (chip) => ({
 
 const totalSx = {
   ...TEXT_STYLES.figure,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
   my: 0.25,
 };
 
 const detailSx = {
   fontSize: FONT_SIZES.sm,
   color: 'text.primary',
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 // The little point that makes it a speech bubble rather than a box, and the

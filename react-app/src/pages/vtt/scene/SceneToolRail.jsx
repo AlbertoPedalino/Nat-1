@@ -3,7 +3,7 @@ import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { MousePointer2, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -129,7 +129,7 @@ const railButtonActiveSx = {
 const railLabelSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
-  lineHeight: 1.1,
+  lineHeight: LINE_HEIGHTS.tight,
   textAlign: 'center',
 };
 

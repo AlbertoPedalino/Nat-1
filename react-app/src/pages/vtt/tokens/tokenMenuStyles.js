@@ -1,5 +1,5 @@
 import { battleMapCompactFieldSx } from '../map/battleMapSurface.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 // Looks shared by the piece menu (TokenMenu) and its sections.
 
 export const compactFieldSx = battleMapCompactFieldSx;
@@ -9,5 +9,5 @@ export const sectionTitleSx = {
   fontSize: FONT_SIZES.xs,
   fontWeight: FONT_WEIGHTS.heavy,
   letterSpacing: LETTER_SPACINGS.sm,
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
 };

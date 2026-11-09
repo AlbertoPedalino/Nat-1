@@ -2,7 +2,7 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import { AlertCircle, Shield } from 'lucide-react';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The shield-shaped Armor Class readout: the character's header uses it, and so
@@ -28,7 +28,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
         </Box>
       </Tooltip>
       {showBadge && badgeLabel ? (
-        <Typography sx={{ fontSize: FONT_SIZES.micro, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, textAlign: 'center', lineHeight: 1.1, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.micro, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
           {badgeLabel}
         </Typography>
       ) : null}

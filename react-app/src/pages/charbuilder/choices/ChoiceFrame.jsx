@@ -1,5 +1,5 @@
 import { Chip, Paper, Stack, Typography } from '@mui/material';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 
 // The frame every builder choice sits in: its label and how many of the
 // allowed picks are taken ("2/3", or `countLabel` for a count that says more),
@@ -36,5 +36,5 @@ const labelSx = {
   color: 'text.secondary',
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.heavy,
-  lineHeight: 1.25,
+  lineHeight: LINE_HEIGHTS.snug,
 };

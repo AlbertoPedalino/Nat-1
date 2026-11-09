@@ -9,7 +9,7 @@ import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import CampaignCalendarFields, { QUICK_HOURS, quickButtonSx } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -88,14 +88,14 @@ const stripSx = {
 const dateSx = {
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
-  lineHeight: 1.25,
+  lineHeight: LINE_HEIGHTS.snug,
   color: 'primary.main',
 };
 
 const timeSx = {
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.heading, sm: FONT_SIZES.display },
-  lineHeight: 1.1,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 const weatherSx = {

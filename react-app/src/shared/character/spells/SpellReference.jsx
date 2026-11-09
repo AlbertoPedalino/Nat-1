@@ -8,7 +8,7 @@ import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY } from '../../ui/colors.js';
 
@@ -113,7 +113,7 @@ export function SpellSelectButton({ selected, disabled, onToggle, addColor = 'pr
       color={selected ? 'error' : addColor}
       disabled={disabled}
       onClick={(event) => { event.stopPropagation(); onToggle(); }}
-      sx={{ flexShrink: 0, minWidth: 56, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: 1.5, ...sx }}
+      sx={{ flexShrink: 0, minWidth: 56, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: LINE_HEIGHTS.normal, ...sx }}
     >
       {selected ? 'Remove' : 'Add'}
     </Button>

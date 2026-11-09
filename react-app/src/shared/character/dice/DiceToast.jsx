@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
+import { LAYERS } from '../../ui/layers.js';
 import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
@@ -14,7 +15,7 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 // shared too so they cannot drift apart.
 
 const toastRootSx = {
-  position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
+  position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: LAYERS.diceToast,
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 2, borderColor: 'divider', borderRadius: 2,
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
   boxShadow: UI_SHADOWS.popup,
@@ -90,7 +91,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
 
       {layout.total != null && (
         <Typography sx={{
-          ...TEXT_STYLES.figure, lineHeight: 1, textAlign: 'center', my: 0.25,
+          ...TEXT_STYLES.figure, lineHeight: LINE_HEIGHTS.none, textAlign: 'center', my: 0.25,
           fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
           color: layout.totalColor,
         }}>

@@ -15,7 +15,7 @@ import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
@@ -151,7 +151,7 @@ export default function MapObjectsPanel({
   );
 }
 
-const hintSx = { mb: 1, color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: 1.45 };
+const hintSx = { mb: 1, color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal };
 const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 };
 const countSx = { mb: 0.75, color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs };
 const strokeControlSx = {
@@ -203,7 +203,7 @@ const labelSx = {
   whiteSpace: 'nowrap',
   color: VTT_COLORS.text,
   fontSize: FONT_SIZES.xxs,
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 const emptySx = { py: 3, textAlign: 'center', color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.md };

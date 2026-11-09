@@ -11,7 +11,7 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
@@ -32,12 +32,12 @@ export const SECTION_CARD_SX = {
 export const SECTION_HEADER_SX = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.sm,
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 function EmptyCaption({ children }) {
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.md, lineHeight: 1.45 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal }}>
       {children}
     </Typography>
   );
@@ -56,7 +56,7 @@ export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TON
                 {title}
               </Typography>
               {subtitle ? (
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm, lineHeight: 1.2 }} noWrap>
+                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.tight }} noWrap>
                   {subtitle}
                 </Typography>
               ) : null}
@@ -74,7 +74,7 @@ export function InlineMetadata({ items }) {
   if (!visibleItems.length) return null;
 
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: 1.2 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.tight }}>
       {visibleItems.map((item, index) => (
         <Box component="span" key={item.key}>
           {index > 0 ? (
@@ -144,7 +144,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
 // Shared 5etools entry renderer at the preview's compact type scale.
 export function PreviewEntryText({ entries }) {
   return (
-    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: FONT_SIZES.lg, lineHeight: 1.45 } }}>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: FONT_SIZES.lg, lineHeight: LINE_HEIGHTS.normal } }}>
       <EntryBlocks entries={entries} emptyText="" />
     </Box>
   );
@@ -173,7 +173,7 @@ export function FeatureAccordion({ feature, source, children }) {
     <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {children != null ? children : hasDefaultBody ? <PreviewEntryText entries={body} /> : (
-          <Typography variant="caption" component="div" sx={{ color: 'text.secondary', lineHeight: 1.45, wordBreak: 'break-word' }}>
+          <Typography variant="caption" component="div" sx={{ color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, wordBreak: 'break-word' }}>
             No description.
           </Typography>
         )}

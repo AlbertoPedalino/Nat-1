@@ -12,7 +12,7 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -323,7 +323,7 @@ const outcomeTextSx = {
   my: 0.25,
   fontSize: { xs: FONT_SIZES.xxl, sm: FONT_SIZES.body },
   fontWeight: FONT_WEIGHTS.bold,
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
   overflowWrap: 'anywhere',
 };
 

@@ -8,7 +8,7 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.js
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
@@ -118,7 +118,7 @@ const heroTitleSx = {
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
   color: UI_COLORS.accentText,
   textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, OPACITY.line)}`,
-  lineHeight: 1.1,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 const heroLogoSx = {
@@ -198,7 +198,7 @@ const cardDescSx = {
   fontSize: FONT_SIZES.xl,
   color: UI_COLORS.textFaint,
   textAlign: 'center',
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
   fontStyle: 'italic',
   fontFamily: UI_FONTS.prose,
 };

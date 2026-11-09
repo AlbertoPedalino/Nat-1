@@ -130,7 +130,7 @@ export default function NotesTab({ sheet }) {
         value={activePage.content}
         onChange={(e) => changeContent(activeIdx, e.target.value)}
         sx={{
-          '& .MuiInputBase-root': { bgcolor: UI_COLORS.surfaceHeader, color: 'text.primary', fontFamily: UI_FONTS.body, fontSize: FONT_SIZES.xxl },
+          '& .MuiInputBase-root': { color: 'text.primary', fontFamily: UI_FONTS.body, fontSize: FONT_SIZES.xxl },
           '& fieldset': { borderColor: 'divider' },
           '&:focus-within fieldset': { borderColor: 'primary.main' },
         }}

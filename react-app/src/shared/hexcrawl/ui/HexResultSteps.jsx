@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
 import { encounterDetail, lootDetail } from '../../gmboard/resultText.js';
 import { boardTone } from '../../gmboard/ui/resultVisuals.js';
@@ -139,7 +139,7 @@ const stepIconColSx = {
   flexShrink: 0,
 };
 
-const stepLabelSx = { ...microLabelSx, lineHeight: 1.4 };
+const stepLabelSx = { ...microLabelSx, lineHeight: LINE_HEIGHTS.normal };
 
 const lineSx = {
   fontSize: FONT_SIZES.xl,

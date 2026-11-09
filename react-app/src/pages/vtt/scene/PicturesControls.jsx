@@ -9,10 +9,9 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Grid3x3, Image as ImageIcon, ImagePlus, Trash2 } from 'lucide-react';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
-import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 

@@ -7,7 +7,7 @@ import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
 import { TABLE_ICONS } from './tableCatalog.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -234,7 +234,7 @@ const statLabelSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
-  lineHeight: 1.5,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const statBodySx = {
@@ -248,7 +248,7 @@ const statBodySx = {
 // a GM reads out differ by weight and colour only.
 const statValueSx = {
   fontSize: FONT_SIZES.body,
-  lineHeight: 1.45,
+  lineHeight: LINE_HEIGHTS.normal,
   color: 'text.primary',
 };
 
@@ -260,7 +260,7 @@ const statEmphasisSx = {
 
 const statNoteSx = {
   fontSize: FONT_SIZES.xs,
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
   color: 'text.secondary',
 };
 

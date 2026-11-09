@@ -15,7 +15,7 @@ import { backgroundAbilityBonus, DEFAULT_BACKGROUND_PATTERN } from '../../../sha
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { asArray } from '../../../shared/lists.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
@@ -94,7 +94,7 @@ function BackgroundDetailCard({ background }) {
           <Chip size="small" label={background.source || ''} />
         </Stack>
         {lore ? (
-          <Typography variant="body2" sx={{ ...TEXT_STYLES.note, lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ ...TEXT_STYLES.note, lineHeight: LINE_HEIGHTS.relaxed }}>
             {lore}
           </Typography>
         ) : null}

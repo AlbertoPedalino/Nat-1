@@ -1,11 +1,12 @@
 import { createTheme, lighten } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 
 const SELECTED_OPTION_SX = {
   color: UI_COLORS.accentText,
@@ -121,15 +122,14 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: UI_FONTS.body,
+    // Headings are titles: the display face, as TEXT_STYLES.title.
     h1: {
+      ...TEXT_STYLES.title,
       fontSize: FONT_SIZES.hero,
-      fontWeight: FONT_WEIGHTS.bold,
-      letterSpacing: 0,
     },
     h2: {
+      ...TEXT_STYLES.title,
       fontSize: FONT_SIZES.title,
-      fontWeight: FONT_WEIGHTS.bold,
-      letterSpacing: 0,
     },
     button: {
       textTransform: 'none',
@@ -165,6 +165,7 @@ export const theme = createTheme({
     MuiToggleButton: {
       styleOverrides: {
         root: {
+          color: UI_COLORS.textSecondary,
           '&.Mui-selected': SELECTED_OPTION_SX,
           '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
         },
@@ -191,6 +192,7 @@ export const theme = createTheme({
       styleOverrides: {
         notchedOutline: { borderColor: uiAlpha(UI_COLORS.textPrimary, OPACITY.shade) },
         root: {
+          backgroundColor: UI_COLORS.surfaceHeader,
           '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
             borderColor: UI_COLORS.textSecondary,
           },
@@ -226,8 +228,9 @@ export const theme = createTheme({
           minHeight: 0,
           minWidth: 0,
           padding: '6px 10px',
+          ...TEXT_STYLES.title,
           fontSize: FONT_SIZES.xs,
-          lineHeight: 1.2,
+          lineHeight: LINE_HEIGHTS.tight,
         },
       },
     },

@@ -1,4 +1,4 @@
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
@@ -20,7 +20,6 @@ import {
   Users,
 } from 'lucide-react';
 import { pillLabelSx } from './panelStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 

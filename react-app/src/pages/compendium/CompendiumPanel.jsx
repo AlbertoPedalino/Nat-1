@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { LAYERS } from '../../shared/ui/layers.js';
 import {
   Box, IconButton, Paper, Portal,
 } from '@mui/material';
@@ -44,7 +45,7 @@ function OpenPanel({ onClose }) {
 const panelSx = {
   ...SURFACES.panel,
   position: 'fixed',
-  zIndex: 1250,
+  zIndex: LAYERS.compendium,
   top: `calc(${APP_TOP_BAR_HEIGHT} + 8px)`,
   left: { xs: 8, sm: 16 },
   bottom: { xs: 8, sm: 16 },

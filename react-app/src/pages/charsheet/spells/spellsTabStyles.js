@@ -1,6 +1,6 @@
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -48,7 +48,7 @@ export const spellBodySx = {
   ...SURFACES.inset,
   fontSize: FONT_SIZES.md,
   color: 'text.secondary',
-  lineHeight: 1.5,
+  lineHeight: LINE_HEIGHTS.normal,
   borderTop: 'none',
   borderRadius: cornerRadius(0, 0, 1, 1),
   px: 1.25,
@@ -75,13 +75,12 @@ export const inlineButtonSx = {
   minWidth: 0,
   py: 0.25,
   px: 0.75,
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
   borderRadius: 1,
   ...TEXT_STYLES.title,
 };
 
 export const compactInputSx = {
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.lg, py: 1 },
 };
 

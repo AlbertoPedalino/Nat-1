@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 
 export const placementCardSx = {
@@ -19,7 +19,7 @@ export const placementCardSx = {
   },
 };
 
-export const noticeSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: 1.4 };
+export const noticeSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: LINE_HEIGHTS.normal };
 export const instanceRowSx = { display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, width: '100%' };
 export const instanceNameSx = { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' };
 

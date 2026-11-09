@@ -6,7 +6,7 @@ import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js'
 import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -122,7 +122,7 @@ export default function HPBlock({
               <Typography
                 component="span"
                 onClick={() => startEdit('hp', sheet.currentHP)}
-                sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
+                sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: hpColor, lineHeight: LINE_HEIGHTS.none, cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
               >
                 {sheet.currentHP}
               </Typography>

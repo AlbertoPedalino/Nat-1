@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { LAYERS } from '../../../shared/ui/layers.js';
 import { Box } from '@mui/material';
 import Die3D from '../../../shared/character/dice/Die3D.jsx';
 import D100Orb from '../../../shared/character/dice/D100Orb.jsx';
@@ -301,7 +302,7 @@ const rootSx = {
   inset: 0,
   // Above the fullscreen character sheet (layer 10): a shared roll must stay
   // visible even when the sheet covers the point where the dice land.
-  zIndex: 11,
+  zIndex: LAYERS.mapTray,
   pointerEvents: 'none',
   overflow: 'hidden',
 };

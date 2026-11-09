@@ -8,7 +8,7 @@ import { abilityModifier } from '../../../shared/character/progression/abilityMo
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function scoreMod(value) {
@@ -70,7 +70,7 @@ export default function ScoresStep({ state, dispatch }) {
                 <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
                   <Stack direction="row" spacing={1.25} sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="h2" sx={{ lineHeight: 1.15 }}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
+                      <Typography variant="h2" sx={{ lineHeight: LINE_HEIGHTS.tight }}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
                       <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1 }}>
                         <Chip size="small" label={`Base ${baseScore}`} variant="outlined" />
                         {bonusBreakdown.map((bonus, index) => (
@@ -96,7 +96,7 @@ export default function ScoresStep({ state, dispatch }) {
                         textAlign: 'center',
                       }}
                     >
-                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: FONT_WEIGHTS.heavy, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
+                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: FONT_WEIGHTS.heavy, lineHeight: LINE_HEIGHTS.none }}>{finalScore ?? '-'}</Typography>
                       <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
                         {scoreMod(finalScore)}
                       </Typography>

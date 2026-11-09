@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material';
 import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -49,7 +49,7 @@ export function EntryBlocks({
       {grouped.map((block, index) => {
         if (block.kind === 'heading') {
           return (
-            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: FONT_WEIGHTS.heavy, color: headingColor, lineHeight: 1.25, fontSize: headingFontSize }}>
+            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: FONT_WEIGHTS.heavy, color: headingColor, lineHeight: LINE_HEIGHTS.snug, fontSize: headingFontSize }}>
               {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`h-${index}`} strongColor={strongColor} /> : block.text}
             </Typography>
           );
@@ -58,7 +58,7 @@ export function EntryBlocks({
           return (
             <Box key={`lg-${index}`} component="ul" sx={{ m: 0, pl: 2.25, color: bodyColor }}>
               {block.items.map((item, itemIndex) => (
-                <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: 1.38, fontSize, ...(markerColor ? { '&::marker': { color: markerColor } } : null) }}>
+                <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: LINE_HEIGHTS.normal, fontSize, ...(markerColor ? { '&::marker': { color: markerColor } } : null) }}>
                   {item.tokens?.length ? <RichInline tokens={item.tokens} keyPrefix={`li-${index}-${itemIndex}`} strongColor={strongColor} /> : item.text}
                 </Typography>
               ))}
@@ -101,7 +101,7 @@ export function EntryBlocks({
           );
         }
         return (
-          <Typography key={`p-${index}`} variant="body2" sx={{ color: bodyColor, lineHeight: 1.42, fontSize }}>
+          <Typography key={`p-${index}`} variant="body2" sx={{ color: bodyColor, lineHeight: LINE_HEIGHTS.normal, fontSize }}>
             {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`p-${index}`} strongColor={strongColor} /> : block.text}
           </Typography>
         );

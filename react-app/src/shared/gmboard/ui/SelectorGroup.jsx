@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 
@@ -71,7 +71,7 @@ function optionSx(tone, selected, dense) {
     py: 0.5,
     px: 0.75,
     fontSize: dense ? FONT_SIZES.sm : FONT_SIZES.md,
-    lineHeight: 1.2,
+    lineHeight: LINE_HEIGHTS.tight,
     textTransform: 'none',
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
     color: selected ? tone.color : (tone.dim || 'text.secondary'),

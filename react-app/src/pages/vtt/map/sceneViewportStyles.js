@@ -1,4 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { LAYERS } from '../../../shared/ui/layers.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
@@ -15,7 +16,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 export const coveringSx = {
   position: 'fixed',
   inset: 0,
-  zIndex: 1200,
+  zIndex: LAYERS.mapCover,
   // `dvh`, not `%`: a fixed box measured against the initial containing block is
   // as tall as the page believes the window to be, which on a phone includes the
   // strip behind the browser's own bars — and the controls along the bottom of

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { LAYERS } from '../../../shared/ui/layers.js';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react';
@@ -308,7 +309,7 @@ const panelSx = {
   position: 'absolute',
   top: 50,
   right: 12,
-  zIndex: 10,
+  zIndex: LAYERS.mapFloating,
   width: 'min(620px, calc(100% - 24px))',
   height: 'min(70dvh, calc(100% - 68px))',
   // Keep the window margins on phones even below the desktop size floors.

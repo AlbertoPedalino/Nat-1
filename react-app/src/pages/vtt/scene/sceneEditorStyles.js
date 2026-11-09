@@ -2,7 +2,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // The GM needs to see what is still hidden from the party without being blind
@@ -35,7 +35,7 @@ export const sceneIdentitySx = {
 export const sceneTitleSx = {
   color: 'primary.main',
   fontSize: { xs: FONT_SIZES.body, md: FONT_SIZES.lead },
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',

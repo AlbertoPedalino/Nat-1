@@ -13,7 +13,7 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
@@ -257,7 +257,7 @@ const meterLabelSx = {
 const meterValueSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.heading,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
 };
 
 const meterMaxSx = {
@@ -275,7 +275,7 @@ const currentResultSx = {
   mt: 0.25,
   fontSize: FONT_SIZES.xxl,
   fontWeight: FONT_WEIGHTS.bold,
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const finalResultSx = {
@@ -295,7 +295,7 @@ const finalResultTextSx = {
   my: 0.25,
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.lead },
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const actionGridSx = {
@@ -314,12 +314,12 @@ const actionButtonSx = {
   gap: 0.25,
   ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.xs, sm: FONT_SIZES.sm },
-  lineHeight: 1.25,
+  lineHeight: LINE_HEIGHTS.snug,
   '& small': {
     fontFamily: UI_FONTS.mono,
     fontSize: { xs: FONT_SIZES.xxs, sm: FONT_SIZES.xxs },
     fontWeight: FONT_WEIGHTS.bold,
     opacity: OPACITY.heavy,
-    lineHeight: 1.25,
+    lineHeight: LINE_HEIGHTS.snug,
   },
 };

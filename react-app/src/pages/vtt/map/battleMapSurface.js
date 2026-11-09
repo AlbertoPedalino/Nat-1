@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -88,5 +88,5 @@ export const battleMapCheckboxRowSx = {
   '& .MuiSvgIcon-root': { width: 17, height: 17 },
 };
 
-export const battleMapControlLabelSx = { fontSize: FONT_SIZES.sm, lineHeight: 1.2 };
+export const battleMapControlLabelSx = { fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.tight };
 

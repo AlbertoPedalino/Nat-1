@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 
@@ -193,7 +193,7 @@ const textBaseSx = {
   position: 'relative',
   fontSize: 'clamp(6px, 11cqmin, 12px)',
   fontWeight: FONT_WEIGHTS.bold,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
   fontVariantNumeric: 'tabular-nums',
   // A dark outline keeps the figures readable over both the empty track and a
   // bright fill, without dimming the bar itself.
@@ -224,7 +224,7 @@ export const plateSx = {
   // As large as the cell allows, up to what reads across the table on a
   // projector; zoomed far out it gets small rather than spilling over.
   fontSize: 'clamp(5px, 12cqmin, 11px)',
-  lineHeight: 1.25,
+  lineHeight: LINE_HEIGHTS.snug,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -344,7 +344,7 @@ export const reminderSx = {
   borderColor: 'info.main',
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.bold,
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -357,7 +357,7 @@ export const reminderInlineSx = {
   px: 'clamp(2px, 3cqmin, 5px)',
   py: 0,
   fontSize: 'clamp(6px, 11cqmin, 12px)',
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
 };
 
 export const pillSx = {
@@ -366,7 +366,7 @@ export const pillSx = {
   borderRadius: 1.25,
   fontSize: FONT_SIZES.lg,
   fontWeight: FONT_WEIGHTS.bold,
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
   whiteSpace: 'nowrap',
   border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
 };

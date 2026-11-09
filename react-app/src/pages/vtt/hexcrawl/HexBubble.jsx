@@ -4,7 +4,7 @@ import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../share
 import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -129,10 +129,10 @@ const headlineSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.body,
   color: VTT_COLORS.accent,
-  lineHeight: 1.25,
+  lineHeight: LINE_HEIGHTS.snug,
 };
 
-const lineSx = { fontSize: FONT_SIZES.lg, color: 'text.primary', lineHeight: 1.4 };
+const lineSx = { fontSize: FONT_SIZES.lg, color: 'text.primary', lineHeight: LINE_HEIGHTS.normal };
 
 const footerSx = {
   alignItems: 'center',

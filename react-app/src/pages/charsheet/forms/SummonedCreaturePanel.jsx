@@ -33,7 +33,7 @@ import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -226,7 +226,7 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         py: 0,
         verticalAlign: 'baseline',
         fontSize: FONT_SIZES.xxs,
-        lineHeight: 1.45,
+        lineHeight: LINE_HEIGHTS.normal,
         textTransform: 'none',
         color: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
         borderColor: available ? uiAlpha(UI_COLORS.success, OPACITY.strong) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.strong),

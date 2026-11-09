@@ -7,7 +7,7 @@ import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptio
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -74,9 +74,9 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
-            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
+            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: LINE_HEIGHTS.tight }}>{label}</Typography>
             {source ? (
-              <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, opacity: OPACITY.heavy, textAlign: 'right', lineHeight: 1.2 }}>
+              <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, opacity: OPACITY.heavy, textAlign: 'right', lineHeight: LINE_HEIGHTS.tight }}>
                 {source}
               </Typography>
             ) : null}
@@ -94,13 +94,13 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           <Box sx={{
             px: 1, pb: 0.5, pt: 0.25,
             // Scale 5etools EntryBlocks (body2) down to the compact panel size.
-            '& .MuiTypography-root': { fontSize: FONT_SIZES.xs, lineHeight: 1.45 },
+            '& .MuiTypography-root': { fontSize: FONT_SIZES.xs, lineHeight: LINE_HEIGHTS.normal },
             '& th, & td': { fontSize: FONT_SIZES.xs },
           }}>
             {entries?.length ? (
               <EntryBlocks entries={entries} spacing={0.5} emptyText="" />
             ) : (
-              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
+              <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal }}>{note}</Typography>
             )}
           </Box>
         </CollapsibleBody>

@@ -5,7 +5,7 @@ import {
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -225,7 +225,7 @@ const roundSx = {
   display: 'flex',
   alignItems: 'center',
   height: 24,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
   px: 0.75,
   color: 'gmboard.vtt.accent',
   ...TEXT_STYLES.title,
@@ -332,7 +332,7 @@ const nameSx = {
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   fontSize: FONT_SIZES.md,
-  lineHeight: 1.2,
+  lineHeight: LINE_HEIGHTS.tight,
 };
 
 // On a phone only the one acting keeps a name; the rest are faces.

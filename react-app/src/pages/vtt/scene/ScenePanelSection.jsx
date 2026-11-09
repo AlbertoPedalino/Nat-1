@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -89,11 +89,11 @@ const sectionTitleSx = {
   display: 'block',
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const sectionSummarySx = {
   display: 'block',
   color: VTT_COLORS.textMuted,
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
 };

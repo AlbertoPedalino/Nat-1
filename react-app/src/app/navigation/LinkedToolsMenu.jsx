@@ -21,6 +21,7 @@ import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -236,7 +237,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
                   <Typography component="div" variant="caption" sx={{ color: 'text.secondary' }}>{TOOL_UI[row.sectionKey].label}</Typography>
                   {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography component="div" variant="caption"
-                    sx={{ color: 'text.secondary', mt: 0.5, lineHeight: 1.5, overflowWrap: 'anywhere' }}>
+                    sx={{ color: 'text.secondary', mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
                     Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
                   </Typography>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"

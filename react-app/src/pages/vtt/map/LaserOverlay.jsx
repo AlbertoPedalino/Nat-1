@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -224,7 +224,7 @@ const labelSx = {
   color: VTT_COLORS.laserText,
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
   whiteSpace: 'nowrap',
   textShadow: `-1px -1px 0 ${VTT_COLORS.black}, 1px -1px 0 ${VTT_COLORS.black}, -1px 1px 0 ${VTT_COLORS.black}, 1px 1px 0 ${VTT_COLORS.black}`,
 };

@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { FONT_SIZES } from './fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
@@ -72,7 +72,7 @@ export const statValueSx = {
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.title,
   color: UI_COLORS.accentText,
-  lineHeight: 1,
+  lineHeight: LINE_HEIGHTS.none,
 };
 
 export const statLabelSx = {

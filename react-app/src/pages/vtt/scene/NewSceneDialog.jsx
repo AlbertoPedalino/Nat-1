@@ -18,7 +18,7 @@ import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from './generators.js';
 import { stitchImages } from './stitch.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { pillLabelSx } from './panelStyles.js';
@@ -276,7 +276,7 @@ const cardTitleSx = {
   color: 'primary.main',
 };
 
-const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: 1.4 };
+const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };
 
 const sectionSx = captionLabelSx;
 

@@ -5,6 +5,7 @@ import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY } from '../../ui/colors.js';
+import { LINE_HEIGHTS } from '../../ui/fonts.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -87,7 +88,7 @@ export default function Die3D({
                 width: size,
                 height: size,
                 fontSize: glyph,
-                lineHeight: 1,
+                lineHeight: LINE_HEIGHTS.none,
                 // A face is either a polygon cut out of the box, or — on a coin —
                 // a disc the browser rounds off for us.
                 clipPath: face.clipPath,

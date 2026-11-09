@@ -6,7 +6,7 @@ import {
 import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -237,7 +237,7 @@ const numberSx = {
   color: VTT_COLORS.accent,
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xs,
-  lineHeight: 1.4,
+  lineHeight: LINE_HEIGHTS.normal,
 };
 
 const removeSx = (armed) => ({

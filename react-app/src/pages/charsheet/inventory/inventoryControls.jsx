@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import { Backpack, Check, Shield, Sparkles, Swords } from 'lucide-react';
 import { ITEM_GROUP_CHIPS } from '../../../shared/character/inventory/itemGroups.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -18,7 +17,6 @@ export const withIcons = (chips) => chips.map((chip) => ({ ...chip, icon: CHIP_I
 const FILTERS = withIcons(ITEM_GROUP_CHIPS);
 
 export const compactInputSx = {
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.surfaceHeader, borderRadius: 1 },
   '& input': { fontSize: FONT_SIZES.lg, py: 1 },
 };
 

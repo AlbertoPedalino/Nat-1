@@ -1,12 +1,12 @@
 import { useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const btnSx = {
-  fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure, minWidth: 24, px: 0.5, py: 0, lineHeight: 1.4,
+  fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure, minWidth: 24, px: 0.5, py: 0, lineHeight: LINE_HEIGHTS.normal,
   color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line),
   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) },
 };

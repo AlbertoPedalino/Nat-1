@@ -49,3 +49,13 @@ export const FONT_WEIGHTS = Object.freeze({
   bold: 700,
   heavy: 800,
 });
+
+// Line heights: `none` for figures and one-line chips, `tight`–`snug` for
+// dense rows and labels, `normal` for body text, `relaxed` for prose.
+export const LINE_HEIGHTS = Object.freeze({
+  none: 1,
+  tight: 1.15,
+  snug: 1.25,
+  normal: 1.4,
+  relaxed: 1.6,
+});

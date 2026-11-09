@@ -32,7 +32,7 @@ import {
   PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, filledChipSx,
   PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const PANEL_SX = {
@@ -65,7 +65,7 @@ function PreviewHeader({ character, hp }) {
           <Typography
             variant="h2"
             noWrap
-            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: 1.15, fontWeight: FONT_WEIGHTS.heavy }}
+            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight, fontWeight: FONT_WEIGHTS.heavy }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -86,7 +86,7 @@ function AbilityScoreGrid({ scores }) {
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.sm }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
-              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: 1.15, color: 'text.primary' }}>
+              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHTS.tight, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm }}>
@@ -143,10 +143,10 @@ function AcFormulasSection({ character }) {
           const blocked = (f.requiresNoArmor && hasArmor) ? 'Blocked: wearing armor' : '';
           return (
             <Box key={f.key} sx={{ minWidth: 0 }}>
-              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.25 }}>
+              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.snug }}>
                 {f.label}: {val}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: 1.35 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal }}>
                 {f.base} + {abils.join(' + ')}{blocked ? ` — ${blocked}` : ''}
               </Typography>
             </Box>

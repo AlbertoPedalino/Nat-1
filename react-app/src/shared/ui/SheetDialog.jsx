@@ -1,7 +1,7 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
-import { FONT_SIZES } from './fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
@@ -33,7 +33,7 @@ const titleSx = {
 const titleTextSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.md,
-  lineHeight: 1.3,
+  lineHeight: LINE_HEIGHTS.snug,
 };
 
 // The title of a section inside a dialog's content.
@@ -59,14 +59,12 @@ const actionsSx = {
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
   borderTop: 1,
   borderColor: 'divider',
-  // Small Cinzel buttons matching the sheet's button scale.
+  // Compact buttons, at the sheet's button scale.
   '& .MuiButton-root': {
-    ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.xs,
     minWidth: 0,
     px: 1.5,
     py: 0.25,
-    borderRadius: 1,
   },
 };
 

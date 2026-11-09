@@ -6,7 +6,7 @@ import { parseBeastActions, parseBeastActionsRich } from '../../../shared/charac
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
@@ -296,7 +296,7 @@ const rollChipSx = {
   px: '0.28em',
   py: 0,
   font: 'inherit',
-  lineHeight: 1.35,
+  lineHeight: LINE_HEIGHTS.normal,
   cursor: 'pointer',
   '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
 };
