@@ -20,7 +20,10 @@ const toastRootSx = {
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 2, borderColor: 'divider', borderRadius: 2,
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
   boxShadow: UI_SHADOWS.popup,
-  backdropFilter: 'blur(8px)',
+  // No backdrop blur: behind a 95%-opaque surface it could not be seen, and
+  // over the battle map, where something always moves underneath, it was
+  // recomputed every frame — the roller's map fell to about ten frames a
+  // second for as long as the toast was up.
 };
 
 const modeChipSx = (chip) => ({
