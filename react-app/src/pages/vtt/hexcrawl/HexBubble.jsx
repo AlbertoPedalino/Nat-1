@@ -9,6 +9,7 @@ import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -105,7 +106,7 @@ const bubbleSx = {
   // Grows out of the tail, which sits on the hex, so the answer looks spoken by
   // the ground the party is standing on.
   transformOrigin: 'bottom center',
-  animation: 'gbHexBubbleIn 220ms cubic-bezier(0.34, 1.4, 0.64, 1)',
+  animation: `gbHexBubbleIn ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
   '@keyframes gbHexBubbleIn': {
     from: { opacity: 0, transform: 'scale(0.25)' },
     to: { opacity: 1, transform: 'scale(1)' },

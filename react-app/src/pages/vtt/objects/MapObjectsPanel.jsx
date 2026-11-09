@@ -18,6 +18,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -189,7 +190,7 @@ const objectButtonSx = {
 };
 
 const previewSx = {
-  height: 32,
+  height: CONTROL_HEIGHTS.xl,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -211,5 +212,5 @@ const paginationSx = {
   mt: 1,
   display: 'flex',
   justifyContent: 'center',
-  '& .MuiPaginationItem-root': { minWidth: 25, height: 25, fontSize: FONT_SIZES.sm },
+  '& .MuiPaginationItem-root': { minWidth: 25, height: CONTROL_HEIGHTS.md, fontSize: FONT_SIZES.sm },
 };

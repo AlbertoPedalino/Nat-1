@@ -6,6 +6,7 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { initials } from '../../../shared/ui/textCase.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -216,7 +217,7 @@ const countSx = {
   right: -6,
   bottom: -5,
   minWidth: 20,
-  height: 20,
+  height: CONTROL_HEIGHTS.sm,
   px: 0.5,
   borderRadius: 10,
   bgcolor: VTT_COLORS.accent,

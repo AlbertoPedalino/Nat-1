@@ -4,6 +4,8 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -83,7 +85,7 @@ export const hpSummaryRowSx = {
   alignItems: 'center',
   gap: 0.5,
   flexWrap: 'wrap',
-  minHeight: 22,
+  minHeight: CONTROL_HEIGHTS.sm,
 };
 
 // Labelled disclosure: the row must say what it hides, otherwise a bare chevron
@@ -151,7 +153,7 @@ export const cardSx = {
   bgcolor: 'background.paper',
   border: '2px solid transparent',
   borderRadius: 1.5,
-  transition: 'border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease',
+  transition: `border-color ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
 };
 
 export const hpRowSx = {

@@ -3,6 +3,7 @@ import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.j
 import { ConditionToggleGrid } from '../../../shared/character/combat/ConditionChips.jsx';
 import { sectionTitleSx } from './tokenMenuStyles.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The piece menu's side-by-side Conditions and Reminders columns.
 export default function TokenMarkers({
@@ -68,6 +69,6 @@ const chipsSx = {
 };
 
 const compactChipSx = {
-  height: 20,
+  height: CONTROL_HEIGHTS.sm,
   '& .MuiChip-label': { px: 0.5, fontSize: FONT_SIZES.xxs, lineHeight: LINE_HEIGHTS.none },
 };

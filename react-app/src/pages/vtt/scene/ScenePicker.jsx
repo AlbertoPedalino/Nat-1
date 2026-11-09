@@ -19,6 +19,7 @@ import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -233,7 +234,7 @@ const emptySx = {
 };
 
 const liveChipSx = {
-  height: 18,
+  height: CONTROL_HEIGHTS.xs,
   fontSize: FONT_SIZES.xs,
   ...TEXT_STYLES.title,
   flexShrink: 0,

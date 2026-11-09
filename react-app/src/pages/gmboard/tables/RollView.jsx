@@ -14,6 +14,7 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -199,7 +200,7 @@ const hintSx = {
 
 // A fixed height, so the cards with a tier badge line up with the ones without.
 const headerBandSx = {
-  minHeight: 36,
+  minHeight: CONTROL_HEIGHTS.xxl,
 };
 
 const wrapRowSx = {

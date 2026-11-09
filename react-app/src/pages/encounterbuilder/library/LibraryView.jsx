@@ -15,6 +15,7 @@ import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -226,7 +227,7 @@ function QuestAssignment({ encounter, options, dispatch, notify }) {
           />
         )}
       />
-      <Button variant="outlined" onClick={assign} disabled={!quest} sx={{ minHeight: 40 }}>
+      <Button variant="outlined" onClick={assign} disabled={!quest} sx={{ minHeight: CONTROL_HEIGHTS.huge }}>
         Assign
       </Button>
     </Stack>

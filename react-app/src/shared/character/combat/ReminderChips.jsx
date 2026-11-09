@@ -19,6 +19,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -62,7 +63,7 @@ export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
       sx={(theme) => {
         const accent = theme.palette.info.main;
         return {
-          height: 20,
+          height: CONTROL_HEIGHTS.sm,
           fontSize,
           maxWidth: '100%',
           color: accent,
@@ -149,7 +150,7 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
       sx={(theme) => {
         const accent = theme.palette.info.main;
         return {
-          height: 18,
+          height: CONTROL_HEIGHTS.xs,
           fontSize: FONT_SIZES.xxs,
           maxWidth: '100%',
           color: alpha(accent, OPACITY.veil),

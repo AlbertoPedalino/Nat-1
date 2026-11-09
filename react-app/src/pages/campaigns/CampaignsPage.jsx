@@ -35,6 +35,7 @@ import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -333,7 +334,7 @@ const campaignTitleRowSx = { minWidth: 0, flex: '1 1 320px', display: 'flex', al
 const campaignNameSx = { minWidth: 0, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: 'text.primary', overflowWrap: 'anywhere' };
 const campaignActionsSx = { ml: { xs: 0, sm: 'auto' }, display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 };
 const campaignDividerSx = { my: 1.25 };
-const smallChipSx = { height: 22, fontSize: FONT_SIZES.xs, flexShrink: 0 };
+const smallChipSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs, flexShrink: 0 };
 const inviteChipSx = { ...smallChipSx, cursor: 'pointer', '&:focus-visible': focusVisibleSx };
 const dangerActionSx = { color: 'error.main', flexShrink: 0, '&:focus-visible': focusVisibleSx };
 
@@ -369,7 +370,7 @@ const characterInfoSx = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 
 const characterNameRowSx = { display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flexWrap: 'wrap' };
 const characterNameSx = { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
-const readOnlyChipSx = { flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
+const readOnlyChipSx = { flexShrink: 0, height: CONTROL_HEIGHTS.xs, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.5 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
 const hpStatSx = { color: 'error.main' };

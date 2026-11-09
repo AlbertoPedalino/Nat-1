@@ -1,4 +1,5 @@
 import { FONT_SIZES, FONT_WEIGHTS } from '../../shared/ui/fonts.js';
+import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 // The looks the compendium's parts share (search, catalogs, books).
 
 // An entry's name on one line, cut with an ellipsis.
@@ -18,4 +19,4 @@ export const fillColumnSx = {
 };
 
 // The small chip beside a row (a result's kind, a book's id).
-export const rowChipSx = { height: 20, fontSize: FONT_SIZES.sm, flexShrink: 0 };
+export const rowChipSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.sm, flexShrink: 0 };

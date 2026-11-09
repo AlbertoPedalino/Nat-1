@@ -2,6 +2,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // Styles of a piece on the battle map: the cell layout (art, name plate, HP or
 // death-save bars, reminders), handles, badges, condition pills and tooltips.
@@ -186,7 +187,7 @@ export const hpFillSx = {
   left: 0,
   top: 0,
   height: '100%',
-  transition: 'width 120ms linear',
+  transition: `width ${DURATIONS.fast}ms linear`,
 };
 
 const textBaseSx = {
@@ -210,7 +211,7 @@ export const tempFillSx = {
   top: 0,
   height: '100%',
   bgcolor: VTT_COLORS.tempHp,
-  transition: 'width 120ms linear',
+  transition: `width ${DURATIONS.fast}ms linear`,
 };
 
 export const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)' };
@@ -255,7 +256,7 @@ export const badgeSx = {
   textAlign: 'center',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
-  transition: 'all 120ms ease',
+  transition: `all ${DURATIONS.fast}ms ease`,
 };
 
 // A thin white ring keeps the colour apart from the art and from the map.

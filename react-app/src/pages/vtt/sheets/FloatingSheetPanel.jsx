@@ -22,6 +22,7 @@ import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -349,7 +350,7 @@ const titleSx = {
 
 const selectSx = {
   width: { xs: 145, sm: 220 },
-  height: 30,
+  height: CONTROL_HEIGHTS.lg,
   px: 0.75,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   borderRadius: 1,

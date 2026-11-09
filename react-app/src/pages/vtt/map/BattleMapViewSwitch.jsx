@@ -5,6 +5,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -72,7 +73,7 @@ const rootSx = {
 const selectSx = {
   width: { xs: 148, sm: 210 },
   '& .MuiInputBase-root': {
-    height: 32,
+    height: CONTROL_HEIGHTS.xl,
     bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
     fontSize: FONT_SIZES.md,
   },
@@ -80,7 +81,7 @@ const selectSx = {
 
 const buttonSx = {
   minWidth: 92,
-  height: 32,
+  height: CONTROL_HEIGHTS.xl,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
   

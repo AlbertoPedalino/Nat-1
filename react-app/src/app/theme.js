@@ -7,6 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
+import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 
 const SELECTED_OPTION_SX = {
   color: UI_COLORS.accentText,
@@ -244,6 +245,7 @@ export const theme = createTheme({
     },
     MuiChip: {
       styleOverrides: {
+        sizeSmall: { height: CONTROL_HEIGHTS.sm },
         root: {
           maxWidth: '100%',
           minWidth: 0,

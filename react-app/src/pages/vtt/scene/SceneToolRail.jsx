@@ -7,6 +7,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -148,7 +149,7 @@ const panelSx = {
   borderRadius: 1,
   boxShadow: 6,
   cursor: 'default',
-  transition: 'opacity 140ms ease',
+  transition: `opacity ${DURATIONS.fast}ms ease`,
 };
 
 // Keep the drag source mounted and stationary. A quiet fade reveals the board

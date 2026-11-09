@@ -14,6 +14,7 @@ import { useConditionEntries } from '../../../shared/character/combat/useConditi
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Conditions on a combatant. Active ones are always visible so a GM can scan the
 // initiative list and see who is prone without opening anything; the grid to
@@ -25,7 +26,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 // toggle would let a GM strip the condition and leave the level behind.
 
 // Denser than the sheet's: these sit inside an initiative row, not a panel.
-const pillSx = { height: 20, fontSize: FONT_SIZES.xs };
+const pillSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
 
 export default function CombatantConditions({ combatant }) {
   const { dispatch } = useEncounterBuilder();
@@ -80,7 +81,7 @@ export default function CombatantConditions({ combatant }) {
   );
 }
 
-const gridChipSx = { height: 20, fontSize: FONT_SIZES.xs };
+const gridChipSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
 
 const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 };
 

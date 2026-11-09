@@ -5,6 +5,7 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -138,7 +139,7 @@ export const playAreaStrokeProps = {
 
 // The fullscreen Sheet: dark glass, gold edge, the tools toggle's height.
 export const fullscreenSheetButtonSx = {
-  height: 32,
+  height: CONTROL_HEIGHTS.xl,
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
   bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
@@ -236,7 +237,7 @@ export const placementCountSx = {
   right: -8,
   bottom: -8,
   minWidth: 24,
-  height: 24,
+  height: CONTROL_HEIGHTS.md,
   px: 0.5,
   borderRadius: 12,
   bgcolor: VTT_COLORS.accent,

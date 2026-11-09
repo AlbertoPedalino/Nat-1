@@ -7,6 +7,7 @@ import { useIsPhone } from '../../ui/useIsPhone.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { DURATIONS } from '../../ui/motion.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -78,7 +79,7 @@ export function AddCurrencyTile({ onClick, mode = 'builder' }) {
         gap: 0.5,
         cursor: 'pointer',
         color: 'text.secondary',
-        transition: 'color 120ms, border-color 120ms',
+        transition: `color ${DURATIONS.fast}ms, border-color ${DURATIONS.fast}ms`,
         '&:hover, &:focus-visible': { color: HOVER_ADD, borderColor: HOVER_ADD },
       }}
     >

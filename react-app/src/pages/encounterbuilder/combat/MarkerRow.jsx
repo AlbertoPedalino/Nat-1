@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -53,7 +54,7 @@ const rowSx = {
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: 0.5,
-  minHeight: 22,
+  minHeight: CONTROL_HEIGHTS.sm,
 };
 
 // Labelled disclosure: a bare chevron on a combatant with no markers at all

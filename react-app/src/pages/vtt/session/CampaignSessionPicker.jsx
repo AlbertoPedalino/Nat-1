@@ -7,6 +7,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -99,7 +100,7 @@ const rowButtonSx = {
 };
 
 const chipSx = {
-  height: 20,
+  height: CONTROL_HEIGHTS.sm,
   fontSize: FONT_SIZES.xs,
   ...TEXT_STYLES.figure,
 };

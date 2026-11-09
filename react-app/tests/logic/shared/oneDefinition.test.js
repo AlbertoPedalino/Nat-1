@@ -288,6 +288,12 @@ test('font weights, line heights and layers come from their scales', () => {
   assert.deepEqual(sourceLinesMatching(/zIndex:\s*\d{2,}/, { allow: ['shared/ui/layers.js'] }), []);
 });
 
+// Transition times are DURATIONS steps (shared/ui/motion.js); dice keep
+// their own rhythm.
+test('transition times come from DURATIONS', () => {
+  assert.deepEqual(sourceLinesMatching(/(?<![\w.$])[1-9]\d{1,2}ms/, { allow: ['shared/ui/motion.js', 'shared/character/dice/D100Orb.jsx'] }), []);
+});
+
 // The app has one theme; a page keeps only its own sizes (the builder's
 // density rules), never a theme of its own.
 test('the app has one theme', () => {

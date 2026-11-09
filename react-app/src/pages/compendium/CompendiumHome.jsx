@@ -5,6 +5,7 @@ import Catalog from './catalogs/Catalog.jsx';
 import { CATALOG_TABS } from './catalogs/catalogColumns.jsx';
 import BookLinks from './books/BookLinks.jsx';
 import { fillColumnSx } from './compendiumStyles.js';
+import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 
 const TABS = [
   { key: 'search', label: 'Search' },
@@ -48,11 +49,11 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
 }
 
 const tabsSx = {
-  minHeight: 40,
+  minHeight: CONTROL_HEIGHTS.huge,
   flexShrink: 0,
   borderBottom: '1px solid',
   borderColor: 'divider',
-  '& .MuiTab-root': { minHeight: 40 },
+  '& .MuiTab-root': { minHeight: CONTROL_HEIGHTS.huge },
 };
 
 const paneSx = {

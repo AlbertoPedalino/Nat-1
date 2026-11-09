@@ -9,6 +9,7 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../u
 import { UI_SHADOWS } from '../../ui/shadows.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -23,7 +24,7 @@ const toastRootSx = {
 };
 
 const modeChipSx = (chip) => ({
-  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md,
+  height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1, mb: 0.25, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });

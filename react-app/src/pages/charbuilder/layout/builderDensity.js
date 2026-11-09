@@ -1,4 +1,5 @@
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The character builder's density. The builder uses the app's one theme for
 // every colour, face and surface; what it keeps is smaller default sizes, so
@@ -18,6 +19,6 @@ export const builderRootSx = {
   '& :where(.MuiInputBase-input)': { py: 1, fontSize: FONT_SIZES.md },
   '& :where(.MuiAlert-root)': { py: 0.25, px: 1, fontSize: FONT_SIZES.md },
   '& :where(.MuiCardContent-root)': { p: 0.75, '&:last-child': { pb: 0.75 } },
-  '& :where(.MuiChip-root)': { height: 19, fontSize: FONT_SIZES.xxs },
+  '& :where(.MuiChip-root)': { height: CONTROL_HEIGHTS.xs, fontSize: FONT_SIZES.xxs },
   '& :where(.MuiListItemButton-root)': { px: 1, py: 0.5 },
 };

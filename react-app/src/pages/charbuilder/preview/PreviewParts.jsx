@@ -14,6 +14,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
@@ -124,7 +125,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
             ...outlinedChipSx(tone),
             flex: '0 1 auto',
             minWidth: 0,
-            height: 20,
+            height: CONTROL_HEIGHTS.sm,
             maxWidth: '100%',
             '& .MuiChip-label': {
               color: tone,

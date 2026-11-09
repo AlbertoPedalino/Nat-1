@@ -9,6 +9,7 @@ import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -71,7 +72,7 @@ function FeatureItem({ feature, tone }) {
         <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>{feature.name}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {feature.source && <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, color: isSubclass ? subclassTone : 'text.secondary' }}>{feature.source}</Typography>}
-          {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: FONT_SIZES.micro, height: 16, color: 'text.secondary' }} />}
+          {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: FONT_SIZES.micro, height: CONTROL_HEIGHTS.xxs, color: 'text.secondary' }} />}
         </Box>
       </Box>
       <CollapsibleBody open={open}>

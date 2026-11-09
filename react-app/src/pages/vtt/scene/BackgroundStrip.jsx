@@ -11,6 +11,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -214,7 +216,7 @@ const thumbSx = (selected) => ({
   outline: selected ? `2px solid ${VTT_COLORS.accent}` : `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   outlineOffset: selected ? 1 : 0,
   opacity: selected ? 1 : OPACITY.heavy,
-  transition: 'opacity 120ms',
+  transition: `opacity ${DURATIONS.fast}ms`,
   '&:hover': { opacity: 1 },
   '&.Mui-focusVisible': { outline: `2px solid ${VTT_COLORS.accentHighlight}` },
 });
@@ -266,7 +268,7 @@ const addSx = {
 
 const collapsedSx = {
   ...SURFACES.mapControl,
-  height: 32,
+  height: CONTROL_HEIGHTS.xl,
   px: 1.25,
   color: VTT_COLORS.accent,
   boxShadow: 6,

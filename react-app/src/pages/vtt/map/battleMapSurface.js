@@ -4,6 +4,8 @@ import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
@@ -16,7 +18,7 @@ export const battleMapDialogPaperSx = {
   ...SURFACES.map,
   borderRadius: 1,
   boxShadow: UI_SHADOWS.overlay,
-  transition: 'opacity 140ms ease',
+  transition: `opacity ${DURATIONS.fast}ms ease`,
 };
 
 // Placement sources stay mounted and stationary while the surface fades out,
@@ -76,14 +78,14 @@ export function battleMapMenuPaperSx(width) {
 // The compact controls of those menus: a short text field, a checkbox row and
 // its label.
 export const battleMapCompactFieldSx = {
-  '& .MuiInputBase-root': { height: 34, fontSize: FONT_SIZES.md },
+  '& .MuiInputBase-root': { height: CONTROL_HEIGHTS.xl, fontSize: FONT_SIZES.md },
   '& .MuiInputLabel-root': { fontSize: FONT_SIZES.sm },
   '& .MuiInputLabel-shrink': { transform: 'translate(14px, -7px) scale(0.75)' },
 };
 
 export const battleMapCheckboxRowSx = {
   m: 0,
-  minHeight: 24,
+  minHeight: CONTROL_HEIGHTS.md,
   '& .MuiCheckbox-root': { p: 0.25, mr: 0.25 },
   '& .MuiSvgIcon-root': { width: 17, height: 17 },
 };

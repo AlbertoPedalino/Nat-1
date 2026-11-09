@@ -29,6 +29,7 @@ import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -219,7 +220,7 @@ function SlotBtn({ active, onClick, label }) {
   return (
     <IconButton size="small" onClick={onClick}
       sx={{
-        minWidth: 24, height: 24, px: 0.5,
+        minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
         border: 1,
         borderColor: active ? UI_COLORS.accent : 'divider',
         borderRadius: 0.375,

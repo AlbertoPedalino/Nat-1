@@ -23,6 +23,7 @@ import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -182,7 +183,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}
+                  sx={{ flexShrink: 0, height: CONTROL_HEIGHTS.xs, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}
                   variant="outlined" />
               )}
             </Box>

@@ -11,6 +11,7 @@ import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -231,7 +232,7 @@ export default function HPBlock({
                 size="small"
                 variant="outlined"
                 onClick={onDeathSave}
-                sx={{ ml: 'auto', minWidth: 36, height: 22, fontSize: FONT_SIZES.xxxs, ...TEXT_STYLES.title, color: 'text.secondary', borderColor: 'divider' }}
+                sx={{ ml: 'auto', minWidth: 36, height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, ...TEXT_STYLES.title, color: 'text.secondary', borderColor: 'divider' }}
               >
                 Roll
               </Button>

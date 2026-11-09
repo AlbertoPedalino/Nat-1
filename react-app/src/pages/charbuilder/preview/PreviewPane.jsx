@@ -34,6 +34,7 @@ import {
 } from './PreviewParts.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -110,7 +111,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           label={`Level ${level}`}
           sx={{
             ...filledChipSx(UI_COLORS.accentText),
-            height: 20,
+            height: CONTROL_HEIGHTS.sm,
             fontSize: FONT_SIZES.xxs,
             ...TEXT_STYLES.label,
             

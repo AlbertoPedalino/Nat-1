@@ -16,6 +16,7 @@ import HighlightedText from '../search/HighlightedText.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -341,7 +342,7 @@ const titlePreviewSx = {
   cursor: 'text',
 };
 
-const titleTextSx = { fontWeight: FONT_WEIGHTS.bold, minHeight: 24, overflowWrap: 'anywhere' };
+const titleTextSx = { fontWeight: FONT_WEIGHTS.bold, minHeight: CONTROL_HEIGHTS.md, overflowWrap: 'anywhere' };
 
 // Mirrors the outlined TextField the preview replaces, so switching modes does
 // not make the card jump.

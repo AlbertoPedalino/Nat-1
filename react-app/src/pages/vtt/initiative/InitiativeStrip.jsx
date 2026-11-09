@@ -11,6 +11,8 @@ import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -224,7 +226,7 @@ const roundSx = {
   alignSelf: 'center',
   display: 'flex',
   alignItems: 'center',
-  height: 24,
+  height: CONTROL_HEIGHTS.md,
   lineHeight: LINE_HEIGHTS.none,
   px: 0.75,
   color: 'gmboard.vtt.accent',
@@ -258,7 +260,7 @@ const entrySx = {
   borderRadius: 999,
   border: '1px solid transparent',
   color: VTT_COLORS.text,
-  transition: 'background-color 160ms ease, border-color 160ms ease',
+  transition: `background-color ${DURATIONS.normal}ms ease, border-color ${DURATIONS.normal}ms ease`,
 };
 
 const entryBodySx = {

@@ -33,12 +33,13 @@ import { UI_COLORS } from '../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
     <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-      <Chip size="small" label={index + 1} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
+      <Chip size="small" label={index + 1} sx={{ height: CONTROL_HEIGHTS.xs, fontSize: FONT_SIZES.xxs }} />
       <Icon size={ICON_SIZES.sm} />
       <span>{step.label}</span>
     </Stack>
@@ -129,7 +130,7 @@ export default function CharBuilder() {
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={ICON_SIZES.md} />
               <Typography variant="h2" sx={{ fontSize: FONT_SIZES.xxl, ...TEXT_STYLES.label, color: 'primary.main' }}>{activeStep.label}</Typography>
-              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: FONT_SIZES.xxs }} />
+              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: CONTROL_HEIGHTS.xs, fontSize: FONT_SIZES.xxs }} />
             </Stack>
 
             <ActiveStep

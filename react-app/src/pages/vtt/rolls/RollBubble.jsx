@@ -9,6 +9,8 @@ import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { DURATIONS } from '../../../shared/ui/motion.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -128,7 +130,7 @@ const bubbleSx = {
   // Grows out of the tail, which sits on the token — so the roll looks spoken by
   // the piece rather than dropped onto the map from somewhere off screen.
   transformOrigin: 'bottom center',
-  animation: 'gbRollBubbleIn 220ms cubic-bezier(0.34, 1.4, 0.64, 1)',
+  animation: `gbRollBubbleIn ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
   '@keyframes gbRollBubbleIn': {
     from: { opacity: 0, transform: 'scale(0.25)' },
     to: { opacity: 1, transform: 'scale(1)' },
@@ -188,7 +190,7 @@ const natSx = {
 };
 
 const modeChipSx = (chip) => ({
-  height: 18,
+  height: CONTROL_HEIGHTS.xs,
   fontSize: FONT_SIZES.xxxs,
   fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.md,

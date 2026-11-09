@@ -4,6 +4,7 @@ import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout
 import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -47,7 +48,7 @@ export const scenePresenterActionsSx = {
   pl: { xs: 0, md: 1.25 },
   borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.fill)}` },
   '& .MuiButton-root': {
-    minHeight: 30,
+    minHeight: CONTROL_HEIGHTS.lg,
     fontSize: FONT_SIZES.sm,
     whiteSpace: 'nowrap',
   },
@@ -107,7 +108,7 @@ export const sceneControlsPassThroughSx = {
 // The player preview sits with the sheet switch and takes its height, so the
 // two read as one pair of view controls.
 export const viewButtonSx = {
-  height: 32,
+  height: CONTROL_HEIGHTS.xl,
   fontSize: FONT_SIZES.sm,
   whiteSpace: 'nowrap',
 };

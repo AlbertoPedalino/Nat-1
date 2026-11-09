@@ -2,6 +2,7 @@ import { Button, Stack } from '@mui/material';
 import { ScrollText, Trash2 } from 'lucide-react';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The piece menu's bottom row: Done, and Sheet / Stat block / Remove when this
 // user may use them. Each one closes the menu.
@@ -52,7 +53,7 @@ export default function TokenMenuActions({
 }
 
 const menuButtonSx = {
-  minHeight: 28,
+  minHeight: CONTROL_HEIGHTS.lg,
   py: 0.25,
   fontSize: FONT_SIZES.xs,
 };
