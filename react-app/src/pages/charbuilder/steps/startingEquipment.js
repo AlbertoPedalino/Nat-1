@@ -1,6 +1,7 @@
 import { findInventoryItem } from '../../../shared/character/inventory/itemContainers.js';
 import { strip5eMarkup } from '../../../shared/content/entryText.js';
 import { splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
+import { formatCopper } from '../../../shared/character/inventory/currency.js';
 
 // A class or background's starting equipment: choice blocks, the items and
 // coins they grant, and the gear-type slots still to pick.
@@ -60,10 +61,10 @@ export function flattenEquip(node, items = []) {
       const name = stripSource(node.item);
       const qty = node.quantity && node.quantity > 1 ? ` x${node.quantity}` : '';
       const value = node.containsValue || node.value || 0;
-      items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${Math.floor(value / 100)} gp)` : ''}`);
+      items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${formatCopper(value)})` : ''}`);
     } else if (node.special) items.push(strip5eMarkup(node.special));
     else if (node.equipmentType) items.push(strip5eMarkup(node.equipmentType));
-    else if (node.containsValue || node.value) items.push(`${Math.floor((node.containsValue || node.value) / 100)} gp`);
+    else if (node.containsValue || node.value) items.push(formatCopper(node.containsValue || node.value));
     else if (node.entries) flattenEquip(node.entries, items);
     else Object.entries(node).forEach(([key, value]) => {
       if (!['source', 'page', 'type'].includes(key)) flattenEquip(value, items);

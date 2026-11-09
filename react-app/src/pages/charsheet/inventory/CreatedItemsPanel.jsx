@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
@@ -20,6 +19,7 @@ import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
+import { useItemsDb } from './useItemsDb.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -58,7 +58,7 @@ const stepBtnSx = (disabled) => ({
 export default function CreatedItemsPanel({ action, character, sheet }) {
   const { onUpdateInventory } = useSheetActions();
   const profSets = useProficiencySets();
-  const [itemsDb, setItemsDb] = useState([]);
+  const itemsDb = useItemsDb();
   const detail = useMemo(() => resolveDetail(action, character, sheet), [action, character, sheet]);
 
   const flag = detail.flag;
@@ -105,12 +105,6 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     }
     return [];
   }, [detail.items, detail.toolGroups, character, profSets]);
-
-  useEffect(() => {
-    let alive = true;
-    loadItems().then((db) => { if (alive) setItemsDb(db || []); }).catch(() => {});
-    return () => { alive = false; };
-  }, []);
 
   const { exactMap, looseMap } = useMemo(() => buildCreatedItemLookup(itemsDb), [itemsDb]);
 

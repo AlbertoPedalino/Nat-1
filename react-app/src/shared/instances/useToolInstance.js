@@ -22,6 +22,7 @@ import {
 } from './instanceSync.js';
 import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../cloud/sync/syncKeys.js';
+import { failureMessage } from '../ui/busyAction.js';
 
 function isEditingText() {
   const element = document.activeElement;
@@ -170,7 +171,7 @@ export function useToolInstance(sectionKey) {
     try {
       await resolveConflict(sectionKey, id, choice);
     } catch (error) {
-      notify('error', error?.message || 'Could not resolve the conflict.');
+      notify('error', failureMessage('Could not resolve the conflict.', error));
     }
   }, [id, notify, sectionKey]);
 

@@ -26,13 +26,10 @@ const LOOKUPS = {
 
 const COMPL_FOLLOW_UPS = { Encounter: 'encounter', 'Environment Damage': 'trap', Environment: 'env' };
 
+// The table's paired dice, in the shape every board roll is kept in
+// (tableDice.js): { d1, d2, sum } for 2d20, { d8, d12, sum } otherwise.
 function rollDice(notation, rng) {
-  if (notation === '2d20') {
-    const { d1, d2, sum } = rollD20D20(rng);
-    return { dice: [{ sides: 20, value: d1 }, { sides: 20, value: d2 }], sum };
-  }
-  const { d8, d12, sum } = rollD8D12(rng);
-  return { dice: [{ sides: 8, value: d8 }, { sides: 12, value: d12 }], sum };
+  return notation === '2d20' ? rollD20D20(rng) : rollD8D12(rng);
 }
 
 // The check a result asks of the party, where the generators roll one: loot
@@ -46,14 +43,13 @@ function dcLabel(tableId, data) {
 export function rollTable(tables, tableId, { tier = 1 } = {}, rng = Math.random) {
   const table = ROLL_TABLES.find((entry) => entry.id === tableId);
   if (!table) return null;
-  const { dice, sum } = rollDice(table.dice, rng);
-  const data = LOOKUPS[tableId](tables, sum, tier);
+  const rolled = rollDice(table.dice, rng);
+  const data = LOOKUPS[tableId](tables, rolled.sum, tier);
   const label = dcLabel(tableId, data);
   return {
     tableId,
     tier: table.tiered ? tier : null,
-    dice,
-    sum,
+    ...rolled,
     data,
     // Rolled with the result, as the generators do, never as a separate step.
     dc: label ? { label, ...rollDice('1d8+1d12', rng) } : null,

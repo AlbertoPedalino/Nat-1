@@ -1,7 +1,8 @@
 import { PLAYER_COLORS } from '../../../shared/encounter/combatLabels.js';
+import { clampPlayerStats } from '../../../shared/encounter/combat.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
-import { clampInt } from '../../../shared/numbers.js';
+import { clamp, clampInt } from '../../../shared/numbers.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
 // The encounter builder's party: the default placeholder players, party size
@@ -10,16 +11,6 @@ import { normalizeHexColor } from '../../../shared/ui/colors.js';
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 export const MAX_PARTY_SIZE = 10;
 export const MAX_PARTY_LEVEL = 20;
-
-// A player's numbers as the builder allows them, from any source (a typed-in
-// row, a campaign sheet's summary).
-export function clampPlayerStats({ initMod, ac, hpMax }) {
-  return {
-    initMod: clampInt(initMod, -20, 30, 0),
-    ac: clampInt(ac, 1, 99, 10),
-    hpMax: clampInt(hpMax, 1, 999, 10),
-  };
-}
 
 // The stand-in for party slot `index` until a real character takes it.
 function placeholderPlayer(index) {
@@ -67,7 +58,7 @@ export function removePlayer(state, index) {
     players,
     party: {
       ...state.party,
-      count: Math.max(1, Math.min(MAX_PARTY_SIZE, players.length)),
+      count: clamp(players.length, 1, MAX_PARTY_SIZE),
     },
     campaignNotice: `${removed?.name || 'Player'} removed from encounter.`,
   };
@@ -120,7 +111,7 @@ export function importCampaignPlayers(state, campaignPlayers) {
   return {
     ...state,
     players,
-    party: { count: Math.max(1, Math.min(MAX_PARTY_SIZE, players.length)), level },
+    party: { count: clamp(players.length, 1, MAX_PARTY_SIZE), level },
     campaignNotice: parts.length ? `${parts.join(', ')}.` : 'Campaign players already in party.',
   };
 }

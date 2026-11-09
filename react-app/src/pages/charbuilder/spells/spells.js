@@ -5,6 +5,7 @@ import {
 } from '../../../shared/character/spells/autoGrantedSpells.js';
 import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The spellcasting profile of the class being edited (shared spellcasting.js).
 function builderSpellcastingProfile(character) {
@@ -16,7 +17,7 @@ function builderSpellcastingProfile(character) {
 }
 
 function getClassSpellLevel(character) {
-  return Math.max(1, Math.min(20, primaryClassLevel(character)));
+  return clamp(primaryClassLevel(character), 1, 20);
 }
 
 // A grant record as the builder lists it: name, levels, mode, and its source

@@ -1,4 +1,5 @@
-function getStorage() {
+// This browser's localStorage, or null where it is missing or denied.
+export function getStorage() {
   try {
     return typeof localStorage === 'undefined' ? null : localStorage;
   } catch (_) {
@@ -61,15 +62,20 @@ export function setStorageItem(key, value) {
 // A JSON value: `fallback` when it is missing, unreadable or storage is
 // blocked. Preferences and small caches read this way; a blocked storage only
 // forgets.
-export function getStorageJson(key, fallback = null) {
-  const raw = getStorageItem(key);
-  if (raw == null) return fallback;
+// A stored JSON string read back, or `fallback` when it is missing, not a
+// string, unreadable or null.
+export function parseJsonOr(raw, fallback) {
+  if (typeof raw !== 'string') return fallback;
   try {
     const value = JSON.parse(raw);
     return value == null ? fallback : value;
-  } catch (_) {
+  } catch {
     return fallback;
   }
+}
+
+export function getStorageJson(key, fallback = null) {
+  return parseJsonOr(getStorageItem(key), fallback);
 }
 
 export function setStorageJson(key, value) {

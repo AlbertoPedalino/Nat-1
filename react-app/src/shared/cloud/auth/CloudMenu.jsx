@@ -11,6 +11,7 @@ import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
+import { failureMessage } from '../../ui/busyAction.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -68,7 +69,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         reportCloudSyncState(id, 'conflict', e.message);
         return;
       }
-      notify('error', `Could not save the sheet to the cloud: ${e?.message || 'unknown error'}`);
+      notify('error', failureMessage('Could not save the sheet to the cloud.', e));
     }
   };
 
@@ -79,7 +80,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
     if (state === 'scheduled' || state === 'cancelled') return;
     // A conflict wrote nothing and needs a decision (the open sheet asks it).
     setSyncState(state === 'conflict' ? 'error' : state);
-    if (state === 'error' || state === 'conflict') notify('error', `Could not sync: ${e.detail.error || 'unknown error'}`);
+    if (state === 'error' || state === 'conflict') notify('error', failureMessage('Could not sync.', e.detail.error));
   });
 
   if (!cloudEnabled) {

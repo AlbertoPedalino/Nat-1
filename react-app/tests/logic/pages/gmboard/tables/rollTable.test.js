@@ -26,7 +26,7 @@ test('the roller offers every generator table except weather', () => {
 
 test('rollTable rolls 2d20 on the Event Table and returns the matching row', () => {
   const roll = rollTable(tables, 'event', {}, seqRng([0.3, 0.55, 0.5, 0.5]));
-  assert.deepEqual(roll.dice, [{ sides: 20, value: 7 }, { sides: 20, value: 12 }]);
+  assert.deepEqual([roll.d1, roll.d2], [7, 12]);
   assert.equal(roll.sum, 19);
   assert.equal(roll.tier, null);
   assert.equal(roll.data.name, 'Tracks/Clues');
@@ -40,7 +40,7 @@ test('rollTable rolls 2d20 on the Event Table and returns the matching row', () 
 
 test('rollTable rolls 1d8+1d12 on the Loot Table', () => {
   const roll = rollTable(tables, 'loot', {}, seqRng([0.99, 0.7, 0, 0.99]));
-  assert.deepEqual(roll.dice, [{ sides: 8, value: 8 }, { sides: 12, value: 9 }]);
+  assert.deepEqual([roll.d8, roll.d12], [8, 9]);
   assert.equal(roll.sum, 17);
   assert.equal(diceText(roll), 'd8(8)+d12(9)=17');
   const described = describeRoll(roll);
@@ -54,7 +54,8 @@ test('rollTable rolls 1d8+1d12 on the Loot Table', () => {
   assert.equal(summarizeStats(described.stats), 'Rarity Uncommon · Quality Masterwork · Value 20×Lv · DC to find it 13');
   assert.deepEqual(roll.dc, {
     label: 'DC to find it',
-    dice: [{ sides: 8, value: 1 }, { sides: 12, value: 12 }],
+    d8: 1,
+    d12: 12,
     sum: 13,
   });
   assert.equal(diceText(roll.dc), 'd8(1)+d12(12)=13');

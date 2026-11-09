@@ -7,6 +7,7 @@ import {
 } from '../../encounter/fightRecord.js';
 import { CLOUD_COMMAND_TIMEOUT_MS, currentUser, withTimeout } from '../cloudCall.js';
 import { createKeyedQueue } from '../sync/keyed.js';
+import { isMissingRpc, isNoDataFound } from '../pgErrors.js';
 
 // Fights, as rows.
 //
@@ -133,6 +134,15 @@ export function pendingFightVitals(fightId) {
   return fightVitalsQueue.pending(String(fightId));
 }
 
+// A fight commit's failure: a fight that is gone (or a database without the
+// function) is FIGHT_UNAVAILABLE, anything else as it came.
+function fightError(error) {
+  if (isNoDataFound(error) || isMissingRpc(error)) {
+    return Object.assign(new Error(error.message || 'Fight unavailable.'), { code: FIGHT_UNAVAILABLE });
+  }
+  return error;
+}
+
 function sendFightCombatantVitals(fightId, combatantId, { base, patch }, timeoutMs) {
   const request = Promise.resolve(requireClient().rpc('commit_fight_combatant_vitals', {
     p_fight_id: String(fightId),
@@ -140,12 +150,7 @@ function sendFightCombatantVitals(fightId, combatantId, { base, patch }, timeout
     p_base: base,
     p_patch: patch,
   })).then(({ data, error }) => {
-    if (error) {
-      if (error.code === 'P0002' || error.code === 'PGRST202') {
-        throw Object.assign(new Error(error.message || 'Fight unavailable.'), { code: FIGHT_UNAVAILABLE });
-      }
-      throw error;
-    }
+    if (error) throw fightError(error);
     return { applied: Boolean(data?.applied), row: data?.row || null };
   });
   return withTimeout(request, timeoutMs, 'Enemy health update', FIGHT_TIMEOUT);
@@ -161,12 +166,7 @@ export async function commitFightTurn(fightId, base, step, { timeoutMs = FIGHT_V
     p_base: base || null,
     p_step: step < 0 ? -1 : 1,
   })).then(({ data, error }) => {
-    if (error) {
-      if (error.code === 'P0002' || error.code === 'PGRST202') {
-        throw Object.assign(new Error(error.message || 'Fight unavailable.'), { code: FIGHT_UNAVAILABLE });
-      }
-      throw error;
-    }
+    if (error) throw fightError(error);
     return { applied: Boolean(data?.applied), row: data?.row || null };
   });
   return withTimeout(request, timeoutMs, 'Turn change', FIGHT_TIMEOUT);

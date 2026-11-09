@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Where a piece's or a mark's menu opens, and what it does when a field in it
 // is typed into.
@@ -37,8 +38,8 @@ export function useMenuPlacement(anchor) {
     const root = paper.parentElement;
     const width = root?.clientWidth || globalThis.innerWidth || 0;
     const height = root?.clientHeight || globalThis.innerHeight || 0;
-    const left = Math.max(EDGE, Math.min(anchor.x, width - paper.offsetWidth - EDGE));
-    const top = Math.max(EDGE, Math.min(anchor.y, height - paper.offsetHeight - EDGE));
+    const left = clamp(anchor.x, EDGE, width - paper.offsetWidth - EDGE);
+    const top = clamp(anchor.y, EDGE, height - paper.offsetHeight - EDGE);
     baseTopRef.current = top;
     paper.style.left = `${Math.round(left)}px`;
     paper.style.top = `${Math.round(top)}px`;
@@ -55,7 +56,7 @@ export function useMenuPlacement(anchor) {
       const visibleBottom = (viewport ? viewport.offsetTop + viewport.height : globalThis.innerHeight) - EDGE;
       // Where the field's bottom would be with the menu back in its place.
       const bottom = field.getBoundingClientRect().bottom + liftRef.current;
-      lift = Math.max(0, Math.min(bottom - visibleBottom, baseTopRef.current - EDGE));
+      lift = clamp(bottom - visibleBottom, 0, baseTopRef.current - EDGE);
     }
     if (lift === liftRef.current) return;
     liftRef.current = lift;

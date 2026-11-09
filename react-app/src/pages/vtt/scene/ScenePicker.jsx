@@ -25,7 +25,7 @@ import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
-import { runBusy } from '../../../shared/ui/busyAction.js';
+import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -48,7 +48,7 @@ export default function ScenePicker({
       setScenesByCampaign(Object.fromEntries(entries));
       setError('');
     } catch (cause) {
-      setError(cause?.message || 'Could not load the scenes.');
+      setError(failureMessage('Could not load the scenes.', cause));
     }
   }, []);
 
@@ -116,7 +116,7 @@ export default function ScenePicker({
       await refresh(campaigns.map((campaign) => campaign.id));
       notify('success', scene.isLive ? 'Players see nothing now.' : `Players are now on "${scene.name}".`);
     } catch (cause) {
-      notify('error', cause?.message || 'Could not change the live scene.');
+      notify('error', failureMessage('Could not change the live scene.', cause));
     }
   };
 
@@ -127,7 +127,7 @@ export default function ScenePicker({
       await updateScene(scene.id, { name: next });
       await refresh(campaigns.map((campaign) => campaign.id));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not rename the scene.');
+      notify('error', failureMessage('Could not rename the scene.', cause));
     }
   };
 
@@ -139,7 +139,7 @@ export default function ScenePicker({
       if (cleanupError) notify('warning', 'Scene deleted, but some uploaded images could not be cleaned up.');
       else notify('success', `Deleted "${scene.name}".`);
     } catch (cause) {
-      notify('error', cause?.message || 'Could not delete the scene.');
+      notify('error', failureMessage('Could not delete the scene.', cause));
     }
   };
 

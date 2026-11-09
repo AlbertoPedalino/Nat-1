@@ -3,6 +3,7 @@ import { adapterRegistry } from '../../../adapters/registry.js';
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
 import { adaptBuilderData } from '../../../adapters/adapterPipeline.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // Loads the core and class adapters once the items are in, loads more when a
 // class is added, and runs the loaded game data through them once everything
@@ -20,7 +21,7 @@ export function useBuilderAdapters(state, dispatch, notify) {
         if (!cancelled) dispatch({ type: 'adapters/loaded' });
       })
       .catch((error) => {
-        if (!cancelled) notify('error', `Could not load the class rules: ${error?.message || error}`);
+        if (!cancelled) notify('error', failureMessage('Could not load the class rules.', error));
       });
     return () => {
       cancelled = true;
@@ -40,7 +41,7 @@ export function useBuilderAdapters(state, dispatch, notify) {
         }
       })
       .catch((error) => {
-        if (!cancelled) notify('error', `Could not load the class rules: ${error?.message || error}`);
+        if (!cancelled) notify('error', failureMessage('Could not load the class rules.', error));
       });
     return () => { cancelled = true; };
   }, [state.adaptersLoaded, state.character.className, state.character.extraClasses, state.data.items]);

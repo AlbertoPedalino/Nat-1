@@ -1,3 +1,4 @@
+import { clamp } from '../numbers.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
 // Components should still prefer `gmboard.vtt.*` in `sx` when a theme token is
@@ -81,5 +82,5 @@ export function vttAlpha(color, alpha) {
   const red = (value >> 16) & 255;
   const green = (value >> 8) & 255;
   const blue = value & 255;
-  return `rgba(${red}, ${green}, ${blue}, ${Math.max(0, Math.min(1, Number(alpha)))})`;
+  return `rgba(${red}, ${green}, ${blue}, ${clamp(Number(alpha), 0, 1)})`;
 }

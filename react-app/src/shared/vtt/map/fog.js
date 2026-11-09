@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // Fog of war state: one bit per fog cell, set = revealed.
 //
 // A bitset instead of an array of booleans because the counts are large: a 60x40
@@ -243,7 +244,7 @@ export function brushStrokeCells(from, to, size, { cols, rows }) {
     for (let col = left; col <= right; col += 1) {
       const x = col + 0.5 - from.col;
       const y = row + 0.5 - from.row;
-      const t = lengthSquared ? Math.max(0, Math.min(1, (x * dx + y * dy) / lengthSquared)) : 0;
+      const t = lengthSquared ? clamp((x * dx + y * dy) / lengthSquared, 0, 1) : 0;
       if ((x - t * dx) ** 2 + (y - t * dy) ** 2 <= radius ** 2) cells.push({ col, row });
     }
   }

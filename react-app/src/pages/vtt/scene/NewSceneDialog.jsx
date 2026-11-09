@@ -23,6 +23,7 @@ import {
 } from './generators.js';
 import { stitchImages } from './stitch.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -92,7 +93,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
       else setError('None of those could be imported. The scenes were not created.');
     } catch (cause) {
       setProgress(null);
-      setError(cause?.message || 'Could not create the scenes.');
+      setError(failureMessage('Could not create the scenes.', cause));
     }
   };
 

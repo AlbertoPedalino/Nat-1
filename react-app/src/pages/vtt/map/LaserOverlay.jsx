@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
 // Reaching each target in exactly that interval keeps the motion continuous —
@@ -69,7 +70,7 @@ function RemoteLaser({ laser, grid, view }) {
     let startedAt = null;
     const draw = (now) => {
       if (startedAt === null) startedAt = now;
-      const progress = moving ? Math.min(1, Math.max(0, (now - startedAt) / REMOTE_LASER_TWEEN_MS)) : 1;
+      const progress = moving ? clamp((now - startedAt) / REMOTE_LASER_TWEEN_MS, 0, 1) : 1;
       const point = {
         x: start.x + (target.x - start.x) * progress,
         y: start.y + (target.y - start.y) * progress,

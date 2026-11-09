@@ -11,6 +11,7 @@ import {
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { patchById } from '../../../shared/vtt/session/liveScene.js';
 import { createKeyedQueue } from '../../../shared/cloud/sync/keyed.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The hit points of any piece, from its menu: damage, healing, temporary and
 // maximum hit points as one intent (a character health command's name)
@@ -53,7 +54,7 @@ export function useTokenVitalCommands({
         if (applied) return;
         notify('warning', 'This creature changed elsewhere. Showing the latest values; try again if needed.');
       } catch (cause) {
-        notify('error', cause?.message || 'Could not update that creature.');
+        notify('error', failureMessage('Could not update that creature.', cause));
       }
       refreshVisibleTokens();
     };
@@ -88,7 +89,7 @@ export function useTokenVitalCommands({
       }
     } catch (cause) {
       gmVitals.reload();
-      notify('error', cause?.message || 'Could not update those hit points.');
+      notify('error', failureMessage('Could not update those hit points.', cause));
     }
   }, [gmVitals, notify, setTokens, writeConditions]);
 
@@ -97,7 +98,7 @@ export function useTokenVitalCommands({
       try {
         await characterHealth(token.characterId, command);
       } catch (cause) {
-        notify('error', cause?.message || 'Could not update those hit points.');
+        notify('error', failureMessage('Could not update those hit points.', cause));
       }
       return;
     }

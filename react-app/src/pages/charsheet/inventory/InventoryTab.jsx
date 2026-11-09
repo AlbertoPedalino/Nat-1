@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { adapterRegistry } from '../../../adapters/index.js';
 import { availableItemFlagDefs } from '../../../shared/character/inventory/itemFlags.js';
@@ -10,11 +10,11 @@ import {
   updateCustomCurrency,
 } from '../../../shared/character/inventory/currency.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { loadItemsCached } from './itemSearch.js';
 import { useInventoryActions } from './useInventoryActions.js';
 import InventoryStats from './InventoryStats.jsx';
 import InventoryAddPanel from './InventoryAddPanel.jsx';
 import InventoryList from './InventoryList.jsx';
+import { useItemsDb } from './useItemsDb.js';
 
 // The sheet's inventory tab: coins, carried weight and attunement, the add-item
 // search (InventoryAddPanel) and the owned items (InventoryList). Every change
@@ -23,23 +23,13 @@ export default function InventoryTab({ C, sheet }) {
   const {
     onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onNotice,
   } = useSheetActions();
-  const [itemsDb, setItemsDb] = useState([]);
+  const itemsDb = useItemsDb();
   const inv = sheet?.sheetInventory || [];
   const currency = sheet?.sheetCurrency || {};
   const attunementState = useMemo(() => getCharacterAttunementState(C), [C]);
   const { addItem, rowActions } = useInventoryActions({
     inv, itemsDb, character: C, attunementState, onUpdateInventory, onUpdateCharacter, onNotice,
   });
-
-  useEffect(() => {
-    let alive = true;
-    loadItemsCached().then((items) => {
-      if (alive) setItemsDb(items);
-    }).catch(() => {
-      if (alive) setItemsDb([]);
-    });
-    return () => { alive = false; };
-  }, []);
 
   const attunementFull = useMemo(
     () => countAttunedItems(inv) >= attunementState.limit,

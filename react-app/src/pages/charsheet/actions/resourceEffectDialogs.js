@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { addCreatedSlot, availableRegularSlotLevels, consumeSlot, getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, lowestAvailableSlotLevel, persistUsedSlots, recoverPactSlots } from '../../../shared/character/spells/spellSlots.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The dialogs a spent resource can open (useResourceSideEffects), one hook per
 // family: its state, how it opens and what confirming it does. Each takes
@@ -211,7 +212,7 @@ export function usePactSlotEffects(ctx) {
     if (!consumePactSlotDialog) return;
     const level = consumePactSlotDialog.slotLevel;
     const pactMax = consumePactSlotDialog.pactMax;
-    const amount = Math.max(1, Math.min(consumeCount || 1, consumePactSlotDialog.maxConsume));
+    const amount = clamp(consumeCount || 1, 1, consumePactSlotDialog.maxConsume);
     const used = { ...(sheet?.spellSlotUsed || {}) };
     const key = getPactSlotUsedKey(level);
     used[key] = Math.min(
@@ -250,7 +251,7 @@ export function useSlotRecovery(ctx) {
   const openSpellSlotRecovery = (result, key) => {
     const budget = Math.max(0, Number(result?.budget || 0));
     if (!budget) return;
-    const maxSlotLevel = Math.max(1, Math.min(9, Number(result?.maxSlotLevel || 9)));
+    const maxSlotLevel = clamp(Number(result?.maxSlotLevel || 9), 1, 9);
     const regularSlots = getSpellSlots(C)?.regular || [];
     const used = sheet?.spellSlotUsed || {};
     const levels = [];
@@ -258,7 +259,7 @@ export function useSlotRecovery(ctx) {
     for (let level = 1; level <= topLevel; level++) {
       const total = Number(regularSlots[level - 1] || 0);
       if (!total) continue;
-      const expended = Math.max(0, Math.min(total, getRegularSlotUsed(used, level)));
+      const expended = clamp(getRegularSlotUsed(used, level), 0, total);
       if (!expended) continue;
       levels.push({ level, total, expended });
     }

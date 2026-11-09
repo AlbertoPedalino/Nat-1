@@ -54,5 +54,5 @@ export function deletePlanFor(row, { myId, isGm }) {
 // Loads + merges rows. A failing cloud call never throws and never hides the
 // local list: it just yields the local-only rows plus a non-blocking error.
 export async function loadCharacterRows({ listCloud, listLocal }) {
-  return loadInstanceRows({ listCloud, listLocal, errorMessage: 'Failed to load cloud sheets.' });
+  return loadInstanceRows({ listCloud, listLocal, errorMessage: 'Could not load cloud sheets.' });
 }

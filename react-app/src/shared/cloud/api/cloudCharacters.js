@@ -6,6 +6,7 @@ import { stripRuntimeOnlyCharacterFields } from '../../character/profile/runtime
 import { publishCharacterSheetSaved } from '../sync/characterEvents.js';
 import { tagSync } from '../sync/syncDiagnostics.js';
 import { currentUser } from '../cloudCall.js';
+import { isUniqueViolation } from '../pgErrors.js';
 
 const TABLE = 'characters';
 
@@ -110,7 +111,7 @@ async function writeSheet(charId, character, expectedSheetRevision) {
   };
   const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
   // Created elsewhere in between (unique violation): not ours to overwrite.
-  if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
+  if (isUniqueViolation(error)) throw sheetConflict(charId, await getCloudSheetRevision(charId));
   if (error) throw error;
   return Number(data?.sheet_revision ?? 0);
 }

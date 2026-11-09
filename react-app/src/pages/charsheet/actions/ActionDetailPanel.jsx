@@ -1,10 +1,11 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollTables.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -89,14 +90,8 @@ export default function ActionDetailPanel({ action, character, sheet }) {
     }));
   const roll = detail.roll || null;
   const tableKey = roll?.tableKey || null;
-  const [tableMeta, setTableMeta] = useState(null);
-  useEffect(() => {
-    if (!tableKey) return undefined;
-    let alive = true;
-    // A table that cannot be downloaded just leaves the roll button out.
-    loadRollTable(tableKey).then((table) => { if (alive) setTableMeta(table); }).catch(() => {});
-    return () => { alive = false; };
-  }, [tableKey]);
+  // A table that cannot be downloaded just leaves the roll button out.
+  const tableMeta = useLoaded(() => (tableKey ? loadRollTable(tableKey) : null), [tableKey]).data;
   const dual = Boolean(roll?.dualRollFromLevel != null && charLevel >= Number(roll.dualRollFromLevel));
 
   const doRoll = (e) => {

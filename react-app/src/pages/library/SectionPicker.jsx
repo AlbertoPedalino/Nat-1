@@ -16,6 +16,7 @@ import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
+import { failureMessage } from '../../shared/ui/busyAction.js';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -53,7 +54,7 @@ export default function SectionPicker({ meta }) {
       await refresh();
       notify('success', `Renamed to "${name}".`);
     } catch (cause) {
-      notify('error', cause?.message || 'Could not rename the save.');
+      notify('error', failureMessage('Could not rename the save.', cause));
     }
   }, [meta.sectionKey, notify, refresh]);
 
@@ -65,7 +66,7 @@ export default function SectionPicker({ meta }) {
       refresh();
       notify('success', `Deleted "${row.name || row.id}".`);
     } catch (cause) {
-      notify('error', cause?.message || 'Could not delete the save.');
+      notify('error', failureMessage('Could not delete the save.', cause));
     }
   }, [meta.sectionKey, notify, refresh]);
 

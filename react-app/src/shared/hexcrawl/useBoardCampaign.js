@@ -4,6 +4,7 @@ import { readHexcrawlBoardCampaign } from '../cloud/api/hexcrawl.js';
 import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../cloud/sync/syncKeys.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../appEvents.js';
+import { failureMessage } from '../ui/busyAction.js';
 
 // The board-campaign link changes rarely and local changes announce
 // themselves; the shared recovery triggers catch another device's edit.
@@ -26,7 +27,7 @@ export function useBoardCampaign(boardId) {
         if (!cancelled && ticket === request) setState({ boardId, campaign, error: null });
       } catch (cause) {
         if (!cancelled && ticket === request) {
-          setState({ boardId, campaign: null, error: cause?.message || 'Could not read the linked campaign.' });
+          setState({ boardId, campaign: null, error: failureMessage('Could not read the linked campaign.', cause) });
         }
         return false;
       }

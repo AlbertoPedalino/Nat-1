@@ -1,6 +1,7 @@
 import { computeMaxHp } from '../combat/hp.js';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '../inventory/currency.js';
 import { sheetVitals } from '../combat/vitals.js';
+import { clamp } from '../../numbers.js';
 
 export function deriveSheetState(C) {
   // RAW 2024: Wild Shape keeps your own Hit Points (no beast HP pool), so maxHP
@@ -25,7 +26,7 @@ export function deriveSheetState(C) {
   );
 
   const sheetInspiration = Boolean(C?.inspiration);
-  const exhaustionLevel = Math.max(0, Math.min(6, Math.floor(Number(C?.exhaustionLevel) || 0)));
+  const exhaustionLevel = clamp(Math.floor(Number(C?.exhaustionLevel) || 0), 0, 6);
   const xpStored = Number(C?.xp || 0);
   const notes = C?.notes ?? '';
 

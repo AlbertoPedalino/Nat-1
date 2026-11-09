@@ -5,6 +5,7 @@ import { hexToWorld, hexWidth, isHexGrid } from '../../../shared/vtt/map/hexGeom
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from '../tokens/TokenSprite.jsx';
 import { distanceSx, placementCountSx } from './sceneViewportStyles.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Markers drawn over the board at screen positions, none of them interactive.
 
@@ -53,7 +54,7 @@ export function PartyHexMarker({
   const centre = worldToScreen(hexToWorld(partyHex, grid), view);
   // Two thirds of the hex it stands in: the marker is read from across the
   // table, and a pin the size of a token label is not.
-  const glyph = Math.min(96, Math.max(20, hexWidth(grid) * view.zoom * 0.66));
+  const glyph = clamp(hexWidth(grid) * view.zoom * 0.66, 20, 96);
   return (
     <Box
       aria-hidden

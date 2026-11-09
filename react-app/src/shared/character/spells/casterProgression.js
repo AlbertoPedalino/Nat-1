@@ -1,10 +1,11 @@
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from './spellTables.js';
+import { clamp } from '../../numbers.js';
 
 // Spell slots from caster progressions (XPHB 2024), for the builder and the
 // sheet alike: a class's own table, the multiclass table when more than one
 // class has Spellcasting, and Pact Magic kept apart.
 
-const clampLevel = (level) => Math.max(1, Math.min(20, Math.floor(Number(level) || 1)));
+const clampLevel = (level) => clamp(Math.floor(Number(level) || 1), 1, 20);
 
 // 'full' | 'half' | 'third' | 'artificer' | 'pact', or null. Accepts the
 // 5etools spellings ('1/2', '1/3').

@@ -6,7 +6,7 @@ import {
   EXHAUSTION_KEY,
 } from '../character/combat/conditions.js';
 import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
-import { clampInt, numberOr } from '../numbers.js';
+import { clamp, clampInt, numberOr } from '../numbers.js';
 import {
   clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
 } from '../character/combat/mortality.js';
@@ -180,7 +180,7 @@ function withMortality(combatant, hpCurrent) {
 
 // Regaining hit points clears the death saves.
 function applyHp(combatant, value) {
-  const hpCurrent = Math.max(0, Math.min(numberOr(combatant.hpMax, 1), Math.round(value)));
+  const hpCurrent = clamp(Math.round(value), 0, numberOr(combatant.hpMax, 1));
   const healed = hpCurrent > 0 && combatant.deathSaves ? { ...combatant, deathSaves: { success: 0, fail: 0 } } : combatant;
   return withMortality(healed, hpCurrent);
 }
@@ -210,8 +210,9 @@ function reviveCombatant(combatant) {
 // A combatant read back from a saved fight, its HP clamped and its mortality
 // resolved again.
 export function restoreCombatantMortality(combatant) {
-  return withMortality(combatant, Math.max(0, Math.min(
-    numberOr(combatant.hpMax, 1),
+  return withMortality(combatant, clamp(
     Math.round(numberOr(combatant.hpCurrent, combatant.hpMax)),
-  )));
+    0,
+    numberOr(combatant.hpMax, 1),
+  ));
 }

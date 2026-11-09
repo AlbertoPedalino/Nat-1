@@ -4,6 +4,7 @@ import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import HitDiceSpendControl from './HitDiceSpendControl.jsx';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/resources/restResources.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The Short Rest dialog (Hit Dice to spend, per pool) and the Long Rest
 // confirmation. `rest` is the state and handlers from useRests.
@@ -37,7 +38,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         </Typography>
         <Stack spacing={1.25}>
           {hitDicePools.map((pool) => {
-            const value = Math.max(0, Math.min(Number(rest.hdToSpend[pool.key] || 0), pool.remaining));
+            const value = clamp(Number(rest.hdToSpend[pool.key] || 0), 0, pool.remaining);
             return (
               <HitDiceSpendControl
                 key={pool.key}

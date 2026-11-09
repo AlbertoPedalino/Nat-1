@@ -3,7 +3,7 @@ import { dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { normalizeFumbleTables } from '../rolls/fumbles.js';
 import { normalizeNegotiation } from '../negotiation/negotiation.js';
 import { hydrateEncounterItems, serializeEncounterItem } from '../../../shared/bestiary/monsterUtils.js';
-import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
+import { readInstanceJson, readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 
 // Encounter Builder payload adapter: which keys an instance stores and how
@@ -24,12 +24,7 @@ export const STORAGE_KEYS = Object.freeze({
 });
 
 function readJson(id, key, fallback) {
-  try {
-    const raw = readInstanceValue(SECTION_KEY, id, key);
-    return raw == null ? fallback : JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
+  return readInstanceJson(SECTION_KEY, id, key, fallback);
 }
 
 export function readPersistedInstance(id, monsters = []) {

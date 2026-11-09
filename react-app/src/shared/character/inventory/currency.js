@@ -1,6 +1,18 @@
 import { makeId } from '../../ids.js';
+import { formatNumber } from '../../ui/numberFormat.js';
 // XPHB 2024 coins: copper, silver, gold, platinum. Electrum (EP) was dropped
 // from the 2024 Player's Handbook and is intentionally not included.
+// An amount in copper pieces (how 5etools prices items) in the largest coin
+// that shows it whole: 1500 → "15 gp", 50 → "5 sp", 7 → "7 cp"; '' for none.
+// The one way an item's price is written.
+export function formatCopper(copper) {
+  const cp = Math.round(Number(copper) || 0);
+  if (!cp) return '';
+  if (cp % 100 === 0) return `${formatNumber(cp / 100)} gp`;
+  if (cp % 10 === 0) return `${formatNumber(cp / 10)} sp`;
+  return `${formatNumber(cp)} cp`;
+}
+
 export const CURRENCY_TYPES = [
   { key: 'cp', label: 'Copper', shortLabel: 'CP', tone: '#b87333' },
   { key: 'sp', label: 'Silver', shortLabel: 'SP', tone: '#b8b8b8' },

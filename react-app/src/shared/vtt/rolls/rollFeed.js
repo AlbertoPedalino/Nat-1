@@ -79,6 +79,19 @@ export function makeRollEntry(toast, {
   };
 }
 
+// A roll from the feed (normalizeRoll) back in a dice toast's shape, for the
+// toast and the bubble over a piece.
+export function rollToast(roll) {
+  return {
+    ...roll,
+    timestamp: roll.at,
+    meta: {
+      ...(roll.mode ? { mode: roll.mode } : {}),
+      ...(roll.bonus != null ? { bonus: roll.bonus } : {}),
+    },
+  };
+}
+
 export function normalizeRoll(entry) {
   if (!entry) return null;
   const label = boundedText(entry.label, 60);

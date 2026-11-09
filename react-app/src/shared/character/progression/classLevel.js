@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // Canonical class-level accessors — the ONE home for two questions that were
 // previously hand-copied across the builder, sheet and adapters:
 //
@@ -28,7 +29,7 @@ export function totalLevel(C) {
   const stored = Number(C?.level);
   if (Number.isFinite(stored) && stored > 0) return Math.min(20, Math.floor(stored));
   const primary = Number(C?.classLevel);
-  return Math.min(20, Math.max(1, (primary > 0 ? primary : 1) + multiclassLevels(C?.extraClasses)));
+  return clamp((primary > 0 ? primary : 1) + multiclassLevels(C?.extraClasses), 1, 20);
 }
 
 export function primaryClassLevel(C) {

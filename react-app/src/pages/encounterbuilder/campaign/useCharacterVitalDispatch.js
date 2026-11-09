@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 import { commandCharacterVitals } from '../../../shared/cloud/api/healthCommands.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { HP_COMMANDS, MARK_COMMANDS } from '../../../shared/encounter/combatantVitals.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // Everything that changes a linked player's vitals, conditions or reminders:
 // all of it lives on their sheet.
@@ -24,7 +25,7 @@ export function useCharacterVitalDispatch(combat, reduce, vitalsRef = null) {
         digest: vitals?.digests?.get(id) ?? null,
         base: vitals?.baseMax?.get(id) ?? null,
       })
-        .catch((error) => notify('error', `Could not update hit points: ${error.message}`));
+        .catch((error) => notify('error', failureMessage('Could not update hit points.', error)));
       return;
     }
     reduce(action);

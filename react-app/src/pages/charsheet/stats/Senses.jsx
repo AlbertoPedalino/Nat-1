@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { ChevronDown, Eye } from 'lucide-react';
 import { passiveScore } from '../../../shared/character/sheet/sheetStats.js';
@@ -9,6 +9,7 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -16,15 +17,10 @@ export default function Senses({ C }) {
   const passIns = passiveScore(C, 'Insight');
   const { vision: visionRows, other: otherRows } = collectSenses(C);
   const [expanded, setExpanded] = useState(null);
-  const [, setDescLoaded] = useState(false);
+  // Live rules text from 5etools (same source as spells/items): the rows redraw
+  // once it is in.
+  useLoaded(loadSenseDescriptions);
   const toggle = (key) => setExpanded((cur) => (cur === key ? null : key));
-
-  // Live rules text from 5etools (same source as spells/items), loaded once.
-  useEffect(() => {
-    let alive = true;
-    loadSenseDescriptions().then(() => { if (alive) setDescLoaded(true); }).catch(() => {});
-    return () => { alive = false; };
-  }, []);
 
   const renderRow = (key, value, row) => {
     // Live rules text: generic sense first, then the granting feature, then note.

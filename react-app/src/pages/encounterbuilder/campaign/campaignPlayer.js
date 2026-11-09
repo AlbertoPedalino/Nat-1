@@ -1,6 +1,6 @@
 import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
-import { clampPlayerStats } from '../state/partyState.js';
+import { clampPlayerStats } from '../../../shared/encounter/combat.js';
 import { totalLevel } from '../../../shared/character/progression/classLevel.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
 

@@ -12,6 +12,7 @@ import {
 import { adapterEntryApplies } from '../progression/choiceUtils.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { hitDieFaces } from '../combat/hp.js';
+import { clamp } from '../../numbers.js';
 function resourceOwnerLevel(def, character) {
   return Number(def?.ownerLevel ?? primaryClassLevel(character));
 }
@@ -147,7 +148,7 @@ export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
   return pools.map((pool) => {
     const rawUsed = hasPoolState ? Number(usedPools[pool.key] || 0) : Math.min(pool.total, remainingLegacy);
     if (!hasPoolState) remainingLegacy -= rawUsed;
-    const used = Math.max(0, Math.min(pool.total, Math.floor(rawUsed)));
+    const used = clamp(Math.floor(rawUsed), 0, pool.total);
     return { ...pool, used, remaining: Math.max(0, pool.total - used) };
   });
 }

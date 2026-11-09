@@ -66,15 +66,21 @@ export function prevTurn(combat) {
   return stepTurn(combat, -1);
 }
 
-export function setInitiative(combat, id, value) {
+// The fight with a new list of combatants, sorted by initiative, the turn
+// still on whoever had it.
+export function resortKeepingTurn(combat, combatants) {
   const current = combat.combatants?.[combat.currentTurn || 0];
-  const initiative = Math.round(numberOr(value, 0));
-  const sorted = sortCombatants((combat.combatants || []).map((combatant) => (
-    combatant.id === id ? { ...combatant, initiative } : combatant
-  )));
+  const sorted = sortCombatants(combatants);
   return {
     ...combat,
     combatants: sorted,
     currentTurn: current ? Math.max(0, sorted.findIndex((combatant) => combatant.id === current.id)) : 0,
   };
+}
+
+export function setInitiative(combat, id, value) {
+  const initiative = Math.round(numberOr(value, 0));
+  return resortKeepingTurn(combat, (combat.combatants || []).map((combatant) => (
+    combatant.id === id ? { ...combatant, initiative } : combatant
+  )));
 }

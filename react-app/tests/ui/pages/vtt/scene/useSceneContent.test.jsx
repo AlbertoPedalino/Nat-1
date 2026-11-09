@@ -52,7 +52,7 @@ test('a failed reconnect also releases an initial spinner', async () => {
   const { result, notify } = openScene();
   await act(async () => { await result.current.refreshContent(); });
   expect(result.current.loading).toBe(false);
-  expect(notify).toHaveBeenCalledWith('error', 'Offline');
+  expect(notify).toHaveBeenCalledWith('error', 'Could not load this scene: Offline.');
 });
 
 test.each(['refreshContent', 'refreshVisibleTokens'])('%s preserves changes made during the read and refreshes untouched tokens', async (method) => {

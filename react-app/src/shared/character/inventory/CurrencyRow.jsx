@@ -1,14 +1,9 @@
-import {
-  Box,
-  IconButton,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, orderedCurrencyEntries } from './currency.js';
 import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
 import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
+import { useIsPhone } from '../../ui/useIsPhone.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -123,7 +118,7 @@ export function CurrencyRow({
   sx,
 }) {
   const { gap, basis } = ROW_LAYOUT[mode] ?? ROW_LAYOUT.builder;
-  const compact = useMediaQuery((theme) => theme.breakpoints.down('sm'), { noSsr: true });
+  const compact = useIsPhone();
   const entries = orderedCurrencyEntries(currency);
   // Labels are editable only when the parent wires up metadata/remove handlers
   // (builder). The sheet passes amount-only handlers, so labels stay read-only.

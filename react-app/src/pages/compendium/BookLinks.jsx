@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   Box,
   Chip,
@@ -11,18 +10,15 @@ import { ExternalLink } from 'lucide-react';
 import { loadBookList } from './books.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
+import { useLoaded } from '../../shared/ui/useLoaded.js';
+
+const NO_BOOKS = [];
 
 // The supported manuals and adventures, each opening its 5etools page in a new
 // tab.
 export default function BookLinks() {
-  const [state, setState] = useState({ status: 'loading', books: [] });
-  useEffect(() => {
-    let cancelled = false;
-    loadBookList()
-      .then((books) => { if (!cancelled) setState({ status: 'ready', books }); })
-      .catch(() => { if (!cancelled) setState({ status: 'error', books: [] }); });
-    return () => { cancelled = true; };
-  }, []);
+  const { status, data: books } = useLoaded(loadBookList, [], { initial: NO_BOOKS });
+  const state = { status, books };
 
   if (isLoadPending(state.status)) {
     return (

@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip,
   Typography,
@@ -21,6 +21,7 @@ import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { byName } from '../../../shared/lists.js';
 import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
+import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -34,12 +35,12 @@ const CURRENT_LIST_PAGE = 50;
 function useDebouncedSearch(value, commit) {
   const [local, setLocal] = useState(value || '');
   useEffect(() => { setLocal(value || ''); }, [value]);
-  useEffect(() => {
-    if (local === (value || '')) return;
-    const handle = setTimeout(() => commit(local), 200);
-    return () => clearTimeout(handle);
-  }, [local]);
-  return [local, setLocal];
+  const commitLater = useDebouncedCallback(commit, 200);
+  const change = useCallback((next) => {
+    setLocal(next);
+    commitLater(next);
+  }, [commitLater]);
+  return [local, change];
 }
 
 function FilterChips({ filters, value, onChange }) {

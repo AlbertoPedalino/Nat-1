@@ -1,5 +1,6 @@
 import { requireClient } from '../supabaseClient.js';
 import { tagSync } from '../sync/syncDiagnostics.js';
+import { isMissingRpc } from '../pgErrors.js';
 
 // One read for everything this client has open (26_sync_digest.sql): the
 // answer for each key (shared/cloud/sync/syncKeys.js), null for a row that is
@@ -13,5 +14,5 @@ export async function readSyncDigest(keys) {
 
 // The database has no sync_digest yet (26_sync_digest.sql not run).
 export function isMissingSyncDigest(error) {
-  return error?.code === 'PGRST202' || error?.code === '42883';
+  return isMissingRpc(error);
 }

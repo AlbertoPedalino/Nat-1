@@ -15,6 +15,8 @@ import {
 } from '../../../shared/character/profile/store.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
 import { characterIdFromUrl, replaceCharacterIdInUrl } from '../../../shared/character/profile/characterRoutes.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { CLOUD_SAVE_DELAY_MS } from '../../../shared/cloud/sync/cloudSaveQueue.js';
 
 function hasFinishedLoading(loading) {
   return !Object.values(loading || {}).some(Boolean);
@@ -73,7 +75,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       cloudConflictRef.current = error;
       setCloudConflict(error);
     },
-    onError: (error) => notify('error', `Could not save the character online: ${error?.message || error}`),
+    onError: (error) => notify('error', failureMessage('Could not save the character online.', error)),
   });
 
   // "Load updated version": the builder takes the cloud character.
@@ -89,7 +91,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       setCloudConflict(null);
       dispatch({ type: 'character/restore', character: row.data });
     } catch (error) {
-      notify('error', `Could not load the character from the cloud: ${error?.message || error}`);
+      notify('error', failureMessage('Could not load the character from the cloud.', error));
     }
   };
 
@@ -109,7 +111,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       cloudConflictRef.current = null;
       setCloudConflict(null);
     } catch (error) {
-      notify('error', `Could not reach the cloud: ${error?.message || error}`);
+      notify('error', failureMessage('Could not reach the cloud.', error));
     }
   };
 
@@ -208,7 +210,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       if (saved?.id && !hadId) {
         replaceCharacterIdInUrl(saved.id);
       }
-    }, cloudActive ? 1200 : 300);
+    }, cloudActive ? CLOUD_SAVE_DELAY_MS : 300);
     return () => clearTimeout(handle);
     // cloudSave.request is stable and reads refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps

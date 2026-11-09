@@ -1,4 +1,4 @@
-import { clampInt } from '../../../shared/numbers.js';
+import { clamp, clampInt } from '../../../shared/numbers.js';
 const DEFAULT_NPC_ATTITUDE = 'neutral';
 const MIN_INTEREST = 1;
 export const MAX_INTEREST = 5;
@@ -65,7 +65,7 @@ export function normalizeNegotiationThreshold(value) {
   if (value === '' || value == null) return null;
   const parsed = Math.trunc(Number(value));
   if (!Number.isFinite(parsed)) return null;
-  return Math.max(MIN_THRESHOLD, Math.min(MAX_THRESHOLD, parsed));
+  return clamp(parsed, MIN_THRESHOLD, MAX_THRESHOLD);
 }
 
 export function normalizeNegotiation(value) {

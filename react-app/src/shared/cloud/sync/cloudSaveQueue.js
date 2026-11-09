@@ -1,5 +1,9 @@
 import { createKeyedQueue } from './keyed.js';
 
+// How long an edited character waits before it goes to the cloud: the
+// builder, the sheet and the background sync all use this one pause.
+export const CLOUD_SAVE_DELAY_MS = 1_200;
+
 // At most one builder cloud save in flight. `enqueue()` asks for a save of the
 // builder's current state: if one is already running, it waits behind it, and
 // every further request made while it waits is the same save (it reads the

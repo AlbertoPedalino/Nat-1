@@ -19,6 +19,7 @@ import {
   plateSx,
   secretPlateSx,
 } from './tokenSpriteStyles.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Bars and plate stack under the art. The numbers ride inside the bar rather
 // than beside it: one strip to read instead of two things to line up, and it
@@ -35,8 +36,8 @@ export default function TokenVitalsStack({
   onDeathSaveChange,
 }) {
   const { success: deathSuccesses, fail: deathFailures } = normalizeDeathSaves(token.deathSaves);
-  const ratio = hasHp ? Math.max(0, Math.min(1, current / token.hpMax)) : 0;
-  const tempRatio = hasHp ? Math.max(0, Math.min(1, (token.tempHp || 0) / token.hpMax)) : 0;
+  const ratio = hasHp ? clamp(current / token.hpMax, 0, 1) : 0;
+  const tempRatio = hasHp ? clamp((token.tempHp || 0) / token.hpMax, 0, 1) : 0;
 
   return (
     <Box sx={hasHandles ? stackBelowSx : stackInsideSx}>

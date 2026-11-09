@@ -1,3 +1,4 @@
+import { clamp } from '../numbers.js';
 // The choices a GM Board offers (seasons, weather, mounts, terrain, population,
 // tiers), shared with the battle map's hexcrawl and dungeon panels.
 export const SEASONS = Object.freeze(['Spring', 'Summer', 'Autumn', 'Winter']);
@@ -35,7 +36,7 @@ export function normalizeMountSpeed(value) {
   if (!Number.isFinite(speed) || speed <= 0) return 1;
   // Quarters: ×1.5 is a real answer, ×1.37 is a spreadsheet.
   const quartered = Math.round(speed * 4) / 4;
-  return Math.min(MAX_MOUNT_SPEED, Math.max(MIN_MOUNT_SPEED, quartered));
+  return clamp(quartered, MIN_MOUNT_SPEED, MAX_MOUNT_SPEED);
 }
 
 export const TERRAIN_OPTIONS = Object.freeze([

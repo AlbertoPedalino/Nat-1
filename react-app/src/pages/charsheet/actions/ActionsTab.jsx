@@ -7,9 +7,7 @@ import { makeWildShapeActions } from '../../../shared/character/forms/wildShapeA
 import { FILTERS, SECTION_DEFS, buildActionTags } from './actionTags.js';
 import { normalizeResourceMax } from '../../../shared/character/resources/restResources.js';
 import { makeWeaponActions } from './weaponActions.js';
-import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
-import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import {
   compactInputSx,
   filterChipSx,
@@ -32,6 +30,9 @@ import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { AdapterActionCard } from './AdapterActionCard.jsx';
 import { ensureClassAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
+import { useItemsDb } from '../inventory/useItemsDb.js';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { useMasteryEntries } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -51,15 +52,18 @@ function actionLabel(value) {
   return capitalize(value);
 }
 
+const NO_RULES = [];
+
 export default function ActionsTab({ C, sheet, resources }) {
   const {
     onRoll, setResources, onShowToast, onNotice, onUpdateSheet, onUpdateCharacter,
   } = useSheetActions();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [itemsDb, setItemsDb] = useState([]);
-  const [variantRules, setVariantRules] = useState([]);
-  const [, setMasteriesLoaded] = useState(false);
+  const itemsDb = useItemsDb();
+  const variantRules = useLoaded(loadVariantRules, [], { initial: NO_RULES }).data;
+  // Mastery descriptions: the cards redraw once they are in.
+  useMasteryEntries();
   const ownedClassNames = classNames(C);
   const classNamesKey = ownedClassNames.join('|');
 
@@ -68,20 +72,6 @@ export default function ActionsTab({ C, sheet, resources }) {
     // throw an unhandled rejection.
     ensureClassAdapters(ownedClassNames);
   }, [classNamesKey]);
-
-  useEffect(() => {
-    let alive = true;
-    loadItems()
-      .then((items) => { if (alive) setItemsDb(items || []); })
-      .catch(() => { if (alive) setItemsDb([]); });
-    loadVariantRules()
-      .then((rules) => { if (alive) setVariantRules(rules || []); })
-      .catch(() => { if (alive) setVariantRules([]); });
-    loadMasteryEntries()
-      .then(() => { if (alive) setMasteriesLoaded(true); })
-      .catch(() => {});
-    return () => { alive = false; };
-  }, []);
 
   const inv = sheet?.sheetInventory || [];
   const attacks = inv.filter((item) => item.equipped && isWeaponItem(item));

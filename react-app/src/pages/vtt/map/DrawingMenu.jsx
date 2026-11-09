@@ -24,6 +24,7 @@ import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
+import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -42,7 +43,7 @@ export default function DrawingMenu({
   // The mark as it was when the menu opened: the slider scales from it rather
   // than compounding on every step, and a refused write goes back to it.
   const openedRef = useRef(null);
-  const typingTimerRef = useRef(null);
+  const typed = useDebouncedPatch((patch) => onSave(drawing, patch));
   // A slider or a number moves many times a frame; the board is redrawn once a
   // frame with the latest of them, or dragging stutters.
   const previewRef = useRef(null);
@@ -69,10 +70,7 @@ export default function DrawingMenu({
   // keep the field above the keyboard.
   const placement = useMenuPlacement(anchor);
 
-  useEffect(() => () => {
-    clearTimeout(typingTimerRef.current);
-    cancelAnimationFrame(previewFrameRef.current);
-  }, []);
+  useEffect(() => () => cancelAnimationFrame(previewFrameRef.current), []);
 
   if (!drawing) return null;
   const area = drawing.area;
@@ -92,14 +90,10 @@ export default function DrawingMenu({
   };
   const cellWord = gridCellWord(gridShape);
 
-  const saveSoon = (patch) => {
-    clearTimeout(typingTimerRef.current);
-    typingTimerRef.current = setTimeout(() => onSave(drawing, patch), TYPING_DELAY);
-  };
-  const saveNow = (patch) => {
-    clearTimeout(typingTimerRef.current);
-    onSave(drawing, patch);
-  };
+  // Typed text waits for a pause; a click saves at once, carrying what is
+  // still waiting.
+  const saveSoon = (patch) => typed.add(patch);
+  const saveNow = (patch) => onSave(drawing, { ...typed.take(), ...patch });
 
   const textPatch = (value) => {
     // A note is its words: emptied, it would become an invisible stroke.
@@ -133,7 +127,7 @@ export default function DrawingMenu({
     <Menu
       open={Boolean(anchor)}
       onClose={() => {
-        clearTimeout(typingTimerRef.current);
+        typed.cancel();
         onClose();
       }}
       {...placement.menuProps}
@@ -318,7 +312,6 @@ export default function DrawingMenu({
 }
 
 const MENU_WIDTH = 280;
-const TYPING_DELAY = 400;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {

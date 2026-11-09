@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { clearLiveScene, setLiveScene, updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { promptText } from '../../../shared/ui/promptText.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The scene's own row, from the header: going live and renaming.
 export function useSceneHeaderActions({ scene, onSceneChange, notify }) {
@@ -13,7 +14,7 @@ export function useSceneHeaderActions({ scene, onSceneChange, notify }) {
         onSceneChange(await setLiveScene(scene.id));
       }
     } catch (cause) {
-      notify('error', cause?.message || 'Could not change the live scene.');
+      notify('error', failureMessage('Could not change the live scene.', cause));
     }
   }, [notify, onSceneChange, scene]);
 
@@ -26,7 +27,7 @@ export function useSceneHeaderActions({ scene, onSceneChange, notify }) {
     try {
       onSceneChange(await updateScene(scene.id, { name: next }));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not rename the scene.');
+      notify('error', failureMessage('Could not rename the scene.', cause));
     }
   }, [notify, onSceneChange, scene.id, scene.name]);
 

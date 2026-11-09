@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
-import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { consumePactSlot, consumeSlot, getAvailablePactSlots, getRegularSlotUsed, persistCreatedSlots } from '../../../shared/character/spells/spellSlots.js';
@@ -28,6 +27,7 @@ import {
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { useItemsDb } from './useItemsDb.js';
 
 const sectionSx = {
   p: 0.8,
@@ -91,18 +91,12 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     setResources,
     readOnly,
   } = useSheetActions();
-  const [itemsDb, setItemsDb] = useState([]);
+  const itemsDb = useItemsDb();
   const [chargeSource, setChargeSource] = useState('');
   const [chargeLevel, setChargeLevel] = useState('');
   const [drainSource, setDrainSource] = useState('');
   const [transmuteSource, setTransmuteSource] = useState('');
   const [transmuteTarget, setTransmuteTarget] = useState('');
-
-  useEffect(() => {
-    let alive = true;
-    loadItems().then((items) => { if (alive) setItemsDb(items || []); }).catch(() => {});
-    return () => { alive = false; };
-  }, []);
 
   const inventory = sheet?.sheetInventory || [];
   const replicated = useMemo(() => inventory.filter(isReplicatedItem), [inventory]);

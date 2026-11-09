@@ -4,6 +4,7 @@ import { matchKey } from '../../../shared/content/nameKeys.js';
 import {
   bucketCounts, hasPickedSpell, withoutSpellPicked, withSpellPicked, withWizardBookToggled,
 } from '../../../shared/character/spells/spellBuckets.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The class entry a spell action edits: an extra class by index, else the
 // character (the primary class).
@@ -122,7 +123,7 @@ export function handleSpellToggle(state, action, { updateCharacter }) {
 }
 
 export function handleWizardSpellbookToggle(state, action, { updateCharacter }) {
-  const level = Math.max(0, Math.min(9, Number(action.level || 0)));
+  const level = clamp(Number(action.level || 0), 0, 9);
   const name = String(action.name || '');
   if (!name) return state;
   return updateSpellBucket(state, action.extraIndex, (bucket) => withWizardBookToggled(bucket, level, name), updateCharacter);

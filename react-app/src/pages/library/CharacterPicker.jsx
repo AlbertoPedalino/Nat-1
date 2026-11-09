@@ -20,6 +20,7 @@ import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
+import { failureMessage } from '../../shared/ui/busyAction.js';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -103,7 +104,7 @@ export default function CharacterPicker() {
       refresh();
       notify('success', `Deleted "${row.name || row.id}".`);
     } catch (e) {
-      notify('error', e?.message || 'Could not delete the character.');
+      notify('error', failureMessage('Could not delete the character.', e));
     }
   }, [myId, isGm, notify, refresh]);
 
@@ -112,7 +113,7 @@ export default function CharacterPicker() {
       const cloud = await getCloudCharacter(row.id, { reason: 'export' });
       downloadCharacterExport(cloud.data, row.name || row.id);
     } catch (e) {
-      notify('error', e?.message || 'Could not download the character.');
+      notify('error', failureMessage('Could not download the character.', e));
     }
   };
 
@@ -121,7 +122,7 @@ export default function CharacterPicker() {
       await pullCharacter(row.id);
       notify('success', `"${row.name || row.id}" saved locally.`);
     } catch (e) {
-      notify('error', e?.message || 'Could not save the character on this device.');
+      notify('error', failureMessage('Could not save the character on this device.', e));
     }
   };
 

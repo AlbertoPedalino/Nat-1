@@ -29,6 +29,7 @@
 import { getChoiceValue, setChoiceValuePatch } from '../progression/choiceUtils.js';
 import { abilityModifier } from '../progression/abilityModifier.js';
 import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { clamp } from '../../numbers.js';
 
 export const PRIMAL_BEASTS = Object.freeze([
   { name: 'Beast of the Land', short: 'Land', damageTypes: ['Bludgeoning', 'Piercing', 'Slashing'] },
@@ -65,7 +66,7 @@ export function getPrimalCompanion(C, { rangerLevel = 0 } = {}) {
 export function primalCompanionHp(companion, maxHp) {
   const max = Math.max(0, Number(maxHp) || 0);
   if (companion?.hpCurrent == null) return max;
-  return Math.max(0, Math.min(max, Math.round(companion.hpCurrent)));
+  return clamp(Math.round(companion.hpCurrent), 0, max);
 }
 
 // Summoning a beast (a different one after a Long Rest, or the same one again)
@@ -90,7 +91,7 @@ export function setPrimalDamageTypePatch(companion, damageType) {
 
 export function setPrimalCompanionHpPatch(companion, nextCurrent, maxHp) {
   const max = Math.max(0, Number(maxHp) || 0);
-  const clamped = Math.max(0, Math.min(max, Math.round(Number(nextCurrent) || 0)));
+  const clamped = clamp(Math.round(Number(nextCurrent) || 0), 0, max);
   return { primalCompanion: { ...companion, hpCurrent: clamped >= max ? null : clamped } };
 }
 

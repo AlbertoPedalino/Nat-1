@@ -4,7 +4,7 @@ import {
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { readGmRollsShown, rollVisibility } from '../../../shared/cloud/sync/rollVisibility.js';
 import {
-  addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor,
+  addRoll, currentBubbles, currentThrows, makeRollEntry, normalizeRoll, rollAuthor, rollToast,
 } from '../../../shared/vtt/rolls/rollFeed.js';
 import { customRollToast } from '../../../shared/character/dice/customRoll.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
@@ -27,14 +27,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   const acceptRoll = useCallback((entry, { local = false } = {}) => {
     const roll = normalizeRoll(entry);
     if (!roll) return;
-    if (local) setToast({
-      ...roll,
-      timestamp: roll.at,
-      meta: {
-        ...(roll.mode ? { mode: roll.mode } : {}),
-        ...(roll.bonus != null ? { bonus: roll.bonus } : {}),
-      },
-    });
+    if (local) setToast(rollToast(roll));
     setFeed((current) => addRoll(current, roll, { local }));
   }, []);
 

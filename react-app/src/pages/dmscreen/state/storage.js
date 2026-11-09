@@ -1,5 +1,6 @@
 import { normalizeNoteSize } from '../notes/notes.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
+import { instanceKey } from '../../../shared/instances/sectionRegistry.js';
 
 // DM Screen payload adapter: which keys a screen stores and how they are
 // (de)serialized. Registry, sync and opening are shared (shared/instances/);
@@ -13,7 +14,7 @@ export const NOTES_VERSION = 2;
 export const LEGACY_NOTES_VERSION = 1;
 
 export function scopeKey(id, key = NOTES_STORAGE_KEY) {
-  return `gb:dmscreen:${id}:${key}`;
+  return instanceKey(SECTION_KEY, id, key);
 }
 
 function isValidNotesPayload(value, version) {

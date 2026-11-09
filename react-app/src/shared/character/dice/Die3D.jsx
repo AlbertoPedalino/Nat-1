@@ -3,6 +3,7 @@ import CoinFace from './CoinFace.jsx';
 import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { UI_FONTS } from '../../ui/fonts.js';
+import { clamp } from '../../numbers.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -147,7 +148,7 @@ function numberSize(size, room, characters) {
   // a hundred-sided die a 7px numeral is wider than the triangle holding it, so
   // it came out clipped in half. A blur of tiny numerals is what a d100 looks
   // like anyway, and it beats a die with blank faces.
-  const floor = Math.min(7, Math.max(3, Math.round(across * 0.8)));
+  const floor = clamp(Math.round(across * 0.8), 3, 7);
 
   // Capped so a d6, whose faces are nearly all room, does not end up with a
   // number bigger than the die reads as.

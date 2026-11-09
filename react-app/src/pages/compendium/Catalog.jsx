@@ -9,8 +9,6 @@ import {
   Stack,
   TextField,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { List } from 'react-window';
@@ -18,6 +16,7 @@ import SearchField from '../../shared/ui/SearchField.jsx';
 import { SOURCE_LABELS } from '../../shared/bestiary/bestiaryConstants.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
+import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 
 // A compendium catalog: a filter bar of selects over one kind's entries, a
 // virtualized list with columns (one compact line in the panel), and the
@@ -57,7 +56,7 @@ export default function Catalog({
   const set = (key) => (value) => setFilters((current) => ({ ...current, [key]: value }));
   // A phone gets the panel's compact rows: the columns left a name its first
   // few letters.
-  const phone = useMediaQuery(useTheme().breakpoints.down('sm'));
+  const phone = useIsPhone();
   const narrow = layout === 'panel' || phone;
   const changed = Object.keys(initialFilters).some((key) => key !== 'sort' && filters[key] !== initialFilters[key]);
 

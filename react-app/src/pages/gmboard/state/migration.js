@@ -1,6 +1,6 @@
 import { createDefaultCoreState } from '../../../shared/gmboard/defaultState.js';
 import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
-import { parseJsonOr } from '../../../shared/gmboard/boardFormat.js';
+import { parseJsonOr } from '../../../shared/storage/storage.js';
 
 export const LEGACY_KEYS = Object.freeze([
   'gm_state', 'gm_wea', 'gm_ev', 'gm_lo', 'gm_co', 'gm_env',

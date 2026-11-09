@@ -3,6 +3,7 @@ import PipButton from '../../../shared/ui/PipButton.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
 // the old standalone Hit Dice panel: hollow pips are dice already used,
@@ -10,7 +11,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 // rest. Click a pip to set how many dice to spend (click the last queued
 // pip again to decrement).
 export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
-  const setCount = (n) => onChange(Math.max(0, Math.min(n, pool.remaining)));
+  const setCount = (n) => onChange(clamp(n, 0, pool.remaining));
 
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.headerBg, 0.72) }}>

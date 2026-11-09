@@ -2,6 +2,7 @@ import { adapterRegistry } from '../../../adapters/registry.js';
 import { getClassSpellLimits } from './spellProgression.js';
 import { classEntities } from '../progression/classLevel.js';
 import { combinedSpellSlots, maxSpellLevelFor, normalizeCasterProgression } from './casterProgression.js';
+import { clamp } from '../../numbers.js';
 
 // A character's spellcasting, for the sheet and the builder alike: the casting
 // entities (primary class and multiclasses), their spellcasting profile from
@@ -92,7 +93,7 @@ function addLimit(a, b) {
 }
 
 function clampLevel(level) {
-  return Math.max(1, Math.min(20, Number(level || 1)));
+  return clamp(Number(level || 1), 1, 20);
 }
 
 export function getMaxLearnableSpellLevelForEntity(entity) {

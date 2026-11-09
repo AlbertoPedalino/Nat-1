@@ -11,6 +11,7 @@ import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { SKILLS } from '../../content/rulesVocabulary.js';
 import { asArray } from '../../lists.js';
+import { clamp } from '../../numbers.js';
 
 const SKILL_ABILITY = Object.freeze(Object.fromEntries(SKILLS.map((skill) => [skill.name, skill.ability])));
 
@@ -22,7 +23,7 @@ export const EXHAUSTION_MAX = 6;
 const EXHAUSTION_D20_PER_LEVEL = 2;
 const EXHAUSTION_SPEED_PER_LEVEL = 5;
 export function clampExhaustion(level) {
-  return Math.max(0, Math.min(EXHAUSTION_MAX, Math.floor(Number(level) || 0)));
+  return clamp(Math.floor(Number(level) || 0), 0, EXHAUSTION_MAX);
 }
 export function exhaustionD20Penalty(level = 0) {
   return EXHAUSTION_D20_PER_LEVEL * clampExhaustion(level);

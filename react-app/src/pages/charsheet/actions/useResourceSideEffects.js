@@ -3,6 +3,7 @@ import {
   usePactSlotEffects, useSlotForResource, useSlotRecovery, useSorceryPointSlots, useWildResurgence,
 } from './resourceEffectDialogs.js';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // What spending an adapter resource triggers (registered with
 // registerResourceSideEffect): recovering slots or resources at once, or opening
@@ -42,7 +43,7 @@ export function useResourceSideEffects(ctx) {
     if (!resources || !setResources) return;
     const max = resMaxMap[key] ?? 1;
     const res = { ...resources };
-    res[key] = Math.max(0, Math.min(max, (res[key] || 0) + delta));
+    res[key] = clamp((res[key] || 0) + delta, 0, max);
     setResources(res);
 
     if (delta < 0) {

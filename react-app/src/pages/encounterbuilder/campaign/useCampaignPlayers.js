@@ -15,7 +15,7 @@ async function rowsToPlayers(rows, campaign) {
 export function useCampaignPlayers() {
   const { campaigns, refreshCampaign, ...rest } = useGmCampaigns({
     mapRows: rowsToPlayers,
-    errorMessage: 'Failed to load campaign players.',
+    errorMessage: 'Could not load campaign players.',
   });
 
   // The encounter builder has always called this list `players`; the shared hook

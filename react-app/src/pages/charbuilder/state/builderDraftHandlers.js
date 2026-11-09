@@ -4,6 +4,7 @@ import { generateCharId } from '../../../shared/character/profile/store.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { NEW_CHARACTER, replaceCharacterIdInUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { extractSheetData, buildImportedCharacter } from './sheetImport.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The builder's explicit persistence actions: importing a JSON sheet as a
 // draft, then saving that draft locally or uploading it. `refs` are the cloud
@@ -75,7 +76,7 @@ export function createDraftHandlers({
       replaceCharacterIdInUrl(NEW_CHARACTER);
       notify('success', 'Imported. Save local or upload to cloud from the Sheet step.');
     } catch (error) {
-      notify('error', `Could not import the character: ${error?.message || error}`);
+      notify('error', failureMessage('Could not import the character.', error));
     }
   };
 

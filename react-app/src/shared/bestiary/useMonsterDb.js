@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { loadMonsterDatabase } from './bestiary.js';
+import { failureMessage } from '../ui/busyAction.js';
 
 const initialState = {
   status: 'idle',
@@ -25,7 +26,7 @@ export function useMonsterDb() {
           setState((prev) => ({
             ...prev,
             status: 'error',
-            error: error?.message || 'Failed to load bestiary.',
+            error: failureMessage('Could not load bestiary.', error),
           }));
         }
       });

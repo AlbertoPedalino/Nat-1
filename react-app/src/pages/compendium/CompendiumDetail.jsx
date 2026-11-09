@@ -11,6 +11,7 @@ import { StatBlockHeader, StatBlockSheet } from '../../shared/bestiary/StatBlock
 import { rollDice } from '../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
 import { compendiumKind } from './compendiumIndex.js';
+import { formatCopper } from '../../shared/character/inventory/currency.js';
 
 // One compendium entry, shown the way the rest of the app shows that kind: a
 // spell as on the sheet, a monster as the encounter builder's stat block (its
@@ -73,17 +74,10 @@ function ItemFacts({ item }) {
     item.ac ? `AC ${item.ac}` : '',
     ...itemPropertyLabels(item),
     item.weight ? `${item.weight} lb.` : '',
-    item.value ? formatValue(item.value) : '',
+    formatCopper(item.value),
   ].filter(Boolean);
   if (!facts.length) return null;
   return <Typography variant="body2" sx={{ color: 'text.secondary' }}>{facts.join(' · ')}</Typography>;
-}
-
-// 5etools values are in copper pieces.
-function formatValue(copper) {
-  if (copper >= 100 && copper % 100 === 0) return `${copper / 100} gp`;
-  if (copper >= 10 && copper % 10 === 0) return `${copper / 10} sp`;
-  return `${copper} cp`;
 }
 
 // An item's picture, large: it is what the entry is opened for as often as

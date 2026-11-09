@@ -15,7 +15,7 @@ import {
   saveInstanceFight,
 } from '../../../shared/cloud/api/encounterFights.js';
 import { addById, patchById } from '../../../shared/vtt/session/liveScene.js';
-import { runBusy } from '../../../shared/ui/busyAction.js';
+import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 
 // Putting pieces on the scene: markers, uploaded images, campaign characters,
 // monsters, map objects and a whole encounter from the library, by click (in
@@ -204,7 +204,7 @@ export function useTokenPlacement({
       await setTokenSecret(created.id, secret);
       setTokens((current) => patchById(current, created.id, { secretLabel: secret }));
     } catch (cause) {
-      notify('error', cause?.message || 'The marker was placed, but its note could not be kept secret.');
+      notify('error', failureMessage('The marker was placed, but its note could not be kept secret.', cause));
     }
   }, [activeLayer, addToken, canPlacePiece, nextFreeCell, notify, role.isGm]);
 
@@ -250,7 +250,7 @@ export function useTokenPlacement({
           try {
             await saveInstanceFight(instanceId, launched.entry);
           } catch (cause) {
-            notify('warning', `The encounter was launched here, but not online: ${cause?.message || 'the fight could not be saved.'}`);
+            notify('warning', failureMessage('The encounter was launched here, but not online.', cause));
           }
         }
         // The fight of the encounter's previous version, left behind by a save

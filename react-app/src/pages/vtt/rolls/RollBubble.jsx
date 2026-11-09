@@ -4,6 +4,7 @@ import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayo
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 
 const FONT = UI_FONTS.display;
 
@@ -18,13 +19,7 @@ const FONT = UI_FONTS.display;
 // over the pieces, and on a phone eight seconds is long to wait for the board
 // back. The little cross only says that it can be closed.
 export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
-  const layout = resolveToastLayout({
-    label: roll.label,
-    detail: roll.detail,
-    total: roll.total,
-    rolls: roll.rolls,
-    meta: { mode: roll.mode, bonus: roll.bonus },
-  });
+  const layout = resolveToastLayout(rollToast(roll));
 
   return (
     // Outer box owns the position; the transform here must stay untouched, so

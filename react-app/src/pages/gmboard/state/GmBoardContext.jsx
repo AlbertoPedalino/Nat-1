@@ -11,6 +11,7 @@ import { createDungeon, isValidRoomCount } from '../../../shared/dungeon/dungeon
 import { createQuests } from '../quests/quest.js';
 import { rollTable } from '../tables/rollTable.js';
 import { makeId } from '../../../shared/ids.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 const GmBoardContext = createContext(null);
 
@@ -49,7 +50,7 @@ export function GmBoardProvider({ instanceId, children }) {
     campaignClock
       .saveClock({ ...clockFromResult(result), season: state.season }, { logEntry: result.logEntry })
       .then(() => setClockError(null))
-      .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
+      .catch((cause) => setClockError(failureMessage('Could not save the campaign clock.', cause)));
   }, [campaignClock, state.season]);
 
   const pushClockState = useCallback((nextState, patch) => {
@@ -57,7 +58,7 @@ export function GmBoardProvider({ instanceId, children }) {
     campaignClock
       .saveClock((current) => ({ ...clockSeedPatch(current, nextState), ...patch }))
       .then(() => setClockError(null))
-      .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
+      .catch((cause) => setClockError(failureMessage('Could not save the campaign clock.', cause)));
   }, [campaignClock]);
 
   // Every hand edit of the clock or the travel picks: applied here, and written

@@ -1,10 +1,11 @@
 import { getSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // How many cantrips and spells a class entry may pick at its level.
 
 export function getPickerLimits(C, picker) {
-  const level = Math.max(1, Math.min(20, Number(picker?.level || 1)));
+  const level = clamp(Number(picker?.level || 1), 1, 20);
   const profile = picker?.profile || getSpellcastingProfile(picker);
   const { cantrips, spells } = getClassSpellLimits(profile, level);
   return {

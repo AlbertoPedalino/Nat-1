@@ -3,6 +3,7 @@ import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { ABILITY_ABBREVIATIONS, DAMAGE_TYPE_NAMES } from '../../content/rulesVocabulary.js';
+import { formatCopper } from './currency.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -158,12 +159,6 @@ export function decodeDamageType(code) {
   return DAMAGE_TYPE_NAMES[key]?.toLowerCase() || String(code).toLowerCase();
 }
 
-function formatGpValue(rawValue) {
-  const gp = Number(rawValue || 0) / 100;
-  if (!gp) return '';
-  return `${Number.isInteger(gp) ? gp : gp.toFixed(2)} gp`;
-}
-
 const WEAPON_MASTERY_DISPLAY = {
   cleave: 'Cleave',
   graze: 'Graze',
@@ -315,7 +310,7 @@ registerItemPropertySegment('weight', (item) => {
   return [{ kind: 'weight', label: 'Weight', value: `${item.weight} lb` }];
 });
 registerItemPropertySegment('value', (item) => {
-  const gp = formatGpValue(item?.value);
+  const gp = formatCopper(item?.value);
   return gp ? [{ kind: 'value', label: 'Value', value: gp }] : [];
 });
 registerItemPropertySegment('abilitySet', (item) => {

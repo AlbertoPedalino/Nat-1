@@ -1,4 +1,4 @@
-import { numberOr } from '../numbers.js';
+import { clamp, numberOr } from '../numbers.js';
 import { formatNumber } from '../ui/numberFormat.js';
 // Turning a rolled encounter into creatures to put in the room.
 //
@@ -51,7 +51,7 @@ export function fillBudget(monsters, budget, rng = Math.random) {
     const monster = pick(affordable);
     // As many as the budget takes, and never so many that the round is spent
     // rolling initiative.
-    const count = Math.max(1, Math.min(MAX_PER_KIND, Math.round(left / monster.xp)));
+    const count = clamp(Math.round(left / monster.xp), 1, MAX_PER_KIND);
     const spend = count * monster.xp;
     groups.push({ monster, count, xp: spend });
     left -= spend;

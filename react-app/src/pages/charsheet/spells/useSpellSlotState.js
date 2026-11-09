@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, persistCreatedSlots, persistUsedSlots,
 } from '../../../shared/character/spells/spellSlots.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The spell tab's slot pips: a local mirror of the sheet's used and created
 // slots (reset whenever the sheet's copy changes) and the click that spends,
@@ -25,7 +26,7 @@ export function useSpellSlotState(sheet, { readOnly, onUpdateSheet, onUpdateChar
       : getRegularSlotUsed(slotUsed, level);
     if (kind === 'pact') {
       const nextUsed = index < used ? Math.max(0, index) : index + 1;
-      const next = { ...slotUsed, [key]: Math.max(0, Math.min(total, nextUsed)) };
+      const next = { ...slotUsed, [key]: clamp(nextUsed, 0, total) };
       setSlotUsed(next);
       persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
       return;

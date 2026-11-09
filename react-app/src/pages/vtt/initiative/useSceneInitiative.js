@@ -12,6 +12,7 @@ import {
 } from '../../../shared/vtt/tokens/initiative.js';
 import { previewToken } from '../../../shared/vtt/tokens/placement.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The initiative strip and creature stat blocks on the map. The GM reads the
 // shown fight row and sees every combatant; everyone else (player preview and
@@ -55,7 +56,7 @@ export function useSceneInitiative({
     } catch (cause) {
       notify('error', cause?.code === FIGHT_UNAVAILABLE
         ? 'That fight is no longer available.'
-        : cause?.message || 'Could not change the turn.');
+        : failureMessage('Could not change the turn.', cause));
     } finally {
       turnBusyRef.current = false;
       setTurnBusy(false);
@@ -65,7 +66,7 @@ export function useSceneInitiative({
     try {
       await sceneTurns.choose(choice ? { instanceId: choice.instanceId, fightId: choice.fightId } : null);
     } catch (cause) {
-      notify('error', cause?.message || 'Could not change the fight shown.');
+      notify('error', failureMessage('Could not change the fight shown.', cause));
     }
   }, [notify, sceneTurns]);
   // A creature's stat block, for the GM: a monster of a cloud fight, whose

@@ -1,7 +1,7 @@
-import { getSection, makeInstanceId } from './sectionRegistry.js';
+import { getSection, instanceKey, makeInstanceId } from './sectionRegistry.js';
 import { normalizeLinkGroupId } from './linkGroupId.js';
 import {
-  getStorageItem, getStorageJson, listStorageKeys, removeStorageItem,
+  getStorageItem, getStorageJson, listStorageKeys, parseJsonOr, removeStorageItem,
   removeStorageItemStrict, setStorageItem, writeStorageItemStrict,
 } from '../storage/storage.js';
 
@@ -227,8 +227,14 @@ export function getActiveInstanceId(sectionKey) {
 }
 
 export function readInstanceValue(sectionKey, id, subKey) {
-  const section = requireSection(sectionKey);
-  return getStorageItem(section.scopedPrefix(id) + subKey);
+  requireSection(sectionKey);
+  return getStorageItem(instanceKey(sectionKey, id, subKey));
+}
+
+// One stored value of an instance read as JSON, `fallback` when it is missing
+// or unreadable.
+export function readInstanceJson(sectionKey, id, subKey, fallback) {
+  return parseJsonOr(readInstanceValue(sectionKey, id, subKey), fallback);
 }
 
 export function readInstancePayload(sectionKey, id) {

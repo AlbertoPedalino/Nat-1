@@ -1,3 +1,5 @@
+import { failureMessage } from '../../../shared/ui/busyAction.js';
+
 export function shouldPullCloudCopy(localUpdatedAt, cloudMeta) {
   if (!cloudMeta?.updated_at) return false;
   const cloudUpdatedAt = Date.parse(cloudMeta.updated_at);
@@ -47,14 +49,14 @@ export function mergeInstanceRows(cloudRows = [], localEntries = []) {
   return rows;
 }
 
-export async function loadInstanceRows({ listCloud, listLocal, errorMessage = 'Failed to load cloud saves.' }) {
+export async function loadInstanceRows({ listCloud, listLocal, errorMessage = 'Could not load cloud saves.' }) {
   const localEntries = (await listLocal()) || [];
   let cloudRows = [];
   let error = null;
   try {
     cloudRows = (await listCloud()) || [];
   } catch (cause) {
-    error = cause?.message || errorMessage;
+    error = failureMessage(errorMessage, cause);
   }
   return { rows: mergeInstanceRows(cloudRows, localEntries), error };
 }

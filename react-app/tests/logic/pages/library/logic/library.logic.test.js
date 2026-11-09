@@ -166,7 +166,7 @@ test('failing section cloud list keeps full local list and returns notice', asyn
     listCloud: async () => { throw new Error('offline'); },
   });
   assert.deepEqual(result.rows.map((row) => row.id).sort(), ['one', 'two']);
-  assert.equal(result.error, 'offline');
+  assert.equal(result.error, 'Could not load cloud saves: offline.');
 });
 
 test('section delete plan never sends local-only deletion to cloud', () => {

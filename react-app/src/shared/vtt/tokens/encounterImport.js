@@ -6,7 +6,7 @@
 
 import { getHP, getMonsterTokenUrls } from '../../bestiary/monsterUtils.js';
 import { makeSourceRef } from './encounterSync.js';
-import { numberOrNull } from '../../numbers.js';
+import { clamp, numberOrNull } from '../../numbers.js';
 
 // D&D creature sizes in squares. A Large creature is the first that stops
 // fitting in one, and Tiny still gets a whole square: two goblins sharing a
@@ -116,7 +116,7 @@ export function monsterToToken(monster, { layer = 'tokens', label } = {}) {
 // Several copies of the same creature get the letters the encounter builder
 // would have given them, because "Goblin" three times over is unusable.
 export function monsterGroupTokens(monster, count, options = {}) {
-  const total = Math.max(1, Math.min(24, Math.round(Number(count) || 1)));
+  const total = clamp(Math.round(Number(count) || 1), 1, 24);
   const name = monster?.name || 'Creature';
   return Array.from({ length: total }, (_, index) => monsterToToken(monster, {
     ...options,

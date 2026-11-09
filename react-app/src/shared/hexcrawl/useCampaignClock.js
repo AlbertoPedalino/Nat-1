@@ -10,6 +10,8 @@ import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../cloud/sync/syncKeys.js';
 import { createKeyedQueue } from '../cloud/sync/keyed.js';
+import { failureMessage } from '../ui/busyAction.js';
+import { LOG_STORE_LIMIT } from '../gmboard/campaignTime.js';
 
 // The campaign's travelling clock, shared by the GM Board and the map.
 //
@@ -98,7 +100,7 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
     } catch (cause) {
       if (scopeRef.current !== campaignId) return null;
       if (firstLoad) setState((current) => ({ ...current, loading: false }));
-      setError(cause?.message || 'Could not read the campaign clock.');
+      setError(failureMessage('Could not read the campaign clock.', cause));
       return false;
     }
   }, [acceptClock, acceptLog, active, campaignId, withLog]);
@@ -156,7 +158,7 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
       if (logEntry) {
         const entry = await appendCampaignLog(campaignId, logEntry);
         if (entry && withLog && scopeRef.current === campaignId) {
-          setState((current) => ({ ...current, log: [entry, ...current.log].slice(0, 50) }));
+          setState((current) => ({ ...current, log: [entry, ...current.log].slice(0, LOG_STORE_LIMIT) }));
         }
       }
       return saved;

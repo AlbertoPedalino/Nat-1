@@ -1,5 +1,5 @@
 import { BOARD_COLUMNS } from './layout.js';
-import { clampInt } from '../../../shared/numbers.js';
+import { clamp, clampInt } from '../../../shared/numbers.js';
 
 export const MIN_NOTE_HEIGHT = 160;
 export const MAX_NOTE_HEIGHT = 1200;
@@ -26,7 +26,7 @@ export function normalizeNoteSize(size) {
   );
   const rawHeight = Math.round(Number(size?.height));
   const height = Number.isFinite(rawHeight) && rawHeight > 0
-    ? Math.min(MAX_NOTE_HEIGHT, Math.max(MIN_NOTE_HEIGHT, rawHeight))
+    ? clamp(rawHeight, MIN_NOTE_HEIGHT, MAX_NOTE_HEIGHT)
     : AUTO_NOTE_HEIGHT;
   return { cols, height };
 }

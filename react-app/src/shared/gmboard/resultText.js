@@ -19,12 +19,11 @@ export function lootDetail(loot) {
   return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
 }
 
-// The dice behind a result: "d8(3)+d12(7)=10". Takes every shape a board roll
-// is stored in — `{ d8, d12 }`, `{ d1, d2 }` (2d20) and `{ dice: [{ sides, value }] }`.
+// The dice behind a result: "d8(3)+d12(7)=10". A board roll is kept as
+// `{ d8, d12, sum }` or, for 2d20, `{ d1, d2, sum }` (tableDice.js).
 export function diceText(roll) {
-  const dice = roll.dice
-    || (roll.d8 != null
-      ? [{ sides: 8, value: roll.d8 }, { sides: 12, value: roll.d12 }]
-      : [{ sides: 20, value: roll.d1 }, { sides: 20, value: roll.d2 }]);
-  return `${dice.map((die) => `d${die.sides}(${die.value})`).join('+')}=${roll.sum}`;
+  const dice = roll.d8 != null
+    ? [[8, roll.d8], [12, roll.d12]]
+    : [[20, roll.d1], [20, roll.d2]];
+  return `${dice.map(([faces, value]) => `d${faces}(${value})`).join('+')}=${roll.sum}`;
 }

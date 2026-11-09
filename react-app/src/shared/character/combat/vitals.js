@@ -1,7 +1,6 @@
 import { normalizeConditions } from './conditions.js';
 import { normalizeEffects } from './combatEffects.js';
-import { clampInt } from '../../numbers.js';
-import { numberOr } from '../../numbers.js';
+import { clamp, clampInt, numberOr } from '../../numbers.js';
 
 // Vitals are the character `data` fields kept in sync between the sheet and the
 // encounter combat: current HP, temp HP, max-HP bonus, death saves, active
@@ -26,11 +25,6 @@ import { numberOr } from '../../numbers.js';
 //   clampData - clamp a raw `data` value (with a fallback) for the sheet
 //   normalize - stable form used to build echo-suppression keys
 //   defaultCombat - optional; value when neither payload nor combatant has one
-
-function finiteNumber(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
 
 function clampNonNegativeInt(value, fallback = 0) {
   return Math.max(0, Math.round(numberOr(value, fallback)));
@@ -57,12 +51,12 @@ export const SYNCED_VITALS = [
     data: 'currentHP',
     combat: 'hpCurrent',
     toCombat: (src, { hpMax }) => {
-      const v = finiteNumber(src.currentHP ?? src.hpCurrent);
-      return v == null ? null : Math.max(0, Math.min(hpMax ?? v, Math.round(v)));
+      const v = numberOr(src.currentHP ?? src.hpCurrent, null);
+      return v == null ? null : clamp(Math.round(v), 0, hpMax ?? v);
     },
     toData: (c, { hpMax }) => {
       const cur = Math.round(numberOr(c.hpCurrent, hpMax ?? 0));
-      return Math.max(0, Math.min(hpMax ?? cur, cur));
+      return clamp(cur, 0, hpMax ?? cur);
     },
     clampData: (value, fallback, { maxHP }) => clampInt(value ?? fallback, 0, maxHP == null ? Number.MAX_SAFE_INTEGER : maxHP, 0),
     normalize: (v) => Math.max(0, Math.round(numberOr(v, 0))),

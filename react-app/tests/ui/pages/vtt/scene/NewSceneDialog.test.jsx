@@ -152,7 +152,7 @@ test('a failed import says so and leaves the dialog open to try again', async ()
     target: { files: [pngFile('cave.png')] },
   });
 
-  expect(await screen.findByText('Storage said no.')).toBeInTheDocument();
+  expect(await screen.findByText('Could not create the scenes: Storage said no.')).toBeInTheDocument();
   expect(onClose).not.toHaveBeenCalled();
 });
 

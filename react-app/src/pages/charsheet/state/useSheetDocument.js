@@ -25,6 +25,7 @@ import {
 } from '../../../shared/character/profile/store.js';
 import { characterIdFromUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 function getCharIdFromUrl() {
   return characterIdFromUrl() || getActiveCharId();
@@ -134,7 +135,7 @@ export function useSheetDocument({
         ? { hpBasis: digest.hpBasis, baseMax: confirmed.baseMaxHP }
         : null;
       commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch }, { digest, base })
-        .catch((error) => notify('error', `Could not update hit points: ${error.message}`));
+        .catch((error) => notify('error', failureMessage('Could not update hit points.', error)));
       patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
       if (!Object.keys(patch).length) return;
     }

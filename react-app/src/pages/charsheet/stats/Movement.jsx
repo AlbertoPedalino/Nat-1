@@ -18,6 +18,7 @@ import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import { clamp } from '../../../shared/numbers.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -80,7 +81,7 @@ export default function Movement({ C, sheet }) {
     return {
       key,
       base: value,
-      final: speedZero ? 0 : overloaded ? Math.min(5, Math.max(0, computed)) : Math.max(0, computed),
+      final: speedZero ? 0 : overloaded ? clamp(computed, 0, 5) : Math.max(0, computed),
     };
   });
   const hasPenalty = speedPenalty < 0 || overloaded || speedZero || exhaustionPenalty > 0;

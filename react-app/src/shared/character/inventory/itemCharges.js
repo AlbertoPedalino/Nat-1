@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 export function itemChargeMaximum(item) {
   const maximum = Number(item?.charges);
   return Number.isFinite(maximum) && maximum > 0 ? Math.floor(maximum) : 0;
@@ -7,7 +8,7 @@ export function itemChargeCurrent(item) {
   const maximum = itemChargeMaximum(item);
   if (!maximum) return 0;
   const stored = item?.chargesCurrent == null ? maximum : Number(item.chargesCurrent);
-  return Math.max(0, Math.min(maximum, Number.isFinite(stored) ? Math.floor(stored) : maximum));
+  return clamp(Number.isFinite(stored) ? Math.floor(stored) : maximum, 0, maximum);
 }
 
 export function shouldShowItemCharges(item) {
@@ -22,7 +23,7 @@ export function withItemCharges(item, value) {
   const current = Number.isFinite(parsed) ? Math.floor(parsed) : itemChargeCurrent(item);
   return {
     ...item,
-    chargesCurrent: Math.max(0, Math.min(maximum, current)),
+    chargesCurrent: clamp(current, 0, maximum),
   };
 }
 

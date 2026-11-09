@@ -6,10 +6,10 @@ import { DEAD_CONDITION_KEY, toggleCondition } from '../../../shared/character/c
 import {
   clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
 } from '../../../shared/character/combat/mortality.js';
+import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
 
 // Long enough that a word is not written mid-keystroke, short enough that
 // closing the menu straight after typing still catches it.
-const TYPING_DELAY = 400;
 
 // What the one "+ 5 -" stepper does to the field it targets.
 export const STEP_TARGETS = {
@@ -47,10 +47,11 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
   const [effects, setEffects] = useState([]);
   const [deathSaves, setDeathSaves] = useState({ success: 0, fail: 0 });
   const syncedIdRef = useRef(null);
-  const typingTimerRef = useRef(null);
-  const pendingPatchRef = useRef({});
-  const vitalsTimerRef = useRef(null);
-  const pendingVitalsRef = useRef({});
+  // Typing is the one thing not written per keystroke. Typed fields wait in
+  // `typed` (one patch, saved together); typed maximum and temporary hit points
+  // in `typedVitals`, one command per field, the last value of each.
+  const typed = useDebouncedPatch((patch) => save(patch));
+  const typedVitals = useDebouncedPatch((commands) => sendVitals(commands));
 
   // Loaded once per opening, keyed by id rather than by object identity: a
   // realtime update rebuilds the token on every render, and resyncing on that
@@ -64,10 +65,8 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
     }
     if (syncedIdRef.current === token.id) return;
     syncedIdRef.current = token.id;
-    pendingPatchRef.current = {};
-    clearTimeout(typingTimerRef.current);
-    pendingVitalsRef.current = {};
-    clearTimeout(vitalsTimerRef.current);
+    typed.cancel();
+    typedVitals.cancel();
     setStepTarget('hp');
     const secret = token.secretLabel || '';
     setGmOnly(Boolean(secret));
@@ -103,9 +102,9 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
   const liveVitals = [token?.hpCurrent, token?.hpMax, token?.tempHp, token?.maxHpBonus].join('|');
   useEffect(() => {
     if (!token || syncedIdRef.current !== token.id) return;
-    const pending = pendingVitalsRef.current;
-    if (!Object.hasOwn(pendingPatchRef.current, 'hpCurrent')) setHpCurrent(token.hpCurrent ?? '');
-    if (!Object.hasOwn(pendingPatchRef.current, 'hpMax') && !pending.setMaxHp) {
+    const pending = typedVitals.pending();
+    if (!Object.hasOwn(typed.pending(), 'hpCurrent')) setHpCurrent(token.hpCurrent ?? '');
+    if (!Object.hasOwn(typed.pending(), 'hpMax') && !pending.setMaxHp) {
       setHpMax(token.hpMax ?? '');
       setMaxBonus(token.maxHpBonus || 0);
     }
@@ -113,19 +112,13 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveVitals]);
 
-  useEffect(() => () => {
-    clearTimeout(typingTimerRef.current);
-    clearTimeout(vitalsTimerRef.current);
-  }, []);
 
   // Every control writes as it is used. A Save button in a menu opened by
   // right-clicking a piece mid-combat is one click too many, and forgetting it
   // loses the change silently.
   const save = useCallback((patch) => {
     if (!token) return;
-    clearTimeout(typingTimerRef.current);
-    patch = { ...pendingPatchRef.current, ...patch };
-    pendingPatchRef.current = {};
+    patch = { ...typed.take(), ...patch };
     const next = {
       label, gmOnly, conditions, showHp, effects, hpCurrent, hpMax, deathSaves, ...patch,
     };
@@ -151,35 +144,20 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
     });
   }, [conditions, deathSaves, effects, gmOnly, hpCurrent, hpMax, label, onSave, showHp, token]);
 
-  // Typing is the one thing not written per keystroke: that would be a row
-  // version per character, and a realtime event for each one.
-  const saveSoon = useCallback((patch) => {
-    clearTimeout(typingTimerRef.current);
-    pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
-    typingTimerRef.current = setTimeout(() => save({}), TYPING_DELAY);
-  }, [save]);
+  const saveSoon = useCallback((patch) => typed.add(patch), [typed]);
 
-  // Maximum and temporary hit points typed in: one command per field once the
-  // typing stops, the last value of each.
-  const flushVitals = useCallback(() => {
-    clearTimeout(vitalsTimerRef.current);
-    const pending = Object.values(pendingVitalsRef.current);
-    pendingVitalsRef.current = {};
-    if (token && onVitals) pending.forEach((command) => onVitals(token, command));
+  const sendVitals = useCallback((commands) => {
+    if (token && onVitals) Object.values(commands).forEach((command) => onVitals(token, command));
   }, [onVitals, token]);
-
-  const vitalsSoon = useCallback((command) => {
-    clearTimeout(vitalsTimerRef.current);
-    pendingVitalsRef.current = { ...pendingVitalsRef.current, [command.type]: command };
-    vitalsTimerRef.current = setTimeout(flushVitals, TYPING_DELAY);
-  }, [flushVitals]);
+  const flushVitals = useCallback(() => sendVitals(typedVitals.take()), [sendVitals, typedVitals]);
+  const vitalsSoon = useCallback((command) => typedVitals.add({ [command.type]: command }), [typedVitals]);
 
   // A stepper click on the targeted field, shown at once and corrected by the
   // values that come back. A value still being typed goes first.
   const step = useCallback((delta) => {
     if (!token || !onVitals) return;
     flushVitals();
-    if (Object.keys(pendingPatchRef.current).length) save({});
+    if (Object.keys(typed.pending()).length) save({});
     const command = { type: STEP_TARGETS[stepTarget].command, delta };
     // What the GM sees is what the step applies to: a value typed a moment ago
     // may not have come back on the piece yet.

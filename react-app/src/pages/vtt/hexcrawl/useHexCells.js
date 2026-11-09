@@ -11,6 +11,7 @@ import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
 import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 import { assembleSnapshot, diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 const EMPTY_CELLS = new Map();
 
@@ -30,7 +31,7 @@ export function useHexCells({
     }
     listHexCells(sceneId)
       .then((rows) => { if (!cancelled) setCells(rows); })
-      .catch((cause) => { if (!cancelled) setError(cause?.message || 'Could not read this map\'s hexes.'); });
+      .catch((cause) => { if (!cancelled) setError(failureMessage("Could not read this map's hexes.", cause)); });
     return () => { cancelled = true; };
   }, [sceneId, visible]);
 

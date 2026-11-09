@@ -1,7 +1,8 @@
 import { createDefaultCoreState, createDefaultResults } from '../../../shared/gmboard/defaultState.js';
 import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
 import { editTableCell } from '../../../shared/gmboard/tables.js';
-import { LOG_STORE_LIMIT, ROLL_HISTORY_LIMIT } from './constants.js';
+import { ROLL_HISTORY_LIMIT } from './constants.js';
+import { LOG_STORE_LIMIT } from '../../../shared/gmboard/campaignTime.js';
 import { normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import { clockFromResult, mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 

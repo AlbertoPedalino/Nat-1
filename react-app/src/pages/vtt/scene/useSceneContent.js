@@ -16,6 +16,7 @@ import {
 } from '../../../shared/cloud/sync/revisionDiff.js';
 import { applyDrawingEvent } from '../../../shared/vtt/session/liveScene.js';
 import { createPendingWrites } from '../../../shared/cloud/sync/pendingWrites.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The GM-only label of each piece. A secrets row read for the piece is the
 // answer, an empty label included (cleared elsewhere); the label already held
@@ -117,7 +118,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
       setLoading(false);
     } catch (cause) {
       if (request === loadRequestRef.current) {
-        notify('error', cause?.message || 'Could not load this scene.');
+        notify('error', failureMessage('Could not load this scene.', cause));
       }
     } finally {
       if (request === loadRequestRef.current) setLoading(false);

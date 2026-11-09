@@ -16,6 +16,7 @@ import {
 } from '../../../shared/vtt/map/drawing.js';
 import { areaEffect } from '../../../shared/vtt/map/areas.js';
 import { promptText } from '../../../shared/ui/promptText.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The scene's marks: freehand strokes, areas of effect, text notes and their
 // menu (label, colour, size, visibility), erasing, moving and undoing them, plus
@@ -35,7 +36,7 @@ export function useSceneDrawings({
       });
       if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not save that stroke.');
+      notify('error', failureMessage('Could not save that stroke.', cause));
     }
   }, [activeLayer, drawColor, drawWidth, notify, role.isGm, scene.id]);
 
@@ -46,7 +47,7 @@ export function useSceneDrawings({
       await deleteDrawing(drawing.id);
     } catch (cause) {
       setDrawings((current) => addById(current, drawing));
-      notify('error', cause?.message || 'Could not remove that stroke.');
+      notify('error', failureMessage('Could not remove that stroke.', cause));
     }
   }, [notify]);
 
@@ -82,7 +83,7 @@ export function useSceneDrawings({
       committed = await moveDrawing(drawing.id, points);
     } catch (cause) {
       setDrawings((current) => replaceById(current, drawing));
-      notify('error', cause?.message || 'Could not move that mark.');
+      notify('error', failureMessage('Could not move that mark.', cause));
     } finally {
       // Echoes of this mark waited while it was being written; the last
       // write's answer is the row now.
@@ -103,7 +104,7 @@ export function useSceneDrawings({
       });
       if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not place that area.');
+      notify('error', failureMessage('Could not place that area.', cause));
     }
   }, [activeLayer, drawColor, drawWidth, notify, role.isGm, scene.id]);
 
@@ -137,7 +138,7 @@ export function useSceneDrawings({
       committed = await updateDrawing(drawing.id, patch);
       return true;
     } catch (cause) {
-      notify('error', cause?.message || 'Could not change that mark.');
+      notify('error', failureMessage('Could not change that mark.', cause));
       reconcileContent({ fullDrawings: true });
       return false;
     } finally {
@@ -176,7 +177,7 @@ export function useSceneDrawings({
       });
       if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not write that note.');
+      notify('error', failureMessage('Could not write that note.', cause));
     }
   }, [activeLayer, drawColor, drawWidth, notify, role.isGm, scene.id]);
 

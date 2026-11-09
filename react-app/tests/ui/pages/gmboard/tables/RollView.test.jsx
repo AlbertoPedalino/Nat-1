@@ -14,7 +14,8 @@ const EVENT_ROLL = {
   id: 'roll_2',
   tableId: 'event',
   tier: null,
-  dice: [{ sides: 20, value: 3 }, { sides: 20, value: 3 }],
+  d1: 3,
+  d2: 3,
   sum: 6,
   data: { r: 6, name: 'Encounter', type: 'encounter' },
   dc: null,
@@ -24,7 +25,8 @@ const TRAP_ROLL = {
   id: 'roll_1',
   tableId: 'trap',
   tier: 1,
-  dice: [{ sides: 8, value: 1 }, { sides: 12, value: 1 }],
+  d8: 1,
+  d12: 1,
   sum: 2,
   data: { r: 2, type: 'Deadly', lv: '4', dc: 15, damage: '11 (2d10)' },
   dc: null,
@@ -34,10 +36,11 @@ const LOOT_ROLL = {
   id: 'roll_3',
   tableId: 'loot',
   tier: null,
-  dice: [{ sides: 8, value: 8 }, { sides: 12, value: 9 }],
+  d8: 8,
+  d12: 9,
   sum: 17,
   data: { r: 17, type: 'Magic Item', rarity: 'Uncommon', quality: 'Masterwork', value: '20×Lv', extra: '' },
-  dc: { label: 'DC to find it', dice: [{ sides: 8, value: 1 }, { sides: 12, value: 12 }], sum: 13 },
+  dc: { label: 'DC to find it', d8: 1, d12: 12, sum: 13 },
 };
 
 const renderView = (state) => {

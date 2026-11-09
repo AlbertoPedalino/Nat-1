@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // Druid Wild Companion (XPHB 2024) — active summoned familiar state.
 //
 // Wild Companion (Druid lv.2): as a Magic action you expend a use of Wild Shape
@@ -38,7 +39,7 @@ export function getWildCompanionHp(C) {
   const wc = getActiveWildCompanion(C);
   if (!wc) return null;
   const max = beastMaxHp(wc.beast);
-  return { current: Math.max(0, Math.min(max, Number(wc.currentHP) || 0)), max };
+  return { current: clamp(Number(wc.currentHP) || 0, 0, max), max };
 }
 
 // Patch that sets the familiar's current HP, clamped to [0, max]. Preserves the
@@ -47,7 +48,7 @@ export function setWildCompanionHpPatch(C, nextCurrent) {
   const wc = getActiveWildCompanion(C);
   if (!wc) return null;
   const max = beastMaxHp(wc.beast);
-  const clamped = Math.max(0, Math.min(max, Math.round(Number(nextCurrent) || 0)));
+  const clamped = clamp(Math.round(Number(nextCurrent) || 0), 0, max);
   return { wildCompanion: { ...wc, currentHP: clamped } };
 }
 

@@ -24,7 +24,7 @@ import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 import { crKey, crXP } from '../../../shared/bestiary/challengeRating.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../shared/appEvents.js';
-import { runBusy } from '../../../shared/ui/busyAction.js';
+import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 
 // Links change rarely and every local change announces itself (the gb:* link
 // events, storage); the shared recovery triggers catch another device's edit.
@@ -88,7 +88,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       } catch (cause) {
         if (!cancelled && ticket === request) {
           setEncounterInstance(null);
-          setLinkHint(cause?.message || 'Could not load campaign links.');
+          setLinkHint(failureMessage('Could not load campaign links.', cause));
         }
         return false;
       } finally {
@@ -125,7 +125,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
         if (cancelled) return;
         setState(row ? { key: row.key, fights: row.fights } : EMPTY);
       })
-      .catch((cause) => { if (!cancelled) setError(cause?.message || 'Could not read this map\'s dungeon.'); })
+      .catch((cause) => { if (!cancelled) setError(failureMessage("Could not read this map's dungeon.", cause)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [enabled, sceneId]);
@@ -270,7 +270,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       try {
         await saveInstanceFight(encounterInstance.id, entry);
       } catch (cause) {
-        reach = `The room was sent, but only to this browser: ${cause?.message || 'the fight could not be saved online.'}`;
+        reach = failureMessage('The room was sent, but only to this browser.', cause);
       }
       const fights = { ...state.fights, [roomId]: roomLink };
       setState((current) => ({ ...current, fights }));

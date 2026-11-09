@@ -14,6 +14,7 @@ import {
 import { snapshotFight } from '../../../shared/encounter/combat.js';
 import { HP_COMMANDS, MARK_COMMANDS } from '../../../shared/encounter/combatantVitals.js';
 import { encounterReducer } from '../state/reducer.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // Everything that changes an enemy's vitals or marks.
 const MONSTER_VITAL_ACTIONS = new Set([...HP_COMMANDS, ...MARK_COMMANDS]);
@@ -63,7 +64,7 @@ export function useMonsterVitalDispatch({ state, reduce, cloudRef }) {
         return { row };
       }, async (error) => {
         if (error?.code === FIGHT_UNAVAILABLE) return { unavailable: true };
-        notify('error', `Could not update the creature's hit points: ${error?.message || 'unknown error'}`);
+        notify('error', failureMessage("Could not update the creature's hit points.", error));
         return { row: await getInstanceFight(fightId).catch(() => null) };
       })
       .then(({ row, unavailable }) => {

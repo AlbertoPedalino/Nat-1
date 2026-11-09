@@ -1,18 +1,13 @@
 import { SYNCED_VITALS } from '../character/combat/vitals.js';
-import { clampInt, numberOr } from '../numbers.js';
+import { clamp, clampInt, numberOr } from '../numbers.js';
 import { resolveMortality } from '../character/combat/mortality.js';
 
 // The synced-field contract (which fields, how they map/clamp) lives in
 // shared/character/vitals.js. These functions are the encounter-side combat
 // mappers driven by that single registry; adding a field there flows through here.
 
-function finiteNumber(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
 function clampHpMax(value) {
-  const hpMax = finiteNumber(value);
+  const hpMax = numberOr(value, null);
   return hpMax == null ? null : clampInt(hpMax, 1, 999, 10);
 }
 
@@ -50,7 +45,7 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
   // "undamaged", so it resolves to full. The `?? hpMax` has to happen before
   // numberOr, because Number(null) is 0 — a finite value that would silently
   // win over the fallback and drop the combatant to 0 HP.
-  out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax))));
+  out.hpCurrent = clamp(Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax)), 0, hpMax);
   const { dead, conditions, deathSaves } = resolveMortality({
     player: true, hp: out.hpCurrent, deathSaves: out.deathSaves, conditions: out.activeConditions,
   });
@@ -68,7 +63,7 @@ export function combatVitalsMatch(combatant, v) {
 
 // Build the cloud `data` patch from a combatant (combat -> sheet), via registry.
 export function combatantToSheetPatch(combatant = {}) {
-  const hpMax = finiteNumber(combatant.hpMax);
+  const hpMax = numberOr(combatant.hpMax, null);
   const patch = {};
   for (const field of SYNCED_VITALS) patch[field.data] = field.toData(combatant, { hpMax });
   return patch;

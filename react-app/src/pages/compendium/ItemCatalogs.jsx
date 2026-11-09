@@ -15,8 +15,8 @@ import {
   equipmentCategory,
   filterEquipment,
   filterMagicItems,
-  formatCost,
-  formatWeight,
+  formatCostCell,
+  formatWeightCell,
   itemAttributes,
   magicBonus,
   magicItemType,
@@ -130,8 +130,8 @@ const EQUIPMENT_COLUMNS = [
       </NameCell>
     ),
   },
-  { key: 'cost', label: 'Cost', width: '0.7fr', render: (entry) => formatCost(entry.record.value) },
-  { key: 'weight', label: 'Weight', width: '0.7fr', render: (entry) => formatWeight(entry.record.weight) },
+  { key: 'cost', label: 'Cost', width: '0.7fr', render: (entry) => formatCostCell(entry.record.value) },
+  { key: 'weight', label: 'Weight', width: '0.7fr', render: (entry) => formatWeightCell(entry.record.weight) },
   { key: 'attributes', label: 'Attributes', width: '2fr', render: (entry) => itemAttributes(entry.record).join(', ') || '—' },
   { key: 'notes', label: 'Notes', width: '0.6fr', render: (entry) => entry.source },
 ];

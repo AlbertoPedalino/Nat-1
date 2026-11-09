@@ -5,6 +5,7 @@ import {
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import { overlapsSelection, screenSelectionRect } from './viewportGeometry.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // What is selected on the board: the piece of scenery whose resize/rotate
 // handles are showing, and the box selection — its marquee, moving the
@@ -86,7 +87,7 @@ export function useViewportSelection({
       // them here flashes "Remove 0 selected pieces" before it disappears.
       setDeleteDialogOpen(false);
     } catch (cause) {
-      setDeleteError(cause?.message || 'Could not delete the selected pieces. Please try again.');
+      setDeleteError(failureMessage('Could not delete the selected pieces. Please try again.', cause));
     } finally {
       deletingRef.current = false;
       setDeleting(false);

@@ -7,7 +7,7 @@ import {
   equipmentCategory,
   filterEquipment,
   filterMagicItems,
-  formatCost,
+  formatCostCell,
   itemAttributes,
   itemGroupLookup,
   itemImageMap,
@@ -59,8 +59,8 @@ test('equipment filters: category, cost, weight, sort by cost; rows show cost an
   assert.deepEqual(names({ sort: 'cost' }), ['Rope', 'Longsword', 'Plate Armor']);
   const longsword = gear.find((entry) => entry.name === 'Longsword').record;
   assert.equal(equipmentCategory(longsword), 'weapon');
-  assert.equal(formatCost(longsword.value), '15 gp');
-  assert.equal(formatCost(5), '5 cp');
+  assert.equal(formatCostCell(longsword.value), '15 gp');
+  assert.equal(formatCostCell(5), '5 cp');
   assert.deepEqual(itemAttributes(longsword), ['1d8 Slashing', 'Versatile (1d10)', 'Mastery: Sap']);
 });
 

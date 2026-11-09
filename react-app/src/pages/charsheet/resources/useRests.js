@@ -14,6 +14,7 @@ import { applyFreeCastRest } from '../../../shared/character/spells/spellFreeCas
 import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { rollDie } from '../../../shared/character/dice/dice.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Short and Long Rest: the dialogs' state and what confirming each one does to
 // HP, Hit Dice, slots, resources, free casts, toggles and rest-bound features.
@@ -37,7 +38,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     let totalHeal = 0;
     const rolls = [];
     pools.forEach((pool) => {
-      const n = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
+      const n = clamp(Number(hdToSpend[pool.key] || 0), 0, pool.remaining);
       if (!n) return;
       spendByPool[pool.key] = n;
       for (let i = 0; i < n; i++) {

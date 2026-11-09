@@ -32,6 +32,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
+import { clamp } from '../../../shared/numbers.js';
 
 const CINZEL = UI_FONTS.display;
 
@@ -134,7 +135,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   const applyHp = (index, delta) => {
     if (!onUpdateCharacter || !delta) return;
     const cur = Number(cannons[index]?.hpCurrent ?? maxHp);
-    const next = Math.max(0, Math.min(maxHp, cur + delta));
+    const next = clamp(cur + delta, 0, maxHp);
     if (next === cur) return;
     onUpdateCharacter((prev) => ({ ...prev, ...updateCannonHpPatch(prev, index, next) }));
   };

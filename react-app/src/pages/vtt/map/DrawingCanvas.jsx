@@ -6,6 +6,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { CONE_SPREAD, areaGeometry, areaLabelAnchor, squareTurn } from '../../../shared/vtt/map/areas.js';
 import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
@@ -251,7 +252,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
 // The label on a stroke or an area: parchment with a dark edge, sized to the
 // squares so it reads at any zoom without swamping a small mark.
 function drawMapLabel(context, text, at, cellPixels, baseline) {
-  const fontSize = Math.max(11, Math.min(26, cellPixels * 0.32));
+  const fontSize = clamp(cellPixels * 0.32, 11, 26);
   context.font = `700 ${fontSize}px ${UI_FONTS.prose}`;
   context.textAlign = 'center';
   context.textBaseline = baseline;

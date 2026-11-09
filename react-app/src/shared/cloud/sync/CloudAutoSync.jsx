@@ -12,8 +12,9 @@ import {
 } from '../../instances/instanceSync.js';
 import { listenForRecovery } from './recoveryTriggers.js';
 import { CHARACTER_DELETED_EVENT, CHARACTER_SAVED_EVENT } from '../../appEvents.js';
+import { CLOUD_SAVE_DELAY_MS } from './cloudSaveQueue.js';
 
-export const DEBOUNCE_MS = 1200;
+export const DEBOUNCE_MS = CLOUD_SAVE_DELAY_MS;
 
 // Every state goes to cloudSyncState.js and out as CLOUD_SYNC_EVENT. A push
 // refused because the cloud sheet moved on is a 'conflict', not an error.

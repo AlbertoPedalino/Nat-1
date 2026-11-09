@@ -61,6 +61,11 @@ export const SECTION_REGISTRY = Object.freeze({
 
 export const SECTION_KEYS = Object.freeze(Object.keys(SECTION_REGISTRY));
 
+// The storage key of one value of an instance: its section's prefix + `subKey`.
+export function instanceKey(sectionKey, id, subKey) {
+  return getSection(sectionKey).scopedPrefix(id) + subKey;
+}
+
 export function getSection(sectionKey) {
   return Object.prototype.hasOwnProperty.call(SECTION_REGISTRY, sectionKey) ? SECTION_REGISTRY[sectionKey] : null;
 }

@@ -1,4 +1,5 @@
 import { titleCase } from '../../ui/textCase.js';
+import { clamp } from '../../numbers.js';
 // A map object stores only the kebab-case Lucide name. Rendering resolves that
 // name through Lucide's own dynamic catalog; arbitrary markup and image bytes
 // can therefore never enter the token row.
@@ -10,7 +11,7 @@ export const MAX_MAP_OBJECT_STROKE = 4;
 export function normalizeMapObjectStroke(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return DEFAULT_MAP_OBJECT_STROKE;
-  return Math.min(MAX_MAP_OBJECT_STROKE, Math.max(MIN_MAP_OBJECT_STROKE, parsed));
+  return clamp(parsed, MIN_MAP_OBJECT_STROKE, MAX_MAP_OBJECT_STROKE);
 }
 
 export function normalizeMapObjectKey(value) {

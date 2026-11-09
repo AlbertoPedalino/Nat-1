@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { setTokenVisibility, updateToken } from '../../../shared/cloud/api/vttTokens.js';
 import { applyCommittedToken, movableFilter, patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 import { isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // A piece held still under the pointer sends no frames, and the other screens
 // would sweep its ghost away and show it back where it started. The last frame
@@ -77,7 +78,7 @@ export function useTokenMoves({
       if (wasVisible !== willBeVisible) sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => replaceById(current, token));
-      notify('error', cause?.message || 'Could not move that token.');
+      notify('error', failureMessage('Could not move that token.', cause));
     } finally {
       // Released only after the write settles: until then a remote echo would
       // still be our own move coming back.
@@ -147,7 +148,7 @@ export function useTokenMoves({
       await updateToken(token.id, rowPatch);
     } catch (cause) {
       setTokens((current) => replaceById(current, token));
-      notify('error', cause?.message || 'Could not update that object.');
+      notify('error', failureMessage('Could not update that object.', cause));
     }
   }, [notify]);
 
@@ -167,7 +168,7 @@ export function useTokenMoves({
       sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => replaceById(current, token));
-      notify('error', cause?.message || 'Could not change who can see that piece.');
+      notify('error', failureMessage('Could not change who can see that piece.', cause));
     }
   }, [notify, sendDrag]);
 

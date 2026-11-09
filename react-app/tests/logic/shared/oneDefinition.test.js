@@ -110,6 +110,30 @@ test('every confirmation goes through confirmAction', () => {
   assert.deepEqual(sourceFilesMatching(/window\.confirm\(/, { allow: ['shared/ui/confirmAction.js'] }), []);
 });
 
+// "Could not …: reason." is written by failureMessage, not by hand: the bare
+// reason or the bare action alone is what the copies used to show.
+test('failure lines are made by failureMessage', () => {
+  assert.deepEqual(sourceLinesMatching(/\?\.message \|\| ['"]Could not|`Could not[^`]*\$\{\w+\??\.message|'Failed to /, {
+    allow: ['shared/ui/busyAction.js'],
+  }), []);
+});
+
+// `Math.max(lo, Math.min(hi, x))` is clamp(x, lo, hi) in every case, so it is
+// written as clamp (shared/numbers.js).
+test('range clamps go through clamp', () => {
+  assert.deepEqual(sourceLinesMatching(/Math\.max\([^,()]+, Math\.min\(/, { allow: ['shared/numbers.js'] }), []);
+});
+
+// "Is this a phone" is one breakpoint, read the one way (useIsPhone).
+test('the phone breakpoint is read through useIsPhone', () => {
+  assert.deepEqual(sourceLinesMatching(/useMediaQuery\([^)]*breakpoints\.down\('sm'\)/, { allow: ['shared/ui/useIsPhone.js'] }), []);
+});
+
+// What a database error code means is pgErrors.js's to say.
+test('database error codes are read through pgErrors.js', () => {
+  assert.deepEqual(sourceLinesMatching(/code === '(23505|PGRST202|42883|P0002)'/, { allow: ['shared/cloud/pgErrors.js'] }), []);
+});
+
 // Waiting for a previous task before starting the next (a per-key queue) is
 // createKeyedQueue's job (shared/cloud/sync/keyed.js), however the chain is
 // spelled: `.catch(() => {}|null).then(task)` or `ref.current.then(run, run)`.

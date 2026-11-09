@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCloudCharacter } from '../api/cloudCharacters.js';
+import { failureMessage } from '../../ui/busyAction.js';
 
 // One whole `characters` row, for a view that shows the whole sheet — editable
 // or read-only. It is read once on mount. Nothing here follows it: the sheet
@@ -27,7 +28,7 @@ export function useCloudCharacterRow(charId) {
         if (alive && row?.data && typeof row.data === 'object') setState({ row, loading: false, error: '' });
       })
       .catch((error) => {
-        if (alive) setState((prev) => (prev.row ? prev : { row: null, loading: false, error: error?.message || 'Failed to load sheet.' }));
+        if (alive) setState((prev) => (prev.row ? prev : { row: null, loading: false, error: failureMessage('Could not load sheet.', error) }));
       });
     return () => { alive = false; };
   }, [id]);

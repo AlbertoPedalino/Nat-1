@@ -7,7 +7,7 @@ import {
 } from '../../../shared/cloud/api/vttScenePictures.js';
 import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { sceneView, viewPatch } from '../../../shared/vtt/scene/scene.js';
-import { runBusy } from '../../../shared/ui/busyAction.js';
+import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 
 // The scene's pictures: uploading or removing the battlemap and backgrounds,
 // and switching what is on show. While the projector is frozen (not
@@ -74,7 +74,7 @@ export function useSceneImages({
     try {
       noteSceneWrite(await updateScene(scene.id, patch));
     } catch (cause) {
-      notify('error', cause?.message || failure);
+      notify('error', failureMessage(failure, cause));
     }
   }, [noteSceneWrite, notify, onSceneChange, role.isGm, scene]);
 

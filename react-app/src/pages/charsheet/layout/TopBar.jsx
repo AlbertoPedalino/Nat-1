@@ -19,6 +19,7 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar
 import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -41,7 +42,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
       if (previous) deletePortrait(previous);
       notify('success', 'Portrait updated.');
     } catch (cause) {
-      notify('error', `Could not use that image: ${cause?.message || 'unknown error'}`);
+      notify('error', failureMessage('Could not use that image.', cause));
     }
   };
 

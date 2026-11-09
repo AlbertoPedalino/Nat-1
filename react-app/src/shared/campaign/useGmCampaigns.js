@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { listCampaignCharacters, listMyCampaigns } from '../cloud/api/campaigns.js';
+import { failureMessage } from '../ui/busyAction.js';
 
 // Loads the campaigns where the signed-in user is GM, together with their
 // character rows. The caller supplies `mapRows` because consumers want different
@@ -18,7 +19,7 @@ const IDLE = Object.freeze({
   error: null,
 });
 
-export function useGmCampaigns({ mapRows, errorMessage = 'Failed to load campaign characters.' }) {
+export function useGmCampaigns({ mapRows, errorMessage = 'Could not load campaign characters.' }) {
   const { cloudEnabled, status, user } = useAuth();
   const userId = user?.id;
   const [payload, setPayload] = useState(() => ({
@@ -73,7 +74,7 @@ export function useGmCampaigns({ mapRows, errorMessage = 'Failed to load campaig
             loading: false,
             allCampaigns: [],
             campaigns: [],
-            error: error?.message || errorMessage,
+            error: failureMessage(errorMessage, error),
           });
         }
       }
@@ -104,7 +105,7 @@ export function useGmCampaigns({ mapRows, errorMessage = 'Failed to load campaig
       }));
       return members;
     } catch (error) {
-      setPayload((prev) => ({ ...prev, error: error?.message || errorMessage }));
+      setPayload((prev) => ({ ...prev, error: failureMessage(errorMessage, error) }));
       return null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

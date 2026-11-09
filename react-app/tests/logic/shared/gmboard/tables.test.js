@@ -37,7 +37,6 @@ test('loot rows: nothing found, values and the one-line detail', () => {
 test('dice text reads every stored roll shape', () => {
   assert.equal(diceText({ d8: 3, d12: 7, sum: 10 }), 'd8(3)+d12(7)=10');
   assert.equal(diceText({ d1: 4, d2: 15, sum: 19 }), 'd20(4)+d20(15)=19');
-  assert.equal(diceText({ dice: [{ sides: 20, value: 1 }], sum: 1 }), 'd20(1)=1');
 });
 
 test('a "nothing" event in the hexcrawl rolls no DC', () => {

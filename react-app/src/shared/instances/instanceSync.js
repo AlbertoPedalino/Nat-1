@@ -15,6 +15,7 @@ import {
 import { getSection, SECTION_KEYS } from './sectionRegistry.js';
 import { normalizeLinkGroupId } from './linkGroupId.js';
 import { createKeyedDebounce, createKeyedQueue } from '../cloud/sync/keyed.js';
+import { failureMessage } from '../ui/busyAction.js';
 
 // The sync engine of tool instances: the only code that talks to the cloud
 // about them, and the only place that decides between INSERT, UPDATE, pull and
@@ -427,7 +428,7 @@ export async function listToolInstances(sectionKey, { includeCloud = isInstanceS
     try {
       cloudRows = await cloud.listRows(client(), section);
     } catch (cause) {
-      error = cause?.message || 'Failed to load cloud saves.';
+      error = failureMessage('Could not load cloud saves.', cause);
     }
   }
   return { rows: mergeInstanceRows(sectionKey, cloudRows, local), error };

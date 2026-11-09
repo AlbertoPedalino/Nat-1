@@ -53,7 +53,7 @@ test('a failed read shows the error; no id reads nothing', async () => {
   m.get.mockRejectedValueOnce(new Error('offline'));
   const { result } = renderHook(() => useCloudCharacterRow('pc'));
   await settle();
-  expect(result.current).toMatchObject({ row: null, loading: false, error: 'offline' });
+  expect(result.current).toMatchObject({ row: null, loading: false, error: 'Could not load sheet: offline.' });
   m.get.mockClear();
   const none = renderHook(() => useCloudCharacterRow(null));
   await settle();

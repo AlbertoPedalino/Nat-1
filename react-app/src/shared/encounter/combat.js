@@ -6,7 +6,9 @@ import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { clampInt, numberOr } from '../numbers.js';
 import { clampTempHp, restoreCombatantMortality } from './combatantVitals.js';
-import { rollInitiative, initiativeKey, creatureInitiativeSources, sortCombatants } from './initiative.js';
+import {
+  rollInitiative, initiativeKey, creatureInitiativeSources, resortKeepingTurn, sortCombatants,
+} from './initiative.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -82,6 +84,42 @@ function createLabeler(existing = []) {
 
 // `initiative`: { [initiativeRoster key]: 'adv' | 'disadv' } chosen before the
 // launch; anything absent rolls on the creature's own sources.
+// A player's numbers as a fight allows them, from any source (a typed-in party
+// row, a campaign sheet's summary, a launched combatant).
+export function clampPlayerStats({ initMod, ac, hpMax }) {
+  return {
+    initMod: clampInt(initMod, -20, 30, 0),
+    ac: clampInt(ac, 1, 99, 10),
+    hpMax: clampInt(hpMax, 1, 999, 10),
+  };
+}
+
+// A monster in a fight — from the bestiary (`monster`) or typed in by hand
+// (`name`, `hpMax`, `ac`, `initMod`, `tempHP`) — at full hit points, with its
+// letter-and-shape label from `assignLabel`.
+function makeMonsterCombatant({
+  id, monster = null, name = monster?.name, hpMax, ac, initMod, tempHP = 0, initiative, assignLabel,
+}) {
+  return {
+    id,
+    name,
+    ...(monster ? { source: monster.source } : {}),
+    type: 'monster',
+    initiative,
+    initMod,
+    hpCurrent: hpMax,
+    hpMax,
+    tempHP,
+    activeConditions: [],
+    activeEffects: [],
+    ac,
+    deathSaves: { success: 0, fail: 0 },
+    isDead: false,
+    monsterData: monster,
+    ...assignLabel(name),
+  };
+}
+
 export function buildCombat(encounter, players, encounterId = null, rng = Math.random, { initiative = {} } = {}) {
   const assignLabel = createLabeler();
   let id = 0;
@@ -90,31 +128,20 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
     const monster = item.monsterData;
     if (!monster) return;
     const initMod = abilityModifier(monster.dex);
-    const hp = getHP(monster.hp);
-    const ac = getAC(monster.ac);
     for (let i = 0; i < clampInt(item.qty, 0, 99, 0); i += 1) {
-      combatants.push({
+      combatants.push(makeMonsterCombatant({
         id: id++,
-        name: monster.name,
-        source: monster.source,
-        type: 'monster',
-        initiative: rollInitiative(null, initMod, rng, initiative[initiativeKey('monster', itemIndex, i)]),
+        monster,
+        hpMax: getHP(monster.hp),
+        ac: getAC(monster.ac),
         initMod,
-        ac,
-        hpMax: hp,
-        hpCurrent: hp,
-        tempHP: 0,
-        activeConditions: [],
-        activeEffects: [],
-        monsterData: monster,
-        isDead: false,
-        ...assignLabel(monster.name),
-      });
+        initiative: rollInitiative(null, initMod, rng, initiative[initiativeKey('monster', itemIndex, i)]),
+        assignLabel,
+      }));
     }
   });
   (Array.isArray(players) ? players : []).forEach((player, index) => {
-    const initMod = clampInt(player.initMod, -20, 30, 0);
-    const hpMax = clampInt(player.hpMax, 1, 999, 10);
+    const { initMod, ac, hpMax } = clampPlayerStats(player);
     const vitals = resolveCombatVitals(player, { ...player, hpMax });
     combatants.push({
       id: id++,
@@ -124,7 +151,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       campaignId: player.campaignId || null,
       initiative: rollInitiative(player, initMod, rng, initiative[initiativeKey('player', index)]),
       initMod,
-      ac: clampInt(player.ac, 1, 99, 10),
+      ac,
       // Includes the player's reminders, a synced vital.
       ...vitals,
       monsterData: null,
@@ -152,68 +179,32 @@ export function removeCombatant(combat, id) {
   return { ...combat, combatants, currentTurn };
 }
 
-export function addMonsterCombatant(combat, monster, rng = Math.random) {
-  if (!monster) return combat;
-  const current = combat.combatants?.[combat.currentTurn || 0];
-  const assignLabel = createLabeler(combat.combatants || []);
-  const initMod = abilityModifier(monster.dex);
-  const hp = getHP(monster.hp);
-  const next = {
+// A creature joining a fight under way: placed by its initiative, the turn
+// staying on whoever has it.
+function joinFight(combat, fields, rng) {
+  const next = makeMonsterCombatant({
+    ...fields,
     id: nextCombatantId(combat.combatants),
-    name: monster.name,
-    source: monster.source,
-    type: 'monster',
-    initiative: rollInitiative(null, initMod, rng),
-    initMod,
-    hpCurrent: hp,
-    hpMax: hp,
-    tempHP: 0,
-    activeConditions: [],
-    activeEffects: [],
-    ac: getAC(monster.ac),
-    deathSaves: { success: 0, fail: 0 },
-    isDead: false,
-    monsterData: monster,
-    ...assignLabel(monster.name),
-  };
-  const combatants = sortCombatants([...(combat.combatants || []), next]);
-  return {
-    ...combat,
-    combatants,
-    currentTurn: current ? combatants.findIndex((combatant) => combatant.id === current.id) : 0,
-  };
+    initiative: rollInitiative(null, fields.initMod, rng),
+    assignLabel: createLabeler(combat.combatants || []),
+  });
+  return resortKeepingTurn(combat, [...(combat.combatants || []), next]);
 }
 
+export function addMonsterCombatant(combat, monster, rng = Math.random) {
+  if (!monster) return combat;
+  return joinFight(combat, {
+    monster, hpMax: getHP(monster.hp), ac: getAC(monster.ac), initMod: abilityModifier(monster.dex),
+  }, rng);
+}
+
+// Typed in by hand: the same limits as a player's numbers.
 export function addManualCombatant(combat, payload, rng = Math.random) {
   const name = String(payload?.name || '').trim();
   if (!name) return combat;
-  const current = combat.combatants?.[combat.currentTurn || 0];
-  const assignLabel = createLabeler(combat.combatants || []);
-  const initMod = clampInt(payload.initMod, -20, 30, 0);
-  const hp = clampInt(payload.hpMax, 1, 999, 10);
-  const next = {
-    id: nextCombatantId(combat.combatants),
-    name,
-    type: 'monster',
-    initiative: rollInitiative(null, initMod, rng),
-    initMod,
-    hpCurrent: hp,
-    hpMax: hp,
-    tempHP: clampTempHp(payload.tempHP),
-    activeConditions: [],
-    activeEffects: [],
-    ac: clampInt(payload.ac, 0, 99, 10),
-    deathSaves: { success: 0, fail: 0 },
-    isDead: false,
-    monsterData: null,
-    ...assignLabel(name),
-  };
-  const combatants = sortCombatants([...(combat.combatants || []), next]);
-  return {
-    ...combat,
-    combatants,
-    currentTurn: current ? combatants.findIndex((combatant) => combatant.id === current.id) : 0,
-  };
+  return joinFight(combat, {
+    name, ...clampPlayerStats(payload), tempHP: clampTempHp(payload.tempHP),
+  }, rng);
 }
 
 function nextCombatantId(combatants) {

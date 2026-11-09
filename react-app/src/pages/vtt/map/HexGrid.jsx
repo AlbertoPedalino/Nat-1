@@ -2,6 +2,7 @@ import { memo, useId, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { hexHeight, hexRowStep, hexWidth } from '../../../shared/vtt/map/hexGeometry.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // The hex overlay.
 //
@@ -131,7 +132,7 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
       d: tilePath(tileWidth, tileHeight, radius),
       // Full strength while a hex is big enough to read, then down to a third as
       // it approaches the width of its own line.
-      opacity: Math.min(1, Math.max(0.33, tileWidth / READABLE_WIDTH)),
+      opacity: clamp(tileWidth / READABLE_WIDTH, 0.33, 1),
     };
   }
 

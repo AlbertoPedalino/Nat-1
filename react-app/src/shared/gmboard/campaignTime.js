@@ -1,3 +1,7 @@
+// How many entries a campaign's log keeps, on the board and in the clock the
+// battle map shares.
+export const LOG_STORE_LIMIT = 50;
+
 export const MONTH_NAMES = Object.freeze([
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',

@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { sheetColumnSx } from './layout.js';
+import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
 // bottom of the sheet, so a roll never needs a scroll back to the top.
@@ -19,7 +20,7 @@ import { sheetColumnSx } from './layout.js';
 export default function SheetDiceDock({
   embedded, rollLog, onRoll, onClearLog,
 }) {
-  const phone = useMediaQuery(useTheme().breakpoints.down('sm'), { noSsr: true });
+  const phone = useIsPhone();
 
   // Chrome on Android stretches the page when a scroll runs into its end, and
   // the dock on the bottom edge stretches with it. The sheet's own page turns

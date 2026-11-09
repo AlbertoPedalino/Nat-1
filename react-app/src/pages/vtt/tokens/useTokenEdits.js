@@ -20,7 +20,7 @@ import {
   monsterVitalsPatch,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { withDeathSave } from '../../../shared/character/combat/mortality.js';
-import { runBusy } from '../../../shared/ui/busyAction.js';
+import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 
 // Changing pieces already on the scene: conditions, reminders, HP and the rest
@@ -49,7 +49,7 @@ export function useTokenEdits({
       return true;
     } catch (cause) {
       if (cause?.code === FIGHT_UNAVAILABLE) return false;
-      notify('error', cause?.message || 'Could not update that creature.');
+      notify('error', failureMessage('Could not update that creature.', cause));
       refreshVisibleTokens();
       return true;
     }
@@ -98,7 +98,7 @@ export function useTokenEdits({
       if (owned) await updateToken(token.id, { show_hp: showHp });
     } catch (cause) {
       setTokens((current) => replaceById(current, token));
-      notify('error', cause?.message || 'Could not mark that token.');
+      notify('error', failureMessage('Could not mark that token.', cause));
     }
   }, [canMove, characterHealth, notify, writeConditions]);
 
@@ -143,7 +143,7 @@ export function useTokenEdits({
       if (secret !== (token.secretLabel || '')) await setTokenSecret(token.id, secret);
     } catch (cause) {
       setTokens((current) => replaceById(current, token));
-      notify('error', cause?.message || 'Could not update that token.');
+      notify('error', failureMessage('Could not update that token.', cause));
     }
   }, [characterHealth, commitLinkedMonster, gmVitals, notify, writeConditions]);
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
@@ -6,6 +6,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { byName } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
 
 // A catalog with files missing is not kept: the next scroll opened asks again
 // for what failed.
@@ -18,16 +19,8 @@ const loadSpellsCached = async () => (await loadSpellCatalogCached())?.spells ||
 // scribe's); left blank, a found scroll's fixed ones apply.
 export default function ScrollSpellPicker({ item, onWrite }) {
   const level = spellScrollLevel(item);
-  const [spells, setSpells] = useState(null);
-
-  useEffect(() => {
-    if (level == null) return undefined;
-    let alive = true;
-    loadSpellsCached()
-      .then((all) => { if (alive) setSpells(all || []); })
-      .catch(() => { if (alive) setSpells([]); });
-    return () => { alive = false; };
-  }, [level]);
+  const spellsLoad = useLoaded(() => (level == null ? null : loadSpellsCached()), [level]);
+  const spells = spellsLoad.status === 'error' ? [] : spellsLoad.data;
 
   const options = useMemo(() => (spells || [])
     .filter((spell) => Number(spell.level ?? 0) === level)

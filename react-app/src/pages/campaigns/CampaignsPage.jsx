@@ -18,6 +18,7 @@ import { signed } from '../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
+import { failureMessage } from '../../shared/ui/busyAction.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -50,7 +51,7 @@ export default function CampaignsPage() {
       setCharsByCampaign(Object.fromEntries(charEntries));
       setMembersByCampaign(Object.fromEntries(memEntries));
     } catch (e) {
-      notify('error', e?.message || 'Could not load your campaigns.');
+      notify('error', failureMessage('Could not load your campaigns.', e));
     } finally { setLoading(false); }
   }, [status]);
 
@@ -64,7 +65,7 @@ export default function CampaignsPage() {
       setNewName('');
       notify('success', `Campaign created. Invite code: ${c.join_code}`);
       await load();
-    } catch (e) { notify('error', e?.message || 'Could not create the campaign.'); }
+    } catch (e) { notify('error', failureMessage('Could not create the campaign.', e)); }
     finally { setBusy(false); }
   };
 
@@ -76,7 +77,7 @@ export default function CampaignsPage() {
       setJoinCode('');
       notify('success', `Joined "${c.name}".`);
       await load();
-    } catch (e) { notify('error', e?.message || 'Could not join: the invite code is not valid.'); }
+    } catch (e) { notify('error', failureMessage('Could not join: the invite code is not valid.', e)); }
     finally { setBusy(false); }
   };
 
@@ -91,7 +92,7 @@ export default function CampaignsPage() {
   const assignChar = async (charId, campaignId) => {
     setBusy(true);
     try { await setCharacterCampaign(charId, campaignId); await load(); }
-    catch (e) { notify('error', e?.message || 'Could not assign the character.'); }
+    catch (e) { notify('error', failureMessage('Could not assign the character.', e)); }
     finally { setBusy(false); }
   };
 
@@ -99,7 +100,7 @@ export default function CampaignsPage() {
     if (!confirmAction('Leave this campaign?')) return;
     setBusy(true);
     try { await leaveCampaign(campaignId); await load(); notify('success', 'Left the campaign.'); }
-    catch (e) { notify('error', e?.message || 'Could not leave the campaign.'); }
+    catch (e) { notify('error', failureMessage('Could not leave the campaign.', e)); }
     finally { setBusy(false); }
   };
 
@@ -107,7 +108,7 @@ export default function CampaignsPage() {
     if (!confirmAction(`Delete campaign "${c.name}"? Members are removed and their sheets are detached (not deleted).`)) return;
     setBusy(true);
     try { await deleteCampaign(c.id); await load(); notify('success', `Deleted "${c.name}".`); }
-    catch (e) { notify('error', e?.message || 'Could not delete the campaign.'); }
+    catch (e) { notify('error', failureMessage('Could not delete the campaign.', e)); }
     finally { setBusy(false); }
   };
 

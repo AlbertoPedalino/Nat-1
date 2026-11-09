@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { Check, Handshake, Skull, Sparkles, X } from 'lucide-react';
 import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
 import {
@@ -25,6 +16,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -35,8 +27,7 @@ const ACTION_UI = Object.freeze([
 
 export default function NegotiationDialog({ open, onClose }) {
   const { state, dispatch } = useEncounterBuilder();
-  const theme = useTheme();
-  const mobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const mobile = useIsPhone();
   const negotiation = state.negotiation;
   const attitude = getNpcAttitude(negotiation.attitude);
   const status = negotiationStatus(negotiation);

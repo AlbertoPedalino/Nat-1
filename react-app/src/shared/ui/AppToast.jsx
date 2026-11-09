@@ -1,8 +1,9 @@
-import { Snackbar, Alert, Portal, useMediaQuery, useTheme } from '@mui/material';
+import { Snackbar, Alert, Portal } from '@mui/material';
 import { UI_COLORS, uiAlpha } from './colors.js';
 import { UI_FONTS } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
+import { useIsPhone } from './useIsPhone.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -23,12 +24,11 @@ const MOBILE_ANCHOR = { vertical: 'top', horizontal: 'center' };
 const DESKTOP_ANCHOR = { vertical: 'top', horizontal: 'right' };
 
 export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
-  const theme = useTheme();
   const color = SEVERITY_COLOR[toast?.severity] || SEVERITY_COLOR.info;
 
   // noSsr resolves the breakpoint from matchMedia on the first paint (same
   // pattern as CurrencyCoinBox). Phone: top centre; tablet and desktop: top right.
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
+  const isMobile = useIsPhone();
 
   return (
     // Portal to <body>: Snackbar is position:fixed but MUI doesn't portal it, so

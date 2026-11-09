@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { clamp } from '../../../shared/numbers.js';
 
 const FONT = UI_FONTS.display;
 
@@ -35,7 +36,7 @@ export default function ResourceBar({ value, max, onChange }) {
   const applyFromPosition = useCallback((bar, clientX) => {
     const { max: m, value: v, onChange: cb } = refs.current;
     const rect = bar.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
     const target = Math.round(ratio * m);
     const delta = target - v;
     if (delta !== 0) cb(delta);

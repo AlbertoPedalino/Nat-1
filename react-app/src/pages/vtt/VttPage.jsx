@@ -20,6 +20,7 @@ import ScenePicker from './scene/ScenePicker.jsx';
 import SessionGate from './session/SessionGate.jsx';
 import * as s from './styles.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { failureMessage } from '../../shared/ui/busyAction.js';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -90,7 +91,7 @@ export default function VttPage() {
     } catch (cause) {
       if (request !== loadRequestRef.current) return;
       setScene(null);
-      setError(cause?.message || 'Could not open this scene.');
+      setError(failureMessage('Could not open this scene.', cause));
     } finally {
       if (request === loadRequestRef.current) setLoading(false);
     }

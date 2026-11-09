@@ -5,6 +5,7 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { makeId } from '../../../shared/ids.js';
+import { clamp } from '../../../shared/numbers.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -64,7 +65,7 @@ export default function NotesTab({ sheet }) {
       if (prev.length <= 1) return prev;
       return prev.filter((_, i) => i !== index);
     });
-    setActiveIdx((cur) => Math.max(0, Math.min(cur, pages.length - 2)));
+    setActiveIdx((cur) => clamp(cur, 0, pages.length - 2));
   }, [pages.length]);
 
   const changeContent = useCallback((index, content) => {

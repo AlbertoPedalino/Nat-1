@@ -11,6 +11,7 @@ import {
   sameFog,
 } from '../../../shared/vtt/map/fog.js';
 import { acceptFogDelta, newFogStroke } from '../../../shared/vtt/map/fogStream.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 const FOG_BROADCAST_MS = 80;
 
@@ -101,7 +102,7 @@ export function useFogPainting({
     fogDeltaRef.current = { stroke: null, seq: 0, on: [], off: [] };
     sendDrag({ fog });
     updateScene(scene.id, { fog }).then(noteSceneWrite).catch((cause) => {
-      notify('error', cause?.message || 'Could not save the fog.');
+      notify('error', failureMessage('Could not save the fog.', cause));
     });
   }, [noteSceneWrite, notify, scene.id, sendDrag]);
 

@@ -9,7 +9,7 @@
 // and the redraw is cheaper — for a line nobody can tell apart from the original.
 
 import { areaGeometry, isPointOnArea, normalizeArea } from './areas.js';
-import { numberOr } from '../../numbers.js';
+import { clamp, numberOr } from '../../numbers.js';
 
 const DEFAULT_TOLERANCE = 0.08; // cells
 
@@ -35,7 +35,7 @@ function distanceToSegment(point, a, b) {
   const dy = b.y - a.y;
   if (dx === 0 && dy === 0) return Math.hypot(point.x - a.x, point.y - a.y);
   const t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / (dx * dx + dy * dy);
-  const clamped = Math.max(0, Math.min(1, t));
+  const clamped = clamp(t, 0, 1);
   return Math.hypot(point.x - (a.x + clamped * dx), point.y - (a.y + clamped * dy));
 }
 

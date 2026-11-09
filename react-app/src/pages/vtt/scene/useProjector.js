@@ -4,6 +4,8 @@ import { sceneView, viewBackgroundPath, viewPatch } from '../../../shared/vtt/sc
 import { createCameraSourceId } from '../../../shared/vtt/session/cameraSync.js';
 import { shouldApplyPresenterFrame, spectatorUrl } from '../../../shared/vtt/session/spectator.js';
 import { createProjectorLink, isWindowOpen } from '../../../shared/vtt/session/projectorLink.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // How long an open projector in this browser has to say it is there.
 const PROJECTOR_ANSWER_MS = 400;
@@ -222,7 +224,7 @@ export function useProjectorControls({
         noteSceneWrite(await updateScene(scene.id, patch));
         onSceneChange({ ...scene, ...patch });
       } catch (cause) {
-        notify('error', cause?.message || 'Could not share the prepared view.');
+        notify('error', failureMessage('Could not share the prepared view.', cause));
         return;
       }
     }
@@ -264,8 +266,8 @@ export function useProjectorControls({
   // the handle available, which is what lets "Stop" close it again.
   const openSpectator = useCallback(() => {
     const url = spectatorUrl(window.location.href, scene.campaignId, presenterCameraSource);
-    const width = Math.min(1280, Math.max(640, window.screen?.availWidth || 1280));
-    const height = Math.min(800, Math.max(480, window.screen?.availHeight || 800));
+    const width = clamp(window.screen?.availWidth || 1280, 640, 1280);
+    const height = clamp(window.screen?.availHeight || 800, 480, 800);
     const projector = window.open(
       url,
       'gmboard-projector',

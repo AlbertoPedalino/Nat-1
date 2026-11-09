@@ -1,3 +1,5 @@
+import { getStorage } from '../../storage/storage.js';
+
 // A character's portrait: where its bytes live, and how a browser keeps a copy
 // so it does not ask the bucket again.
 //
@@ -34,16 +36,7 @@ export function isSupportedPortrait(file) {
   return file.size > 0 && file.size <= PORTRAIT_MAX_BYTES;
 }
 
-function defaultStore() {
-  try {
-    return globalThis.localStorage || null;
-  } catch {
-    // Storage can be denied outright; a portrait is not worth an exception.
-    return null;
-  }
-}
-
-export function readPortrait(path, store = defaultStore()) {
+export function readPortrait(path, store = getStorage()) {
   if (!path || !store) return null;
   try {
     const raw = store.getItem(CACHE_PREFIX + path);
@@ -55,7 +48,7 @@ export function readPortrait(path, store = defaultStore()) {
   }
 }
 
-export function writePortrait(path, url, store = defaultStore()) {
+export function writePortrait(path, url, store = getStorage()) {
   if (!path || !url || !store) return false;
   const entry = JSON.stringify({ url, at: Date.now() });
   try {
@@ -77,7 +70,7 @@ export function writePortrait(path, url, store = defaultStore()) {
   }
 }
 
-export function forgetPortrait(path, store = defaultStore()) {
+export function forgetPortrait(path, store = getStorage()) {
   if (!path || !store) return;
   try {
     store.removeItem(CACHE_PREFIX + path);
@@ -107,7 +100,7 @@ function listPortraits(store) {
 
 // Down to the budget, oldest first. Called after every write, so the cache
 // cannot grow past it however long a session runs.
-export function prunePortraits(store = defaultStore(), budget = CACHE_BUDGET) {
+export function prunePortraits(store = getStorage(), budget = CACHE_BUDGET) {
   if (!store) return 0;
   const entries = listPortraits(store);
   if (entries.length <= budget) return 0;

@@ -16,6 +16,7 @@ import { pactSlots } from '../../../shared/character/spells/casterProgression.js
 import {
   INVOCATIONS, INVOCATION_SLOT_LEVELS, MODIFIER_CANTRIP_EFFECTS, MODIFIER_ELIGIBLE_CANTRIPS, warlockChoiceMatches,
 } from './invocations.js';
+import { clamp } from '../../../shared/numbers.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -487,7 +488,7 @@ registerClassSheetResources("Warlock", [
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.
 registerResourceSideEffect('magical_cunning', function (ctx = {}) {
   const C = ctx.character || ctx.C;
-  const wlv = Math.min(20, Math.max(0, warlockLevel(C)));
+  const wlv = clamp(warlockLevel(C), 0, 20);
   if (!wlv) return null;
 
   const { count: slotCount, level: slotLevel } = pactSlots(wlv);

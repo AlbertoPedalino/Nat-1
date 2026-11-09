@@ -1,4 +1,5 @@
 import { currentUser } from '../cloud/cloudCall.js';
+import { isUniqueViolation } from '../cloud/pgErrors.js';
 // The only Supabase path for tool instances (tables `boards`, `encounters`,
 // `dm_screens`; rows are owner-only by RLS).
 //
@@ -13,10 +14,6 @@ import { currentUser } from '../cloud/cloudCall.js';
 const META_COLUMNS = 'id, name, link_group_id, version, updated_at';
 const ROW_COLUMNS = 'id, name, link_group_id, data, version, updated_at';
 
-// Postgres unique_violation: the id already has a row.
-function isDuplicate(error) {
-  return error?.code === '23505';
-}
 
 export async function fetchMeta(client, section, id) {
   const { data, error } = await client.from(section.table).select(META_COLUMNS).eq('id', id).maybeSingle();
@@ -50,7 +47,7 @@ export async function insertRow(client, section, row) {
     .insert({ ...row, owner: user.id, owner_username: user.user_metadata?.username || null })
     .select(META_COLUMNS)
     .maybeSingle();
-  if (isDuplicate(error)) return { duplicate: true };
+  if (isUniqueViolation(error)) return { duplicate: true };
   if (error) throw error;
   if (!data) throw new Error('Could not save this tool instance.');
   return { row: data };

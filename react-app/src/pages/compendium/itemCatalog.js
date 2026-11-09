@@ -7,9 +7,10 @@
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
-import { formatNumber } from '../../shared/ui/numberFormat.js';
 import { recordKey, splitNameSource, stripSource } from '../../shared/content/nameKeys.js';
 import { runCatalogFilter } from './catalogFilter.js';
+import { formatCopper } from '../../shared/character/inventory/currency.js';
+import { formatWeight } from '../../shared/character/inventory/weight.js';
 
 const typeCode = (item) => stripSource(item?.type).toUpperCase();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
@@ -111,18 +112,14 @@ export const WEIGHT_RANGES = Object.freeze([
   { key: 'over20', label: 'Over 20 lb.', test: (lb) => lb > 20 },
 ]);
 
-// 5etools values are in copper pieces.
-export function formatCost(copper) {
-  const cp = Number(copper) || 0;
-  if (!cp) return '—';
-  if (cp >= 100 && cp % 100 === 0) return `${formatNumber(cp / 100)} gp`;
-  if (cp >= 10 && cp % 10 === 0) return `${cp / 10} sp`;
-  return `${cp} cp`;
+// The catalog's Cost and Weight cells: the shared formats, a dash for none.
+export function formatCostCell(copper) {
+  return formatCopper(copper) || '—';
 }
 
-export function formatWeight(pounds) {
+export function formatWeightCell(pounds) {
   const lb = Number(pounds) || 0;
-  return lb ? `${lb} lb.` : '—';
+  return lb ? `${formatWeight(lb)} lb.` : '—';
 }
 
 

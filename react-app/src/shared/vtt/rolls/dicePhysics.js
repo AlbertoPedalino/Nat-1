@@ -17,6 +17,7 @@
 
 import { seededRandom } from '../../seededRandom.js';
 import { dieGeometry } from '../../character/dice/polyhedra.js';
+import { clamp } from '../../numbers.js';
 
 export const THROWN_DIE_SIZE = 76;
 
@@ -32,10 +33,7 @@ export const TRAY = { width: 460, height: 300 };
 export function thrownDieSize(count) {
   const dice = Math.max(1, Math.floor(Number(count) || 1));
   const packingArea = TRAY.width * TRAY.height * 0.503;
-  return Math.max(26, Math.min(
-    THROWN_DIE_SIZE,
-    Math.floor(Math.sqrt(packingArea / Math.max(dice, 12))),
-  ));
+  return clamp(Math.floor(Math.sqrt(packingArea / Math.max(dice, 12))), 26, THROWN_DIE_SIZE);
 }
 
 const FPS = 60;

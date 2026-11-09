@@ -20,6 +20,7 @@ import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { appTopBarButtonSx } from '../../shared/ui/appBar.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
 import { TOOL_CATALOG } from './toolCatalog.js';
+import { failureMessage } from '../../shared/ui/busyAction.js';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -81,7 +82,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
           campaign.hexcrawlBoardId = board.id;
         }
       } catch (cause) {
-        failure = cause?.message || 'Could not select the linked GM Board. Reopen this panel to retry.';
+        failure = failureMessage('Could not select the linked GM Board. Reopen this panel to retry.', cause);
       }
       // Readers of the board's tables refresh, even after a partial failure:
       // the destination campaign may already point at the board.

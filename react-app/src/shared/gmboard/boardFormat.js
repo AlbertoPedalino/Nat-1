@@ -1,5 +1,7 @@
 import { createDefaultCoreState, createDefaultResults } from './defaultState.js';
 import { createDefaultTables } from './defaultTables.js';
+import { instanceKey } from '../instances/sectionRegistry.js';
+import { parseJsonOr } from '../storage/storage.js';
 
 // How a GM Board instance stores its data: one JSON value per key, scoped to
 // the board id. The board page and the battle map (which reads a campaign's
@@ -11,17 +13,7 @@ export const STORAGE_KEYS = Object.freeze({
 });
 
 export function scopeKey(id, key) {
-  return `gb:board:${id}:${key}`;
-}
-
-export function parseJsonOr(raw, fallback) {
-  if (typeof raw !== 'string') return fallback;
-  try {
-    const value = JSON.parse(raw);
-    return value == null ? fallback : value;
-  } catch {
-    return fallback;
-  }
+  return instanceKey('gmboard', id, key);
 }
 
 // A board's { state, tables, results } from its stored values, wherever they

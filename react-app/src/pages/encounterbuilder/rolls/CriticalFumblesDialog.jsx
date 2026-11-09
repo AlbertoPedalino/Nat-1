@@ -1,16 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dices, Skull } from 'lucide-react';
 import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
 import {
@@ -25,11 +14,11 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
-  const theme = useTheme();
-  const mobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const mobile = useIsPhone();
   const [categoryId, setCategoryId] = useState(FUMBLE_CATEGORIES[0].id);
   const [outcome, setOutcome] = useState(null);
   const outcomeRef = useRef(null);

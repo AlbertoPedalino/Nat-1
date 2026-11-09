@@ -16,8 +16,9 @@ import {
 } from '../../../shared/character/profile/store.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { CLOUD_SAVE_DELAY_MS } from '../../../shared/cloud/sync/cloudSaveQueue.js';
 
-const CLOUD_SAVE_DELAY_MS = 1_200;
 
 // The sheet's content sync with the cloud:
 //   - a cloud sheet (`usesExternalChar`) saves its own edits, debounced and
@@ -200,7 +201,7 @@ export function useSheetCloudSave({
       }
     },
     onConflict: () => refreshForConflict(),
-    onError: (error) => notify('error', `Could not save the sheet online: ${error?.message || 'unknown error'}`),
+    onError: (error) => notify('error', failureMessage('Could not save the sheet online.', error)),
   });
   flushCloudSaveRef.current = cloudSave.request;
   resetErrorNoticeRef.current = cloudSave.resetErrorNotice;
