@@ -83,3 +83,20 @@ test('its chevron tucks it into a tab that brings it back, and the choice is kep
   fireEvent.click(screen.getByRole('button', { name: 'Show dice' }));
   expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
 });
+
+test('the tab opens as the finger lifts, even if the click that follows is lost', () => {
+  localStorage.setItem('gb:sheet:dice-dock-hidden', '1');
+  render(<SheetDiceDock rollLog={[]} />);
+  fireEvent.pointerUp(screen.getByRole('button', { name: 'Show dice' }));
+  expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+});
+
+test('on its own page the end-of-scroll stretch is off while the sheet is open', () => {
+  const root = document.documentElement;
+  const { unmount } = render(<SheetDiceDock rollLog={[]} />);
+  expect(root.style.overscrollBehaviorY).toBe('none');
+  unmount();
+  expect(root.style.overscrollBehaviorY).toBe('');
+  render(<SheetDiceDock embedded rollLog={[]} />);
+  expect(root.style.overscrollBehaviorY).toBe('');
+});

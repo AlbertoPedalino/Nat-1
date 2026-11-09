@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Box, Button } from '@mui/material';
 import { ChevronUp, Dices } from 'lucide-react';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
@@ -25,10 +26,28 @@ export default function SheetDiceDock({
   embedded, rollLog, onRoll, onClearLog,
 }) {
   const [hidden, setHidden] = useStoredFlag(HIDDEN_KEY);
+  const show = () => setHidden(false);
+
+  // Chrome on Android stretches the page when a scroll runs into its end, and
+  // the handle on the bottom edge stretched with it. The sheet's own page turns
+  // that effect off while it is open; an embedded sheet's panel does the same
+  // for itself (FloatingSheetPanel).
+  useEffect(() => {
+    if (embedded) return undefined;
+    const root = document.documentElement;
+    const previous = root.style.overscrollBehaviorY;
+    root.style.overscrollBehaviorY = 'none';
+    return () => { root.style.overscrollBehaviorY = previous; };
+  }, [embedded]);
+
   return (
     <Box sx={[embedded ? embeddedDockSx : pageDockSx, hidden ? flushSx : null]}>
       {hidden ? (
-        <Button size="small" variant="outlined" aria-label="Show dice" onClick={() => setHidden(false)} sx={[tabSx, actionButtonToneSx(UI_COLORS.goldLight), solidOnHoverSx]}>
+        // Opens as the finger lifts, not on the click after it: a mobile browser
+        // whose toolbar comes back at that tap (Brave) moves the page under the
+        // finger and drops the click, but the lift still reaches the handle.
+        // onClick stays for the keyboard; opening twice is the same as once.
+        <Button size="small" variant="outlined" aria-label="Show dice" onPointerUp={show} onClick={show} sx={[tabSx, actionButtonToneSx(UI_COLORS.goldLight), solidOnHoverSx]}>
           <ChevronUp size={14} />
           <Dices size={14} />
         </Button>

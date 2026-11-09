@@ -368,7 +368,9 @@ const contentSx = {
   minWidth: 0,
   minHeight: 0,
   overflow: 'auto',
-  overscrollBehavior: 'contain',
+  // Contained (no scroll chaining to the map) and without Chrome's stretch at
+  // the ends, which pulled the sheet's dice handle with it.
+  overscrollBehavior: 'none',
   '& > *': {
     width: '100%',
     maxWidth: 760,
