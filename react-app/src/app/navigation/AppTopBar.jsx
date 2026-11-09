@@ -6,8 +6,9 @@ import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 
-export const APP_TOP_BAR_HEIGHT = '48px';
+export { APP_TOP_BAR_HEIGHT };
 
 // Every bar offers the compendium, except the compendium's own page. `start`
 // adds page buttons next to Home/Back; `children` sit on the right, before

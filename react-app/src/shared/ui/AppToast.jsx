@@ -1,6 +1,7 @@
 import { Snackbar, Alert, Portal, useMediaQuery, useTheme } from '@mui/material';
 import { UI_COLORS, uiAlpha } from './colors.js';
 import { UI_FONTS } from './fonts.js';
+import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
@@ -14,9 +15,11 @@ const SEVERITY_COLOR = {
   info: UI_COLORS.blueLight,
 };
 
-// Desktop toasts sit below the sticky top bar; mobile toasts anchor to the bottom.
-const DESKTOP_TOP_OFFSET = 104;
-const MOBILE_ANCHOR = { vertical: 'bottom', horizontal: 'center' };
+// Just under the app's top bar on every screen: centred on a phone, at the
+// right from a tablet up. Set per breakpoint so it wins over the Snackbar's own
+// `top: 24px` media query, which put it over the bar on a desktop.
+const TOP_BELOW_BAR = `calc(${APP_TOP_BAR_HEIGHT} + 10px + env(safe-area-inset-top, 0px))`;
+const MOBILE_ANCHOR = { vertical: 'top', horizontal: 'center' };
 const DESKTOP_ANCHOR = { vertical: 'top', horizontal: 'right' };
 
 export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
@@ -24,7 +27,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
   const color = SEVERITY_COLOR[toast?.severity] || SEVERITY_COLOR.info;
 
   // noSsr resolves the breakpoint from matchMedia on the first paint (same
-  // pattern as CurrencyCoinBox). Mobile anchors bottom-centre, desktop top-right.
+  // pattern as CurrencyCoinBox). Phone: top centre; tablet and desktop: top right.
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
 
   return (
@@ -41,7 +44,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
         onClose={(_, reason) => { if (reason !== 'clickaway') onClose?.(); }}
         disableWindowBlurListener
         anchorOrigin={isMobile ? MOBILE_ANCHOR : DESKTOP_ANCHOR}
-        sx={{ top: isMobile ? undefined : DESKTOP_TOP_OFFSET }}
+        sx={{ top: { xs: TOP_BELOW_BAR, sm: TOP_BELOW_BAR } }}
       >
         {toast ? (
           <Alert
