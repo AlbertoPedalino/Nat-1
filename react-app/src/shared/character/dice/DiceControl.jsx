@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Box, Button, ButtonGroup, IconButton, Popover, Tooltip,
 } from '@mui/material';
-import { ChevronLeft, Dices, ScrollText } from 'lucide-react';
+import { Dices, ScrollText } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
@@ -20,10 +20,9 @@ import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js
 // chrome — the map, which is often fullscreen: { groupSx, segmentSx,
 // dividerColor, paperSx, dialog } where `dialog` holds CustomRollDialog's
 // style props. `settings` (the GM's GmRollsShownSwitch) is shown where the
-// roll is made and on top of the log. `onHide` adds a last segment that tucks
-// a floating control away to the left edge (the sheet's dock, on a phone).
+// roll is made and on top of the log.
 export default function DiceControl({
-  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, placement = 'down', onHide = null, sx,
+  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, placement = 'down', sx,
 }) {
   const [anchor, setAnchor] = useState(null);
   const [rollerOpen, setRollerOpen] = useState(false);
@@ -57,11 +56,6 @@ export default function DiceControl({
           <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
             Log{count ? ` · ${count}` : ''}
           </Button>
-          {onHide ? (
-            <Button aria-label="Hide dice" onClick={onHide} sx={[hideSx, actionButtonToneSx(UI_COLORS.textSecondary)]}>
-              <ChevronLeft size={14} />
-            </Button>
-          ) : null}
         </ButtonGroup>
       )}
       <Popover
@@ -103,9 +97,6 @@ const iconSegmentSx = { borderRadius: 0, px: 0.9 };
 function dividerSx(color = 'divider') {
   return { borderLeft: '1px solid', borderLeftColor: color };
 }
-
-// The hide segment of a floating control: just wide enough for its chevron.
-const hideSx = { flex: 'none', minWidth: 0, px: 1 };
 
 // The half whose popover is open is lit.
 const openSx = { bgcolor: uiAlpha(UI_COLORS.gold, 0.16) };

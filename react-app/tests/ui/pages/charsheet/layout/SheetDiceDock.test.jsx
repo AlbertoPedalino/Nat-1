@@ -86,28 +86,21 @@ function asPhone() {
   }));
 }
 
-test('on a phone its chevron tucks it into a handle that brings it back, and the choice is kept', () => {
-  localStorage.clear();
+test('on a phone it is a compact pill of two icons, always out', () => {
   const matchMedia = asPhone();
   try {
-    const { unmount } = render(<SheetDiceDock rollLog={[]} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Hide dice' }));
-    expect(screen.queryByRole('group', { name: 'Dice' })).not.toBeInTheDocument();
-    unmount();
     render(<SheetDiceDock rollLog={[]} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Show dice' }));
-    expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Roll dice' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Roll log, 0 rolls' })).toBeInTheDocument();
+    expect(screen.queryByText('Roll')).not.toBeInTheDocument();
   } finally {
     matchMedia.mockRestore();
   }
 });
 
-test('from a tablet up it is always out, with nothing to tuck it away', () => {
-  localStorage.setItem('gb:sheet:dice-dock-hidden', '1');
+test('from a tablet up it keeps its labels', () => {
   render(<SheetDiceDock rollLog={[]} />);
-  expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Hide dice' })).not.toBeInTheDocument();
-  localStorage.clear();
+  expect(screen.getByRole('button', { name: 'Roll' })).toBeInTheDocument();
 });
 
 test('on its own page the end-of-scroll stretch is off while the sheet is open', () => {
