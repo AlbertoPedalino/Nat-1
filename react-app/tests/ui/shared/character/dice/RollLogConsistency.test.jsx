@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MemoryRouter } from 'react-router-dom';
 import DiceControl from '../../../../../src/shared/character/dice/DiceControl.jsx';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
-import TopBar from '../../../../../src/pages/charsheet/layout/TopBar.jsx';
+import SheetDiceDock from '../../../../../src/pages/charsheet/layout/SheetDiceDock.jsx';
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 const theme = createTheme({ palette: { mode: 'dark', text: { primary: '#eeeeee' } } });
@@ -15,16 +15,14 @@ const rolls = [
 ];
 
 // Every screen that rolls shows the same control and the same log: the
-// encounter builder's DiceControl, the map's corner pill and the sheet header.
+// encounter builder's DiceControl, the map's corner pill and the sheet's dock.
 function renderSurface(surface, log) {
   render(
     <ThemeProvider theme={theme}>
       <MemoryRouter>
         {surface === 'encounter' ? <DiceControl log={log} onRoll={vi.fn()} onClear={vi.fn()} /> : null}
         {surface === 'map' ? <RollsButton feed={log} onCustomRoll={vi.fn()} onClear={vi.fn()} /> : null}
-        {surface === 'player' ? (
-          <TopBar C={{ name: 'Wizard', className: 'Wizard', level: 1, extraClasses: [] }} sheet={{ xpStored: 0 }} embedded rollLog={log} />
-        ) : null}
+        {surface === 'player' ? <SheetDiceDock rollLog={log} /> : null}
       </MemoryRouter>
     </ThemeProvider>,
   );

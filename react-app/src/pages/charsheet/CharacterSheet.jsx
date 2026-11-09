@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
-import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout/layout.js';
+import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX, sheetColumnSx } from './layout/layout.js';
 import TopBar from './layout/TopBar.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
 import HPBlock from './resources/HPBlock.jsx';
@@ -14,6 +14,7 @@ import TabsPanel from './layout/TabsPanel.jsx';
 import RestDialogs from './resources/RestDialogs.jsx';
 import { useRests } from './resources/useRests.js';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
+import SheetDiceDock from './layout/SheetDiceDock.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
@@ -120,9 +121,8 @@ export default function CharacterSheet({
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
     <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', pb: embedded ? 1 : 4, width: '100%' }}>
-      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
-        rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
-      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? 0 : { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
+      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
+      <Box sx={{ ...sheetColumnSx(embedded), overflow: 'hidden' }}>
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
@@ -184,6 +184,7 @@ export default function CharacterSheet({
           </Stack>
         </Box>
       </Box>
+      <SheetDiceDock embedded={embedded} rollLog={rollLog} onClearLog={() => setRollLog([])} onShowToast={showDiceToast} />
       {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
 
       <RestDialogs C={C} sheet={sheet} rest={rest} />

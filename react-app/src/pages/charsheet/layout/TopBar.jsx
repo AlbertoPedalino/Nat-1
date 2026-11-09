@@ -3,7 +3,6 @@ import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
 import { ArrowLeft, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
-import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice/dice.js';
 import IconColorPicker from '../../../shared/ui/IconColorPicker.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/characterArt.js';
@@ -18,8 +17,9 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { sheetColumnSx } from './layout.js';
 
-export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
+export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
   const [colorAnchor, setColorAnchor] = useState(null);
   const [badgeAnchor, setBadgeAnchor] = useState(null);
@@ -106,7 +106,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           <Box sx={{ height: APP_TOP_BAR_HEIGHT }} />
         </>
       ) : null}
-      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? '0.45rem' : { xs: '0.6rem', md: '1.1rem' } }}>
+      <Box sx={sheetColumnSx(embedded, { embeddedPx: '0.45rem' })}>
       {/* On a desktop three columns — identity, XP, actions — with XP in the
           middle; below that a column (see the XP and actions row). */}
       <Box sx={{
@@ -218,18 +218,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
             )}
           </Box>
 
-          <SheetActions
-            readOnly={readOnly}
-            embedded={embedded}
-            rollLog={rollLog}
-            onShortRest={onShortRest}
-            onLongRest={onLongRest}
-            onRoll={(formula) => {
-              const { total, rolls } = rollFormulaDice(formula);
-              onShowToast?.(formatRollTitle('Custom Roll', formula), formula, total, rolls);
-            }}
-            onClearLog={onClearRollLog}
-          />
+          <SheetActions readOnly={readOnly} embedded={embedded} onShortRest={onShortRest} onLongRest={onLongRest} />
         </Box>
       </Box>
       </Box>

@@ -6,13 +6,14 @@ import { Dices, ScrollText } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { actionButtonTextSx } from '../../ui/actionButton.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
 // is one click away and the log never stands in front of it. The dice half
 // opens the custom roll picker (`onRoll(formula)`); the log half opens the
-// roll log (RollLogList) in a popover under the control.
+// roll log (RollLogList) in a popover under the control (`placement: 'up'`:
+// above it, for a control docked at the bottom).
 //
 // `variant`: 'text' (labelled buttons) or 'icon' (a pill of two icons, for a
 // corner of the map). `surface` restyles the pieces for a screen with its own
@@ -21,7 +22,7 @@ import { UI_FONTS } from '../../ui/fonts.js';
 // style props. `settings` (the GM's GmRollsShownSwitch) is shown where the
 // roll is made and on top of the log.
 export default function DiceControl({
-  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, sx,
+  log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, placement = 'down', sx,
 }) {
   const [anchor, setAnchor] = useState(null);
   const [rollerOpen, setRollerOpen] = useState(false);
@@ -49,10 +50,10 @@ export default function DiceControl({
         </Box>
       ) : (
         <ButtonGroup size="small" variant="outlined" aria-label="Dice" sx={sx}>
-          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[textSx, toneSx(UI_COLORS.goldLight)]}>
+          <Button startIcon={<Dices size={14} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, toneSx(UI_COLORS.goldLight)]}>
             Roll
           </Button>
-          <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[textSx, toneSx(UI_COLORS.success), anchor ? openSx : null]}>
+          <Button startIcon={<ScrollText size={14} />} {...logProps} sx={[actionButtonTextSx, toneSx(UI_COLORS.success), anchor ? openSx : null]}>
             Log{count ? ` · ${count}` : ''}
           </Button>
         </ButtonGroup>
@@ -61,9 +62,9 @@ export default function DiceControl({
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { 'aria-label': 'Roll log', sx: { ...paperSx, ...surface.paperSx } } }}
+        anchorOrigin={placement === 'up' ? { vertical: 'top', horizontal: 'center' } : { vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={placement === 'up' ? { vertical: 'bottom', horizontal: 'center' } : { vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { 'aria-label': 'Roll log', sx: { ...paperSx, ...(placement === 'up' ? { mt: 0, mb: 0.75 } : null), ...surface.paperSx } } }}
       >
         {settings ? <Box sx={settingsSx}>{settings}</Box> : null}
         <RollLogList log={log} onClear={onClear} emptyText={emptyText} />
@@ -78,15 +79,6 @@ export default function DiceControl({
     </>
   );
 }
-
-const textSx = {
-  flex: 1,
-  whiteSpace: 'nowrap',
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-};
 
 function toneSx(color) {
   return {
