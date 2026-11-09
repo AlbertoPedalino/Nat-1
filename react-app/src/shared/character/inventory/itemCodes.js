@@ -1,9 +1,11 @@
 import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
-import { capitalize, titleCase } from '../../ui/textCase.js';
+import { capitalize } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { ABILITY_ABBREVIATIONS, DAMAGE_TYPE_NAMES } from '../../content/rulesVocabulary.js';
 import { formatCopper } from './currency.js';
+import { rarityLabel } from './itemRarity.js';
+import { attunementRequirementText } from './itemAttunement.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -175,11 +177,6 @@ function masteryDisplayName(rawCode) {
   return WEAPON_MASTERY_DISPLAY[code] || capitalize(code);
 }
 
-function formatRarity(rarity) {
-  const r = String(rarity || '').trim().toLowerCase();
-  if (!r || r === 'none' || r === 'unknown' || r === 'varies') return '';
-  return titleCase(r);
-}
 
 const RECHARGE_LABELS = {
   dawn: 'at dawn', dusk: 'at dusk', midnight: 'at midnight',
@@ -219,14 +216,14 @@ registerItemPropertySegment('type', (item) => {
   return label ? [{ kind: 'type', label: 'Type', value: label }] : [];
 });
 registerItemPropertySegment('rarity', (item) => {
-  const value = formatRarity(item?.rarity);
+  const value = rarityLabel(item);
   return value ? [{ kind: 'rarity', label: 'Rarity', value }] : [];
 });
 registerItemPropertySegment('attunement', (item) => {
-  if (!item?.reqAttune) return [];
-  const detail = typeof item.reqAttune === 'string' ? item.reqAttune : '';
-  const status = item.attuned ? ' — attuned' : ' — not attuned';
-  const value = (detail ? `Required (${detail})` : 'Required') + status;
+  const required = attunementRequirementText(item);
+  if (!required) return [];
+  // The item card is a carried item's: whether it is attuned now goes with it.
+  const value = `${required} — ${item.attuned ? 'attuned' : 'not attuned'}`;
   return [{ kind: 'attunement', label: 'Attunement', value }];
 });
 registerItemPropertySegment('enhancement', (item) => {

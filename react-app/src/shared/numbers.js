@@ -26,3 +26,17 @@ export function clampInt(value, min, max, fallback = min) {
   const n = Math.round(Number(value));
   return Number.isFinite(n) ? clamp(n, min, max) : fallback;
 }
+
+// Whether `value` lies within a range typed by hand: `min` and `max` are the
+// fields' text ('' leaves that end open, a comma reads as a decimal point).
+export function withinTypedRange(value, min, max) {
+  const bound = (raw) => {
+    const text = String(raw ?? '').trim();
+    if (!text) return null;
+    const n = Number(text.replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  };
+  const low = bound(min);
+  const high = bound(max);
+  return (low == null || value >= low) && (high == null || value <= high);
+}

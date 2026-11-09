@@ -1,4 +1,5 @@
 import { stripSource } from '../../content/nameKeys.js';
+import { isMagicItem } from './itemRarity.js';
 // The filter-chip taxonomy for item lists: which shelf an item sits on, the
 // chip set itself, and the test a chip applies. Shared so the builder and the
 // sheet cannot disagree — they used to classify independently, and a ring with
@@ -18,8 +19,7 @@ export function itemGroupKey(item) {
   if (WEAPON_TYPES.has(type)) return 'weapon';
   if (ARMOR_TYPES.has(type)) return 'armor';
   if (MAGIC_TYPES.has(type)) return 'magic';
-  const rarity = String(item?.rarity || '').trim().toLowerCase();
-  if (rarity && rarity !== 'none') return 'magic';
+  if (isMagicItem(item)) return 'magic';
   return 'gear';
 }
 

@@ -8,9 +8,10 @@ import {
 } from '@mui/material';
 import { ExternalLink } from 'lucide-react';
 import { loadBookList } from './books.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
-import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
-import { useLoaded } from '../../shared/ui/useLoaded.js';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { rowChipSx } from '../compendiumStyles.js';
+import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
 
 const NO_BOOKS = [];
 
@@ -40,7 +41,7 @@ export default function BookLinks() {
           {books.map((book) => (
             <ListItemButton key={book.id} component="a" href={book.url} target="_blank" rel="noopener" sx={rowSx}>
               <Typography variant="body2" sx={{ fontWeight: 700, flex: 1 }}>{book.name}</Typography>
-              <Chip size="small" variant="outlined" label={book.id} sx={idChipSx} />
+              <Chip size="small" variant="outlined" label={book.id} sx={rowChipSx} />
               <ExternalLink size={14} />
             </ListItemButton>
           ))}
@@ -53,13 +54,10 @@ export default function BookLinks() {
 const scrollSx = { minHeight: 0, overflowY: 'auto', flex: 1 };
 
 const subheaderSx = {
+  ...captionLabelSx,
   bgcolor: 'background.paper',
   color: 'primary.main',
-  fontFamily: UI_FONTS.display,
-  letterSpacing: '0.06em',
   lineHeight: '36px',
 };
 
 const rowSx = { gap: 1, borderBottom: '1px solid', borderColor: 'divider' };
-
-const idChipSx = { height: 20, fontSize: '0.65rem', flexShrink: 0 };

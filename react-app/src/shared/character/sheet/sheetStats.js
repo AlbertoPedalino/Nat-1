@@ -41,7 +41,7 @@ export function effectiveD20Modifier(rawBonus, exhaustionLevel = 0) {
   return rawBonus - exhaustionD20Penalty(exhaustionLevel);
 }
 
-export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+export { SPELL_LEVEL_LABELS } from '../spells/spellTables.js';
 const XP_TABLE = XP_THRESHOLDS; // single source of truth: shared/character/xp.js
 
 export { XP_TABLE };

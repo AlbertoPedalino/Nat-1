@@ -4,7 +4,7 @@ import {
   buildCompendiumIndex,
   compendiumEntryText,
   searchCompendium,
-} from '../../../../src/pages/compendium/compendiumIndex.js';
+} from '../../../../../src/pages/compendium/search/compendiumIndex.js';
 
 const records = {
   spell: [
@@ -28,7 +28,7 @@ test('the index lists the supported records, with a line saying what each is', (
   assert.equal(byKey['spell:Fireball|XPHB'].subtitle, '3rd-level Evocation');
   assert.equal(byKey['spell:Fire Bolt|XPHB'].subtitle, 'Evocation cantrip');
   assert.equal(byKey['spell:Detect Magic|XPHB'].subtitle, '1st-level Divination (ritual, concentration)');
-  assert.equal(byKey['item:Bag of Holding|XDMG'].subtitle, 'Wondrous item, uncommon');
+  assert.equal(byKey['item:Bag of Holding|XDMG'].subtitle, 'Wondrous item, Uncommon');
   assert.equal(byKey['monster:Goblin Warrior|XMM'].subtitle, 'CR 1/4 · Fey');
   assert.equal(byKey['feat:Alert|XPHB'].subtitle, 'Origin feat');
   assert.ok(byKey['rule:Falling|XPHB']);

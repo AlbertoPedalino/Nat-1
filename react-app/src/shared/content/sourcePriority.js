@@ -79,3 +79,20 @@ export function compareBySourcePriority(a, b, priorityList) {
   const bEdition = isSupportedEdition(bRecord) ? 0 : 1;
   return aEdition - bEdition;
 }
+
+// The supported books by name, for a source filter or a credit line.
+export const SOURCE_LABELS = Object.freeze({
+  XPHB: "Player's Handbook (2024)",
+  XMM: 'Monster Manual (2024)',
+  XDMG: "Dungeon Master's Guide (2024)",
+  FRAiF: 'Forgotten Realms: Adventures in Faerun',
+  FRHoF: 'Forgotten Realms: Heroes of Faerun',
+  EFA: 'Eberron: Forge of the Artificer',
+  RHW: 'Ravenloft: The Horrors Within',
+  AU: 'Arcana Unleashed',
+  AUD: 'Arcana Unleashed: Deadfall',
+});
+
+export function sourceLabel(source) {
+  return SOURCE_LABELS[source] || source;
+}

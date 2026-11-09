@@ -32,15 +32,17 @@ and `logic/` trees.
 | `gmboard/` | `dungeon/`, `hexcrawl/`, and `quests/`: generation and result views; `tables/`: the table catalog (icons, editor columns), editing, and single-table rolls; `session/`: date and time, weather, and the session log; `ui/`: BoardPanel, the result card parts, and the guide; `state/`: context (one `editClock` for every hand edit of the campaign clock), reducer, defaults, migration, and persistence. Table rules (BOARD_TABLES, event kinds, loot), result text and visuals live in `shared/gmboard/` |
 | `dmscreen/` | `notes/`: note board, cards, and layout; `search/`: filtering and highlighting; `drag/`: drag/reorder behavior and styles; `state/`: context, reducer, and persistence |
 
-`compendium/` is one search over the supported 5etools records: `compendiumIndex.js`
-(pure index and ranking), `loadCompendium.js` (loads every kind once per tab through
-the existing loaders), `CompendiumBrowser.jsx` (search, kind filter, results, entry),
-`CompendiumDetail.jsx`, the catalogs (generic `Catalog.jsx` with a react-window list; filters in
-`spellCatalog.js`, `monsterCatalog.js`, `itemCatalog.js`; tabs in `SpellMonsterCatalogs.jsx` and
-`ItemCatalogs.jsx`), the Books tab (`books.js` + `BookLinks.jsx`: the supported books
-as links to their 5etools pages), the tabs (`CompendiumHome.jsx`), the `/compendium` page and the session side panel
-(`CompendiumPanel.jsx`, opened by `CompendiumButton.jsx` in the battle map's and DM
-Screen's top bars).
+`compendium/` is one search over the supported 5etools records, with catalogs and books. The
+root holds the tabs (`CompendiumHome.jsx`), the `/compendium` page, the session side panel
+(`CompendiumPanel.jsx`, opened by `CompendiumButton.jsx` in every top bar) and the styles its
+parts share (`compendiumStyles.js`). `search/`: `compendiumIndex.js` (pure index and ranking)
+and `CompendiumBrowser.jsx` (search, kind toggles, paged results, entry). `catalogs/`: one
+definition per catalog (`spellCatalog.js`, `monsterCatalog.js`, `itemCatalog.js`: what it
+lists, its filter fields — select, yes/no, typed min–max range — and sorts), run by
+`catalogFilter.js` and drawn by the generic `Catalog.jsx` (react-window list), with the columns
+and the tab list in `catalogColumns.jsx`. `detail/`: `CompendiumDetail.jsx`. `books/`:
+`books.js` + `BookLinks.jsx`. `data/`: `loadCompendium.js` (every kind once per tab through the
+existing loaders, `useCompendium`) and `itemPictures.js`.
 
 The smaller `campaigns/`, `campaignsheet/`, `home/`, `library/`, and `notfound/`
 pages retain their compact structure. Add subfolders when a distinct element

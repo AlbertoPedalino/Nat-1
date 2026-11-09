@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import {
-  Box, IconButton, Paper, Portal, Typography,
+  Box, IconButton, Paper, Portal,
 } from '@mui/material';
 import { BookOpen, X } from 'lucide-react';
-import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
+import PanelHeader from '../../shared/ui/PanelHeader.jsx';
 import { activePortalContainer } from '../../shared/ui/portalContainer.js';
 import CompendiumHome from './CompendiumHome.jsx';
-import { useCompendium } from './loadCompendium.js';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { useCompendium } from './data/loadCompendium.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -25,13 +25,11 @@ function OpenPanel({ onClose }) {
   return (
     <Portal container={activePortalContainer}>
       <Paper role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
-        <Box sx={headerSx}>
-          <BookOpen size={16} />
-          <Typography sx={titleSx}>Compendium</Typography>
+        <PanelHeader icon={BookOpen} title="Compendium">
           <IconButton size="small" aria-label="Close the compendium" onClick={onClose} sx={{ ml: 'auto' }}>
             <X size={16} />
           </IconButton>
-        </Box>
+        </PanelHeader>
         <Box sx={{ flex: 1, minHeight: 0 }}>
           <CompendiumHome compendium={compendium} layout="panel" autoFocus />
         </Box>
@@ -56,23 +54,4 @@ const panelSx = {
   border: '1px solid',
   borderColor: 'divider',
   boxShadow: 12,
-};
-
-const headerSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  px: 1.5,
-  py: 1,
-  color: 'primary.main',
-  borderBottom: '1px solid',
-  borderColor: 'divider',
-  flexShrink: 0,
-};
-
-const titleSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.8rem',
-  fontWeight: 700,
-  letterSpacing: '0.08em',
 };

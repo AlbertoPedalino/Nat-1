@@ -1,6 +1,7 @@
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { SRC_COLOR } from './spellSourceDisplay.js';
+import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
 
 // The small badges on a spell row: its preparation-status chip and its
 // casting-time badge (A / BA / RE).
@@ -27,9 +28,10 @@ export function getSpellStatusChips(entry) {
 }
 
 export function getCastBadge(spell) {
-  const unit = spell?.time?.[0]?.unit || '';
+  const unit = spellCastUnit(spell);
   if (unit === 'bonus') return { label: 'BA', color: ACTION_COLORS.bonus };
   if (unit === 'reaction') return { label: 'RE', color: ACTION_COLORS.reaction };
   if (unit === 'action' || unit === '') return { label: 'A', color: ACTION_COLORS.action };
-  return { label: unit, color: UI_COLORS.textParchment };
+  // A minute or more: the record's own unit ("minute", "hour").
+  return { label: spell.time[0].unit, color: UI_COLORS.textParchment };
 }

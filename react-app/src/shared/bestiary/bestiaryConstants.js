@@ -19,17 +19,6 @@ export const PROJECT_TO_RAW_SOURCE = Object.freeze({
 
 export const RAW_ALLOWED_SOURCES = Object.freeze(PROJECT_ALLOWED_SOURCES.map((source) => PROJECT_TO_RAW_SOURCE[source]));
 
-export const SOURCE_LABELS = Object.freeze({
-  XPHB: "Player's Handbook (2024)",
-  XMM: 'Monster Manual (2024)',
-  XDMG: "Dungeon Master's Guide (2024)",
-  FRAiF: 'Forgotten Realms: Adventures in Faerun',
-  FRHoF: 'Forgotten Realms: Heroes of Faerun',
-  EFA: 'Eberron: Forge of the Artificer',
-  RHW: 'Ravenloft: The Horrors Within',
-  AU: 'Arcana Unleashed',
-  AUD: 'Arcana Unleashed: Deadfall',
-});
 
 export const CR_XP = Object.freeze({
   0: 10,
@@ -70,5 +59,7 @@ export const CR_XP = Object.freeze({
 
 export const CR_ORDER = Object.freeze(['0', '1/8', '1/4', '1/2', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']);
 
-export const TYPE_OPTIONS = Object.freeze(CREATURE_TYPES.map((type) => type.toLowerCase()));
+// The filter options of a bestiary (the encounter builder's, the compendium's).
+export const CR_OPTIONS = Object.freeze(CR_ORDER.map((cr) => Object.freeze({ key: cr, label: `CR ${cr}` })));
+export const CREATURE_TYPE_OPTIONS = Object.freeze(CREATURE_TYPES.map((type) => Object.freeze({ key: type.toLowerCase(), label: type })));
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, MenuItem, Select, TextField } from '@mui/material';
+import { Box, Button, MenuItem, Select } from '@mui/material';
 import { ChevronDown, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
 import { RICH_TEXT_ACCENT } from '../../ui/entityColors.js';
 import {
@@ -11,6 +11,7 @@ import {
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
+import RangeInputs from '../../ui/RangeInputs.jsx';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -53,11 +54,6 @@ const controlSx = {
   '& .MuiSelect-select': { py: '5px' },
 };
 
-const numberFieldSx = {
-  width: 72,
-  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
-  '& input': { fontSize: '0.72rem', py: '6px' },
-};
 
 const gridSx = {
   display: 'grid',
@@ -73,7 +69,6 @@ const gridSx = {
   bgcolor: uiAlpha(UI_COLORS.ink, 0.65),
 };
 
-const unitSx = { fontSize: '0.6rem', color: 'text.secondary' };
 const placeholderSx = { color: 'text.secondary', opacity: 0.75 };
 const menuProps = { PaperProps: { sx: { maxHeight: 320 } } };
 const menuItemSx = { fontSize: '0.75rem' };
@@ -159,31 +154,18 @@ function MultiChoiceSelect({ value, options, onChange }) {
   );
 }
 
-function RangeInputs({ field, filters, onField }) {
+function RangeField({ field, filters, onField }) {
   const [minKey, maxKey] = rangeFilterKeys(field);
   return (
-    <>
-      <TextField
-        size="small"
-        type="number"
-        placeholder="min"
-        value={filters[minKey] ?? ''}
-        onChange={(event) => onField(minKey, event.target.value)}
-        slotProps={{ htmlInput: { min: 0, step: field.step, 'aria-label': `${field.label} minimum` } }}
-        sx={numberFieldSx}
-      />
-      <Box component="span" sx={unitSx}>–</Box>
-      <TextField
-        size="small"
-        type="number"
-        placeholder="max"
-        value={filters[maxKey] ?? ''}
-        onChange={(event) => onField(maxKey, event.target.value)}
-        slotProps={{ htmlInput: { min: 0, step: field.step, 'aria-label': `${field.label} maximum` } }}
-        sx={numberFieldSx}
-      />
-      <Box component="span" sx={unitSx}>{field.unit}</Box>
-    </>
+    <RangeInputs
+      label={field.label}
+      unit={field.unit}
+      step={field.step}
+      min={filters[minKey]}
+      max={filters[maxKey]}
+      onMin={(value) => onField(minKey, value)}
+      onMax={(value) => onField(maxKey, value)}
+    />
   );
 }
 
@@ -220,7 +202,7 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
             if (field.kind === 'range') {
               return (
                 <FilterRow key={field.key} label={field.label}>
-                  <RangeInputs field={field} filters={filters} onField={setField} />
+                  <RangeField field={field} filters={filters} onField={setField} />
                 </FilterRow>
               );
             }

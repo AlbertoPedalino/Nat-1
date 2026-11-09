@@ -5,6 +5,7 @@ import {
   itemPropertyLabels,
 } from './itemCodes.js';
 import { compareText } from '../../lists.js';
+import { withinTypedRange } from '../../numbers.js';
 
 // Single source of truth for the advanced item filters. The empty state, the
 // active-value count, the dropdown options, the match test and the panel rows
@@ -95,6 +96,10 @@ export const ITEM_FILTER_FIELDS = Object.freeze([
   },
 ].map(Object.freeze));
 
+// The min–max fields (weight, value), which the compendium's equipment
+// catalog filters by too.
+export const ITEM_RANGE_FIELDS = Object.freeze(ITEM_FILTER_FIELDS.filter((field) => field.kind === 'range'));
+
 // Fields backed by a dropdown, i.e. everything that contributes option lists.
 export const ITEM_FILTER_CHOICE_FIELDS = Object.freeze(
   ITEM_FILTER_FIELDS.filter((field) => field.kind !== 'range'),
@@ -178,20 +183,6 @@ export function buildItemFilterOptions(items) {
   return options;
 }
 
-function withinRange(value, min, max) {
-  const minRaw = String(min ?? '').trim();
-  const maxRaw = String(max ?? '').trim();
-  if (minRaw !== '') {
-    const minNum = Number(minRaw.replace(',', '.'));
-    if (Number.isFinite(minNum) && value < minNum) return false;
-  }
-  if (maxRaw !== '') {
-    const maxNum = Number(maxRaw.replace(',', '.'));
-    if (Number.isFinite(maxNum) && value > maxNum) return false;
-  }
-  return true;
-}
-
 // Fields combine as AND, and so do multiple values within one multiSelect:
 // "Thrown + Light" keeps only items carrying both, which is what stacking
 // filters is for.
@@ -200,7 +191,7 @@ export function itemMatchesFilters(item, filters) {
   return ITEM_FILTER_FIELDS.every((field) => {
     if (field.kind === 'range') {
       const [minKey, maxKey] = rangeFilterKeys(field);
-      return withinRange(field.valueOf(item), filters[minKey], filters[maxKey]);
+      return withinTypedRange(field.valueOf(item), filters[minKey], filters[maxKey]);
     }
     const wanted = field.kind === 'multiSelect'
       ? selectedValues(filters, field)

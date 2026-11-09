@@ -1,10 +1,10 @@
 import { render, screen, within } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
-import BookLinks from '../../../../src/pages/compendium/BookLinks.jsx';
+import BookLinks from '../../../../../src/pages/compendium/books/BookLinks.jsx';
 
 const mocks = vi.hoisted(() => ({ loadBookList: vi.fn() }));
 
-vi.mock('../../../../src/pages/compendium/books.js', () => ({ loadBookList: mocks.loadBookList }));
+vi.mock('../../../../../src/pages/compendium/books/books.js', () => ({ loadBookList: mocks.loadBookList }));
 
 beforeEach(() => {
   mocks.loadBookList.mockResolvedValue([

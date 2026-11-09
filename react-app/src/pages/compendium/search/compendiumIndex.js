@@ -4,15 +4,18 @@
 //
 // Pure: the loading lives in loadCompendium.js, so this can be tested in node.
 
-import { normalizeSearchText } from '../../shared/content/searchText.js';
-import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../shared/content/sourcePriority.js';
-import { decodeItemTypeLabel } from '../../shared/character/inventory/itemCodes.js';
-import { getType } from '../../shared/bestiary/monsterUtils.js';
-import { capitalize } from '../../shared/ui/textCase.js';
-import { ABILITY_NAMES } from '../../shared/content/rulesVocabulary.js';
-import { crKey } from '../../shared/bestiary/challengeRating.js';
-import { asArray, byName, compareText } from '../../shared/lists.js';
-import { stripMarkup } from '../../shared/content/markupText.js';
+import { normalizeSearchText } from '../../../shared/content/searchText.js';
+import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../../shared/content/sourcePriority.js';
+import { decodeItemTypeLabel } from '../../../shared/character/inventory/itemCodes.js';
+import { getType } from '../../../shared/bestiary/monsterUtils.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
+import { ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { crKey } from '../../../shared/bestiary/challengeRating.js';
+import { asArray, byName, compareText } from '../../../shared/lists.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
+import { attunementRequirementText } from '../../../shared/character/inventory/itemAttunement.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -55,24 +58,17 @@ const FEAT_CATEGORIES = Object.freeze({
   DG: 'Dark Gift',
 });
 
-function ordinal(level) {
-  const n = Number(level) || 0;
-  const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
-  return `${n}${suffix}`;
-}
-
 function spellSubtitle(spell) {
   const school = spell.schoolFull || spell.school || '';
-  const base = Number(spell.level) ? `${ordinal(spell.level)}-level ${school}` : `${school} cantrip`;
+  const base = Number(spell.level) ? `${SPELL_LEVEL_LABELS[Number(spell.level)]}-level ${school}` : `${school} cantrip`;
   const tags = [spell.ritual ? 'ritual' : '', spell.concentration ? 'concentration' : ''].filter(Boolean);
   return tags.length ? `${base} (${tags.join(', ')})` : base;
 }
 
 function itemSubtitle(item) {
-  const parts = [item.wondrous ? 'Wondrous item' : decodeItemTypeLabel(item)];
-  if (item.rarity && item.rarity !== 'none') parts.push(item.rarity);
-  const line = parts.join(', ');
-  return item.reqAttune ? `${line} (requires attunement)` : line;
+  const line = [item.wondrous ? 'Wondrous item' : decodeItemTypeLabel(item), rarityLabel(item)].filter(Boolean).join(', ');
+  const attunement = attunementRequirementText(item);
+  return attunement ? `${line} (${attunement.toLowerCase()})` : line;
 }
 
 function monsterSubtitle(monster) {
@@ -175,7 +171,7 @@ function nameRank(entry, query, terms) {
 // Name matches first (exact, prefix, word starts, anywhere), then — from three
 // letters on — matches in the description. With no query, the kind's list.
 // `kind` is a key of COMPENDIUM_KINDS or 'all'.
-export function searchCompendium(index, query, { kind = 'all', limit = 100, inText = true } = {}) {
+export function searchCompendium(index, query, { kind = 'all', limit = Infinity, inText = true } = {}) {
   const pool = (index || []).filter((entry) => kind === 'all' || entry.kind === kind);
   const normalized = normalizeSearchText(query);
   if (!normalized) return pool.slice(0, limit);

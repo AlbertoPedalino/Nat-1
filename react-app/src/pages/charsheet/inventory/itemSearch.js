@@ -5,6 +5,7 @@ import { itemGroupKey as itemType } from '../../../shared/character/inventory/it
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { byName, compareText } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
+import { rarityRank } from '../../../shared/character/inventory/itemRarity.js';
 
 // Searching the item database from the inventory's add panel: normalized
 // search text per item (name, type, rarity, properties), relevance order (name
@@ -50,11 +51,6 @@ function sourcePriority(source) {
   return sourceRank(source, INVENTORY_SOURCE_PRIORITY);
 }
 
-function rarityPriority(rarity) {
-  const order = ['none', 'common', 'uncommon', 'rare', 'very rare', 'legendary', 'artifact'];
-  const idx = order.indexOf(String(rarity || 'none').toLowerCase());
-  return idx === -1 ? 999 : idx;
-}
 
 export function compareItemsBySearch(query) {
   const q = normalizeSearch(query);
@@ -79,8 +75,8 @@ export function compareItemsBySearch(query) {
     const bp = b._sourcePriority ?? sourcePriority(b?.source);
     if (ap !== bp) return ap - bp;
 
-    const ar = a._rarityPriority ?? rarityPriority(a?.rarity);
-    const br = b._rarityPriority ?? rarityPriority(b?.rarity);
+    const ar = a._rarityPriority ?? rarityRank(a);
+    const br = b._rarityPriority ?? rarityRank(b);
     if (ar !== br) return ar - br;
 
     return byName(a, b);
@@ -94,7 +90,7 @@ function prepareSearchItem(item) {
     _searchName: normalizeSearch(itemDisplayName(item)),
     _searchText: itemSearchText(item),
     _sourcePriority: sourcePriority(item?.source),
-    _rarityPriority: rarityPriority(item?.rarity),
+    _rarityPriority: rarityRank(item),
   };
 }
 

@@ -1,17 +1,15 @@
 import { useCallback, useState } from 'react';
-import { Box, Chip, Link, Stack, Typography } from '@mui/material';
-import { ExternalLink } from 'lucide-react';
-import { EntryBlocks } from '../../shared/content/EntryBlocks.jsx';
-import { get5eToolsItemUrl, get5eToolsSpellUrl } from '../../shared/content/fiveEToolsLinks.js';
-import { HigherLevelBlock, SpellMetaGrid } from '../../shared/character/spells/SpellReference.jsx';
-import { decodeDamageType, itemPropertyLabels } from '../../shared/character/inventory/itemCodes.js';
-import DiceToast from '../../shared/character/dice/DiceToast.jsx';
-import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../shared/ui/entityColors.js';
-import { StatBlockHeader, StatBlockSheet } from '../../shared/bestiary/StatBlockSheet.jsx';
-import { rollDice } from '../../shared/character/dice/rollNotation.js';
-import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
-import { compendiumKind } from './compendiumIndex.js';
-import { formatCopper } from '../../shared/character/inventory/currency.js';
+import { Box, Chip, Stack, Typography } from '@mui/material';
+import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
+import { ItemNameIcon, SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
+import { HigherLevelBlock, SpellMetaGrid } from '../../../shared/character/spells/SpellReference.jsx';
+import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPropertyTable.jsx';
+import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
+import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
+import { rollDice } from '../../../shared/character/dice/rollNotation.js';
+import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
+import { compendiumKind } from '../search/compendiumIndex.js';
 
 // One compendium entry, shown the way the rest of the app shows that kind: a
 // spell as on the sheet, a monster as the encounter builder's stat block (its
@@ -36,17 +34,13 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
     );
   }
 
-  const url = kind === 'spell' ? get5eToolsSpellUrl(record) : kind === 'item' ? get5eToolsItemUrl(record) : null;
   return (
     <Stack spacing={1.25}>
       <Box>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" component="h2" sx={titleSx}>{entry.name}</Typography>
-          {url ? (
-            <Link href={url} target="_blank" rel="noopener" aria-label={`${entry.name} on 5e.tools`} sx={linkSx}>
-              <ExternalLink size={14} />
-            </Link>
-          ) : null}
+          {kind === 'spell' ? <SpellNameIcon spell={record} /> : null}
+          {kind === 'item' ? <ItemNameIcon item={record} /> : null}
         </Stack>
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
           <Chip size="small" variant="outlined" label={compendiumKind(kind)?.single || kind} sx={chipTintStyle(COMPENDIUM_KIND_COLORS[kind])} />
@@ -61,23 +55,13 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
         <Box component="img" src={entry.image} alt={entry.name} loading="lazy" sx={pictureSx} />
       ) : null}
       {kind === 'spell' ? <SpellMetaGrid spell={record} /> : null}
-      {kind === 'item' ? <ItemFacts item={record} /> : null}
+      {/* As the item card shows it, but for its attunement: whether it is
+          required is in the line above, and nobody here is attuned to it. */}
+      {kind === 'item' ? <ItemPropertyTable item={record} exclude={['type', 'rarity', 'attunement']} /> : null}
       <EntryBlocks entries={record.descriptionEntries || record.entries} />
       {kind === 'spell' ? <HigherLevelBlock entries={record.higherLevelEntries} /> : null}
     </Stack>
   );
-}
-
-function ItemFacts({ item }) {
-  const facts = [
-    item.dmg1 ? `${item.dmg1}${item.dmgType ? ` ${decodeDamageType(item.dmgType)}` : ''}` : '',
-    item.ac ? `AC ${item.ac}` : '',
-    ...itemPropertyLabels(item),
-    item.weight ? `${item.weight} lb.` : '',
-    formatCopper(item.value),
-  ].filter(Boolean);
-  if (!facts.length) return null;
-  return <Typography variant="body2" sx={{ color: 'text.secondary' }}>{facts.join(' · ')}</Typography>;
 }
 
 // An item's picture, large: it is what the entry is opened for as often as
@@ -92,12 +76,6 @@ const pictureSx = {
 
 const titleSx = {
   fontSize: '1.15rem',
-};
-
-const linkSx = {
-  display: 'inline-flex',
-  color: 'text.secondary',
-  '&:hover': { color: 'primary.main' },
 };
 
 const monsterHeaderSx = {

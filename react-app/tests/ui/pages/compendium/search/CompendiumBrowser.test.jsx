@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import CompendiumBrowser from '../../../../src/pages/compendium/CompendiumBrowser.jsx';
-import { buildCompendiumIndex } from '../../../../src/pages/compendium/compendiumIndex.js';
+import CompendiumBrowser from '../../../../../src/pages/compendium/search/CompendiumBrowser.jsx';
+import { buildCompendiumIndex } from '../../../../../src/pages/compendium/search/compendiumIndex.js';
 
 const index = buildCompendiumIndex({
   spell: [{

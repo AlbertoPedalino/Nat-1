@@ -1,17 +1,16 @@
-import { useEffect, useState } from 'react';
-import { loadActions, loadConditionRecords, loadSkills, loadVariantRules } from '../../shared/content/catalogs/rulesData.js';
-import { loadBackgrounds, loadFeats, loadSpecies } from '../../shared/content/catalogs/characterOptionData.js';
-import { loadClassIndex, loadOptionalFeatures } from '../../shared/content/catalogs/classData.js';
-import { loadItemGroups, loadItems } from '../../shared/content/catalogs/itemData.js';
-import { loadSpells } from '../../shared/content/catalogs/spellData.js';
-import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../shared/content/sourcePriority.js';
-import { loadMonsterDatabase } from '../../shared/bestiary/bestiary.js';
-import { GAME_IMAGE_BASE, loadGameData } from '../../shared/content/gameData.js';
-import { itemGroupLookup, itemImageMap, itemPicture } from './itemCatalog.js';
-import { spellClasses } from './spellCatalog.js';
-import { getMonsterTokenUrls } from '../../shared/bestiary/monsterUtils.js';
-import { buildCompendiumIndex } from './compendiumIndex.js';
-import { cachedLoader } from '../../shared/content/cachedLoader.js';
+import { loadActions, loadConditionRecords, loadSkills, loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
+import { loadBackgrounds, loadFeats, loadSpecies } from '../../../shared/content/catalogs/characterOptionData.js';
+import { loadClassIndex, loadOptionalFeatures } from '../../../shared/content/catalogs/classData.js';
+import { loadItemGroups, loadItems } from '../../../shared/content/catalogs/itemData.js';
+import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
+import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../../shared/content/sourcePriority.js';
+import { loadMonsterDatabase } from '../../../shared/bestiary/bestiary.js';
+import { GAME_IMAGE_BASE, loadGameData } from '../../../shared/content/gameData.js';
+import { itemGroupLookup, itemImageMap, itemPicture } from './itemPictures.js';
+import { spellClasses } from '../catalogs/spellCatalog.js';
+import { buildCompendiumIndex } from '../search/compendiumIndex.js';
+import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 
 // Every kind at once, each from the loader the rest of the app uses (and so
 // from the same per-file cache). A kind that fails to load is left out and
@@ -78,11 +77,10 @@ export const loadCompendium = cachedLoader(() => {
       }
     });
     const index = buildCompendiumIndex(records);
-    // Noted on the compendium's own entries: the class lists a spell is on, a
-    // creature's token when 5etools has one.
+    // Noted on the compendium's own entries: the class lists a spell is on (a
+    // creature's token is MonsterToken's to find).
     index.forEach((entry) => {
       if (entry.kind === 'spell') entry.classes = spellClasses(entry.record, classSpellIndex);
-      if (entry.kind === 'monster' && entry.record.hasToken) [entry.image] = getMonsterTokenUrls(entry.record);
     });
     // The index's entries are the compendium's own: a picture can be noted on
     // an item entry without touching the item record the sheet shares.
@@ -96,14 +94,11 @@ export const loadCompendium = cachedLoader(() => {
   });
 }, { failed: (result) => result.failed.length === Object.keys(LOADERS).length });
 
+const EMPTY = Object.freeze({ index: [], legendaryGroups: new Map(), failed: [] });
+
+// { status, index, legendaryGroups, failed }: a load that brought nothing at
+// all is an error.
 export function useCompendium() {
-  const [state, setState] = useState({ status: 'loading', index: [], legendaryGroups: new Map(), failed: [] });
-  useEffect(() => {
-    let cancelled = false;
-    loadCompendium().then((payload) => {
-      if (!cancelled) setState({ status: payload.index.length ? 'ready' : 'error', ...payload });
-    });
-    return () => { cancelled = true; };
-  }, []);
-  return state;
+  const { status, data } = useLoaded(loadCompendium, [], { initial: EMPTY });
+  return { ...data, status: status === 'ready' && !data.index.length ? 'error' : status };
 }

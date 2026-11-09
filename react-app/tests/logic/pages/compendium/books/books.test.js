@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, toBookList } from '../../../../src/pages/compendium/books.js';
+import { BOOK_IDS, toBookList } from '../../../../../src/pages/compendium/books/books.js';
 
 test('only the supported manuals and adventures are listed, oldest first, each with its 5etools page', () => {
   const list = toBookList(

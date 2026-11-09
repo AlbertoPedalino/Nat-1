@@ -14,6 +14,7 @@ import { collectFixedFeatSpells } from './featSpellMeta.js';
 import { resolveSpellMeta } from './spellPreparation.js';
 import { wizardRitualBookSpells } from './wizardSpellbook.js';
 import { compareText } from '../../../shared/lists.js';
+import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
 
 // The Spells tab's list: every spell the character has, from each source
 // (class, subclass, species, feats, items, scrolls, at-will grants), merged into
@@ -249,11 +250,8 @@ export const SPELL_ACTION_FILTERS = [
 ];
 
 export function getSpellActionFilter(entry) {
-  const unit = String(entry?.time?.[0]?.unit || '').toLowerCase();
-  if (unit === 'bonus') return 'bonus';
-  if (unit === 'reaction') return 'reaction';
-  if (unit === 'action') return 'action';
-  if (unit) return 'other';
+  const unit = spellCastUnit(entry);
+  if (unit) return unit;
 
   const castingTime = String(entry?.castingTimeLabel || entry?.castingTime || '').toLowerCase();
   if (/\breaction\b/.test(castingTime)) return 'reaction';

@@ -72,3 +72,10 @@ export function getSpellMetaSegments(spell) {
   ].filter((segment) => segment.value);
 }
 
+// What casting a spell takes, from its first casting time: 'action', 'bonus',
+// 'reaction', 'other' (a minute or more) or '' when the record says nothing.
+export function spellCastUnit(spell) {
+  const unit = String(spell?.time?.[0]?.unit || '').toLowerCase();
+  if (unit === 'action' || unit === 'bonus' || unit === 'reaction') return unit;
+  return unit ? 'other' : '';
+}

@@ -13,11 +13,10 @@ import {
   Typography,
 } from '@mui/material';
 import { Plus } from 'lucide-react';
-import { CR_ORDER, TYPE_OPTIONS } from './bestiaryConstants.js';
+import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
 import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
-import { capitalize } from '../ui/textCase.js';
 import { formatNumber } from '../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 import { crKey, crXP } from './challengeRating.js';
@@ -91,14 +90,14 @@ export default function MonsterBrowser({
           <InputLabel>CR</InputLabel>
           <Select label="CR" value={filters.cr} onChange={(event) => onFilterChange('cr', event.target.value)}>
             <MenuItem value="">All CR</MenuItem>
-            {CR_ORDER.map((cr) => <MenuItem key={cr} value={cr}>CR {cr}</MenuItem>)}
+            {CR_OPTIONS.map(({ key, label }) => <MenuItem key={key} value={key}>{label}</MenuItem>)}
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 170 }}>
           <InputLabel>Type</InputLabel>
           <Select label="Type" value={filters.type} onChange={(event) => onFilterChange('type', event.target.value)}>
             <MenuItem value="">All types</MenuItem>
-            {TYPE_OPTIONS.map((type) => <MenuItem key={type} value={type}>{capitalize(type)}</MenuItem>)}
+            {CREATURE_TYPE_OPTIONS.map(({ key, label }) => <MenuItem key={key} value={key}>{label}</MenuItem>)}
           </Select>
         </FormControl>
       </Stack>

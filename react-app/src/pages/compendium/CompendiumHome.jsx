@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
-import CompendiumBrowser from './CompendiumBrowser.jsx';
-import { EquipmentCatalog, MagicItemCatalog } from './ItemCatalogs.jsx';
-import { MonsterCatalog, SpellCatalog } from './SpellMonsterCatalogs.jsx';
-import BookLinks from './BookLinks.jsx';
+import CompendiumBrowser from './search/CompendiumBrowser.jsx';
+import Catalog from './catalogs/Catalog.jsx';
+import { CATALOG_TABS } from './catalogs/catalogColumns.jsx';
+import BookLinks from './books/BookLinks.jsx';
+import { fillColumnSx } from './compendiumStyles.js';
 
 const TABS = [
   { key: 'search', label: 'Search' },
-  { key: 'spells', label: 'Spells' },
-  { key: 'monsters', label: 'Monsters' },
-  { key: 'magic', label: 'Magic Items' },
-  { key: 'equipment', label: 'Equipment' },
+  ...CATALOG_TABS,
   { key: 'books', label: 'Books' },
 ];
 
@@ -24,16 +22,13 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
     setTab(value);
     setOpened((current) => (current.has(value) ? current : new Set([...current, value])));
   };
-  const panes = {
-    search: <CompendiumBrowser compendium={compendium} layout={layout} autoFocus={autoFocus} />,
-    spells: <SpellCatalog compendium={compendium} layout={layout} />,
-    monsters: <MonsterCatalog compendium={compendium} layout={layout} />,
-    magic: <MagicItemCatalog compendium={compendium} layout={layout} />,
-    equipment: <EquipmentCatalog compendium={compendium} layout={layout} />,
-    books: <BookLinks />,
+  const pane = (tabDef) => {
+    if (tabDef.key === 'search') return <CompendiumBrowser compendium={compendium} layout={layout} autoFocus={autoFocus} />;
+    if (tabDef.key === 'books') return <BookLinks />;
+    return <Catalog compendium={compendium} definition={tabDef.definition} columns={tabDef.columns} layout={layout} />;
   };
   return (
-    <Box sx={rootSx}>
+    <Box sx={fillColumnSx}>
       <Tabs
         value={tab}
         onChange={choose}
@@ -43,21 +38,14 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
       >
         {TABS.map(({ key, label }) => <Tab key={key} value={key} label={label} />)}
       </Tabs>
-      {TABS.map(({ key, label }) => (
-        <Box key={key} sx={[paneSx, tab !== key && hiddenSx]} role="tabpanel" aria-label={label}>
-          {opened.has(key) ? panes[key] : null}
+      {TABS.map((tabDef) => (
+        <Box key={tabDef.key} sx={[paneSx, tab !== tabDef.key && hiddenSx]} role="tabpanel" aria-label={tabDef.label}>
+          {opened.has(tabDef.key) ? pane(tabDef) : null}
         </Box>
       ))}
     </Box>
   );
 }
-
-const rootSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  height: '100%',
-};
 
 const tabsSx = {
   minHeight: 40,

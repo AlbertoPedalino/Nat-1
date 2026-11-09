@@ -10,13 +10,20 @@ import {
   Typography,
 } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
-import SearchField from '../../shared/ui/SearchField.jsx';
-import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../shared/ui/entityColors.js';
+import SearchField from '../../../shared/ui/SearchField.jsx';
+import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
+import { usePagedList } from '../../../shared/ui/usePagedList.js';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
+import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendiumIndex.js';
-import CompendiumDetail from './CompendiumDetail.jsx';
-import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
+import CompendiumDetail from '../detail/CompendiumDetail.jsx';
+import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
+import { entryNameSx, fillColumnSx, rowChipSx } from '../compendiumStyles.js';
 
-const RESULT_LIMIT = 120;
+// The kind filter: everything, or one kind.
+const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
+const PAGE_SIZE = 50;
 
 // Search, kind filter, results and the open entry. `layout`:
 // 'page' — results and entry side by side (one at a time on a phone);
@@ -29,9 +36,12 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
   // Typing stays immediate; the search over thousands of entries follows.
   const deferredQuery = useDeferredValue(query);
   const results = useMemo(
-    () => searchCompendium(compendium.index, deferredQuery, { kind, limit: RESULT_LIMIT }),
+    () => searchCompendium(compendium.index, deferredQuery, { kind }),
     [compendium.index, deferredQuery, kind],
   );
+  // Every match, a page at a time: a cut-off list looked like a search that
+  // had found only that much.
+  const page = usePagedList(results, { pageSize: PAGE_SIZE, resetKey: `${deferredQuery}|${kind}` });
   const selected = useMemo(
     () => compendium.index.find((entry) => entry.key === selectedKey) || null,
     [compendium.index, selectedKey],
@@ -49,25 +59,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
         ariaLabel="Search the compendium"
       />
       <Box role="group" aria-label="Kind" sx={kindRowSx}>
-        <Chip
-          size="small"
-          label="All"
-          variant={kind === 'all' ? 'filled' : 'outlined'}
-          color={kind === 'all' ? 'primary' : 'default'}
-          onClick={() => setKind('all')}
-          aria-pressed={kind === 'all'}
-        />
-        {COMPENDIUM_KINDS.map((option) => (
-          <Chip
-            key={option.key}
-            size="small"
-            label={option.label}
-            variant="outlined"
-            onClick={() => setKind(kind === option.key ? 'all' : option.key)}
-            aria-pressed={kind === option.key}
-            sx={kind === option.key ? chipTintStyle(COMPENDIUM_KIND_COLORS[option.key], { bgAlpha: 0.32 }) : null}
-          />
-        ))}
+        <FilterToggles options={KIND_OPTIONS} value={kind} onChange={(key) => setKind(kind === key ? 'all' : key)} />
       </Box>
     </Stack>
   );
@@ -91,7 +83,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
         ) : null}
         {results.length ? (
           <List dense disablePadding aria-label="Results">
-            {results.map((entry) => (
+            {page.visible.map((entry) => (
               <ListItemButton
                 key={entry.key}
                 selected={entry.key === selectedKey}
@@ -99,7 +91,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
                 sx={resultSx}
               >
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography variant="body2" sx={resultNameSx}>{entry.name}</Typography>
+                  <Typography variant="body2" sx={entryNameSx}>{entry.name}</Typography>
                   <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
                     {[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
                   </Typography>
@@ -108,19 +100,15 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
                   size="small"
                   variant="outlined"
                   label={compendiumKind(entry.kind)?.single || entry.kind}
-                  sx={[kindChipSx, chipTintStyle(COMPENDIUM_KIND_COLORS[entry.kind])]}
+                  sx={[rowChipSx, chipTintStyle(COMPENDIUM_KIND_COLORS[entry.kind])]}
                 />
               </ListItemButton>
             ))}
           </List>
         ) : (
-          <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>Nothing found.</Typography>
+          <Typography sx={statusSx}>Nothing found.</Typography>
         )}
-        {results.length === RESULT_LIMIT ? (
-          <Typography variant="caption" sx={[{ color: 'text.secondary' }, statusSx]}>
-            Showing the first {RESULT_LIMIT}: type more to narrow it down.
-          </Typography>
-        ) : null}
+        <ShowMoreButton page={page} />
       </>
     );
   }
@@ -138,18 +126,18 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
 
   if (panel) {
     return (
-      <Box sx={panelRootSx}>
+      <Box sx={fillColumnSx}>
         {showList ? search : null}
-        <Box sx={scrollSx}>{showList ? list : detail}</Box>
+        <Box {...(showList ? page.listProps : {})} sx={scrollSx}>{showList ? list : detail}</Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={pageRootSx}>
+    <Box sx={fillColumnSx}>
       {search}
       <Box sx={pageBodySx}>
-        <Box sx={[scrollSx, pageListSx, selected && { display: { xs: 'none', md: 'block' } }]}>{list}</Box>
+        <Box {...page.listProps} sx={[scrollSx, pageListSx, selected && { display: { xs: 'none', md: 'block' } }]}>{list}</Box>
         <Box sx={[scrollSx, pageDetailSx, !selected && { display: { xs: 'none', md: 'block' } }]}>
           {selected ? (
             <>
@@ -164,9 +152,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
               {detail}
             </>
           ) : (
-            <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>
-              Pick an entry to read it.
-            </Typography>
+            <Typography sx={statusSx}>Pick an entry to read it.</Typography>
           )}
         </Box>
       </Box>
@@ -181,37 +167,21 @@ const searchBarSx = {
   flexShrink: 0,
 };
 
-// Wrapped, not scrolled: in one scrolling row the chips shrank to their first
-// letter on a phone or in the panel.
+// Wrapped, not scrolled: in one scrolling row the toggles shrank to their
+// first letter on a phone or in the panel.
 const kindRowSx = {
   display: 'flex',
   flexWrap: 'wrap',
   gap: 0.75,
 };
 
-const statusSx = {
-  p: 2,
-  alignItems: 'center',
-};
+const statusSx = { ...emptyTextSx, p: 2 };
 
 const resultSx = {
   gap: 1,
   alignItems: 'center',
   borderBottom: '1px solid',
   borderColor: 'divider',
-};
-
-const resultNameSx = {
-  fontWeight: 700,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
-const kindChipSx = {
-  flexShrink: 0,
-  height: 20,
-  fontSize: '0.65rem',
 };
 
 const scrollSx = {
@@ -221,20 +191,6 @@ const scrollSx = {
 
 const detailSx = {
   p: 2,
-};
-
-const panelRootSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  height: '100%',
-};
-
-const pageRootSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  height: '100%',
 };
 
 const pageBodySx = {

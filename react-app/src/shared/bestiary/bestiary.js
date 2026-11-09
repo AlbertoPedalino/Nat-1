@@ -1,4 +1,5 @@
-import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from './bestiaryConstants.js';
+import { RAW_ALLOWED_SOURCES } from './bestiaryConstants.js';
+import { sourceLabel } from '../content/sourcePriority.js';
 import { loadGameData } from '../content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
 import { byName } from '../lists.js';
@@ -91,7 +92,7 @@ async function buildMonsterDatabase() {
     legendaryGroups,
     sourceOptions: availableSources.map((source) => ({
       source,
-      label: SOURCE_LABELS[source] || source,
+      label: sourceLabel(source),
     })),
   };
 }

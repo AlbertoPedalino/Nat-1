@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
-import { buildCompendiumIndex } from '../../../../src/pages/compendium/compendiumIndex.js';
-import { EquipmentCatalog, MagicItemCatalog } from '../../../../src/pages/compendium/ItemCatalogs.jsx';
+import { buildCompendiumIndex } from '../../../../../src/pages/compendium/search/compendiumIndex.js';
+import Catalog from '../../../../../src/pages/compendium/catalogs/Catalog.jsx';
+import { CATALOG_TABS } from '../../../../../src/pages/compendium/catalogs/catalogColumns.jsx';
+
+const tab = (key) => CATALOG_TABS.find((entry) => entry.key === key);
+const renderCatalog = (key) => render(<Catalog compendium={compendium} definition={tab(key).definition} columns={tab(key).columns} />);
 
 const index = buildCompendiumIndex({
   item: [
@@ -24,12 +28,12 @@ beforeEach(() => {
 });
 
 test('magic items list with rarity, type and attunement, and open their entry', () => {
-  render(<MagicItemCatalog compendium={compendium} />);
+  renderCatalog('magic');
   expect(screen.getByText('2 magic items')).toBeInTheDocument();
   const wand = screen.getByRole('button', { name: /Wand of Fireballs/ });
   expect(wand).toHaveTextContent('Rare');
   expect(wand).toHaveTextContent('Wand');
-  expect(wand).toHaveTextContent('Required by a spellcaster');
+  expect(wand).toHaveTextContent('Requires attunement by a spellcaster');
   expect(wand).toHaveTextContent('7 charges');
   expect(screen.queryByRole('button', { name: /Rope/ })).not.toBeInTheDocument();
   expect(wand.querySelector('img')).toBeNull();
@@ -44,12 +48,18 @@ test('magic items list with rarity, type and attunement, and open their entry', 
   expect(within(dialog).getByRole('img', { name: 'Bag of Holding' })).toBeInTheDocument();
 });
 
-test('equipment lists cost, weight and attributes', () => {
-  render(<EquipmentCatalog compendium={compendium} />);
+test('equipment lists value, weight and attributes, and filters by typed ranges', () => {
+  renderCatalog('equipment');
   expect(screen.getByText('2 items')).toBeInTheDocument();
   const sword = screen.getByRole('button', { name: /Longsword/ });
   expect(sword).toHaveTextContent('15 gp');
   expect(sword).toHaveTextContent('3 lb.');
-  expect(sword).toHaveTextContent('1d8 Slashing');
+  expect(sword).toHaveTextContent('1d8 slashing');
   expect(sword).toHaveTextContent('Weapons');
+
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Weight minimum' }), { target: { value: '4' } });
+  expect(screen.getByText('1 items')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Rope/ })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
+  expect(screen.getByText('2 items')).toBeInTheDocument();
 });

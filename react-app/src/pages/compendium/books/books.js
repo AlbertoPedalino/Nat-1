@@ -1,10 +1,10 @@
 // The supported manuals and adventures, each pointing at its 5etools page:
 // the books are read there, the compendium is for looking things up.
 
-import { loadGameData } from '../../shared/content/gameData.js';
-import { CORE_2024_SOURCE_PRIORITY } from '../../shared/content/sourcePriority.js';
-import { byName, compareText } from '../../shared/lists.js';
-import { get5eToolsBookUrl } from '../../shared/content/fiveEToolsLinks.js';
+import { loadGameData } from '../../../shared/content/gameData.js';
+import { CORE_2024_SOURCE_PRIORITY } from '../../../shared/content/sourcePriority.js';
+import { byName, compareText } from '../../../shared/lists.js';
+import { get5eToolsBookUrl } from '../../../shared/content/fiveEToolsLinks.js';
 
 // The player manuals, plus the 2024 Monster Manual.
 export const BOOK_IDS = Object.freeze([...new Set([...CORE_2024_SOURCE_PRIORITY, 'XMM'])]);
