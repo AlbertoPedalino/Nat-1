@@ -322,7 +322,6 @@ export const optionToggleSx = {
   textTransform: 'none',
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accent, 0.4),
-  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText },
 };
 
 // Muted text button for "dismiss / revert" actions on summon-style panels

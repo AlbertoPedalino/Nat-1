@@ -103,7 +103,6 @@ export const levelToggleSx = {
     fontSize: FONT_SIZES.xxs,
     color: 'text.secondary',
     borderColor: 'divider',
-    '&.Mui-selected': { color: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accent, 0.12), borderColor: UI_COLORS.accent },
   },
 };
 

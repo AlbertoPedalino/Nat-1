@@ -74,16 +74,6 @@ function AtmosphereOption({ type, selected, onSelect }) {
           bgcolor: vttAlpha(VTT_COLORS.accent, 0.12),
           color: VTT_COLORS.text,
         },
-        '&.Mui-selected': {
-          borderColor: VTT_COLORS.accent,
-          bgcolor: VTT_COLORS.accent,
-          color: VTT_COLORS.surface,
-        },
-        '&.Mui-selected:hover': {
-          borderColor: VTT_COLORS.accentHighlight,
-          bgcolor: VTT_COLORS.accentHighlight,
-          color: VTT_COLORS.surface,
-        },
       }}
     >
       <Icon size={15} strokeWidth={1.8} />

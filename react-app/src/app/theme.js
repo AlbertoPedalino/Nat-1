@@ -5,6 +5,18 @@ import { activePortalContainer } from '../shared/ui/portalContainer.js';
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS, uiAlpha } from '../shared/ui/colors.js';
+import { UI_SHADOWS } from '../shared/ui/shadows.js';
+
+const SELECTED_OPTION_SX = {
+  color: UI_COLORS.accentText,
+  backgroundColor: uiAlpha(UI_COLORS.accent, 0.16),
+  borderColor: uiAlpha(UI_COLORS.accent, 0.6),
+};
+const SELECTED_ROW_SX = {
+  color: UI_COLORS.textPrimary,
+  backgroundColor: uiAlpha(UI_COLORS.accent, 0.2),
+  boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
+};
 
 export const theme = createTheme({
   palette: {
@@ -135,9 +147,66 @@ export const theme = createTheme({
     MuiPopper: {
       defaultProps: { container: activePortalContainer },
     },
+    // Controls. Their look is set here, once: a page's sx only places and
+    // sizes them. `size="small"` is the dense default of the sheet and tools.
     MuiButton: {
       defaultProps: {
         disableElevation: true,
+      },
+      styleOverrides: {
+        sizeSmall: { fontSize: FONT_SIZES.xl },
+        sizeMedium: { fontSize: FONT_SIZES.xxl },
+        sizeLarge: { fontSize: FONT_SIZES.body },
+        outlined: { borderColor: uiAlpha(UI_COLORS.accent, 0.5) },
+      },
+    },
+    // A chosen option (toggle buttons, segmented choices): an accent wash
+    // with accent text and edge.
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': SELECTED_OPTION_SX,
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.24) },
+        },
+      },
+    },
+    // A chosen row (lists, menus): an accent wash with a bar on its left edge.
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': SELECTED_ROW_SX,
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.28) },
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': SELECTED_ROW_SX,
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.28) },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: { borderColor: uiAlpha(UI_COLORS.textPrimary, 0.23) },
+        root: {
+          '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
+            borderColor: UI_COLORS.textSecondary,
+          },
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: UI_COLORS.surfaceRaised,
+          color: UI_COLORS.textPrimary,
+          border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.25)}`,
+          boxShadow: UI_SHADOWS.float,
+          fontSize: FONT_SIZES.sm,
+        },
+        arrow: { color: UI_COLORS.surfaceRaised },
       },
     },
     MuiTabs: {

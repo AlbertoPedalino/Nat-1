@@ -285,7 +285,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accent, 0.14), color: UI_COLORS.accentText, borderColor: UI_COLORS.accent } } }}
+        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: '8px', py: '3px', border: 1, borderRadius: '999px !important' }, '& .MuiToggleButton-root:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' } }}
       >
         {options.map((opt) => (
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>

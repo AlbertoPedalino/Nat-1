@@ -131,8 +131,8 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
 const compactSwitchSx = {
   bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
-  '& .MuiToggleButton-root': { color: VTT_COLORS.textSecondary, border: 0, px: 1, py: 0.4 },
-  '& .Mui-selected': { color: VTT_COLORS.surface, bgcolor: VTT_COLORS.accent },
+  '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
+  '& .MuiToggleButton-root': { border: 0, px: 1, py: 0.4 },
 };
 
 function HiddenFileInput({ inputRef, onPick }) {

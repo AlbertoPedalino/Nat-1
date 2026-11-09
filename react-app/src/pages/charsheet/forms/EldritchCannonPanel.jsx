@@ -276,8 +276,6 @@ const toggleSx = {
   textTransform: 'none',
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accent, 0.4),
-  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText },
-  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.24) },
 };
 
 // AC shield beside the Defenses box, as in the character's header.

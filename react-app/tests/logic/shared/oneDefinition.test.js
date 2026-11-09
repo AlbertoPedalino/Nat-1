@@ -260,6 +260,12 @@ test('text treatments come from TEXT_STYLES', () => {
     'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx', 'pages/home/HomePage.jsx', 'pages/library/styles.js'] }), []);
 });
 
+// The look of a chosen option or row is the theme's (MuiToggleButton,
+// MuiListItemButton, MuiMenuItem), so every selection reads the same.
+test('selected states are styled only in the theme', () => {
+  assert.deepEqual(sourceLinesMatching(/['"]&\s*\.Mui-selected/, { allow: ['app/theme.js'] }), []);
+});
+
 // Corners are multiples of theme.shape.borderRadius (numbers in sx, or
 // cornerRadius for per-corner shapes), so a restyle changes them with the theme.
 // Pills (999px) and circles (50%) are shapes, not a radius.

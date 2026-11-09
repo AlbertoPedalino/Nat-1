@@ -116,15 +116,8 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
             px: '8px',
             py: '3px',
             border: 1,
-            borderColor: 'divider',
             borderRadius: '999px !important',
-            color: 'text.secondary',
-            bgcolor: 'transparent',
-            '&.Mui-selected': {
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.14),
-              color: 'primary.light',
-              borderColor: 'primary.main',
-            },
+            '&:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' },
           },
         }}
       >

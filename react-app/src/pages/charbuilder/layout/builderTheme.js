@@ -60,12 +60,6 @@ export const builderRootSx = {
 // Builder-scoped component defaults use theme overrides instead of descendant
 // selectors in `builderRootSx`. This keeps component `sx` authoritative for
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
-const BUILDER_SELECTED_SX = {
-  color: UI_COLORS.textPrimary,
-  backgroundColor: uiAlpha(UI_COLORS.accent, 0.20),
-  boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
-};
-const BUILDER_SELECTED_HOVER_BG = uiAlpha(UI_COLORS.accent, 0.28);
 export const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
@@ -95,11 +89,7 @@ export const builderTheme = createTheme(theme, {
         root: {
           padding: '4.4px 7.2px',
           backgroundColor: UI_COLORS.surfaceHeader,
-          '&.Mui-selected': BUILDER_SELECTED_SX,
-          '&.Mui-selected:hover': {
-            backgroundColor: BUILDER_SELECTED_HOVER_BG,
-          },
-          '&:hover': {
+          '&:hover:not(.Mui-selected)': {
             backgroundColor: UI_COLORS.surfaceRaised,
           },
         },
@@ -109,20 +99,6 @@ export const builderTheme = createTheme(theme, {
       styleOverrides: {
         root: {
           color: UI_COLORS.textSecondary,
-          '&.Mui-selected': BUILDER_SELECTED_SX,
-          '&.Mui-selected:hover': {
-            backgroundColor: BUILDER_SELECTED_HOVER_BG,
-          },
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          '&.Mui-selected': BUILDER_SELECTED_SX,
-          '&.Mui-selected:hover': {
-            backgroundColor: BUILDER_SELECTED_HOVER_BG,
-          },
         },
       },
     },
