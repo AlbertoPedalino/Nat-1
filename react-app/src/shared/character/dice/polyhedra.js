@@ -2,7 +2,7 @@
 //
 // A d20 drawn as a cube reads as "a number in a box"; a real icosahedron
 // tumbling across the map reads as a die. So each die type is built as its own
-// solid — tetrahedron, cube, octahedron, pentagonal bipyramid, dodecahedron,
+// solid — tetrahedron, cube, octahedron, pentagonal trapezohedron, dodecahedron,
 // icosahedron — and every face is handed to CSS as a `matrix3d` that places it
 // in space plus a `clip-path` that cuts it to the right polygon.
 //
@@ -78,15 +78,28 @@ const CUBE_VERTICES = signs([1, 1, 1]);
 const OCTA_VERTICES = dedupe(signs([1, 0, 0]).concat(signs([0, 1, 0]), signs([0, 0, 1])));
 const TETRA_VERTICES = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]];
 
-// A d10 is really a pentagonal trapezohedron, but a pentagonal bipyramid has
-// the same ten faces, the same silhouette in motion, and a tenth of the maths.
-function bipyramid(sides = 5, height = 1.15) {
-  const vertices = [];
+// A d10 is a pentagonal trapezohedron: two poles, and two rings of five corners
+// between them, each ring turned half a step from the other, so every face is a
+// kite. A bipyramid has ten faces too, but they are triangles, and at rest it
+// read as a d8 or a d20.
+//
+// The rings' height is not free. A kite runs from one pole down through two
+// corners of the near ring to one corner of the far ring, and those four points
+// are only flat when the ring sits at exactly this fraction of the pole's
+// height — any other and the hull breaks every kite into two triangles.
+//
+// The poles are listed first: the landing face turns its first corner up, and
+// a d10's number reads with the pole above it.
+function trapezohedron(sides = 5, height = 1.2) {
+  const half = Math.PI / sides;
+  const ring = (height * (1 - Math.cos(half))) / (1 + Math.cos(half));
+  const vertices = [[0, 0, height], [0, 0, -height]];
   for (let i = 0; i < sides; i += 1) {
-    const angle = (2 * Math.PI * i) / sides;
-    vertices.push([Math.cos(angle), Math.sin(angle), 0]);
+    const upper = 2 * half * i;
+    const lower = upper + half;
+    vertices.push([Math.cos(upper), Math.sin(upper), ring]);
+    vertices.push([Math.cos(lower), Math.sin(lower), -ring]);
   }
-  vertices.push([0, 0, height], [0, 0, -height]);
   return vertices;
 }
 
@@ -117,7 +130,7 @@ const SOLIDS = {
   4: TETRA_VERTICES,
   6: CUBE_VERTICES,
   8: OCTA_VERTICES,
-  10: bipyramid(5),
+  10: trapezohedron(5),
   12: DODECA_VERTICES,
   20: ICOSA_VERTICES,
   100: sphereVertices(52),
@@ -231,18 +244,21 @@ function hullFaces(vertices) {
   return [...found.values()];
 }
 
-function buildFace({ points, normal }, upright = false) {
+function buildFace({ points, normal }) {
   const centre = centroidOf(points);
   // The plane's own normal, not the direction of the centroid: on a die whose
-  // faces are isosceles rather than regular — the d10 — those are not the same
+  // faces are kites rather than regular — the d10 — those are not the same
   // line, and using the centroid would tilt every face slightly out of true.
   const outward = normal;
 
   // Where the face's own X axis points decides how the polygon sits inside it,
-  // and with it which way up the number reads. The face that lands is turned so
-  // a corner points up and the number stays upright; the rest are scenery.
-  const corner = normalize(sub(points[0], centre));
-  const u = upright ? normalize(cross(corner.map((c) => -c), outward)) : corner;
+  // and with it which way up the number reads. Every face is turned the same
+  // way — the top of its number towards its farthest corner — as a real die is
+  // printed. Leaving the faces that did not land pointing at any old corner put
+  // the d10's numbers on their sides across its kites; on a kite the farthest
+  // corner is the pole, which is where a d10's numbers point.
+  const corner = normalize(sub(farthestFrom(centre, points), centre));
+  const u = normalize(cross(corner.map((c) => -c), outward));
   const v = cross(outward, u);
 
   const flat = points
@@ -253,6 +269,21 @@ function buildFace({ points, normal }, upright = false) {
     .sort((a, b) => Math.atan2(a.y, a.x) - Math.atan2(b.y, b.x));
 
   return { normal: outward, u, v, centre, flat, room: incircle(flat) };
+}
+
+// The corner a face's number points at. On a regular face every corner is as
+// far as any other and the first one wins, so the choice is still fixed.
+function farthestFrom(centre, points) {
+  let best = points[0];
+  let reach = length(sub(best, centre));
+  for (const point of points) {
+    const distance = length(sub(point, centre));
+    if (distance > reach + EPS) {
+      best = point;
+      reach = distance;
+    }
+  }
+  return best;
 }
 
 // How much room a face has for a number: the largest circle that fits inside
@@ -284,7 +315,7 @@ function alignedFaces(vertices) {
     if (face.normal[2] > raw[landing].normal[2]) landing = index;
   });
 
-  const built = raw.map((face, index) => buildFace(face, index === landing));
+  const built = raw.map(buildFace);
   const anchor = built[landing];
   // The rotation that takes the landing face's own axes onto the screen's: read
   // every vector back in that basis and it is applied to the whole solid at

@@ -29,9 +29,6 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
           strokeLinejoin="round"
         />
       )}
-      {sides >= 8 ? (
-        <path d="M20 3 L20 37 M4 20 L36 20" fill="none" stroke="currentColor" strokeWidth="0.65" opacity="0.28" />
-      ) : null}
       <text
         x="20"
         y="20.5"
@@ -48,12 +45,17 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
   );
 }
 
+// One outline per die, each told apart by its silhouette alone: a d10 is the
+// kite its faces are, with the long point up as on the 3D die, so it no longer
+// reads as a d12; the d12 is its pentagon and the d20 the hexagon an
+// icosahedron shows when it lies flat, where the two used to be near-identical
+// heptagons.
 function pointsForDie(faces) {
   if (faces <= 4) return '20,3 37,35 3,35';
-  if (faces <= 6) return '4,4 36,4 36,36 4,36';
+  if (faces <= 6) return '5,5 35,5 35,35 5,35';
   if (faces <= 8) return '20,2 38,20 20,38 2,20';
-  if (faces <= 10) return '20,2 36,13 31,36 9,36 4,13';
-  if (faces <= 12) return '20,2 34,8 38,23 29,37 11,37 2,23 6,8';
-  if (faces <= 20) return '20,2 34,8 38,24 28,38 12,38 2,24 6,8';
+  if (faces <= 10) return '20,2 36,25 20,38 4,25';
+  if (faces <= 12) return '20,3 37,15 31,36 9,36 3,15';
+  if (faces <= 20) return '20,2 36,11 36,29 20,38 4,29 4,11';
   return '20,2 31,6 38,15 38,26 31,35 20,38 9,35 2,26 2,15 9,6';
 }

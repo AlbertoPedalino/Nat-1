@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dieGeometry, dieShapeFor } from '../../../../../src/shared/character/dice/polyhedra.js';
 
-const EXPECTED_SIDES = { 4: 3, 6: 4, 8: 3, 10: 3, 12: 5, 20: 3 };
+const EXPECTED_SIDES = { 4: 3, 6: 4, 8: 3, 10: 4, 12: 5, 20: 3 };
 
 test('every die is the solid it should be', () => {
   for (const sides of [4, 6, 8, 10, 12, 20]) {
@@ -55,10 +55,10 @@ test('the face that lands looks straight out of the screen', () => {
     assert.deepEqual(matrix.slice(0, 3), [1, 0, 0]);
     assert.deepEqual(matrix.slice(4, 7), [0, 1, 0]);
     assert.deepEqual(matrix.slice(8, 11), [0, 0, 1]);
-    // Centred over the die — except on the d10, whose faces are isosceles, so
+    // Centred over the die — except on the d10, whose faces are kites, so
     // their centres sit a little off the axis by construction.
     const offset = Math.hypot(matrix[12], matrix[13]);
-    assert.ok(offset < (sides === 10 ? 1 : 1e-9), `d${sides} lands ${offset} off centre`);
+    assert.ok(offset < (sides === 10 ? 16 * 0.15 : 1e-9), `d${sides} lands ${offset} off centre`);
   }
 });
 
@@ -69,6 +69,34 @@ test('a corner of the landing face points up', () => {
     .split(' ')
     .map(parseFloat);
   assert.ok(y < 40, `the first corner sits at ${y}% down, not near the top`);
+});
+
+// A d10 face is a kite, read with its long point — the pole — above the number.
+// A bipyramid's triangles made it look like a d8 or a d20 at rest.
+test('a d10 lands on a kite with its pole at the top', () => {
+  const geometry = dieGeometry(10);
+  const corners = geometry.faces[geometry.landing]
+    .clipPath.slice('polygon('.length, -1)
+    .split(', ')
+    .map((corner) => corner.split(' ').map(parseFloat));
+  assert.equal(corners.length, 4);
+  const [poleX, poleY] = corners[0];
+  assert.ok(Math.abs(poleX - 50) < 1e-6, 'the pole sits on the axis of the kite');
+  assert.ok(corners.every(([, y]) => y >= poleY), 'the pole is the highest corner');
+});
+
+// Every face is printed the same way up, not only the one that lands: the map
+// can leave a die resting on any face, and the numbers seen on the others while
+// it tumbles should not lie on their sides.
+test('every d10 number points at its pole', () => {
+  for (const face of dieGeometry(10).faces) {
+    const corners = face.clipPath.slice('polygon('.length, -1)
+      .split(', ')
+      .map((corner) => corner.split(' ').map(parseFloat));
+    const [poleX, poleY] = corners[0];
+    assert.ok(Math.abs(poleX - 50) < 1e-3, `pole off axis at ${poleX}%`);
+    assert.ok(corners.every(([, y]) => y >= poleY), 'the pole is the highest corner');
+  }
 });
 
 test('a die grows with its radius and nothing else', () => {
