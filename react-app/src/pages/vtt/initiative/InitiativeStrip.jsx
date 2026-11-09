@@ -7,6 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -210,7 +211,7 @@ const stripSx = {
   py: 0.375,
   minWidth: 0,
   maxWidth: '100%',
-  boxShadow: `0 6px 18px ${vttAlpha(VTT_COLORS.black, 0.5)}`,
+  boxShadow: UI_SHADOWS.float,
 };
 
 // Its own line box, centred on the faces beside it: a serif's default line

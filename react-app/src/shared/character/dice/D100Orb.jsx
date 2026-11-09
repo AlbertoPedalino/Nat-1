@@ -100,7 +100,7 @@ const resultSx = {
   display: 'grid',
   placeItems: 'center',
   border: '1px solid rgba(237, 212, 138, 0.74)',
-  borderRadius: '999px',
+  borderRadius: 999,
   bgcolor: 'rgba(9, 8, 7, 0.82)',
   boxShadow: '0 2px 9px rgba(0,0,0,0.52)',
   fontFamily: UI_FONTS.display,

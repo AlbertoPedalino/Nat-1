@@ -118,7 +118,7 @@ function SelectedChips({ values }) {
             px: '5px',
             border: 1,
             borderColor: uiAlpha(UI_COLORS.gold, 0.45),
-            borderRadius: '3px',
+            borderRadius: 0.375,
             bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
             color: UI_COLORS.goldLight,
             fontSize: FONT_SIZES.xs,

@@ -5,6 +5,7 @@ import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -120,7 +121,7 @@ const bubbleSx = {
   bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
   border: '2px solid',
   borderColor: 'divider',
-  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}`,
+  boxShadow: UI_SHADOWS.popup,
   // Grows out of the tail, which sits on the token — so the roll looks spoken by
   // the piece rather than dropped onto the map from somewhere off screen.
   transformOrigin: 'bottom center',
@@ -155,12 +156,12 @@ const closeSx = {
 
 const critSx = {
   borderColor: VTT_COLORS.goldRoll,
-  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}, 0 0 18px ${vttAlpha(VTT_COLORS.goldRoll, 0.28)}`,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.goldRoll, 0.28)}`,
 };
 
 const failSx = {
   borderColor: VTT_COLORS.error,
-  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}, 0 0 18px ${vttAlpha(VTT_COLORS.error, 0.28)}`,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.error, 0.28)}`,
 };
 
 const actorSx = {

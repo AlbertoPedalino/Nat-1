@@ -12,7 +12,7 @@ export function stepButtonSx(size = 20, { danger = false } = {}) {
     p: 0,
     border: 1,
     borderColor: 'divider',
-    borderRadius: '3px',
+    borderRadius: 0.375,
     color: 'text.secondary',
     '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.gold, color: danger ? UI_COLORS.danger : UI_COLORS.gold },
     '&.Mui-disabled': { opacity: 0.4 },

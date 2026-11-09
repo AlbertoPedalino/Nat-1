@@ -5,6 +5,7 @@ import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -97,7 +98,7 @@ const bubbleSx = {
   bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
   border: '2px solid',
   borderColor: 'divider',
-  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}`,
+  boxShadow: UI_SHADOWS.popup,
   // Grows out of the tail, which sits on the hex, so the answer looks spoken by
   // the ground the party is standing on.
   transformOrigin: 'bottom center',

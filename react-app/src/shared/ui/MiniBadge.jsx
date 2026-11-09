@@ -17,7 +17,7 @@ export default function MiniBadge({ label, color, bg = 'transparent', title, sx 
         borderColor: color,
         color,
         bgcolor: bg,
-        borderRadius: '3px',
+        borderRadius: 0.375,
         px: '6px',
         py: '1px',
         fontFamily: UI_FONTS.display,

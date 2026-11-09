@@ -159,7 +159,7 @@ function getCardSx(color) {
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: (theme) => alpha(paletteValue(theme, color), 0.3),
-    borderRadius: '12px',
+    borderRadius: 1.5,
     bgcolor: UI_COLORS.surfaceHome,
     backgroundImage: 'none',
     transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',

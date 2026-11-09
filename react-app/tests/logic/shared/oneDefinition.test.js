@@ -239,6 +239,20 @@ test('font sizes come from FONT_SIZES', () => {
   }).filter((hit) => !hit.startsWith('data/')), []);
 });
 
+// Corners are multiples of theme.shape.borderRadius (numbers in sx, or
+// cornerRadius for per-corner shapes), so a restyle changes them with the theme.
+// Pills (999px) and circles (50%) are shapes, not a radius.
+test('border radii follow the theme radius', () => {
+  assert.deepEqual(sourceLinesMatching(/borderRadius:\s*['"`](?![^'"`]*999px)[^'"`]*\d+px/)
+    .filter((hit) => !hit.startsWith('data/')), []);
+});
+
+// Drop shadows under floating surfaces come from UI_SHADOWS (shared/ui/shadows.js).
+test('surface shadows come from UI_SHADOWS', () => {
+  assert.deepEqual(sourceLinesMatching(/0 (?:[4-9]|1\d)px \d{2}px/, { allow: ['shared/ui/shadows.js'] })
+    .filter((hit) => !hit.startsWith('data/')), []);
+});
+
 test('panel title bars are PanelHeader (or SheetDialog, built on its bar)', () => {
   assert.deepEqual(sourceFilesMatching(/headerBg[^\n]*borderLeft: 3|borderLeft: 3[^\n]*headerBg/, {
     allow: ['shared/ui/PanelHeader.jsx'],

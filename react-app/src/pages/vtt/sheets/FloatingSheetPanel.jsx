@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { cornerRadius } from '../../../shared/ui/radius.js';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -16,6 +17,7 @@ import {
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { clamp } from '../../../shared/numbers.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -315,7 +317,7 @@ const panelSx = {
   bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.96),
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.68)}`,
+  boxShadow: UI_SHADOWS.overlay,
   overflow: 'hidden',
   cursor: 'default',
   contain: 'layout paint',
@@ -385,7 +387,7 @@ const resizeHandleSx = {
   zIndex: 2,
   width: 28,
   height: 28,
-  borderRadius: '8px 0 8px 0',
+  borderRadius: cornerRadius(1, 0, 1, 0),
   color: VTT_COLORS.panelTextSoft,
   bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.78),
   cursor: 'nwse-resize',

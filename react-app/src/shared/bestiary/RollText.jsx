@@ -40,7 +40,7 @@ const rollableSx = {
   border: `1px solid ${uiAlpha(UI_COLORS.teal, 0.45)}`,
   bgcolor: uiAlpha(UI_COLORS.teal, 0.12),
   color: UI_COLORS.tealLight,
-  borderRadius: '4px',
+  borderRadius: 0.5,
   px: '0.25rem',
   py: 0,
   mx: '0.1rem',

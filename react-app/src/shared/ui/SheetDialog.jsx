@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from './colors.js';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
+import { UI_SHADOWS } from './shadows.js';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -19,7 +20,7 @@ const paperSx = {
   borderColor: 'divider',
   borderRadius: 2,
   backgroundImage: 'none',
-  boxShadow: `0 18px 52px ${uiAlpha(UI_COLORS.black, 0.62)}`,
+  boxShadow: UI_SHADOWS.overlay,
 };
 
 const titleSx = {

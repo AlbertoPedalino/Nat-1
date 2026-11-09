@@ -4,6 +4,7 @@ import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
+import { UI_SHADOWS } from './shadows.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -62,7 +63,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               border: '1px solid',
               borderColor: color,
               borderRadius: 1,
-              boxShadow: `0 6px 24px ${uiAlpha(UI_COLORS.black, 0.45)}`,
+              boxShadow: UI_SHADOWS.float,
               '& .MuiAlert-icon': { color },
               '& .MuiAlert-action': { color: UI_COLORS.textSecondary },
             }}

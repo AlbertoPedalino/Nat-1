@@ -68,7 +68,7 @@ export const rowSx = {
   gap: '0.5rem',
   p: '0.6rem 0.75rem',
   border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
-  borderRadius: '10px',
+  borderRadius: 1.25,
   bgcolor: UI_COLORS.surfaceHome,
   '&:hover': { borderColor: UI_COLORS.goldDeep },
 };
@@ -123,7 +123,7 @@ export const iconBtnSx = {
   alignItems: 'center',
   justifyContent: 'center',
   border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
-  borderRadius: '6px',
+  borderRadius: 0.75,
   background: uiAlpha(UI_COLORS.black, 0.18),
   color: UI_COLORS.textBrown,
   cursor: 'pointer',
@@ -143,7 +143,7 @@ export function badgeSx(kind, theme) {
     fontSize: FONT_SIZES.xs,
     fontFamily: UI_FONTS.display,
     letterSpacing: '0.04em',
-    borderRadius: '4px',
+    borderRadius: 0.5,
     color,
     bgcolor: alpha(color, 0.12),
     border: '1px solid',
@@ -157,7 +157,7 @@ export const emptyBoxSx = {
   textAlign: 'center',
   p: '2rem 1rem',
   border: `1px dashed ${uiAlpha(UI_COLORS.goldDim, 0.25)}`,
-  borderRadius: '12px',
+  borderRadius: 1.5,
 };
 
 export const emptyTextSx = {

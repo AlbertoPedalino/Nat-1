@@ -1,4 +1,5 @@
 import { alpha } from '@mui/material/styles';
+import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
@@ -188,7 +189,7 @@ export function buildActiveSx(theme) {
       bottom: 0,
       width: 5,
       bgcolor: accent,
-      borderRadius: '6px 0 0 6px',
+      borderRadius: cornerRadius(0.75, 0, 0, 0.75),
     },
   };
 }

@@ -65,7 +65,7 @@ function AtmosphereOption({ type, selected, onSelect }) {
         px: 1,
         py: 0.7,
         border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-        borderRadius: '7px !important',
+        borderRadius: (theme) => `${theme.shape.borderRadius * 0.875}px !important`,
         bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
         color: VTT_COLORS.railText,
         textTransform: 'none',

@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { cornerRadius } from '../../../shared/ui/radius.js';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { RichText } from '../../../shared/content/RichText.jsx';
@@ -85,7 +86,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
       )}
       detailsSx={{
         px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
-        borderRadius: '0 0 6px 6px', bgcolor: uiAlpha(UI_COLORS.headerBg, 0.5),
+        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.headerBg, 0.5),
         fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}

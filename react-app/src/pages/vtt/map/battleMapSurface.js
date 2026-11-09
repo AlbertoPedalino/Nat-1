@@ -1,5 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // Shared glass surface for every control floating over the battle map. Keeping
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
@@ -24,7 +25,7 @@ export const mapIconButtonSx = {
 export const battleMapDialogPaperSx = {
   ...battleMapSurfaceSx,
   borderRadius: 1,
-  boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.62)}`,
+  boxShadow: UI_SHADOWS.overlay,
   transition: 'opacity 140ms ease',
 };
 

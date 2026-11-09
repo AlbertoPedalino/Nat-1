@@ -1,4 +1,5 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 export const panelRootSx = {
@@ -55,7 +56,7 @@ export const spellBodySx = {
   border: 1,
   borderColor: 'divider',
   borderTop: 'none',
-  borderRadius: '0 0 8px 8px',
+  borderRadius: cornerRadius(0, 0, 1, 1),
   px: '10px',
   py: '7px',
   mt: '-4px',

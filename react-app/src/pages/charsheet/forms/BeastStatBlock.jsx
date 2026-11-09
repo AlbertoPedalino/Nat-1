@@ -291,7 +291,7 @@ const rollChipSx = {
   border: `1px solid ${uiAlpha(UI_COLORS.gold, 0.45)}`,
   bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
   color: UI_COLORS.goldLight,
-  borderRadius: '4px',
+  borderRadius: 0.5,
   px: '0.28em',
   py: 0,
   font: 'inherit',

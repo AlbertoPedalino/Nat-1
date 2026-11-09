@@ -14,7 +14,7 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
         gap: Icon ? 0.4 : 0,
         px: 0.9,
         py: 0.25,
-        borderRadius: '999px',
+        borderRadius: 999,
         fontSize: FONT_SIZES.sm,
         fontWeight: 700,
         letterSpacing: '0.03em',

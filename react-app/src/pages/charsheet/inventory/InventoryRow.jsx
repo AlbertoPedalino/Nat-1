@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { cornerRadius } from '../../../shared/ui/radius.js';
 import { Box, Button, IconButton, Tooltip, Typography, alpha } from '@mui/material';
 import { AlertTriangle, Archive, Check, Minus, Plus, Trash2 } from 'lucide-react';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
@@ -32,7 +33,7 @@ const itemStateChipBaseSx = {
   px: '7px',
   py: '2px',
   border: 1,
-  borderRadius: '3px',
+  borderRadius: 0.375,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xxs,
   fontWeight: 700,
@@ -71,7 +72,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   return (
     <ExpandableCard
       containerSx={{ mb: '4px', overflow: 'hidden' }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.ink, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: '0 0 8px 8px', px: '10px', py: '6px', mt: 0, mb: 0 }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: 1.45, bgcolor: UI_COLORS.ink, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: '10px', py: '6px', mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -122,7 +123,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: '3px', color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -162,7 +163,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -184,7 +185,7 @@ function ItemFlagButton({ def, active, onClick }) {
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
       sx={{
-        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs,
+        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: 0.375, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs,
         ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
@@ -204,7 +205,7 @@ function ChargeStepButton({ children, disabled = false, ariaLabel, onClick }) {
         height: 16,
         p: 0,
         color: 'inherit',
-        borderRadius: '3px',
+        borderRadius: 0.375,
         '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, 0.16) },
         '&.Mui-disabled': { color: 'inherit', opacity: 0.35 },
       }}
@@ -221,7 +222,7 @@ function SlotBtn({ active, onClick, label }) {
         minWidth: 24, height: 24, px: '4px',
         border: 1,
         borderColor: active ? UI_COLORS.gold : 'divider',
-        borderRadius: '3px',
+        borderRadius: 0.375,
         color: active ? UI_COLORS.goldLight : 'text.secondary',
         bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.14) : 'transparent',
         fontFamily: UI_FONTS.display,
@@ -267,7 +268,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: '3px', color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: 0.375, color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

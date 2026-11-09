@@ -33,7 +33,7 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
     </Box>
   );
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: '11px', bgcolor: alpha(accent, isOpen ? 0.3 : 0.14), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? 0.3 : 0.14), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
       <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
         sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
@@ -102,7 +102,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             component="button"
             type="button"
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
+            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: 0.375, cursor: 'pointer', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
           >
             <ListChecks size={12} /> Manage ({active.length})
             <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />

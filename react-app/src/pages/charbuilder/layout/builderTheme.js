@@ -83,7 +83,7 @@ export const builderTheme = createTheme(theme, {
       styleOverrides: {
         root: {
           height: 19,
-          borderRadius: '3px',
+          borderRadius: 0.375,
           fontFamily: UI_FONTS.display,
           fontSize: FONT_SIZES.xxs,
           letterSpacing: '0.04em',

@@ -103,7 +103,7 @@ const cardCloseSx = {
   bgcolor: 'transparent',
   cursor: 'pointer',
   color: 'text.secondary',
-  borderRadius: '3px',
+  borderRadius: 0.375,
   '&:hover': { color: CONDITION_ACCENT },
 };
 

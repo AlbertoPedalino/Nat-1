@@ -5,6 +5,7 @@ import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
+import { UI_SHADOWS } from '../../ui/shadows.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -14,7 +15,7 @@ const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.97), border: 2, borderColor: 'divider', borderRadius: 2,
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
-  boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}`,
+  boxShadow: UI_SHADOWS.popup,
   backdropFilter: 'blur(8px)',
 };
 
@@ -43,8 +44,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      ...(layout.isCrit ? { borderColor: UI_COLORS.goldLight, boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}, 0 0 20px ${uiAlpha(UI_COLORS.goldLight, 0.25)}` } : {}),
-      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}, 0 0 20px ${uiAlpha(UI_COLORS.danger, 0.25)}` } : {}),
+      ...(layout.isCrit ? { borderColor: UI_COLORS.goldLight, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.goldLight, 0.25)}` } : {}),
+      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, 0.25)}` } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />

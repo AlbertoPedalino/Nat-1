@@ -3,6 +3,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -18,7 +19,7 @@ export const sceneTopbarSx = {
   px: { xs: 1, md: 1.25 },
   py: 0.85,
   borderRadius: 1,
-  boxShadow: `0 8px 24px ${vttAlpha(VTT_COLORS.black, 0.22)}`,
+  boxShadow: UI_SHADOWS.raised,
 };
 
 // Shrinks rather than grows: the presenter controls belong next to the name the
@@ -193,7 +194,7 @@ export const sheetViewSx = {
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.overlaySurface, 0.88),
   backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, 0.025)}, transparent 42%)`,
-  boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.46)}`,
+  boxShadow: UI_SHADOWS.overlay,
   isolation: 'isolate',
   '& > *': {
     width: '100%',

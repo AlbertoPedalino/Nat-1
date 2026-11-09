@@ -1,6 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -79,7 +80,7 @@ export const placementTargetHintSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.92),
   color: VTT_COLORS.gold,
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.62)}`,
-  boxShadow: `0 4px 14px ${vttAlpha(VTT_COLORS.black, 0.55)}`,
+  boxShadow: UI_SHADOWS.float,
   fontFamily: UI_FONTS.display,
   fontSize: FONT_SIZES.xs,
   fontWeight: 700,

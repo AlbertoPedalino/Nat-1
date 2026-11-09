@@ -36,7 +36,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: '5px', bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
