@@ -21,10 +21,12 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
       {sides === 2 ? (
         <circle cx="20" cy="20" r="17" fill={uiAlpha(UI_COLORS.accentText, OPACITY.soft)} stroke="currentColor" strokeWidth="2" />
       ) : (
+        // Painted like the 3D die and the app's icon: deep green with a cream
+        // edge. The number alone carries the result's colour.
         <polygon
           points={pointsForDie(sides)}
-          fill={uiAlpha(UI_COLORS.accentText, OPACITY.soft)}
-          stroke="currentColor"
+          fill={UI_COLORS.dieFace}
+          stroke={UI_COLORS.onDie}
           strokeWidth="2"
           strokeLinejoin="round"
         />

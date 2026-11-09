@@ -4,7 +4,7 @@ import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { OPACITY } from '../../ui/colors.js';
+import { OPACITY, UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
@@ -35,6 +35,7 @@ export default function Die3D({
   solid = false,
 }) {
   const geometry = dieGeometry(faces, size / 2);
+  const coin = geometry.shape === 2;
   // A die thrown on the map is numbered like a real one and lands on whichever
   // face the throw left on top, so the caller says which. A die standing for a
   // number that was already rolled simply wears it on the face that faces out.
@@ -89,6 +90,7 @@ export default function Die3D({
                 height: size,
                 fontSize: glyph,
                 lineHeight: LINE_HEIGHTS.none,
+                bgcolor: coin ? COIN_EDGE : UI_COLORS.onDie,
                 // A face is either a polygon cut out of the box, or — on a coin —
                 // a disc the browser rounds off for us.
                 clipPath: face.clipPath,
@@ -97,23 +99,23 @@ export default function Die3D({
                 // Only the face that landed carries the result's colour — red
                 // for a 1, gold for the top of the die — and the rest are
                 // scenery that must not shout "natural 20" at you.
-                color: index === landed ? color : 'text.secondary',
+                color: index === landed ? color : otherFaceInk(coin),
               }}
             >
               <Box sx={{
                 ...faceFillSx,
                 clipPath: face.clipPath,
                 borderRadius: face.borderRadius,
-                bgcolor: faceTint(face, dimmed),
+                bgcolor: faceTint(face, dimmed, coin),
               }} />
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
                   made of. */}
-              {geometry.shape === 2 ? (
+              {coin ? (
                 <CoinFace kind={values[index] === 2 ? 'tails' : 'heads'} size={size * 0.56} />
               ) : null}
-              {geometry.shape !== 2 ? (
-                <Box component="span" sx={{ position: 'relative' }}>{values[index]}</Box>
+              {!coin ? (
+                <Box component="span" sx={digits > 1 ? narrowNumberSx : numberSx}>{values[index]}</Box>
               ) : null}
             </Box>
           );
@@ -139,13 +141,16 @@ export default function Die3D({
   );
 }
 
-// A number as large as its face can hold. The face's own incircle is the
-// limit — a triangle holds much less than a square — and a second digit needs
-// room sideways that one does not, which is exactly how "20" ended up with its
-// corners clipped off.
+// A number as large as its face can hold, by the same rule on every die: the
+// box around the numeral fits the face's incircle. The old rule let a single
+// digit overflow the circle by a sixth and capped it at almost half the die,
+// so a d4 or d8 wore a number twice the size of a d20's beside it.
 function numberSize(size, room, characters) {
   const across = size * (room || 0.15) * 2;
-  const fit = characters === 1 ? 1.15 : 1 / (0.62 * characters + 0.2);
+  // A numeral's box, in ems: about 0.6 wide a digit (less when narrowed) and
+  // 0.72 tall. Its diagonal is what has to fit across the circle.
+  const width = DIGIT_WIDTH * characters * (characters > 1 ? NARROWED : 1) + 0.1;
+  const fit = across / Math.hypot(width, DIGIT_HEIGHT);
   // The floor follows the face rather than being a flat legibility minimum: on
   // a hundred-sided die a 7px numeral is wider than the triangle holding it, so
   // it came out clipped in half. A blur of tiny numerals is what a d100 looks
@@ -154,8 +159,17 @@ function numberSize(size, room, characters) {
 
   // Capped so a d6, whose faces are nearly all room, does not end up with a
   // number bigger than the die reads as.
-  return Math.max(floor, Math.round(Math.min(size * 0.44, across * fit)));
+  return Math.max(floor, Math.round(Math.min(size * 0.36, fit)));
 }
+
+const DIGIT_WIDTH = 0.6;
+const DIGIT_HEIGHT = 0.72;
+// Two digits are drawn a little narrower, as they are printed on a real d10 or
+// d20, so they can stand taller on a face that has no room sideways.
+const NARROWED = 0.82;
+
+const numberSx = { position: 'relative' };
+const narrowNumberSx = { position: 'relative', display: 'inline-block', transform: `scaleX(${NARROWED})` };
 
 // Past this many faces a die is too busy to draw in full anywhere it is not the
 // thing being watched, and its numbers are smaller than a legible glyph.
@@ -183,15 +197,36 @@ const solidSx = {
 };
 
 // Each face is painted a little differently by how it sits on the solid, which
-// is what stops an icosahedron from reading as a gold blob when it turns.
+// is what stops an icosahedron from reading as a green blob when it turns.
+//
+// Shaded the way the app's icon is: the face towards you stays deep green so
+// its cream number stands out, the ring of faces around it catches the light,
+// and the faces turning away fall back to dark.
 //
 // A die the mode threw away keeps its shape but loses its colour: it is still
 // shown, because seeing what advantage saved you from is half of why advantage
-// is fun.
-function faceTint(face, dimmed) {
+// is fun. A coin is metal, not a die, and keeps its own gold.
+function faceTint(face, dimmed, coin) {
   const lit = Math.max(0, face.towardsViewer);
-  if (dimmed) return `rgb(${Math.round(44 + 16 * lit)},${Math.round(40 + 14 * lit)},${Math.round(33 + 11 * lit)})`;
-  return `rgb(${Math.round(56 + 38 * lit)},${Math.round(48 + 30 * lit)},${Math.round(33 + 18 * lit)})`;
+  if (coin) {
+    if (dimmed) return `rgb(${Math.round(44 + 16 * lit)},${Math.round(40 + 14 * lit)},${Math.round(33 + 11 * lit)})`;
+    return `rgb(${Math.round(56 + 38 * lit)},${Math.round(48 + 30 * lit)},${Math.round(33 + 18 * lit)})`;
+  }
+  if (dimmed) return mixColors(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
+  const glow = clamp(1 - Math.abs(lit - 0.7) / 0.4, 0, 1);
+  return mixColors(UI_COLORS.dieFace, UI_COLORS.dieFaceLit, glow);
+}
+
+// The numbers on the faces that did not land: cream like the result, but
+// quieter, so the eye goes to the face that counts.
+function otherFaceInk(coin) {
+  return coin ? 'text.secondary' : uiAlpha(UI_COLORS.onDie, OPACITY.strong);
+}
+
+function mixColors(from, to, amount) {
+  const channel = (hex, offset) => parseInt(hex.slice(1 + offset, 3 + offset), 16);
+  const mixed = [0, 2, 4].map((offset) => Math.round(channel(from, offset) + (channel(to, offset) - channel(from, offset)) * amount));
+  return `rgb(${mixed.join(',')})`;
 }
 
 const faceSx = {
@@ -201,13 +236,16 @@ const faceSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // The rim: gold showing around a darker face, so every edge on the solid is
-  // drawn without a border the clip would have eaten. Opaque, or the board
-  // shows through the die and it reads as glass rather than as a solid thing.
-  bgcolor: 'rgb(196,160,78)',
+  // The rim (bgcolor, set per die): cream showing around a darker face, so
+  // every edge on the solid is drawn without a border the clip would have
+  // eaten. Opaque, or the board shows through the die and it reads as glass
+  // rather than as a solid thing.
   ...TEXT_STYLES.figure,
   backfaceVisibility: 'hidden',
 };
+
+// The gold edge of a coin's faces: a coin is struck metal, not a green die.
+const COIN_EDGE = 'rgb(196,160,78)';
 
 // A panel of the band round a coin's edge. It carries no number and cannot be
 // a result, so it needs no clip and no fill of its own — it is the side of the

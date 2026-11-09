@@ -72,6 +72,12 @@ export const UI_COLORS = Object.freeze({
 
   // The default token colour of a player character.
   pcToken: '#5c8fe0',
+
+  // Dice, painted like the app's icon: deep green faces, a lighter green on
+  // the faces turned towards the light, and cream edges and numbers.
+  dieFace: '#1d4a24',
+  dieFaceLit: '#4f8a4b',
+  onDie: '#eef0d4',
 });
 
 // The colour of a hit point readout by its tone (vitals.hpTone).

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { OPACITY } from '../../ui/colors.js';
+import { OPACITY, UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 
 // A d100 is close enough to a sphere that drawing one hundred independently
@@ -10,7 +10,7 @@ import { LINE_HEIGHTS } from '../../ui/fonts.js';
 export default function D100Orb({
   value,
   size = 58,
-  color = '#edd48a',
+  color = UI_COLORS.onDie,
   dimmed = false,
   revealed = true,
   textureRef,
@@ -55,11 +55,12 @@ const orbSx = {
   overflow: 'hidden',
   flex: '0 0 auto',
   borderRadius: '50%',
-  border: '2px solid rgb(190, 153, 70)',
-  bgcolor: 'rgb(55, 45, 30)',
+  // Green with a cream rim, like every other die and the app's icon.
+  border: `2px solid ${UI_COLORS.onDie}`,
+  bgcolor: UI_COLORS.dieFace,
   boxShadow: [
     'inset -12px -14px 18px rgba(0, 0, 0, 0.62)',
-    'inset 8px 7px 12px rgba(255, 225, 145, 0.16)',
+    `inset 8px 7px 12px ${uiAlpha(UI_COLORS.onDie, OPACITY.fill)}`,
     '0 2px 3px rgba(0, 0, 0, 0.38)',
   ].join(', '),
 };
@@ -76,9 +77,12 @@ const textureSx = {
   borderRadius: '50%',
   willChange: 'transform',
   background: [
-    'linear-gradient(32deg, transparent 0 36%, rgba(236, 202, 119, 0.16) 36% 51%, transparent 51%)',
-    'linear-gradient(147deg, rgba(20, 17, 13, 0.34) 0 29%, transparent 29% 67%, rgba(242, 207, 122, 0.12) 67%)',
-    'conic-gradient(from 11deg at 52% 48%, rgb(83,68,42) 0 12.5%, rgb(58,49,34) 12.5% 25%, rgb(105,84,45) 25% 37.5%, rgb(67,56,37) 37.5% 50%, rgb(119,92,48) 50% 62.5%, rgb(62,51,35) 62.5% 75%, rgb(91,72,42) 75% 87.5%, rgb(54,46,34) 87.5% 100%)',
+    `linear-gradient(32deg, transparent 0 36%, ${uiAlpha(UI_COLORS.onDie, OPACITY.fill)} 36% 51%, transparent 51%)`,
+    `linear-gradient(147deg, rgba(20, 17, 13, 0.34) 0 29%, transparent 29% 67%, ${uiAlpha(UI_COLORS.onDie, OPACITY.tint)} 67%)`,
+    // Lighter greens over the orb's own deep green: the facets.
+    `conic-gradient(from 11deg at 52% 48%, ${[OPACITY.strong, OPACITY.tint, OPACITY.heavy, OPACITY.line, OPACITY.solid, OPACITY.fill, OPACITY.veil, OPACITY.wash]
+      .map((alpha, index) => `${uiAlpha(UI_COLORS.dieFaceLit, alpha)} ${index * 12.5}% ${(index + 1) * 12.5}%`)
+      .join(', ')})`,
   ].join(', '),
 };
 
@@ -101,7 +105,7 @@ const resultSx = {
   opacity: 0,
   display: 'grid',
   placeItems: 'center',
-  border: '1px solid rgba(237, 212, 138, 0.74)',
+  border: `1px solid ${uiAlpha(UI_COLORS.onDie, OPACITY.heavy)}`,
   borderRadius: 999,
   bgcolor: 'rgba(9, 8, 7, 0.82)',
   boxShadow: '0 2px 9px rgba(0,0,0,0.52)',
