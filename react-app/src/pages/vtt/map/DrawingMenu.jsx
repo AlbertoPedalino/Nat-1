@@ -24,12 +24,13 @@ import {
   battleMapControlLabelSx,
   battleMapMenuPaperSx,
 } from './battleMapSurface.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -313,10 +314,8 @@ const MENU_WIDTH = 280;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };
 

@@ -8,10 +8,11 @@ import { CLOUD_SYNC_EVENT, reportCloudSyncState } from '../sync/cloudSyncState.j
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 import { failureMessage } from '../../ui/busyAction.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -23,9 +24,9 @@ function resolveActiveCharId() {
 }
 
 const loginBtnSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
+  
 };
 
 // The account name is shown on every screen size; a long one is cut short

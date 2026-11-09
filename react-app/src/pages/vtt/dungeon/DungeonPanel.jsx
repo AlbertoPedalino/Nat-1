@@ -15,6 +15,7 @@ import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { encounterDetail } from '../../../shared/gmboard/resultText.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The dungeon this map is being played as.
 //
@@ -282,7 +283,7 @@ const roomSx = {
 };
 
 const numberSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.body,
   color: 'primary.main',
   minWidth: 20,

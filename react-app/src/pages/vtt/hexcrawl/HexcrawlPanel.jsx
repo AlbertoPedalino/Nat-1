@@ -19,8 +19,9 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -334,9 +335,8 @@ const lastCardSx = {
 };
 
 const lastHexSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  letterSpacing: LETTER_SPACINGS.sm,
   color: VTT_COLORS.text,
 };
 

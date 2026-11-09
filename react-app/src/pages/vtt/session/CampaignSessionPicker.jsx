@@ -3,8 +3,9 @@ import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -99,5 +100,5 @@ const rowButtonSx = {
 const chipSx = {
   height: 20,
   fontSize: FONT_SIZES.xs,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
 };

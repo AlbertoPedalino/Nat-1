@@ -4,6 +4,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -84,9 +85,8 @@ const sectionIconSx = { display: 'flex', color: VTT_COLORS.accent, flexShrink: 0
 
 const sectionTitleSx = {
   display: 'block',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  letterSpacing: LETTER_SPACINGS.md,
   lineHeight: 1.4,
 };
 

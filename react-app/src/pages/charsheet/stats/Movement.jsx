@@ -16,9 +16,10 @@ import {
 import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wildShapeForm.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -107,7 +108,7 @@ export default function Movement({ C, sheet }) {
           <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>{speedLabel(entry.key)}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: hasPenalty ? UI_COLORS.penaltyText : UI_COLORS.accentText, lineHeight: 1 }}>
+              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: hasPenalty ? UI_COLORS.penaltyText : UI_COLORS.accentText, lineHeight: 1 }}>
                 {entry.final}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary' }}>ft</Typography>

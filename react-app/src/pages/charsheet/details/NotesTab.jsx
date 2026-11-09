@@ -6,6 +6,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { makeId } from '../../../shared/ids.js';
 import { clamp } from '../../../shared/numbers.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -22,8 +23,7 @@ function PageTab({ page, active, onClick }) {
     <Box
       onClick={onClick}
       sx={{
-        px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, fontWeight: 700, fontFamily: UI_FONTS.display,
-        bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
+        px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure, bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
         border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
         '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.accentHighlight, 0.15) },
       }}
@@ -104,12 +104,12 @@ export default function NotesTab({ sheet }) {
               if (e.key === 'Escape') setEditingName(null);
             }}
             sx={{
-              '& .MuiInputBase-root': { fontSize: FONT_SIZES.xl, fontFamily: UI_FONTS.display, fontWeight: 700 },
+              '& .MuiInputBase-root': { fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure },
               '& fieldset': { borderColor: 'primary.main' },
             }}
           />
         ) : (
-          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xl, fontWeight: 700, color: 'text.primary' }}>
+          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>
             {activePage.name}
           </Typography>
         )}

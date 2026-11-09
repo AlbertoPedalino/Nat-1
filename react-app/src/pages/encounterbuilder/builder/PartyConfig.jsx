@@ -6,7 +6,7 @@ import { campaignSheetUrl } from '../../../shared/character/profile/characterRou
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
-import { LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -148,9 +148,8 @@ const stepperGroupSx = {
 
 const stepperLabelSx = {
   mr: 0.75,
-  fontWeight: 700,
+  ...TEXT_STYLES.label,
   color: 'text.primary',
-  textTransform: 'uppercase',
-  letterSpacing: LETTER_SPACINGS.sm,
+  
 };
 

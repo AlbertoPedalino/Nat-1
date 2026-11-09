@@ -16,12 +16,13 @@ import {
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -169,7 +170,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   if (!items.length) {
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', fontStyle: 'italic' }}>
+        <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm }}>
           {emptyHint}
         </Typography>
       </Box>
@@ -180,7 +181,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
         <Typography sx={detailTitleSx}>{tagLabel}</Typography>
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 700, color: remaining > 0 ? UI_COLORS.accentText : UI_COLORS.danger }}>
+        <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xs, color: remaining > 0 ? UI_COLORS.accentText : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
       </Box>
@@ -263,7 +264,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
       </Box>
 
       {noneAddable ? (
-        <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
+        <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.5 }}>
           {remaining <= 0
             ? 'Active limit reached. Remove one to make another.'
             : (requireResolvedItem && items.every((value) => !resolveItem(value))

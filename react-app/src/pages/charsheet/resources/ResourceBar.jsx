@@ -1,11 +1,12 @@
 import { useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const btnSx = {
-  fontSize: FONT_SIZES.md, fontFamily: UI_FONTS.display, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
+  fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
   color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35),
   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) },
 };
@@ -23,8 +24,7 @@ const fillSx = (pct) => ({
 });
 
 const labelSx = {
-  fontSize: FONT_SIZES.sm, fontFamily: UI_FONTS.display, fontWeight: 700,
-  color: UI_COLORS.accentText, minWidth: 36, textAlign: 'center',
+  fontSize: FONT_SIZES.sm, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, minWidth: 36, textAlign: 'center',
 };
 
 export default function ResourceBar({ value, max, onChange }) {

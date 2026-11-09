@@ -6,8 +6,9 @@ import { hasWeatherDisadvantage, weatherName } from '../../../shared/gmboard/wea
 import { weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
 // answer to a click and wants reading once, not living on the map.
@@ -77,9 +78,8 @@ const titleRowSx = {
 };
 
 const titleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxl,
-  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };
 

@@ -23,8 +23,9 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -161,9 +162,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
             sx={{
               cursor: isActive || canToggleOn ? 'pointer' : 'not-allowed',
               fontSize: FONT_SIZES.xxs,
-              fontFamily: UI_FONTS.display,
-              fontWeight: 700,
-              letterSpacing: LETTER_SPACINGS.md,
+              ...TEXT_STYLES.title,
               ...statusStyle,
               '&:hover': { borderColor: (isActive || canToggleOn) ? statusTone : statusStyle.borderColor },
             }}
@@ -181,10 +180,10 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: LETTER_SPACINGS.md, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
+                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
-              <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
+              <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>
             )
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
@@ -282,7 +281,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
 
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.3 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
@@ -292,7 +291,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Typography component="div" sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', mt: 0.2, fontStyle: 'italic' }}>
+      <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.2 }}>
         <RichInline text={action.choiceRestNote || "Change when you finish a Short or Long Rest (Smith's Tools required)."} keyPrefix={`choice-${action.choiceKey || 'note'}`} />
       </Typography>
     </Box>

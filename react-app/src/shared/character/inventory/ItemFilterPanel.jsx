@@ -9,9 +9,10 @@ import {
   rangeFilterKeys,
 } from './itemFilters.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -28,18 +29,13 @@ const clearButtonSx = {
   py: '3px',
   borderRadius: 1,
   color: 'text.secondary',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxs,
-  textTransform: 'uppercase',
-  letterSpacing: LETTER_SPACINGS.md,
   '&:hover': { color: UI_COLORS.danger },
 };
 
 const labelSx = {
-  fontFamily: UI_FONTS.display,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
-  textTransform: 'uppercase',
+  ...TEXT_STYLES.label,
   color: RICH_TEXT_ACCENT,
   fontSize: FONT_SIZES.xxs,
   alignSelf: 'center',

@@ -1,5 +1,6 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export const SHEET_AREAS = {
   saves: 'saves',
@@ -58,9 +59,7 @@ export const detailPanelSx = {
 };
 
 export const detailTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
   color: UI_COLORS.accentText,
 };

@@ -12,9 +12,10 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -262,9 +263,9 @@ const dieControlSx = {
 };
 
 const dieLabelSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.md,
-  fontWeight: 800,
+  
 };
 
 const countSx = {
@@ -310,17 +311,14 @@ const outcomeNumberSx = {
   borderRadius: 1,
   bgcolor: 'error.main',
   color: UI_COLORS.dangerSurface,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
-  fontWeight: 900,
+  
 };
 
 const outcomeTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
   color: 'error.light',
 };
 

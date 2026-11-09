@@ -16,7 +16,8 @@ import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
 export default function EncounterBuilderPage() {
   const tool = useToolInstance('encounters');
@@ -114,9 +115,8 @@ function EncounterBuilderShell({ tool }) {
 
 const utilityButtonSx = {
   flexShrink: 0,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
   color: UI_COLORS.accentText,
   borderColor: uiAlpha(UI_COLORS.accentText, 0.4),
 };

@@ -8,9 +8,10 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.js
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
 const toolLink = (id, path) => {
   const { label, description, icon, color } = TOOL_CATALOG[id];
@@ -112,10 +113,8 @@ const homeRootSx = {
 const heroSx = { textAlign: 'center', mb: '3rem' };
 
 const heroTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
-  fontWeight: 900,
-  letterSpacing: LETTER_SPACINGS.md,
   color: UI_COLORS.accentText,
   textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, 0.35)}`,
   lineHeight: 1.1,
@@ -187,10 +186,8 @@ const cardContentSx = {
 };
 
 const cardLabelSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxl,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
   textAlign: 'center',
   color: UI_COLORS.textSecondary,
   transition: 'color 0.15s',
@@ -217,9 +214,8 @@ const clearDataWrapSx = {
 const clearDataButtonSx = {
   borderColor: uiAlpha(UI_COLORS.danger, 0.42),
   color: UI_COLORS.danger,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
   '&:hover': {
     borderColor: UI_COLORS.danger,
     bgcolor: uiAlpha(UI_COLORS.danger, 0.08),

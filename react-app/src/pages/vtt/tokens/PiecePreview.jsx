@@ -2,8 +2,9 @@ import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { initials } from '../../../shared/ui/textCase.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -197,9 +198,9 @@ const imageSx = {
 
 const initialsSx = {
   color: VTT_COLORS.accentHighlight,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 800,
+  
 };
 
 const classIconSx = {

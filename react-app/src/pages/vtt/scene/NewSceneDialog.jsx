@@ -18,11 +18,12 @@ import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from './generators.js';
 import { stitchImages } from './stitch.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { pillLabelSx } from './panelStyles.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -269,7 +270,7 @@ const cardSx = {
 const freshSx = { ...cardSx, borderColor: 'primary.main' };
 
 const cardTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xl,
   color: 'primary.main',
 };

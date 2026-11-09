@@ -4,6 +4,7 @@ import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -60,7 +61,6 @@ const entrySx = {
 };
 
 const emptySx = {
-  fontSize: FONT_SIZES.lg,
-  color: 'text.secondary',
-  fontStyle: 'italic',
+  ...TEXT_STYLES.note, fontSize: FONT_SIZES.lg,
+  
 };

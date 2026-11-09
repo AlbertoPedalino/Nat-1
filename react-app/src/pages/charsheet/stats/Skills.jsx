@@ -10,9 +10,10 @@ import { characterItemBonuses } from '../../../shared/character/inventory/itemBo
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -106,10 +107,10 @@ export default function Skills({ C, sheet, onRoll }) {
               {sk.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', letterSpacing: LETTER_SPACINGS.md }}>
+              <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'text.secondary' }}>
                 {ABILITY_ABBREVIATIONS[sk.ability]}
               </Typography>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
+              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', textAlign: 'right' }}>
                 {signed(shownBonus)}
               </Typography>
               {visual && (

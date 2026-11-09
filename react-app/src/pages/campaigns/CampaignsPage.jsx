@@ -26,12 +26,13 @@ import { resolveCampaignsPageState } from './campaignsPageState.js';
 import { ensureSheetRuntimeAdapters } from '../../shared/character/sheet/sheetRuntimeAdapters.js';
 import { signed } from '../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -314,7 +315,7 @@ const pageSx = {
 
 const headerSx = { display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.5 };
 const headerIconSx = { color: 'primary.main', flexShrink: 0 };
-const titleSx = { fontFamily: UI_FONTS.display, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', fontWeight: 800, color: 'primary.main', letterSpacing: LETTER_SPACINGS.md };
+const titleSx = { ...TEXT_STYLES.title, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: 'primary.main' };
 
 const msgSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxl, maxWidth: 520 };
 
@@ -327,7 +328,7 @@ const emptyPanelSx = { textAlign: 'center', p: 3, mb: 2, border: '1px dashed', b
 const campaignCardSx = { p: { xs: 1.25, sm: 1.75 }, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' };
 const campaignHeaderSx = { display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' };
 const campaignTitleRowSx = { minWidth: 0, flex: '1 1 320px', display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' };
-const campaignNameSx = { minWidth: 0, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.body, fontWeight: 700, color: 'text.primary', overflowWrap: 'anywhere' };
+const campaignNameSx = { minWidth: 0, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: 'text.primary', overflowWrap: 'anywhere' };
 const campaignActionsSx = { ml: { xs: 0, sm: 'auto' }, display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 };
 const campaignDividerSx = { my: 1.25 };
 const smallChipSx = { height: 22, fontSize: FONT_SIZES.xs, flexShrink: 0 };
@@ -366,9 +367,9 @@ const characterOpenButtonSx = {
 const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboard.badge.cloud', flexShrink: 0, mt: 0.25 });
 const characterInfoSx = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' };
 const characterNameRowSx = { display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flexWrap: 'wrap' };
-const characterNameSx = { fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
+const characterNameSx = { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
-const readOnlyChipSx = { flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg, color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
+const readOnlyChipSx = { flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.4 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
 const hpStatSx = { color: 'error.main' };

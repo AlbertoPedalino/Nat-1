@@ -6,11 +6,12 @@ import QuestCard from './QuestCard.jsx';
 import { QUEST_SCOPE_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -113,8 +114,7 @@ const dieSx = {
 };
 
 const maxSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.lead,
-  fontWeight: 900,
   color: 'primary.main',
 };

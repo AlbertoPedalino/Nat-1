@@ -1,5 +1,6 @@
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
+import { FONT_SIZES } from './fonts.js';
 import { UI_COLORS, uiAlpha } from './colors.js';
+import { TEXT_STYLES } from './textStyles.js';
 
 // The label of a compact action button in a button group (the sheet's Rest
 // group, the dice control): small uppercase Cinzel, one line, the buttons of
@@ -7,10 +8,9 @@ import { UI_COLORS, uiAlpha } from './colors.js';
 export const actionButtonTextSx = {
   flex: 1,
   whiteSpace: 'nowrap',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
+  
 };
 
 // A compact action button in one colour: its label and edge, a stronger edge
@@ -37,11 +37,8 @@ export function goldToggleSx(active) {
     borderRadius: 1,
     bgcolor: active ? uiAlpha(UI_COLORS.accent, 0.12) : 'transparent',
     color: active ? UI_COLORS.accentText : 'text.secondary',
-    fontFamily: UI_FONTS.display,
+    ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.xxs,
-    fontWeight: 700,
-    letterSpacing: LETTER_SPACINGS.lg,
-    textTransform: 'uppercase',
     whiteSpace: 'nowrap',
     '&:hover': {
       borderColor: UI_COLORS.accent,

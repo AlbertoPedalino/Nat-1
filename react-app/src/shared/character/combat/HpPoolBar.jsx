@@ -1,8 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
 import { HP_TONE_COLORS, UI_COLORS } from '../../ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 import { hpToneColor } from './vitals.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 
 // "HP cur / max [state] + stepper" pool tracker shared by creature-like sheet
@@ -19,10 +20,10 @@ export default function HpPoolBar({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
-        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 600, letterSpacing: LETTER_SPACINGS.xl, textTransform: 'uppercase', color: 'text.secondary', mr: 0.4 }}>HP</Typography>
-        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.title, fontWeight: 700, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: 1 }}>{current}</Typography>
-        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
-        <Typography component="span" sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxl, fontWeight: 600, color: 'text.secondary' }}>{max}</Typography>
+        <Typography component="span" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mr: 0.4 }}>HP</Typography>
+        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.title, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: 1 }}>{current}</Typography>
+        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
+        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>{max}</Typography>
         {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerMuted, ml: 0.5 }}>{stateLabel}</Typography> : null}
       </Box>
       <HpStepper

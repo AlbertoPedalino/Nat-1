@@ -10,8 +10,9 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -93,7 +94,7 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
   }
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.3 }}>
         Weapon
       </Typography>
       <ToggleButtonGroup

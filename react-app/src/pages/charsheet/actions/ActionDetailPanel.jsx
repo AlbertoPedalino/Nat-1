@@ -4,9 +4,10 @@ import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollT
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { detailPanelSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -19,7 +20,7 @@ function getClassLevel(C, className) {
 function FeatureBox({ title, accent, children }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, fontWeight: 700, color: accent || UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.lg, mb: 0.4 }}>
+      <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.sm, color: accent || UI_COLORS.accentText, mb: 0.4 }}>
         {title}
       </Typography>
       {children}
@@ -133,12 +134,12 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               size="small"
               variant="outlined"
               onClick={doRoll}
-              sx={{ fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display, letterSpacing: LETTER_SPACINGS.md }}
+              sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title }}
             >
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>
             {dual && roll.dualNote ? (
-              <Typography sx={{ mt: 0.3, fontSize: FONT_SIZES.xs, color: UI_COLORS.secondary, fontStyle: 'italic' }}>
+              <Typography sx={{ ...TEXT_STYLES.note, mt: 0.3, fontSize: FONT_SIZES.xs, color: UI_COLORS.secondary }}>
                 {roll.dualNote}
               </Typography>
             ) : null}

@@ -6,10 +6,11 @@ import { parseBeastActions, parseBeastActionsRich } from '../../../shared/charac
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -283,7 +284,7 @@ const statBlockSx = {
   borderColor: 'divider',
 };
 
-const metaSx = { fontSize: FONT_SIZES.xs, fontStyle: 'italic', color: 'text.secondary', letterSpacing: LETTER_SPACINGS.sm };
+const metaSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm };
 
 const rollChipSx = {
   appearance: 'none',
@@ -333,8 +334,7 @@ export const dismissButtonSx = {
   px: 0.8,
   py: 0.1,
   fontSize: FONT_SIZES.xxs,
-  fontFamily: UI_FONTS.display,
-  letterSpacing: LETTER_SPACINGS.sm,
+  ...TEXT_STYLES.title,
   color: UI_COLORS.dangerMuted,
   border: 1,
   borderColor: uiAlpha(UI_COLORS.dangerMuted, 0.45),

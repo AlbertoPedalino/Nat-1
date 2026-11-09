@@ -13,10 +13,11 @@ import {
 import { uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -233,8 +234,7 @@ const emptySx = {
 const liveChipSx = {
   height: 18,
   fontSize: FONT_SIZES.xs,
-  fontFamily: UI_FONTS.display,
-  letterSpacing: LETTER_SPACINGS.md,
+  ...TEXT_STYLES.title,
   flexShrink: 0,
 };
 

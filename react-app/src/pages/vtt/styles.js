@@ -1,4 +1,5 @@
-export const noticeSx = { color: 'text.secondary', fontStyle: 'italic' };
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+export const noticeSx = { ...TEXT_STYLES.note };
 
 export const errorSx = { color: 'error.main', mb: 1 };
 

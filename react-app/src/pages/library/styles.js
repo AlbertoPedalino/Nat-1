@@ -1,7 +1,8 @@
 import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
@@ -27,29 +28,24 @@ export const headerSx = {
 };
 
 export const titleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.md,
   color: UI_COLORS.accentText,
   flex: 1,
   minWidth: '160px',
 };
 
 export const newBtnSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  letterSpacing: LETTER_SPACINGS.md,
+  
 };
 
 export const sectionHeadSx = {
   width: '100%',
   maxWidth: '640px',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxl,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.xl,
-  textTransform: 'uppercase',
   color: UI_COLORS.textSecondary,
   mb: '0.75rem',
 };
@@ -141,8 +137,7 @@ export function badgeSx(kind, theme) {
   return {
     height: '18px',
     fontSize: FONT_SIZES.xs,
-    fontFamily: UI_FONTS.display,
-    letterSpacing: LETTER_SPACINGS.sm,
+    ...TEXT_STYLES.title,
     borderRadius: 0.5,
     color,
     bgcolor: alpha(color, 0.12),

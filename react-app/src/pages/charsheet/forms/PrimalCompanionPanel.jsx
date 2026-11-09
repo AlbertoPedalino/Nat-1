@@ -44,6 +44,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -179,7 +180,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
             >
               {reviveSlot ? `Revive (level ${reviveSlot} slot)` : 'Revive'}
             </Button>
-            <Typography sx={{ ...subSx, mt: 0.4, fontStyle: 'italic', color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+            <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.4, color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
               {reviveSlot
                 ? 'Within an hour of its death: Magic action, touch it, expend a spell slot. It returns after 1 minute with all its HP.'
                 : 'No spell slot to expend — it can be summoned again after a Long Rest.'}

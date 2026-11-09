@@ -15,9 +15,10 @@ import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -89,13 +90,13 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, fontWeight: 600, color: 'text.secondary', letterSpacing: LETTER_SPACINGS.lg, width: 28, flexShrink: 0 }}>
+              <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
                 {ABILITY_NAMES[st]}
               </Typography>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lg, fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
+              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', ml: 'auto' }}>
                 {signed(shownBonus)}
               </Typography>
               {visual && (
@@ -128,7 +129,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                   </Typography>
                 </Box>
                 {r.note && (
-                  <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
                     {r.note}
                   </Typography>
                 )}
@@ -147,7 +148,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                     Concentration saves
                   </Typography>
                 </Box>
-                <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
                   Bladesong
                 </Typography>
               </Box>
@@ -169,7 +170,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                       {mod.label}
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, mt: '1px' }}>
                     {mod.source}
                   </Typography>
                 </Box>
@@ -187,7 +188,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         {saveContexts.map(([target, sources]) => (
           <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: FONT_SIZES.lg, color: UI_COLORS.secondary }}>
             vs {target} — Advantage
-            <Typography sx={{ ml: 1, fontSize: FONT_SIZES.xs, color: 'text.secondary', fontStyle: 'italic' }}>
+            <Typography sx={{ ...TEXT_STYLES.note, ml: 1, fontSize: FONT_SIZES.xs }}>
               ({sources.join(', ')})
             </Typography>
           </MenuItem>

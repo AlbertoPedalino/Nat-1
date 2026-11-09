@@ -1,5 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Styles of a piece on the battle map: the cell layout (art, name plate, HP or
 // death-save bars, reminders), handles, badges, condition pills and tooltips.
@@ -384,9 +385,7 @@ export const conditionTooltipBodySx = { p: 1 };
 
 export const conditionTooltipTitleSx = {
   mb: 0.55,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.md,
   color: VTT_COLORS.warning,
 };

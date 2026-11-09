@@ -4,9 +4,10 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -27,7 +28,7 @@ export function FeatureSection({ title, color, features }) {
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, textTransform: 'uppercase', color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.2), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.2), pb: 0.25, mb: 0.35 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (
@@ -71,7 +72,7 @@ function FeatureItem({ feature, tone }) {
         }}>
         <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: 600 }}>{feature.name}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {feature.source && <Typography sx={{ fontSize: FONT_SIZES.xxs, color: isSubclass ? subclassTone : 'text.secondary', fontStyle: 'italic' }}>{feature.source}</Typography>}
+          {feature.source && <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, color: isSubclass ? subclassTone : 'text.secondary' }}>{feature.source}</Typography>}
           {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: FONT_SIZES.micro, height: 16, color: 'text.secondary' }} />}
         </Box>
       </Box>

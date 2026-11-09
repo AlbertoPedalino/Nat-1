@@ -8,6 +8,7 @@ import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -225,10 +226,8 @@ const roundSx = {
   lineHeight: 1,
   px: 0.75,
   color: 'gmboard.vtt.accent',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
   whiteSpace: 'nowrap',
 };
 

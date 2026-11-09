@@ -35,6 +35,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -197,7 +198,7 @@ export default function SummonedCreaturePanel({
         onRollFormula={rollFormulaToast}
         bonusActionAccessory={divinePowerAccessory}
       />
-      <Typography sx={{ ...subSx, mt: 0.6, fontStyle: 'italic' }}>
+      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
         {config.levelClass
           ? `Scaled for ${config.levelClass} level ${resolvedClassLevel}.`
           : `Scaled for a level ${resolvedSpellLevel} spell slot.`}

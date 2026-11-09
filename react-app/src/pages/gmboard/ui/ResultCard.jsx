@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
 // Roll tab): a header band with an icon, a title and whatever `header` adds
@@ -73,9 +74,8 @@ const headerBandSx = {
 };
 
 const cardTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.lg,
-  letterSpacing: LETTER_SPACINGS.sm,
   color: 'primary.main',
 };
 

@@ -2,6 +2,7 @@ import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -96,9 +97,7 @@ export const hpToggleSx = {
   py: 0,
   color: 'text.secondary',
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
+  ...TEXT_STYLES.label,
   '& .MuiButton-startIcon': { mr: 0.4 },
   '&:hover': { color: 'text.primary' },
 };

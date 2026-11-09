@@ -9,8 +9,9 @@ import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import CampaignCalendarFields, { QUICK_HOURS, quickButtonSx } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The campaign's clock at a glance: date, time and weather in one strip, with
 // the quick steps of time passing. Setting the date, the season or a forced
@@ -84,17 +85,15 @@ const stripSx = {
 };
 
 const dateSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.title },
-  fontWeight: 700,
   lineHeight: 1.25,
   color: 'primary.main',
 };
 
 const timeSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.heading, sm: FONT_SIZES.display },
-  fontWeight: 700,
   lineHeight: 1.1,
 };
 

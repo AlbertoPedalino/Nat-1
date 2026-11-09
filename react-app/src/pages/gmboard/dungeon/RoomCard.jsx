@@ -6,6 +6,7 @@ import { diceText, encounterDetail, lootDetail } from '../../../shared/gmboard/r
 import { trapLabel } from '../../../shared/dungeon/roomMarkers.js';
 import { ResultCard, ResultLine, ResultSlot } from '../ui/ResultCard.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 function SlotBlock({ slot }) {
   const theme = useTheme();
@@ -72,7 +73,6 @@ export default function RoomCard({ room }) {
 }
 
 const dcSx = {
-  fontSize: FONT_SIZES.md,
-  color: 'text.secondary',
-  fontStyle: 'italic',
+  ...TEXT_STYLES.note, fontSize: FONT_SIZES.md,
+  
 };

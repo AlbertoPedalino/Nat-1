@@ -4,6 +4,7 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -25,7 +26,7 @@ export default function XpPanel({ character, dispatch }) {
           </Typography>
         </Box>
         <LinearProgress variant="determinate" value={progress} />
-        <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+        <Typography variant="caption" sx={{ ...TEXT_STYLES.note }}>
           Tracker only — stats use class levels (total {statsLevel}).
         </Typography>
         <XpDeltaControl

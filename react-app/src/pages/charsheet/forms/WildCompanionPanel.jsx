@@ -32,6 +32,7 @@ import {
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -119,7 +120,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           </Box>
         ) : null}
         <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" onRoll={rollCheck} onRollFormula={rollFormulaToast} />
-        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6 }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
           A Fey spirit; rolls its own Initiative and acts on its own turn. It can't attack, but takes other actions normally. Vanishes when you finish a Long Rest.
         </Typography>
       </Box>
@@ -154,7 +155,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: FONT_SIZES.md, py: '6px' } }}
       />
       {!familiars.length ? (
-        <Typography sx={{ ...subSx, fontStyle: 'italic' }}>Loading beasts…</Typography>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>Loading beasts…</Typography>
       ) : (
         <Stack spacing={0.5} sx={{ maxHeight: 260, overflow: 'auto' }}>
           {visible.map((beast) => (
@@ -170,10 +171,10 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
               typeLabel="Fey"
             />
           ))}
-          {!visible.length ? <Typography sx={{ ...subSx, fontStyle: 'italic' }}>No matches.</Typography> : null}
+          {!visible.length ? <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>No matches.</Typography> : null}
         </Stack>
       )}
-      <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
         {!canSummon
           ? 'No Wild Shape uses or spell slots left — finish a rest.'
           : `Summoning spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'one Wild Shape use'}; the familiar is Fey and lasts until a Long Rest.`}

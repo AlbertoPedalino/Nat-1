@@ -1,12 +1,13 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
 import { encounterDetail, lootDetail } from '../../gmboard/resultText.js';
 import { boardTone } from '../../gmboard/ui/resultVisuals.js';
 import { microLabelSx } from '../../ui/PanelHeader.jsx';
 import { boardInsetSx } from '../../gmboard/ui/surfaces.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
@@ -117,10 +118,8 @@ export default function HexResultSteps({ result }) {
 const boxSx = { ...boardInsetSx, p: 1.5 };
 
 const headerSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.md,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
   color: 'primary.main',
   mb: 0.75,
 };

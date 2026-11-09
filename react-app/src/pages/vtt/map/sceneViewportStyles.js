@@ -1,7 +1,8 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -81,10 +82,8 @@ export const placementTargetHintSx = {
   color: VTT_COLORS.accent,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.62)}`,
   boxShadow: UI_SHADOWS.float,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
 };
@@ -116,9 +115,8 @@ export const selectionToolbarSx = {
 
 export const selectionCountSx = {
   color: VTT_COLORS.accent,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 700,
   whiteSpace: 'nowrap',
 };
 
@@ -142,9 +140,8 @@ export const fullscreenSheetButtonSx = {
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.accent, 0.42),
   bgcolor: vttAlpha(VTT_COLORS.surface, 0.82),
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.96) },
 };
 
@@ -209,13 +206,11 @@ export const backgroundStripSx = {
 };
 
 export const placeholderSx = {
-  position: 'absolute',
+  ...TEXT_STYLES.note, position: 'absolute',
   inset: 0,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: 'text.secondary',
-  fontStyle: 'italic',
   textAlign: 'center',
   px: 2,
 };
@@ -228,7 +223,7 @@ export const distanceSx = {
   borderRadius: 1,
   bgcolor: vttAlpha(VTT_COLORS.surface, 0.9),
   color: VTT_COLORS.accent,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,
   whiteSpace: 'nowrap',
   pointerEvents: 'none',

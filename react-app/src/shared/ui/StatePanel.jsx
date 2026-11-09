@@ -1,5 +1,6 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from './fonts.js';
+import { FONT_SIZES } from './fonts.js';
+import { TEXT_STYLES } from './textStyles.js';
 
 // A page's whole-area state instead of its content (not configured, signed
 // out, nothing on the table yet, restoring the session): an icon — or a
@@ -33,11 +34,10 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   color: 'text.primary',
   fontSize: FONT_SIZES.body,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
+  
 };
 
 const messageSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxl, maxWidth: 520 };

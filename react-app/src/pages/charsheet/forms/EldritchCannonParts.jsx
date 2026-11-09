@@ -9,7 +9,8 @@ import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -116,12 +117,10 @@ const rulesToggleSx = {
 };
 
 const rulesToggleTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
   color: UI_COLORS.accentText,
-  textTransform: 'uppercase',
+  
 };
 
 const rulesToggleMetaSx = {
@@ -148,12 +147,9 @@ const rulesGroupSx = {
 };
 
 const rulesGroupTitleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xxs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.xxl,
   color: UI_COLORS.accentText,
-  textTransform: 'uppercase',
   mb: 0.25,
 };
 
@@ -170,10 +166,9 @@ const rulesRowSx = {
 const rulesLabelSx = {
   minWidth: 0,
   fontSize: FONT_SIZES.xxs,
-  fontWeight: 700,
+  ...TEXT_STYLES.label,
   color: UI_COLORS.textMuted,
-  textTransform: 'uppercase',
-  letterSpacing: LETTER_SPACINGS.sm,
+  
 };
 
 const rulesValueSx = {

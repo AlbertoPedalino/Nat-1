@@ -1,7 +1,8 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 export const panelRootSx = {
   display: 'grid',
   gap: 1,
@@ -69,10 +70,8 @@ export const addButtonSx = {
   borderColor: UI_COLORS.accent,
   borderRadius: 1,
   color: UI_COLORS.accent,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
   px: '14px',
   py: '5px',
   '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.2), borderColor: UI_COLORS.accentText },
@@ -85,8 +84,8 @@ export const inlineButtonSx = {
   px: 0.8,
   lineHeight: 1.3,
   borderRadius: 1,
-  fontFamily: UI_FONTS.display,
-  letterSpacing: LETTER_SPACINGS.sm,
+  ...TEXT_STYLES.title,
+  
 };
 
 export const compactInputSx = {
@@ -100,9 +99,8 @@ export const levelToggleSx = {
     minHeight: 0,
     px: '9px',
     py: '4px',
-    fontFamily: UI_FONTS.display,
+    ...TEXT_STYLES.title,
     fontSize: FONT_SIZES.xxs,
-    letterSpacing: LETTER_SPACINGS.lg,
     color: 'text.secondary',
     borderColor: 'divider',
     '&.Mui-selected': { color: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accent, 0.12), borderColor: UI_COLORS.accent },

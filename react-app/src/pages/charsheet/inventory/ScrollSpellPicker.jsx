@@ -3,10 +3,11 @@ import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { byName } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // A catalog with files missing is not kept: the next scroll opened asks again
 // for what failed.
@@ -94,9 +95,7 @@ const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'd
 const titleSx = {
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,
-  fontFamily: UI_FONTS.display,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
+  ...TEXT_STYLES.title,
   mb: 0.5,
 };
 const fieldSx = {

@@ -2,7 +2,8 @@ import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
 // the slot to create, convert or spend, the Wild Resurgence option, the Pact
@@ -145,7 +146,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
                 }}
               >
-                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
+                <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>
@@ -240,7 +241,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display }}>{value}</Typography>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>{value}</Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
               );

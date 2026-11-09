@@ -13,10 +13,11 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -220,10 +221,8 @@ const attitudeButtonSx = {
   flexDirection: { xs: 'row', sm: 'column' },
   justifyContent: 'center',
   gap: { xs: 1, sm: 0.15 },
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.md,
   '& small': {
     fontFamily: UI_FONTS.mono,
     fontSize: FONT_SIZES.xs,
@@ -249,17 +248,14 @@ const prominentMeterSx = {
 };
 
 const meterLabelSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
+  
 };
 
 const meterValueSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.heading,
-  fontWeight: 900,
   lineHeight: 1,
 };
 
@@ -289,19 +285,15 @@ const finalResultSx = {
 };
 
 const finalEyebrowSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 800,
-  letterSpacing: LETTER_SPACINGS.xl,
-  textTransform: 'uppercase',
   color: 'primary.main',
 };
 
 const finalResultTextSx = {
   my: 0.35,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.body, sm: FONT_SIZES.lead },
-  fontWeight: 800,
   lineHeight: 1.35,
 };
 
@@ -319,9 +311,8 @@ const actionButtonSx = {
   display: 'flex',
   flexDirection: 'column',
   gap: 0.25,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: { xs: FONT_SIZES.xs, sm: FONT_SIZES.sm },
-  fontWeight: 800,
   lineHeight: 1.25,
   '& small': {
     fontFamily: UI_FONTS.mono,

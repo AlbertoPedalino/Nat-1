@@ -18,6 +18,7 @@ import {
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -98,7 +99,7 @@ function ItemPlanPanel({
         {title}
       </Typography>
       {note ? (
-        <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs, fontStyle: 'italic' }}>
+        <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs }}>
           {note}
         </Typography>
       ) : null}

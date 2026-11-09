@@ -16,7 +16,7 @@ import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import {
   bucketCounts,
   isInWizardBook,
@@ -28,6 +28,7 @@ import { getPickerLimits } from './spellPickerLimits.js';
 import { spellPickerActions } from './spellPickerActions.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The sheet's Add / Remove Spell dialog: one caster class at a time, a spell
 // level, and the spells it may pick (spellPickerPool) — or, for a Wizard,
@@ -124,7 +125,7 @@ export function SpellPickerDialog({
               variant={pickerClassIndex === index ? 'filled' : 'outlined'}
               color={pickerClassIndex === index ? 'primary' : 'default'}
               onClick={() => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
-              sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.md }}
+              sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs }}
             />
           ))}
         </Box>
@@ -133,7 +134,7 @@ export function SpellPickerDialog({
       {activePicker ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
           <Box sx={{ ...sheetBoxSx, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.md }}>{activePicker.label}</Typography>
+            <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{activePicker.label}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>{activePicker.note}</Typography>
             <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
             {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.info }}>Spellbook {activeSpellbookSize}</Typography> : null}

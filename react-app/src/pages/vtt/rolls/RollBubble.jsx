@@ -3,9 +3,10 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -165,28 +166,22 @@ const failSx = {
 };
 
 const actorSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
   color: VTT_COLORS.accent,
   lineHeight: 1.2,
 };
 
 const labelSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.xxl,
-  textTransform: 'uppercase',
   color: 'text.secondary',
   mb: 0.3,
 };
 
 const natSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 900,
-  letterSpacing: LETTER_SPACINGS.xl,
   mb: 0.3,
 };
 
@@ -205,8 +200,7 @@ const modeChipSx = (chip) => ({
 
 
 const totalSx = {
-  fontFamily: UI_FONTS.display,
-  fontWeight: 900,
+  ...TEXT_STYLES.figure,
   lineHeight: 1,
   my: 0.2,
 };

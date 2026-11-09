@@ -1,4 +1,5 @@
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Small styles shared by the scene's panels (number fields, pill labels,
 // colour inputs).
@@ -7,8 +8,8 @@ export const numberSx = { width: 92 };
 
 export const pillLabelSx = {
   ml: 0.5,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.sm,
+  
 };
 

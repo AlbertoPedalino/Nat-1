@@ -2,7 +2,8 @@ import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { Images, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { MapPanel } from './MapPanel.jsx';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
 // gap that keeps it from touching one.
@@ -113,9 +114,8 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  letterSpacing: LETTER_SPACINGS.lg,
   color: 'primary.main',
   mb: 1,
 };

@@ -15,7 +15,8 @@ import {
   subscribeReminderHistory,
   suggestReminders,
 } from './reminderHistory.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES } from '../../ui/fonts.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -177,7 +178,6 @@ const addSx = {
   px: 0.8,
   py: 0,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.md,
-  textTransform: 'uppercase',
+  ...TEXT_STYLES.label,
+  
 };

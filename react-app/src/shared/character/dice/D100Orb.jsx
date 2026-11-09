@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // A d100 is close enough to a sphere that drawing one hundred independently
 // composited CSS planes buys very little motion and costs a great deal. This
@@ -103,8 +103,7 @@ const resultSx = {
   borderRadius: 999,
   bgcolor: 'rgba(9, 8, 7, 0.82)',
   boxShadow: '0 2px 9px rgba(0,0,0,0.52)',
-  fontFamily: UI_FONTS.display,
-  fontWeight: 800,
+  ...TEXT_STYLES.figure,
   lineHeight: 1,
   transition: 'opacity 150ms ease-out, transform 180ms cubic-bezier(0.2, 0.9, 0.25, 1.18)',
   '&[data-visible="true"]': {

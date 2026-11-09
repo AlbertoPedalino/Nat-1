@@ -1,7 +1,8 @@
 import { Box, IconButton } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import { UI_COLORS } from './colors.js';
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { FONT_SIZES } from './fonts.js';
+import { TEXT_STYLES } from './textStyles.js';
 
 // The small square button of a −/+ stepper (and its neighbours, such as an
 // item's remove button): bordered, quiet, gold on hover — red when `danger`.
@@ -49,7 +50,6 @@ const rowSx = {
 
 const countSx = {
   textAlign: 'center',
-  fontFamily: UI_FONTS.display,
-  fontWeight: 700,
+  ...TEXT_STYLES.figure,
   color: UI_COLORS.accentText,
 };

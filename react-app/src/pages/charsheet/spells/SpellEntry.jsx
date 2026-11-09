@@ -54,6 +54,7 @@ import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function SpellEntry({
   entry,
@@ -365,10 +366,8 @@ export default function SpellEntry({
                 >
                   <Typography
                     sx={{
-                      fontFamily: UI_FONTS.display,
+                      ...TEXT_STYLES.title,
                       fontSize: FONT_SIZES.xs,
-                      fontWeight: 700,
-                      letterSpacing: LETTER_SPACINGS.lg,
                       color: RICH_TEXT_ACCENT,
                       lineHeight: 1.15,
                     }}

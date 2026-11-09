@@ -2,8 +2,8 @@ import { Box } from '@mui/material';
 import CoinFace from './CoinFace.jsx';
 import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
-import { UI_FONTS } from '../../ui/fonts.js';
 import { clamp } from '../../numbers.js';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -203,8 +203,7 @@ const faceSx = {
   // drawn without a border the clip would have eaten. Opaque, or the board
   // shows through the die and it reads as glass rather than as a solid thing.
   bgcolor: 'rgb(196,160,78)',
-  fontFamily: UI_FONTS.display,
-  fontWeight: 700,
+  ...TEXT_STYLES.figure,
   backfaceVisibility: 'hidden',
 };
 

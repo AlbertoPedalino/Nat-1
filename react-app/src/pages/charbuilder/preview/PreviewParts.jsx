@@ -11,7 +11,8 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
@@ -28,10 +29,8 @@ export const SECTION_CARD_SX = {
 };
 
 export const SECTION_HEADER_SX = {
-  textTransform: 'uppercase',
-  letterSpacing: LETTER_SPACINGS.lg,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.sm,
-  fontWeight: 800,
   lineHeight: 1.2,
 };
 

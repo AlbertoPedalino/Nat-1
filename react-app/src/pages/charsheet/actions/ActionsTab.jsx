@@ -34,6 +34,7 @@ import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { useMasteryEntries } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -177,7 +178,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 return (
                   <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.surfaceHeader } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.accentText, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
+                    <Box component="td"><Typography sx={{ ...TEXT_STYLES.figure, color: UI_COLORS.accentText, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>
                 );

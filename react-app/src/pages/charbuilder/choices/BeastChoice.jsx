@@ -9,6 +9,7 @@ import { formatCr } from '../../../shared/bestiary/challengeRating.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -62,7 +63,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
 
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={limit} countLabel={`${selected.length}/${limit} known`}>
-      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs, fontStyle: 'italic' }}>
+      <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs }}>
         {lv < 2
           ? 'Wild Shape unlocks at Druid level 2.'
           : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}

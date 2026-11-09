@@ -245,6 +245,21 @@ test('letter spacing comes from LETTER_SPACINGS', () => {
     .filter((hit) => !hit.startsWith('data/')), []);
 });
 
+// Text treatments are TEXT_STYLES roles (shared/ui/textStyles.js): small
+// capitals are `label`, display-face titles and figures set their weight
+// through `title`/`figure`, quiet asides are `note`. The coin boxes take their
+// face from the coin variant.
+test('text treatments come from TEXT_STYLES', () => {
+  const allow = ['shared/ui/textStyles.js'];
+  assert.deepEqual(sourceLinesMatching(/textTransform:\s*'uppercase'/, { allow: [...allow,
+    'shared/character/inventory/CurrencyCoinBox.jsx', 'shared/character/inventory/CurrencyRow.jsx'] }), []);
+  assert.deepEqual(sourceLinesMatching(/fontFamily:\s*UI_FONTS\.display.*fontWeight|fontWeight.*fontFamily:\s*UI_FONTS\.display/, { allow }), []);
+  // Italic outside `note` is emphasis inside text (rich text, a stat block
+  // entry name) or the prose face's own flourish.
+  assert.deepEqual(sourceLinesMatching(/fontStyle:\s*'italic'/, { allow: [...allow,
+    'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx', 'pages/home/HomePage.jsx', 'pages/library/styles.js'] }), []);
+});
+
 // Corners are multiples of theme.shape.borderRadius (numbers in sx, or
 // cornerRadius for per-corner shapes), so a restyle changes them with the theme.
 // Pills (999px) and circles (50%) are shapes, not a radius.

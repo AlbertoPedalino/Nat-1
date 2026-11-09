@@ -7,8 +7,9 @@ import {
 } from '../../../shared/character/inventory/itemEffects.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
@@ -32,7 +33,7 @@ function TomeConsumePanel({ item, onConsume }) {
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.accentText }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
-        sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.md, borderColor: UI_COLORS.accentText, color: UI_COLORS.accentText, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.08), borderColor: UI_COLORS.accentText } }}>
+        sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, borderColor: UI_COLORS.accentText, color: UI_COLORS.accentText, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, 0.08), borderColor: UI_COLORS.accentText } }}>
         Read & Consume
       </Button>
     </Box>
@@ -46,7 +47,7 @@ function AbilityChoicePanel({ item, onPick }) {
 
   return (
     <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: LETTER_SPACINGS.lg, mb: 0.3 }}>
+      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.3 }}>
         Ability Choice
       </Typography>
       {groups.map((group, groupIdx) => {
@@ -74,7 +75,7 @@ function AbilityChoicePanel({ item, onPick }) {
                 return (
                   <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
                     onClick={() => togglePick(abil)}
-                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: FONT_SIZES.xs, fontFamily: UI_FONTS.display,
+                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: FONT_SIZES.xs, ...TEXT_STYLES.figure,
                       ...(isOn ? { bgcolor: uiAlpha(UI_COLORS.accentText, 0.18), color: UI_COLORS.accentText, borderColor: UI_COLORS.accentText } : { color: 'text.secondary' }) }}>
                     {ABILITY_ABBREVIATIONS[abil] || abil.toUpperCase()}
                   </Button>

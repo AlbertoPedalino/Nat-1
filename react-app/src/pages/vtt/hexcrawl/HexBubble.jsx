@@ -4,8 +4,9 @@ import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../share
 import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -117,17 +118,14 @@ const clickableSx = {
 };
 
 const coordSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  letterSpacing: LETTER_SPACINGS.lg,
-  textTransform: 'uppercase',
   color: 'text.secondary',
 };
 
 const headlineSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.body,
-  fontWeight: 700,
   color: VTT_COLORS.accent,
   lineHeight: 1.25,
 };

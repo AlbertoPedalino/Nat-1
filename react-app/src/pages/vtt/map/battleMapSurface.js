@@ -1,6 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Shared glass surface for every control floating over the battle map. Keeping
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
@@ -41,10 +42,9 @@ export const battleMapDialogTitleSx = {
   borderBottom: '1px solid',
   borderBottomColor: 'gmboard.vtt.accentBorder',
   color: 'primary.main',
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xl,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
+  
 };
 
 export const battleMapDialogContentSx = {

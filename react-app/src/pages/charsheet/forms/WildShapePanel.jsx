@@ -14,6 +14,7 @@ import { classLevel } from '../../../shared/character/progression/classLevel.js'
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -78,7 +79,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
           </Button>
         </Box>
         <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />
-        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6 }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6 }}>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
         </Typography>
       </Box>
@@ -92,7 +93,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
       {!forms.length ? (
-        <Typography sx={{ ...subSx, fontStyle: 'italic' }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>
           No forms chosen yet — pick beasts in the character builder (Class Choices → Wild Shape).
         </Typography>
       ) : (
@@ -117,7 +118,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         </Stack>
       )}
       {lv >= 2 ? (
-        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
+        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.6, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
           {usesLeft <= 0
             ? 'No Wild Shape uses left — finish a Short or Long Rest.'
             : `Transform spends one Wild Shape use (${usesLeft} left).`}

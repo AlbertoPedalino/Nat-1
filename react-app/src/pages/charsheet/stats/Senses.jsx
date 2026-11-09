@@ -7,9 +7,10 @@ import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptio
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -66,14 +67,14 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.05) } : undefined,
         }}
       >
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.lead, fontWeight: 700, color: color || UI_COLORS.accentText, flexShrink: 0 }}>
+        <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: color || UI_COLORS.accentText, flexShrink: 0 }}>
           {value}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
             {source ? (
-              <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', fontStyle: 'italic', opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
+              <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
                 {source}
               </Typography>
             ) : null}

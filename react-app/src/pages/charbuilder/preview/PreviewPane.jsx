@@ -33,6 +33,7 @@ import {
   PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -111,8 +112,8 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
             ...filledChipSx(NEUTRAL_TONE),
             height: 20,
             fontSize: FONT_SIZES.xxs,
-            textTransform: 'uppercase',
-            letterSpacing: LETTER_SPACINGS.lg,
+            ...TEXT_STYLES.label,
+            
           }}
         />
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.22) }} />
@@ -169,9 +170,8 @@ function ProficiencySection({ sections }) {
                 display: 'block',
                 color: PROFICIENCY_TONE,
                 fontSize: FONT_SIZES.xs,
-                fontWeight: 800,
-                letterSpacing: LETTER_SPACINGS.md,
-                textTransform: 'uppercase',
+                ...TEXT_STYLES.label,
+                
               }}
             >
               {section.title}

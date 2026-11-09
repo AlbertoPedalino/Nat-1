@@ -28,12 +28,13 @@ import {
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -191,7 +192,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 if (!group.length) return null;
                 return (
                   <Box key={cat}>
-                    <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xxl, textTransform: 'uppercase', color: ACTION_COLORS[cat], mb: 0.3 }}>
+                    <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: ACTION_COLORS[cat], mb: 0.3 }}>
                       {cat === 'bonus' ? 'Bonus Action' : 'Reaction'}
                     </Typography>
                     <Stack spacing={0.4}>
@@ -245,7 +246,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
           >
             Activate Cannon
           </Button>
-          <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.5, color: canCreate ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+          <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: canCreate ? 'text.secondary' : UI_COLORS.dangerMuted }}>
             {!canCreate
               ? 'No Long Rest use left and no spell slot to expend — finish a rest.'
               : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}

@@ -22,10 +22,11 @@ import {
   inventorySectionSx,
 } from './inventoryControls.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -160,7 +161,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
 
           <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.6 }} />
 
-          <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
+          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm, mb: 0.3 }}>
             {deferredSearch !== search
               ? 'Updating results...'
               : `${searchResults.length} of ${itemsDb.length} items`}
@@ -176,7 +177,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.surfaceHeader, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
+              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.surfaceHeader, color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
               + Add
             </Button>
           </Box>

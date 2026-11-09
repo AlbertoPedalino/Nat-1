@@ -8,11 +8,12 @@ import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIco
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -171,10 +172,8 @@ const sectionTitleSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 0.6,
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  fontWeight: 700,
-  letterSpacing: LETTER_SPACINGS.lg,
   color: 'gmboard.vtt.accent',
   pb: 0.6,
   borderBottom: '1px solid',

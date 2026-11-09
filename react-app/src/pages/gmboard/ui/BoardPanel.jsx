@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // A panel of the GM Board (Travel, Date & Time, Dungeon Explorer, Quest
 // Generator…): a bordered paper box whose first row is the icon and title,
@@ -41,8 +42,7 @@ const titleRowSx = {
 };
 
 const titleSx = {
-  fontFamily: UI_FONTS.display,
+  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xl,
-  letterSpacing: LETTER_SPACINGS.md,
   color: 'primary.main',
 };

@@ -13,13 +13,14 @@ import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
 import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -174,12 +175,12 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, fontWeight: 700, color: UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.sm, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography sx={{ ...TEXT_STYLES.title, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, color: UI_COLORS.accentText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, 0.45), bgcolor: uiAlpha(UI_COLORS.infoText, 0.08), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: '4px' } }}
+                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, 0.45), bgcolor: uiAlpha(UI_COLORS.infoText, 0.08), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: '4px' } }}
                   variant="outlined" />
               )}
             </Box>
@@ -200,7 +201,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
         }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
-              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, letterSpacing: LETTER_SPACINGS.lg, fontWeight: 700 }}>
+              <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText }}>
                 XP · Level {level}
               </Typography>
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', whiteSpace: 'nowrap' }}>
