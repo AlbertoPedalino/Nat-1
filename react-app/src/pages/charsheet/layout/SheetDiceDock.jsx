@@ -6,11 +6,10 @@ import { sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
-// bottom of the sheet, so a roll never needs a scroll back to the top.
-// On a phone a compact pill of two icons in the bottom right, where it covers
-// the least; on a tablet the labelled control, centred; on a desktop at the
-// left, clear of the toasts in the bottom right, and out in the empty margin
-// beside the sheet when the screen leaves room for it.
+// bottom of the sheet, centred on every screen, so a roll never needs a scroll
+// back to the top. On a phone it is a compact pill of two icons in solid gold:
+// small enough to cover little, bright enough to be found without looking for
+// it. From a tablet up, the labelled control.
 //
 // Sticky to the sheet, not fixed to the window: it rides the bottom edge of
 // whatever scrolls the sheet (the page, or the panel an embedded sheet sits
@@ -43,7 +42,8 @@ export default function SheetDiceDock({
         variant={phone ? 'icon' : 'text'}
         emptyText="No rolls yet. Make an ability check, save, or attack to see it here."
         placement="up"
-        sx={phone ? floatingSx : labelledPillSx}
+        surface={phone ? phoneSurface : undefined}
+        sx={phone ? phonePillSx : labelledPillSx}
       />
     </Box>
   );
@@ -68,23 +68,29 @@ const dockSx = {
   '& > *': { pointerEvents: 'auto' },
 };
 
-// An embedded sheet keeps the phone's bottom right, and centres it in its
-// panel on anything larger.
-const embeddedDockSx = { ...dockSx, justifyContent: { xs: 'flex-end', sm: 'center' } };
+// Centred in the sheet's own column, or in the panel an embedded sheet sits in.
+const embeddedDockSx = { ...dockSx, justifyContent: 'center' };
+const pageDockSx = { ...dockSx, ...sheetColumnSx(false), justifyContent: 'center' };
 
-// On its own page: bottom right on a phone, centred on a tablet, at the left of
-// the sheet's column on a desktop, and out in the margin left of the column
-// where that margin holds it.
-const SIDE_MARGIN_FITS = '@media (min-width: 1680px)';
-const pageDockSx = {
-  ...dockSx,
-  ...sheetColumnSx(false),
-  justifyContent: { xs: 'flex-end', sm: 'center', md: 'flex-start' },
-  [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0, px: 3 },
+// Floating over the sheet.
+const floatingSx = { boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}` };
+
+// The phone's pill: solid gold with dark icons and a faint gold halo, the one
+// bright thing at the bottom of a dark sheet; a touch larger to tap.
+const phoneSurface = {
+  groupSx: { bgcolor: 'primary.main', borderColor: 'primary.main' },
+  segmentSx: {
+    color: 'primary.contrastText',
+    px: 1.4,
+    py: 0.85,
+    '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, 0.12) },
+  },
+  dividerColor: uiAlpha(UI_COLORS.black, 0.3),
 };
 
-// Floating over the sheet. The icon pill is already one (DiceControl).
-const floatingSx = { boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}` };
+const phonePillSx = {
+  boxShadow: `0 6px 20px ${uiAlpha(UI_COLORS.black, 0.55)}, 0 0 0 4px ${uiAlpha(UI_COLORS.gold, 0.18)}`,
+};
 
 // The labelled control made into the same pill.
 const labelledPillSx = {
