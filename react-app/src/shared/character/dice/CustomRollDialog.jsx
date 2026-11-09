@@ -101,14 +101,18 @@ export default function CustomRollDialog({
         <Typography sx={CUSTOM_ROLL_SX.countLabel}>{signed(modifier)}</Typography>
         <Button size="small" variant="outlined" onClick={() => setModifier((m) => m + 1)} sx={CUSTOM_ROLL_SX.stepBtn}>+</Button>
       </Box>
-      {hasSelection && (
-        <Typography sx={CUSTOM_ROLL_SX.formula}>{formula}</Typography>
-      )}
-      {totalDice >= DICE_LIMITS.maxDice ? (
-        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', textAlign: 'center' }}>
-          Maximum {DICE_LIMITS.maxDice} dice per roll.
-        </Typography>
-      ) : null}
+      {/* The formula and the dice-cap lines always take their space, hidden when
+          empty: the dialog is centred, so a line appearing on the first tap would
+          shift every button under the next one. */}
+      <Typography sx={{ ...CUSTOM_ROLL_SX.formula, visibility: hasSelection ? 'visible' : 'hidden' }}>
+        {hasSelection ? formula : ' '}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{ color: 'text.secondary', display: 'block', textAlign: 'center', visibility: totalDice >= DICE_LIMITS.maxDice ? 'visible' : 'hidden' }}
+      >
+        Maximum {DICE_LIMITS.maxDice} dice per roll.
+      </Typography>
       {footer ? <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>{footer}</Box> : null}
     </SheetDialog>
   );
