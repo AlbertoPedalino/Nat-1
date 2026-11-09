@@ -266,6 +266,34 @@ test('selected states are styled only in the theme', () => {
   assert.deepEqual(sourceLinesMatching(/['"]&\s*\.Mui-selected/, { allow: ['app/theme.js'] }), []);
 });
 
+// Opacity is a step of OPACITY (shared/ui/colors.js): tints, washes, lines
+// and veils all read the same strengths. Map strokes, the grid and light
+// filters are drawing data and keep their own.
+test('opacities come from OPACITY', () => {
+  const allow = ['shared/ui/colors.js', 'shared/vtt/colors.js', 'shared/vtt/scene/imageFilters.js'];
+  assert.deepEqual(sourceLinesMatching(/\b(alpha|uiAlpha|vttAlpha)\((?:[^()]|\([^()]*\))*,\s*0?\.\d|\bopacity:\s*[^,}]*(?<![\w.])0?\.\d|[aA]lpha:\s*0?\.\d/, { allow })
+    .filter((hit) => !hit.startsWith('data/') && !hit.startsWith('adapters/')), []);
+});
+
+// Spacing is in theme units (numbers in sx, quarter steps), never pixels, so
+// density follows theme.spacing.
+test('spacing is in theme units', () => {
+  assert.deepEqual(sourceLinesMatching(/\b(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|rowGap|columnGap):\s*'-?\d*\.?\d+px'/), []);
+});
+
+// Weights, line heights and the app's layers come from their scales.
+test('font weights, line heights and layers come from their scales', () => {
+  assert.deepEqual(sourceLinesMatching(/fontWeight[:=]\s*[{"']?\d00\b/, { allow: ['shared/ui/fonts.js'] }), []);
+  assert.deepEqual(sourceLinesMatching(/lineHeight:\s*\d/, { allow: ['shared/ui/fonts.js'] }), []);
+  assert.deepEqual(sourceLinesMatching(/zIndex:\s*\d{2,}/, { allow: ['shared/ui/layers.js'] }), []);
+});
+
+// The app has one theme; a page keeps only its own sizes (the builder's
+// density rules), never a theme of its own.
+test('the app has one theme', () => {
+  assert.deepEqual(sourceFilesMatching(/\bcreateTheme\(/, { allow: ['app/theme.js'] }), []);
+});
+
 // Corners are multiples of theme.shape.borderRadius (numbers in sx, or
 // cornerRadius for per-corner shapes), so a restyle changes them with the theme.
 // Pills (999px) and circles (50%) are shapes, not a radius.
