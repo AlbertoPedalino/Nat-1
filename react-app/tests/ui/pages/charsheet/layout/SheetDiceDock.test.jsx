@@ -72,3 +72,14 @@ test('it floats at the bottom without taking clicks from what passes under it', 
   expect(roll).toHaveTextContent('Roll');
   expect(log).toHaveAccessibleName('Roll log, 0 rolls');
 });
+
+test('its chevron tucks it into a tab that brings it back, and the choice is kept', () => {
+  localStorage.clear();
+  const { unmount } = render(<SheetDiceDock rollLog={[]} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Hide dice' }));
+  expect(screen.queryByRole('group', { name: 'Dice' })).not.toBeInTheDocument();
+  unmount();
+  render(<SheetDiceDock rollLog={[]} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show dice' }));
+  expect(screen.getByRole('group', { name: 'Dice' })).toBeInTheDocument();
+});

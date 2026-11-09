@@ -5,19 +5,11 @@ import {
 } from 'lucide-react';
 import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
+import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
-
-function readCollapsed() {
-  return getStorageItem(COLLAPSED_KEY) === '1';
-}
-
-function writeCollapsed(value) {
-  setStorageItem(COLLAPSED_KEY, value ? '1' : '0');
-}
 
 // The GM's slider through the scene's backgrounds, along the bottom of the map
 // while a background is up. Only the GM ever gets it: players see whichever
@@ -35,13 +27,10 @@ export default function BackgroundStrip({
   // Removing deletes the uploaded file, so it takes a second click on the
   // same thumbnail's bin.
   const [armed, setArmed] = useState(null);
-  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [collapsed, setCollapsed] = useStoredFlag(COLLAPSED_KEY);
   const toggleCollapsed = () => {
     setArmed(null);
-    setCollapsed((current) => {
-      writeCollapsed(!current);
-      return !current;
-    });
+    setCollapsed((current) => !current);
   };
   const index = backgrounds.indexOf(selected);
   const step = (delta) => {
