@@ -1,17 +1,20 @@
 import { clamp } from '../numbers.js';
+import { UI_COLORS } from '../ui/colors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
 // Components should still prefer `gmboard.vtt.*` in `sx` when a theme token is
-// enough; both APIs are backed by this palette.
+// enough; both APIs are backed by this palette. Colours the map shares with
+// the rest of the interface (its gold, ink, text and status tones) are read
+// from UI_COLORS, so a new interface palette reaches the map too.
 export const VTT_COLORS = Object.freeze({
-  black: '#000000',
-  ink: '#0f0e0d',
+  black: UI_COLORS.black,
+  ink: UI_COLORS.inkDeep,
   viewport: '#0b0a09',
-  stitchBackground: '#12100e',
-  surfaceRaised: '#1a1713',
-  gold: '#e8c96a',
+  stitchBackground: UI_COLORS.ink,
+  surfaceRaised: UI_COLORS.surfaceDeep,
+  gold: UI_COLORS.goldBright,
   goldSoft: '#edc36f',
-  goldRoll: '#edd48a',
+  goldRoll: UI_COLORS.goldLight,
   goldHandle: '#f1d77d',
   goldPreview: '#f2df9d',
   goldBright: '#f4dda0',
@@ -21,15 +24,15 @@ export const VTT_COLORS = Object.freeze({
   panelText: '#d9cfb8',
   panelTextSoft: '#cdbb83',
   panelTextMuted: '#b9ad91',
-  panelTextFaint: '#9f947d',
-  railText: '#b8a87a',
+  panelTextFaint: UI_COLORS.textFaint,
+  railText: UI_COLORS.textRail,
   rollDetail: '#8a7a5a',
   selectText: '#eadba9',
   selectSurface: '#161411',
   sheetSurface: '#0a0909',
   overlaySurface: '#050507',
-  warning: '#d69245',
-  error: '#de675f',
+  warning: UI_COLORS.warning,
+  error: UI_COLORS.danger,
   danger: '#b3423a',
   dangerBright: '#df6b62',
   dangerDeep: '#8f2f34',
@@ -46,7 +49,7 @@ export const VTT_COLORS = Object.freeze({
   laser: '#ff5046',
   laserCore: '#ffebe6',
   laserText: '#ffd9d4',
-  white: '#ffffff',
+  white: UI_COLORS.white,
   deathText: '#f7e9dc',
   neutralMark: '#e2dac6',
   menuSuccess: '#70b78f',
