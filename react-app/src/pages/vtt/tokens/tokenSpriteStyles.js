@@ -1,5 +1,5 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 
@@ -8,7 +8,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 
 export const initialsSx = {
   fontSize: 'clamp(8px, 24cqmin, 18px)',
-  fontWeight: 800,
+  fontWeight: FONT_WEIGHTS.heavy,
   color: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
   pointerEvents: 'none',
 };
@@ -192,7 +192,7 @@ export const hpFillSx = {
 const textBaseSx = {
   position: 'relative',
   fontSize: 'clamp(6px, 11cqmin, 12px)',
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1,
   fontVariantNumeric: 'tabular-nums',
   // A dark outline keeps the figures readable over both the empty track and a
@@ -249,7 +249,7 @@ export const badgeSx = {
   bgcolor: VTT_COLORS.warning,
   color: VTT_COLORS.surface,
   fontSize: 'clamp(6px, 14cqmin, 10px)',
-  fontWeight: 800,
+  fontWeight: FONT_WEIGHTS.heavy,
   lineHeight: 'clamp(10px, 22cqmin, 16px)',
   boxSizing: 'border-box',
   textAlign: 'center',
@@ -343,7 +343,7 @@ export const reminderSx = {
   border: '1px solid',
   borderColor: 'info.main',
   fontSize: FONT_SIZES.md,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1.35,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -365,7 +365,7 @@ export const pillSx = {
   py: 0.25,
   borderRadius: 1.25,
   fontSize: FONT_SIZES.lg,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1.35,
   whiteSpace: 'nowrap',
   border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,

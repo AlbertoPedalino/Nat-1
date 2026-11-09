@@ -6,6 +6,7 @@ import {
   ChevronDown, Lock, LockOpen, MonitorOff, MonitorPlay, Radio, RadioTower,
 } from 'lucide-react';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Everything that decides what the table sees, in one place: whether this scene
 // is the live one, whether the picture is frozen while the GM prepares the next,
@@ -37,7 +38,7 @@ export default function LiveControls({
         size="small"
         color="inherit"
         variant="outlined"
-        startIcon={<Radio size={14} />}
+        startIcon={<Radio size={ICON_SIZES.sm} />}
         aria-pressed={false}
         onClick={onToggleLive}
       >
@@ -53,8 +54,8 @@ export default function LiveControls({
           size="small"
           color="success"
           variant="contained"
-          startIcon={<Radio size={14} />}
-          endIcon={<ChevronDown size={13} />}
+          startIcon={<Radio size={ICON_SIZES.sm} />}
+          endIcon={<ChevronDown size={ICON_SIZES.xs} />}
           aria-label="Live"
           aria-pressed
           aria-haspopup="menu"
@@ -65,7 +66,7 @@ export default function LiveControls({
           Live
           {/* The projector is a second screen nobody in the room can miss, but
               the GM's bar should still say it is attached. */}
-          {projectorAttached ? <MonitorPlay size={13} aria-hidden /> : null}
+          {projectorAttached ? <MonitorPlay size={ICON_SIZES.xs} aria-hidden /> : null}
         </Button>
       </Tooltip>
       <Tooltip
@@ -76,7 +77,7 @@ export default function LiveControls({
         <Button
           size="small"
           variant={projectorFollowing ? 'outlined' : 'contained'}
-          startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
+          startIcon={projectorFollowing ? <Lock size={ICON_SIZES.sm} /> : <LockOpen size={ICON_SIZES.sm} />}
           aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
           aria-pressed={!projectorFollowing}
           onClick={onToggleFreeze}
@@ -93,18 +94,18 @@ export default function LiveControls({
       >
         {projectorAttached ? (
           <MenuItem onClick={run(onStopProjector)}>
-            <ListItemIcon sx={iconSx}><MonitorOff size={15} /></ListItemIcon>
+            <ListItemIcon sx={iconSx}><MonitorOff size={ICON_SIZES.sm} /></ListItemIcon>
             <ListItemText primary="Stop projector mode" secondary="Closes the projector tab" />
           </MenuItem>
         ) : (
           <MenuItem onClick={run(onOpenProjector)}>
-            <ListItemIcon sx={iconSx}><MonitorPlay size={15} /></ListItemIcon>
+            <ListItemIcon sx={iconSx}><MonitorPlay size={ICON_SIZES.sm} /></ListItemIcon>
             <ListItemText primary="Projector mode" />
           </MenuItem>
         )}
         <Divider />
         <MenuItem onClick={run(onToggleLive)}>
-          <ListItemIcon sx={iconSx}><RadioTower size={15} /></ListItemIcon>
+          <ListItemIcon sx={iconSx}><RadioTower size={ICON_SIZES.sm} /></ListItemIcon>
           <ListItemText primary="Stop live" secondary="Players no longer see this scene" />
         </MenuItem>
       </Menu>

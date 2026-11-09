@@ -12,6 +12,7 @@ import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The campaign's clock at a glance: date, time and weather in one strip, with
 // the quick steps of time passing. Setting the date, the season or a forced
@@ -36,7 +37,7 @@ export default function ClockBar() {
               +{hours}h
             </Button>
           ))}
-          <Button size="small" variant="outlined" startIcon={<Pencil size={13} />} onClick={() => setEditing(true)}>
+          <Button size="small" variant="outlined" startIcon={<Pencil size={ICON_SIZES.xs} />} onClick={() => setEditing(true)}>
             Edit
           </Button>
         </Stack>
@@ -60,7 +61,7 @@ export default function ClockBar() {
         onClose={() => setEditing(false)}
         maxWidth="sm"
         title="Clock & weather"
-        icon={<CalendarDays size={18} />}
+        icon={<CalendarDays size={ICON_SIZES.lg} />}
         actions={<Button onClick={() => setEditing(false)}>Done</Button>}
       >
         <CampaignCalendarFields

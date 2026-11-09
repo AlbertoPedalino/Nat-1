@@ -20,6 +20,7 @@ import { TOOL_CATALOG } from './toolCatalog.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import SheetDialog from '../../shared/ui/SheetDialog.jsx';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -195,7 +196,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
   }, 'Campaign settings updated.');
 
   const button = <Button size="small" variant={groupId ? 'contained' : 'outlined'} color="primary"
-    startIcon={<Network size={14} />} onClick={handleOpen}
+    startIcon={<Network size={ICON_SIZES.sm} />} onClick={handleOpen}
     aria-label="Linked tools" sx={appTopBarButtonSx}>
     <Box component="span" sx={phoneHiddenLabelSx}>LINKS</Box>
   </Button>;
@@ -207,7 +208,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
       onClose={() => !working && setOpen(false)}
       maxWidth="sm"
       title="Linked tools"
-      icon={<Network size={18} />}
+      icon={<Network size={ICON_SIZES.lg} />}
       actions={<Button disabled={working} onClick={() => setOpen(false)}>Close</Button>}
     >
         {loading ? <LoadingLine centered label="Loading linked tools…" /> : <Stack spacing={2}>
@@ -230,7 +231,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               const singleDungeonBuilder = dungeonBuilders.length === 1 && dungeonSelection === dungeonBuilders[0].id;
               return <Stack key={rowKey(row)} direction="row" spacing={1}
                 sx={{ alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
-                <Icon size={18} />
+                <Icon size={ICON_SIZES.lg} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
                   <Typography component="div" variant="caption" sx={{ color: 'text.secondary' }}>{TOOL_UI[row.sectionKey].label}</Typography>
@@ -270,7 +271,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                 {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
                   size="small" disabled={working} aria-label={`Open ${row.name}`} onClick={() => setOpen(false)}>Open</Button>}
                 {groupId && <Tooltip title={`Unlink ${row.name}`}><span><IconButton size="small" color="error"
-                  aria-label={`Unlink ${row.name}`} disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={16} /></IconButton></span></Tooltip>}
+                  aria-label={`Unlink ${row.name}`} disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={ICON_SIZES.md} /></IconButton></span></Tooltip>}
               </Stack>;
             })}
           </Stack>
@@ -284,7 +285,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
             }}>
             {SECTION_KEYS.map((key) => <MenuItem key={`new:${key}`} value={`new:${key}`}>New {TOOL_UI[key].label}</MenuItem>)}
             {candidates.map((row) => <MenuItem key={rowKey(row)} value={rowKey(row)}>{row.name} · {TOOL_UI[row.sectionKey].label}</MenuItem>)}
-          </TextField> : <Button startIcon={<Plus size={16} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
+          </TextField> : <Button startIcon={<Plus size={ICON_SIZES.md} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
         </Stack>}
     </SheetDialog>
   </>;

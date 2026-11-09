@@ -34,6 +34,7 @@ import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -151,7 +152,7 @@ export default function CampaignsPage() {
             icon={Users}
             title="Campaigns live online"
             action={(
-              <Button variant="contained" startIcon={<LogIn size={16} />} onClick={() => setAuthOpen(true)}>
+              <Button variant="contained" startIcon={<LogIn size={ICON_SIZES.md} />} onClick={() => setAuthOpen(true)}>
                 Log in / Sign up
               </Button>
             )}
@@ -165,14 +166,14 @@ export default function CampaignsPage() {
                 <Typography component="h2" sx={sectionTitleSx}>Create a campaign</Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                   <TextField size="small" label="Campaign name" value={newName} onChange={(e) => setNewName(e.target.value)} fullWidth />
-                  <Button variant="contained" size="small" startIcon={<Plus size={14} />} onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</Button>
+                  <Button variant="contained" size="small" startIcon={<Plus size={ICON_SIZES.sm} />} onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</Button>
                 </Stack>
               </Box>
               <Box component="section" sx={setupPanelSx}>
                 <Typography component="h2" sx={sectionTitleSx}>Join with a code</Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                   <TextField size="small" label="Invite code" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} fullWidth />
-                  <Button variant="contained" size="small" startIcon={<Users size={14} />} onClick={handleJoin} disabled={busy} sx={setupActionSx}>Join</Button>
+                  <Button variant="contained" size="small" startIcon={<Users size={ICON_SIZES.sm} />} onClick={handleJoin} disabled={busy} sx={setupActionSx}>Join</Button>
                 </Stack>
               </Box>
             </Stack>
@@ -203,7 +204,7 @@ export default function CampaignsPage() {
                             size="small"
                             label={`Code: ${c.join_code}`}
                             onClick={() => copyCode(c.join_code)}
-                            icon={<Copy size={12} />}
+                            icon={<Copy size={ICON_SIZES.xs} />}
                             color="primary"
                             variant="outlined"
                             aria-label={`Copy invite code ${c.join_code}`}
@@ -215,11 +216,11 @@ export default function CampaignsPage() {
                         <Typography sx={metaSx}>{members.length} member{members.length === 1 ? '' : 's'}</Typography>
                         {isCampaignGm ? (
                           <IconButton size="small" onClick={() => handleDeleteCampaign(c)} title="Delete campaign" aria-label={`Delete campaign ${c.name}`} sx={dangerActionSx}>
-                            <Trash2 size={15} />
+                            <Trash2 size={ICON_SIZES.sm} />
                           </IconButton>
                         ) : (
                           <IconButton size="small" onClick={() => handleLeave(c.id)} title="Leave" aria-label={`Leave campaign ${c.name}`} sx={dangerActionSx}>
-                            <LogOut size={15} />
+                            <LogOut size={ICON_SIZES.sm} />
                           </IconButton>
                         )}
                       </Box>
@@ -245,7 +246,7 @@ export default function CampaignsPage() {
                                   <Box component="span" sx={characterNameRowSx}>
                                     <Typography component="span" sx={characterNameSx}>{ch.name || ch.id}</Typography>
                                     {!canEditChar ? (
-                                      <Chip component="span" size="small" icon={<Eye size={10} />} label="READ ONLY" sx={readOnlyChipSx} variant="outlined" />
+                                      <Chip component="span" size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" sx={readOnlyChipSx} variant="outlined" />
                                     ) : null}
                                   </Box>
                                   <Typography component="span" sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
@@ -261,7 +262,7 @@ export default function CampaignsPage() {
                               </Box>
                               {mine ? (
                                 <IconButton size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" aria-label={`Remove ${ch.name || ch.id} from campaign`} sx={dangerActionSx}>
-                                  <X size={15} />
+                                  <X size={ICON_SIZES.sm} />
                                 </IconButton>
                               ) : null}
                             </Box>

@@ -4,7 +4,7 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -68,7 +68,7 @@ function FeatureItem({ feature, tone }) {
           cursor: 'pointer',
           '&:hover': { bgcolor: UI_COLORS.surfaceRaised },
         }}>
-        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: 600 }}>{feature.name}</Typography>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>{feature.name}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {feature.source && <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, color: isSubclass ? subclassTone : 'text.secondary' }}>{feature.source}</Typography>}
           {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: FONT_SIZES.micro, height: 16, color: 'text.secondary' }} />}

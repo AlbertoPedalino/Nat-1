@@ -33,6 +33,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -98,7 +99,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Sparkles size={14} color={UI_COLORS.accentText} />
+          <Sparkles size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -130,7 +131,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <Sparkles size={14} color={UI_COLORS.accentText} />
+        <Sparkles size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
       <ToggleButtonGroup

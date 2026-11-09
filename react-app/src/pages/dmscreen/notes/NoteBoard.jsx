@@ -10,6 +10,7 @@ import { nextAnnouncement } from './announce.js';
 import { filterNotes, queryTokens } from '../search/search.js';
 import { useNoteDragReorder } from '../drag/useNoteDragReorder.js';
 import NoteCard from './NoteCard.jsx';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -87,14 +88,14 @@ export default function NoteBoard() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search size={16} aria-hidden="true" />
+                    <Search size={ICON_SIZES.md} aria-hidden="true" />
                   </InputAdornment>
                 ),
                 endAdornment: query ? (
                   <InputAdornment position="end">
                     <Tooltip title="Clear search (Esc)">
                       <IconButton size="small" aria-label="Clear search" onClick={() => setQuery('')}>
-                        <X size={14} />
+                        <X size={ICON_SIZES.sm} />
                       </IconButton>
                     </Tooltip>
                   </InputAdornment>
@@ -109,25 +110,25 @@ export default function NoteBoard() {
         <Typography variant="caption" role="status" aria-live="polite" sx={{ color: 'text.secondary' }}>
           {partial ? `${visibleNotes.length} of ${notes.length} notes` : ''}
         </Typography>
-        <Button variant="contained" startIcon={<Plus size={16} />} onClick={addNewNote}>
+        <Button variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>
           Add note
         </Button>
       </Box>
 
       {notes.length === 0 ? (
         <Paper variant="outlined" sx={emptySx}>
-          <StickyNote size={34} aria-hidden="true" />
+          <StickyNote size={ICON_SIZES.hero} aria-hidden="true" />
           <Typography variant="h2">Build your quick-reference screen</Typography>
           <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
             Keep house rules, NPC names, session hooks, loot, and reminders close during play.
           </Typography>
-          <Button variant="outlined" startIcon={<Plus size={16} />} onClick={addNewNote}>
+          <Button variant="outlined" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>
             Add first note
           </Button>
         </Paper>
       ) : visibleNotes.length === 0 ? (
         <Paper variant="outlined" sx={emptySx}>
-          <SearchX size={34} aria-hidden="true" />
+          <SearchX size={ICON_SIZES.hero} aria-hidden="true" />
           <Typography variant="h2">No notes match that search</Typography>
           <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
             Every word has to appear in a note's title or text.

@@ -32,6 +32,7 @@ import {
 import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
 
@@ -201,7 +202,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
 function InventorySectionTitle({ icon: Icon, label }) {
   return (
     <Typography sx={inventorySectionTitleSx}>
-      {Icon ? <Icon size={12} /> : null}
+      {Icon ? <Icon size={ICON_SIZES.xs} /> : null}
       {label}
     </Typography>
   );
@@ -210,7 +211,7 @@ function InventorySectionTitle({ icon: Icon, label }) {
 function SectionHeader({ icon: Icon, label }) {
   return (
     <Typography sx={inventorySectionRuleSx}>
-      {Icon ? <Icon size={12} /> : null}
+      {Icon ? <Icon size={ICON_SIZES.xs} /> : null}
       {label}
     </Typography>
   );

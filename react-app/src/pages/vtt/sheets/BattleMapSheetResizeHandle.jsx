@@ -12,6 +12,7 @@ import {
   sheetSplitAtPointer,
 } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function BattleMapSheetResizeHandle({ containerRef, value, onCommit }) {
   const pointerRef = useRef(null);
@@ -105,7 +106,7 @@ export default function BattleMapSheetResizeHandle({ containerRef, value, onComm
       onKeyDown={handleKeyDown}
       sx={handleSx}
     >
-      <GripVertical size={15} />
+      <GripVertical size={ICON_SIZES.sm} />
     </Box>
   );
 }

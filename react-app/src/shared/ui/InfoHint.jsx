@@ -1,5 +1,6 @@
 import { Box, Tooltip } from '@mui/material';
 import { Info } from 'lucide-react';
+import { ICON_SIZES } from './iconSizes.js';
 
 // A rule that only matters the first time, behind an icon. A panel that spells
 // out every one of them in a caption reads like documentation, and the control
@@ -8,7 +9,7 @@ export default function InfoHint({ text, label }) {
   return (
     <Tooltip title={text} enterTouchDelay={0} leaveTouchDelay={6000}>
       <Box component="span" role="button" tabIndex={0} aria-label={label} sx={infoHintSx}>
-        <Info size={13} />
+        <Info size={ICON_SIZES.xs} />
       </Box>
     </Tooltip>
   );

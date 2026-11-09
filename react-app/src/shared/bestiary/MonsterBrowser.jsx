@@ -24,6 +24,8 @@ import { usePagedList } from '../ui/usePagedList.js';
 import ShowMoreButton from '../ui/ShowMoreButton.jsx';
 import { LoadingLine } from '../ui/LoadStatus.jsx';
 import { SURFACES } from '../ui/surfaces.js';
+import { FONT_WEIGHTS } from '../ui/fonts.js';
+import { ICON_SIZES } from '../ui/iconSizes.js';
 
 const PAGE_SIZE = 50;
 
@@ -122,7 +124,7 @@ export default function MonsterBrowser({
           >
             <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography noWrap sx={{ fontWeight: 700 }}>{monster.name}</Typography>
+              <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{monster.name}</Typography>
               <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
                 {getType(monster.type)} · {monster.source}
               </Typography>
@@ -139,7 +141,7 @@ export default function MonsterBrowser({
                   onPick(monster);
                 }}
               >
-                <Plus size={16} />
+                <Plus size={ICON_SIZES.md} />
               </IconButton>
             </Tooltip>
           </Box>

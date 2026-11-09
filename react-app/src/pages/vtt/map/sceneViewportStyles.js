@@ -1,6 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -242,7 +242,7 @@ export const placementCountSx = {
   color: VTT_COLORS.surface,
   border: `1px solid ${VTT_COLORS.surface}`,
   fontSize: FONT_SIZES.md,
-  fontWeight: 900,
+  fontWeight: FONT_WEIGHTS.heavy,
   lineHeight: '22px',
   textAlign: 'center',
 };

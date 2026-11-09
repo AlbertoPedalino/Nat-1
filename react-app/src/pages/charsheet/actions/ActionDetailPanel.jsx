@@ -4,7 +4,7 @@ import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollT
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { detailPanelSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -47,7 +47,7 @@ function renderSafeInlineBody(value) {
       return;
     }
     nodes.push(bold ? (
-      <Box key={`b-${index}`} component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>
+      <Box key={`b-${index}`} component="span" sx={{ color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>
         {part}
       </Box>
     ) : (
@@ -147,7 +147,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               <Box sx={{ mt: 0.5, p: 0.5, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
-                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700, mb: 0.25 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold, mb: 0.25 }}>
                       Choose one:
                     </Typography>
                     {result.rolls.map((r, i) => (
@@ -158,7 +158,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                   </>
                 ) : (
                   <>
-                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700 }}>
+                    <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold }}>
                       d{tableMeta.sides}: {result.rolls[0].value}
                     </Typography>
                     <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mt: 0.25 }}>

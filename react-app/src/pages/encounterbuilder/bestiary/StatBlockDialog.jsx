@@ -8,6 +8,7 @@ import PlayerSheetPanel from '../campaign/PlayerSheetPanel.jsx';
 
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function StatBlockDialog() {
   const { state, dispatch } = useEncounterBuilder();
@@ -85,7 +86,7 @@ function StatBlockBody({ monster, allowAdd = false }) {
         {allowAdd && state.selectedStatblock?.combatantId == null ? (
           <Button
             variant="contained"
-            startIcon={<Plus size={16} />}
+            startIcon={<Plus size={ICON_SIZES.md} />}
             onClick={() => {
               dispatch({ type: 'addMonster', monster });
               dispatch({ type: 'closeStatblock' });

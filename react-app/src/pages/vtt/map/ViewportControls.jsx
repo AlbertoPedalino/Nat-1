@@ -12,6 +12,7 @@ import {
   selectionCountSx,
   selectionToolbarSx,
 } from './sceneViewportStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Buttons that sit on the map. Each is marked `data-viewport-control`, so the
 // map does not take their clicks for the start of a pan.
@@ -31,14 +32,14 @@ export function SelectionToolbar({
       <Button
         size="small"
         color="error"
-        startIcon={<Trash2 size={14} />}
+        startIcon={<Trash2 size={ICON_SIZES.sm} />}
         onClick={onDelete}
         disabled={!canDelete}
       >
         Delete
       </Button>
       <IconButton size="small" aria-label="Clear selection" onClick={onClear}>
-        <X size={14} />
+        <X size={ICON_SIZES.sm} />
       </IconButton>
     </Stack>
   );
@@ -57,7 +58,7 @@ export function CornerButtons({
         <Button
           size="small"
           variant={sheetOpen ? 'contained' : 'outlined'}
-          startIcon={<ScrollText size={14} />}
+          startIcon={<ScrollText size={ICON_SIZES.sm} />}
           aria-label={sheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
           onClick={() => onSheetOpenChange(!sheetOpen)}
           sx={fullscreenSheetButtonSx}
@@ -74,7 +75,7 @@ export function CornerButtons({
             onClick={onToggleControls}
             sx={mapIconButtonSx}
           >
-            {controlsOpen ? <X size={16} /> : <Settings2 size={16} />}
+            {controlsOpen ? <X size={ICON_SIZES.md} /> : <Settings2 size={ICON_SIZES.md} />}
           </IconButton>
         </Tooltip>
       ) : null}
@@ -92,7 +93,7 @@ export function FullscreenButton({ active, onToggle }) {
         onClick={onToggle}
         sx={fullscreenBtnSx}
       >
-        {active ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+        {active ? <Minimize2 size={ICON_SIZES.md} /> : <Maximize2 size={ICON_SIZES.md} />}
       </IconButton>
     </Tooltip>
   );

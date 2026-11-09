@@ -2,6 +2,7 @@ import { Box, Button, ButtonGroup } from '@mui/material';
 import { Moon, Sun } from 'lucide-react';
 import { phoneHiddenLabelSx } from '../../../shared/ui/iconOnlyOnPhone.js';
 import { actionButtonTextSx } from '../../../shared/ui/actionButton.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The header's actions: resting, which changes the character (Hit Dice, hit
 // points, resources). The dice float at the bottom of the sheet instead
@@ -17,10 +18,10 @@ export default function SheetActions({
       display: 'flex', gap: 1, flexShrink: 0, justifySelf: 'end', width: embedded ? '100%' : { xs: '100%', sm: 'auto' },
     }}>
       <ButtonGroup size="small" variant="outlined" aria-label="Rest" sx={groupSx}>
-        <Button color="warning" startIcon={<Sun size={14} />} onClick={onShortRest} aria-label="Short rest" sx={actionButtonTextSx}>
+        <Button color="warning" startIcon={<Sun size={ICON_SIZES.sm} />} onClick={onShortRest} aria-label="Short rest" sx={actionButtonTextSx}>
           Short<Box component="span" sx={phoneHiddenLabelSx}>&nbsp;rest</Box>
         </Button>
-        <Button color="info" startIcon={<Moon size={14} />} onClick={onLongRest} aria-label="Long rest" sx={actionButtonTextSx}>
+        <Button color="info" startIcon={<Moon size={ICON_SIZES.sm} />} onClick={onLongRest} aria-label="Long rest" sx={actionButtonTextSx}>
           Long<Box component="span" sx={phoneHiddenLabelSx}>&nbsp;rest</Box>
         </Button>
       </ButtonGroup>

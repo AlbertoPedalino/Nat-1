@@ -9,6 +9,7 @@ import { activePortalContainer } from '../../shared/ui/portalContainer.js';
 import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -28,7 +29,7 @@ function OpenPanel({ onClose }) {
       <Paper role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
         <PanelHeader icon={BookOpen} title="Compendium">
           <IconButton size="small" aria-label="Close the compendium" onClick={onClose} sx={{ ml: 'auto' }}>
-            <X size={16} />
+            <X size={ICON_SIZES.md} />
           </IconButton>
         </PanelHeader>
         <Box sx={{ flex: 1, minHeight: 0 }}>

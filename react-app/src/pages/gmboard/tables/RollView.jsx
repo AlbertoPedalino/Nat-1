@@ -7,12 +7,13 @@ import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
 import { TABLE_ICONS } from './tableCatalog.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -88,7 +89,7 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
         <Button
           size="small"
           variant="contained"
-          startIcon={<Dices size={14} />}
+          startIcon={<Dices size={ICON_SIZES.sm} />}
           aria-label={`Roll ${table.label}`}
           onClick={() => onRoll(table.id)}
         >
@@ -99,7 +100,7 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
             key={id}
             size="small"
             variant="outlined"
-            startIcon={<CornerDownRight size={13} />}
+            startIcon={<CornerDownRight size={ICON_SIZES.xs} />}
             aria-label={`Then roll ${TABLE_LABEL[id]}`}
             onClick={() => onRoll(id)}
             sx={followUpSx}
@@ -121,7 +122,7 @@ function HistoryRow({ roll, last }) {
 
   return (
     <Box component="li" sx={{ ...historyRowSx, borderBottom: last ? 'none' : '1px solid', borderColor: 'divider' }}>
-      <Icon size={13} color={theme.palette.text.secondary} />
+      <Icon size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
       <Typography sx={historyTableSx}>
         {TABLE_LABEL[roll.tableId]}{roll.tier ? ` T${roll.tier}` : ''}
       </Typography>
@@ -165,14 +166,14 @@ export default function RollView() {
 
       <Box sx={{ ...historySx, bgcolor: theme.palette.gmboard.panelOverlay }}>
         <Stack direction="row" spacing={1} sx={wrapRowSx}>
-          <History size={13} color={theme.palette.text.secondary} />
+          <History size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
           <Typography sx={historyTitleSx}>Roll History</Typography>
           <Typography sx={historyNoteSx}>Kept until this page is reloaded.</Typography>
           <Button
             size="small"
             variant="outlined"
             color="error"
-            startIcon={<Trash2 size={13} />}
+            startIcon={<Trash2 size={ICON_SIZES.xs} />}
             disabled={!rolls.length}
             onClick={() => dispatch({ type: 'clearRolls' })}
           >
@@ -253,7 +254,7 @@ const statValueSx = {
 
 const statEmphasisSx = {
   ...statValueSx,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   color: 'primary.main',
 };
 

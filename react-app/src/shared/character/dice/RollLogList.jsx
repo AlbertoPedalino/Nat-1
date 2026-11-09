@@ -8,6 +8,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -19,7 +20,7 @@ export default function RollLogList({
   return (
     <Stack spacing={0.75}>
       {onClear && log?.length ? (
-        <Button size="small" variant="outlined" startIcon={<Trash2 size={14} />} onClick={onClear} sx={clearSx}>
+        <Button size="small" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={onClear} sx={clearSx}>
           Clear
         </Button>
       ) : null}

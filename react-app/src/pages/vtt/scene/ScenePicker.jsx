@@ -18,6 +18,7 @@ import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -165,7 +166,7 @@ export default function ScenePicker({
               <Button
                 variant="contained"
                 size="small"
-                startIcon={<Plus size={15} />}
+                startIcon={<Plus size={ICON_SIZES.sm} />}
                 disabled={busy}
                 onClick={() => setCreatingFor(campaign.id)}
               >
@@ -178,7 +179,7 @@ export default function ScenePicker({
                 {scenes.map((scene) => (
                   <Box key={scene.id} sx={rowSx}>
                     <Box component="button" type="button" onClick={() => onOpen(scene.id)} sx={rowButtonSx}>
-                      <Map size={16} />
+                      <Map size={ICON_SIZES.md} />
                       <Typography sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {scene.name}
                       </Typography>
@@ -193,15 +194,15 @@ export default function ScenePicker({
                         color={scene.isLive ? 'primary' : 'default'}
                         onClick={() => handleLive(scene)}
                       >
-                        {scene.isLive ? <Radio size={15} /> : <RadioTower size={15} />}
+                        {scene.isLive ? <Radio size={ICON_SIZES.sm} /> : <RadioTower size={ICON_SIZES.sm} />}
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Rename">
-                      <IconButton size="small" onClick={() => handleRename(scene)}><Pencil size={15} /></IconButton>
+                      <IconButton size="small" onClick={() => handleRename(scene)}><Pencil size={ICON_SIZES.sm} /></IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
                       <IconButton size="small" color="error" onClick={() => handleDelete(scene)}>
-                        <Trash2 size={15} />
+                        <Trash2 size={ICON_SIZES.sm} />
                       </IconButton>
                     </Tooltip>
                   </Box>

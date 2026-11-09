@@ -4,7 +4,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeMarkMatches from '../search/rehypeMarkMatches.js';
 import { MARK_SX } from '../search/HighlightedText.jsx';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 
 // GFM without any raw-HTML plugin: note bodies are user text, so markup stays
 // markdown-only and anything HTML-like renders as inert characters.
@@ -70,7 +70,7 @@ const rootSx = {
 };
 
 const headingSx = {
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   color: 'primary.main',
   mt: 1.5,
   mb: 0.5,
@@ -130,6 +130,6 @@ const cellSx = {
   verticalAlign: 'top',
 };
 
-const thSx = { ...cellSx, fontWeight: 700, color: 'primary.main' };
+const thSx = { ...cellSx, fontWeight: FONT_WEIGHTS.bold, color: 'primary.main' };
 
 const tdSx = cellSx;

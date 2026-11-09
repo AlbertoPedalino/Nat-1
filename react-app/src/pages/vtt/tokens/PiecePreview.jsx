@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { initials } from '../../../shared/ui/textCase.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -223,7 +223,7 @@ const countSx = {
   color: VTT_COLORS.surface,
   border: `1px solid ${VTT_COLORS.surface}`,
   fontSize: FONT_SIZES.xs,
-  fontWeight: 900,
+  fontWeight: FONT_WEIGHTS.heavy,
   lineHeight: '18px',
   textAlign: 'center',
 };

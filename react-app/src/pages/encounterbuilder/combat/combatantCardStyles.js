@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 
@@ -33,7 +33,7 @@ export const identityClusterSx = {
   minWidth: 0,
 };
 
-export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.sm, fontWeight: 800 };
+export const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.heavy };
 
 export const nameButtonSx = { justifyContent: 'flex-start', minWidth: 0, px: 0.5 };
 
@@ -59,9 +59,9 @@ export const acBadgeSx = {
   lineHeight: 1,
 };
 
-export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.xl };
+export const acLabelSx = { fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.xl };
 
-export const acValueSx = { fontSize: FONT_SIZES.body, fontWeight: 800, color: 'text.primary' };
+export const acValueSx = { fontSize: FONT_SIZES.body, fontWeight: FONT_WEIGHTS.heavy, color: 'text.primary' };
 
 export const conditionsRowSx = {
   flex: '1 1 100%',

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { UI_FONTS } from '../../ui/fonts.js';
+import { UI_FONTS, FONT_WEIGHTS } from '../../ui/fonts.js';
 
 // A result, not another roll: roll history uses a quiet, flat silhouette that
 // identifies the die and keeps the face that actually came up readable.
@@ -40,7 +40,7 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
         fill="currentColor"
         fontFamily={UI_FONTS.display}
         fontSize={digits >= 3 ? 9 : digits === 2 ? 11 : 13}
-        fontWeight="800"
+        fontWeight={FONT_WEIGHTS.heavy}
       >
         {value}
       </text>

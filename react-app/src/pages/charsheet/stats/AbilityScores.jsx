@@ -12,6 +12,7 @@ import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -72,7 +73,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
               </Box>
               {visual ? (
                 <Tooltip title={tooltipText}>
-                  <visual.Icon size={12} style={{ color: visual.color, marginTop: '2px' }} />
+                  <visual.Icon size={ICON_SIZES.xs} style={{ color: visual.color, marginTop: '2px' }} />
                 </Tooltip>
               ) : null}
             </RollModeArea>

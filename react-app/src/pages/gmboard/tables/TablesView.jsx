@@ -10,6 +10,7 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function TablesView() {
   const { state, dispatch } = useGmBoard();
@@ -39,7 +40,7 @@ export default function TablesView() {
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}>
-        <Button size="small" variant="outlined" color="error" startIcon={<RotateCcw size={14} />} onClick={handleReset}>
+        <Button size="small" variant="outlined" color="error" startIcon={<RotateCcw size={ICON_SIZES.sm} />} onClick={handleReset}>
           Reset to defaults
         </Button>
         <Typography sx={saveHintSx}>Table edits save automatically.</Typography>
@@ -70,7 +71,7 @@ export default function TablesView() {
       </Tabs>
 
       <Box sx={{ ...activeHeaderSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
-        <ActiveIcon size={16} color={theme.palette.primary.main} />
+        <ActiveIcon size={ICON_SIZES.md} color={theme.palette.primary.main} />
         <Box sx={{ minWidth: 0 }}>
           <Typography sx={activeNameSx}>{activeTab.tableName}</Typography>
           <Typography sx={activeMetaSx}>Roll: {activeTab.roll} · Feeds: {activeTab.feeds}</Typography>

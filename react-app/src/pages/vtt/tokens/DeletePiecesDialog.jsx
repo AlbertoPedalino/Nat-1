@@ -1,6 +1,7 @@
 import { Alert, Button, DialogContentText } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function DeletePiecesDialog({
   open, pieces, busy, error, container, onCancel, onConfirm,
@@ -22,7 +23,7 @@ export default function DeletePiecesDialog({
           <Button
             color="error"
             variant="contained"
-            startIcon={<Trash2 size={16} />}
+            startIcon={<Trash2 size={ICON_SIZES.md} />}
             disabled={busy}
             onClick={onConfirm}
           >

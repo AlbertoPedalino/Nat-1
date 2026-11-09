@@ -10,6 +10,7 @@ import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
 // answer to a click and wants reading once, not living on the map.
@@ -44,7 +45,7 @@ export default function HexResultDialog({ result, onClose }) {
           </Box>
           {clock ? (
             <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>
-              <WeatherIcon size={13} />
+              <WeatherIcon size={ICON_SIZES.xs} />
               <Typography component="span" sx={weatherTextSx}>
                 {weatherName(clock.weather, clock.intensity)}
                 {disadvantage ? ' · disadvantage' : ''}
@@ -59,7 +60,7 @@ export default function HexResultDialog({ result, onClose }) {
       <Stack spacing={0.5} sx={{ mb: 1.25 }}>
         {clock ? (
           <Box sx={lineSx}>
-            <Clock size={14} />
+            <Clock size={ICON_SIZES.sm} />
             <Typography sx={lineTextSx}>{formatCampaignDateTime(clock)}</Typography>
           </Box>
         ) : null}

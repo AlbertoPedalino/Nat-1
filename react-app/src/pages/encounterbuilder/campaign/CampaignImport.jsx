@@ -6,6 +6,7 @@ import { clampInt } from '../../../shared/numbers.js';
 import LoadStatus from '../../../shared/ui/LoadStatus.jsx';
 import { runBusy } from '../../../shared/ui/busyAction.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -36,7 +37,7 @@ export default function CampaignImport() {
     <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
       <Stack spacing={1.5}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Users size={17} />
+          <Users size={ICON_SIZES.md} />
           <Typography variant="h2">Campaign Players</Typography>
         </Stack>
         <LoadStatus
@@ -69,7 +70,7 @@ export default function CampaignImport() {
               </FormControl>
               <Button
                 variant="outlined"
-                startIcon={<Users size={15} />}
+                startIcon={<Users size={ICON_SIZES.sm} />}
                 disabled={!selected.players.length || importing}
                 onClick={handleAdd}
               >

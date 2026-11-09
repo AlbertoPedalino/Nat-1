@@ -22,6 +22,7 @@ import { promptText } from '../../shared/ui/promptText.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -174,7 +175,7 @@ export default function CharacterPicker() {
         onClose={() => setDialogRow(null)}
         maxWidth="xs"
         title="Save Character"
-        icon={<Save size={20} />}
+        icon={<Save size={ICON_SIZES.xl} />}
         actions={(
           <Button onClick={() => setDialogRow(null)} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
             Cancel
@@ -183,13 +184,13 @@ export default function CharacterPicker() {
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 0.5 }}>
           <Button
-            fullWidth variant="outlined" color="secondary" startIcon={<Download size={16} />}
+            fullWidth variant="outlined" color="secondary" startIcon={<Download size={ICON_SIZES.md} />}
             onClick={() => { downloadJson(dialogRow); setDialogRow(null); }} sx={{ justifyContent: 'flex-start', py: 1 }}
           >
             Download JSON
           </Button>
           <Button
-            fullWidth variant="contained" color="primary" startIcon={<Save size={16} />}
+            fullWidth variant="contained" color="primary" startIcon={<Save size={ICON_SIZES.md} />}
             onClick={() => { saveLocal(dialogRow); setDialogRow(null); }} sx={{ justifyContent: 'flex-start', py: 1 }}
           >
             Save local

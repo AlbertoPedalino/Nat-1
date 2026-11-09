@@ -8,6 +8,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -58,7 +59,7 @@ export default function TokenComposer({
       <Button
         size="small"
         variant="outlined"
-        startIcon={open ? <X size={15} /> : <Plus size={15} />}
+        startIcon={open ? <X size={ICON_SIZES.sm} /> : <Plus size={ICON_SIZES.sm} />}
         disabled={blocked}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
@@ -102,7 +103,7 @@ export default function TokenComposer({
               onChange={setColor}
               label="Token color"
             />
-            <Button component="label" size="small" startIcon={<ImagePlus size={14} />}>
+            <Button component="label" size="small" startIcon={<ImagePlus size={ICON_SIZES.sm} />}>
               {image ? 'Change image' : 'Image'}
               <Box
                 component="input"
@@ -114,7 +115,7 @@ export default function TokenComposer({
             </Button>
             {image ? (
               <IconButton size="small" aria-label="Remove token image" onClick={() => setImage(null)}>
-                <X size={14} />
+                <X size={ICON_SIZES.sm} />
               </IconButton>
             ) : null}
             <Button

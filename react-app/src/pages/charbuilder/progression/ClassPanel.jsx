@@ -12,8 +12,9 @@ import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -29,12 +30,12 @@ function MulticlassProfDetails({ className, profs }) {
   }
   return (
     <Stack spacing={0.5}>
-      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+      <Typography variant="caption" sx={{ fontWeight: FONT_WEIGHTS.bold, color: 'text.secondary' }}>
         Multiclass proficiencies gained
       </Typography>
       {rows.map(({ label, values }) => (
         <Typography key={label} variant="caption" sx={{ color: 'text.secondary' }}>
-          <Box component="span" sx={{ fontWeight: 700 }}>{label}:</Box> {values.join(', ')}
+          <Box component="span" sx={{ fontWeight: FONT_WEIGHTS.bold }}>{label}:</Box> {values.join(', ')}
         </Typography>
       ))}
     </Stack>
@@ -60,10 +61,10 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
           >
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, width: '100%' }}>
               <Box sx={{ pt: 0.25 }}>
-                <Icon size={15} />
+                <Icon size={ICON_SIZES.sm} />
               </Box>
               <ListItemText
-                primary={<Typography sx={{ fontWeight: 500, fontSize: FONT_SIZES.lg }}>{cls.name}</Typography>}
+                primary={<Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.lg }}>{cls.name}</Typography>}
                 secondary={(
                   <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.25 }}>
                     <Chip size="small" label={`Hit Die ${hitDie}`} />
@@ -88,7 +89,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
               onClick={toggle}
               sx={{ borderRadius: 0, px: 1, color: 'text.secondary', alignSelf: 'stretch' }}
             >
-              {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
             </IconButton>
           ) : null}
         </Stack>
@@ -149,13 +150,13 @@ export default function ClassPanel({ state, character, dispatch }) {
       action={
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.5 }}>
           {activeExtra ? (
-            <Button size="small" color="error" startIcon={<Trash2 size={16} />} onClick={requestRemove}>
+            <Button size="small" color="error" startIcon={<Trash2 size={ICON_SIZES.md} />} onClick={requestRemove}>
               Remove
             </Button>
           ) : null}
           <Button
             size="small"
-            startIcon={<Plus size={16} />}
+            startIcon={<Plus size={ICON_SIZES.md} />}
             disabled={!canAddMulticlass}
             onClick={() => dispatch({ type: 'multiclass/add' })}
           >
@@ -245,7 +246,7 @@ export default function ClassPanel({ state, character, dispatch }) {
         <SheetDialog
           open
           title={pendingConfirm.title}
-          icon={<TriangleAlert size={20} />}
+          icon={<TriangleAlert size={ICON_SIZES.xl} />}
           onClose={() => setPendingConfirm(null)}
           actions={(
             <>

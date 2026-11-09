@@ -8,6 +8,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -40,7 +41,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
         sx={{ ...bubbleSx, ...(onClose ? clickableSx : null) }}
       >
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25 }}>
-          {TerrainIcon ? <TerrainIcon size={12} color={theme.palette.text.secondary} /> : null}
+          {TerrainIcon ? <TerrainIcon size={ICON_SIZES.xs} color={theme.palette.text.secondary} /> : null}
           <Typography sx={coordSx}>
             Hex {bubble.hex.q}, {bubble.hex.r}
             {/* What the leg cost, weather and mount included, rather than what
@@ -63,7 +64,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
             spacing={0.75}
             sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, OPACITY.edge) }}
           >
-            {WeatherIcon ? <WeatherIcon size={13} color={tone} /> : null}
+            {WeatherIcon ? <WeatherIcon size={ICON_SIZES.xs} color={tone} /> : null}
             <Typography sx={{ ...footerTextSx, color: tone }}>
               {weatherName(clock.weather, clock.intensity)}
               {disadvantage ? ' · Dis' : ''}

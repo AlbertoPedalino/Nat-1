@@ -32,7 +32,7 @@ import {
   PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, filledChipSx,
   PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const PANEL_SX = {
@@ -54,7 +54,7 @@ function PreviewHeader({ character, hp }) {
   ].filter(Boolean).join(' ');
   const metadata = [
     { key: 'identity', value: subtitle || 'No class selected' },
-    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: NEUTRAL_TONE, fontWeight: 800 } },
+    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: NEUTRAL_TONE, fontWeight: FONT_WEIGHTS.heavy } },
   ];
 
   return (
@@ -65,7 +65,7 @@ function PreviewHeader({ character, hp }) {
           <Typography
             variant="h2"
             noWrap
-            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: 1.15, fontWeight: 800 }}
+            sx={{ color: NEUTRAL_TONE, fontSize: FONT_SIZES.lead, lineHeight: 1.15, fontWeight: FONT_WEIGHTS.heavy }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -83,7 +83,7 @@ function AbilityScoreGrid({ scores }) {
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 } }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.sm }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.sm }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
               <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: 1.15, color: 'text.primary' }}>
@@ -143,7 +143,7 @@ function AcFormulasSection({ character }) {
           const blocked = (f.requiresNoArmor && hasArmor) ? 'Blocked: wearing armor' : '';
           return (
             <Box key={f.key} sx={{ minWidth: 0 }}>
-              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: 700, lineHeight: 1.25 }}>
+              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.25 }}>
                 {f.label}: {val}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: 1.35 }}>
@@ -239,7 +239,7 @@ function FeatNameCard({ name }) {
   return (
     <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${SOURCE_COLOR.feat}` }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Typography variant="body2" sx={{ color: SOURCE_COLOR.feat, fontWeight: 700 }}>
+        <Typography variant="body2" sx={{ color: SOURCE_COLOR.feat, fontWeight: FONT_WEIGHTS.bold }}>
           {name}
         </Typography>
       </CardContent>

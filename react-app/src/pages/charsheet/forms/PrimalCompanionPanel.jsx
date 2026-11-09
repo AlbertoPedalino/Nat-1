@@ -42,9 +42,10 @@ import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -122,7 +123,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={14} color={UI_COLORS.accentText} />
+        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
         <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
       </Box>
@@ -201,7 +202,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
         <Box sx={{ mt: 0.5 }}>
           {rules.map((rule) => (
             <Typography key={rule.title} sx={{ ...subSx, mt: 0.25 }}>
-              <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.accentText }}>{rule.title}.</Box> {rule.text}
+              <Box component="span" sx={{ fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentText }}>{rule.title}.</Box> {rule.text}
             </Typography>
           ))}
         </Box>

@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { normalizeRollIdentity } from './rollLogPresentation.js';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
 
 export default function RollActorLabel({ entry, sx }) {
   const identity = normalizeRollIdentity(entry);
@@ -9,7 +9,7 @@ export default function RollActorLabel({ entry, sx }) {
   return (
     <Typography component="div" sx={{
       display: 'flex', alignItems: 'center', gap: 0.5, fontSize: FONT_SIZES.sm,
-      fontWeight: 700, minWidth: 0, ...sx, color: identity.actorColor || 'text.primary',
+      fontWeight: FONT_WEIGHTS.bold, minWidth: 0, ...sx, color: identity.actorColor || 'text.primary',
     }}>
       {identity.actorShape ? (
         <Box component="span" sx={{ flexShrink: 0 }}>{identity.actorShape}{identity.actorLabel}</Box>

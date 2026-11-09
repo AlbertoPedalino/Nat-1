@@ -3,6 +3,7 @@ import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 
 export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);
@@ -11,7 +12,7 @@ export default function DifficultyBar({ encounter, party }) {
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total XP</Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography sx={{ fontWeight: 700 }}>{formatNumber(difficulty.totalXp)} XP</Typography>
+          <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{formatNumber(difficulty.totalXp)} XP</Typography>
           <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: UI_COLORS.onAccent }} />
         </Stack>
       </Stack>
@@ -38,7 +39,7 @@ export default function DifficultyBar({ encounter, party }) {
             }}
           >
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
-            <Typography sx={{ fontWeight: 700 }}>{formatNumber(difficulty.thresholds[index])}</Typography>
+            <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{formatNumber(difficulty.thresholds[index])}</Typography>
           </Box>
         ))}
       </Box>

@@ -6,6 +6,7 @@ import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { asArray } from '../../lists.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -29,7 +30,7 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
       label={label}
       icon={hasDesc ? (
         <ChevronDown
-          size={11}
+          size={ICON_SIZES.xxs}
           style={{
             color: CONDITION_ACCENT,
             transform: isOpen ? 'rotate(180deg)' : 'none',
@@ -39,7 +40,7 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
       ) : undefined}
       onClick={hasDesc ? onToggle : undefined}
       onDelete={onRemove}
-      deleteIcon={onRemove ? <X size={12} /> : undefined}
+      deleteIcon={onRemove ? <X size={ICON_SIZES.xs} /> : undefined}
       sx={{
         cursor: hasDesc ? 'pointer' : 'default',
         color: CONDITION_ACCENT,
@@ -63,7 +64,7 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
       <Box sx={cardHeaderSx}>
         <Typography sx={cardTitleSx}>{label}</Typography>
         <Box component="button" type="button" onClick={onClose} aria-label={`Close ${label}`} sx={cardCloseSx}>
-          <X size={12} />
+          <X size={ICON_SIZES.xs} />
         </Box>
       </Box>
       <EntryBlocks

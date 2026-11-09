@@ -22,6 +22,7 @@ import {
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import AreaEffectSelect from '../map/AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Shared by both audiences: drawing and notes are everyone's. The laser is its
 // own tool — it leaves nothing behind, so it does not belong beside the ones
@@ -43,15 +44,15 @@ export function DrawPanel({
         onChange={(_, value) => onPaintModeChange(value || 'select')}
         aria-label="Drawing tool"
       >
-        <Tooltip title="Draw"><ToggleButton value="draw" aria-label="Draw"><Pencil size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Draw"><ToggleButton value="draw" aria-label="Draw"><Pencil size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
         <Tooltip title="Mark an area of effect">
-          <ToggleButton value="area" aria-label="Area"><CircleDashed size={14} /></ToggleButton>
+          <ToggleButton value="area" aria-label="Area"><CircleDashed size={ICON_SIZES.sm} /></ToggleButton>
         </Tooltip>
         <Tooltip title="Erase your strokes">
-          <ToggleButton value="erase" aria-label="Erase"><Eraser size={14} /></ToggleButton>
+          <ToggleButton value="erase" aria-label="Erase"><Eraser size={ICON_SIZES.sm} /></ToggleButton>
         </Tooltip>
         <Tooltip title="Write on the map">
-          <ToggleButton value="text" aria-label="Write"><Type size={14} /></ToggleButton>
+          <ToggleButton value="text" aria-label="Write"><Type size={ICON_SIZES.sm} /></ToggleButton>
         </Tooltip>
       </ToggleButtonGroup>
 
@@ -84,7 +85,7 @@ export function DrawPanel({
         <Tooltip title="Undo your last mark">
           <span>
             <Button size="small" onClick={onUndoDrawing} disabled={busy || !canUndo}>
-              <Undo2 size={15} />
+              <Undo2 size={ICON_SIZES.sm} />
             </Button>
           </span>
         </Tooltip>
@@ -93,7 +94,7 @@ export function DrawPanel({
       <Button
         size="small"
         variant={paintMode === 'select' ? 'contained' : 'outlined'}
-        startIcon={<MousePointer2 size={14} />}
+        startIcon={<MousePointer2 size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange('select')}
       >
         Back to moving pieces
@@ -122,10 +123,10 @@ export function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetP
         onChange={(_, value) => value && onChange?.({ shape: value })}
         aria-label="Area shape"
       >
-        <Tooltip title="Circle"><ToggleButton value="circle" aria-label="Circle"><Circle size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Line"><ToggleButton value="line" aria-label="Line"><Minus size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Circle"><ToggleButton value="circle" aria-label="Circle"><Circle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Line"><ToggleButton value="line" aria-label="Line"><Minus size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
       </ToggleButtonGroup>
 
       {/* An effect paints the inside itself, so outline or fill only matters

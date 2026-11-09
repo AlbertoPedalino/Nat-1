@@ -10,7 +10,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -46,7 +46,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
           const max = Math.max(1, Number(fc.max) || 1);
           return (
             <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700, lineHeight: 1.1 }}>
+              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.1 }}>
                 {fc.label}
               </Typography>
               <Box sx={{ display: 'inline-flex', gap: 0.5, alignItems: 'center' }}>

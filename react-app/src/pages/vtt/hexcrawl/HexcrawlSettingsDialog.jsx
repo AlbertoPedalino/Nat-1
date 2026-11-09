@@ -14,6 +14,7 @@ import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -42,7 +43,7 @@ export default function HexcrawlSettingsDialog({
       titleSx={titleSx}
       title={(
         <>
-          <Settings size={15} />
+          <Settings size={ICON_SIZES.sm} />
           Hexcrawl settings
         </>
       )}
@@ -64,7 +65,7 @@ export default function HexcrawlSettingsDialog({
 
       <Box sx={columnsSx}>
         <Stack spacing={2} sx={sectionCardSx}>
-          <Typography sx={sectionTitleSx}><CalendarDays size={13} />Calendar</Typography>
+          <Typography sx={sectionTitleSx}><CalendarDays size={ICON_SIZES.xs} />Calendar</Typography>
           {sky ? (
             <CampaignCalendarFields
               clock={sky}
@@ -79,7 +80,7 @@ export default function HexcrawlSettingsDialog({
         </Stack>
 
         <Stack spacing={2} sx={sectionCardSx}>
-          <Typography sx={sectionTitleSx}><Hexagon size={13} />A hex is, unless it says otherwise</Typography>
+          <Typography sx={sectionTitleSx}><Hexagon size={ICON_SIZES.xs} />A hex is, unless it says otherwise</Typography>
           <SelectorGroup
             label="Terrain"
             options={TERRAIN_OPTIONS}
@@ -127,7 +128,7 @@ export default function HexcrawlSettingsDialog({
           read it too. */}
       {onHexColorChange ? (
         <Box sx={[sectionCardSx, { mt: 2 }]}>
-          <Typography sx={[sectionTitleSx, { mb: 1.25 }]}><Palette size={13} />Map</Typography>
+          <Typography sx={[sectionTitleSx, { mb: 1.25 }]}><Palette size={ICON_SIZES.xs} />Map</Typography>
           <Typography sx={groupLabelSx}>Explored hex colour</Typography>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
             {/* Deferred, as the grid's own colour is: a controlled colour

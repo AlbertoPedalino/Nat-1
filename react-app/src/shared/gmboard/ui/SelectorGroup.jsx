@@ -3,6 +3,7 @@ import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -49,7 +50,7 @@ export default function SelectorGroup({
               sx={optionSx(getTone ? getTone(option) : gold, selected, dense)}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                {Icon ? <Icon size={dense ? 12 : 13} /> : null}
+                {Icon ? <Icon size={dense ? ICON_SIZES.xs : ICON_SIZES.xs} /> : null}
                 <span>{getLabel(option)}</span>
               </Box>
               {sub ? <Typography component="span" sx={subLabelSx}>{sub}</Typography> : null}

@@ -8,12 +8,13 @@ import { boardTone } from '../../gmboard/ui/resultVisuals.js';
 import { microLabelSx } from '../../ui/PanelHeader.jsx';
 import { boardInsetSx } from '../../gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
     <Box sx={{ ...stepRowSx, borderBottom: last ? 'none' : '1px solid', borderColor: 'divider' }}>
       <Box sx={stepIconColSx}>
-        <Icon size={15} color={iconColor} />
+        <Icon size={ICON_SIZES.sm} color={iconColor} />
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         {label ? <Typography sx={stepLabelSx}>{label}</Typography> : null}

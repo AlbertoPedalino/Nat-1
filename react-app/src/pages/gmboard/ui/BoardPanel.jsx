@@ -2,6 +2,7 @@ import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // A panel of the GM Board (Travel, Date & Time, Dungeon Explorer, Quest
 // Generator…): a bordered paper box whose first row is the icon and title,
@@ -15,7 +16,7 @@ export default function BoardPanel({
     <Stack spacing={spacing} sx={panelSx}>
       <Box sx={headRowSx}>
         <Box sx={titleRowSx}>
-          {Icon ? <Icon size={14} color={theme.palette.primary.main} /> : null}
+          {Icon ? <Icon size={ICON_SIZES.sm} color={theme.palette.primary.main} /> : null}
           <Typography sx={titleSx}>{title}</Typography>
           {titleAdornment}
         </Box>

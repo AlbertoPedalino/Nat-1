@@ -1,8 +1,9 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -13,7 +14,7 @@ function GuideCard({ title, icon: Icon, children }) {
   return (
     <Box sx={cardSx}>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 1 }}>
-        {Icon ? <Icon size={15} color={theme.palette.primary.main} /> : null}
+        {Icon ? <Icon size={ICON_SIZES.sm} color={theme.palette.primary.main} /> : null}
         <Typography sx={cardTitleSx}>{title}</Typography>
       </Stack>
       <Stack spacing={0.75}>{children}</Stack>
@@ -144,7 +145,7 @@ const stepMarkerSx = {
   borderColor: 'primary.main',
   color: 'primary.main',
   fontSize: FONT_SIZES.xs,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
 };
 
 const kwSx = {

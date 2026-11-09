@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material';
 import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
-import { FONT_SIZES } from '../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../ui/fonts.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -49,7 +49,7 @@ export function EntryBlocks({
       {grouped.map((block, index) => {
         if (block.kind === 'heading') {
           return (
-            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: 800, color: headingColor, lineHeight: 1.25, fontSize: headingFontSize }}>
+            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: FONT_WEIGHTS.heavy, color: headingColor, lineHeight: 1.25, fontSize: headingFontSize }}>
               {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`h-${index}`} strongColor={strongColor} /> : block.text}
             </Typography>
           );
@@ -69,7 +69,7 @@ export function EntryBlocks({
           return (
             <Box key={`tbl-${index}`} sx={{ overflowX: 'auto' }}>
               {block.caption ? (
-                <Typography variant="body2" sx={{ fontWeight: 800, color: headingColor, mb: 0.25, fontSize: headingFontSize }}>
+                <Typography variant="body2" sx={{ fontWeight: FONT_WEIGHTS.heavy, color: headingColor, mb: 0.25, fontSize: headingFontSize }}>
                   {block.caption}
                 </Typography>
               ) : null}

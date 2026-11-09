@@ -14,6 +14,7 @@ import { pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The scene panel's Pictures section: which picture is on show, the battlemap,
 // the backgrounds, and images placed on the map as pieces.
@@ -49,7 +50,7 @@ export function PicturesControls({
         {scene.imagePath ? (
           <Tooltip title="Remove battlemap">
             <IconButton size="small" color="error" disabled={busy} aria-label="Remove battlemap" onClick={onRemoveMap}>
-              <Trash2 size={15} />
+              <Trash2 size={ICON_SIZES.sm} />
             </IconButton>
           </Tooltip>
         ) : null}
@@ -72,7 +73,7 @@ export function PicturesControls({
         {scene.backgroundPath ? (
           <Tooltip title="Remove the background on show">
             <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={() => onRemoveBackground()}>
-              <Trash2 size={15} />
+              <Trash2 size={ICON_SIZES.sm} />
             </IconButton>
           </Tooltip>
         ) : null}
@@ -89,7 +90,7 @@ export function PicturesControls({
         size="small"
         variant="outlined"
         fullWidth
-        startIcon={<ImagePlus size={15} />}
+        startIcon={<ImagePlus size={ICON_SIZES.sm} />}
         disabled={busy}
         onClick={() => extraRef.current?.click()}
       >
@@ -119,11 +120,11 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
       sx={compact ? compactSwitchSx : null}
     >
       <ToggleButton value="map" aria-label="Show the battlemap">
-        <Grid3x3 size={14} />
+        <Grid3x3 size={ICON_SIZES.sm} />
         <Box component="span" sx={pillLabelSx}>Battlemap</Box>
       </ToggleButton>
       <ToggleButton value="background" aria-label="Show the background">
-        <ImageIcon size={14} />
+        <ImageIcon size={ICON_SIZES.sm} />
         <Box component="span" sx={pillLabelSx}>Background</Box>
       </ToggleButton>
     </ToggleButtonGroup>

@@ -1,9 +1,9 @@
-import { FONT_SIZES } from '../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../shared/ui/fonts.js';
 // The looks the compendium's parts share (search, catalogs, books).
 
 // An entry's name on one line, cut with an ellipsis.
 export const entryNameSx = {
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',

@@ -41,3 +41,11 @@ export const LETTER_SPACINGS = Object.freeze({
   xl: '0.1em',
   xxl: '0.12em',
 });
+
+// Font weights. Georgia has two (regular, bold); Cinzel also draws `heavy`
+// for the loudest numbers and titles.
+export const FONT_WEIGHTS = Object.freeze({
+  regular: 400,
+  bold: 700,
+  heavy: 800,
+});

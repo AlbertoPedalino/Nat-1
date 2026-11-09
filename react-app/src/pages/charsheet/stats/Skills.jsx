@@ -14,6 +14,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -115,7 +116,7 @@ export default function Skills({ C, sheet, onRoll }) {
               </Typography>
               {visual && (
                 <Tooltip title={skillTooltip}>
-                  <visual.Icon size={11} style={{ color: visual.color, marginLeft: '2px' }} />
+                  <visual.Icon size={ICON_SIZES.xxs} style={{ color: visual.color, marginLeft: '2px' }} />
                 </Tooltip>
               )}
             </Box>

@@ -14,6 +14,7 @@ import InitiativeLaunchDialog from '../builder/InitiativeLaunchDialog.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -37,7 +38,7 @@ export default function LibraryView() {
             <Typography variant="h2">Library</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>
           </Box>
-          <Button color="error" variant="outlined" startIcon={<Trash2 size={15} />} onClick={clearAll} disabled={!items.length}>
+          <Button color="error" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={clearAll} disabled={!items.length}>
             Clear All
           </Button>
         </Stack>
@@ -46,7 +47,7 @@ export default function LibraryView() {
         groups.map((group) => (
           <Stack key={group.quest ? `quest:${group.quest}` : 'unassigned'} spacing={1}>
             <Typography variant="h2" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <ScrollText size={17} />
+              <ScrollText size={ICON_SIZES.md} />
               {group.quest || 'Unassigned'}
               <Typography component="span" variant="caption" sx={{ color: 'text.secondary' }}>
                 {group.items.length}
@@ -100,7 +101,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           {enc.quest ? (
             <Chip
               size="small"
-              icon={<ScrollText size={13} />}
+              icon={<ScrollText size={ICON_SIZES.xs} />}
               label={enc.quest}
             />
           ) : null}
@@ -128,7 +129,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         <Button
           size="small"
           variant="outlined"
-          startIcon={<Upload size={14} />}
+          startIcon={<Upload size={ICON_SIZES.sm} />}
           onClick={() => {
             dispatch({ type: 'loadLibraryEncounter', entry: enc, monsters });
             notify('success', `"${enc.name}" loaded in Builder.`);
@@ -139,7 +140,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         <Button
           size="small"
           variant="contained"
-          startIcon={<Play size={14} />}
+          startIcon={<Play size={ICON_SIZES.sm} />}
           onClick={() => dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters })}
           disabled={missingMonster}
         >
@@ -153,7 +154,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
               onClick={() => setInitiativeOpen(true)}
               disabled={missingMonster}
             >
-              <SlidersHorizontal size={15} />
+              <SlidersHorizontal size={ICON_SIZES.sm} />
             </IconButton>
           </span>
         </Tooltip>
@@ -162,7 +163,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
             size="small"
             variant="contained"
             color="secondary"
-            startIcon={<RotateCcw size={14} />}
+            startIcon={<RotateCcw size={ICON_SIZES.sm} />}
             onClick={() => dispatch({ type: 'resumeFight', entry: fight, monsters })}
           >
             Resume
@@ -172,7 +173,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           size="small"
           color="error"
           variant="outlined"
-          startIcon={<Trash2 size={14} />}
+          startIcon={<Trash2 size={ICON_SIZES.sm} />}
           onClick={() => {
             if (!confirmAction('Delete this entry from the library?')) return;
             dispatch({ type: 'deleteLibraryEncounter', id: enc.id });

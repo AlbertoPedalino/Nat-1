@@ -1,6 +1,7 @@
 import { Button, Stack } from '@mui/material';
 import { Upload } from 'lucide-react';
 import { useRef } from 'react';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
   const inputRef = useRef(null);
@@ -31,7 +32,7 @@ export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
           event.target.value = '';
         }}
       />
-      <Button variant="outlined" size="small" startIcon={<Upload size={16} />} onClick={() => inputRef.current?.click()} sx={buttonSx}>
+      <Button variant="outlined" size="small" startIcon={<Upload size={ICON_SIZES.md} />} onClick={() => inputRef.current?.click()} sx={buttonSx}>
         Load Sheet JSON
       </Button>
     </Stack>

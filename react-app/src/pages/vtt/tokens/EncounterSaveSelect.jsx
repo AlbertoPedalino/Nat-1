@@ -1,6 +1,7 @@
 import { Cloud } from 'lucide-react';
 import { Box, MenuItem, TextField } from '@mui/material';
 import { cloudBadgeSx, instanceNameSx, instanceRowSx } from './encounterImportStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The Encounter Builder save to import from; one only in the cloud is badged.
 export default function EncounterSaveSelect({
@@ -21,7 +22,7 @@ export default function EncounterSaveSelect({
             <Box component="span" sx={instanceNameSx}>{instance.name || instance.id}</Box>
             {instance.hasLocal ? null : (
               <Box component="span" sx={cloudBadgeSx}>
-                <Cloud size={12} aria-hidden />
+                <Cloud size={ICON_SIZES.xs} aria-hidden />
                 Cloud
               </Box>
             )}

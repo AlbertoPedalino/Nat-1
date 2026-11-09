@@ -20,6 +20,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -262,7 +263,7 @@ export default function FloatingSheetPanel({
         onPointerCancel={endDrag}
         sx={headerSx}
       >
-        <GripHorizontal size={15} aria-hidden="true" />
+        <GripHorizontal size={ICON_SIZES.sm} aria-hidden="true" />
         <Typography sx={titleSx}>Sheet</Typography>
         <Box sx={{ flex: 1 }} />
         {choices.length > 1 || (choices.length && !picked) ? (
@@ -283,7 +284,7 @@ export default function FloatingSheetPanel({
           </Box>
         ) : null}
         <IconButton size="small" aria-label="Close floating sheet" onClick={onClose} sx={closeSx}>
-          <X size={15} />
+          <X size={ICON_SIZES.sm} />
         </IconButton>
       </Stack>
       <Box sx={contentSx}>{children}</Box>
@@ -296,7 +297,7 @@ export default function FloatingSheetPanel({
         onPointerCancel={endResize}
         sx={resizeHandleSx}
       >
-        <MoveDiagonal2 size={15} />
+        <MoveDiagonal2 size={ICON_SIZES.sm} />
       </IconButton>
     </Box>
   );

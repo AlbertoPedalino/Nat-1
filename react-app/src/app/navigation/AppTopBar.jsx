@@ -6,6 +6,7 @@ import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { APP_TOP_BAR_HEIGHT, appTopBarButtonSx, appTopBarFontSx } from '../../shared/ui/appBar.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 export { APP_TOP_BAR_HEIGHT };
 
@@ -27,7 +28,7 @@ export default function AppTopBar({
               variant="outlined"
               color="primary"
               aria-label="Home"
-              startIcon={<Home size={14} />}
+              startIcon={<Home size={ICON_SIZES.sm} />}
               sx={appTopBarButtonSx}
             >
               <Box component="span" sx={phoneHiddenLabelSx}>HOME</Box>
@@ -41,7 +42,7 @@ export default function AppTopBar({
               variant="outlined"
               color="primary"
               aria-label={`Back to ${backLabel}`}
-              startIcon={<ArrowLeft size={14} />}
+              startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
               sx={appTopBarButtonSx}
             >
               <Box component="span" sx={phoneHiddenLabelSx}>{backLabel}</Box>

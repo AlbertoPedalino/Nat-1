@@ -6,6 +6,7 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -40,7 +41,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
         aria-controls={bodyId}
         sx={sectionHeaderSx}
       >
-        <Box component="span" sx={sectionIconSx}><Icon size={15} strokeWidth={1.8} /></Box>
+        <Box component="span" sx={sectionIconSx}><Icon size={ICON_SIZES.sm} strokeWidth={1.8} /></Box>
         <Box component="span" sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
           <Typography component="span" sx={sectionTitleSx}>{title}</Typography>
           {open ? null : (
@@ -53,7 +54,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
           component="span"
           sx={{ display: 'flex', color: VTT_COLORS.textSecondary, transition: 'transform 150ms', transform: open ? 'rotate(180deg)' : 'none' }}
         >
-          <ChevronDown size={15} />
+          <ChevronDown size={ICON_SIZES.sm} />
         </Box>
       </ButtonBase>
       <CollapsibleBody open={open} id={bodyId}>

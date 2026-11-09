@@ -7,6 +7,8 @@ import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
 import { StatBlockPanel } from '../bestiary/StatBlockDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
@@ -33,7 +35,7 @@ export default function CombatView() {
     return (
       <Paper sx={{ p: 4, bgcolor: 'background.paper', textAlign: 'center' }}>
         <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
-          <Swords size={28} />
+          <Swords size={ICON_SIZES.display} />
           <Typography variant="h2">No active encounter</Typography>
           <Typography sx={{ color: 'text.secondary' }}>Launch an encounter from Builder or resume a saved fight from Library.</Typography>
           <Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>
@@ -64,20 +66,20 @@ export default function CombatView() {
               <Box>
                 <Typography variant="h2">Round {combat.round}</Typography>
                 <Typography sx={{ color: 'text.secondary' }}>
-                  Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: 800 }}>{current?.name || '—'}</Box>
+                  Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>
                 </Typography>
               </Box>
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                <Button variant="outlined" startIcon={<ArrowLeft size={15} />} onClick={() => dispatch({ type: 'prevTurn' })}>
+                <Button variant="outlined" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'prevTurn' })}>
                   Previous
                 </Button>
-                <Button variant="contained" color="error" endIcon={<ArrowRight size={15} />} onClick={() => dispatch({ type: 'nextTurn' })}>
+                <Button variant="contained" color="error" endIcon={<ArrowRight size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'nextTurn' })}>
                   Next
                 </Button>
-                <Button variant="outlined" startIcon={<RotateCcw size={15} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>
+                <Button variant="outlined" startIcon={<RotateCcw size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>
                   Reroll All
                 </Button>
-                <Button variant="outlined" startIcon={<X size={15} />} onClick={handleClose}>
+                <Button variant="outlined" startIcon={<X size={ICON_SIZES.sm} />} onClick={handleClose}>
                   Close Encounter
                 </Button>
               </Stack>

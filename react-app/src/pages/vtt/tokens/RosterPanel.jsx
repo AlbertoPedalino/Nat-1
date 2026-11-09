@@ -5,6 +5,7 @@ import { usePortraits } from '../../../shared/character/profile/usePortraits.js'
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import TokenComposer from './TokenComposer.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -114,7 +115,7 @@ export default function RosterPanel({
         <Button
           size="small"
           variant="outlined"
-          startIcon={<Skull size={15} />}
+          startIcon={<Skull size={ICON_SIZES.sm} />}
           disabled={placementDisabled || busy}
           onClick={onPlaceMonster}
         >
@@ -123,7 +124,7 @@ export default function RosterPanel({
         <Button
           size="small"
           variant="outlined"
-          startIcon={<Swords size={15} />}
+          startIcon={<Swords size={ICON_SIZES.sm} />}
           disabled={placementDisabled || busy}
           onClick={onImportEncounter}
         >

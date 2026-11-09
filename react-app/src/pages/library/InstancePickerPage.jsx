@@ -9,6 +9,7 @@ import { resolveTool } from './logic/tools.js';
 import CharacterPicker from './CharacterPicker.jsx';
 import SectionPicker from './SectionPicker.jsx';
 import * as s from './styles.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 export default function InstancePickerPage() {
   const { tool } = useParams();
@@ -41,7 +42,7 @@ export default function InstancePickerPage() {
           <meta.icon size={30} strokeWidth={1.5} />
         </Box>
         <Typography sx={s.titleSx}>{meta.label}</Typography>
-        <Button {...newButtonProps} variant="contained" startIcon={<Plus size={16} />} sx={s.newBtnSx}>
+        <Button {...newButtonProps} variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} sx={s.newBtnSx}>
           New {meta.label}
         </Button>
       </Box>

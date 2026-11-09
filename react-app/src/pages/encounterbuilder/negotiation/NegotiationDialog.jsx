@@ -13,11 +13,12 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -52,7 +53,7 @@ export default function NegotiationDialog({ open, onClose }) {
       open={open}
       onClose={onClose}
       title="Negotiation"
-      icon={<Handshake size={20} />}
+      icon={<Handshake size={ICON_SIZES.xl} />}
       showClose
       maxWidth="sm"
       fullScreen={mobile}
@@ -151,7 +152,7 @@ export default function NegotiationDialog({ open, onClose }) {
                   onClick={() => resolve(id)}
                   sx={actionButtonSx}
                 >
-                  <Icon size={18} />
+                  <Icon size={ICON_SIZES.lg} />
                   <span>{action.label}</span>
                   <small>{formatActionDelta(action)}</small>
                 </Button>
@@ -226,7 +227,7 @@ const attitudeButtonSx = {
   '& small': {
     fontFamily: UI_FONTS.mono,
     fontSize: FONT_SIZES.xs,
-    fontWeight: 600,
+    fontWeight: FONT_WEIGHTS.bold,
     opacity: OPACITY.veil,
   },
 };
@@ -273,7 +274,7 @@ const currentStateSx = {
 const currentResultSx = {
   mt: 0.25,
   fontSize: FONT_SIZES.xxl,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1.35,
 };
 
@@ -317,7 +318,7 @@ const actionButtonSx = {
   '& small': {
     fontFamily: UI_FONTS.mono,
     fontSize: { xs: FONT_SIZES.xxs, sm: FONT_SIZES.xxs },
-    fontWeight: 600,
+    fontWeight: FONT_WEIGHTS.bold,
     opacity: OPACITY.heavy,
     lineHeight: 1.25,
   },

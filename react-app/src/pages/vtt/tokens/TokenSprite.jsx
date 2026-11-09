@@ -21,6 +21,7 @@ import {
 } from './tokenSpriteStyles.js';
 import { isDying } from '../../../shared/character/combat/mortality.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -228,7 +229,7 @@ export default function TokenSprite({
           }}
           sx={rotateHandleSx}
         >
-          <RotateCw size={10} strokeWidth={2.8} />
+          <RotateCw size={ICON_SIZES.xxs} strokeWidth={2.8} />
         </Box>
       ) : null}
 

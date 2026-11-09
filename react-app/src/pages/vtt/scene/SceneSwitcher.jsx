@@ -9,6 +9,7 @@ import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -56,7 +57,7 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
           onClick={open}
           sx={buttonSx}
         >
-          <Layers size={17} />
+          <Layers size={ICON_SIZES.md} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -80,7 +81,7 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
             onClick={() => choose(entry.id)}
           >
             <ListItemIcon sx={iconSx}>
-              {entry.isLive ? <Radio size={15} /> : null}
+              {entry.isLive ? <Radio size={ICON_SIZES.sm} /> : null}
             </ListItemIcon>
             <Typography noWrap sx={nameSx}>{entry.name}</Typography>
           </MenuItem>

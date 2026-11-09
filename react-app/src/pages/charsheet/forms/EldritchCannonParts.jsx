@@ -9,7 +9,7 @@ import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 
@@ -68,7 +68,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: OPACITY.solid }} />
-          <Typography sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.md, fontWeight: 700, color: 'text.primary' }}>{mode.name}</Typography>
+          <Typography sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: 'text.primary' }}>{mode.name}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
             {mode.attackBonus != null ? (
               <AttackRollButton

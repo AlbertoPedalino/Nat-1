@@ -3,6 +3,7 @@ import { Box, Button, Collapse } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -26,7 +27,7 @@ export default function MarkerRow({ label, count = 0, pills, onClear, belowRow, 
           size="small"
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
-          startIcon={open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          startIcon={open ? <ChevronUp size={ICON_SIZES.sm} /> : <ChevronDown size={ICON_SIZES.sm} />}
           sx={toggleSx}
         >
           {label}{count ? ` (${count})` : ''}

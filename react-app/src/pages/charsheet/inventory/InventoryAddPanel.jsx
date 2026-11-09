@@ -28,6 +28,7 @@ import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -140,8 +141,8 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
           size="small"
           aria-expanded={addPanelOpen}
           onClick={() => setAddPanelOpen((prev) => !prev)}
-          startIcon={addPanelOpen ? null : <Plus size={12} />}
-          endIcon={addPanelOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          startIcon={addPanelOpen ? null : <Plus size={ICON_SIZES.xs} />}
+          endIcon={addPanelOpen ? <ChevronDown size={ICON_SIZES.xs} /> : <ChevronRight size={ICON_SIZES.xs} />}
           sx={goldToggleSx(addPanelOpen)}
         >
           {addPanelOpen ? 'Close' : 'Add Item'}

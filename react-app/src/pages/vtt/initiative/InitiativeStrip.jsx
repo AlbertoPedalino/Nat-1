@@ -5,11 +5,12 @@ import {
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -56,7 +57,7 @@ export default function InitiativeStrip({
           <Tooltip title="Previous turn">
             <span>
               <IconButton size="small" aria-label="Previous turn" disabled={busy} onClick={() => onStep?.(-1)} sx={stepButtonSx}>
-                <ChevronLeft size={16} />
+                <ChevronLeft size={ICON_SIZES.md} />
               </IconButton>
             </span>
           </Tooltip>
@@ -96,7 +97,7 @@ export default function InitiativeStrip({
               </Box>
               <Typography component="span" sx={[nameSx, !entry.active && compactNameSx]}>{entry.name}</Typography>
               {controls && entry.hiddenFromPlayers ? (
-                <Box component="span" aria-label="Hidden from players" sx={hiddenBadgeSx}><EyeOff size={10} /></Box>
+                <Box component="span" aria-label="Hidden from players" sx={hiddenBadgeSx}><EyeOff size={ICON_SIZES.xxs} /></Box>
               ) : null}
               </Box>
             </Box>
@@ -107,7 +108,7 @@ export default function InitiativeStrip({
             <Tooltip title="Next turn">
               <span>
                 <IconButton size="small" aria-label="Next turn" disabled={busy} onClick={() => onStep?.(1)} sx={stepButtonSx}>
-                  {busy ? <CircularProgress size={14} /> : <ChevronRight size={16} />}
+                  {busy ? <CircularProgress size={14} /> : <ChevronRight size={ICON_SIZES.md} />}
                 </IconButton>
               </span>
             </Tooltip>
@@ -118,7 +119,7 @@ export default function InitiativeStrip({
                 onClick={(event) => setMenuAnchor(event.currentTarget)}
                 sx={stepButtonSx}
               >
-                <Swords size={14} />
+                <Swords size={ICON_SIZES.sm} />
               </IconButton>
             </Tooltip>
           </>
@@ -147,7 +148,7 @@ export function InitiativeButton({ choices = [], onChoose }) {
       <Button
         size="small"
         variant="outlined"
-        startIcon={<Swords size={14} />}
+        startIcon={<Swords size={ICON_SIZES.sm} />}
         onClick={(event) => setAnchor(event.currentTarget)}
       >
         Initiative
@@ -167,7 +168,7 @@ function FightMenu({ anchor, choices, selectedKey = null, onChoose, onClose }) {
           onClick={() => { onClose(); onChoose?.(choice); }}
         >
           <ListItemText primary={choice.name} />
-          {choice.key === selectedKey ? <Check size={14} /> : null}
+          {choice.key === selectedKey ? <Check size={ICON_SIZES.sm} /> : null}
         </MenuItem>
       ))}
       {selectedKey ? (
@@ -312,7 +313,7 @@ const avatarSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
   color: VTT_COLORS.text,
   fontSize: FONT_SIZES.md,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
 };
 
 const offBoardAvatarSx = {

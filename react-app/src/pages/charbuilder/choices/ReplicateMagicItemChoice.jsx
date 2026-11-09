@@ -17,8 +17,9 @@ import {
 } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -55,14 +56,14 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
             {item ? <ItemNameIcon item={item} /> : null}
             <ListItemText
               primary={(
-                <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}>
+                <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.regular }}>
                   {name}
                 </Typography>
               )}
               secondary={source || null}
               slotProps={{ secondary: { noWrap: true, sx: { fontSize: FONT_SIZES.xxs } } }}
             />
-            {active ? <Check size={16} color="currentColor" /> : null}
+            {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
           </ListItemButton>
           <IconButton
             size="small"
@@ -71,7 +72,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
             onClick={toggle}
             sx={{ borderRadius: 0, px: 1, color: 'text.secondary' }}
           >
-            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
           </IconButton>
         </Stack>
       )}
@@ -95,7 +96,7 @@ function ItemPlanPanel({
   );
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.sm, fontWeight: 700 }}>
+      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold }}>
         {title}
       </Typography>
       {note ? (

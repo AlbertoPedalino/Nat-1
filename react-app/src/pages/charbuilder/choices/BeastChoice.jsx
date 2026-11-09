@@ -8,8 +8,9 @@ import { classLevel } from '../../../shared/character/progression/classLevel.js'
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -79,14 +80,14 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
                   <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.75, px: 1, gap: 0.75 }}>
                     <ListItemText
                       primary={(
-                        <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}>
+                        <Typography noWrap sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.regular }}>
                           {beast.name}
                         </Typography>
                       )}
                       secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
                       slotProps={{ secondary: { noWrap: true, sx: { fontSize: FONT_SIZES.xxs } } }}
                     />
-                    {active ? <Check size={16} color="currentColor" /> : null}
+                    {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
                   </ListItemButton>
                 </Box>
               );

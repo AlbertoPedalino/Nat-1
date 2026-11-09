@@ -7,6 +7,7 @@ import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { makeId } from '../../../shared/ids.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -88,7 +89,7 @@ export default function NotesTab({ sheet }) {
           <PageTab key={page.id} page={page} active={i === activeIdx} onClick={() => setActiveIdx(i)} />
         ))}
         <IconButton size="small" onClick={addPage} sx={{ color: 'primary.main', p: 0.25 }}>
-          <Plus size={14} />
+          <Plus size={ICON_SIZES.sm} />
         </IconButton>
       </Box>
 
@@ -114,11 +115,11 @@ export default function NotesTab({ sheet }) {
           </Typography>
         )}
         <IconButton size="small" onClick={() => setEditingName(editingName === activeIdx ? null : activeIdx)} sx={{ color: 'text.secondary', p: 0.25 }}>
-          {editingName === activeIdx ? <Check size={13} /> : <PencilLine size={13} />}
+          {editingName === activeIdx ? <Check size={ICON_SIZES.xs} /> : <PencilLine size={ICON_SIZES.xs} />}
         </IconButton>
         {pages.length > 1 && (
           <IconButton size="small" onClick={() => deletePage(activeIdx)} sx={{ color: 'error.main', p: 0.25, ml: 'auto' }}>
-            <Minus size={14} />
+            <Minus size={ICON_SIZES.sm} />
           </IconButton>
         )}
       </Box>

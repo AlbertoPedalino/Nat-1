@@ -20,6 +20,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -99,7 +100,7 @@ export default function Movement({ C, sheet }) {
       <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : 'primary.main'}>
         {hasPenalty ? (
           <Tooltip title={reason}>
-            <AlertCircle size={12} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />
+            <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />
           </Tooltip>
         ) : null}
       </PanelHeader>

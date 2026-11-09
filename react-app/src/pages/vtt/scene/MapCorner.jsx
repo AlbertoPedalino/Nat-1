@@ -6,6 +6,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
 // gap that keeps it from touching one.
@@ -45,7 +46,7 @@ export default function MapCorner({
             onClick={() => onOpenChange?.(!open)}
             sx={buttonSx}
           >
-            {open ? <X size={16} /> : <Images size={16} />}
+            {open ? <X size={ICON_SIZES.md} /> : <Images size={ICON_SIZES.md} />}
           </IconButton>
         </Tooltip>
       </Stack>

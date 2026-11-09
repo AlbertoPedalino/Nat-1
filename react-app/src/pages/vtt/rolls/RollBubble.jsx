@@ -3,11 +3,12 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -57,7 +58,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
       >
         {onDismiss ? (
           <Box aria-hidden sx={closeSx}>
-            <X size={11} strokeWidth={2.6} />
+            <X size={ICON_SIZES.xxs} strokeWidth={2.6} />
           </Box>
         ) : null}
 
@@ -189,7 +190,7 @@ const natSx = {
 const modeChipSx = (chip) => ({
   height: 18,
   fontSize: FONT_SIZES.xxxs,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1,
   mb: 0.25,

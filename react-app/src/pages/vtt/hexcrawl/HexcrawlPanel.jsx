@@ -19,10 +19,11 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -156,7 +157,7 @@ function NextHexLine({ terrain, clock, mountSpeed }) {
 
   return (
     <Box sx={nextHexSx}>
-      <Icon size={16} color={VTT_COLORS.accent} />
+      <Icon size={ICON_SIZES.md} color={VTT_COLORS.accent} />
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography sx={nextHexTitleSx}>Next hex · {formatDuration(travel.hours)}</Typography>
         <Typography sx={effectSx}>
@@ -222,7 +223,7 @@ function Chip({ icon: Icon, label, missing = false, tone = null }) {
         ...(missing ? missingChipSx : null),
       }}
     >
-      {Icon ? <Icon size={12} aria-hidden /> : null}
+      {Icon ? <Icon size={ICON_SIZES.xs} aria-hidden /> : null}
       {label}
     </Box>
   );
@@ -239,7 +240,7 @@ function LastHexCard({ last, onOpenResult }) {
     <Box sx={lastCardSx}>
       <Typography sx={sectionSx}>Last hex visited</Typography>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
-        <Box sx={{ pt: 0.25 }}><TerrainIcon size={16} color={VTT_COLORS.accent} /></Box>
+        <Box sx={{ pt: 0.25 }}><TerrainIcon size={ICON_SIZES.md} color={VTT_COLORS.accent} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={lastHexSx}>
             Hex {last.hex.q}, {last.hex.r}
@@ -263,7 +264,7 @@ function LastHexCard({ last, onOpenResult }) {
             </Typography>
           ) : null}
           {onOpenResult ? (
-            <Button size="small" sx={lastButtonSx} startIcon={<Dices size={13} />} onClick={onOpenResult}>
+            <Button size="small" sx={lastButtonSx} startIcon={<Dices size={ICON_SIZES.xs} />} onClick={onOpenResult}>
               See the rolls
             </Button>
           ) : null}
@@ -296,7 +297,7 @@ const nextHexSx = {
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
 };
-const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.accent };
+const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.2, color: VTT_COLORS.accent };
 
 const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
 
@@ -341,7 +342,7 @@ const lastHexSx = {
   color: VTT_COLORS.text,
 };
 
-const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, color: VTT_COLORS.accent, lineHeight: 1.3 };
+const lastHeadlineSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, color: VTT_COLORS.accent, lineHeight: 1.3 };
 const lastLineSx = { fontSize: FONT_SIZES.md, color: 'text.primary', lineHeight: 1.4 };
 const lastMetaSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary', lineHeight: 1.4 };
 

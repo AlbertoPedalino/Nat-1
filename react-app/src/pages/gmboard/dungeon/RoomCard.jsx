@@ -7,6 +7,7 @@ import { trapLabel } from '../../../shared/dungeon/roomMarkers.js';
 import { ResultCard, ResultLine, ResultSlot } from '../ui/ResultCard.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function SlotBlock({ slot }) {
   const theme = useTheme();
@@ -63,7 +64,7 @@ export default function RoomCard({ room }) {
         {loot ? <ResultLine>{loot}</ResultLine> : null}
         {room.lootDc ? (
           <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 0.25 }}>
-            <Lock size={11} color={theme.palette.text.secondary} />
+            <Lock size={ICON_SIZES.xxs} color={theme.palette.text.secondary} />
             <Typography sx={dcSx}>DC to find it: {room.lootDc.sum}</Typography>
           </Stack>
         ) : null}

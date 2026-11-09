@@ -31,6 +31,7 @@ import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -298,7 +299,7 @@ export default function DrawingMenu({
             size="small"
             variant="outlined"
             color="error"
-            startIcon={<Trash2 size={14} />}
+            startIcon={<Trash2 size={ICON_SIZES.sm} />}
             onClick={() => { onDelete(drawing); onClose(); }}
             sx={menuButtonSx}
           >

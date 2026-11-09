@@ -11,8 +11,9 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
@@ -49,7 +50,7 @@ export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TON
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.75} sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-            {Icon ? <Icon size={15} color={tone} /> : null}
+            {Icon ? <Icon size={ICON_SIZES.sm} color={tone} /> : null}
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography sx={{ ...SECTION_HEADER_SX, color: tone }} noWrap>
                 {title}
@@ -94,7 +95,7 @@ export function filledChipSx(bg) {
   return {
     backgroundColor: bg,
     color: darkChipText,
-    fontWeight: 700,
+    fontWeight: FONT_WEIGHTS.bold,
     border: `1px solid ${uiAlpha(UI_COLORS.accentHighlight, OPACITY.heavy)}`,
     boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, OPACITY.line)} inset`,
     '& .MuiChip-label': { color: darkChipText },
@@ -105,7 +106,7 @@ function outlinedChipSx(color) {
   return {
     color,
     borderColor: color,
-    fontWeight: 700,
+    fontWeight: FONT_WEIGHTS.bold,
     '& .MuiChip-label': { color },
   };
 }
@@ -131,7 +132,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               fontSize: FONT_SIZES.xs,
-              fontWeight: 700,
+              fontWeight: FONT_WEIGHTS.bold,
             },
           }}
         />

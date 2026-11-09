@@ -50,7 +50,7 @@ import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
@@ -377,7 +377,7 @@ export default function SpellEntry({
                   <Stack spacing={0.5} sx={{ mt: 0.5 }}>
                     {group.items.map((modifier) => (
                       <Box key={modifier.key || modifier.label}>
-                        <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: 700, lineHeight: 1.2 }}>
+                        <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, lineHeight: 1.2 }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
                         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.3, mt: 0.25 }}>

@@ -8,7 +8,8 @@ import { abilityModifier } from '../../../shared/character/progression/abilityMo
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -41,7 +42,7 @@ export default function ScoresStep({ state, dispatch }) {
 
         {character.scoreMethod === 'dice' ? (
           <Stack direction="row" spacing={1}>
-            <Button startIcon={<Dice5 size={16} />} onClick={() => dispatch({ type: 'dice/roll' })}>
+            <Button startIcon={<Dice5 size={ICON_SIZES.md} />} onClick={() => dispatch({ type: 'dice/roll' })}>
               Roll Stats
             </Button>
             <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
@@ -95,7 +96,7 @@ export default function ScoresStep({ state, dispatch }) {
                         textAlign: 'center',
                       }}
                     >
-                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: 800, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
+                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: FONT_WEIGHTS.heavy, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
                       <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
                         {scoreMod(finalScore)}
                       </Typography>

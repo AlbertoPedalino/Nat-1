@@ -6,6 +6,7 @@ import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.j
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -49,10 +50,10 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
         {state.campaigns.map((campaign) => (
           <Box key={campaign.id} sx={rowSx}>
             <Box component="button" type="button" onClick={() => onJoin(campaign.id)} sx={rowButtonSx}>
-              <Flag size={16} />
+              <Flag size={ICON_SIZES.md} />
               <Typography sx={{ flex: 1, minWidth: 0 }}>{campaign.name}</Typography>
               {campaign.hasLive ? (
-                <Chip size="small" color="success" icon={<Radio size={12} />} label="Live" sx={chipSx} />
+                <Chip size="small" color="success" icon={<Radio size={ICON_SIZES.xs} />} label="Live" sx={chipSx} />
               ) : (
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map up</Typography>
               )}

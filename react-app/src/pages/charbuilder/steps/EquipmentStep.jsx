@@ -23,7 +23,8 @@ import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -72,7 +73,7 @@ function AddItemRow({ item, onAdd }) {
       header={({ open, toggle }) => (
         <ListItemButton onClick={toggle} aria-expanded={open} sx={{ gap: 1, alignItems: 'flex-start' }}>
           <ItemNameIcon item={item} />
-          <ListItemText primary={<Typography noWrap sx={{ fontWeight: 500 }}>{item.name}</Typography>} />
+          <ListItemText primary={<Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.regular }}>{item.name}</Typography>} />
           <QuantityAdder onAdd={(qty) => onAdd(item, qty)} sx={{ alignSelf: 'center' }} />
         </ListItemButton>
       )}
@@ -92,7 +93,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1 }}>
             <ItemNameIcon item={item} />
-            <Typography sx={{ fontWeight: 500, fontSize: FONT_SIZES.xxl, minWidth: 0 }} noWrap>{item.name}</Typography>
+            <Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.xxl, minWidth: 0 }} noWrap>{item.name}</Typography>
           </Box>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
@@ -105,7 +106,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
                 onClick={() => dispatch({ type: 'inventory/remove', index })}
                 sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
               >
-                <Trash2 size={16} />
+                <Trash2 size={ICON_SIZES.md} />
               </IconButton>
             </Tooltip>
           </Stack>

@@ -6,7 +6,8 @@ import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
 // (surprise, a ruling), one row per creature — the second of three goblins can
@@ -43,12 +44,12 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
       open
       onClose={onClose}
       title="Initiative at launch"
-      icon={<Swords size={14} />}
+      icon={<Swords size={ICON_SIZES.sm} />}
       showClose
       actions={(
         <>
           <Button onClick={onClose}>Cancel</Button>
-          <Button variant="contained" startIcon={<Swords size={16} />} onClick={() => onLaunch(choices)}>
+          <Button variant="contained" startIcon={<Swords size={ICON_SIZES.md} />} onClick={() => onLaunch(choices)}>
             Launch
           </Button>
         </>
@@ -80,7 +81,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
                 return (
                   <Box key={row.key} sx={rowSx}>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>{row.name}</Typography>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{row.name}</Typography>
                       {own || choice ? (
                         <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
                           {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
@@ -122,4 +123,4 @@ function ModeToggle({ label, value, onChange }) {
 
 const rowSx = { display: 'flex', alignItems: 'center', gap: 1 };
 
-const toggleSx = { px: 1, py: 0.25, fontSize: FONT_SIZES.sm, fontWeight: 800, letterSpacing: LETTER_SPACINGS.md, minWidth: 38 };
+const toggleSx = { px: 1, py: 0.25, fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.heavy, letterSpacing: LETTER_SPACINGS.md, minWidth: 38 };

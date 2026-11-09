@@ -4,8 +4,9 @@ import { CUSTOM_CURRENCY_TONE, orderedCurrencyEntries } from './currency.js';
 import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
 import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
 import { useIsPhone } from '../../ui/useIsPhone.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -81,12 +82,12 @@ export function AddCurrencyTile({ onClick, mode = 'builder' }) {
         '&:hover, &:focus-visible': { color: HOVER_ADD, borderColor: HOVER_ADD },
       }}
     >
-      <Plus size={18} />
+      <Plus size={ICON_SIZES.lg} />
       <Typography
         sx={{
           fontFamily: v.fontFamily,
           fontSize: FONT_SIZES.xs,
-          fontWeight: 700,
+          fontWeight: FONT_WEIGHTS.bold,
           textTransform: 'uppercase',
           letterSpacing: LETTER_SPACINGS.sm,
           lineHeight: 1.1,

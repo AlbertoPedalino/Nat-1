@@ -4,6 +4,7 @@ import { LogIn } from 'lucide-react';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { useAuth } from './AuthProvider.jsx';
 import { useToast } from '../../ui/ToastProvider.jsx';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 export default function AuthDialog({ open, onClose }) {
   const { signIn, signUp } = useAuth();
@@ -41,7 +42,7 @@ export default function AuthDialog({ open, onClose }) {
       onClose={handleClose}
       maxWidth="xs"
       title="Log in"
-      icon={<LogIn size={20} />}
+      icon={<LogIn size={ICON_SIZES.xl} />}
       actions={(
         <>
           <Button onClick={handleClose} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>

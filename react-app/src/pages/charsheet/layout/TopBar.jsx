@@ -22,6 +22,7 @@ import { sheetColumnSx } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -90,7 +91,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           <AppTopBar
             home
             start={readOnly ? null : (
-              <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
+              <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
                 onClick={() => {
                   const params = new URLSearchParams(window.location.search);
                   // Use the sheet's own id first: the online sheet route is
@@ -133,7 +134,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
             }}
             onClick={readOnly ? undefined : (event) => setBadgeAnchor(event.currentTarget)}
           >
-            <Icon size={25} />
+            <Icon size={ICON_SIZES.xxl} />
           </PortraitBadge>
 
           {/* The badge used to open the colour picker straight away. It now asks
@@ -145,17 +146,17 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
             onClose={() => setBadgeAnchor(null)}
           >
             <MenuItem onClick={() => { setBadgeAnchor(null); portraitInputRef.current?.click(); }}>
-              <ImagePlus size={14} style={{ marginRight: 8 }} />
+              <ImagePlus size={ICON_SIZES.sm} style={{ marginRight: 8 }} />
               {C.portraitPath ? 'Change portrait' : 'Add portrait'}
             </MenuItem>
             {C.portraitPath ? (
               <MenuItem onClick={handleRemovePortrait}>
-                <Trash2 size={14} style={{ marginRight: 8 }} />
+                <Trash2 size={ICON_SIZES.sm} style={{ marginRight: 8 }} />
                 Remove portrait
               </MenuItem>
             ) : null}
             <MenuItem onClick={(event) => { setColorAnchor(event.currentTarget); setBadgeAnchor(null); }}>
-              <Palette size={14} style={{ marginRight: 8 }} />
+              <Palette size={ICON_SIZES.sm} style={{ marginRight: 8 }} />
               Icon colour
             </MenuItem>
           </Menu>
@@ -180,7 +181,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
-                <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
+                <Chip size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY"
                   sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}
                   variant="outlined" />
               )}

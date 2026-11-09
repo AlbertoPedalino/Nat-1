@@ -3,7 +3,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -68,7 +69,7 @@ export default function ExpandableSelectionList({
                           primary={(
                             <Typography
                               noWrap
-                              sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: 500 }}
+                              sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.regular }}
                             >
                               {option.label}
                             </Typography>
@@ -87,7 +88,7 @@ export default function ExpandableSelectionList({
                         onClick={toggle}
                         sx={{ borderRadius: 0, px: 1, color: 'text.secondary' }}
                       >
-                        {open ? <ChevronUp size={17} /> : <ChevronDown size={17} />}
+                        {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
                       </IconButton>
                     </Stack>
                   )}

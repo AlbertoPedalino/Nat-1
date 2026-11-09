@@ -9,6 +9,7 @@ import { MONTH_NAMES, formatHM, validateStart } from '../campaignTime.js';
 import { SEASON_ICONS, WEATHER_ICONS } from '../../hexcrawl/hexIcons.js';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -180,7 +181,7 @@ function AdvanceForm({ disabled, onAdvance }) {
               disabled={disabled || !valid}
               onClick={() => advance(hours)}
             >
-              <FastForward size={16} />
+              <FastForward size={ICON_SIZES.md} />
             </IconButton>
           </span>
         </Tooltip>

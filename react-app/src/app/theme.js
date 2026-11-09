@@ -1,5 +1,5 @@
 import { createTheme, lighten } from '@mui/material';
-import { UI_FONTS, FONT_SIZES } from '../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
@@ -123,18 +123,18 @@ export const theme = createTheme({
     fontFamily: UI_FONTS.body,
     h1: {
       fontSize: FONT_SIZES.hero,
-      fontWeight: 700,
+      fontWeight: FONT_WEIGHTS.bold,
       letterSpacing: 0,
     },
     h2: {
       fontSize: FONT_SIZES.title,
-      fontWeight: 700,
+      fontWeight: FONT_WEIGHTS.bold,
       letterSpacing: 0,
     },
     button: {
       textTransform: 'none',
       letterSpacing: 0,
-      fontWeight: 700,
+      fontWeight: FONT_WEIGHTS.bold,
     },
   },
   components: {
@@ -245,7 +245,7 @@ export const theme = createTheme({
           maxWidth: '100%',
           minWidth: 0,
           flexShrink: 1,
-          fontWeight: 700,
+          fontWeight: FONT_WEIGHTS.bold,
           border: '1px solid transparent',
           // Clickable colored chips act as toggles: selected state gets a
           // solid fill so it stands apart from the tinted resting style.

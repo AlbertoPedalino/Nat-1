@@ -24,6 +24,7 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { pillLabelSx } from './panelStyles.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -105,11 +106,11 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
       onClose={close}
       maxWidth={generator ? 'lg' : 'sm'}
       title={generator ? generator.label : 'New scene'}
-      icon={generator ? <Icon size={16} /> : <MapIcon size={16} />}
+      icon={generator ? <Icon size={ICON_SIZES.md} /> : <MapIcon size={ICON_SIZES.md} />}
       headerRight={generator ? (
         <Button
           size="small"
-          startIcon={<ArrowLeft size={14} />}
+          startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
           disabled={Boolean(progress)}
           onClick={() => { setGenerator(null); setError(''); }}
         >
@@ -140,7 +141,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
                   sx={cardSx}
                 >
                   <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-                    <OptionIcon size={15} />
+                    <OptionIcon size={ICON_SIZES.sm} />
                     <Typography sx={cardTitleSx}>{option.label}</Typography>
                   </Stack>
                   <Typography sx={cardBlurbSx}>{option.blurb}</Typography>
@@ -178,11 +179,11 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             aria-label="What several pictures make"
           >
             <ToggleButton value="scenes" aria-label="A scene each">
-              <Layers size={14} />
+              <Layers size={ICON_SIZES.sm} />
               <Box component="span" sx={pillLabelSx}>A scene each</Box>
             </ToggleButton>
             <ToggleButton value="joined" aria-label="One map, side by side">
-              <Columns2 size={14} />
+              <Columns2 size={ICON_SIZES.sm} />
               <Box component="span" sx={pillLabelSx}>One map, side by side</Box>
             </ToggleButton>
           </ToggleButtonGroup>
@@ -191,7 +192,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             <Button
               variant="contained"
               size="small"
-              startIcon={<Upload size={15} />}
+              startIcon={<Upload size={ICON_SIZES.sm} />}
               disabled={Boolean(progress)}
               onClick={() => filesRef.current?.click()}
             >

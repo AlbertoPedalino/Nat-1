@@ -2,6 +2,7 @@ import { useTheme } from '@mui/material';
 import { Circle } from 'lucide-react';
 import { TIER_OPTIONS } from '../boardOptions.js';
 import SelectorGroup from './SelectorGroup.jsx';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The encounter tier, each in its own colour (theme.palette.gmboard.tier): how
 // the board says how hard the next hex, dungeon or quest is.
@@ -26,5 +27,5 @@ export default function TierSelector({ value, onChange, label = 'Tier', disabled
 
 // The tier's dot, in the button's own colour.
 function TierDot() {
-  return <Circle size={9} fill="currentColor" />;
+  return <Circle size={ICON_SIZES.xxs} fill="currentColor" />;
 }

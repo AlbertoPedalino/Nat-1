@@ -14,6 +14,7 @@ import {
   Triangle,
 } from 'lucide-react';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
@@ -41,10 +42,10 @@ export function MeasurePanel({
         }}
         aria-label="Ruler shape"
       >
-        <Tooltip title="Distance"><ToggleButton value="line" aria-label="Distance"><Ruler size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Radius"><ToggleButton value="radius" aria-label="Radius"><Circle size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={14} /></ToggleButton></Tooltip>
-        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Distance"><ToggleButton value="line" aria-label="Distance"><Ruler size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Radius"><ToggleButton value="radius" aria-label="Radius"><Circle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
+        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
       </ToggleButtonGroup>
 
       {/* Which scale this map is read at, said outright rather than inferred
@@ -94,7 +95,7 @@ export function MeasurePanel({
       <Button
         size="small"
         variant={paintMode === 'measure' ? 'contained' : 'outlined'}
-        startIcon={<Ruler size={14} />}
+        startIcon={<Ruler size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange(paintMode === 'measure' ? 'select' : 'measure')}
       >
         {paintMode === 'measure' ? 'Put the ruler away' : 'Take the ruler'}

@@ -4,9 +4,10 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../ui/fonts.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -21,7 +22,7 @@ const toastRootSx = {
 };
 
 const modeChipSx = (chip) => ({
-  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md,
+  height: 20, fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md,
   borderRadius: 1, mb: 0.25, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
@@ -49,7 +50,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, OPACITY.shade)}` } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
-        <X size={14} />
+        <X size={ICON_SIZES.sm} />
       </IconButton>
 
       <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: 'text.secondary', mb: 0.25 }}>

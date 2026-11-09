@@ -3,6 +3,7 @@ import { Cross, Dices, Shield, Sword } from 'lucide-react';
 import { formatRollTitle, rollFormula } from './dice.js';
 import { normalizeRollerKind, resolveRollers } from './rollers.js';
 import { ROLL_TONES, rollerToneSx } from '../../ui/entityColors.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 const ROLLER_PRESENTATION = {
   damage: {
@@ -74,7 +75,7 @@ export default function RollerButtons({
         }}
         sx={{ ...buttonSx, ...presentation.tone }}
       >
-        <RollerIcon size={12} style={{ marginRight: 2 }} />
+        <RollerIcon size={ICON_SIZES.xs} style={{ marginRight: 2 }} />
         {buttonLabel}
       </Button>
     );

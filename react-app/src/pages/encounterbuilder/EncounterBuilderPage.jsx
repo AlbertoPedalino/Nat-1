@@ -18,6 +18,7 @@ import { EncounterBuilderProvider, useEncounterBuilder } from './state/Encounter
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 export default function EncounterBuilderPage() {
   const tool = useToolInstance('encounters');
@@ -63,7 +64,7 @@ function EncounterBuilderShell({ tool }) {
             <Button
               size="small"
               variant="outlined"
-              startIcon={<Skull size={14} />}
+              startIcon={<Skull size={ICON_SIZES.sm} />}
               onClick={() => setFumblesOpen(true)}
               sx={utilityButtonSx}
             >
@@ -72,7 +73,7 @@ function EncounterBuilderShell({ tool }) {
             <Button
               size="small"
               variant="outlined"
-              startIcon={<Handshake size={14} />}
+              startIcon={<Handshake size={ICON_SIZES.sm} />}
               onClick={() => setNegotiationOpen(true)}
               sx={utilityButtonSx}
             >
@@ -85,9 +86,9 @@ function EncounterBuilderShell({ tool }) {
             variant="scrollable"
             allowScrollButtonsMobile
           >
-            <Tab icon={<BookOpen size={15} />} iconPosition="start" value="builder" label="Builder" />
-            <Tab icon={<Library size={15} />} iconPosition="start" value="library" label="Library" />
-            <Tab icon={<Swords size={15} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
+            <Tab icon={<BookOpen size={ICON_SIZES.sm} />} iconPosition="start" value="builder" label="Builder" />
+            <Tab icon={<Library size={ICON_SIZES.sm} />} iconPosition="start" value="library" label="Library" />
+            <Tab icon={<Swords size={ICON_SIZES.sm} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
           </Tabs>
         </Stack>
       )}
@@ -105,7 +106,7 @@ function EncounterBuilderShell({ tool }) {
       {state.view === 'library' ? <LibraryView /> : null}
       {state.view === 'combat' ? <CombatView /> : null}
       {state.view !== 'combat' && state.combat ? (
-        <Button variant="outlined" startIcon={<Swords size={15} />} onClick={() => dispatch({ type: 'setView', view: 'combat' })} sx={{ alignSelf: 'flex-start' }}>
+        <Button variant="outlined" startIcon={<Swords size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'setView', view: 'combat' })} sx={{ alignSelf: 'flex-start' }}>
           Return to active encounter
         </Button>
       ) : null}

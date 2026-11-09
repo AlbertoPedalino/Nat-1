@@ -1,6 +1,8 @@
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
+import { FONT_WEIGHTS } from '../ui/fonts.js';
+import { ICON_SIZES } from '../ui/iconSizes.js';
 
 // One collapsed accordion row: title (+ optional `leading` element such as a
 // level chip) visible, body on expand. `tone` sets the left border (falls back
@@ -27,7 +29,7 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
       }}
     >
       <AccordionSummary
-        expandIcon={<ChevronDown size={14} />}
+        expandIcon={<ChevronDown size={ICON_SIZES.sm} />}
         sx={{
           minHeight,
           px: summaryPx,
@@ -39,7 +41,7 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
           {leading}
-          <Typography variant="body2" noWrap sx={{ fontWeight: 700, minWidth: 0, color: titleColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, color: titleColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {title}
           </Typography>
         </Stack>

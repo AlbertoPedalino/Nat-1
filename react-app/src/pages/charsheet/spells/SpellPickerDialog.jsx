@@ -29,6 +29,7 @@ import { spellPickerActions } from './spellPickerActions.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The sheet's Add / Remove Spell dialog: one caster class at a time, a spell
 // level, and the spells it may pick (spellPickerPool) — or, for a Wizard,
@@ -106,7 +107,7 @@ export function SpellPickerDialog({
       onClose={onClose}
       maxWidth="md"
       title="Spells"
-      icon={<Sparkles size={20} />}
+      icon={<Sparkles size={ICON_SIZES.xl} />}
       showClose
       topPad={2}
       headerRight={(

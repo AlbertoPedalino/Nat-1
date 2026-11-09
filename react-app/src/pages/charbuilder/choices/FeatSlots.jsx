@@ -13,6 +13,8 @@ import { meetsFeatPrerequisites } from './featPrerequisiteRules.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { asArray } from '../../../shared/lists.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -68,7 +70,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
   const listLabel = feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`;
   return (
     <Stack spacing={0.5}>
-      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 700 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: FONT_WEIGHTS.bold }}>
         {listLabel}
       </Typography>
       {locked ? (
@@ -76,7 +78,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
           size="small"
           color="primary"
           variant="outlined"
-          icon={<Lock size={12} />}
+          icon={<Lock size={ICON_SIZES.xs} />}
           label={grantLabel(additional[entryIdx] || additional[0])}
           sx={{ alignSelf: 'flex-start' }}
         />

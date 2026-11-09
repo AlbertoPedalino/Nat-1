@@ -4,6 +4,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -49,7 +50,7 @@ export default function BattleMapViewSwitch({
       <Button
         size="small"
         variant={showingSheet ? 'contained' : 'outlined'}
-        startIcon={showingSheet ? <PanelRightClose size={14} /> : <ScrollText size={14} />}
+        startIcon={showingSheet ? <PanelRightClose size={ICON_SIZES.sm} /> : <ScrollText size={ICON_SIZES.sm} />}
         disabled={!hasSheets}
         title={hasSheets ? undefined : 'No character sheet is available to you.'}
         aria-label={showingSheet ? 'Hide character sheet' : 'Show character sheet'}

@@ -11,6 +11,7 @@ import BoardPanel from '../ui/BoardPanel.jsx';
 import { boardCardGridSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -80,7 +81,7 @@ export default function DungeonView() {
         </Box>
       ) : (
         <Box sx={{ ...emptyStateSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
-          <Castle size={22} color={theme.palette.text.secondary} />
+          <Castle size={ICON_SIZES.xl} color={theme.palette.text.secondary} />
           <Typography sx={emptyTextSx}>
             No dungeon generated yet. Set a room count, population mode and tier, then press Generate.
           </Typography>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import * as s from '../styles.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Shared row for every instance picker: generic tool lists render it with a
 // plain `to` link, the characters picker renders it with an async `onOpen`
@@ -61,12 +62,12 @@ export default function InstanceRow({
         ) : null}
         {onRename ? (
           <Box component="button" type="button" onClick={onRename} sx={s.iconBtnSx} aria-label={`Rename ${name}`} title="Rename">
-            <Pencil size={14} strokeWidth={1.7} />
+            <Pencil size={ICON_SIZES.sm} strokeWidth={1.7} />
           </Box>
         ) : null}
         {onDelete ? (
           <Box component="button" type="button" onClick={onDelete} sx={s.deleteBtnSx} aria-label={`Delete ${name}`} title="Delete">
-            <Trash2 size={14} strokeWidth={1.7} />
+            <Trash2 size={ICON_SIZES.sm} strokeWidth={1.7} />
           </Box>
         ) : null}
       </Box>

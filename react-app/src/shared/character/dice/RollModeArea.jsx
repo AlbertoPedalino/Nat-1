@@ -4,7 +4,7 @@ import { suppressGestureSelection } from '../../vtt/map/gestureSelection.js';
 import { advArgFor, rollModeLabel, withExtraSource } from './advantage.js';
 import { asArray } from '../../lists.js';
 import { LONG_PRESS_MS, LONG_PRESS_SLOP } from '../../ui/longPress.js';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
 
 // A roller that also answers a right-click or a long press with a small menu:
 // "+ Advantage" / "+ Disadvantage" for this one roll. It adds a source rather
@@ -174,5 +174,5 @@ export default function RollModeArea({
 }
 
 const menuItemSx = { minHeight: 0, py: 0.5 };
-const primarySx = { fontSize: FONT_SIZES.lg, fontWeight: 700 };
+const primarySx = { fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold };
 const secondarySx = { fontSize: FONT_SIZES.sm };

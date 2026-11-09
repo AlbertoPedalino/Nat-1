@@ -6,12 +6,13 @@ import { parseBeastActions, parseBeastActionsRich } from '../../../shared/charac
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -42,7 +43,7 @@ export function BeastNameLink({ name, source, sx }) {
       sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
     >
       <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
-      <ExternalLink size={11} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
+      <ExternalLink size={ICON_SIZES.xxs} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
     </Link>
   );
 }
@@ -102,7 +103,7 @@ export function BeastStatBlock({
       <StatLine label="AC" value={b.ac ?? '—'} />
       {onRollFormula && b.hp?.formula ? (
         <Typography sx={subSx}>
-          <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{hpLabel}:</Box>{' '}
+          <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold }}>{hpLabel}:</Box>{' '}
           {b.hp.average} (
           <RollChip onClick={() => onRollFormula(b.hp.formula, formatRollTitle(b.name, hpLabel))}>{b.hp.formula}</RollChip>)
         </Typography>
@@ -116,7 +117,7 @@ export function BeastStatBlock({
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md, color: UI_COLORS.accentText, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
+              <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md, color: UI_COLORS.accentText, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
               {rollable ? (
                 <RollChip
                   sx={{ fontSize: FONT_SIZES.xs }}
@@ -227,7 +228,7 @@ function RollChip({ onClick, children, sx }) {
 function RollableStatLine({ label, items, onRoll }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{label}:</Box>{' '}
+      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold }}>{label}:</Box>{' '}
       {items.map((it, i) => (
         <Box component="span" key={it.key}>
           {i ? ', ' : null}
@@ -241,8 +242,8 @@ function RollableStatLine({ label, items, onRoll }) {
 function StatLine({ label, value, accent }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: 700 }}>{label}:</Box>{' '}
-      <Box component="span" sx={accent ? { color: UI_COLORS.accentText, fontWeight: 700 } : undefined}>{value}</Box>
+      <Box component="span" sx={{ color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold }}>{label}:</Box>{' '}
+      <Box component="span" sx={accent ? { color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold } : undefined}>{value}</Box>
     </Typography>
   );
 }
@@ -253,7 +254,7 @@ function StatSection({ title, items, onRoll, onRollFormula, beastName, itemAcces
       <Typography sx={{ ...detailTitleSx, fontSize: FONT_SIZES.xxs, mb: 0.25 }}>{title}</Typography>
       {items.map((it, i) => (
         <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.25 }}>
-          <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>
+          <Box component="span" sx={{ fontStyle: 'italic', fontWeight: FONT_WEIGHTS.bold, color: 'text.primary' }}>{it.name}.</Box>
           {typeof itemAccessory === 'function' ? itemAccessory(it) : null}{' '}
           {it.tokens
             ? it.tokens.map((tok, ti) => renderEntryToken(tok, ti, onRoll, onRollFormula, beastName))
@@ -307,7 +308,7 @@ export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
 export function CreatureOptionRow({ label, children }) {
   return (
     <Box sx={{ mb: 0.75 }}>
-      <Typography sx={{ ...subSx, mb: 0.25, fontWeight: 700 }}>{label}</Typography>
+      <Typography sx={{ ...subSx, mb: 0.25, fontWeight: FONT_WEIGHTS.bold }}>{label}</Typography>
       {children}
     </Box>
   );

@@ -12,11 +12,12 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -95,7 +96,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       open={open}
       onClose={handleClose}
       title="Critical Fumbles"
-      icon={<Skull size={20} />}
+      icon={<Skull size={ICON_SIZES.xl} />}
       showClose
       maxWidth="md"
       fullScreen={mobile}
@@ -111,7 +112,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
           >
             Reset
           </Button>
-          <Button onClick={handleRoll} variant="contained" size="small" startIcon={<Dices size={15} />}>
+          <Button onClick={handleRoll} variant="contained" size="small" startIcon={<Dices size={ICON_SIZES.sm} />}>
             Roll Fumble
           </Button>
         </>
@@ -278,13 +279,13 @@ const stepButtonSx = {
   width: 25,
   height: 25,
   p: 0,
-  fontWeight: 900,
+  fontWeight: FONT_WEIGHTS.heavy,
 };
 
 const formulaSx = {
   fontFamily: UI_FONTS.mono,
   fontSize: FONT_SIZES.lg,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   color: UI_COLORS.secondary,
 };
 
@@ -321,7 +322,7 @@ const outcomeTitleSx = {
 const outcomeTextSx = {
   my: 0.25,
   fontSize: { xs: FONT_SIZES.xxl, sm: FONT_SIZES.body },
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1.4,
   overflowWrap: 'anywhere',
 };
@@ -338,7 +339,7 @@ const entryRowSx = {
 const resultLabelSx = {
   fontFamily: UI_FONTS.mono,
   fontSize: FONT_SIZES.md,
-  fontWeight: 800,
+  fontWeight: FONT_WEIGHTS.heavy,
   color: UI_COLORS.accentText,
   whiteSpace: 'nowrap',
 };

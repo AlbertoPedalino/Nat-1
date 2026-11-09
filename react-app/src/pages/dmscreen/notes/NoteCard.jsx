@@ -14,6 +14,8 @@ import { DRAG_TRANSFORM, DRAG_TRANSITION } from '../drag/dragMotion.js';
 import NoteMarkdown from './NoteMarkdown.jsx';
 import HighlightedText from '../search/HighlightedText.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -181,7 +183,7 @@ export default function NoteCard({
               sx={handleSx}
               {...dragHandleProps}
             >
-              <GripVertical size={16} />
+              <GripVertical size={ICON_SIZES.md} />
             </IconButton>
           </Tooltip>
         ) : null}
@@ -193,7 +195,7 @@ export default function NoteCard({
               onClick={() => setEditing((previous) => !previous)}
               aria-label={showEditor ? 'Preview note' : 'Edit note'}
             >
-              {showEditor ? <Eye size={16} /> : <Pencil size={16} />}
+              {showEditor ? <Eye size={ICON_SIZES.md} /> : <Pencil size={ICON_SIZES.md} />}
             </IconButton>
           </Tooltip>
         ) : null}
@@ -204,7 +206,7 @@ export default function NoteCard({
             onClick={handleRemove}
             aria-label="Delete note"
           >
-            <Trash2 size={16} />
+            <Trash2 size={ICON_SIZES.md} />
           </IconButton>
         </Tooltip>
       </Box>
@@ -323,7 +325,7 @@ const handleSx = {
 
 const titleSx = {
   '& .MuiInputBase-input': {
-    fontWeight: 700,
+    fontWeight: FONT_WEIGHTS.bold,
   },
 };
 
@@ -339,7 +341,7 @@ const titlePreviewSx = {
   cursor: 'text',
 };
 
-const titleTextSx = { fontWeight: 700, minHeight: 24, overflowWrap: 'anywhere' };
+const titleTextSx = { fontWeight: FONT_WEIGHTS.bold, minHeight: 24, overflowWrap: 'anywhere' };
 
 // Mirrors the outlined TextField the preview replaces, so switching modes does
 // not make the card jump.

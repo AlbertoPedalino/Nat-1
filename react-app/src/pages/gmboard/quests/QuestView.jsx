@@ -12,6 +12,7 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -23,7 +24,7 @@ function QuestCountHeader({ questSet }) {
   return (
     <Box sx={{ ...headerSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Dices size={12} color={theme.palette.text.secondary} />
+        <Dices size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
         <Typography sx={headerLabelSx}>Quest Count</Typography>
       </Stack>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>

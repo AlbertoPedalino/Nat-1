@@ -6,6 +6,7 @@ import { panelBarSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
+import { ICON_SIZES } from './iconSizes.js';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -88,7 +89,7 @@ export default function SheetDialog({
   ...props
 }) {
   const right = showClose
-    ? <>{headerRight}<IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }}><X size={16} /></IconButton></>
+    ? <>{headerRight}<IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }}><X size={ICON_SIZES.md} /></IconButton></>
     : headerRight;
   return (
     <Dialog
@@ -116,7 +117,7 @@ export default function SheetDialog({
       ) : null}
       <DialogContent sx={{ ...contentSx, '&.MuiDialogContent-root': { pt: topPad }, ...contentSxOverride }}>
         {title == null && showClose ? (
-          <IconButton size="small" aria-label="Close" onClick={onClose} sx={cornerCloseSx}><X size={16} /></IconButton>
+          <IconButton size="small" aria-label="Close" onClick={onClose} sx={cornerCloseSx}><X size={ICON_SIZES.md} /></IconButton>
         ) : null}
         {children}
       </DialogContent>

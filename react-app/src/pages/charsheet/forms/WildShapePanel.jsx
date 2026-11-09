@@ -15,6 +15,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -71,7 +72,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <PawPrint size={14} color={UI_COLORS.accentText} />
+          <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
           <Typography sx={detailTitleSx} component="span">Transformed —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
           <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -89,7 +90,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={14} color={UI_COLORS.accentText} />
+        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
       {!forms.length ? (

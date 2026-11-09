@@ -14,6 +14,7 @@ import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -177,14 +178,14 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
           size="small"
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
-          startIcon={<SlidersHorizontal size={12} />}
-          endIcon={open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          startIcon={<SlidersHorizontal size={ICON_SIZES.xs} />}
+          endIcon={open ? <ChevronDown size={ICON_SIZES.xs} /> : <ChevronRight size={ICON_SIZES.xs} />}
           sx={goldToggleSx(open || activeCount > 0)}
         >
           {activeCount > 0 ? `Filters (${activeCount})` : 'Filters'}
         </Button>
         {activeCount > 0 ? (
-          <Button size="small" onClick={() => onChange(emptyItemFilters())} startIcon={<X size={11} />} sx={clearButtonSx}>
+          <Button size="small" onClick={() => onChange(emptyItemFilters())} startIcon={<X size={ICON_SIZES.xxs} />} sx={clearButtonSx}>
             Clear all
           </Button>
         ) : null}

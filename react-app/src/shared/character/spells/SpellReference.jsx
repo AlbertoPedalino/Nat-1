@@ -8,7 +8,7 @@ import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY } from '../../ui/colors.js';
 
@@ -94,7 +94,7 @@ export function SpellRowLabel({ spell, selected = false, showIcon = true, nameSx
   return (
     <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
       {showIcon ? <SpellNameIcon spell={spell} /> : null}
-      <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? 700 : 500, color: 'text.primary', ...nameSx }}>
+      <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular, color: 'text.primary', ...nameSx }}>
         {spell.name}
       </Typography>
     </Box>

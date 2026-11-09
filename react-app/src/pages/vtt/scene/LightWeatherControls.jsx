@@ -17,6 +17,7 @@ import { numberSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { ATMOSPHERE_ICONS, AtmospherePicker, atmospherePresetsByType } from './AtmospherePicker.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -118,8 +119,8 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
         fullWidth
         size="small"
         variant="outlined"
-        startIcon={<SelectedAtmosphereIcon size={16} strokeWidth={1.8} />}
-        endIcon={<ChevronDown size={15} />}
+        startIcon={<SelectedAtmosphereIcon size={ICON_SIZES.md} strokeWidth={1.8} />}
+        endIcon={<ChevronDown size={ICON_SIZES.sm} />}
         aria-label={`Choose atmosphere. Current: ${selectedAtmosphere.label}`}
         aria-haspopup="dialog"
         aria-expanded={Boolean(atmosphereAnchor)}

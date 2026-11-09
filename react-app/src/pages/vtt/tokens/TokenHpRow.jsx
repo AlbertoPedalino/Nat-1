@@ -4,7 +4,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { STEP_TARGETS } from './useTokenMenuState.js';
 import { compactFieldSx } from './tokenMenuStyles.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 
 // The piece menu's `HP / Max / Temp` row and its one "+ 5 -" stepper. `fields`
 // is the menu's state (useTokenMenuState); `withVitals` is set for the GM, whose
@@ -108,7 +108,7 @@ const maxBonusSx = {
   px: 0.25,
   bgcolor: 'gmboard.vtt.surfaceSolid',
   fontSize: FONT_SIZES.xxs,
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: 1.2,
   pointerEvents: 'none',
 };

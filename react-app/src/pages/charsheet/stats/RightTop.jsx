@@ -30,7 +30,8 @@ import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { sectionLabelSx, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -114,14 +115,14 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
             const Icon = v.Icon;
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                <Icon size={11} color={v.color} />
-                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: 700, letterSpacing: LETTER_SPACINGS.md }}>{v.label}</Typography>
+                <Icon size={ICON_SIZES.xxs} color={v.color} />
+                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md }}>{v.label}</Typography>
               </Box>
             );
           })()}
           {lastInitiativeRoll && (
             <Typography variant="caption" sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
-              Last: <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.accentText }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
+              Last: <Box component="span" sx={{ fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentText }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
             </Typography>
           )}
           {initiativeMessage && (
@@ -159,7 +160,7 @@ function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
     <Box onClick={onToggle} sx={{ minWidth: 90, maxWidth: 110, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: insp ? 'primary.main' : 'divider', borderRadius: 1, p: '0.4rem 0.62rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.25, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' }, ...(insp ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.fill) } : {}) }}>
-      <Sparkles size={20} style={{ color: insp ? UI_COLORS.accentText : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.accent, OPACITY.strong)})` : 'none' }} />
+      <Sparkles size={ICON_SIZES.xl} style={{ color: insp ? UI_COLORS.accentText : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.accent, OPACITY.strong)})` : 'none' }} />
       <Typography sx={{ ...sectionLabelSx, color: insp ? 'primary.main' : 'text.secondary', textAlign: 'center' }}>
         {insp ? 'Insp.' : 'No Insp.'}
       </Typography>

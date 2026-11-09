@@ -36,6 +36,7 @@ import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -139,7 +140,7 @@ export default function SummonedCreaturePanel({
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={14} color={UI_COLORS.accentText} />
+        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
       </Box>
       {versions.length > 1 ? (

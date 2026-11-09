@@ -5,6 +5,7 @@ import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shar
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -20,7 +21,7 @@ export default function XpPanel({ character, dispatch }) {
     <BuilderPanel id="panel-xp" title="Experience (XP)" icon={Layers} note={note}>
       <Stack spacing={1.25}>
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
-          <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: FONT_WEIGHTS.bold, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
             {isMaxLevel ? `${formatNumber(xp)} XP` : `${formatNumber(xp)} / ${formatNumber(nextXp)} XP`}
           </Typography>

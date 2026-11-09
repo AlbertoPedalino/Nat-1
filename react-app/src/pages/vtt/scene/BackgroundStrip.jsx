@@ -10,6 +10,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -60,8 +61,8 @@ export default function BackgroundStrip({
       <Button
         size="small"
         aria-label="Show the backgrounds"
-        startIcon={<Images size={14} />}
-        endIcon={<ChevronUp size={14} />}
+        startIcon={<Images size={ICON_SIZES.sm} />}
+        endIcon={<ChevronUp size={ICON_SIZES.sm} />}
         onClick={toggleCollapsed}
         sx={collapsedSx}
       >
@@ -81,7 +82,7 @@ export default function BackgroundStrip({
     >
       {backgrounds.length > 1 ? (
         <IconButton size="small" aria-label="Previous background" disabled={busy} onClick={() => step(-1)} sx={arrowSx}>
-          <ChevronLeft size={16} />
+          <ChevronLeft size={ICON_SIZES.md} />
         </IconButton>
       ) : null}
 
@@ -116,7 +117,7 @@ export default function BackgroundStrip({
                 }}
                 sx={removeSx(armed === path)}
               >
-                <Trash2 size={12} />
+                <Trash2 size={ICON_SIZES.xs} />
               </IconButton>
             </Box>
           );
@@ -129,18 +130,18 @@ export default function BackgroundStrip({
           onClick={() => fileRef.current?.click()}
           sx={addSx}
         >
-          {busy ? <CircularProgress size={16} /> : <ImagePlus size={18} />}
+          {busy ? <CircularProgress size={16} /> : <ImagePlus size={ICON_SIZES.lg} />}
         </ButtonBase>
       </Stack>
 
       {backgrounds.length > 1 ? (
         <IconButton size="small" aria-label="Next background" disabled={busy} onClick={() => step(1)} sx={arrowSx}>
-          <ChevronRight size={16} />
+          <ChevronRight size={ICON_SIZES.md} />
         </IconButton>
       ) : null}
 
       <IconButton size="small" aria-label="Hide the backgrounds" title="Fold the slider" onClick={toggleCollapsed} sx={arrowSx}>
-        <ChevronDown size={16} />
+        <ChevronDown size={ICON_SIZES.md} />
       </IconButton>
 
       <Box

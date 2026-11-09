@@ -29,6 +29,8 @@ import { capitalize } from '../ui/textCase.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../content/rulesVocabulary.js';
 import { crKey, crPB, crXP } from './challengeRating.js';
 import { get5eToolsBestiaryUrl } from '../content/fiveEToolsLinks.js';
+import { FONT_WEIGHTS } from '../ui/fonts.js';
+import { ICON_SIZES } from '../ui/iconSizes.js';
 
 export function StatBlockHeader({ monster, onClose }) {
   const url = get5eToolsBestiaryUrl(monster?.name, monster?.source);
@@ -50,7 +52,7 @@ export function StatBlockHeader({ monster, onClose }) {
       </Stack>
       {onClose ? (
         <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close statblock">
-          <X size={18} />
+          <X size={ICON_SIZES.lg} />
         </IconButton>
       ) : null}
     </>
@@ -114,7 +116,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
               >
                 <Stack spacing={0} sx={{ alignItems: 'center' }}>
                   <Typography variant="caption">{label}{advTag(advArgFor(sources))}</Typography>
-                  <Typography sx={{ fontWeight: 700 }}>{monster[key] ?? 10} ({mod})</Typography>
+                  <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{monster[key] ?? 10} ({mod})</Typography>
                 </Stack>
               </RollModeArea>
             );
@@ -160,7 +162,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
 function Prop({ label, children }) {
   return (
     <Typography component="div" variant="body2">
-      <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>{label}</Box>{' '}
+      <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.bold }}>{label}</Box>{' '}
       {children}
     </Typography>
   );
@@ -226,7 +228,7 @@ function SectionHeading({ children }) {
 function EntryName({ name, onRoll }) {
   if (!name) return null;
   return (
-    <Box component="span" sx={{ color: 'secondary.main', fontWeight: 700 }}>
+    <Box component="span" sx={{ color: 'secondary.main', fontWeight: FONT_WEIGHTS.bold }}>
       <InlineText value={`${name}.`} onRoll={onRoll} />{' '}
     </Box>
   );

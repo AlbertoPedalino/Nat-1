@@ -10,9 +10,10 @@ import {
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -35,14 +36,14 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
   );
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: 20, px: 0.5, border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
-      <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
+      <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={ICON_SIZES.xxs} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
-        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
         {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
       </Typography>
-      <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={11} /></StepButton>
+      <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={ICON_SIZES.xxs} /></StepButton>
       {hasDesc ? (
-        <ChevronDown size={10} style={{ color: accent, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s', cursor: 'pointer' }}
+        <ChevronDown size={ICON_SIZES.xxs} style={{ color: accent, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s', cursor: 'pointer' }}
           onClick={(e) => { e.stopPropagation(); onToggle(); }} />
       ) : null}
     </Box>
@@ -105,8 +106,8 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             onClick={() => setOpen(!open)}
             sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: 0.375, cursor: 'pointer', ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, OPACITY.wash), color: 'text.primary' } }}
           >
-            <ListChecks size={12} /> Manage ({active.length})
-            <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
+            <ListChecks size={ICON_SIZES.xs} /> Manage ({active.length})
+            <ChevronDown size={ICON_SIZES.xs} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
           </Box>
           {open && (
             <Box>
@@ -121,7 +122,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<X size={12} />}
+                  startIcon={<X size={ICON_SIZES.xs} />}
                   onClick={onClear}
                   sx={{ mt: 0.5, fontSize: FONT_SIZES.xxxs, py: 0.25, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, OPACITY.soft) } }}
                 >

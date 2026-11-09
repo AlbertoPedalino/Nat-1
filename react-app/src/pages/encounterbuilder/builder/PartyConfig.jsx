@@ -8,6 +8,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -56,7 +57,7 @@ export default function PartyConfig() {
                   target="_blank"
                   rel="noopener"
                   size="small"
-                  endIcon={<ExternalLink size={13} />}
+                  endIcon={<ExternalLink size={ICON_SIZES.xs} />}
                   sx={{ justifyContent: 'flex-start', minWidth: 0, flex: 1 }}
                 >
                   <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</Box>
@@ -96,7 +97,7 @@ export default function PartyConfig() {
               />
               <Tooltip title="Remove from encounter">
                 <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removePlayer', index })}>
-                  <Trash2 size={15} />
+                  <Trash2 size={ICON_SIZES.sm} />
                 </IconButton>
               </Tooltip>
             </Box>

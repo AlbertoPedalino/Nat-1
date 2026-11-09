@@ -17,6 +17,7 @@ import {
   sceneViewSwitchSx,
   viewButtonSx,
 } from './sceneEditorStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The scene's title row: scene switcher (GM), name and rename, live and
 // projector controls, initiative, the GM's player-view toggle, and the
@@ -43,7 +44,7 @@ export default function SceneTopBar({
         {role.isGm && !gmPlayerPreview ? (
           <Tooltip title="Rename scene">
             <IconButton size="small" aria-label="Rename scene" onClick={handleRename} sx={sceneRenameButtonSx}>
-              <Pencil size={11} />
+              <Pencil size={ICON_SIZES.xxs} />
             </IconButton>
           </Tooltip>
         ) : null}
@@ -85,7 +86,7 @@ export default function SceneTopBar({
               <Button
                 size="small"
                 variant={gmPlayerPreview ? 'contained' : 'outlined'}
-                startIcon={gmPlayerPreview ? <EyeOff size={14} /> : <Eye size={14} />}
+                startIcon={gmPlayerPreview ? <EyeOff size={ICON_SIZES.sm} /> : <Eye size={ICON_SIZES.sm} />}
                 aria-label={gmPlayerPreview ? 'Exit player view' : 'Player view'}
                 aria-pressed={gmPlayerPreview}
                 onClick={handleTogglePlayerPreview}

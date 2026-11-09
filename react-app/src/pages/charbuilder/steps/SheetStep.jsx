@@ -10,6 +10,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -65,7 +66,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Button
               variant="outlined"
               disabled={!ready}
-              startIcon={<Download size={16} />}
+              startIcon={<Download size={ICON_SIZES.md} />}
               onClick={() => downloadBuilderSheet(character, state.data)}
             >
               Download JSON
@@ -73,7 +74,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Button
               variant="outlined"
               disabled={!ready}
-              startIcon={<Save size={16} />}
+              startIcon={<Save size={ICON_SIZES.md} />}
               onClick={() => {
                 // Explicit local copy. For a normal cloud-backed char pin it to the
                 // server id; for an imported draft save a fresh local row and keep
@@ -93,7 +94,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Button
               variant="outlined"
               disabled={!ready || !cloudActive}
-              startIcon={<CloudUpload size={16} />}
+              startIcon={<CloudUpload size={ICON_SIZES.md} />}
               onClick={() => onUploadToCloud?.()}
             >
               Upload to cloud
@@ -101,7 +102,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Button
               variant="contained"
               disabled={!ready}
-              startIcon={<FileText size={16} />}
+              startIcon={<FileText size={ICON_SIZES.md} />}
               onClick={async () => {
                 if (cloudActive) {
                   // Open the cloud-backed sheet. A draft (or any not-yet-saved char)

@@ -13,6 +13,8 @@ import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -42,7 +44,7 @@ export default function EncounterList() {
           <Button
             size="small"
             variant="outlined"
-            startIcon={<Plus size={15} />}
+            startIcon={<Plus size={ICON_SIZES.sm} />}
             onClick={() => dispatch({ type: 'newEncounter' })}
           >
             New Encounter
@@ -77,7 +79,7 @@ export default function EncounterList() {
           {state.encounter.length ? state.encounter.map((item) => (
             <Box key={item.id} sx={rowSx}>
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography noWrap sx={{ fontWeight: 700 }}>{item.name}</Typography>
+                <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{item.name}</Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {item.source} · CR {item.cr}
                 </Typography>
@@ -94,7 +96,7 @@ export default function EncounterList() {
                 />
                 <Tooltip title="Remove">
                   <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removeEncounterItem', id: item.id })}>
-                    <Trash2 size={15} />
+                    <Trash2 size={ICON_SIZES.sm} />
                   </IconButton>
                 </Tooltip>
               </Stack>
@@ -110,7 +112,7 @@ export default function EncounterList() {
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'stretch' }}>
             <Button
               variant="contained"
-              startIcon={<Swords size={16} />}
+              startIcon={<Swords size={ICON_SIZES.md} />}
               onClick={() => handleLaunch()}
               disabled={cannotLaunch}
               sx={{ flex: 1, minWidth: 0 }}
@@ -125,14 +127,14 @@ export default function EncounterList() {
                   disabled={cannotLaunch}
                   sx={{ border: 1, borderColor: 'divider', borderRadius: 1, px: 1.25 }}
                 >
-                  <SlidersHorizontal size={16} />
+                  <SlidersHorizontal size={ICON_SIZES.md} />
                 </IconButton>
               </Box>
             </Tooltip>
           </Stack>
           <Button
             variant="outlined"
-            startIcon={<Save size={16} />}
+            startIcon={<Save size={ICON_SIZES.md} />}
             onClick={() => handleSave()}
             disabled={!state.encounter.length}
             fullWidth

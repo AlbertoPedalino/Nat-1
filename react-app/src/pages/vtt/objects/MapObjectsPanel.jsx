@@ -17,6 +17,7 @@ import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -74,7 +75,7 @@ export default function MapObjectsPanel({
           slotProps={{
             htmlInput: { 'aria-label': 'Search Lucide icons' },
             input: {
-              startAdornment: <InputAdornment position="start"><Search size={14} /></InputAdornment>,
+              startAdornment: <InputAdornment position="start"><Search size={ICON_SIZES.sm} /></InputAdornment>,
             },
           }}
           sx={{ flex: 1, minWidth: 0 }}

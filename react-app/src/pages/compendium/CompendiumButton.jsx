@@ -3,6 +3,7 @@ import { Box, Button } from '@mui/material';
 import { BookOpen } from 'lucide-react';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { asArray } from '../../shared/lists.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 // Loaded on first opening: the button is in every top bar, and most pages
 // never open the compendium.
@@ -16,7 +17,7 @@ export default function CompendiumButton({ sx }) {
       <Button
         size="small"
         variant={open ? 'contained' : 'outlined'}
-        startIcon={<BookOpen size={14} />}
+        startIcon={<BookOpen size={ICON_SIZES.sm} />}
         aria-label="Compendium"
         aria-pressed={open}
         onClick={() => setOpen((value) => !value)}

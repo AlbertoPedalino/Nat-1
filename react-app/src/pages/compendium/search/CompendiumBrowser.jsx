@@ -20,6 +20,7 @@ import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendium
 import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { entryNameSx, fillColumnSx, rowChipSx } from '../compendiumStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The kind filter: everything, or one kind.
 const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
@@ -116,7 +117,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
   const detail = selected ? (
     <Box sx={detailSx}>
       {panel ? (
-        <Button size="small" startIcon={<ArrowLeft size={14} />} onClick={() => setSelectedKey(null)} sx={{ mb: 1 }}>
+        <Button size="small" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => setSelectedKey(null)} sx={{ mb: 1 }}>
           Back to results
         </Button>
       ) : null}
@@ -143,7 +144,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
             <>
               <Button
                 size="small"
-                startIcon={<ArrowLeft size={14} />}
+                startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
                 onClick={() => setSelectedKey(null)}
                 sx={{ mb: 1, display: { md: 'none' } }}
               >

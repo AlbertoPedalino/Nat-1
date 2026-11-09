@@ -1,4 +1,5 @@
 import { Box, IconButton, TextField } from '@mui/material';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { Plus, Minus } from 'lucide-react';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
@@ -9,14 +10,14 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 const VARIANTS = {
   sheet: {
     btnSize: 22,
-    iconSize: 12,
+    iconSize: ICON_SIZES.xs,
     amountWidth: 46,
     gap: 0.25,
     amountInputSx: { py: 0.25, fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure },
   },
   combat: {
     btnSize: 26,
-    iconSize: 14,
+    iconSize: ICON_SIZES.sm,
     amountWidth: 52,
     gap: 0.5,
     amountInputSx: undefined, // input font is inherited from the card's HP row

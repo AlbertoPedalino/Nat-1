@@ -18,6 +18,7 @@ import {
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY } from '../../ui/colors.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -57,7 +58,7 @@ export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
       size="small"
       label={effect.text}
       onDelete={onRemove}
-      deleteIcon={<X size={12} aria-label={`Remove ${effect.text}`} />}
+      deleteIcon={<X size={ICON_SIZES.xs} aria-label={`Remove ${effect.text}`} />}
       sx={(theme) => {
         const accent = theme.palette.info.main;
         return {
@@ -144,7 +145,7 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
       onClick={onPick}
       onDelete={onForget}
       aria-label={`Add ${text}`}
-      deleteIcon={<X size={11} aria-label={`Forget ${text}`} />}
+      deleteIcon={<X size={ICON_SIZES.xxs} aria-label={`Forget ${text}`} />}
       sx={(theme) => {
         const accent = theme.palette.info.main;
         return {

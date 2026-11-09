@@ -10,6 +10,7 @@ import QuestView from './quests/QuestView.jsx';
 import RollView from './tables/RollView.jsx';
 import TablesView from './tables/TablesView.jsx';
 import GuideView from './ui/GuideView.jsx';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 const TABS = [
   { value: 'hex', label: 'Hexcrawl', Icon: Map },
@@ -52,7 +53,7 @@ function GmBoardShell({ tool }) {
         {TABS.map((t) => (
           <Tab
             key={t.value}
-            icon={<t.Icon size={15} />}
+            icon={<t.Icon size={ICON_SIZES.sm} />}
             iconPosition="start"
             value={t.value}
             label={t.label}

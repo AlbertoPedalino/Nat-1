@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { tokenizeInlineMarkup } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
+import { FONT_WEIGHTS } from '../ui/fonts.js';
 
 function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {
   return tokens.map((token, index) => {
@@ -9,7 +10,7 @@ function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {
       return <Box key={key} component="em" sx={{ fontStyle: 'italic' }}>{token.text}</Box>;
     }
     if (token.type === 'strong') {
-      return <Box key={key} component="strong" sx={{ fontWeight: 700, color: strongColor || 'text.primary' }}>{token.text}</Box>;
+      return <Box key={key} component="strong" sx={{ fontWeight: FONT_WEIGHTS.bold, color: strongColor || 'text.primary' }}>{token.text}</Box>;
     }
     if (token.type === 'ref') {
       return <Box key={key} component="span" sx={{ color: refColor }}>{token.text}</Box>;

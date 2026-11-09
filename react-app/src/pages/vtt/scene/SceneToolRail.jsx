@@ -6,6 +6,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -44,7 +45,7 @@ export default function SceneToolRail({
           }}
           sx={{ ...railButtonSx, ...(activeId === 'cursor' ? railButtonActiveSx : null) }}
         >
-          <MousePointer2 size={17} />
+          <MousePointer2 size={ICON_SIZES.md} />
           <Typography component="span" sx={railLabelSx}>Cursor</Typography>
         </Box>
 
@@ -64,7 +65,7 @@ export default function SceneToolRail({
               }}
               sx={{ ...railButtonSx, ...(active ? railButtonActiveSx : null) }}
             >
-              <Icon size={17} />
+              <Icon size={ICON_SIZES.md} />
               <Typography component="span" sx={railLabelSx}>{group.label}</Typography>
             </Box>
           );
@@ -81,7 +82,7 @@ export default function SceneToolRail({
             <Typography sx={panelTitleSx}>{open.label}</Typography>
             <Box sx={{ flex: 1 }} />
             <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: VTT_COLORS.textSecondary }}>
-              <X size={14} />
+              <X size={ICON_SIZES.sm} />
             </IconButton>
           </Stack>
           {typeof open.content === 'function' ? open.content({ closePanel }) : open.content}

@@ -5,8 +5,9 @@ import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
   const { state, characterDigests } = useEncounterBuilder();
@@ -19,7 +20,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
         <Box sx={playerHeaderSx}>
           <Typography variant="h2">Player Character</Typography>
           <IconButton onClick={onClose} sx={closeButtonSx} aria-label="Close character sheet">
-            <X size={18} />
+            <X size={ICON_SIZES.lg} />
           </IconButton>
         </Box>
         <Divider />
@@ -51,7 +52,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
               rel="noopener"
               size="small"
               variant="outlined"
-              endIcon={<ExternalLink size={14} />}
+              endIcon={<ExternalLink size={ICON_SIZES.sm} />}
               sx={{ flexShrink: 0 }}
             >
               Open sheet
@@ -59,7 +60,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
           ) : null}
         </Stack>
         <IconButton onClick={onClose} sx={closeButtonSx} aria-label="Close character sheet">
-          <X size={18} />
+          <X size={ICON_SIZES.lg} />
         </IconButton>
       </Box>
       <Divider />
@@ -104,7 +105,7 @@ const avatarSx = {
   height: 58,
   color: UI_COLORS.surfaceSunken,
   fontSize: FONT_SIZES.xxl,
-  fontWeight: 900,
+  fontWeight: FONT_WEIGHTS.heavy,
   flex: '0 0 auto',
 };
 

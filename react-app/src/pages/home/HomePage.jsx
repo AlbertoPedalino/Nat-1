@@ -12,6 +12,7 @@ import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 const toolLink = (id, path) => {
   const { label, description, icon, color } = TOOL_CATALOG[id];
@@ -87,7 +88,7 @@ export default function HomePage() {
             variant="outlined"
             size="small"
             color="error"
-            startIcon={<Trash2 size={15} />}
+            startIcon={<Trash2 size={ICON_SIZES.sm} />}
             onClick={handleClearAppData}
             sx={clearDataButtonSx}
           >

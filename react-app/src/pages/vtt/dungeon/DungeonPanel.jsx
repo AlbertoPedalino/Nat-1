@@ -16,6 +16,7 @@ import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx'
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The dungeon this map is being played as.
 //
@@ -83,7 +84,7 @@ export default function DungeonPanel({
         <Button
           size="small"
           variant="contained"
-          startIcon={busy ? <CircularProgress size={13} /> : <Dices size={15} />}
+          startIcon={busy ? <CircularProgress size={13} /> : <Dices size={ICON_SIZES.sm} />}
           disabled={busy || !isValidRoomCount(roomCount)}
           onClick={() => onRoll({
             roomCount,
@@ -95,7 +96,7 @@ export default function DungeonPanel({
           {dungeonKey ? 'Roll it again' : 'Roll the dungeon'}
         </Button>
         {dungeonKey ? (
-          <Button size="small" startIcon={<Trash2 size={14} />} disabled={busy} onClick={onClear}>
+          <Button size="small" startIcon={<Trash2 size={ICON_SIZES.sm} />} disabled={busy} onClick={onClear}>
             Clear
           </Button>
         ) : null}
@@ -132,7 +133,7 @@ export default function DungeonPanel({
 
             {!isNothingFound(keyRoom.loot?.data) ? (
               <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                <Coins size={13} color={theme.palette.gmboard.result.loot} />
+                <Coins size={ICON_SIZES.xs} color={theme.palette.gmboard.result.loot} />
                 <Typography sx={lineSx}>{lootLabel(keyRoom.loot.data, keyRoom.lootDc)}</Typography>
               </Stack>
             ) : null}
@@ -140,7 +141,7 @@ export default function DungeonPanel({
             {chosen?.groups?.length ? (
               <>
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                  <Users size={13} color={theme.palette.gmboard.result.encounter} />
+                  <Users size={ICON_SIZES.xs} color={theme.palette.gmboard.result.encounter} />
                   <Typography sx={lineSx}>{describeGroups(chosen.groups, chosen.budget)}</Typography>
                 </Stack>
 
@@ -241,7 +242,7 @@ function SlotLine({ slot, tones }) {
   if (extra.kind === 'enc') {
     return (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Swords size={13} color={tones.result.encounter} />
+        <Swords size={ICON_SIZES.xs} color={tones.result.encounter} />
         <Typography sx={lineSx}>
           {[extra.data.diff, encounterDetail(extra.data)].filter(Boolean).join(' · ')}
         </Typography>
@@ -251,7 +252,7 @@ function SlotLine({ slot, tones }) {
   if (extra.kind === 'trap') {
     return (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Flame size={13} color={tones.result.trap} />
+        <Flame size={ICON_SIZES.xs} color={tones.result.trap} />
         <Typography sx={lineSx}>
           {trapLabel(extra.data)}
         </Typography>
@@ -260,7 +261,7 @@ function SlotLine({ slot, tones }) {
   }
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-      <Leaf size={13} color={tones.result.none} />
+      <Leaf size={ICON_SIZES.xs} color={tones.result.none} />
       <Typography sx={lineSx}>
         {slot.type}{extra.data?.severity ? ` · ${extra.data.severity}` : ''}
       </Typography>

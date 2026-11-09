@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { ExpandableCard } from './ExpandableCard.jsx';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { ICON_SIZES } from './iconSizes.js';
 
 // Nested "click to reveal" disclosure for secondary prose — e.g. an action's
 // description tucked under its interactive controls, so the text stays available
@@ -21,7 +22,7 @@ export default function CollapsibleNote({ label = 'Description', children, sx })
             color: 'text.secondary', py: 0.25, '&:hover': { color: 'text.primary' },
           }}
         >
-          {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          {open ? <ChevronDown size={ICON_SIZES.xs} /> : <ChevronRight size={ICON_SIZES.xs} />}
           <Typography component="span" sx={{ fontSize: FONT_SIZES.xxs, ...TEXT_STYLES.label }}>
             {label}
           </Typography>

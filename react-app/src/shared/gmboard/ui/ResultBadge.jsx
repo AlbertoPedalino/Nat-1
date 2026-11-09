@@ -1,5 +1,6 @@
 import { Box, useTheme } from '@mui/material';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 export default function ResultBadge({ children, tone, icon: Icon }) {
   const theme = useTheme();
@@ -16,14 +17,14 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
         py: 0.25,
         borderRadius: 999,
         fontSize: FONT_SIZES.sm,
-        fontWeight: 700,
+        fontWeight: FONT_WEIGHTS.bold,
         letterSpacing: LETTER_SPACINGS.sm,
         color: resolvedTone,
         border: `1px solid ${resolvedTone}`,
         bgcolor: theme.palette.gmboard.panelOverlay,
       }}
     >
-      {Icon ? <Icon size={11} /> : null}
+      {Icon ? <Icon size={ICON_SIZES.xxs} /> : null}
       {children}
     </Box>
   );

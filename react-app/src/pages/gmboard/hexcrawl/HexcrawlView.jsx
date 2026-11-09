@@ -16,6 +16,7 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -89,7 +90,7 @@ export default function HexcrawlView() {
         <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
           <Button
             variant="contained"
-            startIcon={<Footprints size={15} />}
+            startIcon={<Footprints size={ICON_SIZES.sm} />}
             disabled={!canProceed}
             onClick={proceed}
           >
@@ -97,7 +98,7 @@ export default function HexcrawlView() {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<FastForward size={15} />}
+            startIcon={<FastForward size={ICON_SIZES.sm} />}
             disabled={!canAdvanceOnly}
             onClick={advanceOnly}
           >

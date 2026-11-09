@@ -1,5 +1,6 @@
 import { Button } from '@mui/material';
 import { goldToggleSx } from './actionButton.js';
+import { ICON_SIZES } from './iconSizes.js';
 
 // One row of filter choices (the sheet's Actions, Spells and Inventory tabs):
 // the chosen one lit in gold. `options` are { key, label, icon? }; the buttons
@@ -11,7 +12,7 @@ export default function FilterToggles({ options, value, onChange }) {
       size="small"
       aria-pressed={value === key}
       onClick={() => onChange(key)}
-      startIcon={Icon ? <Icon size={12} /> : null}
+      startIcon={Icon ? <Icon size={ICON_SIZES.xs} /> : null}
       sx={goldToggleSx(value === key)}
     >
       {label}

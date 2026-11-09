@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { Box, IconButton, TextField } from '@mui/material';
 import { Plus, Minus } from 'lucide-react';
 import { UI_COLORS } from '../../ui/colors.js';
@@ -10,13 +11,13 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 const VARIANTS = {
   default: {
     size: 'medium',
-    iconSize: 18,
+    iconSize: ICON_SIZES.lg,
     inputSx: undefined,
     fieldSx: undefined,
   },
   compact: {
     size: 'small',
-    iconSize: 16,
+    iconSize: ICON_SIZES.md,
     inputSx: { fontSize: FONT_SIZES.lg, py: 0.5, color: UI_COLORS.accentText, ...TEXT_STYLES.figure },
     fieldSx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } },
   },

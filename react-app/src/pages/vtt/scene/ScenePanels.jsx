@@ -22,6 +22,7 @@ import {
 import { pillLabelSx } from './panelStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -39,13 +40,13 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
       sx={compact ? compactLayerSx : null}
     >
       <Tooltip title="Map: scenery and props">
-        <ToggleButton value="map" aria-label="Map layer"><ImageIcon size={14} /></ToggleButton>
+        <ToggleButton value="map" aria-label="Map layer"><ImageIcon size={ICON_SIZES.sm} /></ToggleButton>
       </Tooltip>
       <Tooltip title="Tokens: the pieces everyone sees">
-        <ToggleButton value="tokens" aria-label="Token layer"><Users size={14} /></ToggleButton>
+        <ToggleButton value="tokens" aria-label="Token layer"><Users size={ICON_SIZES.sm} /></ToggleButton>
       </Tooltip>
       <Tooltip title="GM: never sent to the players">
-        <ToggleButton value="gm" aria-label="GM layer"><EyeOff size={14} /></ToggleButton>
+        <ToggleButton value="gm" aria-label="GM layer"><EyeOff size={ICON_SIZES.sm} /></ToggleButton>
       </Tooltip>
     </ToggleButtonGroup>
   );
@@ -73,7 +74,7 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
   if (!scene.fog) {
     return (
       <Stack spacing={1}>
-        <Button size="small" variant="outlined" startIcon={<Cloud size={15} />} disabled={busy} onClick={onEnableFog}>
+        <Button size="small" variant="outlined" startIcon={<Cloud size={ICON_SIZES.sm} />} disabled={busy} onClick={onEnableFog}>
           Cover the map
         </Button>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -93,8 +94,8 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
         onChange={(_, value) => onPaintModeChange(value || 'select')}
         aria-label="Fog tool"
       >
-        <ToggleButton value="reveal" aria-label="Reveal fog"><Eye size={14} /></ToggleButton>
-        <ToggleButton value="hide" aria-label="Cover with fog"><EyeOff size={14} /></ToggleButton>
+        <ToggleButton value="reveal" aria-label="Reveal fog"><Eye size={ICON_SIZES.sm} /></ToggleButton>
+        <ToggleButton value="hide" aria-label="Cover with fog"><EyeOff size={ICON_SIZES.sm} /></ToggleButton>
       </ToggleButtonGroup>
       <TextField
         label="Brush (cells)"
@@ -130,11 +131,11 @@ export function CursorPanel({ paintMode, onPaintModeChange }) {
         aria-label="Cursor mode"
       >
         <ToggleButton value="select" aria-label="Pointer">
-          <MousePointer2 size={14} />
+          <MousePointer2 size={ICON_SIZES.sm} />
           <Box component="span" sx={pillLabelSx}>Pointer</Box>
         </ToggleButton>
         <ToggleButton value="marquee" aria-label="Box select">
-          <SquareDashedMousePointer size={14} />
+          <SquareDashedMousePointer size={ICON_SIZES.sm} />
           <Box component="span" sx={pillLabelSx}>Box select</Box>
         </ToggleButton>
       </ToggleButtonGroup>
@@ -156,7 +157,7 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
       <Button
         size="small"
         variant={active ? 'contained' : 'outlined'}
-        startIcon={<Pointer size={15} />}
+        startIcon={<Pointer size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange(active ? 'select' : 'laser')}
       >
         {active ? 'Put the pointer down' : 'Take the pointer'}

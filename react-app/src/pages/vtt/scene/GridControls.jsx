@@ -16,6 +16,7 @@ import { numberSx, pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The scene panel's Grid section: shape, calibration over the picture, how the
 // lines look, and whether scenery snaps to the cells.
@@ -45,11 +46,11 @@ export function GridControls({ grid, onGridChange }) {
         aria-label="Grid shape"
       >
         <ToggleButton value="square" aria-label="Square grid">
-          <Grid3x3 size={14} />
+          <Grid3x3 size={ICON_SIZES.sm} />
           <Box component="span" sx={pillLabelSx}>Squares</Box>
         </ToggleButton>
         <ToggleButton value="hex" aria-label="Hex grid">
-          <Hexagon size={14} />
+          <Hexagon size={ICON_SIZES.sm} />
           <Box component="span" sx={pillLabelSx}>Hexes</Box>
         </ToggleButton>
       </ToggleButtonGroup>

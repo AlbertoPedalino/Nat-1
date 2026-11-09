@@ -23,7 +23,7 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
@@ -177,7 +177,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 const hitBonus = signed(prof);
                 return (
                   <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.surfaceHeader } }}>
-                    <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
+                    <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>{item.name}</Typography></Box>
                     <Box component="td"><Typography sx={{ ...TEXT_STYLES.figure, color: UI_COLORS.accentText, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>

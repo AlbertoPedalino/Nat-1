@@ -26,6 +26,8 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { ATMOSPHERE_PRESETS } from '../../../shared/vtt/scene/atmosphere.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -77,12 +79,12 @@ function AtmosphereOption({ type, selected, onSelect }) {
         },
       }}
     >
-      <Icon size={15} strokeWidth={1.8} />
+      <Icon size={ICON_SIZES.sm} strokeWidth={1.8} />
       <Typography
         component="span"
         variant="caption"
         noWrap
-        sx={{ minWidth: 0, fontWeight: selected ? 700 : 500 }}
+        sx={{ minWidth: 0, fontWeight: selected ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular }}
       >
         {preset.label}
       </Typography>

@@ -15,11 +15,12 @@ import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -102,12 +103,12 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               </Typography>
               {visual && (
                 <Tooltip title={tooltipText}>
-                  <visual.Icon size={12} style={{ color: visual.color, flexShrink: 0 }} />
+                  <visual.Icon size={ICON_SIZES.xs} style={{ color: visual.color, flexShrink: 0 }} />
                 </Tooltip>
               )}
               {hasContextMenu ? (
                 <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
-                  <ChevronDown size={12} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: OPACITY.strong }} />
+                  <ChevronDown size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: OPACITY.strong }} />
                 </Tooltip>
               ) : null}
             </RollModeArea>
@@ -119,10 +120,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: 0.75 }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Dice5 size={13} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
+              <Dice5 size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentMuted, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentMuted, fontWeight: FONT_WEIGHTS.bold, flexShrink: 0 }}>
                     Min {r.minRoll}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
@@ -139,10 +140,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           ))}
           {concentrationBonus > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Sparkles size={13} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
+              <Sparkles size={ICON_SIZES.xs} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.secondary, fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, flexShrink: 0 }}>
                     +{concentrationBonus}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>
@@ -161,10 +162,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             const { Icon, color, label: kindLabel } = visual;
             return (
               <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-                <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
+                <Icon size={ICON_SIZES.xs} style={{ color, flexShrink: 0, marginTop: 2 }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color, fontWeight: 700, flexShrink: 0 }}>
+                    <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color, fontWeight: FONT_WEIGHTS.bold, flexShrink: 0 }}>
                       {kindLabel}
                     </Typography>
                     <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: 'text.primary' }}>

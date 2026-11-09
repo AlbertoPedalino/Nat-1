@@ -28,6 +28,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -94,12 +95,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
               <Typography sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.textMuted, mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Archive size={10} /> Owned, not carried
+                <Archive size={ICON_SIZES.xxs} /> Owned, not carried
               </Typography>
             ) : null}
             {penaltyMsg && (
               <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'warning.main', mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <AlertTriangle size={10} /> {penaltyMsg}
+                <AlertTriangle size={ICON_SIZES.xxs} /> {penaltyMsg}
               </Typography>
             )}
           </Box>
@@ -121,7 +122,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               ) : null}
             </Box>
           ) : carried && canEquip ? (
-            <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
+            <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}
               sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
@@ -149,26 +150,26 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
                 Charges
               </Box>
               <ChargeStepButton ariaLabel={`Spend one ${item.name} charge`} disabled={chargeCurrent <= 0} onClick={() => actions.charges(index, -1)}>
-                <Minus size={10} />
+                <Minus size={ICON_SIZES.xxs} />
               </ChargeStepButton>
               <Box component="span" sx={{ minWidth: 28, textAlign: 'center' }}>
                 {chargeCurrent}/{chargeMaximum}
               </Box>
               <ChargeStepButton ariaLabel={`Restore one ${item.name} charge`} disabled={chargeCurrent >= chargeMaximum} onClick={() => actions.charges(index, 1)}>
-                <Plus size={10} />
+                <Plus size={ICON_SIZES.xxs} />
               </ChargeStepButton>
             </Box>
           ) : null}
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, ml: 'auto' }}>
-            <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
+            <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={ICON_SIZES.xxs} /> : null}
               sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
             <Tooltip title="Remove">
               <IconButton size="small" aria-label={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
-                <Trash2 size={12} />
+                <Trash2 size={ICON_SIZES.xs} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -182,7 +183,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
 function ItemFlagButton({ def, active, onClick }) {
   const tone = def.tone || ENTITY_COLORS.class;
   return (
-    <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
+    <Button size="small" onClick={onClick} startIcon={active ? <Check size={ICON_SIZES.xxs} /> : null}
       sx={{
         minWidth: 0, px: 1, py: 0.25, border: 1, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
         ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
@@ -256,7 +257,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       <Tooltip title={tip} arrow>
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
-            startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
+            startIcon={cursedAttuned ? <AlertTriangle size={ICON_SIZES.xxs} /> : (item.attuned ? <Check size={ICON_SIZES.xxs} /> : (hasRequirementWarning ? <AlertTriangle size={ICON_SIZES.xxs} /> : null))}
             sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, OPACITY.fill) : 'transparent', '&.Mui-disabled': { opacity: OPACITY.edge } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>

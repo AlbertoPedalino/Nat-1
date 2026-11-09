@@ -26,6 +26,7 @@ import { useSpellCatalog } from './useSpellCatalog.js';
 import { useSpellSlotState } from './useSpellSlotState.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -140,7 +141,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>
-          <Button onClick={() => setPickerOpen(true)} startIcon={<Plus size={15} />} sx={addButtonSx}>
+          <Button onClick={() => setPickerOpen(true)} startIcon={<Plus size={ICON_SIZES.sm} />} sx={addButtonSx}>
             Add / Remove Spell
           </Button>
         </Box>

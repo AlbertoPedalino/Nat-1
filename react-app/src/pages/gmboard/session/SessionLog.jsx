@@ -5,6 +5,7 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -22,7 +23,7 @@ export default function SessionLog() {
           size="small"
           variant="outlined"
           color="error"
-          startIcon={<Trash2 size={13} />}
+          startIcon={<Trash2 size={ICON_SIZES.xs} />}
           onClick={() => dispatch({ type: 'clearLog' })}
           disabled={!entries.length}
         >

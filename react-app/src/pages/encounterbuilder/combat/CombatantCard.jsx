@@ -23,6 +23,8 @@ import {
   hpBarSx, cardSx, hpRowSx, buildActiveSx, deadSx,
 } from './combatantCardStyles.js';
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -69,7 +71,7 @@ export default function CombatantCard({ combatant, active }) {
     >
       <Tooltip title="Remove">
         <IconButton color="error" onClick={remove} size="small" sx={removeButtonSx} aria-label="Remove combatant">
-          <X size={15} />
+          <X size={ICON_SIZES.sm} />
         </IconButton>
       </Tooltip>
       <Box sx={rowSx}>
@@ -102,7 +104,7 @@ export default function CombatantCard({ combatant, active }) {
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Stack direction="row" spacing={0.75} sx={{ minWidth: 0, alignItems: 'center' }}>
                 {combatant.shape ? (
-                  <Typography sx={{ color: combatant.shapeClr, fontWeight: 900, flexShrink: 0 }}>
+                  <Typography sx={{ color: combatant.shapeClr, fontWeight: FONT_WEIGHTS.heavy, flexShrink: 0 }}>
                     {combatant.shape}{combatant.label}
                   </Typography>
                 ) : null}
@@ -115,7 +117,7 @@ export default function CombatantCard({ combatant, active }) {
                     <Box component="span" sx={nameSpanSx}>{combatant.name}</Box>
                   </Button>
                 ) : (
-                  <Typography noWrap sx={{ fontWeight: 800 }}>{combatant.name}</Typography>
+                  <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.heavy }}>{combatant.name}</Typography>
                 )}
                 {!isMonster && combatant.sourceId ? (
                   <Tooltip title="Open sheet">
@@ -128,7 +130,7 @@ export default function CombatantCard({ combatant, active }) {
                       sx={sheetLinkButtonSx}
                       aria-label={`Open ${combatant.name} sheet`}
                     >
-                      <ExternalLink size={13} />
+                      <ExternalLink size={ICON_SIZES.xs} />
                     </IconButton>
                   </Tooltip>
                 ) : null}
@@ -138,7 +140,7 @@ export default function CombatantCard({ combatant, active }) {
                   was noise competing with the one stat read every turn. */}
               <Tooltip title="Armor Class">
                 <Box sx={acBadgeSx}>
-                  <Shield size={13} />
+                  <Shield size={ICON_SIZES.xs} />
                   <Box component="span" sx={acLabelSx}>AC</Box>
                   <Box component="span" sx={acValueSx}>{combatant.ac}</Box>
                 </Box>
@@ -201,7 +203,7 @@ export default function CombatantCard({ combatant, active }) {
                   size="small"
                   onClick={() => setHpDetailsOpen((open) => !open)}
                   aria-expanded={hpDetailsOpen}
-                  startIcon={hpDetailsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  startIcon={hpDetailsOpen ? <ChevronUp size={ICON_SIZES.sm} /> : <ChevronDown size={ICON_SIZES.sm} />}
                   sx={hpToggleSx}
                 >
                   HP modifiers
@@ -299,7 +301,7 @@ function HpFlag({ Icon, title, text }) {
   return (
     <Tooltip title={title}>
       <Box sx={hpFlagSx}>
-        <Icon size={11} />
+        <Icon size={ICON_SIZES.xxs} />
         <Box component="b">{text}</Box>
       </Box>
     </Tooltip>

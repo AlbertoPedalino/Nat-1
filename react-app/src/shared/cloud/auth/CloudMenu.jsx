@@ -13,6 +13,7 @@ import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 import { failureMessage } from '../../ui/busyAction.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -88,7 +89,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
     return (
       <Tooltip title="Online features not configured">
         <Box component="span" sx={{ display: 'inline-flex' }}>
-          <Button size="small" variant="outlined" disabled startIcon={<LogIn size={14} />} sx={{ ...loginBtnSx, ...buttonSx }}>
+          <Button size="small" variant="outlined" disabled startIcon={<LogIn size={ICON_SIZES.sm} />} sx={{ ...loginBtnSx, ...buttonSx }}>
             LOGIN
           </Button>
         </Box>
@@ -106,7 +107,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         size="small"
         variant="outlined"
         color="primary"
-        startIcon={status === 'authed' ? <User size={14} /> : <LogIn size={14} />}
+        startIcon={status === 'authed' ? <User size={ICON_SIZES.sm} /> : <LogIn size={ICON_SIZES.sm} />}
         aria-label={status === 'authed' ? `Account: ${username || 'signed in'}` : 'Log in'}
         onClick={(e) => setAnchor(e.currentTarget)}
         sx={{ ...loginBtnSx, ...buttonSx }}
@@ -127,22 +128,22 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
           <Divider key="d1" />,
           ...(canUploadDraft ? [
             <MenuItem key="uploaddraft" onClick={() => { close(); onUploadDraft?.(); }}>
-              <CloudUpload size={15} style={{ marginRight: 8 }} /> Upload to cloud
+              <CloudUpload size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Upload to cloud
             </MenuItem>,
             <Divider key="ddraft" />,
           ] : []),
           ...((excluded && !canUploadDraft) ? [
             <MenuItem key="savecloud" onClick={saveExcludedToCloud}>
-              <CloudUpload size={15} style={{ marginRight: 8 }} /> Upload to cloud
+              <CloudUpload size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Upload to cloud
             </MenuItem>,
             <Divider key="dsave" />,
           ] : []),
           <MenuItem key="out" onClick={async () => { close(); await signOut(); notify('success', 'Logged out.'); }}>
-            <LogOut size={15} style={{ marginRight: 8 }} /> Log out
+            <LogOut size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log out
           </MenuItem>,
         ] : (
           <MenuItem onClick={() => { close(); setAuthOpen(true); }}>
-            <LogIn size={15} style={{ marginRight: 8 }} /> Log in / Sign up
+            <LogIn size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log in / Sign up
           </MenuItem>
         )}
       </Menu>

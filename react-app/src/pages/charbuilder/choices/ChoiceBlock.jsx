@@ -25,7 +25,8 @@ import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -219,14 +220,14 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                           sx={{
                             color: 'text.primary',
                             fontSize: FONT_SIZES.xl,
-                            fontWeight: 500,
+                            fontWeight: FONT_WEIGHTS.regular,
                           }}
                         >
                           {label}
                         </Typography>
                       }
                     />
-                    {active ? <Check size={16} color="currentColor" /> : null}
+                    {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
                   </ListItemButton>
                   {desc ? (
                     <IconButton
@@ -235,7 +236,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                       onClick={() => toggleExpanded(value)}
                       sx={{ borderRadius: 0, color: 'text.secondary' }}
                     >
-                      {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      {isOpen ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
                     </IconButton>
                   ) : null}
                 </Stack>

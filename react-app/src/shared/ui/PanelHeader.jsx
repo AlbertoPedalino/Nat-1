@@ -3,6 +3,7 @@ import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
+import { ICON_SIZES } from './iconSizes.js';
 
 // The title bar of a sheet panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies) and of SheetDialog: a dark bar with a gold left accent, an
@@ -97,7 +98,7 @@ export const sectionLabelSx = {
 export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', children }) {
   return (
     <Box sx={{ ...panelBarSx, px: '0.8rem', py: '0.48rem', borderLeftColor: tone }}>
-      {Icon ? <Icon size={14} /> : null}
+      {Icon ? <Icon size={ICON_SIZES.sm} /> : null}
       <Typography sx={{ ...panelTitleSx, color: tone }}>{title}</Typography>
       {children}
     </Box>

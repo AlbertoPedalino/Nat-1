@@ -6,6 +6,7 @@ import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js'
 import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/resources/restResources.js';
 import { clamp } from '../../../shared/numbers.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The Short Rest dialog (Hit Dice to spend, per pool) and the Long Rest
 // confirmation. `rest` is the state and handlers from useRests.
@@ -21,7 +22,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         open={rest.shortRestOpen}
         onClose={rest.closeShortRest}
         title="Short Rest"
-        icon={<Hourglass size={20} />}
+        icon={<Hourglass size={ICON_SIZES.xl} />}
         actions={(
           <>
             <Button onClick={rest.closeShortRest} sx={{ color: 'text.secondary' }}>Cancel</Button>
@@ -60,7 +61,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         open={rest.longRestOpen}
         onClose={rest.closeLongRest}
         title="Take a Long Rest?"
-        icon={<Moon size={20} />}
+        icon={<Moon size={ICON_SIZES.xl} />}
         actions={(
           <>
             <Button onClick={rest.closeLongRest} sx={{ color: 'text.secondary' }}>Cancel</Button>

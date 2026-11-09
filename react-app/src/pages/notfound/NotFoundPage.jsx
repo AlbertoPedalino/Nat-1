@@ -3,8 +3,9 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { Compass, Home } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { composeMissingPath } from './notFoundPath.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
+import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../shared/ui/fonts.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -20,7 +21,7 @@ export default function NotFoundPage() {
               404 · Uncharted route
             </Typography>
             <Box sx={compassSx} aria-hidden="true">
-              <Compass size={40} strokeWidth={1.5} />
+              <Compass size={ICON_SIZES.jumbo} strokeWidth={1.5} />
             </Box>
             <Box>
               <Typography variant="h1" sx={titleSx}>
@@ -42,7 +43,7 @@ export default function NotFoundPage() {
               component={RouterLink}
               to="/"
               variant="contained"
-              startIcon={<Home size={16} aria-hidden="true" />}
+              startIcon={<Home size={ICON_SIZES.md} aria-hidden="true" />}
             >
               Return Home
             </Button>
@@ -86,7 +87,7 @@ const messageSx = {
 
 const statusSx = {
   color: 'primary.main',
-  fontWeight: 700,
+  fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.lg,
   lineHeight: 1.4,
 };

@@ -7,6 +7,7 @@ import { signed, withModifier } from '../../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -66,7 +67,7 @@ export default function CustomRollDialog({
       open={open}
       onClose={handleClose}
       title="Custom Roll"
-      icon={<Dices size={20} />}
+      icon={<Dices size={ICON_SIZES.xl} />}
       actions={(
         <>
           <Button onClick={reset} variant="text" size="small" sx={{ color: 'text.secondary', mr: 'auto' }}>Reset</Button>

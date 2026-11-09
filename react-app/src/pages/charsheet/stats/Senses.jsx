@@ -12,6 +12,7 @@ import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -82,7 +83,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           </Box>
           {clickable ? (
             <ChevronDown
-              size={13}
+              size={ICON_SIZES.xs}
               style={{ color: UI_COLORS.accent, flexShrink: 0, opacity: OPACITY.heavy, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
             />
           ) : null}

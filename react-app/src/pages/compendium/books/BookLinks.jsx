@@ -12,6 +12,8 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { rowChipSx } from '../compendiumStyles.js';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const NO_BOOKS = [];
 
@@ -40,9 +42,9 @@ export default function BookLinks() {
         <List key={title} dense subheader={<ListSubheader sx={subheaderSx}>{title}</ListSubheader>} aria-label={title}>
           {books.map((book) => (
             <ListItemButton key={book.id} component="a" href={book.url} target="_blank" rel="noopener" sx={rowSx}>
-              <Typography variant="body2" sx={{ fontWeight: 700, flex: 1 }}>{book.name}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: FONT_WEIGHTS.bold, flex: 1 }}>{book.name}</Typography>
               <Chip size="small" variant="outlined" label={book.id} sx={rowChipSx} />
-              <ExternalLink size={14} />
+              <ExternalLink size={ICON_SIZES.sm} />
             </ListItemButton>
           ))}
         </List>

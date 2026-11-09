@@ -11,6 +11,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Top left, beside the picture settings: the hexcrawl is how this map is played
 // rather than a tool you pick up, so it belongs with the scene's own settings
@@ -32,7 +33,7 @@ export default function HexcrawlCorner({ open = false, onOpenChange, ...props })
           onClick={() => onOpenChange?.(!open)}
           sx={buttonSx}
         >
-          {open ? <X size={16} /> : <Hexagon size={16} />}
+          {open ? <X size={ICON_SIZES.md} /> : <Hexagon size={ICON_SIZES.md} />}
         </IconButton>
       </Tooltip>
 
@@ -42,7 +43,7 @@ export default function HexcrawlCorner({ open = false, onOpenChange, ...props })
             <Typography sx={titleSx}>Hexcrawl</Typography>
             <Tooltip title="Hexcrawl settings">
               <IconButton size="small" aria-label="Hexcrawl settings" onClick={openSettings} sx={settingsButtonSx}>
-                <Settings size={14} />
+                <Settings size={ICON_SIZES.sm} />
               </IconButton>
             </Tooltip>
           </Stack>
