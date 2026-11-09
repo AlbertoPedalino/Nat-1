@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { Backpack, Check, Shield, Sparkles, Swords } from 'lucide-react';
 import { ITEM_GROUP_CHIPS } from '../../../shared/character/inventory/itemGroups.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
@@ -25,7 +25,7 @@ export const inventorySectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.48),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.strong),
   p: '8px',
   mb: 1,
 };

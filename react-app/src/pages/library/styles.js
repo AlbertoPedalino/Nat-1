@@ -1,6 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
@@ -63,7 +63,7 @@ export const rowSx = {
   alignItems: 'center',
   gap: '0.5rem',
   p: '0.6rem 0.75rem',
-  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.18)}`,
+  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.fill)}`,
   borderRadius: 1.25,
   bgcolor: UI_COLORS.surfaceDeep,
   '&:hover': { borderColor: UI_COLORS.accent },
@@ -118,9 +118,9 @@ export const iconBtnSx = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.18)}`,
+  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.fill)}`,
   borderRadius: 0.75,
-  background: uiAlpha(UI_COLORS.black, 0.18),
+  background: uiAlpha(UI_COLORS.black, OPACITY.fill),
   color: UI_COLORS.textFaint,
   cursor: 'pointer',
   p: 0,
@@ -140,9 +140,9 @@ export function badgeSx(kind, theme) {
     ...TEXT_STYLES.title,
     borderRadius: 0.5,
     color,
-    bgcolor: alpha(color, 0.12),
+    bgcolor: alpha(color, OPACITY.tint),
     border: '1px solid',
-    borderColor: alpha(color, 0.35),
+    borderColor: alpha(color, OPACITY.line),
   };
 }
 
@@ -151,7 +151,7 @@ export const emptyBoxSx = {
   maxWidth: '640px',
   textAlign: 'center',
   p: '2rem 1rem',
-  border: `1px dashed ${uiAlpha(UI_COLORS.accentMuted, 0.25)}`,
+  border: `1px dashed ${uiAlpha(UI_COLORS.accentMuted, OPACITY.shade)}`,
   borderRadius: 1.5,
 };
 

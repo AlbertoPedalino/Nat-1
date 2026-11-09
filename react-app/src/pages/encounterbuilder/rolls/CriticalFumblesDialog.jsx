@@ -11,7 +11,7 @@ import {
   getFumbleRange,
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
@@ -242,7 +242,7 @@ const sectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1.5,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.02),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const diceGridSx = {
@@ -259,7 +259,7 @@ const dieControlSx = {
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: 0.5,
-  bgcolor: uiAlpha(UI_COLORS.black, 0.12),
+  bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint),
 };
 
 const dieLabelSx = {
@@ -300,7 +300,7 @@ const outcomeSx = {
   alignItems: 'center',
   border: 1,
   borderColor: 'error.main',
-  bgcolor: uiAlpha(UI_COLORS.dangerStrong, 0.09),
+  bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.soft),
 };
 
 const outcomeNumberSx = {
@@ -336,7 +336,7 @@ const entryRowSx = {
   gridTemplateColumns: { xs: '1fr', sm: '76px minmax(0,1fr)' },
   gap: { xs: 0.55, sm: 1 },
   alignItems: 'center',
-  bgcolor: uiAlpha(UI_COLORS.white, 0.018),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const resultLabelSx = {

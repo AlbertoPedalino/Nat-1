@@ -14,7 +14,7 @@ import {
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
@@ -88,7 +88,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.04) } }}>
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
@@ -106,7 +106,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               )}
               {hasContextMenu ? (
                 <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
-                  <ChevronDown size={12} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: 0.6 }} />
+                  <ChevronDown size={12} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: OPACITY.strong }} />
                 </Tooltip>
               ) : null}
             </RollModeArea>
@@ -181,7 +181,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       )}
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
-        slotProps={{ paper: { sx: { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), border: 1, borderColor: 'divider' } } }}>
+        slotProps={{ paper: { sx: { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 1, borderColor: 'divider' } } }}>
         <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: FONT_SIZES.lg }}>
           Normal save
         </MenuItem>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
@@ -105,13 +105,13 @@ const phoneSurface = {
     color: 'primary.contrastText',
     px: 1.4,
     py: 0.85,
-    '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, 0.12) },
+    '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint) },
   },
-  dividerColor: uiAlpha(UI_COLORS.black, 0.3),
+  dividerColor: uiAlpha(UI_COLORS.black, OPACITY.line),
 };
 
 const phonePillSx = {
-  boxShadow: `${UI_SHADOWS.float}, 0 0 0 4px ${uiAlpha(UI_COLORS.accent, 0.18)}`,
+  boxShadow: `${UI_SHADOWS.float}, 0 0 0 4px ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
 };
 
 // The labelled control made into the same pill.

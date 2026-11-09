@@ -20,6 +20,7 @@ import {
   deadBadgeSx,
 } from './tokenSpriteStyles.js';
 import { isDying } from '../../../shared/character/combat/mortality.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -131,7 +132,7 @@ export default function TokenSprite({
         // map tool owns the pointer so it truly falls through to the viewport.
         ...(!interactive ? { '&, & *': { pointerEvents: 'none !important' } } : null),
         cursor: movable ? 'grab' : 'default',
-        opacity: dimmed ? 0.3 : (token.hiddenFromPlayers || token.layer === 'gm' || staged ? 0.6 : 1),
+        opacity: dimmed ? OPACITY.line : (token.hiddenFromPlayers || token.layer === 'gm' || staged ? OPACITY.strong : 1),
         filter: staged ? 'grayscale(0.7)' : 'none',
         // Above its neighbours while hovered so the expanded conditions are not
         // covered by the next piece along.

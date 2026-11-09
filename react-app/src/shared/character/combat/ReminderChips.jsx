@@ -17,6 +17,7 @@ import {
 } from './reminderHistory.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { OPACITY } from '../../ui/colors.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -66,7 +67,7 @@ export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
           color: accent,
           border: 1,
           borderColor: accent,
-          bgcolor: alpha(accent, 0.14),
+          bgcolor: alpha(accent, OPACITY.fill),
           '& .MuiChip-deleteIcon': { color: accent, '&:hover': { color: accent } },
         };
       }}
@@ -150,10 +151,10 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
           height: 18,
           fontSize: FONT_SIZES.xxs,
           maxWidth: '100%',
-          color: alpha(accent, 0.8),
+          color: alpha(accent, OPACITY.veil),
           borderStyle: 'dashed',
-          borderColor: alpha(accent, 0.5),
-          '& .MuiChip-deleteIcon': { color: alpha(accent, 0.6), '&:hover': { color: accent } },
+          borderColor: alpha(accent, OPACITY.strong),
+          '& .MuiChip-deleteIcon': { color: alpha(accent, OPACITY.strong), '&:hover': { color: accent } },
         };
       }}
     />

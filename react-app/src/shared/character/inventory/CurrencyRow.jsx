@@ -5,6 +5,7 @@ import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
 import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
 import { useIsPhone } from '../../ui/useIsPhone.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
+import { OPACITY } from '../../ui/colors.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -14,7 +15,7 @@ export function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder
     p: 0.25,
     borderRadius: 0,
     color: 'text.secondary',
-    '&.Mui-disabled': { opacity: 0.3 },
+    '&.Mui-disabled': { opacity: OPACITY.line },
     '&:hover': { color: 'text.primary' },
   };
   return (

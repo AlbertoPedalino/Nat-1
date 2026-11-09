@@ -1,4 +1,4 @@
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -27,7 +27,7 @@ export const panelToolbarSx = {
 };
 
 export const levelHeaderSx = {
-  ...sheetSectionHeaderSx({ color: UI_COLORS.info, rule: uiAlpha(UI_COLORS.info, 0.14) }),
+  ...sheetSectionHeaderSx({ color: UI_COLORS.info, rule: uiAlpha(UI_COLORS.info, OPACITY.fill) }),
   mb: 0.55,
 };
 
@@ -46,7 +46,7 @@ export const spellRowSx = {
   cursor: 'pointer',
   minWidth: 0,
   transition: 'border-color 120ms ease, background-color 120ms ease',
-  '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, 0.34), bgcolor: UI_COLORS.surfaceRaised },
+  '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), bgcolor: UI_COLORS.surfaceRaised },
 };
 
 export const spellBodySx = {
@@ -65,7 +65,7 @@ export const spellBodySx = {
 };
 
 export const addButtonSx = {
-  bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
   border: 1,
   borderColor: UI_COLORS.accent,
   borderRadius: 1,
@@ -74,7 +74,7 @@ export const addButtonSx = {
   fontSize: FONT_SIZES.md,
   px: '14px',
   py: '5px',
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.2), borderColor: UI_COLORS.accentText },
+  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade), borderColor: UI_COLORS.accentText },
 };
 
 export const inlineButtonSx = {
@@ -108,7 +108,7 @@ export const levelToggleSx = {
 
 export const statBoxSx = {
   minWidth: 92,
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.72),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,

@@ -5,6 +5,7 @@ import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -64,8 +65,8 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
 
 const sectionSx = {
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.16)}`,
-  bgcolor: vttAlpha(VTT_COLORS.accent, 0.03),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.fill)}`,
+  bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.faint),
   overflow: 'hidden',
 };
 
@@ -77,7 +78,7 @@ const sectionHeaderSx = {
   px: 1,
   py: 0.75,
   color: VTT_COLORS.text,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
   '&.Mui-focusVisible': { outline: `1px solid ${VTT_COLORS.accent}`, outlineOffset: -1 },
 };
 

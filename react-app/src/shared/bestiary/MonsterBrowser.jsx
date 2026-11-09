@@ -18,7 +18,7 @@ import { filterMonsters } from './filters.js';
 import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { formatNumber } from '../ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
 import { crKey, crXP } from './challengeRating.js';
 import { usePagedList } from '../ui/usePagedList.js';
 import ShowMoreButton from '../ui/ShowMoreButton.jsx';
@@ -166,14 +166,14 @@ const rowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
   cursor: 'pointer',
   minWidth: 0,
   userSelect: 'none',
   touchAction: 'pan-y',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: uiAlpha(UI_COLORS.accent, 0.08),
+    bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
   },
 };
 

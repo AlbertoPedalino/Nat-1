@@ -13,6 +13,7 @@ import { columnUnitWidth, columnsForWidth, rowSpanForHeight } from './layout.js'
 import { DRAG_TRANSFORM, DRAG_TRANSITION } from '../drag/dragMotion.js';
 import NoteMarkdown from './NoteMarkdown.jsx';
 import HighlightedText from '../search/HighlightedText.jsx';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -277,7 +278,7 @@ const cardSx = (size, rowSpan, dragging) => ({
   overflow: 'hidden',
   bgcolor: 'background.paper',
   borderColor: dragging ? 'primary.main' : 'divider',
-  opacity: dragging ? 0.85 : 1,
+  opacity: dragging ? OPACITY.veil : 1,
   p: 1.5,
   pb: 2,
   display: 'flex',

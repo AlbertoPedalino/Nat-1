@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
+import { OPACITY } from '../../ui/colors.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -73,8 +74,8 @@ function optionSx(tone, selected, dense) {
     textTransform: 'none',
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
     color: selected ? tone.color : (tone.dim || 'text.secondary'),
-    bgcolor: selected ? alpha(tone.color, 0.16) : 'transparent',
-    '&:hover': { borderColor: tone.color, bgcolor: alpha(tone.color, 0.1) },
+    bgcolor: selected ? alpha(tone.color, OPACITY.fill) : 'transparent',
+    '&:hover': { borderColor: tone.color, bgcolor: alpha(tone.color, OPACITY.tint) },
     '&:focus-visible': { outline: `2px solid ${tone.color}`, outlineOffset: '1px' },
   };
 }
@@ -87,4 +88,4 @@ const groupRowSx = {
   gap: 0.75,
 };
 
-const subLabelSx = { fontSize: FONT_SIZES.xxs, opacity: 0.85 };
+const subLabelSx = { fontSize: FONT_SIZES.xxs, opacity: OPACITY.veil };

@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollTables.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { detailPanelSx } from '../layout/layout.js';
@@ -144,7 +144,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               </Typography>
             ) : null}
             {result ? (
-              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06), borderRadius: 1 }}>
+              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
                     <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: 700, mb: 0.3 }}>

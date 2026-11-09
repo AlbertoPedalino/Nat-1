@@ -7,6 +7,7 @@ import { CONE_SPREAD, areaGeometry, areaLabelAnchor, squareTurn } from '../../..
 import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
@@ -56,7 +57,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       // the dark edge that makes it readable over a busy map.
       if (selectedId && stroke.id === selectedId) {
         context.save();
-        context.shadowColor = vttAlpha(VTT_COLORS.drawingGuide, 0.95);
+        context.shadowColor = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.solid);
         context.shadowBlur = Math.max(6, cell * view.zoom * 0.25);
         drawStroke(context, stroke, points, toScreen, cell, view);
         context.restore();
@@ -76,7 +77,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       const to = toScreen(measure.to);
       const reach = Math.hypot(to.x - from.x, to.y - from.y);
       context.strokeStyle = VTT_COLORS.drawingGuide;
-      context.fillStyle = vttAlpha(VTT_COLORS.drawingGuide, 0.18);
+      context.fillStyle = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.fill);
       context.lineWidth = 2;
       context.setLineDash([6, 4]);
 
@@ -113,7 +114,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
         context.textAlign = 'center';
         context.textBaseline = 'bottom';
         context.lineWidth = 3;
-        context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
+        context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.solid);
         context.strokeText(measure.label, to.x, to.y - 8);
         context.fillStyle = VTT_COLORS.drawingText;
         context.fillText(measure.label, to.x, to.y - 8);
@@ -146,7 +147,7 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     // Outlined rather than boxed: a plate would hide the map under every label,
     // and text over a busy battlemap is unreadable without one.
     context.lineWidth = Math.max(2, fontSize / 6);
-    context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.85);
+    context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.veil);
     context.strokeText(stroke.text, at.x, at.y);
     context.fillStyle = stroke.color || VTT_COLORS.accent;
     context.fillText(stroke.text, at.x, at.y);
@@ -242,7 +243,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
     context.textAlign = 'center';
     context.textBaseline = 'bottom';
     context.lineWidth = 3;
-    context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
+    context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.solid);
     context.strokeText(stroke.hint, tip.x, tip.y - 10);
     context.fillStyle = VTT_COLORS.drawingText;
     context.fillText(stroke.hint, tip.x, tip.y - 10);
@@ -257,7 +258,7 @@ function drawMapLabel(context, text, at, cellPixels, baseline) {
   context.textAlign = 'center';
   context.textBaseline = baseline;
   context.lineWidth = Math.max(2, fontSize / 5);
-  context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
+  context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.solid);
   context.strokeText(text, at.x, at.y);
   context.fillStyle = VTT_COLORS.text;
   context.fillText(text, at.x, at.y);

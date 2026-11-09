@@ -5,6 +5,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
 // Reaching each target in exactly that interval keeps the motion continuous —
@@ -190,7 +191,7 @@ const trailSx = {
   width: '100%',
   height: '100%',
   pointerEvents: 'none',
-  filter: `drop-shadow(0 0 3px ${vttAlpha(VTT_COLORS.laser, 0.6)})`,
+  filter: `drop-shadow(0 0 3px ${vttAlpha(VTT_COLORS.laser, OPACITY.strong)})`,
 };
 
 const dotSx = {
@@ -199,7 +200,7 @@ const dotSx = {
   top: 0,
   display: 'none',
   borderRadius: '50%',
-  background: `radial-gradient(circle, ${vttAlpha(VTT_COLORS.laser, 0.95)} 0%, ${vttAlpha(VTT_COLORS.laser, 0)} 100%)`,
+  background: `radial-gradient(circle, ${vttAlpha(VTT_COLORS.laser, OPACITY.solid)} 0%, ${vttAlpha(VTT_COLORS.laser, 0)} 100%)`,
   pointerEvents: 'none',
   willChange: 'transform',
 };
@@ -211,7 +212,7 @@ const coreSx = {
   width: 'var(--laser-core-size)',
   height: 'var(--laser-core-size)',
   borderRadius: '50%',
-  bgcolor: vttAlpha(VTT_COLORS.laserCore, 0.95),
+  bgcolor: vttAlpha(VTT_COLORS.laserCore, OPACITY.solid),
   transform: 'translate(-50%, -50%)',
 };
 

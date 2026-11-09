@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { levelHeaderSx, panelSurfaceSx, statBoxSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -40,7 +40,7 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
     <Box sx={panelSurfaceSx}>
       {hasRegular ? (
         <>
-          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accent, borderColor: uiAlpha(UI_COLORS.accent, 0.18) }}>Spell Slots</Typography>
+          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accent, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.fill) }}>Spell Slots</Typography>
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.4 }}>
             {slots.regular.map((total, idx) => {
               const lv = idx + 1;
@@ -52,7 +52,7 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
       ) : null}
       {hasPact ? (
         <Box sx={{ mt: hasRegular ? 1 : 0 }}>
-          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.spell, borderColor: uiAlpha(UI_COLORS.spell, 0.22) }}>Pact Slots ({slots.pact.count}x {slots.pact.level})</Typography>
+          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.spell, borderColor: uiAlpha(UI_COLORS.spell, OPACITY.shade) }}>Pact Slots ({slots.pact.count}x {slots.pact.level})</Typography>
           <SlotGroup
             level={slots.pact.level}
             total={slots.pact.count}
@@ -84,7 +84,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
               height: 14,
               borderRadius: '50%',
               border: '1.5px solid',
-              borderColor: index < used ? UI_COLORS.info : uiAlpha(UI_COLORS.textSecondary, 0.28),
+              borderColor: index < used ? UI_COLORS.info : uiAlpha(UI_COLORS.textSecondary, OPACITY.line),
               bgcolor: index < used ? UI_COLORS.info : 'transparent',
               cursor: dotCursor,
               ...dotHover,
@@ -97,7 +97,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
             sx={{
               width: 14, height: 14, borderRadius: '50%', cursor: dotCursor,
               border: '1.5px dashed', borderColor: UI_COLORS.success,
-              bgcolor: uiAlpha(UI_COLORS.success, 0.12),
+              bgcolor: uiAlpha(UI_COLORS.success, OPACITY.tint),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               ...dotHover,
             }}

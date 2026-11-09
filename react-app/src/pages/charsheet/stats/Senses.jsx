@@ -6,7 +6,7 @@ import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
@@ -64,7 +64,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
           cursor: clickable ? 'pointer' : 'default',
-          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.05) } : undefined,
+          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } : undefined,
         }}
       >
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: color || UI_COLORS.accentText, flexShrink: 0 }}>
@@ -74,7 +74,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
             {source ? (
-              <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
+              <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, opacity: OPACITY.heavy, textAlign: 'right', lineHeight: 1.2 }}>
                 {source}
               </Typography>
             ) : null}
@@ -82,7 +82,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           {clickable ? (
             <ChevronDown
               size={13}
-              style={{ color: UI_COLORS.accent, flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+              style={{ color: UI_COLORS.accent, flexShrink: 0, opacity: OPACITY.heavy, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
             />
           ) : null}
         </Box>

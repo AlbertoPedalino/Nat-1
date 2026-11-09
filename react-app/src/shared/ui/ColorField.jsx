@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useDebouncedCallback } from './useDebouncedCallback.js';
+import { OPACITY } from './colors.js';
 
 // A native colour well that does not fight the picker it opens.
 //
@@ -73,7 +74,7 @@ function swatchSx(size, tone) {
     borderRadius: 1,
     bgcolor: map ? 'gmboard.vtt.inset' : 'transparent',
     cursor: 'pointer',
-    '&:disabled': { cursor: 'default', opacity: 0.45 },
+    '&:disabled': { cursor: 'default', opacity: OPACITY.edge },
   };
 }
 

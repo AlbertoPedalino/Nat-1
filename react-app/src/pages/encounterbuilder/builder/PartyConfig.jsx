@@ -4,7 +4,7 @@ import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -134,7 +134,7 @@ const playerRowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const stepperGroupSx = {
@@ -143,7 +143,7 @@ const stepperGroupSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const stepperLabelSx = {

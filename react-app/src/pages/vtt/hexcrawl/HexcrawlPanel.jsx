@@ -22,6 +22,7 @@ import {
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -125,7 +126,7 @@ function WeatherCard({ clock }) {
     && Number.isFinite(clock.hoursSinceWeather);
 
   return (
-    <Box sx={{ ...cardSx, borderColor: alpha(tone, 0.55), bgcolor: alpha(tone, 0.08) }}>
+    <Box sx={{ ...cardSx, borderColor: alpha(tone, OPACITY.strong), bgcolor: alpha(tone, OPACITY.soft) }}>
       <WeatherSummary weather={clock.weather} intensity={clock.intensity} dense />
       <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.6 }}>
         <Typography sx={clockSx}>{formatCampaignDateTime(clock)}</Typography>
@@ -217,7 +218,7 @@ function Chip({ icon: Icon, label, missing = false, tone = null }) {
       component="span"
       sx={{
         ...chipSx,
-        ...(tone ? { color: tone, borderColor: alpha(tone, 0.6) } : null),
+        ...(tone ? { color: tone, borderColor: alpha(tone, OPACITY.strong) } : null),
         ...(missing ? missingChipSx : null),
       }}
     >
@@ -291,9 +292,9 @@ const nextHexSx = {
   gap: 0.9,
   p: 0.9,
   border: '1px solid',
-  borderColor: vttAlpha(VTT_COLORS.accent, 0.35),
+  borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.accent, 0.06),
+  bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
 };
 const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.accent };
 
@@ -331,7 +332,7 @@ const lastCardSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.25),
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
 };
 
 const lastHexSx = {

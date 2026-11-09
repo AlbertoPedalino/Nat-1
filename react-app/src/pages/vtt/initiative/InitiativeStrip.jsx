@@ -9,6 +9,7 @@ import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -289,14 +290,14 @@ const placeableSx = {
 
 // The same colour as the halo on the acting piece, so the two read as one.
 const activeEntrySx = {
-  bgcolor: vttAlpha(VTT_COLORS.turnActive, 0.16),
+  bgcolor: vttAlpha(VTT_COLORS.turnActive, OPACITY.fill),
   borderColor: VTT_COLORS.turnActive,
   color: VTT_COLORS.text,
-  boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.turnActive, 0.5)}`,
+  boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.strong)}`,
 };
 
 const deadEntrySx = {
-  opacity: 0.45,
+  opacity: OPACITY.edge,
   filter: 'grayscale(0.8)',
 };
 
@@ -308,14 +309,14 @@ const avatarSx = {
   overflow: 'hidden',
   display: 'grid',
   placeItems: 'center',
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
   color: VTT_COLORS.text,
   fontSize: FONT_SIZES.md,
   fontWeight: 700,
 };
 
 const offBoardAvatarSx = {
-  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.8)}`,
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.veil)}`,
 };
 
 const avatarImageSx = {

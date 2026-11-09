@@ -19,6 +19,7 @@ import { clamp } from '../../../shared/numbers.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -315,7 +316,7 @@ const panelSx = {
   display: 'grid',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.96),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   boxShadow: UI_SHADOWS.overlay,
@@ -330,7 +331,7 @@ const headerSx = {
   minHeight: SHEET_VISIBLE_HEADER,
   px: 1,
   alignItems: 'center',
-  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.22)}`,
+  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   color: VTT_COLORS.textSecondary,
   cursor: 'move',
   touchAction: 'none',
@@ -348,7 +349,7 @@ const selectSx = {
   width: { xs: 145, sm: 220 },
   height: 30,
   px: 0.75,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.28)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   borderRadius: 1,
   outline: 0,
   bgcolor: VTT_COLORS.surfaceRaised,
@@ -356,13 +357,13 @@ const selectSx = {
   fontFamily: 'inherit',
   fontSize: FONT_SIZES.md,
   cursor: 'pointer',
-  '&:focus': { borderColor: vttAlpha(VTT_COLORS.accent, 0.72) },
+  '&:focus': { borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy) },
   '& option': { bgcolor: VTT_COLORS.surfaceRaised, color: VTT_COLORS.text },
 };
 
 const closeSx = {
   color: VTT_COLORS.textSecondary,
-  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
+  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
 };
 
 const contentSx = {
@@ -388,8 +389,8 @@ const resizeHandleSx = {
   height: 28,
   borderRadius: cornerRadius(1, 0, 1, 0),
   color: VTT_COLORS.textSecondary,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.78),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   cursor: 'nwse-resize',
   touchAction: 'none',
-  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, 0.1) },
+  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint) },
 };

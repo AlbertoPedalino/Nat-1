@@ -13,7 +13,7 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { canAdvanceHex, missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
@@ -128,7 +128,7 @@ const moveBarSx = {
   border: '1px solid',
   borderColor: 'primary.main',
   borderRadius: 2,
-  bgcolor: uiAlpha(UI_COLORS.accent, 0.06),
+  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash),
 };
 
 const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };

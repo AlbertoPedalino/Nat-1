@@ -8,6 +8,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -94,13 +95,13 @@ const buttonSx = {
   width: 30,
   height: 30,
   flexShrink: 0,
-  color: vttAlpha(VTT_COLORS.white, 0.68),
-  border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.16)}`,
+  color: vttAlpha(VTT_COLORS.white, OPACITY.heavy),
+  border: `1px solid ${vttAlpha(VTT_COLORS.white, OPACITY.fill)}`,
   borderRadius: 1,
   '&:hover': {
     color: VTT_COLORS.accent,
-    borderColor: vttAlpha(VTT_COLORS.accent, 0.42),
-    bgcolor: vttAlpha(VTT_COLORS.accent, 0.08),
+    borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
+    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft),
   },
 };
 

@@ -3,7 +3,7 @@ import { Box, Typography, Chip } from '@mui/material';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -23,12 +23,12 @@ export function FeatureSection({ title, color, features }) {
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.info, 0.14) }), pb: 0.25, mb: 0.4 }}>
+      <Typography sx={{ ...sheetSectionHeaderSx({ color, rule: uiAlpha(UI_COLORS.info, OPACITY.fill) }), pb: 0.25, mb: 0.4 }}>
         {title}
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.2), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade), pb: 0.25, mb: 0.35 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (

@@ -4,6 +4,7 @@ import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { OPACITY } from '../../ui/colors.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -73,7 +74,7 @@ export default function Die3D({
             '--gb-die-x': `${-tumble.x * turns}deg`,
             '--gb-die-y': `${-tumble.y * turns}deg`,
           } : null),
-          opacity: dimmed ? 0.35 : 1,
+          opacity: dimmed ? OPACITY.line : 1,
         }}
       >
         {drawn.map((face, offset) => {

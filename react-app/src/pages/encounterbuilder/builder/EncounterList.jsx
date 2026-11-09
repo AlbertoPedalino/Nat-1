@@ -10,7 +10,7 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
 import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 
 export default function EncounterList() {
@@ -165,6 +165,6 @@ const rowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
   minWidth: 0,
 };

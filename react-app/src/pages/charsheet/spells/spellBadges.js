@@ -1,5 +1,5 @@
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { SRC_COLOR } from './spellSourceDisplay.js';
 import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
 
@@ -23,7 +23,7 @@ export function getSpellStatusChips(entry) {
   if (entry.sourceInfo?.kind === 'atWill') return chips;
   if ((entry.originType === 'feat' || entry.originType === 'species') && state === 'granted') return chips;
   const cfg = STATUS_CHIP_CONFIG[state];
-  chips.push({ key: state, label: cfg.label, color: cfg.color, bg: `${cfg.color}1a` });
+  chips.push({ key: state, label: cfg.label, color: cfg.color, bg: uiAlpha(cfg.color, OPACITY.soft) });
   return chips;
 }
 

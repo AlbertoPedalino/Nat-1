@@ -1,4 +1,4 @@
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -52,7 +52,7 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
 export const detailPanelSx = {
   mt: 0.8,
   p: 1,
-  bgcolor: uiAlpha(UI_COLORS.accentText, 0.04),
+  bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash),
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,

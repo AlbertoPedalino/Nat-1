@@ -12,7 +12,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
@@ -180,7 +180,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, 0.45), bgcolor: uiAlpha(UI_COLORS.infoText, 0.08), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: '4px' } }}
+                  sx={{ flexShrink: 0, height: 18, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: '4px' } }}
                   variant="outlined" />
               )}
             </Box>

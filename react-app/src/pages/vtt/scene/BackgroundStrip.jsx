@@ -8,6 +8,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -181,8 +182,8 @@ const rootSx = {
   alignItems: 'center',
   p: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
   maxWidth: '100%',
   minWidth: 0,
@@ -209,9 +210,9 @@ const thumbSx = (selected) => ({
   height: THUMB_H,
   borderRadius: 1,
   overflow: 'hidden',
-  outline: selected ? `2px solid ${VTT_COLORS.accent}` : `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
+  outline: selected ? `2px solid ${VTT_COLORS.accent}` : `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   outlineOffset: selected ? 1 : 0,
-  opacity: selected ? 1 : 0.72,
+  opacity: selected ? 1 : OPACITY.heavy,
   transition: 'opacity 120ms',
   '&:hover': { opacity: 1 },
   '&.Mui-focusVisible': { outline: `2px solid ${VTT_COLORS.accentHighlight}` },
@@ -231,7 +232,7 @@ const numberSx = {
   bottom: 3,
   px: 0.5,
   borderRadius: 0.5,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.8),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   color: VTT_COLORS.accent,
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.xs,
@@ -247,7 +248,7 @@ const removeSx = (armed) => ({
   // Shown on hover or focus; always shown once armed so the second click lands.
   opacity: armed ? 1 : 0,
   color: armed ? VTT_COLORS.text : VTT_COLORS.danger,
-  bgcolor: armed ? VTT_COLORS.hpCritical : vttAlpha(VTT_COLORS.surface, 0.85),
+  bgcolor: armed ? VTT_COLORS.hpCritical : vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   '&:hover': { bgcolor: armed ? VTT_COLORS.dangerDeep : VTT_COLORS.surface },
   '@media (hover: none)': { opacity: 1 },
 });
@@ -258,24 +259,24 @@ const addSx = {
   height: THUMB_H,
   borderRadius: 1,
   color: VTT_COLORS.accent,
-  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.5)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
 };
 
 const collapsedSx = {
   height: 32,
   px: 1.25,
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.96) },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 const arrowSx = {
   flexShrink: 0,
   color: VTT_COLORS.accent,
-  '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.accent, 0.3) },
+  '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.accent, OPACITY.line) },
 };

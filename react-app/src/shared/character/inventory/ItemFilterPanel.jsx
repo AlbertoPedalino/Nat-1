@@ -8,7 +8,7 @@ import {
   emptyItemFilters,
   rangeFilterKeys,
 } from './itemFilters.js';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
@@ -62,10 +62,10 @@ const gridSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.65),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
 };
 
-const placeholderSx = { color: 'text.secondary', opacity: 0.75 };
+const placeholderSx = { color: 'text.secondary', opacity: OPACITY.heavy };
 const menuProps = { PaperProps: { sx: { maxHeight: 320 } } };
 const menuItemSx = { fontSize: FONT_SIZES.lg };
 
@@ -113,9 +113,9 @@ function SelectedChips({ values }) {
           sx={{
             px: '5px',
             border: 1,
-            borderColor: uiAlpha(UI_COLORS.accent, 0.45),
+            borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
             borderRadius: 0.375,
-            bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+            bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
             color: UI_COLORS.accentText,
             fontSize: FONT_SIZES.xs,
           }}

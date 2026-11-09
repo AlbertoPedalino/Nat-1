@@ -9,7 +9,7 @@ import {
   ConditionPill,
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -29,12 +29,12 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
   const StepButton = ({ label, onClick, disabled, children }) => (
     <Box component="button" type="button" aria-label={label} disabled={disabled}
       onClick={(e) => { e.stopPropagation(); if (!disabled) onClick(); }}
-      sx={{ display: 'inline-flex', p: 0, border: 0, bgcolor: 'transparent', color: accent, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.35 : 1 }}>
+      sx={{ display: 'inline-flex', p: 0, border: 0, bgcolor: 'transparent', color: accent, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? OPACITY.line : 1 }}>
       {children}
     </Box>
   );
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? 0.3 : 0.14), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
       <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
         sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
@@ -103,7 +103,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             component="button"
             type="button"
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: 0.375, cursor: 'pointer', ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
+            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: 0.375, cursor: 'pointer', ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, OPACITY.wash), color: 'text.primary' } }}
           >
             <ListChecks size={12} /> Manage ({active.length})
             <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
@@ -123,7 +123,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   variant="outlined"
                   startIcon={<X size={12} />}
                   onClick={onClear}
-                  sx={{ mt: 0.6, fontSize: FONT_SIZES.xxxs, py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, 0.08) } }}
+                  sx={{ mt: 0.6, fontSize: FONT_SIZES.xxxs, py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, OPACITY.soft) } }}
                 >
                   Clear all
                 </Button>

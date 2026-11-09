@@ -5,6 +5,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -115,7 +116,7 @@ const railButtonSx = {
   background: 'none',
   color: VTT_COLORS.textSecondary,
   cursor: 'pointer',
-  '&:hover': { color: VTT_COLORS.accent, bgcolor: vttAlpha(VTT_COLORS.accent, 0.08) },
+  '&:hover': { color: VTT_COLORS.accent, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
 };
 
 const railButtonActiveSx = {

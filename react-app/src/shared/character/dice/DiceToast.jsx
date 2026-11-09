@@ -3,7 +3,7 @@ import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
@@ -14,7 +14,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
-  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.97), border: 2, borderColor: 'divider', borderRadius: 2,
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 2, borderColor: 'divider', borderRadius: 2,
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
   boxShadow: UI_SHADOWS.popup,
   backdropFilter: 'blur(8px)',
@@ -45,8 +45,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      ...(layout.isCrit ? { borderColor: UI_COLORS.accentText, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.accentText, 0.25)}` } : {}),
-      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, 0.25)}` } : {}),
+      ...(layout.isCrit ? { borderColor: UI_COLORS.accentText, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.accentText, OPACITY.shade)}` } : {}),
+      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, OPACITY.shade)}` } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />

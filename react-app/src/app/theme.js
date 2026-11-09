@@ -4,17 +4,17 @@ import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
-import { UI_COLORS, uiAlpha } from '../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
 
 const SELECTED_OPTION_SX = {
   color: UI_COLORS.accentText,
-  backgroundColor: uiAlpha(UI_COLORS.accent, 0.16),
-  borderColor: uiAlpha(UI_COLORS.accent, 0.6),
+  backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.fill),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong),
 };
 const SELECTED_ROW_SX = {
   color: UI_COLORS.textPrimary,
-  backgroundColor: uiAlpha(UI_COLORS.accent, 0.2),
+  backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
   boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
 };
 
@@ -48,7 +48,7 @@ export const theme = createTheme({
       primary: UI_COLORS.textPrimary,
       secondary: UI_COLORS.textSecondary,
     },
-    divider: uiAlpha(UI_COLORS.accent, 0.22),
+    divider: uiAlpha(UI_COLORS.accent, OPACITY.shade),
     // Default token color for player-character combatants without a custom color.
     pcToken: UI_COLORS.pcToken,
     // GM Board semantic tokens, read in sx as 'gmboard.<group>.<key>'. Status
@@ -79,9 +79,9 @@ export const theme = createTheme({
       badge: {
         cloud: UI_COLORS.infoText,
       },
-      panelOverlay: uiAlpha(UI_COLORS.black, 0.2),
-      headerOverlay: uiAlpha(UI_COLORS.black, 0.3),
-      rowDivider: uiAlpha(UI_COLORS.accentMuted, 0.12),
+      panelOverlay: uiAlpha(UI_COLORS.black, OPACITY.shade),
+      headerOverlay: uiAlpha(UI_COLORS.black, OPACITY.line),
+      rowDivider: uiAlpha(UI_COLORS.accentMuted, OPACITY.tint),
       weather: {
         Clear: UI_COLORS.accent,
         Rain: UI_COLORS.info,
@@ -103,14 +103,14 @@ export const theme = createTheme({
       vtt: {
         accent: VTT_COLORS.accent,
         accentHighlight: VTT_COLORS.accentHighlight,
-        accentBorder: vttAlpha(VTT_COLORS.accent, 0.25),
-        accentBorderStrong: vttAlpha(VTT_COLORS.accent, 0.42),
-        accentTint: vttAlpha(VTT_COLORS.accent, 0.16),
-        accentWash: vttAlpha(VTT_COLORS.accent, 0.08),
-        surface: vttAlpha(VTT_COLORS.surface, 0.9),
+        accentBorder: vttAlpha(VTT_COLORS.accent, OPACITY.shade),
+        accentBorderStrong: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
+        accentTint: vttAlpha(VTT_COLORS.accent, OPACITY.fill),
+        accentWash: vttAlpha(VTT_COLORS.accent, OPACITY.soft),
+        surface: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
         surfaceSolid: VTT_COLORS.surface,
-        backdrop: vttAlpha(VTT_COLORS.black, 0.62),
-        inset: vttAlpha(VTT_COLORS.black, 0.3),
+        backdrop: vttAlpha(VTT_COLORS.black, OPACITY.strong),
+        inset: vttAlpha(VTT_COLORS.black, OPACITY.line),
         success: VTT_COLORS.success,
         danger: VTT_COLORS.danger,
       },
@@ -157,7 +157,7 @@ export const theme = createTheme({
         sizeSmall: { fontSize: FONT_SIZES.xl },
         sizeMedium: { fontSize: FONT_SIZES.xxl },
         sizeLarge: { fontSize: FONT_SIZES.body },
-        outlined: { borderColor: uiAlpha(UI_COLORS.accent, 0.5) },
+        outlined: { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong) },
       },
     },
     // A chosen option (toggle buttons, segmented choices): an accent wash
@@ -166,7 +166,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-selected': SELECTED_OPTION_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.24) },
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
         },
       },
     },
@@ -175,7 +175,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-selected': SELECTED_ROW_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.28) },
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.line) },
         },
       },
     },
@@ -183,13 +183,13 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-selected': SELECTED_ROW_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, 0.28) },
+          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.line) },
         },
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        notchedOutline: { borderColor: uiAlpha(UI_COLORS.textPrimary, 0.23) },
+        notchedOutline: { borderColor: uiAlpha(UI_COLORS.textPrimary, OPACITY.shade) },
         root: {
           '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
             borderColor: UI_COLORS.textSecondary,
@@ -202,7 +202,7 @@ export const theme = createTheme({
         tooltip: {
           backgroundColor: UI_COLORS.surfaceRaised,
           color: UI_COLORS.textPrimary,
-          border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.25)}`,
+          border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.shade)}`,
           boxShadow: UI_SHADOWS.float,
           fontSize: FONT_SIZES.sm,
         },
@@ -235,7 +235,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.18)}`,
+          border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
         },
       },
     },
@@ -268,7 +268,7 @@ export const theme = createTheme({
           whiteSpace: 'nowrap',
           minWidth: 0,
         },
-        colorDefault: chipTintStyle(UI_COLORS.textPrimary, { bgAlpha: 0.10, borderAlpha: 0.32 }),
+        colorDefault: chipTintStyle(UI_COLORS.textPrimary, { bgAlpha: OPACITY.soft, borderAlpha: OPACITY.line }),
         colorPrimary: chipTintStyle(UI_COLORS.accent, { text: UI_COLORS.accentText }),
         colorSecondary: chipTintStyle(UI_COLORS.secondary, { text: UI_COLORS.secondaryText }),
         colorError: chipTintStyle(UI_COLORS.danger, { text: UI_COLORS.dangerText }),

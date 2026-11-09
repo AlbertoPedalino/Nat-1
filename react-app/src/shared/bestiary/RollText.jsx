@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import RollModeArea from '../character/dice/RollModeArea.jsx';
 import { advArgFor } from '../character/dice/advantage.js';
 import { advTag, useStatRollSources } from './statRolls.js';
-import { UI_COLORS, uiAlpha } from '../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
 
 // An inline roller in a stat block ("+5", "2d6 + 3", "Dex +4"). A d20 test
 // also takes a one-off advantage/disadvantage on right-click or long press,
@@ -37,8 +37,8 @@ function RollButton(props) {
 
 const rollableSx = {
   appearance: 'none',
-  border: `1px solid ${uiAlpha(UI_COLORS.secondary, 0.45)}`,
-  bgcolor: uiAlpha(UI_COLORS.secondary, 0.12),
+  border: `1px solid ${uiAlpha(UI_COLORS.secondary, OPACITY.edge)}`,
+  bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.tint),
   color: UI_COLORS.secondaryText,
   borderRadius: 0.5,
   px: '0.25rem',
@@ -47,6 +47,6 @@ const rollableSx = {
   font: 'inherit',
   cursor: 'pointer',
   '&:hover': {
-    bgcolor: uiAlpha(UI_COLORS.secondary, 0.22),
+    bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.shade),
   },
 };

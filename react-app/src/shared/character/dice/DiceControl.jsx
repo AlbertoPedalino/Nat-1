@@ -5,7 +5,7 @@ import {
 import { Dices, ScrollText } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
@@ -99,7 +99,7 @@ function dividerSx(color = 'divider') {
 }
 
 // The half whose popover is open is lit.
-const openSx = { bgcolor: uiAlpha(UI_COLORS.accent, 0.16) };
+const openSx = { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.fill) };
 
 const settingsSx = { pb: 1, mb: 1, borderBottom: 1, borderColor: 'divider' };
 

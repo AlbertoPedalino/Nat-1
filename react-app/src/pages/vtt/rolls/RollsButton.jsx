@@ -7,6 +7,7 @@ import {
   battleMapDialogTitleSx,
   mapIconButtonSx,
 } from '../map/battleMapSurface.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The map's dice, in its top-right corner beside the tools toggle: the shared
 // DiceControl as a pill of two icons in the map's chrome. Being on the map,
@@ -33,8 +34,8 @@ const MAP_SURFACE = Object.freeze({
     bgcolor: mapIconButtonSx.bgcolor,
     border: mapIconButtonSx.border,
   },
-  dividerColor: vttAlpha(VTT_COLORS.accent, 0.35),
-  segmentSx: { color: VTT_COLORS.accent, '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.95) } },
+  dividerColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
+  segmentSx: { color: VTT_COLORS.accent, '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) } },
   paperSx: battleMapDialogPaperSx,
   dialog: {
     slotProps: { paper: { sx: battleMapDialogPaperSx } },

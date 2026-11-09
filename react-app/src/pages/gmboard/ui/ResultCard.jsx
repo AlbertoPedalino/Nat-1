@@ -2,6 +2,7 @@ import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
 // Roll tab): a header band with an icon, a title and whatever `header` adds
@@ -32,7 +33,7 @@ export function ResultSlot({
   tone, icon: Icon, label, badges = null, dice, children,
 }) {
   return (
-    <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, 0.08) }}>
+    <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, OPACITY.soft) }}>
       {label ? (
         <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           {Icon ? <Icon size={13} color={tone} /> : null}

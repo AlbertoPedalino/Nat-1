@@ -4,7 +4,7 @@ import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
-import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { APP_TOP_BAR_HEIGHT, appTopBarButtonSx, appTopBarFontSx } from '../../shared/ui/appBar.js';
 
 export { APP_TOP_BAR_HEIGHT };
@@ -78,7 +78,7 @@ const appTopBarSx = {
   alignItems: 'center',
   px: { xs: '0.75rem', md: '1rem' },
   py: '0.5rem',
-  bgcolor: uiAlpha(UI_COLORS.surfaceDarkest, 0.95),
-  borderBottom: `1px solid ${uiAlpha(UI_COLORS.accentMuted, 0.22)}`,
+  bgcolor: uiAlpha(UI_COLORS.surfaceDarkest, OPACITY.solid),
+  borderBottom: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.shade)}`,
   backdropFilter: 'blur(6px)',
 };

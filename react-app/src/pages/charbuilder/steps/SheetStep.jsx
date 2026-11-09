@@ -6,7 +6,7 @@ import { makeSheetPayload, saveCharacter } from '../state/persistence.js';
 import { downloadCharacterExport } from '../../../shared/character/profile/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
@@ -44,7 +44,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             border: 1,
             borderColor: 'divider',
             borderRadius: 1,
-            bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.66),
+            bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.heavy),
             px: 1.4,
             py: 1.25,
             display: 'flex',

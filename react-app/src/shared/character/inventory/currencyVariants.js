@@ -1,4 +1,4 @@
-import { UI_COLORS } from '../../ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 // Accent colors shared across every variant.
@@ -8,7 +8,7 @@ export const HOVER_ADD = UI_COLORS.success;
 export const buttonBaseSx = {
   borderRadius: 0,
   '&.Mui-disabled': {
-    opacity: 0.35,
+    opacity: OPACITY.line,
   },
 };
 

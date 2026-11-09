@@ -9,7 +9,7 @@ import {
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -27,7 +27,7 @@ export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
   const tone = sourceInfo.color || UI_COLORS.spell;
-  const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, 0.16)} />;
+  const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, OPACITY.fill)} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
   return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;
@@ -37,7 +37,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.accent, 0.28), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, 0.06), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
@@ -62,9 +62,9 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
                       sx={{
                         border: '1.5px solid',
-                        borderColor: isUsed ? UI_COLORS.accentText : uiAlpha(UI_COLORS.accent, 0.35),
+                        borderColor: isUsed ? UI_COLORS.accentText : uiAlpha(UI_COLORS.accent, OPACITY.line),
                         bgcolor: isUsed ? UI_COLORS.accent : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.accent, 0.22)}` } : undefined,
+                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.accent, OPACITY.shade)}` } : undefined,
                       }}
                     />
                   );

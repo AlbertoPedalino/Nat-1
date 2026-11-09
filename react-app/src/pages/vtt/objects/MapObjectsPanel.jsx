@@ -16,6 +16,7 @@ import MapObjectGlyph from './MapObjectGlyph.jsx';
 import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -173,17 +174,17 @@ const objectButtonSx = {
   minWidth: 0,
   p: 0.55,
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.24)}`,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.18),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),
   cursor: 'grab',
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',
   userSelect: 'none',
   '&:hover': {
-    bgcolor: vttAlpha(VTT_COLORS.accent, 0.1),
-    borderColor: vttAlpha(VTT_COLORS.accent, 0.6),
+    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint),
+    borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),
   },
-  '&:disabled': { opacity: 0.45, cursor: 'default' },
+  '&:disabled': { opacity: OPACITY.edge, cursor: 'default' },
 };
 
 const previewSx = {
@@ -191,7 +192,7 @@ const previewSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  filter: `drop-shadow(0 2px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
+  filter: `drop-shadow(0 2px 2px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)})`,
 };
 
 const labelSx = {

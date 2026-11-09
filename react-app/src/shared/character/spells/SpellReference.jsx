@@ -10,6 +10,7 @@ import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { OPACITY } from '../../ui/colors.js';
 
 const META_LABEL_SX = {
   ...TEXT_STYLES.label,
@@ -74,8 +75,8 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
 // Shared by every spell row (builder list + sheet picker dialog).
 export function SpellMiniTags({ spell, sx }) {
   const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, bg: alpha(SPELL_TAG_COLORS.concentration, 0.16), title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, bg: alpha(SPELL_TAG_COLORS.ritual, 0.16), title: 'Ritual' } : null,
+    isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, bg: alpha(SPELL_TAG_COLORS.concentration, OPACITY.fill), title: 'Concentration' } : null,
+    isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, bg: alpha(SPELL_TAG_COLORS.ritual, OPACITY.fill), title: 'Ritual' } : null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (

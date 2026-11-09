@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { FONT_SIZES } from '../../ui/fonts.js';
+import { OPACITY } from '../../ui/colors.js';
 
 const TRACKS = [
   { type: 'success', label: 'Success', short: 'S' },
@@ -45,7 +46,7 @@ export default function DeathSaveDots({
                   borderRadius: '50%',
                   bgcolor: active ? colors[type] : 'transparent',
                   cursor: 'pointer',
-                  '&:disabled': { cursor: 'default', opacity: 0.45 },
+                  '&:disabled': { cursor: 'default', opacity: OPACITY.edge },
                 }}
               />
             );

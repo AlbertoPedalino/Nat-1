@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { OPACITY } from '../../ui/colors.js';
 
 // A d100 is close enough to a sphere that drawing one hundred independently
 // composited CSS planes buys very little motion and costs a great deal. This
@@ -23,7 +24,7 @@ export default function D100Orb({
         ...orbSx,
         width: size,
         height: size,
-        opacity: dimmed ? 0.35 : 1,
+        opacity: dimmed ? OPACITY.line : 1,
       }}
     >
       <Box

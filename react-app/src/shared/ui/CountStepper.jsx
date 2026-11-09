@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
-import { UI_COLORS } from './colors.js';
+import { UI_COLORS, OPACITY } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 
@@ -16,7 +16,7 @@ export function stepButtonSx(size = 20, { danger = false } = {}) {
     borderRadius: 0.375,
     color: 'text.secondary',
     '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.accent, color: danger ? UI_COLORS.danger : UI_COLORS.accent },
-    '&.Mui-disabled': { opacity: 0.4 },
+    '&.Mui-disabled': { opacity: OPACITY.edge },
   };
 }
 

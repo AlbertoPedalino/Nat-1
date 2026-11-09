@@ -1,6 +1,6 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
-import { UI_COLORS, uiAlpha } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { panelBarSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
@@ -16,7 +16,7 @@ import { TEXT_STYLES } from './textStyles.js';
 // the content's corner.
 
 const paperSx = {
-  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
   border: 1,
   borderColor: 'divider',
   borderRadius: 2,
@@ -49,7 +49,7 @@ export const dialogSectionTitleSx = {
 // `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` rule —
 // a plain `pt` loses to it and is silently ignored. The gap below the title
 // bar is set via the `topPad` prop.
-const contentSx = { position: 'relative', bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), px: 2.25, pb: 2 };
+const contentSx = { position: 'relative', bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), px: 2.25, pb: 2 };
 
 const cornerCloseSx = { position: 'absolute', top: 8, right: 8, zIndex: 1, color: 'text.secondary' };
 
@@ -57,7 +57,7 @@ const actionsSx = {
   px: 2.25,
   py: 1.25,
   gap: 0.75,
-  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
   borderTop: 1,
   borderColor: 'divider',
   // Small Cinzel buttons matching the sheet's button scale.

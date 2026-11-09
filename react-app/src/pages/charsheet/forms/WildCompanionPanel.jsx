@@ -29,7 +29,7 @@ import {
   summonWildCompanionPatch,
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -189,5 +189,5 @@ const toggleSx = {
   px: '10px',
   textTransform: 'none',
   color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
 };

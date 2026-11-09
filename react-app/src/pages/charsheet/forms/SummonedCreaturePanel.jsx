@@ -30,7 +30,7 @@ import {
 } from './BeastStatBlock.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
@@ -228,11 +228,11 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         lineHeight: 1.45,
         textTransform: 'none',
         color: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
-        borderColor: available ? uiAlpha(UI_COLORS.success, 0.55) : uiAlpha(UI_COLORS.dangerMuted, 0.55),
-        bgcolor: available ? uiAlpha(UI_COLORS.success, 0.08) : uiAlpha(UI_COLORS.dangerMuted, 0.08),
+        borderColor: available ? uiAlpha(UI_COLORS.success, OPACITY.strong) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.strong),
+        bgcolor: available ? uiAlpha(UI_COLORS.success, OPACITY.soft) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.soft),
         '&:hover': {
           borderColor: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
-          bgcolor: available ? uiAlpha(UI_COLORS.success, 0.16) : uiAlpha(UI_COLORS.dangerMuted, 0.16),
+          bgcolor: available ? uiAlpha(UI_COLORS.success, OPACITY.fill) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.fill),
         },
       }}
     >

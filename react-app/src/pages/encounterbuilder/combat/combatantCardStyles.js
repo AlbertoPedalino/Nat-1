@@ -1,6 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -56,7 +56,7 @@ export const acBadgeSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.04),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.wash),
   color: 'text.secondary',
   lineHeight: 1,
 };
@@ -144,7 +144,7 @@ export const hpBarSx = {
   width: '100%',
   height: 5,
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.08),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft),
 };
 
 export const cardSx = {
@@ -178,8 +178,8 @@ export function buildActiveSx(theme) {
   const accent = theme.palette.primary.main;
   return {
     borderColor: accent,
-    bgcolor: alpha(accent, 0.12),
-    boxShadow: `0 0 0 1px ${alpha(accent, 0.55)}, 0 0 16px ${alpha(accent, 0.3)}`,
+    bgcolor: alpha(accent, OPACITY.tint),
+    boxShadow: `0 0 0 1px ${alpha(accent, OPACITY.strong)}, 0 0 16px ${alpha(accent, OPACITY.line)}`,
     '&::before': {
       content: '""',
       position: 'absolute',
@@ -194,5 +194,5 @@ export function buildActiveSx(theme) {
 }
 
 export const deadSx = {
-  opacity: 0.58,
+  opacity: OPACITY.strong,
 };

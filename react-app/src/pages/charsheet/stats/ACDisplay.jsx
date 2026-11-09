@@ -1,6 +1,6 @@
 import { Box, Tooltip, Typography } from '@mui/material';
 import { AlertCircle, Shield } from 'lucide-react';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
@@ -18,7 +18,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, flexShrink: 0 }}>
       <Tooltip title={tooltipText}>
         <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0, borderRadius: 1, border: shieldUnproficient ? 1 : 'none', borderColor: shieldUnproficient ? 'warning.main' : 'transparent' }}>
-          <Shield size={62} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', color: shieldUnproficient ? uiAlpha(UI_COLORS.penalty, 0.2) : uiAlpha(UI_COLORS.accent, 0.14) }} />
+          <Shield size={62} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', color: shieldUnproficient ? uiAlpha(UI_COLORS.penalty, OPACITY.shade) : uiAlpha(UI_COLORS.accent, OPACITY.fill) }} />
           <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
             <Typography sx={statValueSx}>{value}</Typography>
             <Typography sx={statLabelSx}>AC</Typography>

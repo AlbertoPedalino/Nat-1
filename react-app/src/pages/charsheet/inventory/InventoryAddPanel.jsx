@@ -21,7 +21,7 @@ import {
   compactInputSx,
   inventorySectionSx,
 } from './inventoryControls.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { goldToggleSx } from '../../../shared/ui/actionButton.js';
@@ -66,7 +66,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   const { visible, listProps } = page;
 
   return (
-    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.65), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
       {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}

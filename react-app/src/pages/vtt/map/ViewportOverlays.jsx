@@ -6,6 +6,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from '../tokens/TokenSprite.jsx';
 import { distanceSx, placementCountSx } from './sceneViewportStyles.js';
 import { clamp } from '../../../shared/numbers.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Markers drawn over the board at screen positions, none of them interactive.
 
@@ -26,10 +27,10 @@ export function PlacementPreview({
         width: rect.width * view.zoom,
         height: rect.height * view.zoom,
         transform: `translate(${at.x}px, ${at.y}px)`,
-        opacity: 0.88,
+        opacity: OPACITY.veil,
         pointerEvents: 'none',
         zIndex: fogOnTop ? 3 : 5,
-        filter: `drop-shadow(0 5px 8px ${vttAlpha(VTT_COLORS.black, 0.75)})`,
+        filter: `drop-shadow(0 5px 8px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)})`,
       }}
     >
       <TokenSprite
@@ -68,11 +69,11 @@ export function PartyHexMarker({
         transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)`,
         pointerEvents: 'none',
         color: VTT_COLORS.accent,
-        filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, 0.85)})`,
+        filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, OPACITY.veil)})`,
         zIndex: fogOnTop ? 3 : 5,
       }}
     >
-      <MapPin size={glyph} fill={vttAlpha(VTT_COLORS.surfaceRaised, 0.85)} strokeWidth={2} />
+      <MapPin size={glyph} fill={vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.veil)} strokeWidth={2} />
     </Box>
   );
 }
@@ -92,8 +93,8 @@ export function BrushPreview({ mode, point, radius }) {
         height: radius * 2,
         transform: `translate(${point.x - radius}px, ${point.y - radius}px)`,
         borderRadius: '50%',
-        border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.85)}`,
-        boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.6)} inset`,
+        border: `1px solid ${vttAlpha(VTT_COLORS.white, OPACITY.veil)}`,
+        boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, OPACITY.strong)} inset`,
         pointerEvents: 'none',
         zIndex: 4,
       }}

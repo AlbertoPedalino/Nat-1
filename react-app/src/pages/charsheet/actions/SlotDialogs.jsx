@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -67,8 +67,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: createSlotSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
+                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
@@ -109,8 +109,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: convertSlotSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
+                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
@@ -143,7 +143,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
                 <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
@@ -180,8 +180,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, 0.1) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.06) },
+                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>

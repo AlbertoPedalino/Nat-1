@@ -79,7 +79,27 @@ export const HP_TONE_COLORS = Object.freeze({
   healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerStrong,
 });
 
-// A colour of the palette at some opacity: uiAlpha(UI_COLORS.accent, 0.4).
+// How strongly a colour is laid over the surface, in steps: the faint washes
+// behind rows, tints of a chosen chip, the lines of borders and dividers, the
+// veils of overlays. A colour at some opacity is always
+// uiAlpha(UI_COLORS.<role>, OPACITY.<step>), so a restyle can make every tint
+// bolder or quieter from here.
+export const OPACITY = Object.freeze({
+  faint: 0.025,
+  wash: 0.05,
+  soft: 0.08,
+  tint: 0.12,
+  fill: 0.16,
+  shade: 0.22,
+  line: 0.3,
+  edge: 0.4,
+  strong: 0.55,
+  heavy: 0.7,
+  veil: 0.85,
+  solid: 0.95,
+});
+
+// A colour of the palette at some opacity: uiAlpha(UI_COLORS.accent, OPACITY.edge).
 export function uiAlpha(hex, alpha) {
   const value = String(hex).replace('#', '');
   const r = parseInt(value.slice(0, 2), 16);

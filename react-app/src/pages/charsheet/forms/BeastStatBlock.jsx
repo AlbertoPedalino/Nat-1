@@ -5,7 +5,7 @@ import { getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
@@ -41,7 +41,7 @@ export function BeastNameLink({ name, source, sx }) {
       sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
     >
       <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
-      <ExternalLink size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
+      <ExternalLink size={11} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
     </Link>
   );
 }
@@ -176,7 +176,7 @@ export function BeastPickerRow({
         sx={{
           display: 'flex', alignItems: 'center', gap: '8px', px: '8px', py: '5px',
           cursor: expandable ? 'pointer' : 'default',
-          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.accent, 0.06) } : undefined,
+          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } : undefined,
         }}
       >
         {expandable
@@ -191,7 +191,7 @@ export function BeastPickerRow({
           variant="outlined"
           disabled={actionDisabled}
           onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.accent, 0.5), color: UI_COLORS.accentText }}
+          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText }}
         >
           {actionLabel}
         </Button>
@@ -279,7 +279,7 @@ function renderEntryToken(tok, key, onRoll, onRollFormula, beastName) {
 const statBlockSx = {
   p: 0.8,
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.6),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
   border: 1,
   borderColor: 'divider',
 };
@@ -290,8 +290,8 @@ const rollChipSx = {
   appearance: 'none',
   display: 'inline-flex',
   alignItems: 'baseline',
-  border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.45)}`,
-  bgcolor: uiAlpha(UI_COLORS.accent, 0.12),
+  border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.edge)}`,
+  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
   color: UI_COLORS.accentText,
   borderRadius: 0.5,
   px: '0.28em',
@@ -299,7 +299,7 @@ const rollChipSx = {
   font: 'inherit',
   lineHeight: 1.35,
   cursor: 'pointer',
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, 0.24) },
+  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
 };
 
 export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
@@ -321,7 +321,7 @@ export const optionToggleSx = {
   px: '8px',
   textTransform: 'none',
   color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
 };
 
 // Muted text button for "dismiss / revert" actions on summon-style panels
@@ -336,9 +336,9 @@ export const dismissButtonSx = {
   ...TEXT_STYLES.title,
   color: UI_COLORS.dangerMuted,
   border: 1,
-  borderColor: uiAlpha(UI_COLORS.dangerMuted, 0.45),
+  borderColor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.edge),
   borderRadius: 1,
-  '&:hover': { borderColor: UI_COLORS.dangerMuted, bgcolor: uiAlpha(UI_COLORS.dangerMuted, 0.1) },
+  '&:hover': { borderColor: UI_COLORS.dangerMuted, bgcolor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.tint) },
 };
 
 // The box holding a summon's HP bar (and, at 0 HP, what brings it back):

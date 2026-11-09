@@ -1,4 +1,5 @@
 import { alpha } from '@mui/material';
+import { OPACITY } from './colors.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
@@ -122,7 +123,7 @@ export const COMPENDIUM_KIND_COLORS = {
 // same hue, so every roll button on the sheet reads as one family. Pass a
 // ROLL_TONES value.
 export function rollerToneSx(tone) {
-  return { color: tone, borderColor: alpha(tone, 0.4) };
+  return { color: tone, borderColor: alpha(tone, OPACITY.edge) };
 }
 
 // Tint for an attack-roll button. Disadvantage outranks not-proficient: it
@@ -135,7 +136,7 @@ export function attackRollerToneSx({ disadv = false, notProficient = false } = {
 // Single recipe for the translucent tint+border chip look. Both the theme's
 // MuiChip color overrides and entityChipSx derive from this, so the visual
 // language stays in one place.
-export function chipTintStyle(tone, { bgAlpha = 0.18, borderAlpha = 0.65, text = tone } = {}) {
+export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPACITY.heavy, text = tone } = {}) {
   return {
     backgroundColor: alpha(tone, bgAlpha),
     borderColor: alpha(tone, borderAlpha),
@@ -153,5 +154,5 @@ export function entityChipSx(kind) {
 // status). One alpha config so every such chip reads identically; pass a
 // CHIP_TONES value.
 export function chipToneStyle(tone) {
-  return chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 0.55 });
+  return chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: OPACITY.strong });
 }

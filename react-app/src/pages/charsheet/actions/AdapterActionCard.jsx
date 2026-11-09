@@ -22,7 +22,7 @@ import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPrope
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -87,7 +87,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       summary={({ toggle, disabled, open }) => (
           <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: '7px', borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
             {barCat && CAT_COLORS[barCat] && (
-              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: 0.95 }} />
+              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: OPACITY.solid }} />
             )}
 
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -145,7 +145,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
         const statusTone = isSuppressed ? CHIP_TONES.negative : (isActive ? CHIP_TONES.positive : CHIP_TONES.info);
         const statusStyle = chipToneStyle(statusTone);
         return (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.infoText, 0.06), !hasRes, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.infoText, OPACITY.wash), !hasRes, open)}>
           <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>Status</Typography>
           <Chip
             size="small"
@@ -172,7 +172,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       })() : null}
 
       {hasRes ? (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, 0.06), true, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, OPACITY.wash), true, open)}>
           <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
@@ -180,7 +180,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
+                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>
@@ -201,7 +201,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                   sx={{
                     border: '1.5px solid',
                     bgcolor: available ? 'transparent' : UI_COLORS.accentText,
-                    borderColor: available ? uiAlpha(UI_COLORS.accent, 0.35) : UI_COLORS.accentText,
+                    borderColor: available ? uiAlpha(UI_COLORS.accent, OPACITY.line) : UI_COLORS.accentText,
                   }}
                 />
               );

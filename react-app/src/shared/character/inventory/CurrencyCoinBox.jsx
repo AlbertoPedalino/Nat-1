@@ -9,7 +9,7 @@ import {
 import { Minus, Plus, X } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { currencyVariant, HOVER_SUBTRACT, HOVER_ADD, buttonBaseSx } from './currencyVariants.js';
 
 export function CurrencyCoinBox({
@@ -112,7 +112,7 @@ export function CurrencyCoinBox({
                 borderRadius: '50%',
                 bgcolor: coin.tone,
                 border: '1px solid',
-                borderColor: uiAlpha(UI_COLORS.white, 0.5),
+                borderColor: uiAlpha(UI_COLORS.white, OPACITY.strong),
                 cursor: 'pointer',
                 zIndex: 1,
                 transition: 'transform 0.12s',

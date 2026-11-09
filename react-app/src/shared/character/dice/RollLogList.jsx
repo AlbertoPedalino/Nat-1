@@ -4,7 +4,7 @@ import RollActorLabel from './RollActorLabel.jsx';
 import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
 import { formatClockTime } from '../../ui/dateFormat.js';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 
@@ -76,7 +76,7 @@ const rowSx = {
   borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const labelSx = {

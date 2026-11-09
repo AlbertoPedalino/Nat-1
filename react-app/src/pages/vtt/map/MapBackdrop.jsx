@@ -6,6 +6,7 @@ import HexGrid from './HexGrid.jsx';
 import SquareGrid from './SquareGrid.jsx';
 import { playAreaBox, hexPlayAreaPolygon } from './viewportGeometry.js';
 import { playAreaSvgSx, placeholderSx, playAreaStrokeProps } from './sceneViewportStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The still layers under everything on the battle map: the picture (with its
 // light-filter tint), the square or hex grid, and the play-area outline. No
@@ -143,7 +144,7 @@ export default function MapBackdrop({
               transform: `translate(${topLeft.x}px, ${topLeft.y}px)`,
               width: scene.playArea.w * cell,
               height: scene.playArea.h * cell,
-              border: `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.7)}`,
+              border: `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.heavy)}`,
               boxSizing: 'border-box',
               pointerEvents: 'none',
             }}

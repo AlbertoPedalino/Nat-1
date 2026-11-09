@@ -8,6 +8,7 @@ import {
   mapObjectSx,
   turnActiveSx,
 } from './tokenSpriteStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // What a piece looks like: its object glyph, artwork, class icon or initials,
 // inside the ring that says whose it is.
@@ -52,11 +53,11 @@ export default function TokenArt({
         borderStyle: 'solid',
         borderWidth: ringWidth(),
         borderColor: isCharacter || hasUploadedArtworkRing
-          ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
-          : vttAlpha(VTT_COLORS.black, 0.6),
+          ? (token.color || vttAlpha(VTT_COLORS.black, OPACITY.strong))
+          : vttAlpha(VTT_COLORS.black, OPACITY.strong),
         bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
         outline: token.hiddenFromPlayers || token.layer === 'gm'
-          ? `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.9)}`
+          ? `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.solid)}`
           : 'none',
         outlineOffset: '-4px',
         // Whose turn it is, readable from across the table and on the
@@ -68,7 +69,7 @@ export default function TokenArt({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: dead ? 0.58 : 1,
+        opacity: dead ? OPACITY.strong : 1,
         filter: dead ? 'grayscale(0.75)' : 'none',
       }}
     >

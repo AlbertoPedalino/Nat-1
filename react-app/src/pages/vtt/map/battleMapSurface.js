@@ -2,6 +2,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Shared glass surface for every control floating over the battle map. Keeping
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
@@ -18,9 +19,9 @@ export const battleMapSurfaceSx = {
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.8),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.95) },
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 export const battleMapDialogPaperSx = {
@@ -67,7 +68,7 @@ export const battleMapDropDialogSx = {
 
 export const battleMapDropBackdropSx = {
   pointerEvents: 'none',
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.16),
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),
 };
 
 // The paper of a menu opened over the map (the piece menu, the drawing menu):

@@ -2,7 +2,7 @@ import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material';
 import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 
 export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);
@@ -21,7 +21,7 @@ export default function DifficultyBar({ encounter, party }) {
         sx={{
           height: 8,
           borderRadius: 1,
-          bgcolor: uiAlpha(UI_COLORS.white, 0.08),
+          bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft),
           '& .MuiLinearProgress-bar': { bgcolor: difficulty.color },
         }}
       />
@@ -34,7 +34,7 @@ export default function DifficultyBar({ encounter, party }) {
               borderColor: difficulty.difficultyIndex === index ? difficulty.color : 'divider',
               borderRadius: 1,
               p: 1,
-              bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.accent, 0.10) : uiAlpha(UI_COLORS.white, 0.03),
+              bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.accent, OPACITY.tint) : uiAlpha(UI_COLORS.white, OPACITY.faint),
             }}
           >
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>

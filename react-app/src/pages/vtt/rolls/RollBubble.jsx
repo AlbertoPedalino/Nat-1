@@ -7,6 +7,7 @@ import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -119,7 +120,7 @@ const bubbleSx = {
   maxWidth: 260,
   textAlign: 'center',
   borderRadius: 2,
-  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
+  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid),
   border: '2px solid',
   borderColor: 'divider',
   boxShadow: UI_SHADOWS.popup,
@@ -152,17 +153,17 @@ const closeSx = {
   justifyContent: 'center',
   borderRadius: '50%',
   color: 'text.secondary',
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.35),
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.line),
 };
 
 const critSx = {
   borderColor: VTT_COLORS.accent,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.accent, 0.28)}`,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
 };
 
 const failSx = {
   borderColor: VTT_COLORS.danger,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.danger, 0.28)}`,
+  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.danger, OPACITY.line)}`,
 };
 
 const actorSx = {
@@ -222,5 +223,5 @@ const tailSx = {
   height: 0,
   borderLeft: '7px solid transparent',
   borderRight: '7px solid transparent',
-  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, 0.97)}`,
+  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid)}`,
 };

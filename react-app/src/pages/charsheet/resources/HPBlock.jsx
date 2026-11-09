@@ -5,7 +5,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -106,7 +106,7 @@ export default function HPBlock({
         </Typography>
 
         {dead && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, 0.12) }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.tint) }}>
             <Skull size={12} style={{ color: UI_COLORS.dangerStrong }} />
             <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerStrong }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
@@ -123,7 +123,7 @@ export default function HPBlock({
               <Typography
                 component="span"
                 onClick={() => startEdit('hp', sheet.currentHP)}
-                sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: hpColor, lineHeight: 1, cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
               >
                 {sheet.currentHP}
               </Typography>
@@ -156,7 +156,7 @@ export default function HPBlock({
               <Box
                 component="b"
                 onClick={() => startEdit('temp', sheet.tempHP)}
-                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
               >
                 {sheet.tempHP}
               </Box>
@@ -183,7 +183,7 @@ export default function HPBlock({
               <Box
                 component="b"
                 onClick={() => startEdit('mod', sheet.maxHPBonus)}
-                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.accentText, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
               >
                 {signed(sheet.maxHPBonus)}
               </Box>

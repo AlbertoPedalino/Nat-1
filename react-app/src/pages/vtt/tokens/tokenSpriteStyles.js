@@ -1,6 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Styles of a piece on the battle map: the cell layout (art, name plate, HP or
 // death-save bars, reminders), handles, badges, condition pills and tooltips.
@@ -8,7 +9,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 export const initialsSx = {
   fontSize: 'clamp(8px, 24cqmin, 18px)',
   fontWeight: 800,
-  color: vttAlpha(VTT_COLORS.black, 0.75),
+  color: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
   pointerEvents: 'none',
 };
 
@@ -19,7 +20,7 @@ export const classIconSx = {
   alignItems: 'center',
   justifyContent: 'center',
   color: VTT_COLORS.text,
-  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
+  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)})`,
   pointerEvents: 'none',
 };
 
@@ -29,7 +30,7 @@ export const mapObjectSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  filter: `drop-shadow(0 2px 3px ${vttAlpha(VTT_COLORS.black, 0.95)})`,
+  filter: `drop-shadow(0 2px 3px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)})`,
   pointerEvents: 'none',
 };
 
@@ -42,9 +43,9 @@ export const resizeHandleSx = {
   height: 14,
   p: 0,
   borderRadius: 0.375,
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.95)}`,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
   bgcolor: VTT_COLORS.accent,
-  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
+  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, OPACITY.veil)}`,
   cursor: 'nwse-resize',
   touchAction: 'none',
   '&:hover': { bgcolor: VTT_COLORS.accentHighlight },
@@ -59,10 +60,10 @@ export const rotateHandleSx = {
   height: 16,
   p: 0,
   borderRadius: '50%',
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.95)}`,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
   bgcolor: VTT_COLORS.accent,
   color: VTT_COLORS.surface,
-  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
+  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, OPACITY.veil)}`,
   cursor: 'grab',
   touchAction: 'none',
   display: 'flex',
@@ -128,8 +129,8 @@ export const inlineRemindersSx = {
 const barBaseSx = {
   position: 'relative',
   borderRadius: 3,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.75),
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
   overflow: 'hidden',
   display: 'flex',
   alignItems: 'center',
@@ -143,8 +144,8 @@ export const deathTrackSx = {
   height: 'clamp(7px, 15cqmin, 18px)',
   px: 'clamp(1px, 3cqmin, 4px)',
   borderRadius: 3,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.82),
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.65)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.veil),
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}`,
   display: 'flex',
   alignItems: 'center',
   gap: 'clamp(1px, 3cqmin, 4px)',
@@ -159,8 +160,8 @@ export const deathDotSx = {
   height: 'clamp(4px, 9cqmin, 10px)',
   p: 0,
   borderRadius: '50%',
-  bgcolor: vttAlpha(VTT_COLORS.neutralMark, 0.12),
-  border: `1px solid ${vttAlpha(VTT_COLORS.neutralMark, 0.44)}`,
+  bgcolor: vttAlpha(VTT_COLORS.neutralMark, OPACITY.tint),
+  border: `1px solid ${vttAlpha(VTT_COLORS.neutralMark, OPACITY.edge)}`,
   boxSizing: 'border-box',
   cursor: 'pointer',
   '&:disabled': { cursor: 'default' },
@@ -169,16 +170,16 @@ export const deathDotSx = {
 export const deathSuccessSx = {
   bgcolor: VTT_COLORS.success,
   borderColor: VTT_COLORS.success,
-  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.success, 0.8)}`,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.success, OPACITY.veil)}`,
 };
 
 export const deathFailureSx = {
   bgcolor: VTT_COLORS.hpCritical,
   borderColor: VTT_COLORS.danger,
-  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.hpCritical, 0.8)}`,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.hpCritical, OPACITY.veil)}`,
 };
 
-export const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.accent, 0.34) };
+export const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.line) };
 
 export const hpFillSx = {
   position: 'absolute',
@@ -196,7 +197,7 @@ const textBaseSx = {
   fontVariantNumeric: 'tabular-nums',
   // A dark outline keeps the figures readable over both the empty track and a
   // bright fill, without dimming the bar itself.
-  textShadow: `0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)}`,
+  textShadow: `0 1px 2px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)}`,
 };
 
 export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.text };
@@ -218,7 +219,7 @@ export const plateSx = {
   flex: 'none',
   px: 'clamp(2px, 4cqmin, 5px)',
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   color: VTT_COLORS.text,
   // As large as the cell allows, up to what reads across the table on a
   // projector; zoomed far out it gets small rather than spilling over.
@@ -231,7 +232,7 @@ export const plateSx = {
 };
 
 export const secretPlateSx = {
-  outline: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.9)}`,
+  outline: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.solid)}`,
   outlineOffset: '-1px',
 };
 
@@ -261,11 +262,11 @@ export const badgeSx = {
 const turnRing = `0 0 0 2px ${VTT_COLORS.white}, 0 0 0 5px ${VTT_COLORS.turnActive}`;
 
 export const turnActiveSx = {
-  boxShadow: `${turnRing}, 0 0 18px 6px ${vttAlpha(VTT_COLORS.turnActive, 0.7)}`,
+  boxShadow: `${turnRing}, 0 0 18px 6px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.heavy)}`,
   animation: 'gbTurnGlow 1.6s ease-in-out infinite',
   '@keyframes gbTurnGlow': {
-    '0%, 100%': { boxShadow: `${turnRing}, 0 0 12px 3px ${vttAlpha(VTT_COLORS.turnActive, 0.55)}` },
-    '50%': { boxShadow: `${turnRing}, 0 0 26px 10px ${vttAlpha(VTT_COLORS.turnActive, 0.85)}` },
+    '0%, 100%': { boxShadow: `${turnRing}, 0 0 12px 3px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.strong)}` },
+    '50%': { boxShadow: `${turnRing}, 0 0 26px 10px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.veil)}` },
   },
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 };
@@ -279,8 +280,8 @@ export const deadBadgeSx = {
   borderRadius: '50%',
   bgcolor: VTT_COLORS.dangerDeep,
   color: VTT_COLORS.deathText,
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, 0.92)}`,
-  boxShadow: `0 2px 5px ${vttAlpha(VTT_COLORS.black, 0.75)}`,
+  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
+  boxShadow: `0 2px 5px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -337,7 +338,7 @@ export const reminderSx = {
   px: 0.6,
   py: '1px',
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.88),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   color: 'info.main',
   border: '1px solid',
   borderColor: 'info.main',
@@ -367,7 +368,7 @@ export const pillSx = {
   fontWeight: 700,
   lineHeight: 1.35,
   whiteSpace: 'nowrap',
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.55)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
 };
 
 export const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.surface };
@@ -375,10 +376,10 @@ export const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.
 export const conditionTooltipSx = {
   maxWidth: 360,
   p: 0,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.98),
-  border: `1px solid ${vttAlpha(VTT_COLORS.warning, 0.55)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  border: `1px solid ${vttAlpha(VTT_COLORS.warning, OPACITY.strong)}`,
   boxShadow: 8,
-  '& .MuiTooltip-arrow': { color: vttAlpha(VTT_COLORS.surface, 0.98) },
+  '& .MuiTooltip-arrow': { color: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 export const conditionTooltipBodySx = { p: 1 };

@@ -1,5 +1,5 @@
 import { signed } from '../../ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -8,8 +8,8 @@ import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 // and they have to agree. Dependency-free so the plain node runner can cover it.
 
 export const ROLL_MODE_CHIP = {
-  advantage: { label: 'ADV', color: UI_COLORS.success, borderColor: uiAlpha(UI_COLORS.success, 0.55), bgColor: uiAlpha(UI_COLORS.success, 0.14) },
-  disadvantage: { label: 'DIS', color: UI_COLORS.warning, borderColor: uiAlpha(UI_COLORS.warning, 0.55), bgColor: uiAlpha(UI_COLORS.warning, 0.14) },
+  advantage: { label: 'ADV', color: UI_COLORS.success, borderColor: uiAlpha(UI_COLORS.success, OPACITY.strong), bgColor: uiAlpha(UI_COLORS.success, OPACITY.fill) },
+  disadvantage: { label: 'DIS', color: UI_COLORS.warning, borderColor: uiAlpha(UI_COLORS.warning, OPACITY.strong), bgColor: uiAlpha(UI_COLORS.warning, OPACITY.fill) },
 };
 
 export function rollDieColor(value, faces) {

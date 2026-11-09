@@ -1,7 +1,7 @@
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
-import { normalizeHexColor } from '../../../shared/ui/colors.js';
+import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
@@ -45,7 +45,7 @@ export const scenePresenterActionsSx = {
   alignItems: 'center',
   flexWrap: 'wrap',
   pl: { xs: 0, md: 1.25 },
-  borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.16)}` },
+  borderLeft: { xs: 0, md: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.fill)}` },
   '& .MuiButton-root': {
     minHeight: 30,
     fontSize: FONT_SIZES.sm,
@@ -61,7 +61,7 @@ export const sceneRenameButtonSx = {
   p: 0,
   alignSelf: 'flex-start',
   mt: -0.25,
-  color: vttAlpha(VTT_COLORS.white, 0.42),
+  color: vttAlpha(VTT_COLORS.white, OPACITY.edge),
   '&:hover': {
     color: 'gmboard.vtt.accent',
     bgcolor: 'gmboard.vtt.accentWash',
@@ -192,8 +192,8 @@ export const sheetViewSx = {
   border: '1px solid',
   borderColor: 'gmboard.vtt.accentBorderStrong',
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.88),
-  backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, 0.025)}, transparent 42%)`,
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.veil),
+  backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, OPACITY.faint)}, transparent 42%)`,
   boxShadow: UI_SHADOWS.overlay,
   isolation: 'isolate',
   '& > *': {

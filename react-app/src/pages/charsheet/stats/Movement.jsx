@@ -15,7 +15,7 @@ import {
 } from '../../../shared/character/inventory/weight.js';
 import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wildShapeForm.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
@@ -123,13 +123,13 @@ export default function Movement({ C, sheet }) {
                 size="small"
                 label={`${effectTitle(effect)}${effectSummary(effect) ? `: ${effectSummary(effect)}` : ''}`}
                 variant="outlined"
-                sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.38), justifyContent: 'flex-start' }}
+                sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.edge), justifyContent: 'flex-start' }}
               />
             ))}
           </Box>
         ) : null}
         {hasPenalty ? (
-          <Chip size="small" label={reason} variant="outlined" sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.penaltyText, borderColor: uiAlpha(UI_COLORS.penaltyText, 0.45), justifyContent: 'flex-start' }} />
+          <Chip size="small" label={reason} variant="outlined" sx={{ height: 20, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.penaltyText, borderColor: uiAlpha(UI_COLORS.penaltyText, OPACITY.edge), justifyContent: 'flex-start' }} />
         ) : null}
       </Box>
     </Paper>

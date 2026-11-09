@@ -15,7 +15,7 @@ import {
   resolveCreatedItemValue,
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
@@ -224,8 +224,8 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
             />
           );
-          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, 0.4) : 'divider';
-          const rowBg = count > 0 ? uiAlpha(UI_COLORS.accent, 0.06) : UI_COLORS.surfaceHeader;
+          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.edge) : 'divider';
+          const rowBg = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.wash) : UI_COLORS.surfaceHeader;
 
           if (!dbItem) {
             return (

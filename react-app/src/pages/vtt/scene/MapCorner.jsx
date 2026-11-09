@@ -4,6 +4,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { MapPanel } from './MapPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
 // gap that keeps it from touching one.
@@ -86,9 +87,9 @@ const buttonSx = {
   // The strip around it is click-through; the icon and the panel are not.
   pointerEvents: 'auto',
   color: VTT_COLORS.accent,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.95) },
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 // Scrollable rather than tall: in fullscreen a panel that runs past the bottom
@@ -108,8 +109,8 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.97),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.3)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
   boxShadow: 6,
 };
 

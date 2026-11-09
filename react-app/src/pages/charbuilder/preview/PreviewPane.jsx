@@ -23,7 +23,7 @@ import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
@@ -42,8 +42,8 @@ const PANEL_SX = {
   maxHeight: { md: 'calc(100vh - 76px)' },
   overflow: 'auto',
   minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.accentText, 0.22),
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, 0.72),
+  borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade),
+  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
 };
 
 function PreviewHeader({ character, hp }) {
@@ -58,7 +58,7 @@ function PreviewHeader({ character, hp }) {
   ];
 
   return (
-    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.accentText, 0.32) }}>
+    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line) }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.4} sx={{ minWidth: 0 }}>
           <Typography sx={{ ...SECTION_HEADER_SX, color: 'primary.main' }}>Preview</Typography>
@@ -104,7 +104,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.4 }}>
-        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.22) }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
         <Chip
           size="small"
           label={`Level ${level}`}
@@ -116,7 +116,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
             
           }}
         />
-        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, 0.22) }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
       </Box>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {classFeatures.map((feature) => (

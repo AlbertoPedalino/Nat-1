@@ -16,6 +16,7 @@ import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { numberSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { ATMOSPHERE_ICONS, AtmospherePicker, atmospherePresetsByType } from './AtmospherePicker.jsx';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -126,7 +127,7 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
         sx={{
           justifyContent: 'flex-start',
           color: atmosphere.type === 'none' ? VTT_COLORS.textSecondary : VTT_COLORS.accentHighlight,
-          borderColor: vttAlpha(VTT_COLORS.textSecondary, 0.28),
+          borderColor: vttAlpha(VTT_COLORS.textSecondary, OPACITY.line),
           textTransform: 'none',
           '& .MuiButton-endIcon': { ml: 'auto' },
         }}

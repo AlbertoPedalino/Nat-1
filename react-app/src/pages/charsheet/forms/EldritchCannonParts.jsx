@@ -8,7 +8,7 @@ import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -62,10 +62,10 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
           sx={{
             display: 'flex', alignItems: 'center', gap: '6px', px: '8px', py: '5px',
             border: 1, borderColor: 'divider', borderRadius: open ? '6px 6px 0 0' : 1,
-            bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.85), cursor: disabled ? 'default' : 'pointer',
+            bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.veil), cursor: disabled ? 'default' : 'pointer',
           }}
         >
-          <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: 0.95 }} />
+          <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: OPACITY.solid }} />
           <Typography sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.md, fontWeight: 700, color: 'text.primary' }}>{mode.name}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
             {mode.attackBonus != null ? (
@@ -87,7 +87,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
       )}
       detailsSx={{
         px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
-        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.5),
+        borderRadius: cornerRadius(0, 0, 0.75, 0.75), bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
         fontSize: FONT_SIZES.xs, color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
@@ -106,13 +106,13 @@ const rulesToggleSx = {
   px: '8px',
   py: '5px',
   border: 1,
-  borderColor: uiAlpha(UI_COLORS.accent, 0.25),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.58),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
   cursor: 'pointer',
   '&:hover': {
-    borderColor: uiAlpha(UI_COLORS.accent, 0.45),
-    bgcolor: uiAlpha(UI_COLORS.accent, 0.07),
+    borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
+    bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
   },
 };
 
@@ -141,9 +141,9 @@ const rulesGroupSx = {
   px: '8px',
   py: '6px',
   border: 1,
-  borderColor: uiAlpha(UI_COLORS.white, 0.08),
+  borderColor: uiAlpha(UI_COLORS.white, OPACITY.soft),
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.42),
+  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.edge),
 };
 
 const rulesGroupTitleSx = {
@@ -159,7 +159,7 @@ const rulesRowSx = {
   gap: '6px',
   alignItems: 'baseline',
   py: '3px',
-  borderTop: `1px solid ${uiAlpha(UI_COLORS.white, 0.045)}`,
+  borderTop: `1px solid ${uiAlpha(UI_COLORS.white, OPACITY.wash)}`,
   '&:first-of-type': { borderTop: 0 },
 };
 

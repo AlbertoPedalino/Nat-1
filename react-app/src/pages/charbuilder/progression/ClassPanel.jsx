@@ -13,6 +13,7 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -55,7 +56,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
             selected={selected}
             disabled={!prereqMet}
             onClick={onSelect}
-            sx={{ alignItems: 'flex-start', gap: 0.55, opacity: prereqMet ? 1 : 0.45, flexDirection: 'column', flex: 1, minWidth: 0 }}
+            sx={{ alignItems: 'flex-start', gap: 0.55, opacity: prereqMet ? 1 : OPACITY.edge, flexDirection: 'column', flex: 1, minWidth: 0 }}
           >
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, width: '100%' }}>
               <Box sx={{ pt: 0.35 }}>

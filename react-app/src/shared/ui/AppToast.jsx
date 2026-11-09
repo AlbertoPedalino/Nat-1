@@ -1,5 +1,5 @@
 import { Snackbar, Alert, Portal } from '@mui/material';
-import { UI_COLORS, uiAlpha } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
@@ -58,7 +58,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               alignItems: 'center',
               minWidth: 240,
               maxWidth: 360,
-              bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
+              bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
               color: UI_COLORS.textPrimary,
               border: '1px solid',
               borderColor: color,

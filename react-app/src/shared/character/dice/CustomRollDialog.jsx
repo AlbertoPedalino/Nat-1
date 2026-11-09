@@ -4,7 +4,7 @@ import { Dices } from 'lucide-react';
 import { DICE_LIMITS } from './dice.js';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { signed, withModifier } from '../../ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 
@@ -123,7 +123,7 @@ const CUSTOM_ROLL_SX = {
   diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.4, borderBottom: 1, borderColor: 'divider' },
   diceLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary', minWidth: 42 },
   countLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, minWidth: 24, textAlign: 'center' },
-  stepBtn: { minWidth: 28, px: 0.4, py: 0.2, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, 0.35), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } },
+  stepBtn: { minWidth: 28, px: 0.4, py: 0.2, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } },
   modLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'text.secondary', mr: 0.5 },
   formula: { fontFamily: UI_FONTS.mono, fontSize: FONT_SIZES.lg, color: UI_COLORS.secondary, textAlign: 'center', py: 0.5 },
 };

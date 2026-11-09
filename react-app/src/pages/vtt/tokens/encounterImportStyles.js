@@ -1,5 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 export const placementCardSx = {
   display: 'flex',
@@ -7,14 +8,14 @@ export const placementCardSx = {
   gap: 1.25,
   p: 1,
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.22),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
   userSelect: 'none',
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',
   '&:hover': {
-    borderColor: vttAlpha(VTT_COLORS.accent, 0.6),
-    bgcolor: vttAlpha(VTT_COLORS.accent, 0.06),
+    borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),
+    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
   },
 };
 

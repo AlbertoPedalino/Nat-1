@@ -1,7 +1,7 @@
 import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { asArray } from '../../lists.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
@@ -44,10 +44,10 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
         cursor: hasDesc ? 'pointer' : 'default',
         color: CONDITION_ACCENT,
         borderColor: CONDITION_ACCENT,
-        bgcolor: alpha(CONDITION_ACCENT, isOpen ? 0.3 : 0.14),
+        bgcolor: alpha(CONDITION_ACCENT, isOpen ? OPACITY.line : OPACITY.fill),
         boxShadow: isOpen ? `0 0 0 1px ${CONDITION_ACCENT}` : 'none',
-        '&:hover': hasDesc ? { bgcolor: alpha(CONDITION_ACCENT, 0.24) } : undefined,
-        ...(readOnlyReason ? { opacity: 0.75 } : null),
+        '&:hover': hasDesc ? { bgcolor: alpha(CONDITION_ACCENT, OPACITY.shade) } : undefined,
+        ...(readOnlyReason ? { opacity: OPACITY.heavy } : null),
         ...sx,
       }}
     />
@@ -81,10 +81,10 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
 
 const cardSx = {
   border: 1,
-  borderColor: alpha(CONDITION_ACCENT, 0.4),
+  borderColor: alpha(CONDITION_ACCENT, OPACITY.edge),
   borderRadius: 1,
   p: '6px 8px',
-  bgcolor: alpha(CONDITION_ACCENT, 0.05),
+  bgcolor: alpha(CONDITION_ACCENT, OPACITY.wash),
 };
 
 const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 };
@@ -127,8 +127,8 @@ export function ConditionToggleGrid({
             onClick={disabled ? undefined : () => onToggle(condition.key)}
             sx={[
               toggleChipSx,
-              isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, 0.14) } : null,
-              { '&:hover': { boxShadow: `0 0 0 1px ${isOn ? CONDITION_ACCENT : uiAlpha(UI_COLORS.white, 0.25)}` } },
+              isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, OPACITY.fill) } : null,
+              { '&:hover': { boxShadow: `0 0 0 1px ${isOn ? CONDITION_ACCENT : uiAlpha(UI_COLORS.white, OPACITY.shade)}` } },
               ...asArray(chipSx),
             ]}
           />

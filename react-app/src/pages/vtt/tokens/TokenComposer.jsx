@@ -7,6 +7,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -135,9 +136,9 @@ export default function TokenComposer({
 const composerSx = {
   mt: 0.75,
   p: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.25)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.2),
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
 };
 
 const draftSx = {
@@ -146,14 +147,14 @@ const draftSx = {
   gap: 1,
   p: 0.75,
   borderRadius: 1,
-  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, 0.55)}`,
+  border: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
   touchAction: 'pan-y',
   WebkitTouchCallout: 'none',
   userSelect: 'none',
   cursor: 'grab',
 };
 
-const draftDisabledSx = { opacity: 0.5, cursor: 'default' };
+const draftDisabledSx = { opacity: OPACITY.strong, cursor: 'default' };
 
 const draftNameSx = { minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' };
 

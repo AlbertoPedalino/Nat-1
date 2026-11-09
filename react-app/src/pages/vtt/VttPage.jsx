@@ -22,6 +22,7 @@ import * as s from './styles.js';
 import { UI_FONTS, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import { OPACITY } from '../../shared/ui/colors.js';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -318,7 +319,7 @@ const spectatorWaitingSx = {
   inset: 0,
   display: 'grid',
   placeItems: 'center',
-  color: vttAlpha(VTT_COLORS.white, 0.58),
+  color: vttAlpha(VTT_COLORS.white, OPACITY.strong),
   fontFamily: UI_FONTS.display,
   letterSpacing: LETTER_SPACINGS.lg,
 };

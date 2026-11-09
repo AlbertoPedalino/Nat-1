@@ -3,6 +3,7 @@ import { PanelRightClose, ScrollText } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -71,7 +72,7 @@ const selectSx = {
   width: { xs: 148, sm: 210 },
   '& .MuiInputBase-root': {
     height: 32,
-    bgcolor: vttAlpha(VTT_COLORS.black, 0.72),
+    bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
     fontSize: FONT_SIZES.md,
   },
 };

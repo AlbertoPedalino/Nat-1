@@ -15,7 +15,7 @@ import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
-import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
@@ -118,5 +118,5 @@ const utilityButtonSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accentText, 0.4),
+  borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.edge),
 };

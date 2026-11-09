@@ -3,6 +3,7 @@ import { mapIconButtonSx } from './battleMapSurface.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -64,9 +65,9 @@ export const fillViewportSx = {
 };
 
 export const placementTargetSx = {
-  outline: `2px dashed ${vttAlpha(VTT_COLORS.accent, 0.78)}`,
+  outline: `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.veil)}`,
   outlineOffset: -5,
-  boxShadow: `inset 0 0 34px ${vttAlpha(VTT_COLORS.accent, 0.12)}`,
+  boxShadow: `inset 0 0 34px ${vttAlpha(VTT_COLORS.accent, OPACITY.tint)}`,
 };
 
 export const placementTargetHintSx = {
@@ -78,9 +79,9 @@ export const placementTargetHintSx = {
   px: 1.25,
   py: 0.55,
   borderRadius: 10,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.92),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
   color: VTT_COLORS.accent,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.62)}`,
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
   boxShadow: UI_SHADOWS.float,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
@@ -94,8 +95,8 @@ export const selectionMarqueeSx = {
   pointerEvents: 'none',
   boxSizing: 'border-box',
   border: `1px solid ${VTT_COLORS.accent}`,
-  bgcolor: vttAlpha(VTT_COLORS.accent, 0.16),
-  boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.5)}`,
+  bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.fill),
+  boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
 };
 
 export const selectionToolbarSx = {
@@ -108,8 +109,8 @@ export const selectionToolbarSx = {
   px: 1,
   py: 0.5,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.94),
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.45)}`,
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.edge)}`,
   boxShadow: 4,
 };
 
@@ -129,7 +130,7 @@ export const playAreaSvgSx = {
 
 export const playAreaStrokeProps = {
   fill: 'none',
-  stroke: vttAlpha(VTT_COLORS.accent, 0.7),
+  stroke: vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
   strokeWidth: 2,
   strokeDasharray: '7 5',
 };
@@ -138,11 +139,11 @@ export const playAreaStrokeProps = {
 export const fullscreenSheetButtonSx = {
   height: 32,
   minWidth: 88,
-  borderColor: vttAlpha(VTT_COLORS.accent, 0.42),
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.82),
+  borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, 0.96) },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 // Above the rail (top 48), which hangs just below the tools toggle.
@@ -221,7 +222,7 @@ export const distanceSx = {
   top: 0,
   px: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, 0.9),
+  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
   color: VTT_COLORS.accent,
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,

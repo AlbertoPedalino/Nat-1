@@ -5,6 +5,7 @@ import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelecti
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { initials } from '../../../shared/ui/textCase.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -157,8 +158,8 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         bgcolor: token?.color || VTT_COLORS.objectDefault,
         borderWidth: isCharacter || hasUploadedArtworkRing ? 5 : 2,
         borderColor: isCharacter || hasUploadedArtworkRing
-          ? (token?.color || vttAlpha(VTT_COLORS.black, 0.6))
-          : vttAlpha(VTT_COLORS.accent, 0.65),
+          ? (token?.color || vttAlpha(VTT_COLORS.black, OPACITY.strong))
+          : vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
       }}
     >
       {imageUrl ? <Box component="img" src={imageUrl} alt="" draggable={false} sx={imageSx} /> : null}
@@ -181,7 +182,7 @@ const rootSx = {
   borderRadius: '50%',
   overflow: 'visible',
   borderStyle: 'solid',
-  boxShadow: `0 3px 10px ${vttAlpha(VTT_COLORS.black, 0.72)}`,
+  boxShadow: `0 3px 10px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -206,7 +207,7 @@ const initialsSx = {
 const classIconSx = {
   display: 'flex',
   color: VTT_COLORS.text,
-  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
+  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)})`,
   pointerEvents: 'none',
 };
 

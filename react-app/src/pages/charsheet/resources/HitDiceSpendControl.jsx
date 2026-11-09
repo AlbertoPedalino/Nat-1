@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -15,7 +15,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
   const setCount = (n) => onChange(clamp(n, 0, pool.remaining));
 
   return (
-    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.surfaceHeader, 0.72) }}>
+    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.heavy) }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}
@@ -36,10 +36,10 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
               title={used ? 'Already used' : spending ? 'Will spend' : 'Available'}
               sx={{
                 fontSize: FONT_SIZES.sm,
-                borderColor: spending ? UI_COLORS.accent : used ? 'divider' : uiAlpha(UI_COLORS.accent, 0.5),
+                borderColor: spending ? UI_COLORS.accent : used ? 'divider' : uiAlpha(UI_COLORS.accent, OPACITY.strong),
                 color: spending ? UI_COLORS.surfaceDeep : used ? 'text.disabled' : 'primary.main',
-                bgcolor: spending ? UI_COLORS.accent : used ? UI_COLORS.surfaceHeader : uiAlpha(UI_COLORS.accent, 0.14),
-                opacity: used ? 0.35 : 1,
+                bgcolor: spending ? UI_COLORS.accent : used ? UI_COLORS.surfaceHeader : uiAlpha(UI_COLORS.accent, OPACITY.fill),
+                opacity: used ? OPACITY.line : 1,
               }}
             >
               {used ? '○' : '●'}

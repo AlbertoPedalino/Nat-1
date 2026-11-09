@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { ATMOSPHERE_PRESETS } from '../../../shared/vtt/scene/atmosphere.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -64,14 +65,14 @@ function AtmosphereOption({ type, selected, onSelect }) {
         gap: 0.75,
         px: 1,
         py: 0.7,
-        border: `1px solid ${vttAlpha(VTT_COLORS.accent, 0.35)}`,
+        border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
         borderRadius: (theme) => `${theme.shape.borderRadius * 0.875}px !important`,
-        bgcolor: vttAlpha(VTT_COLORS.surface, 0.85),
+        bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
         color: VTT_COLORS.textSecondary,
         textTransform: 'none',
         '&:hover': {
-          borderColor: vttAlpha(VTT_COLORS.accent, 0.68),
-          bgcolor: vttAlpha(VTT_COLORS.accent, 0.12),
+          borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
+          bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint),
           color: VTT_COLORS.text,
         },
       }}

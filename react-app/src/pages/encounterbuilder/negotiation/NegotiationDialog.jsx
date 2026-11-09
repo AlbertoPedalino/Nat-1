@@ -12,7 +12,7 @@ import {
   NPC_ATTITUDES,
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
@@ -180,8 +180,8 @@ function MeterCard({ label, value, max, color, prominent = false }) {
             sx={{
               height: prominent ? 9 : 7,
               borderRadius: 99,
-              bgcolor: index < value ? color : uiAlpha(UI_COLORS.white, 0.09),
-              boxShadow: index < value ? `0 0 8px ${color}55` : 'none',
+              bgcolor: index < value ? color : uiAlpha(UI_COLORS.white, OPACITY.soft),
+              boxShadow: index < value ? `0 0 8px ${uiAlpha(color, OPACITY.line)}` : 'none',
             }}
           />
         ))}
@@ -227,7 +227,7 @@ const attitudeButtonSx = {
     fontFamily: UI_FONTS.mono,
     fontSize: FONT_SIZES.xs,
     fontWeight: 600,
-    opacity: 0.8,
+    opacity: OPACITY.veil,
   },
 };
 
@@ -239,12 +239,12 @@ const meterGridSx = {
 
 const meterCardSx = {
   p: 1.25,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.02),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const prominentMeterSx = {
-  borderColor: uiAlpha(UI_COLORS.secondary, 0.45),
-  bgcolor: uiAlpha(UI_COLORS.secondary, 0.055),
+  borderColor: uiAlpha(UI_COLORS.secondary, OPACITY.edge),
+  bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.wash),
 };
 
 const meterLabelSx = {
@@ -267,7 +267,7 @@ const meterMaxSx = {
 
 const currentStateSx = {
   p: 1.1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.018),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const currentResultSx = {
@@ -281,7 +281,7 @@ const finalResultSx = {
   p: { xs: 1.25, sm: 1.5 },
   border: 1,
   borderColor: 'primary.main',
-  bgcolor: uiAlpha(UI_COLORS.accent, 0.08),
+  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
 };
 
 const finalEyebrowSx = {
@@ -318,7 +318,7 @@ const actionButtonSx = {
     fontFamily: UI_FONTS.mono,
     fontSize: { xs: FONT_SIZES.xxs, sm: FONT_SIZES.xxs },
     fontWeight: 600,
-    opacity: 0.75,
+    opacity: OPACITY.heavy,
     lineHeight: 1.25,
   },
 };

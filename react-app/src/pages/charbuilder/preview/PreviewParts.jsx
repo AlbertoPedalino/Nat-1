@@ -10,7 +10,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -23,8 +23,8 @@ export const PROFICIENCY_TONE = NEUTRAL_TONE;
 
 export const SECTION_CARD_SX = {
   minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.accentText, 0.18),
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
+  borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.fill),
+  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
   backgroundImage: 'none',
 };
 
@@ -95,8 +95,8 @@ export function filledChipSx(bg) {
     backgroundColor: bg,
     color: darkChipText,
     fontWeight: 700,
-    border: `1px solid ${uiAlpha(UI_COLORS.accentHighlight, 0.65)}`,
-    boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, 0.28)} inset`,
+    border: `1px solid ${uiAlpha(UI_COLORS.accentHighlight, OPACITY.heavy)}`,
+    boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, OPACITY.line)} inset`,
     '& .MuiChip-label': { color: darkChipText },
   };
 }

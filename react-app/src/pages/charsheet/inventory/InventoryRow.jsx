@@ -23,7 +23,7 @@ import { scrollCardName } from '../../../shared/character/inventory/spellScrolls
 import { isItemCarried, itemQty as qty } from '../../../shared/character/inventory/weight.js';
 import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
@@ -84,7 +84,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, 0.06) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, 0.55) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : 0.82, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, 0.34) } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : OPACITY.veil, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line) } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
@@ -122,7 +122,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, 0.12) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -142,7 +142,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
                 gap: '4px',
                 borderColor: ITEM_ATTUNEMENT,
                 color: ITEM_ATTUNEMENT,
-                bgcolor: alpha(ITEM_ATTUNEMENT, 0.14),
+                bgcolor: alpha(ITEM_ATTUNEMENT, OPACITY.fill),
               }}
             >
               <Box component="span">
@@ -162,7 +162,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, 0.14), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -185,7 +185,7 @@ function ItemFlagButton({ def, active, onClick }) {
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
       sx={{
         minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
-        ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
+        ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
@@ -205,8 +205,8 @@ function ChargeStepButton({ children, disabled = false, ariaLabel, onClick }) {
         p: 0,
         color: 'inherit',
         borderRadius: 0.375,
-        '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, 0.16) },
-        '&.Mui-disabled': { color: 'inherit', opacity: 0.35 },
+        '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, OPACITY.fill) },
+        '&.Mui-disabled': { color: 'inherit', opacity: OPACITY.line },
       }}
     >
       {children}
@@ -223,7 +223,7 @@ function SlotBtn({ active, onClick, label }) {
         borderColor: active ? UI_COLORS.accent : 'divider',
         borderRadius: 0.375,
         color: active ? UI_COLORS.accentText : 'text.secondary',
-        bgcolor: active ? uiAlpha(UI_COLORS.accent, 0.14) : 'transparent',
+        bgcolor: active ? uiAlpha(UI_COLORS.accent, OPACITY.fill) : 'transparent',
         ...TEXT_STYLES.title,
         fontSize: FONT_SIZES.xxxs,
         '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent },
@@ -257,7 +257,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
-            sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, 0.14) : 'transparent', '&.Mui-disabled': { opacity: 0.4 } }}>
+            sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, OPACITY.fill) : 'transparent', '&.Mui-disabled': { opacity: OPACITY.edge } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </Box>

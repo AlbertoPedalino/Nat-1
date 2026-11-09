@@ -7,6 +7,7 @@ import { isTokenInPlay, isTokenVisibleToPlayers } from '../../../shared/vtt/scen
 import { liftMovablePieces } from '../../../shared/vtt/session/liveScene.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 const VIEWPORT_OVERSCAN = 180;
 
@@ -96,7 +97,7 @@ const TokenNode = memo(function TokenNode({
         transform: `translate(${at.x}px, ${at.y}px)`,
         outline: selected ? `2px solid ${VTT_COLORS.accent}` : 'none',
         outlineOffset: 3,
-        boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, 0.72)}` : 'none',
+        boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}` : 'none',
         zIndex: aboveFog ? 4 : selected ? 2 : undefined,
         '&:has([data-marks-expanded])': {
           zIndex: aboveFog || fullyRevealed ? EXPANDED_Z : EXPANDED_UNDER_FOG_Z,

@@ -7,7 +7,7 @@ import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/stor
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
-import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -116,7 +116,7 @@ const heroTitleSx = {
   ...TEXT_STYLES.title,
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
   color: UI_COLORS.accentText,
-  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, 0.35)}`,
+  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, OPACITY.line)}`,
   lineHeight: 1.1,
 };
 
@@ -125,7 +125,7 @@ const heroLogoSx = {
   width: 'clamp(76px, 15vw, 112px)',
   height: 'auto',
   margin: '0 auto 1rem',
-  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.success, 0.35)})`,
+  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.success, OPACITY.line)})`,
 };
 
 const dividerSx = {
@@ -157,14 +157,14 @@ function getCardSx(color) {
     textDecoration: 'none',
     borderWidth: 1,
     borderStyle: 'solid',
-    borderColor: (theme) => alpha(paletteValue(theme, color), 0.3),
+    borderColor: (theme) => alpha(paletteValue(theme, color), OPACITY.line),
     borderRadius: 1.5,
     bgcolor: UI_COLORS.surfaceDeep,
     backgroundImage: 'none',
     transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',
     '&:hover': {
       borderColor: color,
-      boxShadow: (theme) => `0 0 24px ${alpha(paletteValue(theme, color), 0.15)}`,
+      boxShadow: (theme) => `0 0 24px ${alpha(paletteValue(theme, color), OPACITY.fill)}`,
       transform: 'translateY(-2px)',
     },
     '&:hover .card-label': { color },
@@ -212,13 +212,13 @@ const clearDataWrapSx = {
 };
 
 const clearDataButtonSx = {
-  borderColor: uiAlpha(UI_COLORS.danger, 0.42),
+  borderColor: uiAlpha(UI_COLORS.danger, OPACITY.edge),
   color: UI_COLORS.danger,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
   '&:hover': {
     borderColor: UI_COLORS.danger,
-    bgcolor: uiAlpha(UI_COLORS.danger, 0.08),
+    bgcolor: uiAlpha(UI_COLORS.danger, OPACITY.soft),
   },
 };
 

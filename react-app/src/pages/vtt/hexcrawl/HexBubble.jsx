@@ -7,6 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -60,7 +61,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
           <Stack
             direction="row"
             spacing={0.8}
-            sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, 0.4) }}
+            sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, OPACITY.edge) }}
           >
             {WeatherIcon ? <WeatherIcon size={13} color={tone} /> : null}
             <Typography sx={{ ...footerTextSx, color: tone }}>
@@ -96,7 +97,7 @@ const bubbleSx = {
   maxWidth: 340,
   textAlign: 'left',
   borderRadius: 2,
-  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
+  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid),
   border: '2px solid',
   borderColor: 'divider',
   boxShadow: UI_SHADOWS.popup,
@@ -114,7 +115,7 @@ const clickableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
   font: 'inherit',
-  '&:hover': { borderColor: vttAlpha(VTT_COLORS.accent, 0.75) },
+  '&:hover': { borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy) },
 };
 
 const coordSx = {
@@ -150,5 +151,5 @@ const tailSx = {
   height: 0,
   borderLeft: '7px solid transparent',
   borderRight: '7px solid transparent',
-  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, 0.97)}`,
+  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid)}`,
 };

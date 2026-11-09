@@ -27,7 +27,7 @@ import {
   updateCannonHpPatch,
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
@@ -242,7 +242,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, 0.5), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) } }}
+            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
           >
             Activate Cannon
           </Button>
@@ -275,7 +275,7 @@ const toggleSx = {
   px: '10px',
   textTransform: 'none',
   color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, 0.4),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
 };
 
 // AC shield beside the Defenses box, as in the character's header.

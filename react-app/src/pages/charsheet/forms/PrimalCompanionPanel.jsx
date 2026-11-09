@@ -39,7 +39,7 @@ import {
 } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
@@ -231,7 +231,7 @@ function companionRules(rangerLevel) {
 
 const reviveButtonSx = {
   fontSize: FONT_SIZES.sm,
-  borderColor: uiAlpha(UI_COLORS.accent, 0.5),
+  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong),
   color: UI_COLORS.accentText,
-  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, 0.08) },
+  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) },
 };

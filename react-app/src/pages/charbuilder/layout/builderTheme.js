@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material';
 import { theme } from '../../../app/theme.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -48,7 +48,7 @@ export const builderRootSx = {
     px: 1,
     fontSize: FONT_SIZES.md,
     bgcolor: UI_COLORS.surfaceHeader,
-    border: `1px solid ${uiAlpha(UI_COLORS.accent, 0.18)}`,
+    border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
     color: 'text.secondary',
   },
   '& .MuiCardContent-root': {
@@ -79,8 +79,8 @@ export const builderTheme = createTheme(theme, {
           borderRadius: 0.375,
           ...TEXT_STYLES.title,
           fontSize: FONT_SIZES.xxs,
-          backgroundColor: uiAlpha(UI_COLORS.accent, 0.08),
-          borderColor: uiAlpha(UI_COLORS.accent, 0.28),
+          backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
+          borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line),
         },
       },
     },

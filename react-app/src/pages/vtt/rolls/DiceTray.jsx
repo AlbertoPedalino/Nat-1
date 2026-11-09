@@ -12,6 +12,7 @@ import {
   thrownDieSize,
 } from '../../../shared/vtt/rolls/dicePhysics.js';
 import { clamp } from '../../../shared/numbers.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
 // extra animation frame guarantees that the browser has painted the last
@@ -324,7 +325,7 @@ const shadowSx = {
   bottom: -4,
   height: 8,
   borderRadius: '50%',
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.55),
+  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.strong),
   filter: 'blur(3px)',
   opacity: 0,
 };
