@@ -59,11 +59,15 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     onRoll?.(sharedEntry);
   }, [C?.name, C?.classIconColor, charId, onRoll, publishRoll, showOwnRollToast]);
 
-  // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
-  // labelled message. Routes through the same toast so DiceToast renders the detail.
+  // Gameplay notices (a rest taken, not enough Sorcery Points, a choice made):
+  // shown in the same toast as a roll, but they are not rolls — they stay out of
+  // the roll log and off the table's channel. Shown even where the sheet leaves
+  // its own rolls to the map's toast, since nothing else will show them.
   const showNotice = useCallback((label, message) => {
-    showDiceToast(label, message, null, []);
-  }, [showDiceToast]);
+    setDiceToast({
+      id: makeId('notice'), label, detail: message, total: null, rolls: [], timestamp: Date.now(), notice: true,
+    });
+  }, []);
 
   const rollD20 = useCallback((bonus, label, advantage) => {
     // Exhaustion (XPHB 2024): −2 per level to every D20 Test. rollD20 is the single

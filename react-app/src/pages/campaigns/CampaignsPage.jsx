@@ -50,7 +50,7 @@ export default function CampaignsPage() {
       setCharsByCampaign(Object.fromEntries(charEntries));
       setMembersByCampaign(Object.fromEntries(memEntries));
     } catch (e) {
-      notify('error', e?.message || 'Failed to load.');
+      notify('error', e?.message || 'Could not load your campaigns.');
     } finally { setLoading(false); }
   }, [status]);
 
@@ -64,7 +64,7 @@ export default function CampaignsPage() {
       setNewName('');
       notify('success', `Campaign created. Invite code: ${c.join_code}`);
       await load();
-    } catch (e) { notify('error', e?.message || 'Failed to create.'); }
+    } catch (e) { notify('error', e?.message || 'Could not create the campaign.'); }
     finally { setBusy(false); }
   };
 
@@ -76,7 +76,7 @@ export default function CampaignsPage() {
       setJoinCode('');
       notify('success', `Joined "${c.name}".`);
       await load();
-    } catch (e) { notify('error', e?.message || 'Invalid code.'); }
+    } catch (e) { notify('error', e?.message || 'Could not join: the invite code is not valid.'); }
     finally { setBusy(false); }
   };
 
@@ -91,28 +91,28 @@ export default function CampaignsPage() {
   const assignChar = async (charId, campaignId) => {
     setBusy(true);
     try { await setCharacterCampaign(charId, campaignId); await load(); }
-    catch (e) { notify('error', e?.message || 'Failed to assign.'); }
+    catch (e) { notify('error', e?.message || 'Could not assign the character.'); }
     finally { setBusy(false); }
   };
 
   const handleLeave = async (campaignId) => {
     if (!confirmAction('Leave this campaign?')) return;
     setBusy(true);
-    try { await leaveCampaign(campaignId); await load(); notify('info', 'Left campaign.'); }
-    catch (e) { notify('error', e?.message || 'Failed to leave.'); }
+    try { await leaveCampaign(campaignId); await load(); notify('success', 'Left the campaign.'); }
+    catch (e) { notify('error', e?.message || 'Could not leave the campaign.'); }
     finally { setBusy(false); }
   };
 
   const handleDeleteCampaign = async (c) => {
     if (!confirmAction(`Delete campaign "${c.name}"? Members are removed and their sheets are detached (not deleted).`)) return;
     setBusy(true);
-    try { await deleteCampaign(c.id); await load(); notify('info', 'Campaign deleted.'); }
-    catch (e) { notify('error', e?.message || 'Failed to delete.'); }
+    try { await deleteCampaign(c.id); await load(); notify('success', `Deleted "${c.name}".`); }
+    catch (e) { notify('error', e?.message || 'Could not delete the campaign.'); }
     finally { setBusy(false); }
   };
 
   const copyCode = (code) => {
-    navigator.clipboard?.writeText(code).then(() => notify('info', 'Invite code copied.'), () => {});
+    navigator.clipboard?.writeText(code).then(() => notify('success', 'Invite code copied.'), () => notify('error', 'Could not copy the invite code.'));
   };
 
   return (

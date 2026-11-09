@@ -53,7 +53,7 @@ function normalizeStoredItem(item) {
 // read the latest list through a ref, so they stay stable for the memoized
 // rows while quantities tick.
 export function useInventoryActions({
-  inv, itemsDb, character: C, attunementState, onUpdateInventory, onUpdateCharacter, onShowToast,
+  inv, itemsDb, character: C, attunementState, onUpdateInventory, onUpdateCharacter, onNotice,
 }) {
   const invRef = useRef(inv);
 
@@ -149,27 +149,27 @@ export function useInventoryActions({
       curseBroken,
     });
     if (result.status === 'limit') {
-      onShowToast?.('Attunement limit', `You can attune to at most ${attunementState.limit} items. End attunement on another item first.`, 0, []);
+      onNotice?.('Attunement limit', `You can attune to at most ${attunementState.limit} items. End attunement on another item first.`);
       return;
     }
     if (result.status === 'duplicate') {
-      onShowToast?.('Attunement duplicate', 'You cannot attune to more than one copy of the same magic item.', 0, []);
+      onNotice?.('Attunement duplicate', 'You cannot attune to more than one copy of the same magic item.');
       return;
     }
     if (result.status === 'requirement') {
-      onShowToast?.('Attunement requirement', result.eligibility?.reason || 'This character does not meet the attunement requirement.', 0, []);
+      onNotice?.('Attunement requirement', result.eligibility?.reason || 'This character does not meet the attunement requirement.');
       return;
     }
     if (result.status === 'cursed') {
-      onShowToast?.('Cursed item', 'Attunement cannot be ended voluntarily. Break the curse first.', 0, []);
+      onNotice?.('Cursed item', 'Attunement cannot be ended voluntarily. Break the curse first.');
       return;
     }
     if (result.status === 'not-carried') {
-      onShowToast?.('Attunement unavailable', 'Carry the item before attuning to it.', 0, []);
+      onNotice?.('Attunement unavailable', 'Carry the item before attuning to it.');
       return;
     }
     if (result.status === 'updated') updateInv(result.inventory);
-  }, [C, attunementState, updateInv, onShowToast]);
+  }, [C, attunementState, updateInv, onNotice]);
 
   const setAbilityChoice = useCallback((index, groupIdx, abilities) => {
     const current = invRef.current || [];
@@ -203,8 +203,8 @@ export function useInventoryActions({
       return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
     });
     updateInv(nextInv);
-    onShowToast?.(`Read ${target.name}`, `Permanent +${bonus.value} to ${bonus.ability.toUpperCase()}`, 0, []);
-  }, [updateInv, onUpdateCharacter, onShowToast]);
+    onNotice?.(`Read ${target.name}`, `Permanent +${bonus.value} to ${bonus.ability.toUpperCase()}`);
+  }, [updateInv, onUpdateCharacter, onNotice]);
 
   // Stable for the memoized rows: every row receives the same object.
   const rowActions = useMemo(() => ({

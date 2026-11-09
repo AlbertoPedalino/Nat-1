@@ -3,9 +3,11 @@ import { Box, Button, TextField, Tabs, Tab, Alert } from '@mui/material';
 import { LogIn } from 'lucide-react';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { useAuth } from './AuthProvider.jsx';
+import { useToast } from '../../ui/ToastProvider.jsx';
 
 export default function AuthDialog({ open, onClose }) {
   const { signIn, signUp } = useAuth();
+  const { notify } = useToast();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -24,6 +26,7 @@ export default function AuthDialog({ open, onClose }) {
     try {
       if (mode === 'login') await signIn(username, password);
       else await signUp(username, password);
+      notify('success', mode === 'login' ? `Logged in as ${username.trim()}.` : `Account created. Logged in as ${username.trim()}.`);
       reset();
       onClose?.();
     } catch (e) {

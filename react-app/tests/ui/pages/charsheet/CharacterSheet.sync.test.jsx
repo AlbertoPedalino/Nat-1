@@ -9,6 +9,7 @@ import { excludeFromSync } from '../../../../src/shared/cloud/sync/cloudSyncExcl
 import { publishCharacterSheetSaved, publishCharacterVitals } from '../../../../src/shared/cloud/sync/characterEvents.js';
 import { healthCommandRoute } from '../../../../src/shared/cloud/api/healthCommandRoute.js';
 import { toCharacterDigest } from '../../../../src/shared/campaign/characterDigest.js';
+vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 // Every sheet takes vitals from others through the character digest, and
 // learns that its content changed through its sheet revision

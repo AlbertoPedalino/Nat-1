@@ -1,6 +1,7 @@
 import { Snackbar, Alert, Portal, useMediaQuery, useTheme } from '@mui/material';
 import { UI_COLORS, uiAlpha } from './colors.js';
 import { UI_FONTS } from './fonts.js';
+import { activePortalContainer } from './portalContainer.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -31,8 +32,9 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
     // it's positioned against the nearest ancestor that forms a containing block
     // (any `transform`/`filter`/`backdropFilter` — e.g. AppTopBar) instead of the
     // viewport. The Portal makes the fixed positioning viewport-relative no matter
-    // where the toast is triggered from.
-    <Portal>
+    // where the toast is triggered from. Into the fullscreen element when there
+    // is one (the battle map), or the browser would not paint it at all.
+    <Portal container={activePortalContainer}>
       <Snackbar
         open={Boolean(toast)}
         autoHideDuration={autoHideDuration}

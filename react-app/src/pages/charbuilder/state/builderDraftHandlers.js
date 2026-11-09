@@ -75,7 +75,7 @@ export function createDraftHandlers({
       replaceCharacterIdInUrl(NEW_CHARACTER);
       notify('success', 'Imported. Save local or upload to cloud from the Sheet step.');
     } catch (error) {
-      notify('error', `Import error: ${error?.message || error}`);
+      notify('error', `Could not import the character: ${error?.message || error}`);
     }
   };
 

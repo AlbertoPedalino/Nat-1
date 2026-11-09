@@ -15,6 +15,7 @@ import { formatUpdatedAt } from './logic/tools.js';
 import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
+import { useToast } from '../../shared/ui/ToastProvider.jsx';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -25,6 +26,7 @@ export default function SectionPicker({ meta }) {
   const [rows, setRows] = useState(() => mergeInstanceRows(meta.sectionKey, [], listInstances(meta.sectionKey)));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { notify } = useToast();
   const requestRef = useRef(0);
 
   const refresh = useCallback(async () => {
@@ -49,10 +51,11 @@ export default function SectionPicker({ meta }) {
       if (row.hasLocal) renameInstance(meta.sectionKey, row.id, name);
       else await renameCloudInstance(meta.sectionKey, row.id, name);
       await refresh();
+      notify('success', `Renamed to "${name}".`);
     } catch (cause) {
-      setError(cause?.message || 'Failed to rename cloud save.');
+      notify('error', cause?.message || 'Could not rename the save.');
     }
-  }, [meta.sectionKey, refresh]);
+  }, [meta.sectionKey, notify, refresh]);
 
   const handleDelete = useCallback(async (row) => {
     const plan = sectionDeletePlan(row);
@@ -60,10 +63,11 @@ export default function SectionPicker({ meta }) {
     try {
       await deleteInstance(meta.sectionKey, row.id, { cloud: plan.cloud });
       refresh();
+      notify('success', `Deleted "${row.name || row.id}".`);
     } catch (cause) {
-      setError(cause?.message || 'Failed to delete cloud save.');
+      notify('error', cause?.message || 'Could not delete the save.');
     }
-  }, [meta.sectionKey, refresh]);
+  }, [meta.sectionKey, notify, refresh]);
 
   return (
     <>

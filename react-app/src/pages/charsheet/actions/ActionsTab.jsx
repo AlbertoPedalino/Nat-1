@@ -52,7 +52,9 @@ function actionLabel(value) {
 }
 
 export default function ActionsTab({ C, sheet, resources }) {
-  const { onRoll, setResources, onShowToast, onUpdateSheet, onUpdateCharacter } = useSheetActions();
+  const {
+    onRoll, setResources, onShowToast, onNotice, onUpdateSheet, onUpdateCharacter,
+  } = useSheetActions();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [itemsDb, setItemsDb] = useState([]);
@@ -149,7 +151,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   adapterActions.forEach((a) => warnDanglingResKey(a, resMaxMap));
 
   const { handleResChange, dialogs: slotDialogs } = useResourceSideEffects({
-    C, sheet, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap,
+    C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap,
   });
 
   return (
@@ -219,6 +221,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 onResChange={handleResChange}
                 onRoll={onRoll}
                 onShowToast={onShowToast}
+                onNotice={onNotice}
                 resMax={resMaxMap[action.resKey]}
                 isPool={resPoolMap[action.resKey]}
                 resTrack={resTrackMap[action.resKey]}

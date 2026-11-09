@@ -73,7 +73,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       cloudConflictRef.current = error;
       setCloudConflict(error);
     },
-    onError: (error) => notify('error', `Cloud save error: ${error?.message || error}`),
+    onError: (error) => notify('error', `Could not save the character online: ${error?.message || error}`),
   });
 
   // "Load updated version": the builder takes the cloud character.
@@ -89,7 +89,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       setCloudConflict(null);
       dispatch({ type: 'character/restore', character: row.data });
     } catch (error) {
-      notify('error', `Cloud load error: ${error?.message || error}`);
+      notify('error', `Could not load the character from the cloud: ${error?.message || error}`);
     }
   };
 
@@ -109,7 +109,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       cloudConflictRef.current = null;
       setCloudConflict(null);
     } catch (error) {
-      notify('error', `Cloud error: ${error?.message || error}`);
+      notify('error', `Could not reach the cloud: ${error?.message || error}`);
     }
   };
 

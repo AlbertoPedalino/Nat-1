@@ -101,17 +101,18 @@ export default function CharacterPicker() {
       else if (plan.cloud === 'any') await deleteCloudCharacter(row.id);
       if (plan.local) deleteCharacter(row.id);
       refresh();
+      notify('success', `Deleted "${row.name || row.id}".`);
     } catch (e) {
-      setError(e?.message || 'Failed to delete.');
+      notify('error', e?.message || 'Could not delete the character.');
     }
-  }, [myId, isGm, refresh]);
+  }, [myId, isGm, notify, refresh]);
 
   const downloadJson = async (row) => {
     try {
       const cloud = await getCloudCharacter(row.id, { reason: 'export' });
       downloadCharacterExport(cloud.data, row.name || row.id);
     } catch (e) {
-      setError(e?.message || 'Failed to download.');
+      notify('error', e?.message || 'Could not download the character.');
     }
   };
 
@@ -120,7 +121,7 @@ export default function CharacterPicker() {
       await pullCharacter(row.id);
       notify('success', `"${row.name || row.id}" saved locally.`);
     } catch (e) {
-      notify('error', e?.message || 'Failed to save locally.');
+      notify('error', e?.message || 'Could not save the character on this device.');
     }
   };
 

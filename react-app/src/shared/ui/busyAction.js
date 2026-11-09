@@ -2,11 +2,15 @@
 // failure first runs `onError(cause)` (cleanup such as deleting an uploaded
 // file; its own failure is ignored), then is reported — the cause's message,
 // else `failure` — through `report(message)` (a panel's error line) or, by
-// default, an error toast; it resolves to null.
-export async function runBusy({ setBusy, notify, report }, task, failure, { onError } = {}) {
+// default, an error toast; it resolves to null. `success`, when given, is the
+// toast for a task that finished (the app's rule: an action the user asked for
+// says when it worked).
+export async function runBusy({ setBusy, notify, report }, task, failure, { onError, success } = {}) {
   setBusy(true);
   try {
-    return await task();
+    const result = await task();
+    if (success) notify?.('success', success);
+    return result;
   } catch (cause) {
     if (onError) {
       try { await onError(cause); } catch { /* the report below matters more */ }

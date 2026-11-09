@@ -24,6 +24,7 @@ import {
   setActiveCharId,
 } from '../../../shared/character/profile/store.js';
 import { characterIdFromUrl } from '../../../shared/character/profile/characterRoutes.js';
+import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 function getCharIdFromUrl() {
   return characterIdFromUrl() || getActiveCharId();
@@ -38,8 +39,8 @@ function getCharIdFromUrl() {
 export function useSheetDocument({
   externalChar, externalCharId, externalSheetRevision, onSheetRow, onSheetDeleted, readOnly, liveDigest,
   C, setC, sheet, setSheet, charId, setCharId, setResources, setFreeCastUses, setConditionEntries,
-  showNotice, setDiceToast,
 }) {
+  const { notify } = useToast();
   const sheetRef = useRef(null);
   sheetRef.current = sheet;
   // The sheet revision of the loaded copy (content sync, useSheetCloudSave).
@@ -71,7 +72,7 @@ export function useSheetDocument({
   const {
     sheetConflict, loadRemoteVersion, keepLocalVersion, noteLocalEdit, resetCloudSave, reloadKey,
   } = useSheetCloudSave({
-    C, charId, healthId, usesExternalChar, readOnly, onSheetRow, onSheetDeleted, sheetBaseRevision, showNotice,
+    C, charId, healthId, usesExternalChar, readOnly, onSheetRow, onSheetDeleted, sheetBaseRevision,
   });
 
   useEffect(() => {
@@ -133,7 +134,7 @@ export function useSheetDocument({
         ? { hpBasis: digest.hpBasis, baseMax: Math.max(1, (Number(confirmed.maxHP) || 1) - (Number(confirmed.maxHPBonus) || 0)) }
         : null;
       commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch }, { digest, base })
-        .catch((error) => setDiceToast({ label: 'Health update failed', detail: error.message, rolls: [], timestamp: Date.now() }));
+        .catch((error) => notify('error', `Could not update hit points: ${error.message}`));
       patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
       if (!Object.keys(patch).length) return;
     }

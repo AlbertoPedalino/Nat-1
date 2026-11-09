@@ -136,9 +136,8 @@ export default function ScenePicker({
     try {
       const { cleanupError } = await deleteScene(scene.id, scene.campaignId);
       await refresh(campaigns.map((campaign) => campaign.id));
-      if (cleanupError) {
-        notify('warning', 'Scene deleted, but some uploaded images could not be cleaned up.');
-      }
+      if (cleanupError) notify('warning', 'Scene deleted, but some uploaded images could not be cleaned up.');
+      else notify('success', `Deleted "${scene.name}".`);
     } catch (cause) {
       notify('error', cause?.message || 'Could not delete the scene.');
     }

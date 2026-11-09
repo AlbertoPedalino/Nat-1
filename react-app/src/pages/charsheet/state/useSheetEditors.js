@@ -8,7 +8,7 @@ const ignore = () => {};
 // through SheetActionsContext — dice and toasts always, every data change a
 // no-op on a read-only sheet.
 export function useSheetEditors({
-  C, setSheet, setResources, setFreeCastUses, persist, syncSheet, rollD20, showDiceToast, readOnly,
+  C, setSheet, setResources, setFreeCastUses, persist, syncSheet, rollD20, showDiceToast, showNotice, readOnly,
 }) {
   const updateCurrentCharacter = useCallback((updater) => {
     if (!C) return;
@@ -63,7 +63,9 @@ export function useSheetEditors({
   // Stable, cross-cutting handlers shared with the deep tab/card tree via context.
   const sheetActions = useMemo(() => ({
     onRoll: rollD20,
+    // A roll (dice, the log, the table) and a notice (the same toast, nothing else).
     onShowToast: showDiceToast,
+    onNotice: showNotice,
     setResources: saveResourcesState,
     onUpdateInventory: updateInventory,
     onUpdateCurrency: updateCurrency,
@@ -73,7 +75,7 @@ export function useSheetEditors({
     onUpdateCharacter: updateCurrentCharacter,
     onToggleFreeCast: toggleFreeCast,
   }), [
-    rollD20, showDiceToast, saveResourcesState, updateInventory, updateCurrency,
+    rollD20, showDiceToast, showNotice, saveResourcesState, updateInventory, updateCurrency,
     updateSpells, syncSheet, updateNotes, updateCurrentCharacter, toggleFreeCast,
   ]);
 

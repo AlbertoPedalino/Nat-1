@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import DiceControl from '../../../../../src/shared/character/dice/DiceControl.jsx';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
 import TopBar from '../../../../../src/pages/charsheet/layout/TopBar.jsx';
+vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 const theme = createTheme({ palette: { mode: 'dark', text: { primary: '#eeeeee' } } });
 

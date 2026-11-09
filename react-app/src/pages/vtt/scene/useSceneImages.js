@@ -18,7 +18,7 @@ export function useSceneImages({
 }) {
   // Every picture change takes the same shape: one cloud call returning the
   // updated row, plus a cleanup that may fail without failing the change.
-  const runSceneImageChange = useCallback(async (change, failure) => {
+  const runSceneImageChange = useCallback(async (change, failure, success) => {
     return runBusy({ setBusy, notify }, async () => {
       const result = await change();
       onSceneChange(result.scene);
@@ -26,15 +26,15 @@ export function useSceneImages({
         notify('warning', 'The picture was saved, but an old uploaded file could not be cleaned up.');
       }
       return result;
-    }, failure);
+    }, failure, { success });
   }, [notify, onSceneChange]);
 
   const handleUploadMap = useCallback(
-    (file) => runSceneImageChange(() => replaceSceneImage(scene, file), 'Could not upload that image.'),
+    (file) => runSceneImageChange(() => replaceSceneImage(scene, file), 'Could not upload that image.', 'Map uploaded.'),
     [runSceneImageChange, scene],
   );
   const handleRemoveMap = useCallback(
-    () => runSceneImageChange(() => removeSceneImage(scene), 'Could not remove that picture.'),
+    () => runSceneImageChange(() => removeSceneImage(scene), 'Could not remove that picture.', 'Map removed.'),
     [runSceneImageChange, scene],
   );
 
@@ -45,6 +45,7 @@ export function useSceneImages({
     const result = await runSceneImageChange(
       () => addSceneBackground(scene, file, { show }),
       'Could not upload that image.',
+      'Background uploaded.',
     );
     if (result?.path) setGmView({ shownImage: 'background', backgroundPath: result.path });
   }, [runSceneImageChange, scene]);
@@ -56,6 +57,7 @@ export function useSceneImages({
     return runSceneImageChange(
       () => removeSceneBackground(scene, target),
       'Could not remove that picture.',
+      'Background removed.',
     );
   }, [backgroundForViewport, runSceneImageChange, scene]);
 

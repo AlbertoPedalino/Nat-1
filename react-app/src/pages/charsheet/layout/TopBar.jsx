@@ -17,8 +17,10 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
+import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
+  const { notify } = useToast();
   const [colorAnchor, setColorAnchor] = useState(null);
   const [badgeAnchor, setBadgeAnchor] = useState(null);
   const portraitInputRef = useRef(null);
@@ -36,8 +38,9 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
       const previous = C.portraitPath;
       onUpdateCharacter?.((prev) => ({ ...prev, portraitPath: path }));
       if (previous) deletePortrait(previous);
+      notify('success', 'Portrait updated.');
     } catch (cause) {
-      onShowToast?.('Portrait', cause?.message || 'Could not use that image.', null, null);
+      notify('error', `Could not use that image: ${cause?.message || 'unknown error'}`);
     }
   };
 
@@ -46,6 +49,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
     const previous = C.portraitPath;
     onUpdateCharacter?.((prev) => ({ ...prev, portraitPath: null }));
     if (previous) deletePortrait(previous);
+    notify('success', 'Portrait removed.');
   };
   const navigate = useNavigate();
   const extra = C.extraClasses || [];

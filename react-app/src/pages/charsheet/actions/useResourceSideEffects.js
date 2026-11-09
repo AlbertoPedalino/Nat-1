@@ -12,7 +12,7 @@ import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js'
 // `dialogs` is the state the SlotDialogs render, from one hook per dialog
 // family (resourceEffectDialogs.js).
 export function useResourceSideEffects(ctx) {
-  const { C, sheet, resources, setResources, onShowToast, resMaxMap, resNameMap } = ctx;
+  const { C, sheet, resources, setResources, onNotice, resMaxMap, resNameMap } = ctx;
   const sorcery = useSorceryPointSlots(ctx);
   const wildResurgence = useWildResurgence(ctx);
   const slotForResource = useSlotForResource(ctx);
@@ -30,12 +30,12 @@ export function useResourceSideEffects(ctx) {
     const after = Math.min(max, before + amount);
     const recovered = after - before;
     if (!recovered) {
-      onShowToast?.(result.label || 'Resource Recovery', `${resNameMap[targetKey] || targetKey} already at maximum.`, 0, []);
+      onNotice?.(result.label || 'Resource Recovery', `${resNameMap[targetKey] || targetKey} already at maximum.`);
       return;
     }
     res[targetKey] = after;
     setResources(res);
-    onShowToast?.(result.label || 'Resource Recovery', `Recovered ${recovered} ${resNameMap[targetKey] || targetKey}`, recovered, []);
+    onNotice?.(result.label || 'Resource Recovery', `Recovered ${recovered} ${resNameMap[targetKey] || targetKey}`);
   };
 
   const handleResChange = (key, delta) => {

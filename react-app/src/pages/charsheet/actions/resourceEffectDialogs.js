@@ -5,12 +5,12 @@ import { addCreatedSlot, availableRegularSlotLevels, consumeSlot, getPactSlotUse
 
 // The dialogs a spent resource can open (useResourceSideEffects), one hook per
 // family: its state, how it opens and what confirming it does. Each takes
-// the sheet context { C, sheet, resources, setResources, onShowToast,
+// the sheet context { C, sheet, resources, setResources, onNotice,
 // onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap }.
 
 // Font of Magic: spend Sorcery Points for a temporary slot, or a slot for points.
 export function useSorceryPointSlots(ctx) {
-  const { C, sheet, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, resMaxMap } = ctx;
+  const { C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resMaxMap } = ctx;
   const [createSlotDialog, setCreateSlotDialog] = useState(null);
   const [createSlotSelection, setCreateSlotSelection] = useState(null);
   const [convertSlotDialog, setConvertSlotDialog] = useState(null);
@@ -23,7 +23,7 @@ export function useSorceryPointSlots(ctx) {
       .filter(([level, cost]) => currentSP >= cost)
       .map(([level, cost]) => ({ level: Number(level), cost }));
     if (!levels.length) {
-      onShowToast?.(result?.label || 'Create Spell Slot', 'Not enough Sorcery Points.', 0, []);
+      onNotice?.(result?.label || 'Create Spell Slot', 'Not enough Sorcery Points.');
       return;
     }
     setCreateSlotDialog({ label: result?.label || 'Create Spell Slot', levels, table, sourceKey: result?.sourceResourceKey || 'sorc_pts' });
@@ -37,19 +37,19 @@ export function useSorceryPointSlots(ctx) {
     if (!cost) return;
     const res = { ...resources };
     const beforeSP = Number(res[createSlotDialog.sourceKey] || 0);
-    if (beforeSP < cost) { onShowToast?.('Create Spell Slot', 'Not enough Sorcery Points.', 0, []); return; }
+    if (beforeSP < cost) { onNotice?.('Create Spell Slot', 'Not enough Sorcery Points.'); return; }
     res[createSlotDialog.sourceKey] = beforeSP - cost;
     setResources(res);
     addCreatedSlot(sheet, level, onUpdateSheet, onUpdateCharacter);
     setCreateSlotDialog(null);
     setCreateSlotSelection(null);
-    onShowToast?.('Create Spell Slot', `Created a temporary level ${level} spell slot (lasts until Long Rest).`, 0, []);
+    onNotice?.('Create Spell Slot', `Created a temporary level ${level} spell slot (lasts until Long Rest).`);
   };
 
   const openConvertSlotDialog = (result) => {
     const levels = availableRegularSlotLevels(getSpellSlots(C)?.regular || [], sheet);
     if (!levels.length) {
-      onShowToast?.(result?.label || 'Convert Spell Slot', 'No spell slots available to convert.', 0, []);
+      onNotice?.(result?.label || 'Convert Spell Slot', 'No spell slots available to convert.');
       return;
     }
     setConvertSlotDialog({ label: result?.label || 'Convert Spell Slot', levels, targetKey: result?.targetResourceKey || 'sorc_pts' });
@@ -65,13 +65,13 @@ export function useSorceryPointSlots(ctx) {
     const res = { ...resources };
     const beforeSP = Number(res[targetKey] || 0);
     const afterSP = Math.min(max, beforeSP + spGain);
-    if (afterSP <= beforeSP) { onShowToast?.('Convert Spell Slot', 'Sorcery Points already at maximum.', 0, []); return; }
+    if (afterSP <= beforeSP) { onNotice?.('Convert Spell Slot', 'Sorcery Points already at maximum.'); return; }
     consumeSlot(getSpellSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
     res[targetKey] = afterSP;
     setResources(res);
     setConvertSlotDialog(null);
     setConvertSlotSelection(null);
-    onShowToast?.('Convert Spell Slot', `Converted a level ${level} spell slot into ${spGain} Sorcery Points.`, 0, []);
+    onNotice?.('Convert Spell Slot', `Converted a level ${level} spell slot into ${spGain} Sorcery Points.`);
   };
 
   return { openCreateSlotDialog, openConvertSlotDialog, createSlotDialog, setCreateSlotDialog, createSlotSelection, setCreateSlotSelection, convertSlotDialog, setConvertSlotDialog, convertSlotSelection, setConvertSlotSelection, confirmCreateSlot, confirmConvertSlot };
@@ -79,7 +79,7 @@ export function useSorceryPointSlots(ctx) {
 
 // Wild Resurgence: a Wild Shape use for a level 1 slot, or a slot for a use.
 export function useWildResurgence(ctx) {
-  const { C, sheet, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, resMaxMap } = ctx;
+  const { C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resMaxMap } = ctx;
   const [wildResurgenceDialog, setWildResurgenceDialog] = useState(null);
 
   const openWildResurgenceDialog = (result) => {
@@ -88,7 +88,7 @@ export function useWildResurgence(ctx) {
     if (result.hasWildShape) opts.push({ key: 'shape_to_slot', label: 'Expend 1 Wild Shape use to create a temporary level 1 spell slot', icon: 'paw-print' });
     if (result.hasAvailableSlot) opts.push({ key: 'slot_to_shape', label: 'Spend a spell slot (level 1+) to regain 1 Wild Shape use', icon: 'sparkles' });
     if (!opts.length) {
-      onShowToast?.(result.label || 'Wild Resurgence', 'No Wild Shape uses or spell slots available.', 0, []);
+      onNotice?.(result.label || 'Wild Resurgence', 'No Wild Shape uses or spell slots available.');
       return;
     }
     setWildResurgenceDialog({ options: opts, label: result.label || 'Wild Resurgence', currentWS: result.currentWS });
@@ -100,21 +100,21 @@ export function useWildResurgence(ctx) {
     if (choice === 'shape_to_slot') {
       const res = { ...resources };
       const beforeWS = Number(res.wild_shape || 0);
-      if (beforeWS <= 0) { onShowToast?.('Wild Resurgence', 'No Wild Shape uses available.', 0, []); return; }
+      if (beforeWS <= 0) { onNotice?.('Wild Resurgence', 'No Wild Shape uses available.'); return; }
       res.wild_shape = beforeWS - 1;
       setResources(res);
       addCreatedSlot(sheet, 1, onUpdateSheet, onUpdateCharacter);
-      onShowToast?.('Wild Resurgence', 'Expended 1 Wild Shape use to create a temporary level 1 spell slot.', 0, []);
+      onNotice?.('Wild Resurgence', 'Expended 1 Wild Shape use to create a temporary level 1 spell slot.');
     } else if (choice === 'slot_to_shape') {
       const regularSlots = getSpellSlots(C)?.regular || [];
       const level = lowestAvailableSlotLevel(regularSlots, sheet);
       const consumed = level > 0 && consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter);
-      if (!consumed) { onShowToast?.('Wild Resurgence', 'No available spell slots to expend.', 0, []); return; }
+      if (!consumed) { onNotice?.('Wild Resurgence', 'No available spell slots to expend.'); return; }
       const res = { ...resources };
       const beforeWS = Number(res.wild_shape || 0);
       res.wild_shape = Math.min(resMaxMap.wild_shape ?? 0, beforeWS + 1);
       setResources(res);
-        onShowToast?.('Wild Resurgence', 'Regained 1 Wild Shape use by spending a spell slot.', 0, []);
+        onNotice?.('Wild Resurgence', 'Regained 1 Wild Shape use by spending a spell slot.');
     }
   };
 
@@ -123,7 +123,7 @@ export function useWildResurgence(ctx) {
 
 // Expending a spell slot to recover uses of another resource.
 export function useSlotForResource(ctx) {
-  const { C, sheet, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, resNameMap } = ctx;
+  const { C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resNameMap } = ctx;
   const [spendSlotRecoverDialog, setSpendSlotRecoverDialog] = useState(null);
   const [spendSlotRecoverSelection, setSpendSlotRecoverSelection] = useState(null);
 
@@ -131,7 +131,7 @@ export function useSlotForResource(ctx) {
     if (!result?.targetKey) return;
     const levels = availableRegularSlotLevels(getSpellSlots(C)?.regular || [], sheet);
     if (!levels.length) {
-      onShowToast?.(result?.label || 'Spell Slot Recovery', 'No spell slots available to expend.', 0, []);
+      onNotice?.(result?.label || 'Spell Slot Recovery', 'No spell slots available to expend.');
       return;
     }
     setSpendSlotRecoverDialog({
@@ -153,7 +153,7 @@ export function useSlotForResource(ctx) {
     const res = { ...resources };
     const beforeTarget = Number(res[targetKey] || 0);
     if (max !== Infinity && beforeTarget >= max) {
-      onShowToast?.(spendSlotRecoverDialog.label, `${resNameMap[targetKey] || targetKey} already at maximum.`, 0, []);
+      onNotice?.(spendSlotRecoverDialog.label, `${resNameMap[targetKey] || targetKey} already at maximum.`);
       setSpendSlotRecoverDialog(null);
       setSpendSlotRecoverSelection(null);
       return;
@@ -161,7 +161,7 @@ export function useSlotForResource(ctx) {
     const afterTarget = Math.min(max, beforeTarget + amount);
     const actualRecover = afterTarget - beforeTarget;
     if (actualRecover <= 0) {
-      onShowToast?.(spendSlotRecoverDialog.label, `${resNameMap[targetKey] || targetKey} already at maximum.`, 0, []);
+      onNotice?.(spendSlotRecoverDialog.label, `${resNameMap[targetKey] || targetKey} already at maximum.`);
       setSpendSlotRecoverDialog(null);
       setSpendSlotRecoverSelection(null);
       return;
@@ -172,7 +172,7 @@ export function useSlotForResource(ctx) {
     setSpendSlotRecoverDialog(null);
     setSpendSlotRecoverSelection(null);
     const label = resNameMap[targetKey] || targetKey;
-    onShowToast?.(spendSlotRecoverDialog.label, `Recovered ${actualRecover} ${label} by expending a level ${level} spell slot.`, actualRecover, []);
+    onNotice?.(spendSlotRecoverDialog.label, `Recovered ${actualRecover} ${label} by expending a level ${level} spell slot.`);
   };
 
   return { openSpendSlotRecoverResource, spendSlotRecoverDialog, setSpendSlotRecoverDialog, spendSlotRecoverSelection, setSpendSlotRecoverSelection, confirmSpendSlotRecover };
@@ -180,13 +180,13 @@ export function useSlotForResource(ctx) {
 
 // Pact Magic slots a resource spends, or recovers at once.
 export function usePactSlotEffects(ctx) {
-  const { C, sheet, onShowToast, onUpdateSheet, onUpdateCharacter } = ctx;
+  const { C, sheet, onNotice, onUpdateSheet, onUpdateCharacter } = ctx;
   const [consumePactSlotDialog, setConsumePactSlotDialog] = useState(null);
 
   const openConsumePactSlotDialog = (result) => {
     const slots = getSpellSlots(C);
     if (!slots?.pact?.level) {
-      onShowToast?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available.', 0, []);
+      onNotice?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available.');
       return;
     }
     const pactLevel = Number(slots.pact.level);
@@ -195,7 +195,7 @@ export function usePactSlotEffects(ctx) {
     const expended = getPactSlotUsed(used, pactLevel);
     const available = pactCount - expended;
     if (available <= 0) {
-      onShowToast?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available. Take a Short Rest to recover them.', 0, []);
+      onNotice?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available. Take a Short Rest to recover them.');
       return;
     }
     setConsumePactSlotDialog({
@@ -220,7 +220,7 @@ export function usePactSlotEffects(ctx) {
     );
     persistUsedSlots(used, onUpdateSheet, onUpdateCharacter);
     setConsumePactSlotDialog(null);
-    onShowToast?.(consumePactSlotDialog.label, `Expended ${amount} Pact Magic slot${amount > 1 ? 's' : ''} (level ${level}).`, 0, []);
+    onNotice?.(consumePactSlotDialog.label, `Expended ${amount} Pact Magic slot${amount > 1 ? 's' : ''} (level ${level}).`);
   };
 
   const applyPactSlotRecovery = (result) => {
@@ -231,7 +231,7 @@ export function usePactSlotEffects(ctx) {
     const { used, recovered } = recovery;
     persistUsedSlots(used, onUpdateSheet, onUpdateCharacter);
     const label = result.label || 'Spell Recovery';
-    onShowToast?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`, recovered, []);
+    onNotice?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`);
   };
 
   return { openConsumePactSlotDialog, applyPactSlotRecovery, consumePactSlotDialog, setConsumePactSlotDialog, confirmConsumePactSlot };
@@ -239,7 +239,7 @@ export function usePactSlotEffects(ctx) {
 
 // Arcane Recovery style budgets: pick expended slots up to a level total.
 export function useSlotRecovery(ctx) {
-  const { C, sheet, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap } = ctx;
+  const { C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap } = ctx;
   const [slotRecovery, setSlotRecovery] = useState(null);
   const [slotRecoverySelection, setSlotRecoverySelection] = useState({});
   const slotRecoverySpent = slotRecovery
@@ -263,7 +263,7 @@ export function useSlotRecovery(ctx) {
       levels.push({ level, total, expended });
     }
     if (!levels.length) {
-      onShowToast?.(result?.label || resNameMap[key] || 'Spell Recovery', 'No expended eligible spell slots to recover.', 0, []);
+      onNotice?.(result?.label || resNameMap[key] || 'Spell Recovery', 'No expended eligible spell slots to recover.');
       return;
     }
     setSlotRecovery({
@@ -325,16 +325,14 @@ export function useSlotRecovery(ctx) {
         if (bladeCur < bladeMax) {
           const nextRes = { ...resources, bladesong: Math.min(bladeMax, bladeCur + 1) };
           setResources(nextRes);
-              onShowToast?.('Arcane Recovery', `Recovered 1 Bladesong use (${Math.min(bladeMax, bladeCur + 1)}/${bladeMax})`, 1, []);
+              onNotice?.('Arcane Recovery', `Recovered 1 Bladesong use (${Math.min(bladeMax, bladeCur + 1)}/${bladeMax})`);
         }
       }
     }
 
-    onShowToast?.(
+    onNotice?.(
       slotRecovery.label,
       `Recovered ${recovered} slot${recovered === 1 ? '' : 's'}${details.length ? ` (${details.join(', ')})` : ''}`,
-      recovered,
-      [],
     );
   };
 

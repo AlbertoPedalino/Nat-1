@@ -63,7 +63,7 @@ export function useMonsterVitalDispatch({ state, reduce, cloudRef }) {
         return { row };
       }, async (error) => {
         if (error?.code === FIGHT_UNAVAILABLE) return { unavailable: true };
-        notify('error', `Enemy health update failed: ${error?.message || 'unknown error'}`);
+        notify('error', `Could not update the creature's hit points: ${error?.message || 'unknown error'}`);
         return { row: await getInstanceFight(fightId).catch(() => null) };
       })
       .then(({ row, unavailable }) => {

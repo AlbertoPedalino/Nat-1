@@ -10,6 +10,7 @@ import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
+import { useToast } from '../../shared/ui/ToastProvider.jsx';
 
 const toolLink = (id, path) => {
   const { label, description, icon, color } = TOOL_CATALOG[id];
@@ -28,7 +29,7 @@ export const TOOLS = [
 ];
 
 export default function HomePage() {
-  const [clearMessage, setClearMessage] = useState('');
+  const { notify } = useToast();
   const [appDataCount, setAppDataCount] = useState(0);
 
   const refreshAppDataCount = useCallback(() => {
@@ -46,8 +47,8 @@ export default function HomePage() {
 
     const removed = clearAppLocalStorage();
     setAppDataCount(0);
-    setClearMessage(removed ? `Deleted ${removed} local data ${removed === 1 ? 'entry' : 'entries'}.` : 'No local app data found.');
-  }, []);
+    notify('success', removed ? `Deleted ${removed} local data ${removed === 1 ? 'entry' : 'entries'}.` : 'No local app data found.');
+  }, [notify]);
 
   return (
     <Box sx={homeRootSx}>
@@ -79,23 +80,18 @@ export default function HomePage() {
         ))}
       </Box>
 
-      {(appDataCount > 0 || clearMessage) ? (
+      {appDataCount > 0 ? (
         <Box sx={clearDataWrapSx}>
-          {appDataCount > 0 ? (
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              startIcon={<Trash2 size={15} />}
-              onClick={handleClearAppData}
-              sx={clearDataButtonSx}
-            >
-              Clear App Data
-            </Button>
-          ) : null}
-          {clearMessage ? (
-            <Typography sx={clearDataMessageSx}>{clearMessage}</Typography>
-          ) : null}
+          <Button
+            variant="outlined"
+            size="small"
+            color="error"
+            startIcon={<Trash2 size={15} />}
+            onClick={handleClearAppData}
+            sx={clearDataButtonSx}
+          >
+            Clear App Data
+          </Button>
         </Box>
       ) : null}
     </Box>
@@ -230,8 +226,3 @@ const clearDataButtonSx = {
   },
 };
 
-const clearDataMessageSx = {
-  color: UI_COLORS.textBrown,
-  fontSize: '0.72rem',
-  fontFamily: UI_FONTS.prose,
-};

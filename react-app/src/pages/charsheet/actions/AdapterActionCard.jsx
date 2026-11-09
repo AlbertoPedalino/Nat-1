@@ -28,7 +28,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
 
-export function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, colorBarCat, displayName }) {
+export function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, onNotice, resMax, isPool, resTrack, colorBarCat, displayName }) {
   const barCat = colorBarCat || action._colorBarCat || action.cat;
   const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
@@ -219,7 +219,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
             ? (cardInteractive ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode)
             : null}
           {action.choiceKey && onUpdateCharacter ? (
-            <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
+            <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onNotice={onNotice} />
           ) : null}
           <WeaponMasteryBlock mastery={action._weaponMastery} />
           {action._itemProperty ? <WeaponNoteBlock notes={[action._itemProperty]} /> : null}
@@ -248,7 +248,7 @@ const _CHOICE_PICKER_OPTIONS = {
   ],
 };
 
-function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
+function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
   const choiceKey = action.choiceKey;
   const options = action.choiceOptions || _CHOICE_PICKER_OPTIONS[choiceKey];
   if (!options || !options.length) return null;
@@ -268,7 +268,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
         delete choices[choiceKey];
         return { ...prev, choices };
       });
-      if (!action.choiceNoToast) onShowToast?.('Choice Cleared', `${action.choiceLabel || 'Choice'} cleared`, 0, []);
+      if (!action.choiceNoToast) onNotice?.('Choice Cleared', `${action.choiceLabel || 'Choice'} cleared`);
       return;
     }
     onUpdateCharacter((prev) => {
@@ -276,7 +276,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
       choices[choiceKey] = next;
       return { ...prev, choices };
     });
-    if (!action.choiceNoToast) onShowToast?.('Choice Updated', `${action.choiceLabel || 'Choice'}: ${next}`, 0, []);
+    if (!action.choiceNoToast) onNotice?.('Choice Updated', `${action.choiceLabel || 'Choice'}: ${next}`);
   };
 
   return (

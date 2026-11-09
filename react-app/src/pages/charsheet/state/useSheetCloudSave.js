@@ -15,6 +15,7 @@ import {
   saveCharacter as storeSaveCharacter,
 } from '../../../shared/character/profile/store.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
+import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 const CLOUD_SAVE_DELAY_MS = 1_200;
 
@@ -28,8 +29,9 @@ const CLOUD_SAVE_DELAY_MS = 1_200;
 // from the cloud) and `resetCloudSave` whenever it loads a new copy;
 // `reloadKey` moves when a local sheet stored the cloud's copy and must reload.
 export function useSheetCloudSave({
-  C, charId, healthId, usesExternalChar, readOnly, onSheetRow, onSheetDeleted, sheetBaseRevision, showNotice,
+  C, charId, healthId, usesExternalChar, readOnly, onSheetRow, onSheetDeleted, sheetBaseRevision,
 }) {
+  const { notify } = useToast();
   const cloudSaveReadyRef = useRef(false);
   const pendingCloudSaveRef = useRef(null);
   const cloudSaveInFlightRef = useRef(null);
@@ -198,7 +200,7 @@ export function useSheetCloudSave({
       }
     },
     onConflict: () => refreshForConflict(),
-    onError: (error) => showNotice('Cloud Save', error?.message || 'Failed to save online sheet.'),
+    onError: (error) => notify('error', `Could not save the sheet online: ${error?.message || 'unknown error'}`),
   });
   flushCloudSaveRef.current = cloudSave.request;
   resetErrorNoticeRef.current = cloudSave.resetErrorNotice;

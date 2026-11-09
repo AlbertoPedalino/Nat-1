@@ -66,7 +66,6 @@ export default function CharacterSheet({
   } = useSheetDocument({
     externalChar, externalCharId, externalSheetRevision, onSheetRow, onSheetDeleted, readOnly, liveDigest,
     C, setC, sheet, setSheet, charId, setCharId, setResources, setFreeCastUses, setConditionEntries,
-    showNotice, setDiceToast,
   });
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function CharacterSheet({
   const {
     updateCurrentCharacter, saveResourcesState, updateXp, actions: effectiveActions,
   } = useSheetEditors({
-    C, setSheet, setResources, setFreeCastUses, persist, syncSheet, rollD20, showDiceToast, readOnly,
+    C, setSheet, setResources, setFreeCastUses, persist, syncSheet, rollD20, showDiceToast, showNotice, readOnly,
   });
 
   const rest = useRests({
@@ -185,7 +184,7 @@ export default function CharacterSheet({
           </Stack>
         </Box>
       </Box>
-      {showOwnRollToast && diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+      {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
 
       <RestDialogs C={C} sheet={sheet} rest={rest} />
     </Box>

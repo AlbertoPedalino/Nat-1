@@ -20,13 +20,15 @@ import InventoryList from './InventoryList.jsx';
 // search (InventoryAddPanel) and the owned items (InventoryList). Every change
 // to the item list goes through useInventoryActions.
 export default function InventoryTab({ C, sheet }) {
-  const { onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onShowToast } = useSheetActions();
+  const {
+    onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onNotice,
+  } = useSheetActions();
   const [itemsDb, setItemsDb] = useState([]);
   const inv = sheet?.sheetInventory || [];
   const currency = sheet?.sheetCurrency || {};
   const attunementState = useMemo(() => getCharacterAttunementState(C), [C]);
   const { addItem, rowActions } = useInventoryActions({
-    inv, itemsDb, character: C, attunementState, onUpdateInventory, onUpdateCharacter, onShowToast,
+    inv, itemsDb, character: C, attunementState, onUpdateInventory, onUpdateCharacter, onNotice,
   });
 
   useEffect(() => {

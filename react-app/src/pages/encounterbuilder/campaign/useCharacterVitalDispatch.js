@@ -24,7 +24,7 @@ export function useCharacterVitalDispatch(combat, reduce, vitalsRef = null) {
         digest: vitals?.digests?.get(id) ?? null,
         base: vitals?.baseMax?.get(id) ?? null,
       })
-        .catch((error) => notify('error', `Health update failed: ${error.message}`));
+        .catch((error) => notify('error', `Could not update hit points: ${error.message}`));
       return;
     }
     reduce(action);

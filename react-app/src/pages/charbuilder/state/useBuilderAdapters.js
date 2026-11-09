@@ -20,7 +20,7 @@ export function useBuilderAdapters(state, dispatch, notify) {
         if (!cancelled) dispatch({ type: 'adapters/loaded' });
       })
       .catch((error) => {
-        if (!cancelled) notify('error', `Adapter load error: ${error?.message || error}`);
+        if (!cancelled) notify('error', `Could not load the class rules: ${error?.message || error}`);
       });
     return () => {
       cancelled = true;
@@ -40,7 +40,7 @@ export function useBuilderAdapters(state, dispatch, notify) {
         }
       })
       .catch((error) => {
-        if (!cancelled) notify('error', `Adapter load error: ${error?.message || error}`);
+        if (!cancelled) notify('error', `Could not load the class rules: ${error?.message || error}`);
       });
     return () => { cancelled = true; };
   }, [state.adaptersLoaded, state.character.className, state.character.extraClasses, state.data.items]);

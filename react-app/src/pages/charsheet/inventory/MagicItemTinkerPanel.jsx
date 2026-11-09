@@ -87,7 +87,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     onUpdateInventory,
     onUpdateSheet,
     onUpdateCharacter,
-    onShowToast,
+    onNotice,
     setResources,
     readOnly,
   } = useSheetActions();
@@ -152,7 +152,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     if (!spent) return;
     onUpdateInventory?.(rechargeReplicatedItem(inventory, chargeSource, level));
     const sourceLabel = source === 'pact' ? 'Pact Magic slot' : 'spell slot';
-    onShowToast?.('Charge Magic Item', `${selectedChargeItem.displayName || selectedChargeItem.name} regained up to ${level} charges using a level ${level} ${sourceLabel}.`, null, []);
+    onNotice?.('Charge Magic Item', `${selectedChargeItem.displayName || selectedChargeItem.name} regained up to ${level} charges using a level ${level} ${sourceLabel}.`);
   };
 
   const drainItem = () => {
@@ -164,7 +164,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     persistCreatedSlots(created, onUpdateSheet, onUpdateCharacter);
     onUpdateInventory?.(removeOneCrafted(inventory, 'replicated', drainSource));
     spendResource(MAGIC_ITEM_TINKER_DRAIN_RESOURCE);
-    onShowToast?.('Drain Magic Item', `${selectedDrainItem.displayName || selectedDrainItem.name} vanished; created a level ${level} spell slot.`, null, []);
+    onNotice?.('Drain Magic Item', `${selectedDrainItem.displayName || selectedDrainItem.name} vanished; created a level ${level} spell slot.`);
     setDrainSource('');
   };
 
@@ -176,12 +176,12 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
       hasImprovedArmorer(character)
       && replicatedNonArmorCount(next) > baseReplicatedItemLimit(artificerLevel(character))
     ) {
-      onShowToast?.('Transmute Magic Item', 'The Armorer additional replicated item must remain in the Armor category.', null, []);
+      onNotice?.('Transmute Magic Item', 'The Armorer additional replicated item must remain in the Armor category.');
       return;
     }
     onUpdateInventory?.(next);
     spendResource(MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE);
-    onShowToast?.('Transmute Magic Item', `Transformed the item into ${selectedTarget.label}.`, null, []);
+    onNotice?.('Transmute Magic Item', `Transformed the item into ${selectedTarget.label}.`);
     setTransmuteSource('');
     setTransmuteTarget('');
   };

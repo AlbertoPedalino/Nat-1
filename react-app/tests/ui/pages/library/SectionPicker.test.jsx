@@ -3,6 +3,7 @@ import { beforeEach, vi } from 'vitest';
 import SectionPicker from '../../../../src/pages/library/SectionPicker.jsx';
 import { createInstance, getInstance } from '../../../../src/shared/instances/instanceStore.js';
 import { SECTION_REGISTRY } from '../../../../src/shared/instances/sectionRegistry.js';
+vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),

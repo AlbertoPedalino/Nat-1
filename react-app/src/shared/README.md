@@ -18,7 +18,7 @@ See the [source map](../README.md) for the page feature folders.
 | `hexcrawl/` | Hex data, hex travel rules (`hexRules.js`), icons, hex result and mount UI |
 | `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
 | `storage/` | Generic localStorage helpers and character registry metadata |
-| `ui/` | Reusable presentation components/hooks, toasts, colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction` / `promptText`, `useEventListener` (DOM listeners for a mounted component), `useDebouncedCallback`, `useLoaded` + `LoadStatus` (async loads and their status), `ConflictBanner` (pick one of two copies), long-press timing (`longPress.js`) |
+| `ui/` | Reusable presentation components/hooks, the app toast (`ToastProvider` + `AppToast`, `notify(severity, message)`: success when an action the user asked for worked, error "Could not …: reason" when it failed, warning when it partly worked, info only for what the app did by itself; painted in the fullscreen element too; `runBusy(..., { success })` for busy actions — gameplay notices on the sheet use its dice toast through `onNotice`, never the roll log), colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction` / `promptText`, `useEventListener` (DOM listeners for a mounted component), `useDebouncedCallback`, `useLoaded` + `LoadStatus` (async loads and their status), `ConflictBanner` (pick one of two copies), long-press timing (`longPress.js`) |
 | `vtt/` | Battle-map geometry, fog, scenes, dice physics, sheets, and realtime state |
 
 ## Character

@@ -3,6 +3,7 @@ import CharacterSheet from '../../../../src/pages/charsheet/CharacterSheet.jsx';
 import CloudAutoSync from '../../../../src/shared/cloud/sync/CloudAutoSync.jsx';
 import { saveCharacter, setActiveCharId } from '../../../../src/shared/character/profile/store.js';
 import { buildOptionalFeatureEntryLookup } from '../../../../src/shared/character/progression/optionalFeatures.js';
+vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 // The optional-feature catalog is attached to the open sheet on load, never
 // stored, and must survive every edit so invocation and action text resolves.

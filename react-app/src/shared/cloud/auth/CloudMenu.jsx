@@ -68,7 +68,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         reportCloudSyncState(id, 'conflict', e.message);
         return;
       }
-      notify('error', e?.message || 'Failed to save.');
+      notify('error', `Could not save the sheet to the cloud: ${e?.message || 'unknown error'}`);
     }
   };
 
@@ -79,7 +79,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
     if (state === 'scheduled' || state === 'cancelled') return;
     // A conflict wrote nothing and needs a decision (the open sheet asks it).
     setSyncState(state === 'conflict' ? 'error' : state);
-    if (state === 'error' || state === 'conflict') notify('error', `Sync failed: ${e.detail.error || ''}`);
+    if (state === 'error' || state === 'conflict') notify('error', `Could not sync: ${e.detail.error || 'unknown error'}`);
   });
 
   if (!cloudEnabled) {
@@ -135,7 +135,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
             </MenuItem>,
             <Divider key="dsave" />,
           ] : []),
-          <MenuItem key="out" onClick={async () => { close(); await signOut(); notify('info', 'Logged out.'); }}>
+          <MenuItem key="out" onClick={async () => { close(); await signOut(); notify('success', 'Logged out.'); }}>
             <LogOut size={15} style={{ marginRight: 8 }} /> Log out
           </MenuItem>,
         ] : (
