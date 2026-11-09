@@ -52,7 +52,8 @@ function editorTab(tableId, tier = null) {
     tier,
     label: tier ? `${table.label} ${tierOption.shortLabel}` : table.label,
     tableName: tier ? `${table.tableName} ${tierOption.label} (${tierOption.shortLevels})` : table.tableName,
-    group: tier ? `${table.label} tiers` : 'Shared tables',
+    // A tiered table says which set of tiers it belongs to; the others need no heading.
+    group: tier ? `${table.label} tiers` : null,
     feeds: table.feeds,
     roll: table.dice,
     matchField: table.matchField,

@@ -18,3 +18,11 @@ export const boardInsetSx = {
   borderColor: 'divider',
   borderRadius: 2,
 };
+
+// The cards a generator or the roller lays out (rooms, quests, roll results):
+// one column on a phone, two on a tablet, three on a desktop.
+export const boardCardGridSx = {
+  display: 'grid',
+  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+  gap: 1.25,
+};

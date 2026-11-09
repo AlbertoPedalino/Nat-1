@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
-import { Castle, Dices, Trash2 } from 'lucide-react';
+import { Box, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { Castle } from 'lucide-react';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import RoomCard from './RoomCard.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
-import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { isValidRoomCount, roomCountInputFrom } from '../../../shared/dungeon/dungeon.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
+import { boardCardGridSx } from '../../../shared/gmboard/ui/surfaces.js';
+import GenerateActions from '../ui/GenerateActions.jsx';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -38,11 +39,6 @@ export default function DungeonView() {
     generateDungeon({ roomCount, popMode: state.dPop, thr: state.dThr, tier: state.dTier });
   };
 
-  const handleClear = () => {
-    if (!confirmAction('Discard the generated dungeon? This cannot be undone.')) return;
-    dispatch({ type: 'clearDungeon' });
-  };
-
   const dungeon = state.results.dungeon;
 
   return (
@@ -68,25 +64,17 @@ export default function DungeonView() {
           onChange={(o) => dispatch(dPopContract.action(o))}
         />
         <TierSelector value={state.dTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.dTier.action({ tier }))} />
-        <Box sx={dividerSx} />
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" startIcon={<Dices size={15} />} disabled={!canGenerate} onClick={handleGenerate}>
-            Generate
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Trash2 size={15} />}
-            disabled={!dungeon}
-            onClick={handleClear}
-          >
-            Clear
-          </Button>
-        </Stack>
+        <GenerateActions
+          canGenerate={canGenerate}
+          onGenerate={handleGenerate}
+          hasResult={Boolean(dungeon)}
+          clearMessage="Discard the generated dungeon? This cannot be undone."
+          onClear={() => dispatch({ type: 'clearDungeon' })}
+        />
       </BoardPanel>
 
       {dungeon ? (
-        <Box sx={roomsGridSx}>
+        <Box sx={boardCardGridSx}>
           {dungeon.rooms.map((room) => <RoomCard key={room.id} room={room} />)}
         </Box>
       ) : (
@@ -100,17 +88,6 @@ export default function DungeonView() {
     </Stack>
   );
 }
-
-const dividerSx = {
-  borderTop: '1px solid',
-  borderColor: 'divider',
-};
-
-const roomsGridSx = {
-  display: 'grid',
-  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-  gap: 1.25,
-};
 
 const emptyStateSx = {
   display: 'flex',

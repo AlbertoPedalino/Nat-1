@@ -60,7 +60,7 @@ export default function TablesView() {
             aria-label={`${tab.label} — feeds ${tab.feeds}`}
             label={
               <Box sx={tabLabelSx}>
-                <Box component="span" sx={tabGroupSx}>{tab.group}</Box>
+                {tab.group ? <Box component="span" sx={tabGroupSx}>{tab.group}</Box> : null}
                 <Box component="span" sx={tabNameSx}>{tab.label}</Box>
               </Box>
             }

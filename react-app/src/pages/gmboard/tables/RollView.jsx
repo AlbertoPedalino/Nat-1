@@ -11,7 +11,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
+import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -149,7 +149,7 @@ export default function RollView() {
         </Typography>
       </BoardPanel>
 
-      <Box sx={gridSx}>
+      <Box sx={boardCardGridSx}>
         {ROLL_TABLES.map((table) => (
           <TableCard
             key={table.id}
@@ -193,12 +193,6 @@ export default function RollView() {
 const hintSx = {
   fontSize: '0.7rem',
   color: 'text.secondary',
-};
-
-const gridSx = {
-  display: 'grid',
-  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-  gap: 1.25,
 };
 
 // A fixed height, so the cards with a tier badge line up with the ones without.

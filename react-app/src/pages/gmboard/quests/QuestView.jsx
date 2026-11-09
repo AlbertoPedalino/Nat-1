@@ -1,16 +1,16 @@
-import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { Dices, ScrollText, Trash2 } from 'lucide-react';
+import { Box, Stack, Typography, useTheme } from '@mui/material';
+import { Dices, ScrollText } from 'lucide-react';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import QuestCard from './QuestCard.jsx';
 import { QUEST_SCOPE_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
-import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
+import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
+import GenerateActions from '../ui/GenerateActions.jsx';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -58,11 +58,6 @@ export default function QuestView() {
     generateQuests({ scope: state.qPop, thr: state.qThr, tier: state.qTier });
   };
 
-  const handleClear = () => {
-    if (!confirmAction('Discard the generated quests? This cannot be undone.')) return;
-    dispatch({ type: 'clearQuests' });
-  };
-
   return (
     <Stack spacing={2}>
       <BoardPanel icon={ScrollText} title="Quest Generator">
@@ -74,27 +69,19 @@ export default function QuestView() {
           onChange={(o) => dispatch(qPopContract.action(o))}
         />
         <TierSelector value={state.qTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.qTier.action({ tier }))} />
-        <Box sx={dividerSx} />
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" startIcon={<Dices size={15} />} disabled={!canGenerate} onClick={handleGenerate}>
-            Generate
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Trash2 size={15} />}
-            disabled={!questSet}
-            onClick={handleClear}
-          >
-            Clear
-          </Button>
-        </Stack>
+        <GenerateActions
+          canGenerate={canGenerate}
+          onGenerate={handleGenerate}
+          hasResult={Boolean(questSet)}
+          clearMessage="Discard the generated quests? This cannot be undone."
+          onClear={() => dispatch({ type: 'clearQuests' })}
+        />
       </BoardPanel>
 
       {questSet ? (
         <>
           <QuestCountHeader questSet={questSet} />
-          <Box sx={gridSx}>
+          <Box sx={boardCardGridSx}>
             {questSet.quests.map((quest) => <QuestCard key={quest.id} quest={quest} />)}
           </Box>
         </>
@@ -102,17 +89,6 @@ export default function QuestView() {
     </Stack>
   );
 }
-
-const dividerSx = {
-  borderTop: '1px solid',
-  borderColor: 'divider',
-};
-
-const gridSx = {
-  display: 'grid',
-  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-  gap: 1.25,
-};
 
 const headerSx = boardInsetSx;
 

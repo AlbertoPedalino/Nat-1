@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Divider, Stack, Typography } from '@mui/material';
 import { FastForward, Footprints, Hexagon } from 'lucide-react';
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import ClockBar from '../session/ClockBar.jsx';
@@ -14,7 +14,7 @@ import { canAdvanceHex, missingHexSetup } from '../../../shared/hexcrawl/hexEntr
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { formatDate, formatHM } from '../../../shared/gmboard/campaignTime.js';
+import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -57,7 +57,7 @@ export default function HexcrawlView() {
           />
           <TierSelector value={state.hexTier} onChange={(tier) => dispatch(SELECTOR_CONTRACTS.hexTier.action({ tier }))} />
         </Box>
-        <Box sx={dividerSx} />
+        <Divider />
         {/* The mount belongs with the crossing, not with the hex: it is the
             same forest either way, and the party crosses it faster. */}
         <MountSelector
@@ -73,7 +73,7 @@ export default function HexcrawlView() {
           <Typography sx={moveTitleSx}>Move the party</Typography>
           <Typography sx={moveSummarySx}>
             {[
-              `${formatDate(state)}, ${formatHM(state.min)}`,
+              formatCampaignDateTime(state),
               weatherName(state.weather, state.intensity),
               state.terrain ? travelLine(state.terrain, travel) : null,
               popOption?.label,
@@ -115,11 +115,6 @@ const pairSx = {
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
   gap: 1.25,
-};
-
-const dividerSx = {
-  borderTop: '1px solid',
-  borderColor: 'divider',
 };
 
 const moveBarSx = {
