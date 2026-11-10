@@ -9,16 +9,6 @@ import {
   updateToken,
 } from '../../../shared/cloud/api/vttTokens.js';
 import { useTokenVitalCommands } from './useTokenVitalCommands.js';
-import {
-  FIGHT_UNAVAILABLE,
-  commitFightCombatantVitals,
-} from '../../../shared/cloud/api/encounterFights.js';
-import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
-import {
-  monsterEditFromToken,
-  monsterVitalsBase,
-  monsterVitalsPatch,
-} from '../../../shared/vtt/tokens/fightVitals.js';
 import { withDeathSave } from '../../../shared/character/combat/mortality.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
@@ -31,30 +21,6 @@ export function useTokenEdits({
   role, notify, tokens, setTokens, canMove, characterHealth, gmVitals, refreshVisibleTokens,
   setBusy,
 }) {
-  const commitLinkedMonster = useCallback(async (token, edit) => {
-    const ref = token.characterId ? null : parseSourceRef(token.sourceRef);
-    if (!ref) return false;
-    const { before, after } = monsterEditFromToken(token, edit);
-    const patch = monsterVitalsPatch(before, after);
-    if (!Object.keys(patch).length) return true;
-    try {
-      const { applied } = await commitFightCombatantVitals(ref.fightId, ref.combatantId, {
-        base: { hpCurrent: monsterVitalsBase(before).hpCurrent, hpMax: monsterVitalsBase(before).hpMax },
-        patch,
-      });
-      if (!applied) {
-        notify('warning', 'This creature changed elsewhere. Showing the latest values; try again if needed.');
-        refreshVisibleTokens();
-      }
-      return true;
-    } catch (cause) {
-      if (cause?.code === FIGHT_UNAVAILABLE) return false;
-      notify('error', failureMessage('Could not update that creature.', cause));
-      refreshVisibleTokens();
-      return true;
-    }
-  }, [notify, refreshVisibleTokens]);
-
   // A character's conditions live on their sheet, which is what the encounter
   // builder and the sheet view both read. Writing them onto the token row would
   // create a second copy that the next sheet update silently overwrites.
@@ -65,6 +31,10 @@ export function useTokenEdits({
     }
     await setTokenConditions(token.id, conditions);
   }, [characterHealth]);
+
+  const { handleTokenVitals, commitCreatureEdit } = useTokenVitalCommands({
+    gmVitals, characterHealth, writeConditions, setTokens, notify, refreshVisibleTokens,
+  });
 
   const handleMarkToken = useCallback(async (token, {
     conditions, showHp, effects, hpCurrent, deathSaves, healthPatch = {},
@@ -121,7 +91,7 @@ export function useTokenEdits({
     try {
       // Vitals take the route that suits the piece: a character's go to the
       // sheet, a cloud fight's enemy to its combatant, anything else to its row.
-      const linked = await commitLinkedMonster(token, { hpCurrent, hpMax, conditions, effects });
+      const linked = await commitCreatureEdit(token, creatureEdit(healthPatch, { hpCurrent, conditions, effects }));
       if (token.characterId) {
         if (Object.keys(healthPatch).length) await characterHealth(token.characterId, tokenHealthCommand(token, healthPatch));
       } else if (!linked) {
@@ -145,11 +115,7 @@ export function useTokenEdits({
       setTokens((current) => replaceById(current, token));
       notify('error', failureMessage('Could not update that token.', cause));
     }
-  }, [characterHealth, commitLinkedMonster, gmVitals, notify, writeConditions]);
-
-  const handleTokenVitals = useTokenVitalCommands({
-    gmVitals, characterHealth, writeConditions, setTokens, notify, refreshVisibleTokens,
-  });
+  }, [characterHealth, commitCreatureEdit, gmVitals, notify, writeConditions]);
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
@@ -224,5 +190,18 @@ export function useTokenEdits({
   return {
     handleMarkToken, handleSaveToken, handleTokenVitals, handleDeathSaveChange,
     handleDeleteToken, handleDeleteTokens, handleRemoveCharacter,
+  };
+}
+
+// What the GM changed in a creature's menu: the fields the control touched
+// (`healthPatch`, as for a character), applied to the creature as its fight
+// has it now — the menu's other values were loaded when it opened and may be
+// stale. A blank HP clears nothing on a creature. The maximum goes as a health
+// command of its own.
+function creatureEdit(healthPatch, { hpCurrent, conditions, effects }) {
+  return {
+    ...(Object.hasOwn(healthPatch, 'currentHP') && hpCurrent != null ? { hpCurrent } : {}),
+    ...(Object.hasOwn(healthPatch, 'activeConditions') ? { conditions } : {}),
+    ...(Object.hasOwn(healthPatch, 'activeEffects') ? { effects } : {}),
   };
 }

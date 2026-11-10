@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 import { useSceneDungeon } from '../../../../../src/pages/vtt/dungeon/useSceneDungeon.js';
 import { combatantToToken } from '../../../../../src/shared/vtt/tokens/encounterImport.js';
-import { fightWithTokenVitals } from '../../../../../src/shared/vtt/tokens/encounterSync.js';
+import { applyCombatantEdit } from '../../../../../src/shared/encounter/combatantVitals.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../../../src/shared/appEvents.js';
 
 const mocks = vi.hoisted(() => ({
@@ -122,9 +122,8 @@ test.each(['local', 'cloud'])('reimporting a room restores current conditions an
   const { result } = await openDungeon();
 
   // Token edits update the fight. Removing map pieces leaves this saved state intact.
-  combatants = fightWithTokenVitals(combatants, {
-    sourceRef: 'enc_a:900:1', hpCurrent: 31, hpMax: 59, conditions: ['prone'],
-  });
+  const edit = (change) => combatants.map((c) => (c.id === 1 ? applyCombatantEdit(c, change) : c));
+  combatants = edit({ hpCurrent: 31, conditions: ['prone'] });
   let link;
   await act(async () => { link = await result.current.sendRoomToBuilder(1); });
   expect(link.fightId).toBe(900);
@@ -134,9 +133,7 @@ test.each(['local', 'cloud'])('reimporting a room restores current conditions an
   });
 
   // Read again on every import, including when the panel stayed open during edits.
-  combatants = fightWithTokenVitals(combatants, {
-    sourceRef: 'enc_a:900:1', hpCurrent: 25, hpMax: 59, conditions: ['poisoned'],
-  });
+  combatants = edit({ hpCurrent: 25, conditions: ['poisoned'] });
   await act(async () => { link = await result.current.sendRoomToBuilder(1); });
   expect(combatantToToken(link.combatants[0], link)).toMatchObject({
     conditions: ['poisoned'], hp_current: 25,

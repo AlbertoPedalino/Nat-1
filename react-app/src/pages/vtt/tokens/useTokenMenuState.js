@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import { applyMonsterVitalCommand } from '../../../shared/vtt/tokens/fightVitals.js';
+import { applyCombatantHpCommand } from '../../../shared/encounter/combatantVitals.js';
 import { DEAD_CONDITION_KEY, toggleCondition } from '../../../shared/character/combat/conditions.js';
 import {
   clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
@@ -168,7 +168,7 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
       maxHPBonus: maxBonus,
       activeConditions: conditions,
     };
-    const after = applyMonsterVitalCommand(shown, command);
+    const after = applyCombatantHpCommand(shown, command);
     setHpCurrent(after.hpCurrent ?? '');
     setHpMax(after.hpMax ?? '');
     setTempHp(after.tempHP ?? 0);

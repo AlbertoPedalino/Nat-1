@@ -1,17 +1,7 @@
-// Keeping an imported piece and its combatant in step.
-//
-// A piece imported from a fight carries a `sourceRef` to its combatant; an edit
-// on the map becomes the combatant that fight should end up with, which
-// fightVitals.js commits to the fight row (the one authority for enemy
-// vitals). A character's piece takes nothing from here: its vitals, conditions
-// and reminders belong to the sheet.
-//
-// Everything here is pure: the callers own the reads and the writes.
-
-import { effectId, normalizeEffects } from '../../character/combat/combatEffects.js';
-import { normalizeDeathSaves } from '../../character/combat/vitals.js';
-import { DEAD_CONDITION_KEY, normalizeConditions } from '../../character/combat/conditions.js';
-import { resolveMortality } from '../../character/combat/mortality.js';
+// The reference an imported piece carries to its combatant:
+// `instanceId:fightId:combatantId`. Edits on the map go to that combatant in
+// its fight row (fightVitals.js, the one authority for enemy vitals); a
+// character's piece has none — its vitals belong to the sheet.
 
 const SEPARATOR = ':';
 
@@ -27,86 +17,4 @@ export function parseSourceRef(ref) {
   const parts = String(ref || '').split(SEPARATOR);
   if (parts.length !== 3 || parts.some((part) => !part)) return null;
   return { instanceId: parts[0], fightId: parts[1], combatantId: parts[2] };
-}
-
-// Takes saves or anything carrying them (a token, a combatant).
-function deathSavesOf(value) {
-  return normalizeDeathSaves(value?.deathSaves || value);
-}
-
-// Order and shape are normalized on both sides, so these compare meaning rather
-// than JSON: a differently ordered list is not a change to write back.
-function conditionsKey(list) {
-  return normalizeConditions(list).join('|');
-}
-
-function effectsKey(list) {
-  return normalizeEffects(list).map((effect) => effectId(effect)).join('|');
-}
-
-function deathSavesKey(value) {
-  if (value == null) return '';
-  const saves = deathSavesOf(value);
-  return `${saves.success}|${saves.fail}`;
-}
-
-// Map -> encounter. The combatants a fight should end up with once a token's
-// hit points have been edited on the map. Returns null when nothing changed, so
-// the caller can skip the write and the event it would emit.
-export function fightWithTokenVitals(combatants, token) {
-  const ref = parseSourceRef(token?.sourceRef);
-  if (!ref && !token?.characterId) return null;
-
-  let changed = false;
-  const next = (combatants || []).map((combatant) => {
-    const mine = ref
-      ? String(combatant?.id) === ref.combatantId
-      : combatant?.sourceId === token.characterId;
-    if (!mine) return combatant;
-
-    let conditions = normalizeConditions(token.conditions);
-    const effects = normalizeEffects(token.effects);
-    // Hit points are optional here: a piece can be marked prone without anyone
-    // touching its health, and refusing the whole write in that case is what
-    // would leave the two tools disagreeing.
-    let hpCurrent = token.hpCurrent == null ? combatant.hpCurrent : Math.round(Number(token.hpCurrent));
-    const hpMax = token.hpMax == null ? combatant.hpMax : Math.round(Number(token.hpMax));
-    const player = combatant.type === 'player' || Boolean(combatant.sourceId);
-    let saves = player ? deathSavesOf(token.deathSaves ?? combatant.deathSaves) : combatant.deathSaves;
-    // On the map, marking a piece Dead is what drops it to 0 HP; regaining hit
-    // points clears a character's death saves.
-    if (conditions.includes(DEAD_CONDITION_KEY)) {
-      hpCurrent = 0;
-      if (player) saves = { success: 0, fail: 3 };
-    }
-    if (hpCurrent > 0 && player) saves = { success: 0, fail: 0 };
-    const resolved = resolveMortality({ player, hp: hpCurrent, deathSaves: saves, conditions });
-    const { dead: isDead, deathSaves } = resolved;
-    conditions = resolved.conditions;
-
-    if (combatant.hpCurrent === hpCurrent
-      && combatant.hpMax === hpMax
-      && conditionsKey(combatant.activeConditions) === conditionsKey(conditions)
-      && effectsKey(combatant.activeEffects) === effectsKey(effects)
-      && deathSavesKey(player ? combatant.deathSaves : null) === deathSavesKey(player ? deathSaves : null)
-      && Boolean(combatant.isDead) === isDead) {
-      return combatant;
-    }
-
-    changed = true;
-    return {
-      ...combatant,
-      hpCurrent,
-      hpMax,
-      activeConditions: conditions,
-      activeEffects: effects,
-      ...(player ? { deathSaves: { success: deathSaves.success, fail: deathSaves.fail } } : {}),
-      // isDead is the encounter builder's own flag and has to keep agreeing
-      // with the hit points, or a creature killed on the map comes back alive
-      // there.
-      isDead,
-    };
-  });
-
-  return changed ? next : null;
 }

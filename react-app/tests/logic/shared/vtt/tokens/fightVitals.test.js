@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  applyMonsterVitalCommand,
   monsterVitalsPatch,
   newerFightRow,
   withGmTokenVitals,
 } from '../../../../../src/shared/vtt/tokens/fightVitals.js';
+import {
+  applyCombatantEdit,
+  applyCombatantHpCommand as applyMonsterVitalCommand,
+} from '../../../../../src/shared/encounter/combatantVitals.js';
 
 // The battle map's copy of a fight row: a recovery read that left before a
 // realtime event arrived must not put the older enemy vitals back.
@@ -80,4 +83,33 @@ test('stepping a creature: temporary HP, and a maximum moved by an amount', () =
   assert.deepEqual(monsterVitalsPatch(ogre, applyMonsterVitalCommand(ogre, { type: 'modifyMaxHp', delta: 5 })), {
     hpMax: 64, maxHPBonus: 5,
   });
+});
+
+// What the GM types in a creature's menu lands on the creature as its fight
+// has it now, with the builder's mortality rules.
+test('a typed 0 is Dead, and typed hit points bring a creature back', () => {
+  const ogre = { id: 0, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: [], isDead: false };
+  const dead = applyCombatantEdit(ogre, { hpCurrent: 0 });
+  assert.deepEqual(monsterVitalsPatch(ogre, dead), { hpCurrent: 0, activeConditions: ['dead'], isDead: true });
+  assert.deepEqual(monsterVitalsPatch(dead, applyCombatantEdit(dead, { hpCurrent: 4, conditions: [] })), {
+    hpCurrent: 4, activeConditions: [], isDead: false,
+  });
+});
+
+test('marking Dead drops a creature to 0 HP; removing it brings it back at 1', () => {
+  const ogre = { id: 0, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: ['prone'], isDead: false };
+  const dead = applyCombatantEdit(ogre, { conditions: ['prone', 'dead'] });
+  assert.deepEqual([dead.hpCurrent, dead.isDead, dead.activeConditions], [0, true, ['dead', 'prone']]);
+  const back = applyCombatantEdit(dead, { conditions: ['prone'] });
+  assert.deepEqual([back.hpCurrent, back.isDead, back.activeConditions], [1, false, ['prone']]);
+});
+
+// Marking a piece prone touches no hit points; an edit of nothing is no write.
+test('conditions and reminders reach the creature without touching hit points', () => {
+  const ogre = { id: 0, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: [], activeEffects: [], isDead: false };
+  const marked = applyCombatantEdit(ogre, { conditions: ['prone'], effects: [{ key: 'custom', text: 'Bane' }] });
+  assert.deepEqual(monsterVitalsPatch(ogre, marked), {
+    activeConditions: ['prone'], activeEffects: [{ key: 'custom', text: 'Bane' }],
+  });
+  assert.deepEqual(monsterVitalsPatch(ogre, applyCombatantEdit(ogre, {})), {});
 });

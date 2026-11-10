@@ -29,6 +29,7 @@ vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
   commitFightCombatantVitals: (...args) => m.commit(...args),
   listFightVitals: async () => m.fightRows.current,
+  getInstanceFight: async (id) => m.fightRows.current.find((row) => String(row.id) === String(id)) || null,
   listFightRevisions: async () => m.fightRows.current.map((row) => ({ id: row.id, updated_at: row.updated_at })),
   saveInstanceFight: vi.fn(),
 }));
@@ -121,11 +122,18 @@ function mountEditor() {
   }} onSceneChange={vi.fn()} /></ThemeProvider>);
 }
 
+// As the menu sends it: whole values, and in `healthPatch` the fields the
+// control touched.
 async function saveFromMenu(token, edit) {
+  const healthPatch = {
+    ...(Object.hasOwn(edit, 'hpCurrent') ? { currentHP: edit.hpCurrent } : {}),
+    ...(Object.hasOwn(edit, 'conditions') ? { activeConditions: edit.conditions } : {}),
+    ...(Object.hasOwn(edit, 'effects') ? { activeEffects: edit.effects } : {}),
+  };
   await act(async () => {
     await m.menu.current.onSave(token, {
       label: token.label, gmOnly: false, conditions: token.conditions, effects: token.effects,
-      showHp: token.showHp, hpCurrent: token.hpCurrent, hpMax: token.hpMax, deathSaves: null, healthPatch: {},
+      showHp: token.showHp, hpCurrent: token.hpCurrent, hpMax: token.hpMax, deathSaves: null, healthPatch,
       ...edit,
     });
   });
@@ -153,11 +161,12 @@ beforeEach(() => {
 });
 
 test('a GM editing a linked enemy on the map writes its combatant once, never the piece vitals', async () => {
+  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
   mountEditor();
   await saveFromMenu(OGRE, { hpCurrent: 20, conditions: ['prone'] });
   expect(m.commit).toHaveBeenCalledTimes(1);
   expect(m.commit).toHaveBeenCalledWith('77', '0', {
-    base: { hpCurrent: 30, hpMax: 59 },
+    base: { hpCurrent: 30, hpMax: 59, tempHP: null },
     patch: { hpCurrent: 20, activeConditions: ['prone'] },
   });
   expect(hpWrites()).toEqual([]);
@@ -167,6 +176,12 @@ test('a GM editing a linked enemy on the map writes its combatant once, never th
 });
 
 test('killing and reviving on the map follows the builder mortality rules', async () => {
+  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
+  // The answer is the fight as the kill left it: the revive starts from there.
+  m.commit.mockResolvedValueOnce({
+    applied: true,
+    row: fightWith({ hpCurrent: 0, hpMax: 59, activeConditions: ['dead'], isDead: true }),
+  });
   mountEditor();
   await saveFromMenu(OGRE, { conditions: ['dead'] });
   expect(m.commit.mock.calls[0][2].patch).toEqual({ hpCurrent: 0, activeConditions: ['dead'], isDead: true });
@@ -176,6 +191,7 @@ test('killing and reviving on the map follows the builder mortality rules', asyn
 });
 
 test('saving a linked enemy without a change writes nothing to the fight', async () => {
+  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
   mountEditor();
   await saveFromMenu(OGRE, { label: 'Big ogre' });
   expect(m.commit).not.toHaveBeenCalled();
@@ -183,6 +199,7 @@ test('saving a linked enemy without a change writes nothing to the fight', async
 });
 
 test('a conflict is not retried: the map realigns on the fight and stops', async () => {
+  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
   m.commit.mockResolvedValue({ applied: false, row: null });
   mountEditor();
   await saveFromMenu(OGRE, { hpCurrent: 20 });
@@ -193,9 +210,9 @@ test('a conflict is not retried: the map realigns on the fight and stops', async
 });
 
 test('a piece whose fight has no cloud row keeps its HP in the GM-only source', async () => {
-  m.commit.mockRejectedValue(Object.assign(new Error('unavailable'), { code: 'FIGHT_UNAVAILABLE' }));
   mountEditor();
   await saveFromMenu(OGRE, { hpCurrent: 20 });
+  expect(m.commit).not.toHaveBeenCalled();
   expect(m.setTokenHp).toHaveBeenCalledWith('ogre-piece', { hpCurrent: 20, hpMax: 59 });
   expect(m.updateToken.mock.calls.some(([, patch]) => 'hp_current' in patch || 'hp_max' in patch)).toBe(false);
 });
@@ -425,5 +442,17 @@ test('a character piece sends damage, temporary and maximum hit points to the sh
   expect(m.characterCommand.mock.calls.map(([id, command, context]) => [id, command, healthCommandRoute(id, command, context)]))
     .toEqual(commands.map((command) => ['hero', command, 'digest']));
   expect(m.commit).not.toHaveBeenCalled();
+  expect(m.setTokenHp).not.toHaveBeenCalled();
+});
+
+// The fight not loaded on this screen yet: a step reads it first and goes to
+// the creature, never to the piece's GM-only values.
+test('a step on a creature whose fight is not loaded yet still goes to its fight', async () => {
+  mountEditor();
+  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
+  act(() => m.viewport.menuOpener({ id: 'ogre-piece' }, { x: 1, y: 1 }));
+  const { onVitals, token } = m.menu.current;
+  await act(async () => { await onVitals(token, { type: 'modifyHp', delta: -5 }); });
+  expect(m.commit).toHaveBeenCalledWith('77', '0', expect.objectContaining({ patch: { hpCurrent: 25 } }));
   expect(m.setTokenHp).not.toHaveBeenCalled();
 });

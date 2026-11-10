@@ -142,14 +142,41 @@ export function hpCommandFields(before, command) {
   }
 }
 
-// A hit point command on one combatant of the fight, with mortality resolved
-// (0 HP is Dead for a monster, dying for a player; healing clears death saves).
+// A hit point command on one combatant, with mortality resolved (0 HP is Dead
+// for a monster, dying for a player; regaining hit points clears a player's
+// death saves). Only the fields it changes are written, so the result diffs
+// into a minimal fight patch (monsterVitalsPatch). The builder, the battle
+// map's creatures and its loose pieces all step hit points through this.
+export function applyCombatantHpCommand(combatant, command) {
+  const fields = hpCommandFields(combatant, command);
+  const next = { ...combatant, ...fields };
+  if (!Object.hasOwn(fields, 'hpCurrent') || fields.hpCurrent === combatant?.hpCurrent) return next;
+  return withHp(next, combatant, fields.hpCurrent);
+}
+
 export function applyHpCommand(combat, id, command) {
-  return updateCombatant(combat, id, (combatant) => {
-    const { hpCurrent, ...rest } = hpCommandFields(combatant, command);
-    const next = { ...combatant, ...rest };
-    return hpCurrent === undefined ? next : applyHp(next, hpCurrent);
-  });
+  return updateCombatant(combat, id, (combatant) => applyCombatantHpCommand(combatant, command));
+}
+
+// An edit typed in a creature's map menu: the fields it carries are what the
+// GM changed (`hpCurrent`, `conditions`, `effects`), applied to the combatant
+// as it stands now. Marking Dead drops it to 0 HP, removing Dead brings it
+// back at 1, a typed 0 is Dead.
+export function applyCombatantEdit(combatant, edit = {}) {
+  let next = combatant;
+  if (Object.hasOwn(edit, 'conditions')) {
+    const conditions = normalizeConditions(edit.conditions);
+    const wasDead = normalizeConditions(combatant?.activeConditions).includes(DEAD_CONDITION_KEY);
+    const nowDead = conditions.includes(DEAD_CONDITION_KEY);
+    next = { ...next, activeConditions: conditions };
+    if (nowDead && !wasDead) next = killCombatant(next);
+    else if (wasDead && !nowDead) next = reviveCombatant(next);
+  }
+  if (edit.hpCurrent != null && Number.isFinite(Number(edit.hpCurrent))) {
+    next = applyCombatantHpCommand(next, { type: 'setHp', value: edit.hpCurrent });
+  }
+  if (Object.hasOwn(edit, 'effects')) next = { ...next, activeEffects: normalizeEffects(edit.effects) };
+  return next;
 }
 
 export function applySheetVitals(combat, sourceId, vitals) {
@@ -178,11 +205,18 @@ function withMortality(combatant, hpCurrent) {
   return { ...combatant, hpCurrent, isDead: dead, activeConditions: conditions, deathSaves };
 }
 
-// Regaining hit points clears the death saves.
-function applyHp(combatant, value) {
-  const hpCurrent = clamp(Math.round(value), 0, numberOr(combatant.hpMax, 1));
-  const healed = hpCurrent > 0 && combatant.deathSaves ? { ...combatant, deathSaves: { success: 0, fail: 0 } } : combatant;
-  return withMortality(healed, hpCurrent);
+// `next` at `hpCurrent` (already clamped by hpCommandFields), Dead, isDead and
+// a player's death saves following it; only what moved is written.
+function withHp(next, before, hpCurrent) {
+  const player = before?.type === 'player';
+  const saves = player && hpCurrent > 0 && before.deathSaves ? { success: 0, fail: 0 } : before?.deathSaves;
+  const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
+  const resolved = resolveMortality({ player, hp: hpCurrent, deathSaves: saves, conditions });
+  const out = { ...next, hpCurrent };
+  if (normalizeConditions(conditions).join('|') !== resolved.conditions.join('|')) out.activeConditions = resolved.conditions;
+  if (Boolean(before?.isDead) !== resolved.dead) out.isDead = resolved.dead;
+  if (player && resolved.deathSaves !== before?.deathSaves) out.deathSaves = resolved.deathSaves;
+  return out;
 }
 
 // A combatant in the neutral shape mortality.js works on, and back.

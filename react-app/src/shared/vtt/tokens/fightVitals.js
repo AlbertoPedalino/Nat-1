@@ -5,10 +5,8 @@
 //
 // Everything here is pure: the callers own the requests and the state.
 
-import { DEAD_CONDITION_KEY } from '../../character/combat/conditions.js';
-import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
-import { resolveMortality } from '../../character/combat/mortality.js';
-import { HP_COMMANDS, clampTempHp, hpCommandFields } from '../../encounter/combatantVitals.js';
+import { parseSourceRef } from './encounterSync.js';
+import { clampTempHp } from '../../encounter/combatantVitals.js';
 
 // Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([
@@ -97,56 +95,6 @@ export function linkedCombatant(fights, ref) {
   return (row.fight?.combatants || []).find((c) => String(c?.id) === ref.combatantId && isMonsterCombatant(c)) || null;
 }
 
-
-// Damage, healing, temporary and maximum hit points for a creature, by the
-// builder's rules (hpCommandFields). The commands are the character health
-// command names, so the menu sends one intent whatever the piece is. Only the
-// fields the command touched change, so the result diffs into a minimal fight
-// patch; 0 HP is Dead.
-export function applyMonsterVitalCommand(before, command) {
-  if (!HP_COMMANDS.includes(command?.type)) throw new Error('Unknown creature health command.');
-  const next = { ...before, ...hpCommandFields(before, command) };
-  if (next.hpCurrent !== before?.hpCurrent) {
-    const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
-    const resolved = resolveMortality({ player: false, hp: next.hpCurrent, conditions });
-    const { dead } = resolved;
-    if (conditions.includes(DEAD_CONDITION_KEY) !== dead) next.activeConditions = resolved.conditions;
-    if (Boolean(before?.isDead) !== dead) next.isDead = dead;
-  }
-  return next;
-}
-
-// A linked piece's displayed values as the combatant they mirror, and the same
-// combatant after an edit made on the map, with the builder's mortality rules
-// (0 HP is Dead; Dead is 0 HP; removing Dead from a 0 HP creature revives it).
-export function monsterFromToken(token) {
-  const conditions = Array.isArray(token?.conditions) ? token.conditions : [];
-  return {
-    id: 'piece',
-    type: 'monster',
-    hpCurrent: token?.hpCurrent ?? null,
-    hpMax: token?.hpMax ?? null,
-    activeConditions: conditions,
-    activeEffects: Array.isArray(token?.effects) ? token.effects : [],
-    isDead: conditions.includes('dead') || (token?.hpCurrent != null && Number(token.hpCurrent) <= 0),
-  };
-}
-
-export function monsterEditFromToken(token, edit) {
-  const before = monsterFromToken(token);
-  let next = { ...token, ...edit };
-  const wasDead = before.activeConditions.includes('dead');
-  const nowDead = Array.isArray(next.conditions) && next.conditions.includes('dead');
-  if (wasDead && !nowDead && Number(next.hpCurrent) <= 0) next = { ...next, hpCurrent: 1 };
-  const [after] = fightWithTokenVitals([before], {
-    sourceRef: 'edit:edit:piece',
-    hpCurrent: next.hpCurrent,
-    hpMax: next.hpMax,
-    conditions: next.conditions,
-    effects: next.effects,
-  }) || [before];
-  return { before, after };
-}
 
 // Of two copies of one fight row, the one with the newer enemy vitals. The
 // database advances `vitals_revision` on every vitals command and on nothing
