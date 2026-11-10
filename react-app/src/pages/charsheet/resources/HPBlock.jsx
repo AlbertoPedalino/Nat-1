@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Tooltip } from '@mui/material';
+import { Box, Typography, TextField, Button } from '@mui/material';
 import { HeartPulse, Sparkles, Skull } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
-import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
+import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import { atDeathsDoor, clickedDeathSaveCount, resolveMortality } from '../../../shared/character/combat/mortality.js';
 import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { HP_TONE_COLORS, UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -60,10 +62,16 @@ export default function HPBlock({
   }, [editing]);
 
   if (!sheet) return null;
-  const { success: dsSuccess, fail: dsFail } = normalizeDeathSaves(sheet.deathSaves);
-  const atZero = sheet.currentHP === 0;
-  const dead = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
-  const hpColor = sheet.currentHP > sheet.maxHP / 2 ? UI_COLORS.success : sheet.currentHP > 0 ? UI_COLORS.warning : UI_COLORS.dangerStrong;
+  const deathSaves = normalizeDeathSaves(sheet.deathSaves);
+  // The same rules as the builder and the map: dead at 0 HP with three failed
+  // saves or the Dead condition — or, on a sheet, at the last exhaustion level.
+  const exhausted = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
+  const dead = exhausted || resolveMortality({
+    player: true, hp: sheet.currentHP, deathSaves, conditions: sheet.activeConditions,
+  }).dead;
+  // A dead character's saves can still be corrected; only exhaustion is final.
+  const showDeathSaves = atDeathsDoor({ player: true, hp: sheet.currentHP }) && !exhausted;
+  const hpColor = hpToneColor(sheet.currentHP, sheet.maxHP, HP_TONE_COLORS);
 
   const startEdit = (key, current) => {
     setEditVal(String(current));
@@ -109,7 +117,7 @@ export default function HPBlock({
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.25, py: 0.25, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.tint) }}>
             <Skull size={ICON_SIZES.xs} style={{ color: UI_COLORS.dangerStrong }} />
             <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerStrong }}>
-              Dead — Exhaustion {EXHAUSTION_MAX}
+              {exhausted ? `Dead — Exhaustion ${EXHAUSTION_MAX}` : 'Dead'}
             </Typography>
           </Box>
         )}
@@ -200,34 +208,18 @@ export default function HPBlock({
           />
         </Box>
 
-        {atZero && !dead && (
+        {showDeathSaves && (
           <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
               <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>
                 Death Saves
               </Typography>
-              <Tooltip title="Click to set successes">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <Box
-                      key={`s${i}`}
-                      onClick={() => onDeathSaveSet?.('success', dsSuccess === i + 1 ? i : i + 1)}
-                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsSuccess ? UI_COLORS.success : 'transparent', cursor: 'pointer', '&:hover': { borderColor: UI_COLORS.success } }}
-                    />
-                  ))}
-                </Box>
-              </Tooltip>
-              <Tooltip title="Click to set failures">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <Box
-                      key={`f${i}`}
-                      onClick={() => onDeathSaveSet?.('fail', dsFail === i + 1 ? i : i + 1)}
-                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsFail ? UI_COLORS.danger : 'transparent', cursor: 'pointer', '&:hover': { borderColor: UI_COLORS.danger } }}
-                    />
-                  ))}
-                </Box>
-              </Tooltip>
+              <DeathSaveDots
+                deathSaves={deathSaves}
+                colors={{ success: UI_COLORS.success, fail: UI_COLORS.danger }}
+                onChange={(type, value) => onDeathSaveSet?.(type, clickedDeathSaveCount(deathSaves[type], value))}
+              />
+              {!dead && (
               <Button
                 size="small"
                 variant="outlined"
@@ -236,6 +228,7 @@ export default function HPBlock({
               >
                 Roll
               </Button>
+              )}
             </Box>
           </Box>
         )}
