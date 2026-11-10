@@ -11,33 +11,24 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Dragonborn_XPHB", function (s) {
-  let specs = [];
-  // Draconic Resistance is determined by the ancestry choice; do not render a separate resistance choice.
-  specs = specs.filter(function (x) { return !String(x.key || '').startsWith('species_resist'); });
+  // Draconic Resistance follows the ancestry: no separate resistance pick.
+  const specs = [];
 
-  const fallbackAncestries = [
-    'Black Dragon', 'Blue Dragon', 'Brass Dragon', 'Bronze Dragon', 'Copper Dragon',
-    'Gold Dragon', 'Green Dragon', 'Red Dragon', 'Silver Dragon', 'White Dragon',
-  ];
+  // The ten ancestries from the species data, each with the damage type it
+  // gives (the stored value stays the colour).
   const opts = [];
-
   if (Array.isArray(s._versions)) {
     s._versions.forEach(function (v) {
       if (v && v._abstract && Array.isArray(v._implementations)) {
         v._implementations.forEach(function (impl) {
-          const vars = impl && impl._variables ? Object.values(impl._variables).filter(Boolean) : [];
-          const label = vars[0] || impl?.name;
-          if (label) opts.push({ key: impl?.name || label, label });
+          const color = impl?._variables?.color || impl?.name;
+          if (!color) return;
+          const damage = impl?._variables?.damageType;
+          opts.push({ key: color, label: damage ? color + ' (' + damage + ')' : color });
         });
       }
     });
   }
-
-  fallbackAncestries.forEach(function (name) {
-    if (!opts.some(function (opt) { return String(opt.label || opt.key).toLowerCase() === name.toLowerCase(); })) {
-      opts.push({ key: name, label: name });
-    }
-  });
 
   specs.push({ key: 'species_version', label: 'Draconic Ancestry', type: 'option', options: opts, count: 1, level: 1 });
   return specs;

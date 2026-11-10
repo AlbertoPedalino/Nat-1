@@ -1,24 +1,11 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerFeatAdapter } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, getWeaponMasteryChoiceNames, allItemsDb } = createAdapterBindings(registry, context);
 
-
-
-  var _SIMPLE_WEAPONS = [
-    "Club", "Dagger", "Greatclub", "Handaxe", "Javelin",
-    "Light Hammer", "Mace", "Quarterstaff", "Sickle", "Spear",
-    "Dart", "Light Crossbow", "Shortbow", "Sling"
-  ];
-  var _MARTIAL_WEAPONS = [
-    "Battleaxe", "Flail", "Glaive", "Greataxe", "Greatsword",
-    "Halberd", "Lance", "Longsword", "Maul", "Morningstar",
-    "Pike", "Rapier", "Scimitar", "Shortsword", "Trident",
-    "War Pick", "Warhammer", "Whip",
-    "Blowgun", "Hand Crossbow", "Heavy Crossbow", "Longbow", "Net"
-  ];
-
-  registerFeatAdapter("Weapon Master", function (feat) {
+  // Weapon Master (XPHB 2024): the mastery property of one kind of Simple or
+  // Martial weapon — read from the item data, as a Fighter's picks are.
+  registerFeatAdapter("Weapon Master", function (feat, ctx = {}) {
     return {
       ...feat,
       choiceUi: {
@@ -26,11 +13,9 @@ export default function install(registry, context = {}) {
         weaponMastery: {
           keySuffix: "weapon_mastery",
           label: "Weapon Mastery",
-          weapons: _SIMPLE_WEAPONS.concat(_MARTIAL_WEAPONS)
-        }
-      }
+          weapons: getWeaponMasteryChoiceNames(ctx.items, allItemsDb),
+        },
+      },
     };
   });
-
 }
-
