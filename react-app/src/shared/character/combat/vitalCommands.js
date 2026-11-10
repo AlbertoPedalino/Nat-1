@@ -1,9 +1,9 @@
-import { clampCharacterVitals, maxHpFor } from './vitals.js';
+import { changeHp, clampCharacterVitals, maxHpFor, tempHpAfter } from './vitals.js';
 import { clickedDeathSaveCount, markDead, toggleMortalCondition, withDeathSave } from './mortality.js';
 import {
   DEAD_CONDITION_KEY as DEAD, EXHAUSTION_KEY as EXHAUSTION, EXHAUSTION_MAX, setConditionActive,
 } from './conditions.js';
-import { addReminder, effectId, normalizeEffects, removeEffect } from './combatEffects.js';
+import { addReminder, removeEffect } from './combatEffects.js';
 
 // Apply an intent to the vitals a command starts from — the character digest
 // the caller follows (or, rarely, the sheet) — never to an encounter snapshot.
@@ -21,16 +21,16 @@ export function applyVitalCommand(data, command, baseMaxHP) {
   let recover = false;
   switch (command.type) {
     case 'modifyHp': {
-      const absorbed = command.delta < 0 ? Math.min(v.tempHP, -n) : 0;
-      v.tempHP -= absorbed;
-      v.currentHP += n + absorbed;
+      const next = changeHp({ current: v.currentHP, temp: v.tempHP }, n);
+      v.currentHP = next.current;
+      v.tempHP = next.temp;
       recover = true;
       break;
     }
     case 'setHp': v.currentHP = n; recover = true; break;
-    case 'modifyTempHp': v.tempHP += n; break;
-    case 'setTempHp': v.tempHP = n; break;
-    case 'grantTempHp': v.tempHP = Math.max(v.tempHP, n); break;
+    case 'modifyTempHp':
+    case 'setTempHp':
+    case 'grantTempHp': v.tempHP = tempHpAfter(v.tempHP, command.type, n); break;
     case 'modifyMaxHp': v.maxHPBonus += n; break;
     case 'setMaxHp': v.maxHPBonus = n - baseMaxHP; break;
     case 'setMaxHpBonus': v.maxHPBonus = n; break;
@@ -73,25 +73,6 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     case 'setExhaustion':
       v.activeConditions = setConditionActive(v.activeConditions, EXHAUSTION, n > 0);
       if (n >= EXHAUSTION_MAX) v = withMortality(v, markDead(mortalityOf(v)));
-      break;
-    case 'editToken':
-      if (Object.hasOwn(command.patch, 'currentHP')) { v.currentHP = command.patch.currentHP; recover = true; }
-      for (const key of command.removeConditions || []) v.activeConditions = setConditionActive(v.activeConditions, key, false);
-      for (const key of command.addConditions || []) v.activeConditions = setConditionActive(v.activeConditions, key, true);
-      if (command.removeEffects?.length) {
-        const gone = new Set(command.removeEffects);
-        v.activeEffects = v.activeEffects.filter((effect) => !gone.has(effectId(effect)));
-      }
-      if (command.addEffects?.length) v.activeEffects = normalizeEffects([...v.activeEffects, ...command.addEffects]);
-      v.deathSaves = { ...v.deathSaves, ...command.deathSaves };
-      if (command.removeConditions?.includes(DEAD) && !command.deathSaves) {
-        if (!Object.hasOwn(command.patch, 'currentHP')) v.currentHP = Math.max(1, v.currentHP);
-        v.deathSaves = { success: 0, fail: 0 };
-        recover = true;
-      }
-      if (command.addConditions?.includes(DEAD) || Number(command.deathSaves?.fail) >= 3) {
-        v = withMortality(v, markDead(mortalityOf(v)));
-      }
       break;
     default: throw new Error('Unknown character health command.');
   }

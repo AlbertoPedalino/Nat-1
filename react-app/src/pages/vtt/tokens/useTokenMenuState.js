@@ -116,7 +116,11 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
   // Every control writes as it is used. A Save button in a menu opened by
   // right-clicking a piece mid-combat is one click too many, and forgetting it
   // loses the change silently.
-  const save = useCallback((patch) => {
+  //
+  // On a character's piece `command` is what the control did, as the sheet
+  // and the builder say it (toggleCombatantCondition, setDeathSave, …): their
+  // sheet applies it with its own rules. A typed HP becomes setHp.
+  const save = useCallback((patch, command = null) => {
     if (!token) return;
     patch = { ...typed.take(), ...patch };
     const next = {
@@ -133,6 +137,12 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
       hpCurrent: next.hpCurrent === '' ? null : Number(next.hpCurrent),
       hpMax: next.hpMax === '' ? null : Number(next.hpMax),
       deathSaves: deathSavesForToken(next.deathSaves, next.conditions, token.characterId),
+      healthCommands: token.characterId ? [
+        ...(Object.hasOwn(patch, 'hpCurrent') && patch.hpCurrent !== ''
+          ? [{ type: 'setHp', value: Math.trunc(Number(patch.hpCurrent)) || 0 }]
+          : []),
+        ...(command ? [command] : []),
+      ] : [],
       // Only fields touched by this control are a health edit. Renaming a
       // token or changing its visibility must never replay cached HP.
       healthPatch: {
@@ -232,8 +242,9 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
     save({
       deathSaves: nextDeathSaves,
       conditions: nextConditions,
-      ...(dead ? { hpCurrent: 0 } : {}),
-    });
+      // A character's sheet applies the save itself (setDeathSave).
+      ...(dead && !token.characterId ? { hpCurrent: 0 } : {}),
+    }, { type: 'setDeathSave', saveType: type, value: count });
   };
 
   const clickCondition = (key) => {
@@ -241,30 +252,32 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
       { player: Boolean(token.characterId), hp: hpCurrent, deathSaves, conditions },
       key,
     );
+    const command = { type: 'toggleCombatantCondition', key };
     setConditions(next.conditions);
     if (key !== DEAD_CONDITION_KEY) {
-      save({ conditions: next.conditions });
+      save({ conditions: next.conditions }, command);
       return;
     }
     setHpCurrent(next.hp);
     setDeathSaves(next.deathSaves);
+    // The command carries the kill or the revive: the HP shown is not typed.
     save({
       conditions: next.conditions,
-      hpCurrent: next.hp,
+      ...(token.characterId ? {} : { hpCurrent: next.hp }),
       deathSaves: next.deathSaves,
-    });
+    }, command);
   };
 
   const addReminderText = (text) => {
     const next = addReminder(effects, text);
     setEffects(next);
-    save({ effects: next });
+    save({ effects: next }, { type: 'addCombatantEffect', payload: { text } });
   };
 
   const removeReminder = (id) => {
     const next = removeEffect(effects, id);
     setEffects(next);
-    save({ effects: next });
+    save({ effects: next }, { type: 'removeCombatantEffect', effectId: id });
   };
 
   return {

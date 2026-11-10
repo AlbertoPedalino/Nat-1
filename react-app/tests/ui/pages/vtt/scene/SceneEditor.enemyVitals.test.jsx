@@ -282,14 +282,17 @@ test('a character piece edited on the map commands health from the roster digest
   };
   m.tokens.current = [hero];
   mountEditor();
-  await saveFromMenu(hero, { hpCurrent: 11, healthPatch: { currentHP: 11 } });
-  await saveFromMenu(hero, { conditions: ['prone'], healthPatch: { activeConditions: ['prone'] } });
+  await saveFromMenu(hero, { hpCurrent: 11, healthCommands: [{ type: 'setHp', value: 11 }] });
+  await saveFromMenu(hero, { conditions: ['prone'], healthCommands: [{ type: 'toggleCombatantCondition', key: 'prone' }] });
   expect(m.characterCommand).toHaveBeenCalledTimes(2);
   for (const [id, command, context] of m.characterCommand.mock.calls) {
     expect(context).toEqual({ digest, base: { hpBasis: 'h1', baseMax: 30 } });
     expect(healthCommandRoute(id, command, context)).toBe('digest');
   }
-  expect(m.characterCommand.mock.calls[0][1]).toEqual({ type: 'editToken', patch: { currentHP: 11 } });
+  expect(m.characterCommand.mock.calls.map(([, command]) => command)).toEqual([
+    { type: 'setHp', value: 11 },
+    { type: 'toggleCombatantCondition', key: 'prone' },
+  ]);
   // A character's hit points belong to the sheet, never to the piece.
   expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'hp_current'))).toBe(false);
 });
@@ -308,11 +311,11 @@ test('a character piece\'s reminders go to its sheet, never onto the piece row',
   m.tokens.current = [hero];
   mountEditor();
   const effects = [{ key: 'custom', text: 'Guidance' }];
-  await saveFromMenu(hero, { effects, healthPatch: { activeEffects: effects } });
-  expect(m.characterCommand).toHaveBeenCalledTimes(1);
-  expect(m.characterCommand.mock.calls[0][1]).toEqual({
-    type: 'editToken', patch: {}, addEffects: effects, removeEffects: [],
+  await saveFromMenu(hero, {
+    effects, healthCommands: [{ type: 'addCombatantEffect', payload: { text: 'Guidance' } }],
   });
+  expect(m.characterCommand).toHaveBeenCalledTimes(1);
+  expect(m.characterCommand.mock.calls[0][1]).toEqual({ type: 'addCombatantEffect', payload: { text: 'Guidance' } });
   expect(m.setTokenEffects).not.toHaveBeenCalled();
   expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'effects'))).toBe(false);
 });

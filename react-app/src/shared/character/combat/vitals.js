@@ -35,6 +35,30 @@ export function clampTempHp(value) {
   return clampNonNegativeInt(value);
 }
 
+// The hit point arithmetic a character's sheet and a fight's combatant share
+// (vitalCommands.js, combatantVitals.js hpCommandFields); each clamps against
+// its own maximum, which the two keep differently.
+//
+// Hit points changed by `n` (damage negative): damage takes temporary hit
+// points first (RAW).
+export function changeHp({ current, temp }, n) {
+  const held = clampTempHp(temp);
+  const absorbed = n < 0 ? Math.min(held, -n) : 0;
+  return { current: current + n + absorbed, temp: held - absorbed };
+}
+
+// Temporary hit points after a temporary hit point command (set, step, or a
+// grant that never lowers what is there), or undefined for any other command.
+export function tempHpAfter(temp, type, n) {
+  const held = clampTempHp(temp);
+  switch (type) {
+    case 'setTempHp': return Math.max(0, n);
+    case 'modifyTempHp': return Math.max(0, held + n);
+    case 'grantTempHp': return Math.max(held, n);
+    default: return undefined;
+  }
+}
+
 function getDeathSave(raw, sheetKey, combatKey) {
   if (!raw || typeof raw !== 'object') return 0;
   return clampInt(raw[sheetKey] ?? raw[combatKey], 0, 3, 0);

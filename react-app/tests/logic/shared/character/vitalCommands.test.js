@@ -1,7 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyVitalCommand } from '../../../../src/shared/character/combat/vitalCommands.js';
-import { tokenHealthCommand } from '../../../../src/shared/vtt/tokens/characterHealth.js';
 
 const apply = (data, command, max = 30) => applyVitalCommand(data, command, max);
 test('damage consumes temp HP, healing caps at current derived max and clears death saves', () => {
@@ -26,16 +25,17 @@ test('death-save commands preserve the other track and a natural 20 recovers', (
   assert.equal(v.currentHP, 1);
   assert.deepEqual(v.deathSaves, { success: 0, fail: 0 });
 });
-test('token condition edits preserve newer HP and unrelated conditions', () => {
-  const command = tokenHealthCommand({ conditions: [], hpCurrent: 30 }, { activeConditions: ['poisoned'] });
-  const v = apply({ currentHP: 12, activeConditions: ['blinded'] }, command);
+// The map sends a character's edits as the same commands as the sheet.
+test('a condition toggled on the map keeps newer HP and the other conditions', () => {
+  const v = apply({ currentHP: 12, activeConditions: ['blinded'] }, { type: 'toggleCombatantCondition', key: 'poisoned' });
   assert.equal(v.currentHP, 12);
   assert.deepEqual(new Set(v.activeConditions), new Set(['poisoned', 'blinded']));
 });
-test('correcting a token death-save failure leaves the character at zero HP', () => {
-  const command = tokenHealthCommand({ conditions: ['dead'], deathSaves: { success: 1, fail: 3 } },
-    { activeConditions: [], deathSaves: { success: 1, fail: 2 } });
-  const v = apply({ currentHP: 0, activeConditions: ['dead'], deathSaves: { success: 1, fail: 3 } }, command);
+test('taking back a third failed death save leaves the character dying at zero HP', () => {
+  const v = apply(
+    { currentHP: 0, activeConditions: ['dead'], deathSaves: { success: 1, fail: 3 } },
+    { type: 'setDeathSave', saveType: 'fail', value: 2 },
+  );
   assert.equal(v.currentHP, 0);
   assert.deepEqual(v.deathSaves, { success: 1, fail: 2 });
   assert.deepEqual(v.activeConditions, []);
@@ -75,13 +75,10 @@ test('a command drops the advantage calls an older list still carries', () => {
   assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'cover' }]);
 });
 
-test('token reminder edits add and remove only what the map changed', () => {
-  const token = { effects: [{ key: 'custom', text: 'Guidance' }] };
-  const command = tokenHealthCommand(token, { activeEffects: [{ key: 'custom', text: 'Bane' }] });
-  assert.deepEqual(command.addEffects, [{ key: 'custom', text: 'Bane' }]);
-  assert.deepEqual(command.removeEffects, ['Guidance']);
-  // One the sheet added meanwhile survives the map's edit.
-  const v = apply({ activeEffects: [{ key: 'custom', text: 'Guidance' }, { key: 'custom', text: 'Bless' }] }, command);
-  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Bless' }, { key: 'custom', text: 'Bane' }]);
-  assert.equal(Object.hasOwn(tokenHealthCommand(token, { currentHP: 3 }), 'addEffects'), false);
+test('a reminder removed on the map leaves the ones the sheet added meanwhile', () => {
+  const v = apply(
+    { activeEffects: [{ key: 'custom', text: 'Guidance' }, { key: 'custom', text: 'Bless' }] },
+    { type: 'removeCombatantEffect', effectId: 'Guidance' },
+  );
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Bless' }]);
 });

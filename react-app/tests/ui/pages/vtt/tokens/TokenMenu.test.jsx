@@ -92,7 +92,28 @@ test('a down character can change death saves and the third failure sets Dead', 
       hpCurrent: 0,
       deathSaves: { success: 1, fail: 3 },
       conditions: ['dead'],
+      // The sheet applies the save itself, by its own rules.
+      healthCommands: [{ type: 'setDeathSave', saveType: 'fail', value: 3 }],
     }),
+  );
+});
+
+test("a character's conditions go to their sheet as the toggle clicked", () => {
+  const onSave = vi.fn();
+  render(
+    <TokenMenu
+      token={{ id: 'hero-1', characterId: 'character-1', label: 'Aria', hpCurrent: 9, hpMax: 20, conditions: [], effects: [] }}
+      anchor={{ x: 20, y: 20 }}
+      canMark
+      onClose={vi.fn()}
+      onSave={onSave}
+      onDelete={vi.fn()}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: /prone/i }));
+  expect(onSave).toHaveBeenLastCalledWith(
+    expect.anything(),
+    expect.objectContaining({ healthCommands: [{ type: 'toggleCombatantCondition', key: 'prone' }] }),
   );
 });
 

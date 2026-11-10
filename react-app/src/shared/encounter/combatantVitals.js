@@ -5,7 +5,7 @@ import {
   EXHAUSTION_KEY,
 } from '../character/combat/conditions.js';
 import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
-import { clampTempHp } from '../character/combat/vitals.js';
+import { changeHp, clampTempHp, tempHpAfter } from '../character/combat/vitals.js';
 import { clamp, clampInt, numberOr } from '../numbers.js';
 import {
   clickedDeathSaveCount, markDead, resolveMortality, revive, toggleMortalCondition, withDeathSave,
@@ -105,14 +105,14 @@ export function hpCommandFields(before, command) {
   const current = Math.round(Number(before?.hpCurrent ?? hpMax ?? 0));
   const temp = clampTempHp(before?.tempHP);
   const clampHp = (value, max = hpMax) => Math.max(0, max == null ? value : Math.min(max, value));
+  const tempHP = tempHpAfter(temp, command?.type, n);
+  if (tempHP !== undefined) return { tempHP };
   switch (command?.type) {
     case 'modifyHp': {
-      const absorbed = n < 0 ? Math.min(temp, -n) : 0;
-      return { hpCurrent: clampHp(current + n + absorbed), ...(absorbed ? { tempHP: temp - absorbed } : {}) };
+      const next = changeHp({ current, temp }, n);
+      return { hpCurrent: clampHp(next.current), ...(next.temp !== temp ? { tempHP: next.temp } : {}) };
     }
     case 'setHp': return { hpCurrent: clampHp(n) };
-    case 'setTempHp': return { tempHP: Math.max(0, n) };
-    case 'modifyTempHp': return { tempHP: Math.max(0, temp + n) };
     case 'modifyMaxHp': return hpCommandFields(before, { type: 'setMaxHp', value: (hpMax ?? current) + n });
     case 'setMaxHpBonus': {
       const baseMax = (hpMax ?? current) - (Number(before?.maxHPBonus) || 0);

@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
 import {
   deleteToken,
   setTokenConditions,
@@ -9,7 +8,6 @@ import {
   updateToken,
 } from '../../../shared/cloud/api/vttTokens.js';
 import { useTokenVitalCommands } from './useTokenVitalCommands.js';
-import { withDeathSave } from '../../../shared/character/combat/mortality.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 
@@ -21,15 +19,21 @@ export function useTokenEdits({
   role, notify, tokens, setTokens, canMove, characterHealth, gmVitals, refreshVisibleTokens,
   setBusy,
 }) {
-  // A character's conditions live on their sheet, which is what the encounter
-  // builder and the sheet view both read. Writing them onto the token row would
-  // create a second copy that the next sheet update silently overwrites.
+  // A piece's own conditions. A character's live on their sheet, which the
+  // builder and the sheet view read too, and change only through their health
+  // commands (sendCharacterCommands): a copy on the token row would be
+  // overwritten by the next sheet update.
   const writeConditions = useCallback(async (token, conditions) => {
-    if (token.characterId) {
-      await characterHealth(token.characterId, tokenHealthCommand(token, { activeConditions: conditions }));
-      return;
-    }
+    if (token.characterId) return;
     await setTokenConditions(token.id, conditions);
+  }, []);
+
+  // A character's edits from the menu, one health command each, in order.
+  const sendCharacterCommands = useCallback(async (token, commands = []) => {
+    for (const command of commands) {
+      // eslint-disable-next-line no-await-in-loop
+      await characterHealth(token.characterId, command);
+    }
   }, [characterHealth]);
 
   const { handleTokenVitals, commitCreatureEdit } = useTokenVitalCommands({
@@ -37,7 +41,7 @@ export function useTokenEdits({
   });
 
   const handleMarkToken = useCallback(async (token, {
-    conditions, showHp, effects, hpCurrent, deathSaves, healthPatch = {},
+    conditions, showHp, effects, hpCurrent, deathSaves, healthCommands = [],
   }) => {
     // On a piece of their own, a player may also decide whether it wears a hit
     // point bar — that is an ordinary update the row policy already allows.
@@ -54,7 +58,7 @@ export function useTokenEdits({
     )));
     try {
       if (token.characterId && owned) {
-        if (Object.keys(healthPatch).length) await characterHealth(token.characterId, tokenHealthCommand(token, healthPatch));
+        await sendCharacterCommands(token, healthCommands);
       } else {
         await writeConditions(token, conditions);
       }
@@ -70,10 +74,11 @@ export function useTokenEdits({
       setTokens((current) => replaceById(current, token));
       notify('error', failureMessage('Could not mark that token.', cause));
     }
-  }, [canMove, characterHealth, notify, writeConditions]);
+  }, [canMove, notify, sendCharacterCommands, writeConditions]);
 
   const handleSaveToken = useCallback(async (token, {
     label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves, healthPatch = {},
+    healthCommands = [],
   }) => {
     const publicLabel = gmOnly ? '' : label;
     const secret = gmOnly ? label : '';
@@ -93,7 +98,7 @@ export function useTokenEdits({
       // sheet, a cloud fight's enemy to its combatant, anything else to its row.
       const linked = await commitCreatureEdit(token, creatureEdit(healthPatch, { hpCurrent, conditions, effects }));
       if (token.characterId) {
-        if (Object.keys(healthPatch).length) await characterHealth(token.characterId, tokenHealthCommand(token, healthPatch));
+        await sendCharacterCommands(token, healthCommands);
       } else if (!linked) {
         await writeConditions(token, conditions);
         // `token` carries the GM's real values (overlaid), so an unchanged
@@ -115,30 +120,17 @@ export function useTokenEdits({
       setTokens((current) => replaceById(current, token));
       notify('error', failureMessage('Could not update that token.', cause));
     }
-  }, [characterHealth, commitCreatureEdit, gmVitals, notify, writeConditions]);
+  }, [commitCreatureEdit, gmVitals, notify, sendCharacterCommands, writeConditions]);
 
-  const handleDeathSaveChange = useCallback((token, type, value) => {
+  // The dots on a character's piece: the count clicked, applied by their sheet.
+  const handleDeathSaveChange = useCallback(async (token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
-    // A character marking death saves is at 0 HP.
-    const { deathSaves, conditions } = withDeathSave(
-      { hp: 0, deathSaves: token.deathSaves, conditions: token.conditions || [] },
-      type,
-      value,
-    );
-    const patch = {
-      label: token.secretLabel || token.label || '',
-      gmOnly: Boolean(token.secretLabel),
-      conditions,
-      hpCurrent: 0,
-      hpMax: token.hpMax,
-      showHp: token.showHp,
-      effects: token.effects || [],
-      deathSaves,
-      healthPatch: { deathSaves, activeConditions: conditions },
-    };
-    if (role.isGm) handleSaveToken(token, patch);
-    else handleMarkToken(token, patch);
-  }, [handleMarkToken, handleSaveToken, role.isGm]);
+    try {
+      await characterHealth(token.characterId, { type: 'setDeathSave', saveType: type, value });
+    } catch (cause) {
+      notify('error', failureMessage('Could not mark that token.', cause));
+    }
+  }, [characterHealth, notify]);
 
   const handleDeleteToken = useCallback(async (token) => {
     return runBusy({ setBusy, notify }, async () => {
@@ -205,3 +197,4 @@ function creatureEdit(healthPatch, { hpCurrent, conditions, effects }) {
     ...(Object.hasOwn(healthPatch, 'activeEffects') ? { effects } : {}),
   };
 }
+
