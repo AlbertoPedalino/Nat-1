@@ -162,7 +162,7 @@ export function classScopedData(data, cls) {
   const included = asArray(cls.includeSubclassesFrom).map(parseClassRef).filter(Boolean).flatMap((ref) => (
     asArray(data?.subclasses).filter((sub) => isClass(sub, ref.name, ref.source) && !shortNames.has(lowerKey(sub.shortName)))
   ));
-  const subclasses = [...own, ...included.map((sub) => ({ ...sub, className: cls.name, classSource: cls.source }))];
+  const subclasses = [...own, ...included.map((sub) => ({ ...sub, className: cls.name, classSource: cls.source, isIncluded: true }))];
 
   const classIndex = featureIndex(data?.classFeatures, classFeatureKey);
   const allFeatures = Array.isArray(cls.classFeatures)
@@ -185,10 +185,11 @@ export function classScopedData(data, cls) {
 // The subclass a hero class (World of Warcraft) fixes: "your subclass choice is
 // fixed" holds for the Death Knight and the Demon Hunter, the hero classes
 // that bring a subclass of their own; the Evoker, whose only subclass is a
-// reprinted Sorcerer one, chooses freely. Null when the choice is free.
+// reprinted Sorcerer one, chooses freely. The base class's subclasses it lists
+// (`includeSubclassesFrom`) are not its own. Null when the choice is free.
 export function fixedSubclassShortName(cls, subclasses) {
   if (!cls?.isHero) return null;
-  const own = asArray(subclasses).filter((sub) => isClass(sub, cls.name, cls.source) && !sub.isReprint);
+  const own = asArray(subclasses).filter((sub) => isClass(sub, cls.name, cls.source) && !sub.isReprint && !sub.isIncluded);
   return own.length === 1 ? own[0].shortName : null;
 }
 

@@ -15,7 +15,7 @@ const paladin = {
 };
 const deathKnight = {
   name: 'Death Knight', source: 'WoW', reskinOf: ['Paladin|XPHB'], isHero: true,
-  _copy: { name: 'Paladin', source: 'XPHB' },
+  _copy: { name: 'Paladin', source: 'XPHB' }, includeSubclassesFrom: ['Paladin|XPHB'],
   classFeatures: ['Death Coil|Death Knight|WoW|1', 'Channel Divinity|Paladin|XPHB|3', { classFeature: 'Death Knight Subclass|Death Knight|WoW|3', gainSubclassFeature: true }],
 };
 const druidWow = { name: 'Druid', source: 'WoW', reskinOf: ['Druid|XPHB'], _copy: { name: 'Druid', source: 'XPHB' }, includeSubclassesFrom: ['Druid|XPHB'] };
@@ -32,6 +32,7 @@ const classFeatures = [
   feature('Wild Shape', 'Druid', 'XPHB', 2),
 ];
 const moon = { name: 'Circle of the Moon', shortName: 'Moon', source: 'XPHB', className: 'Druid', classSource: 'XPHB', subclassFeatures: ['Circle of the Moon|Druid|XPHB|Moon|XPHB|3'] };
+const devotion = { name: 'Oath of Devotion', shortName: 'Devotion', source: 'XPHB', className: 'Paladin', classSource: 'XPHB', subclassFeatures: [] };
 const ebonBlade = { name: 'Oath of the Ebon Blade', shortName: 'Ebon Blade', source: 'WoW', className: 'Death Knight', classSource: 'WoW', subclassFeatures: [] };
 const subclassFeatures = [
   { name: 'Circle of the Moon', className: 'Druid', classSource: 'XPHB', subclassShortName: 'Moon', subclassSource: 'XPHB', level: 3, source: 'XPHB', entries: [] },
@@ -40,7 +41,7 @@ const subclassFeatures = [
 function load() {
   const allClasses = [paladin, deathKnight, druid, druidWow];
   return resolveClassData({
-    allClasses, classes: allClasses, allSubclasses: [moon, ebonBlade], subclasses: [moon, ebonBlade], classFeatures, subclassFeatures,
+    allClasses, classes: allClasses, allSubclasses: [moon, devotion, ebonBlade], subclasses: [moon, devotion, ebonBlade], classFeatures, subclassFeatures,
   });
 }
 
@@ -76,7 +77,10 @@ test('a renamed skin inherits the base class features and subclasses', () => {
 test('Death Knight and Demon Hunter fix their own subclass, the Evoker does not', () => {
   const data = load();
   const dk = data.classes.find((cls) => cls.name === 'Death Knight');
-  assert.equal(fixedSubclassShortName(dk, data.subclasses), 'Ebon Blade');
+  // The Paladin's subclasses are listed under it too, but are not its own.
+  const { subclasses } = classScopedData(data, dk);
+  assert.deepEqual(subclasses.map((sub) => sub.shortName), ['Ebon Blade', 'Devotion']);
+  assert.equal(fixedSubclassShortName(dk, subclasses), 'Ebon Blade');
   const evoker = { name: 'Evoker', source: 'WoW', isHero: true };
   assert.equal(fixedSubclassShortName(evoker, [{ shortName: 'Draconic', className: 'Evoker', classSource: 'WoW', isReprint: true }]), null);
   assert.equal(fixedSubclassShortName(druid, data.subclasses), null);
