@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { saveDcPills } from '../../shared/character/progression/featureSaveDc.js';
 import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
@@ -39,8 +38,6 @@ registerSpeciesSheetActions("Aasimar_XPHB", [
     cat: 'bonus',
     resKey: 'aasimar_revelation',
     minLevel: 3,
-    // Necrotic Shroud's Charisma save.
-    inlinePills: saveDcPills('cha'),
   },
 ]);
 registerSpeciesSheetResources("Aasimar_XPHB", [

@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 import { levelTable, PSIONIC_DICE_COUNT } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
@@ -53,8 +52,7 @@ registerSubclassSheetActions("Rogue_Soulknife", [
     "name": "Rend Mind",
     "cat": "attack",
     "resKey": "rend_mind",
-    "minLevel": 17,
-    inlinePills: saveDcPills('dex')
+    "minLevel": 17
   }
 ]);
 registerSubclassSheetResources("Rogue_Soulknife", [

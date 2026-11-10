@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { featureSaveDc } from '../../shared/character/progression/featureSaveDc.js';
 
 // World of Warcraft. Darkvision 120 ft and Poison Resistance come from the
 // species data.
@@ -15,10 +14,7 @@ export default function install(registry, context = {}) {
         { kind: 'heal', formula: '1d10' },
         { kind: 'damage', formula: '1d10', label: ({ formula }) => `${formula} radiant` },
       ],
-      inlinePills: ({ character }) => [
-        { label: 'Save DC', value: featureSaveDc(character, 'con') },
-        { label: 'Area', value: '15-ft Cone' },
-      ],
+      inlinePills: [{ label: 'Area', value: '15-ft Cone' }],
     },
   ]);
   registerSpeciesSheetEffects('Earthen_WoW', [

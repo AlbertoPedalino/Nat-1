@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { saveDcPills } from '../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -48,7 +47,6 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
       const dice = lv >= 17 ? 4 : lv >= 11 ? 3 : lv >= 5 ? 2 : 1;
       return `${dice}d10`;
     } }],
-    inlinePills: saveDcPills('con'),
     minLevel: 1,
   },
   {

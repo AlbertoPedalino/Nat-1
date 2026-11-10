@@ -69,8 +69,10 @@ export function buildActionTags(action, C) {
   }
 
   // Convention: an adapter's `inlinePills` are for facts the action's resource
-  // bar can't show (range, duration, save DC, THP amount, a chosen damage type,
-  // etc.). Never add a pill that just restates the action's own resource-bar
+  // bar can't show (range, duration, THP amount, a chosen damage type, etc.).
+  // No save DC pills: the feature text gives the formula, as for Grapple or
+  // Shove, and a pill on every saving throw card would crowd the tab. Never
+  // add a pill that just restates the action's own resource-bar
   // value — e.g. a "Pool = level×5 HP" pill on an action whose resKey already
   // tracks that pool. That's redundant; let the bar own the number.
   const pills = typeof action.inlinePills === 'function'

@@ -1,6 +1,5 @@
 import { createAdapterBindings } from '../../../adapterBindings.js';
 import { finalAbilityModifier } from '../../../../shared/character/progression/abilityScores.js';
-import { featureSaveDc } from '../../../../shared/character/progression/featureSaveDc.js';
 
 // Death Knight (World of Warcraft), a skin of the Paladin: the Paladin's
 // entries come from its adapters (minus the features this class replaces,
@@ -21,7 +20,6 @@ export default function install(registry, context = {}) {
       minLevel: 1,
       rollers: [{ kind: 'damage', formula: ({ character }) => `${deathCoilDice(character)}d8`, label: ({ formula }) => `${formula} necrotic` }],
       inlinePills: ({ character, ownerLevel }) => [
-        { label: 'Save DC', value: featureSaveDc(character, 'cha') },
         { label: 'Max dice', value: deathCoilDice(character) },
         ...(Number(ownerLevel) >= 14 ? [{ label: 'Extra necrotic', value: deathCoilDice(character) }] : []),
       ],

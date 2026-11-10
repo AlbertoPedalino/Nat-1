@@ -1,6 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
-import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 const SHOT_LEVELS = [3, 3, 7, 10, 15, 18];
 
 export default function install(registry, context = {}) {
@@ -43,7 +42,7 @@ export default function install(registry, context = {}) {
     { type: 'skill', values: ['Arcana', 'Nature'], minLevel: 3 },
   ]);
   registerSubclassSheetActions('Fighter_Arcane Archer', [
-    { name: 'Arcane Shot', cat: 'special', resKey: 'arcane_shot', minLevel: 3, inlinePills: saveDcPills('int') },
+    { name: 'Arcane Shot', cat: 'special', resKey: 'arcane_shot', minLevel: 3 },
     { name: 'Curving Shot', cat: 'bonus', minLevel: 7 },
     { name: 'Magical Ammunition', cat: 'action', resKey: 'arcane_magical_ammunition', minLevel: 7 },
     { name: 'Masterful Shots', cat: 'reaction', minLevel: 18 },

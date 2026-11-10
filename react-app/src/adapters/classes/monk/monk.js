@@ -2,7 +2,6 @@ import { createAdapterBindings } from '../../adapterBindings.js';
 import { levelTable, MARTIAL_ARTS_DIE } from '../../classAdapterHelpers.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
-import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -75,15 +74,13 @@ registerClassSheetActions("Monk", [
       const total = dex + lv;
       return withModifier('1d10', total);
     }, label: ({ formula }) => `${String(formula || '')} reduce`, title: 'Reduction' }],
-    rollLabelPrefix: 'Deflect Attacks',
-    inlinePills: saveDcPills('wis')
+    rollLabelPrefix: 'Deflect Attacks'
   },
   {
     name: 'Stunning Strike',
     cat: 'special',
     resKey: 'ki',
-    minLevel: 5,
-    inlinePills: saveDcPills('wis')
+    minLevel: 5
   },
   {
     name: 'Disciplined Survivor',
