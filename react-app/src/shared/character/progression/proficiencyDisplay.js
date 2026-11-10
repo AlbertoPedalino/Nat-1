@@ -15,53 +15,6 @@ const CANONICAL_DISPLAY_LABELS = {
   ...Object.fromEntries(DAMAGE_TYPES.map((type) => [type.toLowerCase(), type])),
 };
 
-const SIMPLE_WEAPONS = new Set([
-  'club',
-  'dagger',
-  'greatclub',
-  'handaxe',
-  'javelin',
-  'lighthammer',
-  'mace',
-  'quarterstaff',
-  'sickle',
-  'spear',
-  'lightcrossbow',
-  'crossbowlight',
-  'dart',
-  'shortbow',
-  'sling',
-]);
-
-const MARTIAL_WEAPONS = new Set([
-  'battleaxe',
-  'flail',
-  'glaive',
-  'greataxe',
-  'greatsword',
-  'halberd',
-  'lance',
-  'longsword',
-  'maul',
-  'morningstar',
-  'pike',
-  'rapier',
-  'scimitar',
-  'shortsword',
-  'trident',
-  'warpick',
-  'warhammer',
-  'whip',
-  'blowgun',
-  'handcrossbow',
-  'crossbowhand',
-  'heavycrossbow',
-  'crossbowheavy',
-  'longbow',
-  'musket',
-  'pistol',
-]);
-
 export function cleanProficiencyText(value) {
   return stripMarkup(value)
     .replace(/[{}]/g, '')
@@ -100,20 +53,15 @@ function itemWeaponCategory(item) {
   const categoryKey = labelKey(raw);
   if (categoryKey.includes('simple')) return 'simple';
   if (categoryKey.includes('martial')) return 'martial';
-
-  const name = itemNameKey(item);
-  if (SIMPLE_WEAPONS.has(name)) return 'simple';
-  if (MARTIAL_WEAPONS.has(name)) return 'martial';
   return '';
 }
 
+// A weapon's category from the item data (`weaponCategory`); '' when the
+// item database is not at hand.
 function lookupWeaponCategory(label, allItemsDb) {
   const baseKey = labelKey(splitSource(label).base);
   const item = (allItemsDb || []).find((entry) => itemNameKey(entry) === baseKey);
-  if (item) return itemWeaponCategory(item);
-  if (SIMPLE_WEAPONS.has(baseKey)) return 'simple';
-  if (MARTIAL_WEAPONS.has(baseKey)) return 'martial';
-  return '';
+  return item ? itemWeaponCategory(item) : '';
 }
 
 export function uniqueDisplayLabels(values) {

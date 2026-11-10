@@ -273,7 +273,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
   const scores = builtAbilityScores(character);
   const hp = computeMaxHp(character);
   const primaryLv = primaryClassLevel(character);
-  const proficiencySections = collectPreviewProficiencies(character);
+  const proficiencySections = collectPreviewProficiencies(character, items);
   const weaponMasteries = collectResolvedWeaponMasteries(character, items);
   const previewFeats = collectPreviewFeats(character, feats);
   const species = character.speciesObj || character.speciesSnapshot;

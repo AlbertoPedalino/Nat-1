@@ -54,12 +54,15 @@ function collectSkillProficiencies(character) {
   return uniqueClean(out);
 }
 
-function mergePreviewSection(sections, title, items, prepend = false) {
-  const cleaned = title === 'Weapons' ? collapseWeaponProficiencies(items) : uniqueClean(items);
+// `allItemsDb`: the builder's item data, which knows each weapon's category, so
+// a weapon covered by "Simple" or "Martial" is not listed again.
+function mergePreviewSection(sections, title, items, prepend = false, allItemsDb = []) {
+  const collapse = (list) => collapseWeaponProficiencies(list, { allItemsDb });
+  const cleaned = title === 'Weapons' ? collapse(items) : uniqueClean(items);
   if (!cleaned.length) return;
   const existing = sections.find((section) => section.title === title);
   if (existing) {
-    existing.items = title === 'Weapons' ? collapseWeaponProficiencies([...existing.items, ...cleaned]) : uniqueClean([...existing.items, ...cleaned]);
+    existing.items = title === 'Weapons' ? collapse([...existing.items, ...cleaned]) : uniqueClean([...existing.items, ...cleaned]);
     return;
   }
   const next = { title, items: cleaned };
@@ -67,20 +70,20 @@ function mergePreviewSection(sections, title, items, prepend = false) {
   else sections.push(next);
 }
 
-export function collectPreviewProficiencies(character) {
+export function collectPreviewProficiencies(character, allItemsDb = []) {
   const sheetLike = buildPreviewSheetCharacter(character);
   const sections = collectAllProficiencies(sheetLike, collectEquipmentProficiencySets(sheetLike)).map((section) => ({
     title: section.title,
-    items: section.title === 'Weapons' ? collapseWeaponProficiencies(section.items) : uniqueClean(section.items),
+    items: section.title === 'Weapons' ? collapseWeaponProficiencies(section.items, { allItemsDb }) : uniqueClean(section.items),
   }));
 
   collectPreviewDefenseSections(sheetLike).forEach((section) => {
-    mergePreviewSection(sections, section.title, section.items);
+    mergePreviewSection(sections, section.title, section.items, false, allItemsDb);
   });
 
   collectPreviewEffectProficiencySections(sheetLike).forEach((section) => {
     if (section.title === 'Armor Training' || section.title === 'Weapon Training') return;
-    mergePreviewSection(sections, section.title, section.items);
+    mergePreviewSection(sections, section.title, section.items, false, allItemsDb);
   });
 
   const skillItems = collectSkillProficiencies(character);
