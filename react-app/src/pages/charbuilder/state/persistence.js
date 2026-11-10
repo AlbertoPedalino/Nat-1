@@ -18,6 +18,7 @@ import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { hpBonusPerLevelOf } from '../../../shared/character/combat/hp.js';
 import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
@@ -97,7 +98,7 @@ export function makeSheetPayload(character, data) {
       return {
         ...pickFields(feat, FEAT_SNAPSHOT_FIELDS),
         ...pickFields(adapted, FEAT_SNAPSHOT_FIELDS),
-        hpBonusPerLevel: Number(adapted.hpBonusPerLevel || feat.hpBonusPerLevel || 0),
+        hpBonusPerLevel: hpBonusPerLevelOf(adapterRegistry.getFeatSheetEffects(feat.name)),
       };
     });
   const fixedFeatSpellNames = ownedFeatSnapshots.flatMap((feat) => {
@@ -243,9 +244,7 @@ export function makeSheetPayload(character, data) {
       armorProficiencies: character.speciesObj?.armorProficiencies,
       weaponProficiencies: character.speciesObj?.weaponProficiencies,
       entries: character.speciesObj?.entries || [],
-      hpBonusPerLevel: Number(adapterRegistry.getSpeciesSheetHpBonus
-        ? adapterRegistry.getSpeciesSheetHpBonus(character.speciesName, character.speciesSource) || 0
-        : 0),
+      hpBonusPerLevel: hpBonusPerLevelOf(adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource)),
     },
     backgroundSnapshot: {
       skillProficiencies: character.backgroundObj?.skillProficiencies || [],

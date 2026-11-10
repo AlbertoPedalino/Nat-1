@@ -7,7 +7,6 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetResources,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    registerSpeciesSheetHpBonus,
     getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Dwarf_XPHB", function (s) {
@@ -16,11 +15,6 @@ registerSpeciesAdapter("Dwarf_XPHB", function (s) {
 
 registerSpeciesSheetCommonChoiceMeta("Dwarf_XPHB");
 
-// Dwarven Toughness: +1 HP per character level
-registerSpeciesSheetHpBonus("Dwarf_XPHB", 1);
-registerSpeciesSheetHpBonus("Dwarf_PHB", 1);
-registerSpeciesSheetHpBonus("Hill Dwarf_XPHB", 1);
-registerSpeciesSheetHpBonus("Hill Dwarf_PHB", 1);
 
 registerSpeciesSheetActions("Dwarf_XPHB", [
   {
@@ -47,8 +41,10 @@ registerSpeciesSheetResources("Dwarf_XPHB", [
 ]);
 
 // Dwarven Resilience: Advantage on saves to avoid or end the Poisoned condition.
+// Dwarven Toughness: +1 HP per character level.
 registerSpeciesSheetEffects("Dwarf_XPHB", [
   { type: 'advantage', target: 'save', conditions: ['Poisoned'], minLevel: 1, note: 'Dwarven Resilience' },
+  { type: 'hpBonus', perLevel: 1, minLevel: 1, note: 'Dwarven Toughness' },
 ]);
 
 }

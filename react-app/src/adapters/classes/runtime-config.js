@@ -21,7 +21,6 @@ export default function install(registry, context = {}) {
 
   regClass("Barbarian", {
     multiclassPrerequisites: [{ str: 13 }],
-    unarmoredDefense: [{ name: "Unarmored Defense", base: 10, abilities: ["dex", "con"], allowShield: true, minLevel: 1 }],
   });
   regClass("Bard", {
     multiclassPrerequisites: [{ cha: 13 }],
@@ -38,15 +37,6 @@ export default function install(registry, context = {}) {
       choiceSpellSources: {
         bard_magical_secrets_lv10: { label: "Magical Secrets", ability: "cha" },
       },
-    },
-    skillRules: { jackOfAllTradesMinLevel: 2 },
-    featureDice: {
-      bardicInspiration: [
-        { minLevel: 15, faces: 12 },
-        { minLevel: 10, faces: 10 },
-        { minLevel: 5, faces: 8 },
-        { minLevel: 1, faces: 6 },
-      ],
     },
   });
   regClass("Cleric", {
@@ -86,7 +76,6 @@ export default function install(registry, context = {}) {
   });
   regClass("Monk", {
     multiclassPrerequisites: [{ dex: 13, wis: 13 }],
-    unarmoredDefense: [{ name: "Unarmored Defense", base: 10, abilities: ["dex", "wis"], allowShield: false, minLevel: 1 }],
   });
   regClass("Paladin", {
     multiclassPrerequisites: [{ str: 13, cha: 13 }],

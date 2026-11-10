@@ -1,8 +1,6 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
 import { canonicalProficiencyLabel } from '../progression/proficiencyDisplay.js';
-import { classEntities } from '../progression/classLevel.js';
+import { collectOwnerEntries } from '../sheet/adapterOwners.js';
 import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
-import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 
 export function normalizeLabel(value) {
@@ -56,42 +54,10 @@ export function collectFixedFeatureProfs(character, field) {
   return out;
 }
 
-function choiceMatches(character, requiredChoice, prefix = '') {
-  if (!requiredChoice?.key) return true;
-  const choices = character?.choices || {};
-  const keys = [requiredChoice.key, `${prefix || ''}${requiredChoice.key}`].filter(Boolean);
-  const wanted = asArray(requiredChoice.value);
-  const wantedNorm = wanted.map((value) => matchKey(stripSource(value)));
-  return keys.some((key) => {
-    const stored = choices[key];
-    const values = Array.isArray(stored) ? stored : (stored ? [stored] : []);
-    return values.some((value) => wantedNorm.includes(matchKey(stripSource(value))));
-  });
-}
-
+// The proficiency grants of the character's classes, subclasses and species
+// (adapterOwners.js), each with where it comes from.
 export function collectAdapterProfGrants(character) {
-  const grants = [];
-  const push = (list, level, prefix = '', sourceType = '', sourceName = '') => {
-    (list || []).forEach((grant) => {
-      if (!grant || typeof grant !== 'object') return;
-      if ((level || 1) < Number(grant.minLevel || 1)) return;
-      if (grant.requiredChoice && !choiceMatches(character, grant.requiredChoice, prefix)) return;
-      grants.push({ ...grant, sourceType, sourceName });
-    });
-  };
-  const collectEntity = (className, subclassShortName, level, prefix = '') => {
-    push(adapterRegistry.getClassSheetProficiencies(className), level, prefix, 'class', className);
-    push(adapterRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix, 'subclass', subclassShortName);
-  };
-  classEntities(character).forEach((entity) => {
-    collectEntity(entity.className, entity.subclassShortName, entity.level, entity.choicePrefix);
-  });
-  push(
-    adapterRegistry.getSpeciesSheetProficiencies(character?.speciesName || '', character?.speciesSource || ''),
-    character?.level || 1,
-    '',
-    'species',
-    character?.speciesName || '',
-  );
-  return grants;
+  return collectOwnerEntries(character, 'SheetProficiencies').map(({ entry, owner }) => ({
+    ...entry, sourceType: owner.kind, sourceName: owner.name,
+  }));
 }

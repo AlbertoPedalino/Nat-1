@@ -23,3 +23,28 @@ test('feat detail choices are not read as feats', () => {
   const withDetails = { ...fighter, choices: { feat_asi_lv4: 'Alert', feat_asi_lv4_asi: ['Tough'] } };
   assert.equal(computeMaxHp(withDetails, 0), 28);
 });
+
+// One rule for every owner's hit point bonus (`hpBonus` sheet effects).
+test('class, species and feat hit point bonuses go through the same effects', async () => {
+  const [{ default: installDraconic }, { default: installDwarf }] = await Promise.all([
+    import('../../../../../src/adapters/classes/sorcerer/draconic.js'),
+    import('../../../../../src/adapters/species/dwarf.js'),
+  ]);
+  installDraconic(adapterRegistry);
+  installDwarf(adapterRegistry);
+  // Sorcerer 5, d6, CON +0: 6 + 4 × 4 = 22; Draconic Resilience 3 + 2 = 5.
+  const sorcerer = { className: 'Sorcerer', subclassShortName: 'Draconic', level: 5, classLevel: 5, cls: { hd: { faces: 6 } }, choices: {} };
+  assert.equal(computeMaxHp(sorcerer, 0), 27);
+  // Dwarven Toughness: +1 per level.
+  assert.equal(computeMaxHp({ ...sorcerer, speciesName: 'Dwarf', speciesSource: 'XPHB' }, 0), 32);
+});
+
+test('a sheet whose adapters did not load keeps the bonuses its snapshots carry', () => {
+  const saved = {
+    className: 'Wizard', level: 3, classLevel: 3, cls: { hd: { faces: 6 } }, choices: {},
+    speciesName: 'Nowhere', speciesSnapshot: { hpBonusPerLevel: 1 },
+    allFeatSnapshots: [{ name: 'Unloaded Feat', hpBonusPerLevel: 2 }],
+  };
+  // 6 + 2 × 4 = 14, + 3 × (1 + 2).
+  assert.equal(computeMaxHp(saved, 0), 23);
+});

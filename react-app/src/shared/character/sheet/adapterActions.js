@@ -1,12 +1,8 @@
 // The action cards a character's adapters give (class, subclass, species,
 // feats), live from the registry or from the sheet's serialized runtime, one
 // per signature, with their formulas resolved for the character.
-import {
-  classEntities,
-  primaryClassLevel,
-} from '../progression/classLevel.js';
-import { adapterRegistry } from '../../../adapters/registry.js';
-import { adapterEntryApplies } from '../progression/choiceUtils.js';
+import { primaryClassLevel } from '../progression/classLevel.js';
+import { collectOwnerEntries, entryApplies } from './adapterOwners.js';
 import {
   featDescriptionEntries,
   featNamedEntries,
@@ -15,7 +11,6 @@ import {
   getActionRollers,
   resolveActionRollers,
 } from '../dice/rollers.js';
-import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { matchKey } from '../../content/nameKeys.js';
 
 // Development warnings already given, so each is logged once.
@@ -253,12 +248,12 @@ export function collectAdapterActions(C, sheet) {
     return null;
   };
 
-  const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1) => {
+  // `checked`: already gated by collectOwnerEntries.
+  const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1, { checked = false } = {}) => {
     (arr || []).forEach(a => {
       if (!a || !a.name) return;
       const lv = Number(a.ownerLevel ?? ownerLevel ?? C?.level ?? 1);
-      if (a.minLevel && lv < Number(a.minLevel)) return;
-      if (!adapterEntryApplies(a, C, sheet)) return;
+      if (!checked && !entryApplies(a, C, { level: lv, sheet })) return;
       if (!isExecutableAction(a)) return;
       const officialEntries = resolveOfficialEntries(a, source);
       if (!officialEntries && !a.noDescription) {
@@ -277,21 +272,8 @@ export function collectAdapterActions(C, sheet) {
 
   // Prefer live registry data so function properties such as condition/max/formula survive
   // after the character has been serialized to localStorage.
-  classEntities(C).forEach((entity) => {
-    pushFiltered(adapterRegistry.getClassSheetActions(entity.className), entity.ownerName, entity.level);
-    if (entity.subclassShortName) {
-      pushFiltered(
-        adapterRegistry.getSubclassSheetActions(entity.className, entity.subclassShortName),
-        `${entity.subclassShortName} (${entity.className})`,
-        entity.level,
-      );
-    }
-  });
-  if (C?.speciesName) {
-    pushFiltered(adapterRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource), C.speciesName, C.level || 1);
-  }
-  ownedFeatNames(C).forEach((featName) => {
-    pushFiltered(adapterRegistry.getFeatSheetActions(featName), featName, C.level || 1);
+  collectOwnerEntries(C, 'SheetActions', { sheet }).forEach(({ entry, owner }) => {
+    pushFiltered([entry], owner.label, owner.level, { checked: true });
   });
 
   // Fallback for older exported characters that already contain adapterRuntime.

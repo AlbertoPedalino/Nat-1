@@ -44,7 +44,6 @@ test('an empty result is a fresh value each time', () => {
   assert.deepEqual(registry.getFeatSheetActions('Alert'), []);
   assert.deepEqual(registry.getClassRuntimeConfig('Bard'), {});
   assert.equal(registry.getClassAtWillSpells('Bard'), null);
-  assert.equal(registry.getSpeciesSheetHpBonus('Dwarf', 'XPHB'), 0);
 });
 
 test('bindings split a subclass or species raw key; class and feat registers pass through', () => {

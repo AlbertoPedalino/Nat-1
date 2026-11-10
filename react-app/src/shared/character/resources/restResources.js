@@ -1,16 +1,11 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
 import { getFinal, getMod, getPB } from '../sheet/sheetStats.js';
-import {
-  classEntities,
-  primaryClassLevel,
-} from '../progression/classLevel.js';
+import { primaryClassLevel } from '../progression/classLevel.js';
+import { collectOwnerEntries } from '../sheet/adapterOwners.js';
 import { resolveScalingFormula } from '../dice/scalingFormula.js';
 import {
   rechargesOnRest,
   isKnownRecharge,
 } from './rechargeRules.js';
-import { adapterEntryApplies } from '../progression/choiceUtils.js';
-import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { hitDieFaces } from '../combat/hp.js';
 import { clamp } from '../../numbers.js';
 function resourceOwnerLevel(def, character) {
@@ -72,11 +67,10 @@ function warnBadResourceDef(def, ownerName) {
   }
 }
 
+// `def` is already in force (collectOwnerEntries).
 function pushResource(out, def, character, ownerName, ownerLevel) {
   if (!def?.key) return;
   const lv = Number(def.ownerLevel ?? ownerLevel ?? character?.level ?? 1);
-  if (def.minLevel && lv < Number(def.minLevel)) return;
-  if (!adapterEntryApplies(def, character)) return;
   warnBadResourceDef(def, ownerName);
   out.push({ ...def, ownerName: def.ownerName || ownerName, ownerLevel: lv });
 }
@@ -103,23 +97,8 @@ function restBlockedByLevel(def, character, type) {
 export function getAllResourceDefs(character) {
   const out = [];
 
-  classEntities(character).forEach((entity) => {
-    (adapterRegistry.getClassSheetResources(entity.className) || [])
-      .forEach((def) => pushResource(out, def, character, entity.ownerName, entity.level));
-    if (entity.subclassShortName) {
-      (adapterRegistry.getSubclassSheetResources(entity.className, entity.subclassShortName) || [])
-        .forEach((def) => pushResource(out, def, character, `${entity.subclassShortName} (${entity.className})`, entity.level));
-    }
-  });
-
-  if (character?.speciesName) {
-    (adapterRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [])
-      .forEach((def) => pushResource(out, def, character, character.speciesName, character.level || 1));
-  }
-
-  ownedFeatNames(character).forEach((featName) => {
-    (adapterRegistry.getFeatSheetResources(featName) || [])
-      .forEach((def) => pushResource(out, def, character, featName, character?.level || 1));
+  collectOwnerEntries(character, 'SheetResources').forEach(({ entry, owner }) => {
+    pushResource(out, entry, character, owner.label, owner.level);
   });
 
   return uniqResources(out);

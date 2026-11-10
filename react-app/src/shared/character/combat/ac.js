@@ -1,24 +1,23 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
 import { getAcBonusEffects } from '../sheet/effectBonuses.js';
+import { collectSheetEffects } from '../sheet/sheetEffects.js';
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
-import { classEntities } from '../progression/classLevel.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
-import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';
 
-function collectFromSheetEffects(out, list, meta, character, seenKeys) {
-  asArray(list).forEach((effect) => {
-    if (!effect || typeof effect !== 'object') return;
+// The alternate AC formulas in force (Unarmored Defense, Draconic Resilience…):
+// sheet effects of type `acFormula`, gated like every other effect
+// (collectSheetEffects), one per key.
+export function collectAcFormulas(character) {
+  if (!character?.className) return [];
+  const seen = new Set();
+  return collectSheetEffects(character).flatMap((effect) => {
     const type = String(effect.type || '');
-    if (type !== 'acFormula' && type !== 'unarmoredDefense') return;
-    const minLevel = Number(effect.minLevel || 1);
-    if (Number(meta.ownerLevel || 1) < minLevel) return;
-    const rawKey = effect.key || `${meta.sourceKey}_${type}_${(effect.abilities || []).join('_')}`;
-    const key = matchKey(rawKey);
-    if (seenKeys.has(key)) return;
-    seenKeys.add(key);
-    out.push({
+    if (type !== 'acFormula' && type !== 'unarmoredDefense') return [];
+    const key = matchKey(effect.key || `${effect.sourceKey}_${type}_${(effect.abilities || []).join('_')}`);
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [{
       ...effect,
       type: 'acFormula',
       key,
@@ -28,93 +27,8 @@ function collectFromSheetEffects(out, list, meta, character, seenKeys) {
       allowShield: effect.allowShield !== false,
       requiresNoArmor: effect.requiresNoArmor !== false,
       minLevel: Number(effect.minLevel || 1),
-      ownerName: meta.ownerName,
-      ownerType: meta.ownerType,
-      sourceKey: meta.sourceKey,
-    });
+    }];
   });
-}
-
-function collectRuntimeConfigFormulas(out, character, seenKeys) {
-  classEntities(character).forEach((entity) => {
-    const ol = entity.level;
-
-    const clsCfg = adapterRegistry.getClassRuntimeConfig(entity.className);
-    if (clsCfg?.unarmoredDefense) {
-      asArray(clsCfg.unarmoredDefense).forEach((cfg) => {
-        if (ol < Number(cfg.minLevel || 1)) return;
-        const key = matchKey(`${entity.className}_unarmored_defense`);
-        if (seenKeys.has(key)) return;
-        seenKeys.add(key);
-        out.push({
-          type: 'acFormula',
-          key,
-          label: cfg.name || 'Unarmored Defense',
-          base: Number(cfg.base) || 10,
-          abilities: cfg.abilities || ['dex'],
-          allowShield: cfg.allowShield !== false,
-          requiresNoArmor: true,
-          minLevel: Number(cfg.minLevel || 1),
-          ownerName: entity.className,
-          ownerType: 'class',
-          sourceKey: `${entity.className}_runtime`,
-        });
-      });
-    }
-
-    if (entity.subclassShortName) {
-      const subCfg = adapterRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName);
-      if (subCfg?.unarmoredDefense) {
-        asArray(subCfg.unarmoredDefense).forEach((cfg) => {
-          if (ol < Number(cfg.minLevel || 1)) return;
-          const key = matchKey(`${entity.className}_${entity.subclassShortName}_${cfg.name || 'unarmored_defense'}`);
-          if (seenKeys.has(key)) return;
-          seenKeys.add(key);
-          out.push({
-            type: 'acFormula',
-            key,
-            label: cfg.name || 'Unarmored Defense',
-            base: Number(cfg.base) || 10,
-            abilities: cfg.abilities || ['dex'],
-            allowShield: cfg.allowShield !== false,
-            requiresNoArmor: true,
-            minLevel: Number(cfg.minLevel || 1),
-            ownerName: entity.subclassShortName,
-            ownerType: 'subclass',
-            sourceKey: `${entity.className}_${entity.subclassShortName}_runtime`,
-          });
-        });
-      }
-    }
-  });
-}
-
-export function collectAcFormulas(character) {
-  if (!character?.className) return [];
-  const out = [];
-  const seenKeys = new Set();
-
-  classEntities(character).forEach((entity) => {
-    const ol = entity.level;
-    collectFromSheetEffects(out, adapterRegistry.getClassSheetEffects(entity.className), {
-      ownerName: entity.className, ownerType: 'class', ownerLevel: ol, sourceKey: entity.className,
-    }, character, seenKeys);
-    if (entity.subclassShortName) {
-      collectFromSheetEffects(out, adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
-        ownerName: entity.subclassShortName, ownerType: 'subclass', ownerLevel: ol, sourceKey: `${entity.className}_${entity.subclassShortName}`,
-      }, character, seenKeys);
-    }
-  });
-
-  if (character.speciesName) {
-    collectFromSheetEffects(out, adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
-      ownerName: character.speciesName, ownerType: 'species', ownerLevel: Number(character.level || 1), sourceKey: character.speciesName,
-    }, character, seenKeys);
-  }
-
-  collectRuntimeConfigFormulas(out, character, seenKeys);
-
-  return out;
 }
 
 export function getEquippedArmor(character, items) {

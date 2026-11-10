@@ -10,11 +10,14 @@ import { readChoiceValue } from './choiceUtils.js';
  * compared by normalized (lowercased, alphanumeric) equality.
  */
 
-export function matchesRequiredChoice(character, requiredChoice) {
+// `prefix`: the owner's multiclass choice prefix (`mc<i>_`), whose copy of the
+// choice is read first.
+export function matchesRequiredChoice(character, requiredChoice, { prefix = '' } = {}) {
   if (!requiredChoice?.key) return true;
   const expectedValues = asArray(requiredChoice.value).map(choiceKey).filter(Boolean);
   if (!expectedValues.length) return true;
-  const stored = readChoiceValue(character, requiredChoice.key);
+  const stored = (prefix ? readChoiceValue(character, `${prefix}${requiredChoice.key}`) : null)
+    ?? readChoiceValue(character, requiredChoice.key);
   const storedNorms = asArray(stored).map(choiceKey);
   return expectedValues.some((expected) => storedNorms.includes(expected));
 }

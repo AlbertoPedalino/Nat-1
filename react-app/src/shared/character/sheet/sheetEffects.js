@@ -1,45 +1,6 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
-import { matchesRequiredChoice } from '../progression/lineageMatch.js';
-import { inventoryHasFlag } from '../progression/choiceUtils.js';
-import { ownedFeatNames } from '../progression/selectedFeats.js';
-import { classEntities } from '../progression/classLevel.js';
+import { collectOwnerEntries } from './adapterOwners.js';
 import { asArray } from '../../lists.js';
 import { effectKey, displayLabel, effectSummary } from './sheetEffectText.js';
-
-function conditionPasses(effect, context) {
-  if (typeof effect?.condition !== 'function') return true;
-  try {
-    return !!effect.condition(context.character, context);
-  } catch (_) {
-    try {
-      return !!effect.condition(context);
-    } catch {
-      return false;
-    }
-  }
-}
-
-function requiredChoicePasses(effect, character) {
-  const rc = effect?.requiredChoice;
-  if (!rc?.key) return true;
-  return matchesRequiredChoice(character, rc);
-}
-
-function requiredItemFlagPasses(effect, character) {
-  const requirement = effect?.requiredItemFlag;
-  if (!requirement) return true;
-  const inv = character?.inventory || [];
-  return inventoryHasFlag(inv, requirement);
-}
-
-function effectIsActive(effect, context) {
-  if (!effect || typeof effect !== 'object') return false;
-  const minLevel = Number(effect.minLevel || 1);
-  if (Number(context.ownerLevel || 1) < minLevel) return false;
-  if (!requiredChoicePasses(effect, context.character)) return false;
-  if (!requiredItemFlagPasses(effect, context.character)) return false;
-  return conditionPasses(effect, context);
-}
 
 function annotate(effect, meta) {
   return {
@@ -70,62 +31,22 @@ function dedupeEffects(effects) {
       return;
     }
 
-    const existingScore = String(existing.note || '').length + (existing.ownerType === 'runtime' ? 0 : 20);
-    const nextScore = String(effect.note || '').length + (effect.ownerType === 'runtime' ? 0 : 20);
-    if (nextScore > existingScore) byKey.set(key, effect);
+    // The fuller note of two otherwise identical effects wins.
+    if (String(effect.note || '').length > String(existing.note || '').length) byKey.set(key, effect);
   });
 
   return [...byKey.values()];
 }
 
-function collectFromList(out, list, meta, character) {
-  const context = { character, ownerLevel: meta.ownerLevel, ownerName: meta.ownerName, ownerType: meta.ownerType };
-  asArray(list).forEach((effect) => {
-    if (!effectIsActive(effect, context)) return;
-    out.push(annotate(effect, meta));
-  });
-}
-
+// Every sheet effect in force on the character, from its classes, subclasses,
+// species and feats (adapterOwners.js), each annotated with its owner.
 export function collectSheetEffects(character = {}) {
-  const out = [];
-
-  classEntities(character).forEach((entity) => {
-    collectFromList(out, adapterRegistry.getClassSheetEffects(entity.className), {
-      ownerName: entity.className,
-      ownerType: 'class',
-      ownerLevel: entity.level,
-      sourceKey: entity.className,
-    }, character);
-
-    if (entity.subclassShortName) {
-      collectFromList(out, adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
-        ownerName: entity.subclassShortName,
-        ownerType: 'subclass',
-        ownerLevel: entity.level,
-        sourceKey: `${entity.className}_${entity.subclassShortName}`,
-      }, character);
-    }
-  });
-
-  if (character.speciesName) {
-    collectFromList(out, adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
-      ownerName: character.speciesName,
-      ownerType: 'species',
-      ownerLevel: Number(character.level || 1),
-      sourceKey: `${character.speciesName}_${character.speciesSource || ''}`,
-    }, character);
-  }
-
-  ownedFeatNames(character).forEach((feat) => {
-    collectFromList(out, adapterRegistry.getFeatSheetEffects(feat), {
-      ownerName: feat,
-      ownerType: 'feat',
-      ownerLevel: Number(character.level || 1),
-      sourceKey: feat,
-    }, character);
-  });
-
-  return dedupeEffects(out);
+  return dedupeEffects(collectOwnerEntries(character, 'SheetEffects').map(({ entry, owner }) => annotate(entry, {
+    ownerName: owner.name,
+    ownerType: owner.kind,
+    ownerLevel: owner.level,
+    sourceKey: owner.sourceKey,
+  })));
 }
 
 // Known sense-effect type tokens. Adapters may register either `type:'sense'`

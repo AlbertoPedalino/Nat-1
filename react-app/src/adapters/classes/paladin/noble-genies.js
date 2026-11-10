@@ -74,7 +74,6 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
 ]);
 
 registerSubclassRuntimeConfig("Paladin_Noble Genies", {
-  unarmoredDefense: [{ name: "Genie's Splendor", base: 10, abilities: ["dex", "cha"], allowShield: true, minLevel: 3 }],
   spellcasting: {
     alwaysPreparedSpells: [
       { name: "Chromatic Orb", minLevel: 3, level: 1 },

@@ -1,5 +1,5 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
+import { collectSheetEffects } from '../sheet/sheetEffects.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { primaryClassLevel, totalLevel } from '../progression/classLevel.js';
 
@@ -21,38 +21,42 @@ function levelEntry(character, key, faces) {
   return Math.floor(faces / 2) + 1;
 }
 
-function classHpBonusFor(className, subclassShortName, classLevel, snapshotEffects) {
-  const live = [
-    ...adapterRegistry.getClassSheetEffects(className),
-    ...adapterRegistry.getSubclassSheetEffects(className, subclassShortName),
-  ];
-  const effects = live.length ? live : (snapshotEffects || []);
-  return effects.reduce((sum, eff) => {
-    if (!eff || eff.type !== 'hpBonus') return sum;
-    const min = Number(eff.minLevel || 1);
-    if (Number(classLevel || 1) < min) return sum;
-    const base = Number(eff.amount || 0);
-    const per = Number(eff.perLevelAfter || 0);
-    return sum + base + per * Math.max(0, Number(classLevel || 1) - min);
-  }, 0);
+// The one hit point bonus rule, `hpBonus` sheet effects of any owner:
+// `amount` once its owner reaches `minLevel`, `perLevelAfter` for each owner
+// level beyond it (Draconic Resilience), `perLevel` for each character level
+// (Dwarven Toughness, Tough).
+export function hpBonusFromEffect(effect, ownerLevel, characterLevel) {
+  if (!effect || effect.type !== 'hpBonus') return 0;
+  const min = Number(effect.minLevel || 1);
+  const level = Number(ownerLevel || 1);
+  if (level < min) return 0;
+  return Number(effect.amount || 0)
+    + Number(effect.perLevelAfter || 0) * Math.max(0, level - min)
+    + Number(effect.perLevel || 0) * Number(characterLevel || 1);
 }
 
-function speciesHpBonus(character) {
-  const live = adapterRegistry.getSpeciesSheetHpBonus(character?.speciesName, character?.speciesSource);
-  if (live) return live;
-  return Number(character?.speciesSnapshot?.hpBonusPerLevel || 0);
+// What a species' or feat's effects add per character level, for snapshots.
+export function hpBonusPerLevelOf(effects) {
+  return (effects || []).reduce((sum, effect) => (
+    effect?.type === 'hpBonus' ? sum + Number(effect.perLevel || 0) : sum
+  ), 0);
 }
 
-function featHpBonusPerLevel(featName, featSnapshot) {
-  if (featSnapshot?.hpBonusPerLevel != null) return Number(featSnapshot.hpBonusPerLevel) || 0;
-  const adapter = adapterRegistry.getFeatAdapter(featName);
-  if (typeof adapter !== 'function') return 0;
-  try {
-    const out = adapter({ name: featName }) || {};
-    return Number(out.hpBonusPerLevel || 0);
-  } catch {
-    return 0;
-  }
+// A sheet whose adapters could not load (a stale-deploy chunk) still gets the
+// bonuses its saved snapshots carry.
+function snapshotHpBonus(character, primaryLevel, characterLevel) {
+  const classBonus = (effects, level) => (effects || [])
+    .reduce((sum, effect) => sum + hpBonusFromEffect(effect, level, characterLevel), 0);
+  let total = classBonus(character.adapterRuntime?.classEffects, primaryLevel);
+  (character.extraClasses || []).forEach((ec) => {
+    total += classBonus(ec.adapterRuntime?.classEffects, Math.max(1, Number(ec.level || 1)));
+  });
+  const owned = new Set(ownedFeatNames(character));
+  const featPerLevel = (character.allFeatSnapshots || [])
+    .filter((feat) => owned.has(feat?.name))
+    .reduce((sum, feat) => sum + (Number(feat.hpBonusPerLevel) || 0), 0);
+  const speciesPerLevel = Number(character.speciesSnapshot?.hpBonusPerLevel || 0);
+  return total + (featPerLevel + speciesPerLevel) * characterLevel;
 }
 
 export function computeMaxHp(character, conMod) {
@@ -69,33 +73,19 @@ export function computeMaxHp(character, conMod) {
   for (let lv = 2; lv <= primaryLevel; lv += 1) {
     total += levelEntry(character, lv, primaryFaces) + conModNum;
   }
-  total += classHpBonusFor(
-    character.className,
-    character.subclassShortName,
-    primaryLevel,
-    character.adapterRuntime?.classEffects,
-  );
-
   extras.forEach((ec, index) => {
     const faces = hitDieFaces(ec.cls || ec.clsSnapshot);
     const ecLevel = Math.max(1, Number(ec.level || 1));
     for (let lv = 1; lv <= ecLevel; lv += 1) {
       total += levelEntry(character, `extra_${index}_${lv}`, faces) + conModNum;
     }
-    total += classHpBonusFor(ec.name, ec.subclassShortName, ecLevel, ec.adapterRuntime?.classEffects);
   });
 
-  total += speciesHpBonus(character) * characterLevel;
-
-  const featNames = ownedFeatNames(character);
-  const featSnapshotsByName = new Map(
-    (character?.allFeatSnapshots || []).map((feat) => [feat?.name, feat]),
-  );
-  const featBonusPerLevel = featNames.reduce(
-    (sum, name) => sum + featHpBonusPerLevel(name, featSnapshotsByName.get(name)),
-    0,
-  );
-  total += featBonusPerLevel * characterLevel;
+  // Every owner's `hpBonus` effects, gated like any effect (collectSheetEffects).
+  const bonuses = collectSheetEffects(character).filter((effect) => effect.type === 'hpBonus');
+  total += bonuses.length
+    ? bonuses.reduce((sum, effect) => sum + hpBonusFromEffect(effect, effect.ownerLevel, characterLevel), 0)
+    : snapshotHpBonus(character, primaryLevel, characterLevel);
 
   return Math.max(1, total);
 }

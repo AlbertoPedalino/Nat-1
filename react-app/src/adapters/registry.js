@@ -127,7 +127,6 @@ export const KEYED_SLOTS = [
   // Spell riders: factories `(ctx) => rider | null` that attach an extra roller /
   // tag / description to a spell row at render time (e.g. Stars Druid Chalice).
   { register: 'SpellRiders', get: 'SpellRiders', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
-  { register: 'SheetHpBonus', get: 'SheetHpBonus', kinds: ['Species'], mode: 'number', empty: 0 },
   { register: 'AtWillSpells', get: 'AtWillSpells', kinds: ['Class'], mode: 'list', empty: null },
   { register: 'LongRestGrants', get: 'LongRestGrants', kinds: ['Species'], mode: 'raw', empty: null },
 ];
