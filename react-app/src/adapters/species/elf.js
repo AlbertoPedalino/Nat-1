@@ -1,26 +1,11 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
   const {
-    registerSpeciesAdapter,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
-// Canonical lineage tokens — single source for both the choice options
-// (validated against _versions via `expect`) and the requiredChoice predicates.
-const ELF_LINEAGE = { DROW: 'Drow', HIGH_ELF: 'High Elf', WOOD_ELF: 'Wood Elf' };
-
-registerSpeciesAdapter("Elf_XPHB", function (s) {
-  const specs = [];
-  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Elf', suffixes: ['Lineage'], expect: Object.values(ELF_LINEAGE) });
-
-  specs.push({ key: 'species_version', label: 'Elven Lineage', type: 'option', options: lineageOptions, count: 1, level: 1 });
-  // The High Elf's Wizard cantrip comes from the lineage's data
-  // (speciesSpellChoiceSpecs).
-  return specs;
-});
-
+// The lineage pick comes from the species' versions (speciesVersionChoiceSpec).
 registerSpeciesSheetCommonChoiceMeta("Elf_XPHB", {
   labels: {
     species_version: 'Elven Lineage',

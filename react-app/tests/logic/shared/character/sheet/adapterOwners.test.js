@@ -2,10 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installDance from '../../../../../src/adapters/classes/bard/dance.js';
+import installOrc from '../../../../../src/adapters/species/orc.js';
 import {
   characterOwners,
   collectOwnerEntries,
   entryApplies,
+  ownerEntries,
+  speciesOwner,
 } from '../../../../../src/shared/character/sheet/adapterOwners.js';
 import { collectAcFormulas } from '../../../../../src/shared/character/combat/ac.js';
 import { getUnarmedStrike } from '../../../../../src/shared/character/sheet/effectBonuses.js';
@@ -62,4 +65,13 @@ test('speed effects: bonuses per mode, "walking" modes, situational ones only li
   assert.deepEqual(bonus, {});
   // Aquatic Affinity swims at walking speed; Stormborn's flight is only while Wrath is active.
   assert.deepEqual([...walkingModes], ['swim']);
+});
+
+test('a reprinted species reads the entries of the species it copies', () => {
+  installOrc(adapterRegistry);
+  const owner = speciesOwner({ speciesName: 'Orc', speciesSource: 'WoW', speciesSnapshot: { copiedFrom: { name: 'Orc', source: 'XPHB' } } });
+  assert.deepEqual(owner.keys, [['Orc', 'WoW'], ['Orc', 'XPHB']]);
+  const names = ownerEntries(owner, 'SheetResources').map((resource) => resource.key);
+  assert.ok(names.includes('orc_relentless_endurance'));
+  assert.deepEqual(ownerEntries(speciesOwner({ speciesName: 'Orc', speciesSource: 'WoW' }), 'SheetResources'), []);
 });

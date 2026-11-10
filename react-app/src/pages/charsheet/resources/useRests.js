@@ -12,7 +12,7 @@ import {
 import { clearedToggles } from '../state/toggleState.js';
 import { applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
 import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';
-import { adapterRegistry } from '../../../adapters/registry.js';
+import { ownerEntries, speciesOwner } from '../../../shared/character/sheet/adapterOwners.js';
 import { rollDie } from '../../../shared/character/dice/dice.js';
 import { clamp } from '../../../shared/numbers.js';
 
@@ -131,7 +131,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     }
 
     if (C?.speciesName) {
-      const grants = adapterRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
+      const grants = ownerEntries(speciesOwner(C), 'LongRestGrants');
       if (grants?.inspiration) {
         s.sheetInspiration = true;
         patch.inspiration = true;

@@ -1,4 +1,5 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
+import { ownerEntries, speciesOwner } from '../sheet/adapterOwners.js';
 import { speciesWithVersion } from '../progression/speciesVersion.js';
 import { enumerateFixedAdditionalSpells } from './additionalSpellGrants.js';
 import { isGrantUnlocked } from './spellGrants.js';
@@ -96,10 +97,8 @@ function subclassFullName(entity) {
  * whatever an adapter's runtime config still adds.
  */
 export function enumerateSpeciesGrants(character) {
-  const spellcasting = adapterRegistry.getSpeciesRuntimeConfig(
-    character?.speciesName,
-    character?.speciesSource,
-  )?.spellcasting || {};
+  const owner = speciesOwner(character);
+  const spellcasting = (owner ? ownerEntries(owner, 'RuntimeConfig') : null)?.spellcasting || {};
   const chosenAbility = character?.normalizedChoices?.species?.spellAbility || null;
   const level = Number(character?.level || 1);
   const species = speciesWithVersion(character?.speciesSnapshot || character?.speciesObj, character?.choices);

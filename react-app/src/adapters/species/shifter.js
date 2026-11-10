@@ -1,35 +1,14 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
-import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
   const {
-    registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
-// Canonical lineage tokens — single source for both the choice options
-// (validated against _versions via `expect`) and the requiredChoice predicates.
-const SHIFTER_LINEAGE = { BEASTHIDE: 'Beasthide', LONGTOOTH: 'Longtooth', SWIFTSTRIDE: 'Swiftstride', WILDHUNT: 'Wildhunt' };
-
-registerSpeciesAdapter("Shifter_EFA", function (s) {
-  const specs = [];
-  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Shifter', expect: Object.values(SHIFTER_LINEAGE) });
-
-  specs.push({
-    key: 'species_version',
-    label: 'Shifter Lineage',
-    type: 'option',
-    options: lineageOptions,
-    count: 1,
-    level: 1,
-  });
-
-  return specs;
-});
-
+// The lineage pick comes from the species' versions (speciesVersionChoiceSpec).
 registerSpeciesSheetCommonChoiceMeta("Shifter_EFA", {
   labels: {
     species_version: 'Shifter Lineage',

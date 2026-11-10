@@ -50,7 +50,7 @@ function isPlainObject(value) {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
 
-function mergeRuntimeConfig(base, patch) {
+export function mergeRuntimeConfig(base, patch) {
   if (!isPlainObject(base)) return isPlainObject(patch) ? { ...patch } : {};
   if (!isPlainObject(patch)) return { ...base };
 

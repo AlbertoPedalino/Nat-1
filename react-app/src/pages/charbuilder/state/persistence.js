@@ -1,5 +1,6 @@
 import { collectOwnedFeatNames, withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
+import { ownerEntries, speciesOwner } from '../../../shared/character/sheet/adapterOwners.js';
 import {
   createCharacter as storeCreateCharacter,
   getActiveCharId,
@@ -259,7 +260,8 @@ export function makeSheetPayload(character, data) {
       armorProficiencies: character.speciesObj?.armorProficiencies,
       weaponProficiencies: character.speciesObj?.weaponProficiencies,
       entries: character.speciesObj?.entries || [],
-      hpBonusPerLevel: hpBonusPerLevelOf(adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource)),
+      hpBonusPerLevel: hpBonusPerLevelOf(ownerEntries(speciesOwner(character), 'SheetEffects')),
+      copiedFrom: character.speciesObj?.copiedFrom || null,
     },
     backgroundSnapshot: {
       skillProficiencies: character.backgroundObj?.skillProficiencies || [],
@@ -282,13 +284,13 @@ export function makeSheetPayload(character, data) {
       subclassResources: runtimeSubclassResources,
       subclassEffects: adapterRegistry.getSubclassSheetEffects(character.className, character.subclassShortName),
       speciesActions: annotateActions(
-        adapterRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
+        ownerEntries(speciesOwner(character), 'SheetActions'),
         character.speciesName,
         Number(character.level || 1),
         'species',
       ),
-      speciesResources: adapterRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [],
-      speciesEffects: adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
+      speciesResources: ownerEntries(speciesOwner(character), 'SheetResources') || [],
+      speciesEffects: ownerEntries(speciesOwner(character), 'SheetEffects'),
       featActions: ownedFeatNames.flatMap((feat) => annotateActions(
         adapterRegistry.getFeatSheetActions(feat),
         feat,

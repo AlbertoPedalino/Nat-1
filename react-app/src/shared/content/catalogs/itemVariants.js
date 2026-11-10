@@ -2,19 +2,10 @@ import { matchKey, stripSource } from '../nameKeys.js';
 import { canonicalItemSource, formatLeadingBonusName, withCanonicalSource } from './itemRecords.js';
 import { resolveVariantTemplate } from './entryTemplates.js';
 import { asArray } from '../../lists.js';
+import { nameSourceKey, resolveCopyRecords as resolveCopies } from '../copyRecords.js';
 
 // 5etools item variants: `_copy` resolution, base-item requirement matching,
 // and the expansion of magic variants into concrete items.
-
-function cloneJson(value) {
-  if (value == null || typeof value !== 'object') return value;
-  if (Array.isArray(value)) return value.map(cloneJson);
-  return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, cloneJson(child)]));
-}
-
-function recordKey(name, source) {
-  return `${String(name || '').trim().toLowerCase()}|${String(source || '').trim().toLowerCase()}`;
-}
 
 // Magic variants carry their source on `inherits`, not at the top level, so
 // "+1 Weapon" (DMG) and "+1 Weapon" (XDMG) would otherwise share one key.
@@ -22,104 +13,12 @@ function recordSource(record) {
   return record?.source || record?.inherits?.source;
 }
 
-function getParentAndKey(target, path, create = false) {
-  const parts = String(path || '').split('.').filter(Boolean);
-  if (!parts.length) return null;
-  let parent = target;
-  for (const part of parts.slice(0, -1)) {
-    if (!parent[part] || typeof parent[part] !== 'object' || Array.isArray(parent[part])) {
-      if (!create) return null;
-      parent[part] = {};
-    }
-    parent = parent[part];
-  }
-  return { parent, key: parts.at(-1) };
-}
-
-function arrayItems(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value.map(cloneJson) : [cloneJson(value)];
-}
-
-function sameJsonValue(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
-function applyCopyModification(target, path, rawModification) {
-  const modification = rawModification === 'remove'
-    ? { mode: 'remove' }
-    : rawModification;
-  if (!modification || typeof modification !== 'object') return;
-
-  const location = getParentAndKey(target, path, modification.mode !== 'remove');
-  if (!location) return;
-  const { parent, key } = location;
-
-  if (modification.mode === 'remove') {
-    delete parent[key];
-    return;
-  }
-  if (modification.mode === 'setProp') {
-    parent[key] = cloneJson(modification.value);
-    return;
-  }
-
-  const current = Array.isArray(parent[key]) ? parent[key].map(cloneJson) : [];
-  const items = arrayItems(modification.items);
-  if (modification.mode === 'appendArr') {
-    parent[key] = [...current, ...items];
-  } else if (modification.mode === 'appendIfNotExistsArr') {
-    parent[key] = [...current, ...items.filter((item) => !current.some((entry) => sameJsonValue(entry, item)))];
-  } else if (modification.mode === 'insertArr') {
-    const requestedIndex = Number(modification.index);
-    const index = Number.isFinite(requestedIndex) && requestedIndex >= 0
-      ? Math.min(requestedIndex, current.length)
-      : current.length;
-    parent[key] = [...current.slice(0, index), ...items, ...current.slice(index)];
-  } else if (modification.mode === 'replaceArr') {
-    const requestedIndex = Number(modification.replace?.index ?? modification.index);
-    if (!Number.isFinite(requestedIndex) || requestedIndex < 0 || requestedIndex >= current.length) return;
-    parent[key] = [
-      ...current.slice(0, requestedIndex),
-      ...items,
-      ...current.slice(requestedIndex + 1),
-    ];
-  }
-}
-
-/** Resolve 5etools `_copy` chains while keeping the upstream data external. */
+/** Resolve 5etools `_copy` chains of items (copyRecords.js). */
 export function resolveCopyRecords(records) {
-  const source = Array.isArray(records) ? records : [];
-  const lookup = new Map(source.map((record) => [recordKey(record?.name, recordSource(record)), record]));
-  const resolved = new Map();
-  const resolving = new Set();
-
-  function resolve(record) {
-    if (!record || typeof record !== 'object') return record;
-    const key = recordKey(record.name, recordSource(record));
-    if (resolved.has(key)) return cloneJson(resolved.get(key));
-    if (resolving.has(key)) return cloneJson(record);
-    resolving.add(key);
-
-    let result = {};
-    const copy = record._copy;
-    if (copy?.name) {
-      const base = lookup.get(recordKey(copy.name, copy.source || recordSource(record)));
-      if (base) result = resolve(base);
-      Object.entries(copy._mod || {}).forEach(([path, modification]) => {
-        applyCopyModification(result, path, modification);
-      });
-    }
-
-    Object.entries(record).forEach(([field, value]) => {
-      if (field !== '_copy') result[field] = cloneJson(value);
-    });
-    resolving.delete(key);
-    resolved.set(key, result);
-    return cloneJson(result);
-  }
-
-  return source.map(resolve);
+  return resolveCopies(records, {
+    keyOf: (record) => nameSourceKey(record?.name, recordSource(record)),
+    copyKeyOf: (copy, record) => nameSourceKey(copy.name, copy.source || recordSource(record)),
+  });
 }
 
 function normalizeComparable(value) {

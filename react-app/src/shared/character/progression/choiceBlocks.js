@@ -98,6 +98,8 @@ export function genericSpeciesChoiceSpecs(species) {
     specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability', type: 'ability_choice', from: [...new Set(abilities)], count: 1, level: 1 });
   }
 
+  const versionSpec = speciesVersionChoiceSpec(species);
+  if (versionSpec) specs.push(versionSpec);
   specs.push(...speciesSpellChoiceSpecs(species));
 
   // A species with versions (Tiefling legacies, Dragonborn colours) takes its
@@ -155,4 +157,25 @@ export function speciesSpellChoiceSpecs(species) {
   return additionalSpellChoiceGroups(grants[0]).map((group, index) => (
     spellChoiceSpec(group, `species_${group.level === 0 ? 'cantrip' : 'spell'}_${index}`, null)
   ));
+}
+
+// The lineage / legacy pick of a species with versions ("Elf; Drow Lineage",
+// "Tiefling; Abyssal Legacy", "Shifter; Beasthide"), stored as its short name.
+// Named after the species trait that offers it ("Elven Lineage"). Abstract
+// variants (Dragonborn colours) are an adapter's to offer.
+export function speciesVersionChoiceSpec(species) {
+  const versions = asArray(species?._versions).filter((version) => !version?._abstract);
+  const labels = [...new Set(versions.map(versionChoiceLabel).filter(Boolean))];
+  if (!labels.length) return null;
+  const trait = asArray(species?.entries)
+    .map((entry) => (entry && typeof entry === 'object' ? String(entry.name || '') : ''))
+    .find((name) => /(Lineage|Legacy)$/i.test(name));
+  return {
+    key: 'species_version',
+    label: trait || `${species?.name || 'Species'} Lineage`,
+    type: 'option',
+    options: labels.map((label) => ({ key: label, label })),
+    count: 1,
+    level: 1,
+  };
 }

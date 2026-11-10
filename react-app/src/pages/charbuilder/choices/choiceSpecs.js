@@ -1,4 +1,5 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
+import { ownerEntries, speciesOwner } from '../../../shared/character/sheet/adapterOwners.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
 import {
@@ -305,7 +306,7 @@ export function speciesChoiceSpecs(character) {
   // What the species data offers, for every species; an adapter adds only
   // what the data cannot say (lineages, spell abilities…).
   specs.push(...genericSpeciesChoiceSpecs(species));
-  const adapter = adapterRegistry.getSpeciesAdapter(character.speciesName, character.speciesSource);
+  const adapter = ownerEntries(speciesOwner(character), 'Adapter');
   const adapterSpecs = typeof adapter === 'function' ? adapter(species) : null;
   if (Array.isArray(adapterSpecs)) specs.push(...adapterSpecs);
   return dedupSpecs(filterByRequiredChoice(specs, character));

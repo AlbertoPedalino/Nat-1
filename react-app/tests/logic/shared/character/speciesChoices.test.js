@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { speciesChoiceSpecs } from '../../../../src/pages/charbuilder/choices/choiceSpecs.js';
-import { genericSpeciesChoiceSpecs } from '../../../../src/shared/character/progression/choiceBlocks.js';
+import { genericSpeciesChoiceSpecs, speciesVersionChoiceSpec } from '../../../../src/shared/character/progression/choiceBlocks.js';
 
 // One parser for what a species' data offers, whether or not it has an adapter.
 const species = {
@@ -63,4 +63,18 @@ test('a species-wide cantrip pick needs no lineage', () => {
   assert.equal(spec.key, 'species_cantrip_0');
   assert.deepEqual(spec.classes, ['Cleric', 'Druid', 'Wizard']);
   assert.equal(spec.requiredChoice, undefined);
+});
+
+test('the lineage pick comes from the species versions, named after its trait', () => {
+  const spec = speciesVersionChoiceSpec({
+    name: 'Elf',
+    entries: [{ name: 'Darkvision' }, { name: 'Azeroth Elven Lineage' }],
+    _versions: [{ name: 'Elf; Blood Elf Lineage' }, { name: 'Elf; Night Elf Lineage' }],
+  });
+  assert.equal(spec.key, 'species_version');
+  assert.equal(spec.label, 'Azeroth Elven Lineage');
+  assert.deepEqual(spec.options.map((option) => option.key), ['Blood Elf', 'Night Elf']);
+  assert.equal(speciesVersionChoiceSpec({ name: 'Gnome', _versions: [] }), null);
+  assert.equal(speciesVersionChoiceSpec({ name: 'Shifter', _versions: [{ name: 'Shifter; Beasthide' }] }).label, 'Shifter Lineage');
+  assert.equal(speciesVersionChoiceSpec({ name: 'Dragonborn', _versions: [{ _abstract: true, _implementations: [] }] }), null);
 });

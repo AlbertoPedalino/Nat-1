@@ -6,13 +6,21 @@ import {
 } from '../sourcePriority.js';
 import { loadGameData } from '../gameData.js';
 import { byName } from '../../lists.js';
+import { resolveCopyRecords } from '../copyRecords.js';
 
 // The species, backgrounds and feats a character picks from.
 
+// A reprint (Dwarf|WoW copies Dwarf|XPHB) comes resolved, with its own source;
+// `copiedFrom` names the record it copies, whose adapter it falls back on.
 export async function loadSpecies() {
   const data = await loadGameData('races.json');
-  return (data.race || data.species || [])
-    .filter((species) => isAllowedSource(species.source, SPECIES_ALLOWED_SOURCES))
+  const all = data.race || data.species || [];
+  const allowed = all.filter((species) => isAllowedSource(species.source, SPECIES_ALLOWED_SOURCES));
+  return resolveCopyRecords(allowed, { pool: all })
+    .map((species, index) => {
+      const copy = allowed[index]._copy;
+      return copy?.name ? { ...species, copiedFrom: { name: copy.name, source: copy.source || species.source } } : species;
+    })
     .sort(byName);
 }
 

@@ -4,50 +4,15 @@ import { loadGameData } from '../content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
 import { byName } from '../lists.js';
 import { cachedLoader } from '../content/cachedLoader.js';
+import { resolveCopyRecords } from '../content/copyRecords.js';
 
 function legendaryGroupKey(name, source) {
   return `${source || ''}__${name || ''}`;
 }
 
 export function resolveLegendaryGroups(data) {
-  const rawGroups = new Map((data?.legendaryGroup || []).map((group) => [
-    legendaryGroupKey(group.name, group.source),
-    group,
-  ]));
-  const resolved = new Map();
-
-  function resolve(group, visited = new Set()) {
-    if (!group) return null;
-    const key = legendaryGroupKey(group.name, group.source);
-    if (resolved.has(key)) return resolved.get(key);
-    if (visited.has(key)) return group;
-
-    const copy = group._copy;
-    if (!copy?.name || !copy?.source) {
-      resolved.set(key, group);
-      return group;
-    }
-
-    const nextVisited = new Set(visited);
-    nextVisited.add(key);
-    const base = resolve(rawGroups.get(legendaryGroupKey(copy.name, copy.source)), nextVisited);
-    const merged = { ...(base || {}), ...group };
-    delete merged._copy;
-
-    for (const [prop, mod] of Object.entries(copy._mod || {})) {
-      if (!mod || !Array.isArray(mod.items)) continue;
-      const current = Array.isArray(merged[prop]) ? merged[prop] : [];
-      if (mod.mode === 'prependArr') merged[prop] = [...mod.items, ...current];
-      else if (mod.mode === 'appendArr') merged[prop] = [...current, ...mod.items];
-      else if (mod.mode === 'replaceArr') merged[prop] = [...mod.items];
-    }
-
-    resolved.set(key, merged);
-    return merged;
-  }
-
-  rawGroups.forEach((group) => resolve(group));
-  return resolved;
+  const groups = resolveCopyRecords(data?.legendaryGroup || []);
+  return new Map(groups.map((group) => [legendaryGroupKey(group.name, group.source), group]));
 }
 
 export function getLegendaryGroup(monster, legendaryGroups) {
