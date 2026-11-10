@@ -10,7 +10,8 @@ import { failureMessage } from '../../../shared/ui/busyAction.js';
 // has arrived.
 export function useBuilderAdapters(state, dispatch, notify) {
   useEffect(() => {
-    if (state.adaptersLoaded || state.loading.items) return;
+    // Classes and species first: a class skin loads its base class's adapters.
+    if (state.adaptersLoaded || state.loading.items || state.loading.classes || state.loading.species) return;
     let cancelled = false;
     const activeClasses = classNames(state.character);
     Promise.all([
@@ -26,7 +27,7 @@ export function useBuilderAdapters(state, dispatch, notify) {
     return () => {
       cancelled = true;
     };
-  }, [state.adaptersLoaded, state.loading.items, state.data.items]);
+  }, [state.adaptersLoaded, state.loading.items, state.loading.classes, state.loading.species, state.data.items]);
 
   useEffect(() => {
     if (!state.adaptersLoaded) return;

@@ -17,6 +17,7 @@ import { withOwnedFeatSnapshots } from '../../../shared/character/progression/se
 import { splitNameSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
+import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
 import {
   patchTouchesNormalizeSource, pruneOrphanFeatChoices, cleanChoicesForLevel, totalCharacterLevel,
   normalizeCharacterLevels, normChoice, clearSpeciesChoices, pruneStaleSpeciesLineageChoices,
@@ -105,11 +106,7 @@ export function builderReducer(state, action) {
       // Derive the class-scoped data (subclasses + feature lists) for one class.
       // Shared by the primary class and every multiclass entry so re-hydration
       // after a reload (when heavy fields were stripped) is identical for both.
-      const deriveClassData = (name, source, subclassSource = '') => ({
-        subclasses: data.subclasses.filter((s) => s.className === name && (s.classSource === source || !s.classSource)),
-        allFeatures: data.classFeatures.filter((f) => f.className === name && (f.classSource === source || !f.classSource)),
-        allSubFeatures: data.subclassFeatures.filter((f) => f.className === name && (f.classSource === source || !f.classSource) && (!subclassSource || !f._copy || f.subclassSource === subclassSource)),
-      });
+      const deriveClassData = (cls) => classScopedData(data, cls);
 
       const classObject = findByNameSource(data.classes, state.character.className, state.character.classSource) || state.character.cls;
       const speciesObj = findByNameSource(data.species, state.character.speciesName, state.character.speciesSource) || state.character.speciesObj;
@@ -120,7 +117,7 @@ export function builderReducer(state, action) {
       const extraClasses = (state.character.extraClasses || []).map((extra) => {
         const extraCls = findByNameSource(data.classes, extra.name, extra.source) || extra.cls;
         if (!extraCls) return extra;
-        return { ...extra, cls: extraCls, ...deriveClassData(extraCls.name, extraCls.source, extra.subclassSource || '') };
+        return { ...extra, cls: extraCls, ...deriveClassData(extraCls) };
       });
 
       return {
@@ -133,7 +130,7 @@ export function builderReducer(state, action) {
           speciesObj,
           backgroundObj,
           extraClasses,
-          ...deriveClassData(className, classSource, state.character.subclassSource || ''),
+          ...deriveClassData(classObject || { name: className, source: classSource }),
         }, data.feats),
       };
     }

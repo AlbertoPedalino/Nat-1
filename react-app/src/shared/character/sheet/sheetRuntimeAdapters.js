@@ -1,6 +1,7 @@
 import { loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
 import { asArray } from '../../lists.js';
 import { classNames } from '../progression/classLevel.js';
+import { registerCharacterInheritance } from './recordInheritance.js';
 
 function asCharacterList(characters) {
   return asArray(characters).filter(Boolean);
@@ -31,5 +32,6 @@ export async function ensureClassAdapters(classNameList, { spells = false } = {}
 // Sheet summaries, campaign rosters, and the full sheet all depend on adapter
 // effects/resources/actions.
 export async function ensureSheetRuntimeAdapters(characters, options) {
+  asCharacterList(characters).forEach(registerCharacterInheritance);
   return ensureClassAdapters(collectSheetRuntimeClassNames(characters), options);
 }

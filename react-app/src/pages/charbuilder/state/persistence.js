@@ -69,6 +69,12 @@ function makeClassSnapshot(cls = null) {
     startingProficiencies: cls.startingProficiencies || {},
     multiclassProficienciesGained: cls.multiclassProficienciesGained || {},
     startingEquipment: cls.startingEquipment || null,
+    // A class skin (World of Warcraft): the class whose rules it follows, the
+    // base-class features it replaces, and the spells its own features give.
+    ruleClass: cls.ruleClass || null,
+    removedFeatures: cls.removedFeatures || [],
+    isHero: Boolean(cls.isHero),
+    skinAdditionalSpells: cls.skinAdditionalSpells || [],
   };
 }
 

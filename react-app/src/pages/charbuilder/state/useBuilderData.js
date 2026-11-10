@@ -4,18 +4,25 @@ import { loadClassIndex, loadOptionalFeatures } from '../../../shared/content/ca
 import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { loadBeasts } from '../../../shared/content/catalogs/beastData.js';
+import { registerClassSkins, registerSpeciesCopies } from '../../../shared/character/sheet/recordInheritance.js';
 
 // The game data the builder needs, by scope: how to load it and where it goes
 // in `state.data`. Scope names are also what the load-error banner shows.
 const BUILDER_DATA = {
-  classes: [loadClassIndex, (result) => ({
+  classes: [loadClassIndex, (result) => {
+    registerClassSkins(result.classes);
+    return {
     classCache: result.cache,
     classes: result.classes,
     subclasses: result.subclasses,
     classFeatures: result.classFeatures,
     subclassFeatures: result.subclassFeatures,
-  })],
-  species: [loadSpecies, (species) => ({ species })],
+    };
+  }],
+  species: [loadSpecies, (species) => {
+    registerSpeciesCopies(species);
+    return { species };
+  }],
   backgrounds: [loadBackgrounds, (backgrounds) => ({ backgrounds })],
   feats: [loadFeats, (feats) => ({ feats })],
   spells: [loadSpells, (result) => ({ spells: result.spells, classSpellIndex: result.classSpellIndex })],

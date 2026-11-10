@@ -1,5 +1,6 @@
 import { asArray } from '../../lists.js';
 import { choiceKey } from '../../content/nameKeys.js';
+import { classEntities } from './classLevel.js';
 // A choice is saved under its base key, or under a multiclass-prefixed copy
 // (`mc1_<key>`) when its class was added as a multiclass.
 export function baseChoiceKey(key) {
@@ -47,10 +48,15 @@ export function getChoiceValue(C, key) {
 
 // The prefix the builder gives a class's choices: none for the primary class,
 // `mc<i>_` for the i-th multiclass.
+// Where a class's choices are saved: '' for the primary class, `mc<i>_` for
+// an extra class. A class skin answers for its base class (a Hunter's choices
+// for 'Ranger').
 export function classChoicePrefix(C, className) {
   const target = String(className || '').toLowerCase();
-  const index = (C?.extraClasses || []).findIndex((ec) => String(ec?.name || '').toLowerCase() === target);
-  return String(C?.className || '').toLowerCase() !== target && index >= 0 ? `mc${index}_` : '';
+  const entity = classEntities(C).find((candidate) => (
+    candidate.className.toLowerCase() === target || candidate.ruleClassName.toLowerCase() === target
+  ));
+  return entity?.choicePrefix || '';
 }
 
 // Patch that sets a single-pick builder choice from the sheet, in the builder's

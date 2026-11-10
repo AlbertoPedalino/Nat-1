@@ -1,4 +1,5 @@
 import { matchKey } from '../shared/content/nameKeys.js';
+import { asArray } from '../shared/lists.js';
 function subclassKey(className, subclassShortName) {
   const cls = matchKey(className);
   const sub = matchKey(subclassShortName);
@@ -141,7 +142,83 @@ function emptyValue(empty) {
   return empty;
 }
 
-function keyedSlotMethods(slot, kindName, store) {
+// ── Inherited entries ────────────────────────────────────────────────────
+// A record can stand on another one (from the 5etools data, registered with
+// registerClassSkin / registerSpeciesCopy): a World of Warcraft class skin on
+// its base class (Death Knight on Paladin, its subclasses on the Paladin's),
+// a reprinted species on the one it copies (Dwarf|WoW on Dwarf|XPHB). Every
+// read of such a record also reads the record it stands on: lists join (an
+// own entry replacing an inherited one of the same key or name), choice
+// adapters run both, objects merge with its own values winning. Entries of a
+// base-class feature the skin replaces ("Lay on Hands" for the Death Knight)
+// are left out; an entry names its feature in `feature`, else by its name.
+
+// The feature an entry belongs to: its `feature`, the feature a config entry
+// names as its `source` (Divine Smite: "Paladin's Smite"), else its own name.
+function featureIdentities(entry) {
+  if (!entry || typeof entry !== 'object') return [];
+  return [entry.feature, typeof entry.source === 'string' ? entry.source : null, entry.name, entry.note]
+    .filter(Boolean)
+    .map((value) => matchKey(String(value).replace(/\.$/, '')));
+}
+
+function isRemoved(entry, removed) {
+  return featureIdentities(entry).some((identity) => removed.has(identity));
+}
+
+function withoutRemoved(entries, removed) {
+  if (!removed?.size) return entries;
+  return entries.filter((entry) => !isRemoved(entry, removed));
+}
+
+// The same through a runtime config's nested lists (always-prepared spells…).
+function pruneRemoved(value, removed) {
+  if (!removed?.size) return value;
+  if (Array.isArray(value)) return withoutRemoved(value, removed).map((item) => pruneRemoved(item, removed));
+  if (isPlainObject(value)) {
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, pruneRemoved(child, removed)]));
+  }
+  return value;
+}
+
+function entryIdentity(entry) {
+  return entry && typeof entry === 'object' ? (entry.key || entry.name || null) : null;
+}
+
+// A choice adapter either pushes specs into its third argument (classes,
+// subclasses) or returns them (species, feats).
+function composeAdapters(inherited, own, removed) {
+  if (typeof inherited !== 'function') return own;
+  return (...args) => {
+    const target = Array.isArray(args[2]) ? args[2] : null;
+    if (target) {
+      const scratch = [];
+      const returned = inherited(args[0], args[1], scratch, ...args.slice(3));
+      target.push(...withoutRemoved([...scratch, ...asArray(returned)], removed));
+      return typeof own === 'function' ? own(...args) : undefined;
+    }
+    const inheritedOut = withoutRemoved(asArray(inherited(...args)), removed);
+    const ownOut = typeof own === 'function' ? asArray(own(...args)) : [];
+    return [...inheritedOut, ...ownOut];
+  };
+}
+
+function combineInherited(mode, own, inherited, removed) {
+  if (mode === 'fn') return composeAdapters(inherited, own, removed);
+  if (mode === 'list') {
+    const ownList = asArray(own);
+    const ownIds = new Set(ownList.map(entryIdentity).filter(Boolean));
+    return [
+      ...withoutRemoved(asArray(inherited), removed).filter((entry) => !ownIds.has(entryIdentity(entry))),
+      ...ownList,
+    ];
+  }
+  if (mode === 'merge') return mergeRuntimeConfig(pruneRemoved(inherited || {}, removed), own || {});
+  if (mode === 'object') return { ...pruneRemoved(inherited || {}, removed), ...(own || {}) };
+  return own ?? inherited;
+}
+
+function keyedSlotMethods(slot, kindName, store, parentOf) {
   const kind = OWNER_KINDS[kindName];
   const { arity } = kind;
   const register = (...args) => {
@@ -155,7 +232,15 @@ function keyedSlotMethods(slot, kindName, store) {
       default: kind.write(store, key, value);
     }
   };
-  const get = (...args) => kind.find(store, args.slice(0, arity)) || emptyValue(slot.empty);
+  const read = (key, depth) => {
+    const own = kind.find(store, key);
+    const parent = depth < 4 ? parentOf(kindName, key) : null;
+    if (!parent) return own;
+    const inherited = read(parent.key, depth + 1);
+    if (inherited == null) return own;
+    return combineInherited(slot.mode, own, inherited, parent.removed);
+  };
+  const get = (...args) => read(args.slice(0, arity), 0) || emptyValue(slot.empty);
   return {
     [`register${kindName}${slot.register}`]: register,
     [`get${kindName}${slot.get}`]: get,
@@ -163,9 +248,26 @@ function keyedSlotMethods(slot, kindName, store) {
 }
 
 export function createAdapterRegistry() {
+  const classSkins = new Map();
+  const speciesCopies = new Map();
+  const parentOf = (kindName, key) => {
+    if (kindName === 'Class' || kindName === 'Subclass') {
+      const skin = classSkins.get(matchKey(key[0]));
+      if (!skin) return null;
+      return kindName === 'Class'
+        ? { key: [skin.base], removed: skin.removed }
+        : { key: [skin.base, key[1]], removed: null };
+    }
+    if (kindName === 'Species') {
+      const base = speciesCopies.get(speciesKey(key[0], key[1]));
+      return base ? { key: [base.name, base.source], removed: null } : null;
+    }
+    return null;
+  };
+
   const keyed = {};
   KEYED_SLOTS.forEach((slot) => {
-    slot.kinds.forEach((kindName) => Object.assign(keyed, keyedSlotMethods(slot, kindName, new Map())));
+    slot.kinds.forEach((kindName) => Object.assign(keyed, keyedSlotMethods(slot, kindName, new Map(), parentOf)));
   });
 
   const globals = {};
@@ -193,6 +295,24 @@ export function createAdapterRegistry() {
   return {
     ...keyed,
     ...globals,
+    // A class skin (World of Warcraft): the class it reskins and the names of
+    // the base-class features it replaces.
+    registerClassSkin(name, { base, removedFeatures = [] } = {}) {
+      const skin = matchKey(name);
+      if (!skin || !base || matchKey(base) === skin) return;
+      classSkins.set(skin, { base: String(base), removed: new Set(asArray(removedFeatures).map((feature) => matchKey(feature)).filter(Boolean)) });
+    },
+    // The class a skin's rules come from ("Death Knight" -> "Paladin"); the
+    // class itself when it is not a skin.
+    getRuleClassName(name) {
+      return classSkins.get(matchKey(name))?.base || name;
+    },
+    // A reprinted species and the species it copies.
+    registerSpeciesCopy(name, source, base) {
+      const key = speciesKey(name, source);
+      if (!key || !base?.name || speciesKey(base.name, base.source) === key) return;
+      speciesCopies.set(key, { name: base.name, source: base.source || '' });
+    },
     registerResourceSideEffect(name, fn) {
       if (typeof fn === 'function') stores.resourceSideEffects.set(String(name), fn);
     },

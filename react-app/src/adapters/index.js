@@ -14,11 +14,13 @@ function classFolderToken(name) {
   return String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
+// A class skin's adapters live with its base class (registry.js,
+// registerClassSkin): both folders load.
 function pathsForClass(name) {
-  const token = classFolderToken(name);
-  return Object.keys(adapterModules).filter((path) =>
-    path.includes(`./classes/${token}/`) || path.includes(`/classes/${token}/`),
-  );
+  const tokens = [...new Set([name, adapterRegistry.getRuleClassName(name)].map(classFolderToken))];
+  return Object.keys(adapterModules).filter((path) => tokens.some((token) => (
+    path.includes(`./classes/${token}/`) || path.includes(`/classes/${token}/`)
+  )));
 }
 
 function pathsForSpecies() {

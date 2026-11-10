@@ -5,6 +5,7 @@ import {
   bucketCounts, hasPickedSpell, withoutSpellPicked, withSpellPicked, withWizardBookToggled,
 } from '../../../shared/character/spells/spellBuckets.js';
 import { clamp } from '../../../shared/numbers.js';
+import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
 
 // The class entry a spell action edits: an extra class by index, else the
 // character (the primary class).
@@ -22,9 +23,7 @@ export function handleClassSelect(state, action, { findByNameSource, updateChara
   const classObject = action.classObject || findByNameSource(state.data.classes, action.className, action.source);
   const className = action.className || classObject?.name;
   const source = action.source || classObject?.source;
-  const subclasses = state.data.subclasses.filter((subclass) => subclass.className === className && (subclass.classSource === source || !subclass.classSource));
-  const allFeatures = state.data.classFeatures.filter((feature) => feature.className === className && (feature.classSource === source || !feature.classSource));
-  const allSubFeatures = state.data.subclassFeatures.filter((feature) => feature.className === className && (feature.classSource === source || !feature.classSource));
+  const { subclasses, allFeatures, allSubFeatures } = classScopedData(state.data, classObject || { name: className, source });
   if (state.character.activeClassTab > 0) {
     const index = state.character.activeClassTab - 1;
     const currentExtra = state.character.extraClasses[index];

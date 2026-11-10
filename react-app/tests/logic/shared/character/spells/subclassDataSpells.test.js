@@ -28,3 +28,16 @@ test('a subclass list that depends on a choice (several entries) is left to its 
   const [entity] = classEntities(land);
   assert.equal(enumerateEntityGrants(entity, land).some((g) => g.name === 'a' || g.name === 'b'), false);
 });
+
+test('a class skin grants the spells of its own features, prepared with a free cast', async () => {
+  const { enumerateClassDataGrants } = await import('../../../../../src/shared/character/spells/autoGrantedSpells.js');
+  const entity = {
+    className: 'Death Knight', level: 5,
+    entry: { clsSnapshot: { skinAdditionalSpells: [{ prepared: { 2: { daily: { 1: ['rune strike|wow'] } }, 5: { daily: { 1: ['find steed|xphb'] } } } }] } },
+  };
+  const grants = enumerateClassDataGrants(entity);
+  assert.deepEqual(grants.map((g) => g.name), ['rune strike', 'find steed']);
+  assert.equal(grants[0].mode, 'prepared');
+  assert.equal(grants[0].entry.freeCast.maxUses, 1);
+  assert.equal(enumerateClassDataGrants({ ...entity, level: 3 }).length, 1);
+});

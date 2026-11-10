@@ -1,4 +1,4 @@
-import { KEYED_SLOTS, adapterRegistry, mergeRuntimeConfig } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { classEntities } from '../progression/classLevel.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { matchesRequiredChoice } from '../progression/lineageMatch.js';
@@ -14,8 +14,10 @@ import { asArray } from '../../lists.js';
 // rules. Here the walk, the names and the gate are written once:
 //
 //   characterOwners(C)            who owns behaviour on this character
-//   ownerEntries(owner, slot)     that owner's registered entries of a slot,
-//                                 its own and those of the record it copies
+//   ownerEntries(owner, slot)     that owner's registered entries of a slot
+//                                 (with those of a record it stands on: the
+//                                 registry joins a class skin to its base class
+//                                 and a reprinted species to the one it copies)
 //   entryApplies(entry, C, opts)  whether one entry is in force
 //   collectOwnerEntries(C, slot)  all entries of a slot in force, with owner
 
@@ -31,8 +33,6 @@ const KIND_NAMES = Object.freeze({
 //                subclass, the character's for the rest
 //   sourceKey    a stable id for deduplication
 //   choicePrefix where its class's choices are saved ('' or `mc<i>_`)
-//   keys         the registry keys its entries are read under: its own, then
-//                the record it copies (Dwarf|WoW reads Dwarf|XPHB's too)
 export function characterOwners(C) {
   if (!C) return [];
   const owners = [];
@@ -66,12 +66,10 @@ export function characterOwners(C) {
   return owners;
 }
 
-// The character's species as an owner. A reprint (`copiedFrom`, saved with
-// the species) also reads the entries of the species it copies.
+// The character's species as an owner.
 export function speciesOwner(C) {
   if (!C?.speciesName) return null;
   const source = C.speciesSource || '';
-  const copied = C.speciesObj?.copiedFrom || C.speciesSnapshot?.copiedFrom || null;
   return {
     kind: 'species',
     name: C.speciesName,
@@ -80,56 +78,17 @@ export function speciesOwner(C) {
     level: Number(C.level || 1),
     choicePrefix: '',
     sourceKey: `${C.speciesName}_${source}`,
-    keys: [[C.speciesName, source], ...(copied?.name ? [[copied.name, copied.source || '']] : [])],
   };
-}
-
-function ownerKeys(owner) {
-  if (Array.isArray(owner?.keys) && owner.keys.length) return owner.keys;
-  if (owner?.kind === 'subclass') return [[owner.className, owner.name]];
-  if (owner?.kind === 'species') return [[owner.name, owner.speciesSource]];
-  return [[owner?.name]];
-}
-
-function entryIdentity(entry) {
-  return entry && typeof entry === 'object' ? (entry.key || entry.name || null) : null;
-}
-
-// One slot's values under each of an owner's keys, own first, made one: lists
-// join (the copied record's first, an own entry of the same key or name
-// replacing it), choice adapters run both, objects merge with the own
-// values winning.
-function combineSlotValues(mode, values) {
-  if (values.length === 1) return values[0];
-  const [own, ...inherited] = values;
-  if (mode === 'list') {
-    const ownIds = new Set(asArray(own).map(entryIdentity).filter(Boolean));
-    return [
-      ...inherited.flatMap((list) => asArray(list).filter((entry) => !ownIds.has(entryIdentity(entry)))),
-      ...asArray(own),
-    ];
-  }
-  if (mode === 'fn') {
-    const fns = [...inherited.reverse(), own].filter((fn) => typeof fn === 'function');
-    if (fns.length < 2) return fns[0] || null;
-    return (...args) => fns.flatMap((fn) => asArray(fn(...args)));
-  }
-  if (mode === 'object' || mode === 'merge') {
-    return [...inherited.reverse(), own].reduce((acc, value) => (
-      mode === 'merge' ? mergeRuntimeConfig(acc, value || {}) : { ...acc, ...(value || {}) }
-    ), {});
-  }
-  return own ?? inherited.find((value) => value != null) ?? null;
 }
 
 // An owner's entries of one registry slot ('SheetActions', 'SheetEffects',
 // 'RuntimeConfig'…); empty when the slot has no such owner kind.
 export function ownerEntries(owner, slot) {
-  const kindName = KIND_NAMES[owner?.kind];
-  const getter = adapterRegistry[`get${kindName}${slot}`];
+  const getter = adapterRegistry[`get${KIND_NAMES[owner?.kind]}${slot}`];
   if (typeof getter !== 'function') return [];
-  const mode = KEYED_SLOTS.find((row) => row.get === slot && row.kinds.includes(kindName))?.mode;
-  return combineSlotValues(mode, ownerKeys(owner).map((key) => getter.call(adapterRegistry, ...key)));
+  if (owner.kind === 'subclass') return getter.call(adapterRegistry, owner.className, owner.name);
+  if (owner.kind === 'species') return getter.call(adapterRegistry, owner.name, owner.speciesSource);
+  return getter.call(adapterRegistry, owner.name);
 }
 
 function conditionPasses(entry, C, context) {

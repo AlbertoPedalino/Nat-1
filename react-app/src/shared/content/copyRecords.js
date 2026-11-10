@@ -1,3 +1,5 @@
+import { recordKey } from './nameKeys.js';
+
 // 5etools `_copy` records: a record that copies another one ("Dwarf|WoW"
 // copies "Dwarf|XPHB", "Shaman|WoW" copies "Barbarian|XPHB") and changes it
 // through `_copy._mod`. The one resolver for items, species, classes,
@@ -12,11 +14,6 @@ export function cloneJson(value) {
 
 function lower(value) {
   return String(value || '').trim().toLowerCase();
-}
-
-// name|source: the key of most records and of the record a `_copy` names.
-export function nameSourceKey(name, source) {
-  return `${lower(name)}|${lower(source)}`;
 }
 
 // What a copy does not take from the record it copies unless `_preserve`
@@ -144,8 +141,8 @@ function applyModification(target, path, rawModification) {
   }
 }
 
-const defaultKeyOf = (record) => nameSourceKey(record?.name, record?.source);
-const defaultCopyKeyOf = (copy, record) => nameSourceKey(copy.name, copy.source || record?.source);
+const defaultKeyOf = (record) => recordKey(record?.name, record?.source);
+const defaultCopyKeyOf = (copy, record) => recordKey(copy.name, copy.source || record?.source);
 
 /**
  * Resolve the `_copy` chains of a list of records (keeping the upstream data

@@ -6,11 +6,11 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { describeMulticlassProficiencies, getMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
-import { checkMulticlassPrerequisite } from './multiclassRules.js';
+import { checkMulticlassPrerequisite, multiclassBlockReason } from './multiclassRules.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
-import { classNames, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
@@ -72,6 +72,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                     <MiniBadge label={`Hit Die ${hitDie}`} color={ENTITY_COLORS.class} />
                     {cls.primary ? <MiniBadge label={`Primary ${cls.primary}`} color={ENTITY_COLORS.class} /> : null}
                     {saves ? <MiniBadge label={`Saves ${saves}`} color={ENTITY_COLORS.class} /> : null}
+                    {cls.ruleClass ? <MiniBadge label={`Skin of ${cls.ruleClass.name}`} color={ENTITY_COLORS.class} /> : null}
                   </Stack>
                 )}
                 slotProps={{ secondary: { component: 'div' } }}
@@ -113,7 +114,8 @@ export default function ClassPanel({ state, character, dispatch }) {
   const visibleClasses = classes.filter((cls) => matchesQuery(search, cls.name, cls.source));
   const activeExtra = activeExtraClass(character);
   const isExtraTab = !!activeExtra;
-  const takenNames = new Set(classNames(character));
+  const activeClass = activeExtra ? activeExtra.cls : character.cls;
+  const activeLevel = activeExtra ? Number(activeExtra.level || 1) : primaryClassLevel(character);
   const PanelIcon = classIcon(activeExtra?.name || character.className);
   const primaryLevel = primaryClassLevel(character);
   const canAddMulticlass = Number(character.level || 1) < 20
@@ -176,6 +178,11 @@ export default function ClassPanel({ state, character, dispatch }) {
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
+        {activeClass?.isHero && activeLevel < 3 ? (
+          <Typography variant="caption" sx={{ color: 'warning.main' }}>
+            {activeClass.name} is a hero class: it normally starts at level 3. Below that it needs your DM&apos;s permission.
+          </Typography>
+        ) : null}
         <SearchField
           value={search}
           placeholder="Search classes"
@@ -193,9 +200,9 @@ export default function ClassPanel({ state, character, dispatch }) {
               const { met: prereqMet, reason: prereqReason } = isExtraTab && !selected
                 ? !hasLevelRoom
                   ? { met: false, reason: 'Maximum total level reached' }
-                  : !takenNames.has(cls.name)
-                    ? checkMcPrereq(character, cls.name)
-                    : { met: false, reason: 'Class already taken' }
+                  : multiclassBlockReason(character, cls, { replacingIndex: character.activeClassTab - 1 })
+                    ? { met: false, reason: multiclassBlockReason(character, cls, { replacingIndex: character.activeClassTab - 1 }) }
+                    : checkMcPrereq(character, cls.name)
                 : { met: true, reason: '' };
               const profGained = isExtraTab ? getMulticlassProficiencies(cls.name, cls) : null;
               const details = isExtraTab ? <MulticlassProfDetails className={cls.name} profs={profGained} /> : null;

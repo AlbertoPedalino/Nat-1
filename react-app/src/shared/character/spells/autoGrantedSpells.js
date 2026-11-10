@@ -278,8 +278,44 @@ export function enumerateSubclassDataGrants(entity) {
   }));
 }
 
+// The spells a World of Warcraft skin's own features give, from its data
+// (Death Knight: Rune Strike, Find Steed). A base class's always-prepared
+// spells come from its runtime config.
+export function classDataSpells(entity) {
+  const record = entity?.entry?.cls || entity?.entry?.clsSnapshot;
+  return Array.isArray(record?.skinAdditionalSpells) ? record.skinAdditionalSpells : [];
+}
+
 /**
- * All grants for one class entity: the subclass data first, then runtime
+ * Grants from the class data, the way the subclass's are read.
+ */
+export function enumerateClassDataGrants(entity) {
+  const spells = classDataSpells(entity);
+  if (spells.length !== 1) return [];
+  const level = Number(entity?.level || 1);
+  return enumerateFixedAdditionalSpells(spells).filter((grant) => level >= grant.minLevel).map((grant) => ({
+    name: grant.name,
+    minLevel: grant.minLevel,
+    level: null,
+    mode: grant.mode === 'prepared' ? 'prepared' : 'known',
+    origin: 'class',
+    ownerClassName: entity?.className || null,
+    ownerLevel: level,
+    explicitSource: null,
+    sourceType: 'class',
+    ability: grant.ability || null,
+    entry: {
+      name: grant.name,
+      minLevel: grant.minLevel,
+      sourceType: 'class',
+      ...(grant.freeCast ? { freeCast: grant.freeCast } : {}),
+      ...(grant.ritualOnly ? { ritualOnly: true } : {}),
+    },
+  }));
+}
+
+/**
+ * All grants for one class entity: the class and subclass data first, then runtime
  * config (what the data cannot say: class grants, free casts and modifiers of
  * a feature, gated choices), then — for a subclass with no data list — the
  * spells named in its feature text. A later source never repeats an earlier
@@ -288,7 +324,8 @@ export function enumerateSubclassDataGrants(entity) {
  * enumerateAutoGrantedSpells).
  */
 export function enumerateEntityGrants(entity, character) {
-  const dataGrants = enumerateSubclassDataGrants(entity);
+  const subclassGrants = enumerateSubclassDataGrants(entity);
+  const dataGrants = [...enumerateClassDataGrants(entity), ...subclassGrants];
   const fromData = new Set(dataGrants.map((r) => matchKey(r.name)));
   const configGrants = enumerateClassGrants(entity, character)
     .filter((r) => !(r.subclassShortName && fromData.has(matchKey(r.name)) && !r.entry?.freeCast));
@@ -297,7 +334,7 @@ export function enumerateEntityGrants(entity, character) {
     entity?.subclassShortName,
   )?.spellcasting;
   const grants = [...dataGrants, ...configGrants];
-  if (dataGrants.length || subclassSpellcasting?.disableFeatureSpellScrape) return grants;
+  if (subclassGrants.length || subclassSpellcasting?.disableFeatureSpellScrape) return grants;
   const granted = new Set(grants.map((r) => matchKey(r.name)));
   return [
     ...grants,

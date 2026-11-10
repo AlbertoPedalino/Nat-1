@@ -1,5 +1,7 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
+import { classEntities } from '../../../shared/character/progression/classLevel.js';
+import { ruleClassOf } from '../../../shared/content/catalogs/classScope.js';
 
 /**
  * Multiclass rules validator for 5e 2024
@@ -35,3 +37,16 @@ export function checkMulticlassPrerequisite(character, className) {
   };
 }
 
+
+// Why a class cannot be added as a multiclass, or '' when it can: it is
+// already taken, or it is the same class under another name (a World of
+// Warcraft skin is its base class: no Death Knight next to a Paladin, either
+// way round). `replacingIndex` is the extra class being changed, which does
+// not count.
+export function multiclassBlockReason(character, cls, { replacingIndex = -1 } = {}) {
+  const entities = classEntities(character).filter((entity) => entity.extraIndex !== replacingIndex);
+  if (entities.some((entity) => entity.className === cls?.name)) return 'Class already taken';
+  const rule = ruleClassOf(cls);
+  if (entities.some((entity) => entity.ruleClassName === rule)) return `Same class as your ${rule} levels`;
+  return '';
+}

@@ -1,4 +1,6 @@
-import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { useEffect } from 'react';
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
 import { Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
@@ -28,7 +30,17 @@ export default function SubclassPanel({ character, dispatch }) {
   const subclassShortName = isExtra ? (extra?.subclassShortName || '') : (character.subclassShortName || '');
   const unlockLevel = cls?.subclassLevel || 3;
   const currentLevel = isExtra ? (extra?.level || 1) : primaryClassLevel(character);
-  if (!cls || !subclasses.length || currentLevel < unlockLevel) return null;
+  // A hero class whose subclass is fixed (Death Knight, Demon Hunter) takes it
+  // as soon as it unlocks.
+  const fixed = fixedSubclassShortName(cls, subclasses);
+  const unlocked = currentLevel >= unlockLevel;
+  useEffect(() => {
+    if (!fixed || !unlocked || subclassShortName === fixed) return;
+    if (isExtra) dispatch({ type: 'extra-subclass/select', index: extraIdx, subclassShortName: fixed });
+    else dispatch({ type: 'subclass/select', subclassShortName: fixed });
+  }, [fixed, unlocked, subclassShortName, isExtra, extraIdx, dispatch]);
+  if (!cls || !subclasses.length || !unlocked) return null;
+  const title = cls.subclassTitle || 'Subclass';
   const subclassFeatures = allSubFeatures.filter(
     (feature) => feature.subclassShortName === subclassShortName
       && !feature?.isReprinted
@@ -39,11 +51,11 @@ export default function SubclassPanel({ character, dispatch }) {
     else dispatch({ type: 'subclass/select', subclassShortName: value });
   };
   return (
-    <BuilderPanel id="panel-subclass" title={isExtra ? `Subclass — ${extra?.name || ''}` : 'Subclass'} icon={Sparkles} note={`Unlock level ${unlockLevel}`}>
+    <BuilderPanel id="panel-subclass" title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={Sparkles} note={`Unlock level ${unlockLevel}`}>
       <Stack spacing={1.5}>
         <FormControl fullWidth size="small">
-          <InputLabel>Subclass</InputLabel>
-          <Select label="Subclass" value={subclassShortName} onChange={(event) => onChange(event.target.value)}>
+          <InputLabel>{title}</InputLabel>
+          <Select label={title} value={subclassShortName} disabled={Boolean(fixed)} onChange={(event) => onChange(event.target.value)}>
             <MenuItem value="">None</MenuItem>
             {subclasses.map((subclass) => (
               <MenuItem key={`${subclass.shortName || subclass.name}-${subclass.source}`} value={subclass.shortName || subclass.name}>
@@ -51,6 +63,7 @@ export default function SubclassPanel({ character, dispatch }) {
               </MenuItem>
             ))}
           </Select>
+          {fixed ? <FormHelperText>The subclass of this hero class is fixed.</FormHelperText> : null}
         </FormControl>
         {subclassShortName ? (
           <Box sx={{ maxHeight: 450, overflowY: 'auto', overflowX: 'hidden', minWidth: 0 }}>

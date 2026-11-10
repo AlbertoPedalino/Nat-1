@@ -3,7 +3,8 @@ import { clamp } from '../../numbers.js';
 // previously hand-copied across the builder, sheet and adapters:
 //
 //   primaryClassLevel(C)      → the character's primary-class level
-//   classLevel(C, className)  → levels in a specific class (primary or multiclass)
+//   classLevel(C, className)  → levels in a specific class (primary or multiclass),
+//                               a class skin counting as its base class
 //
 // Centralizing these means the multiclass lookup and the fallbacks can never
 // drift between call sites (a fix or a new rule lives in one place).
@@ -39,13 +40,21 @@ export function primaryClassLevel(C) {
   return Math.max(1, total - multiclassLevels(C?.extraClasses));
 }
 
+// The class whose rules a class follows: a World of Warcraft skin's base class
+// ("Death Knight" -> "Paladin", from its `reskinOf`), else the class itself.
+// `entry` is the character (primary class) or an extra class.
+export function ruleClassName(entry, className = entry?.className || entry?.name) {
+  return (entry?.cls || entry?.clsSnapshot)?.ruleClass?.name || className || '';
+}
+
+// Levels in a class, by its name or by the class it reskins: a Hunter (skin of
+// the Ranger) has Ranger levels for every rule that asks for them.
 export function classLevel(C, className) {
   const target = String(className || '').toLowerCase();
-  if (String(C?.className || '').toLowerCase() === target) return primaryClassLevel(C);
-  const extra = (C?.extraClasses || []).find(
-    (ec) => String(ec?.name || '').toLowerCase() === target,
-  );
-  return Number(extra?.level || 0);
+  if (!target) return 0;
+  return classEntities(C)
+    .filter((entity) => entity.className.toLowerCase() === target || entity.ruleClassName.toLowerCase() === target)
+    .reduce((sum, entity) => sum + entity.level, 0);
 }
 
 // Each class the character has (primary first, then multiclasses), with its
@@ -60,6 +69,7 @@ export function classEntities(C) {
   if (C.className) {
     out.push({
       className: C.className,
+      ruleClassName: ruleClassName(C, C.className),
       subclassShortName: C.subclassShortName || '',
       level: primaryClassLevel(C),
       ownerName: C.className,
@@ -74,6 +84,7 @@ export function classEntities(C) {
     if (!extra?.name) return;
     out.push({
       className: extra.name,
+      ruleClassName: ruleClassName(extra, extra.name),
       subclassShortName: extra.subclassShortName || '',
       level: Number(extra.level || 1),
       ownerName: extra.name,

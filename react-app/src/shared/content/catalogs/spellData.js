@@ -1,6 +1,6 @@
 import { SPELL_FILES } from './catalogFiles.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../character/spells/spellNormalization.js';
-import { SPELL_SOURCE_PRIORITY } from '../sourcePriority.js';
+import { CLASS_ALLOWED_SOURCES, SPELL_SOURCE_PRIORITY } from '../sourcePriority.js';
 import { matchKey } from '../nameKeys.js';
 import { loadGameData } from '../gameData.js';
 import { byName } from '../../lists.js';
@@ -15,7 +15,13 @@ function debugLog(...args) {
   if (DEBUG_LOADERS) console.log(...args);
 }
 
-const CASTERS = ['artificer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'sorcerer', 'warlock', 'wizard', 'monk', 'rogue', 'fighter'];
+// Class lists are read for the classes of the supported books only (the
+// generated lookup also carries the 2014 lists), each under its class name:
+// a World of Warcraft skin has its own list (Mage, Priest, Death Knight…), or
+// the very list of the base class it shares its name with (Druid, Paladin).
+function isSupportedClassSource(classSource) {
+  return CLASS_ALLOWED_SOURCES.includes(String(classSource || '').trim());
+}
 
 export async function loadSpells() {
   const entries = await Promise.allSettled(SPELL_FILES.map((file) => loadGameData(`spells/${file}`)));
@@ -86,7 +92,7 @@ export function buildClassSpellIndexFromSpells(spells) {
     if (Array.isArray(fromClassList)) {
       fromClassList.forEach((entry) => {
         const className = matchKey(entry?.name);
-        if (CASTERS.includes(className)) {
+        if (className && isSupportedClassSource(entry?.source)) {
           if (!out[className]) out[className] = new Set();
           out[className].add(String(spell.name || '').toLowerCase());
         }
@@ -101,7 +107,7 @@ export function buildClassSpellIndexFromSpells(spells) {
     if (Array.isArray(fromClassListVariant)) {
       fromClassListVariant.forEach((entry) => {
         const className = matchKey(entry?.name);
-        if (CASTERS.includes(className) && isSupportedClassVariant(entry)) {
+        if (className && isSupportedClassVariant(entry)) {
           if (!out[className]) out[className] = new Set();
           out[className].add(String(spell.name || '').toLowerCase());
         }
@@ -111,11 +117,11 @@ export function buildClassSpellIndexFromSpells(spells) {
     // Handle classes.class: { "Cleric": {}, "Wizard": {} } or { phb: { "Cleric": {} } }
     const classObj = spell.classes.class || {};
     if (typeof classObj === 'object') {
-      Object.values(classObj).forEach((obj) => {
-        if (typeof obj === 'object') {
+      Object.entries(classObj).forEach(([classSource, obj]) => {
+        if (typeof obj === 'object' && isSupportedClassSource(classSource)) {
           Object.keys(obj || {}).forEach((className) => {
             const key = matchKey(className);
-            if (CASTERS.includes(key)) {
+            if (key) {
               if (!out[key]) out[key] = new Set();
               out[key].add(String(spell.name || '').toLowerCase());
             }
@@ -141,7 +147,7 @@ export function buildClassSpellIndex(node) {
 
   const collect = (className, spellName) => {
     const key = matchKey(className);
-    if (!CASTERS.includes(key)) return;
+    if (!key) return;
     if (!out[key]) out[key] = new Set();
     out[key].add(String(spellName || '').toLowerCase());
   };
@@ -151,8 +157,8 @@ export function buildClassSpellIndex(node) {
 
   const visitClassMap = (classMap, visitor, { variant = false } = {}) => {
     if (!classMap || typeof classMap !== 'object') return;
-    Object.values(classMap).forEach((bySource) => {
-      if (!bySource || typeof bySource !== 'object') return;
+    Object.entries(classMap).forEach(([classSource, bySource]) => {
+      if (!bySource || typeof bySource !== 'object' || !isSupportedClassSource(classSource)) return;
       Object.entries(bySource).forEach(([className, metadata]) => {
         if (variant && !isSupportedClassVariant(metadata)) return;
         visitor(className);
@@ -166,8 +172,7 @@ export function buildClassSpellIndex(node) {
     Object.entries(sourceBlock).forEach(([spellName, info]) => {
       if (!info || typeof info !== 'object') return;
       const collectClassSpell = (className) => {
-        const key = matchKey(className);
-        if (CASTERS.includes(key)) hasClassSpells.add(key);
+        hasClassSpells.add(matchKey(className));
         collect(className, spellName);
       };
       visitClassMap(info.class, collectClassSpell);
@@ -183,8 +188,8 @@ export function buildClassSpellIndex(node) {
       if (!info || typeof info !== 'object') return;
       const subclassMap = info.subclass;
       if (subclassMap && typeof subclassMap === 'object') {
-        Object.values(subclassMap).forEach((bySource) => {
-          if (!bySource || typeof bySource !== 'object') return;
+        Object.entries(subclassMap).forEach(([classSource, bySource]) => {
+          if (!bySource || typeof bySource !== 'object' || !isSupportedClassSource(classSource)) return;
           Object.keys(bySource).forEach((className) => {
             if (!hasClassSpells.has(matchKey(className))) {
               collect(className, spellName);

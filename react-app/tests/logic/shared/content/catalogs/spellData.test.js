@@ -74,3 +74,15 @@ test('loading preserves explicit spell printings while the picker uses source pr
   await loadSpells();
   assert.equal(requests.length, SPELL_FILES.length + 1);
 });
+
+test('class spell index reads the supported books, World of Warcraft skins included', () => {
+  const index = buildClassSpellIndex({
+    xphb: {
+      'flame strike': { class: { XPHB: { Cleric: true }, WoW: { Priest: true, Mage: true } } },
+      'old spell': { class: { PHB: { Cleric: true } } },
+    },
+  });
+  assert.deepEqual(index.mage, ['flame strike']);
+  assert.deepEqual(index.priest, ['flame strike']);
+  assert.deepEqual(index.cleric, ['flame strike']);
+});

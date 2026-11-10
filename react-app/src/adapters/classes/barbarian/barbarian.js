@@ -28,6 +28,7 @@ registerClassAdapter("Barbarian", function (cls, lv, specs, ctx = {}) {
     const allSkills = SKILL_NAMES;
     specs.push({
       key: 'barbarian_primal_knowledge',
+      feature: 'Primal Knowledge',
       label: 'Primal Knowledge (Extra Skill)',
       type: 'skill_choice',
       from: allSkills,

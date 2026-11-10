@@ -1,5 +1,6 @@
 import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { hasLevelAbove, totalCharacterLevel } from './choiceCleanup.js';
+import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
 
 // The builder reducer's class actions beyond the primary class pick
 // (stateHandlers.js handleClassSelect): subclasses and the multiclass tabs.
@@ -68,12 +69,7 @@ export function handleSubclassSelect(state, action, { findByNameSource, updateCh
     (s) => s.shortName === action.subclassShortName
   );
   const subclassSource = selectedSubclass?.source || '';
-  const allSubFeatures = state.data.subclassFeatures.filter(
-    (feature) => feature.className === state.character.className
-      && (feature.classSource === state.character.classSource || !feature.classSource)
-      && (!subclassSource || !feature._copy || feature.subclassSource === subclassSource)
-  );
-  return updateCharacter(state, { subclassShortName: action.subclassShortName, subclassSource, allSubFeatures, choices });
+  return updateCharacter(state, { subclassShortName: action.subclassShortName, subclassSource, choices });
 }
 
 // The class picked for an extra class tab; a different class than before
@@ -86,9 +82,7 @@ export function handleExtraClassSelect(state, action, { findByNameSource, update
 
   const previous = state.character.extraClasses?.[idx] || {};
   const sameClass = previous.name === classObject.name && (!action.source || previous.source === classObject.source);
-  const subclasses = state.data.subclasses.filter((subclass) => subclass.className === classObject.name && (subclass.classSource === classObject.source || !subclass.classSource));
-  const allFeatures = state.data.classFeatures.filter((feature) => feature.className === classObject.name && (feature.classSource === classObject.source || !feature.classSource));
-  const allSubFeatures = state.data.subclassFeatures.filter((feature) => feature.className === classObject.name && (feature.classSource === classObject.source || !feature.classSource));
+  const { subclasses, allFeatures, allSubFeatures } = classScopedData(state.data, classObject);
 
   const prefix = `mc${idx}_`;
   const choices = { ...state.character.choices };
@@ -135,12 +129,7 @@ export function handleExtraSubclassSelect(state, action, { findByNameSource, upd
       (s) => s.shortName === action.subclassShortName
     );
     const subclassSource = selectedSubclass?.source || '';
-    const allSubFeatures = state.data.subclassFeatures.filter(
-      (feature) => feature.className === extraClass.name
-        && (feature.classSource === extraClass.source || !feature.classSource)
-        && (!subclassSource || !feature._copy || feature.subclassSource === subclassSource)
-    );
-    return { ...extraClass, subclassShortName: action.subclassShortName, subclassSource, allSubFeatures };
+    return { ...extraClass, subclassShortName: action.subclassShortName, subclassSource };
   });
   return updateCharacter(state, { extraClasses, choices });
 }

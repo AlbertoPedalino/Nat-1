@@ -12,13 +12,17 @@ import {
 import { loadGameData } from '../gameData.js';
 import { stripTemplatedEntries } from './entryTemplates.js';
 import { byName } from '../../lists.js';
+import { resolveClassData } from './classScope.js';
 
-// Classes, subclasses and their features, plus the optional features a class
+// Classes, subclasses and their features (`_copy` resolved, class skins with
+// their rule class: classScope.js), plus the optional features a class
 // chooses from (invocations, fighting styles, metamagic…).
 
 export async function loadClassIndex() {
   const entries = await Promise.allSettled(CLASS_FILES.map((file) => loadGameData(`class/${file}`)));
   const cache = {};
+  const allClasses = [];
+  const allSubclasses = [];
   const classes = [];
   const subclasses = [];
   const classFeatures = [];
@@ -29,6 +33,8 @@ export async function loadClassIndex() {
     const file = CLASS_FILES[index];
     const data = entry.value;
     cache[file] = data;
+    allClasses.push(...(data.class || []));
+    allSubclasses.push(...(data.subclass || []));
     classes.push(...(data.class || []).filter((cls) => isAllowedSource(cls.source, CLASS_ALLOWED_SOURCES)));
     const allSubs = (data.subclass || []).filter(isSupportedSubclassRecord);
     const subByKey = {};
@@ -46,12 +52,11 @@ export async function loadClassIndex() {
     )));
   });
 
+  const resolved = resolveClassData({ allClasses, classes, allSubclasses, subclasses, classFeatures, subclassFeatures });
   return {
     cache,
-    classes: classes.sort(byName),
-    subclasses,
-    classFeatures,
-    subclassFeatures,
+    ...resolved,
+    classes: resolved.classes.sort(byName),
   };
 }
 

@@ -1,8 +1,8 @@
-import { matchKey, stripSource } from '../nameKeys.js';
+import { matchKey, recordKey, stripSource } from '../nameKeys.js';
 import { canonicalItemSource, formatLeadingBonusName, withCanonicalSource } from './itemRecords.js';
 import { resolveVariantTemplate } from './entryTemplates.js';
 import { asArray } from '../../lists.js';
-import { nameSourceKey, resolveCopyRecords as resolveCopies } from '../copyRecords.js';
+import { resolveCopyRecords as resolveCopies } from '../copyRecords.js';
 
 // 5etools item variants: `_copy` resolution, base-item requirement matching,
 // and the expansion of magic variants into concrete items.
@@ -16,8 +16,8 @@ function recordSource(record) {
 /** Resolve 5etools `_copy` chains of items (copyRecords.js). */
 export function resolveCopyRecords(records) {
   return resolveCopies(records, {
-    keyOf: (record) => nameSourceKey(record?.name, recordSource(record)),
-    copyKeyOf: (copy, record) => nameSourceKey(copy.name, copy.source || recordSource(record)),
+    keyOf: (record) => recordKey(record?.name, recordSource(record)),
+    copyKeyOf: (copy, record) => recordKey(copy.name, copy.source || recordSource(record)),
   });
 }
 

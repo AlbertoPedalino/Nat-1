@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installDance from '../../../../../src/adapters/classes/bard/dance.js';
 import installOrc from '../../../../../src/adapters/species/orc.js';
+import { registerSpeciesCopies } from '../../../../../src/shared/character/sheet/recordInheritance.js';
 import {
   characterOwners,
   collectOwnerEntries,
@@ -69,9 +70,9 @@ test('speed effects: bonuses per mode, "walking" modes, situational ones only li
 
 test('a reprinted species reads the entries of the species it copies', () => {
   installOrc(adapterRegistry);
-  const owner = speciesOwner({ speciesName: 'Orc', speciesSource: 'WoW', speciesSnapshot: { copiedFrom: { name: 'Orc', source: 'XPHB' } } });
-  assert.deepEqual(owner.keys, [['Orc', 'WoW'], ['Orc', 'XPHB']]);
-  const names = ownerEntries(owner, 'SheetResources').map((resource) => resource.key);
-  assert.ok(names.includes('orc_relentless_endurance'));
-  assert.deepEqual(ownerEntries(speciesOwner({ speciesName: 'Orc', speciesSource: 'WoW' }), 'SheetResources'), []);
+  const owner = speciesOwner({ speciesName: 'Orc', speciesSource: 'WoW' });
+  assert.deepEqual(ownerEntries(owner, 'SheetResources'), []);
+  registerSpeciesCopies([{ name: 'Orc', source: 'WoW', copiedFrom: { name: 'Orc', source: 'XPHB' } }]);
+  const keys = ownerEntries(owner, 'SheetResources').map((resource) => resource.key);
+  assert.ok(keys.includes('orc_relentless_endurance'));
 });
