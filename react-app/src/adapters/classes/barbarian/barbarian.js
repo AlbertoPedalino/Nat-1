@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { RAGE_DAMAGE_LEVELS, rageDamageBonus } from './rageDamage.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -51,9 +52,10 @@ registerClassSheetEffects("Barbarian", [
   { type: "advantage", target: "save", ability: "str", minLevel: 1, note: "Rage", condition: _barbarianRaging },
   // Feral Instinct: Advantage on Initiative rolls.
   { type: "advantage", target: "initiative", minLevel: 7, note: "Feral Instinct." },
-  { type: "meleeDamageBonus", ability: "str", value: 2, minLevel: 1,  note: "Rage", condition: _barbarianRaging },
-  { type: "meleeDamageBonus", ability: "str", value: 3, minLevel: 9,  note: "Rage", condition: _barbarianRaging },
-  { type: "meleeDamageBonus", ability: "str", value: 4, minLevel: 16, note: "Rage", condition: _barbarianRaging },
+  // Rage Damage, one tier per step of the Rage table (rageDamage.js).
+  ...RAGE_DAMAGE_LEVELS.map((minLevel) => (
+    { type: "meleeDamageBonus", ability: "str", value: rageDamageBonus(minLevel), minLevel, note: "Rage", condition: _barbarianRaging }
+  )),
 ]);
 
 registerClassSheetActions("Barbarian", [
