@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { followInstanceData } from '../../../shared/instances/instanceStore.js';
-import { readPersistedInstance } from '../state/storage.js';
+import { readPersistedFight, readPersistedInstance } from '../state/storage.js';
 import { externalDelta } from './externalSync.js';
 
 // The battle map writes back into this instance's saved fights — hit points,
@@ -44,9 +44,7 @@ export function useExternalFightSync({
     if (!instanceId || !activeFightId) return undefined;
 
     const apply = () => {
-      const persisted = readPersistedInstance(instanceId, monsters);
-      const entry = (persisted?.fightsData?.items || [])
-        .find((fight) => String(fight.id) === String(activeFightId));
+      const entry = readPersistedFight(instanceId, activeFightId, monsters);
       if (!entry) return;
 
       const signature = combatantVitalsSignature(entry);
@@ -57,9 +55,7 @@ export function useExternalFightSync({
 
     // Seeded rather than applied: the fight on screen is already this one, and
     // dispatching on mount would reset the view for no reason.
-    const persisted = readPersistedInstance(instanceId, monsters);
-    const current = (persisted?.fightsData?.items || [])
-      .find((fight) => String(fight.id) === String(activeFightId));
+    const current = readPersistedFight(instanceId, activeFightId, monsters);
     lastRef.current = current ? combatantVitalsSignature(current) : '';
 
     return followInstanceData('encounters', instanceId, apply);

@@ -10,8 +10,10 @@ import { placeAroundCenter } from '../../../shared/vtt/tokens/placement.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene/scene.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { launchLibraryEncounter } from '../../encounterbuilder/sync/handoff.js';
+import { readPersistedFight } from '../../encounterbuilder/state/storage.js';
 import {
   deleteInstanceFight,
+  getInstanceFight,
   saveInstanceFight,
 } from '../../../shared/cloud/api/encounterFights.js';
 import { addById, patchById } from '../../../shared/vtt/session/liveScene.js';
@@ -39,6 +41,16 @@ async function imageSpan(file, longSide = 4) {
     // A browser without createImageBitmap, or a file it cannot decode: the
     // upload still goes through and the GM sizes it themselves.
     return { w: longSide, h: longSide };
+  }
+}
+
+async function ensureFightOnline(instanceId, fightId, notify) {
+  try {
+    if (await getInstanceFight(fightId)) return;
+    const entry = readPersistedFight(instanceId, fightId);
+    if (entry) await saveInstanceFight(instanceId, entry);
+  } catch (cause) {
+    notify('warning', failureMessage('The encounter is placed, but its fight is not online: no initiative or hit points from it until the Encounter Builder saves it.', cause));
   }
 }
 
@@ -259,6 +271,12 @@ export function useTokenPlacement({
         (launched.supersededFightIds || []).forEach((fightId) => {
           deleteInstanceFight(fightId).catch(() => {});
         });
+      } else if (ref && instance) {
+        // A fight launched before. Its row is what starts the initiative on this
+        // scene (guard_token_turn) and holds the creatures' hit points; one only
+        // in this browser — its upload still pending in the builder — would land
+        // pieces with neither. An existing row is never overwritten from here.
+        await ensureFightOnline(instance, ref, notify);
       }
       const pieces = placed.map((combatant) => combatantToToken(combatant, {
         layer,

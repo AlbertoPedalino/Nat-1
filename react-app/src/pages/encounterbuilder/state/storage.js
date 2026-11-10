@@ -47,6 +47,13 @@ export function readPersistedInstance(id, monsters = []) {
   };
 }
 
+// One fight of the instance as this browser stores it, or null.
+export function readPersistedFight(instanceId, fightId, monsters = []) {
+  if (!instanceId || fightId == null) return null;
+  return (readPersistedInstance(instanceId, monsters)?.fightsData?.items || [])
+    .find((fight) => String(fight.id) === String(fightId)) || null;
+}
+
 const partyValue = (party, players) => JSON.stringify({ version: STORAGE_VERSION, party, players });
 const libraryValue = (library) => JSON.stringify(Array.isArray(library) ? library : []);
 const fightsValue = (activeFightId, fights) => JSON.stringify({

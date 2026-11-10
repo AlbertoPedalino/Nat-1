@@ -13,7 +13,7 @@
 import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import {
-  makeSavedEncounter, persistFights, persistLibrary, readPersistedInstance,
+  makeSavedEncounter, persistFights, persistLibrary, readPersistedFight, readPersistedInstance,
 } from '../state/storage.js';
 import { getInstance } from '../../../shared/instances/instanceStore.js';
 import { hydrateEncounterItems, toEncounterMonster } from '../../../shared/bestiary/monsterUtils.js';
@@ -195,6 +195,5 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
 export function localFightPresence(instanceId, fightId) {
   if (!instanceId || !fightId) return 'missing';
   if (!getInstance('encounters', instanceId)) return 'unknown';
-  const items = readPersistedInstance(instanceId, [])?.fightsData?.items || [];
-  return items.some((fight) => String(fight.id) === String(fightId)) ? 'present' : 'missing';
+  return readPersistedFight(instanceId, fightId) ? 'present' : 'missing';
 }

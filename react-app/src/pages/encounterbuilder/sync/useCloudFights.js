@@ -106,8 +106,12 @@ export function useCloudFights({
     writesRef.current.cancelAll();
   }, [instanceId]);
 
+  // Leaving the builder sends what is still waiting out its debounce: a fight
+  // launched just before going to the battle map would otherwise reach the
+  // database only on the builder's next visit — and a map piece of it would
+  // find no fight to start the initiative from.
   useEffect(() => () => {
-    writesRef.current.cancelAll();
+    writesRef.current.flushAll();
   }, []);
 
   // Ask for a row to go, and check afterwards that it went. Realtime reports a

@@ -16,7 +16,7 @@ import {
 import { readCampaignToolLinks } from '../../../shared/cloud/api/campaignTools.js';
 import { listToolInstances } from '../../../shared/instances/instanceSync.js';
 import { localFightPresence, sendEncounterToBuilder } from '../../encounterbuilder/sync/handoff.js';
-import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
+import { readPersistedFight } from '../../encounterbuilder/state/storage.js';
 import { restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
@@ -225,9 +225,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       // The room link contains the creatures as first sent. Reimport from the
       // saved fight so later conditions, damage and deaths survive token removal.
       if (presence === 'present') {
-        const persisted = readPersistedInstance(existing.instanceId, priced);
-        const entry = (persisted?.fightsData?.items || [])
-          .find((fight) => String(fight.id) === String(existing.fightId));
+        const entry = readPersistedFight(existing.instanceId, existing.fightId, priced);
         return roomLinkWithFight(existing, entry, priced);
       }
       if (cloudActive) {

@@ -46,3 +46,22 @@ test('a keyed debounce runs once per key after the last schedule, and can be can
   await tick();
   assert.deepEqual(runs, ['x2']);
 });
+
+test('a keyed debounce can run everything pending at once', () => {
+  const pending = [];
+  const debounce = createKeyedDebounce({
+    delay: 100,
+    setTimer: (fn) => { const timer = { fn }; pending.push(timer); return timer; },
+    clearTimer: (timer) => { pending.splice(pending.indexOf(timer), 1); },
+  });
+  const runs = [];
+  debounce.schedule('a', () => runs.push('a1'));
+  debounce.schedule('a', () => runs.push('a2'));
+  debounce.schedule('b', () => runs.push('b'));
+  debounce.flushAll();
+  assert.deepEqual(runs, ['a2', 'b']);
+  assert.equal(pending.length, 0);
+  assert.equal(debounce.has('a'), false);
+  debounce.flushAll();
+  assert.deepEqual(runs, ['a2', 'b'], 'nothing runs twice');
+});

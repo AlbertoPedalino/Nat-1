@@ -25,6 +25,9 @@ vi.mock('../../../../../src/pages/encounterbuilder/sync/handoff.js', () => ({
 }));
 vi.mock('../../../../../src/pages/encounterbuilder/state/storage.js', () => ({
   readPersistedInstance: mocks.readPersistedInstance,
+  readPersistedFight: (instanceId, fightId, monsters) => (
+    mocks.readPersistedInstance(instanceId, monsters)?.fightsData?.items || []
+  ).find((fight) => String(fight.id) === String(fightId)) || null,
 }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
   useAuth: () => ({ ...mocks.auth, cloudActive: Boolean(mocks.auth.cloudEnabled && mocks.auth.status === 'authed') }),

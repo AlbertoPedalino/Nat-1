@@ -33,10 +33,11 @@ export function createKeyedQueue() {
 
 // `setTimer` / `clearTimer` are injectable for tests that drive time by hand.
 export function createKeyedDebounce({ delay = 0, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
+  // key -> { timer, run }
   const timers = new Map();
   const cancel = (key) => {
     if (!timers.has(key)) return false;
-    clearTimer(timers.get(key));
+    clearTimer(timers.get(key).timer);
     timers.delete(key);
     return true;
   };
@@ -44,16 +45,28 @@ export function createKeyedDebounce({ delay = 0, setTimer = setTimeout, clearTim
     // Runs `run()` once the key has been quiet for `wait` ms (default `delay`).
     schedule(key, run, wait = delay) {
       cancel(key);
-      timers.set(key, setTimer(() => {
-        timers.delete(key);
-        return run();
-      }, wait));
+      timers.set(key, {
+        run,
+        timer: setTimer(() => {
+          timers.delete(key);
+          return run();
+        }, wait),
+      });
     },
     // Drops the key's pending run; true when there was one.
     cancel,
     cancelAll() {
-      for (const timer of timers.values()) clearTimer(timer);
+      for (const { timer } of timers.values()) clearTimer(timer);
       timers.clear();
+    },
+    // Runs every pending run now, instead of after its wait.
+    flushAll() {
+      const due = [...timers.values()];
+      timers.clear();
+      for (const { timer, run } of due) {
+        clearTimer(timer);
+        run();
+      }
     },
     has: (key) => timers.has(key),
   });

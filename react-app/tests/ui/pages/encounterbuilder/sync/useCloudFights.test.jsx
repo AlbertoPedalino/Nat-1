@@ -444,3 +444,13 @@ test('a fight whose write failed is written again on the next recovery, as it st
   await act(async () => { window.dispatchEvent(new Event('online')); });
   expect(mocks.saveInstanceFight).toHaveBeenCalledTimes(2);
 });
+
+test('leaving the builder sends a fight still waiting out its debounce', async () => {
+  mocks.listInstanceFights.mockResolvedValue([]);
+  const { rerender, unmount } = render(<Harness fights={[]} library={[]} dispatch={vi.fn()} />);
+  await waitFor(() => expect(mocks.listInstanceFights).toHaveBeenCalled());
+  rerender(<Harness fights={[FIGHT]} library={[]} dispatch={vi.fn()} />);
+  expect(mocks.saveInstanceFight).not.toHaveBeenCalled();
+  unmount();
+  expect(mocks.saveInstanceFight).toHaveBeenCalledWith('enc_a', FIGHT);
+});
