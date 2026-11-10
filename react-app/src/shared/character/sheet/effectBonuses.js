@@ -168,14 +168,35 @@ export function getMeleeStrDamageBonus(character = {}) {
   return bonus;
 }
 
-export function getSpeedBonus(character = {}) {
-  let total = 0;
+// Speed from active effects, one shape for every mode:
+//   { type: 'speed', speedType: 'walk' | 'fly' | 'swim' | 'climb' | 'burrow',
+//     value: <feet added> | 'walking' (that mode equals your walking Speed) }
+// `speedType` defaults to walking. An effect marked `situational` holds only
+// while something is active (a form, a rage): it is listed, never added.
+// Returns { bonus: { [mode]: feet }, walkingModes: Set<mode> }.
+export const SPEED_MODES = Object.freeze(['walk', 'fly', 'swim', 'climb', 'burrow']);
+
+function speedMode(value) {
+  const key = effectKey(value);
+  if (!key || key === 'walking' || key === 'speed') return 'walk';
+  return SPEED_MODES.find((mode) => key.startsWith(mode)) || null;
+}
+
+export function getSpeedEffects(character = {}) {
+  const bonus = {};
+  const walkingModes = new Set();
   collectSheetEffects(character).forEach((effect) => {
-    if (!effectKey(effect.type).includes('speed')) return;
-    if (effectKey(effect.type).includes('fly') || effectKey(effect.type).includes('climb') || effectKey(effect.type).includes('swim')) return;
-    total += Number(effect.value ?? 0);
+    if (effectKey(effect.type) !== 'speed' || effect.situational) return;
+    const mode = speedMode(effect.speedType);
+    if (!mode) return;
+    if (effect.value === 'walking') {
+      if (mode !== 'walk') walkingModes.add(mode);
+      return;
+    }
+    const feet = Number(effect.value);
+    if (Number.isFinite(feet)) bonus[mode] = (bonus[mode] || 0) + feet;
   });
-  return total;
+  return { bonus, walkingModes };
 }
 
 // The Unarmed Strike from active effects (type `unarmedStrike`): the largest

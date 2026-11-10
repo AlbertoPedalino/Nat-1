@@ -1,5 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { addWizardSavantSpellChoices } from './wizardSavant.js';
+import { addWizardSavantSpellChoices } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const {

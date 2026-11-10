@@ -118,9 +118,14 @@ function collectStaticDefenseItems(character = {}) {
   return dedupeDefenseItems(out);
 }
 
+// The effect types that are defenses, exactly: a type that merely mentions
+// one (Hunter's `damageResistanceReaction`) is not a standing resistance.
+const RESISTANCE_TYPES = new Set(['resistance', 'resistancechoice']);
+const IMMUNITY_TYPES = new Set(['immunity', 'immunitychoice', 'conditionimmunity']);
+
 function resistanceItemsFromEffects(character = {}) {
   return collectSheetEffects(character)
-    .filter((effect) => effectKey(effect.type).includes('resistance'))
+    .filter((effect) => RESISTANCE_TYPES.has(effectKey(effect.type)))
     .flatMap((effect) => {
       const summary = effectSummary(effect, character);
       const fromSummary = summary
@@ -146,7 +151,7 @@ function resistanceItemsFromEffects(character = {}) {
 
 function immunityItemsFromEffects(character = {}) {
   return collectSheetEffects(character)
-    .filter((effect) => effectKey(effect.type).includes('immunity'))
+    .filter((effect) => IMMUNITY_TYPES.has(effectKey(effect.type)))
     .flatMap((effect) => {
       const labels = [];
 

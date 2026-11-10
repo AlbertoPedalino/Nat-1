@@ -33,7 +33,7 @@ registerSubclassSheetActions("Druid_Sea", [
 registerSubclassSheetEffects("Druid_Sea", [
 
   { type: "speed", speedType: "swim", value: "walking", minLevel: 6, note: "Aquatic Affinity." },
-  { type: "speed", speedType: "fly", value: "walking", minLevel: 10, note: "Stormborn while Wrath of the Sea is active." },
+  { type: "speed", speedType: "fly", value: "walking", situational: true, minLevel: 10, note: "Stormborn while Wrath of the Sea is active." },
   { type: "resistance", damageTypes: ["Cold", "Lightning", "Thunder"], minLevel: 10, note: "Stormborn while Wrath of the Sea is active." },
 
 ]);

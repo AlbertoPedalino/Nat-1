@@ -109,9 +109,6 @@ export function effectTitle(effect) {
     darkvision: 'Darkvision',
     telepathy: 'Telepathy',
     speed: 'Speed',
-    flySpeed: 'Fly Speed',
-    climbSpeed: 'Climb Speed',
-    swimSpeed: 'Swim Speed',
     acFormula: 'Armor Class Formula',
     unarmoredDefense: 'Unarmored Defense',
     hpBonus: 'HP Bonus',
@@ -125,6 +122,10 @@ export function effectTitle(effect) {
     advantage: 'Advantage',
   };
 
+  // One speed shape for every mode (effectBonuses.js getSpeedEffects).
+  if (type === 'speed' && effect?.speedType && effectKey(effect.speedType) !== 'walk') {
+    return `${displayLabel(effect.speedType)} Speed`;
+  }
   if (labels[type]) return labels[type];
   if (normalizedType.includes('resistance')) return 'Resistance';
   if (normalizedType.includes('immunity')) return 'Immunity';

@@ -39,3 +39,18 @@ export function addWizardSavantSpellChoices(specs, lv, cfg) {
     });
   });
 }
+
+// A value that grows with a class's level, from its class table:
+// `rows` is [[minLevel, value], …] in ascending order.
+export function levelTable(level, rows) {
+  const lv = Number(level || 1);
+  let value = rows[0][1];
+  rows.forEach(([minLevel, rowValue]) => { if (lv >= minLevel) value = rowValue; });
+  return value;
+}
+
+// Monk Martial Arts die (faces), also the Mercy and Elements dice.
+export const MARTIAL_ARTS_DIE = Object.freeze([[1, 6], [5, 8], [11, 10], [17, 12]]);
+// Psionic Energy Dice (Psi Warrior, Soulknife): faces, and how many.
+export const PSIONIC_DIE = Object.freeze([[1, 6], [5, 8], [11, 10], [17, 12]]);
+export const PSIONIC_DICE_COUNT = Object.freeze([[1, 4], [5, 6], [9, 8], [13, 10], [17, 12]]);

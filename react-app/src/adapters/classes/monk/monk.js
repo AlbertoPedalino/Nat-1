@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { levelTable, MARTIAL_ARTS_DIE } from '../../classAdapterHelpers.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
@@ -31,10 +32,9 @@ registerClassAdapter("Monk", function (cls, lv, specs) {
 registerClassSheetEffects("Monk", [
   { type: "acFormula", key: "monk_unarmored_defense", label: "Unarmored Defense", base: 10, abilities: ["dex", "wis"], allowShield: false, minLevel: 1, requiresNoArmor: true },
   // Martial Arts: the Unarmed Strike die grows with Monk level and may use Dexterity.
-  { type: "unarmedStrike", face: 6, dexterity: true, uses: "Martial Arts", minLevel: 1, note: "Martial Arts" },
-  { type: "unarmedStrike", face: 8, dexterity: true, uses: "Martial Arts", minLevel: 5, note: "Martial Arts" },
-  { type: "unarmedStrike", face: 10, dexterity: true, uses: "Martial Arts", minLevel: 11, note: "Martial Arts" },
-  { type: "unarmedStrike", face: 12, dexterity: true, uses: "Martial Arts", minLevel: 17, note: "Martial Arts" },
+  ...MARTIAL_ARTS_DIE.map(([minLevel, face]) => (
+    { type: "unarmedStrike", face, dexterity: true, uses: "Martial Arts", minLevel, note: "Martial Arts" }
+  )),
 ]);
 
 registerClassSheetActions("Monk", [
@@ -53,11 +53,7 @@ registerClassSheetActions("Monk", [
     uses: '1 Focus Point',
     resKey: 'ki',
     minLevel: 2,
-    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
-      const lv = Number(ownerLevel || 1);
-      const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
-      return `2d${die}`;
-    } }]
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => `2d${levelTable(ownerLevel, MARTIAL_ARTS_DIE)}` }]
   },
   {
     name: 'Patient Defense',

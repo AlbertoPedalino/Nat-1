@@ -1,4 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { levelTable, PSIONIC_DIE, PSIONIC_DICE_COUNT } from '../../classAdapterHelpers.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -13,11 +16,9 @@ registerSubclassAdapter("Fighter_Psi Warrior", function (cls, lv, specs) {});
 registerSubclassSheetActions("Fighter_Psi Warrior", [
   { name: "Protective Field", icon: "", cat: "reaction", uses: "1 Psi Die", resKey: "psi_dice", minLevel: 3 },
   { name: "Psionic Strike", icon: "", cat: "attack", uses: "1 Psi Die / turn", resKey: "psi_dice", minLevel: 3,
-    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
-      const lv = Number(ownerLevel || 1);
-      const die = lv >= 17 ? 'd12' : lv >= 11 ? 'd10' : lv >= 5 ? 'd8' : 'd6';
-      return `1${die}+INT`;
-    }, label: ({ formula }) => `+${formula} force` }] },
+    rollers: [{ kind: 'damage', formula: ({ character, ownerLevel }) => (
+      withModifier(`1d${levelTable(ownerLevel, PSIONIC_DIE)}`, finalAbilityModifier(character, 'int'))
+    ), label: ({ formula }) => `+${formula} force` }] },
   { name: "Telekinetic Movement", icon: "", cat: "action", uses: "1 / SR+LR or Psi Die", resKey: "telekinetic_movement", minLevel: 3 },
   { name: "Psi-Powered Leap", icon: "", cat: "bonus", uses: "1 / SR+LR or Psi Die", resKey: "psi_leap", minLevel: 7 },
   { name: "Guarded Mind", icon: "", cat: "action", uses: "No action · Psi Die", resKey: "psi_dice", minLevel: 10 },
@@ -26,8 +27,7 @@ registerSubclassSheetActions("Fighter_Psi Warrior", [
 ]);
 registerSubclassSheetResources("Fighter_Psi Warrior", [
   { key: "psi_dice", name: "Psionic Energy Dice", icon: "orbit", recharge: "LR",
-    max: (lv) => lv >= 17 ? 12 : lv >= 13 ? 10 : lv >= 9 ? 8 : lv >= 5 ? 6 : 4,
-    die: (lv) => lv >= 17 ? "d12" : lv >= 11 ? "d10" : lv >= 5 ? "d8" : "d6",
+    max: (lv) => levelTable(lv, PSIONIC_DICE_COUNT),
     pool: true, track: "used" },
   { key: "telekinetic_movement", name: "Telekinetic Movement", icon: "wind",   recharge: "SR", max: () => 1 },
   { key: "psi_leap",             name: "Psi-Powered Leap",     icon: "arrow-up", recharge: "SR", max: () => 1 },

@@ -52,3 +52,14 @@ test('Dazzling Footwork: Unarmored Defense and the Bardic die on unarmed strikes
   const shielded = bard({ inventory: [{ type: 'S', equipped: true }] });
   assert.deepEqual(getUnarmedStrike(shielded), { face: 1, dexterity: false, uses: null });
 });
+
+test('speed effects: bonuses per mode, "walking" modes, situational ones only listed', async () => {
+  const { getSpeedEffects } = await import('../../../../../src/shared/character/sheet/effectBonuses.js');
+  const { default: installSea } = await import('../../../../../src/adapters/classes/druid/sea.js');
+  installSea(adapterRegistry);
+  const druid = { className: 'Druid', subclassShortName: 'Sea', level: 10, inventory: [], choices: {} };
+  const { bonus, walkingModes } = getSpeedEffects(druid);
+  assert.deepEqual(bonus, {});
+  // Aquatic Affinity swims at walking speed; Stormborn's flight is only while Wrath is active.
+  assert.deepEqual([...walkingModes], ['swim']);
+});

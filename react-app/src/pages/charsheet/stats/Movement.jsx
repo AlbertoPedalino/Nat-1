@@ -5,7 +5,7 @@ import { getFinal, exhaustionSpeedPenalty } from '../../../shared/character/shee
 import { getSpeedZeroConditions } from '../../../shared/character/combat/conditions.js';
 import { collectMovementEffects } from '../../../shared/character/sheet/sheetEffects.js';
 import { effectSummary, effectTitle } from '../../../shared/character/sheet/sheetEffectText.js';
-import { getSpeedBonus } from '../../../shared/character/sheet/effectBonuses.js';
+import { getSpeedEffects } from '../../../shared/character/sheet/effectBonuses.js';
 import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {
@@ -59,26 +59,28 @@ export default function Movement({ C, sheet }) {
   const speedZero = speedZeroConditions.length > 0;
   const exhaustionLevel = sheet?.exhaustionLevel || 0;
   const exhaustionPenalty = exhaustionSpeedPenalty(exhaustionLevel);
-  const movementEffects = collectMovementEffects(C).filter((effect) => {
-    if (String(effect.type || '').toLowerCase() === 'speed' && typeof effect.value === 'number') {
-      return getSpeedBonus(C) > 0;
-    }
-    return true;
-  });
-  const runtimeSpeedBonus = getSpeedBonus(C);
+  const movementEffects = collectMovementEffects(C);
+  const runtimeSpeed = getSpeedEffects(C);
   const itemEffects = characterItemEffects(C);
   // Compose modes referenced by `equal` rules even if they aren't in baseSpeeds.
   const allModes = new Set(Object.keys(baseSpeeds));
   Object.keys(itemEffects.speedEqual || {}).forEach((mode) => allModes.add(mode));
+  runtimeSpeed.walkingModes.forEach((mode) => allModes.add(mode));
+  const walking = (baseSpeeds.walk || 0) + (runtimeSpeed.bonus.walk || 0);
   const entries = [...allModes].map((key) => {
     const value = baseSpeeds[key] || 0;
     const equal = itemEffects.speedEqual[key];
-    const equalSource = equal ? (baseSpeeds[equal.from] || 0) : 0;
+    const equalSource = Math.max(
+      equal ? (baseSpeeds[equal.from] || 0) : 0,
+      runtimeSpeed.walkingModes.has(key) ? walking : 0,
+    );
     const baseAfterEqual = Math.max(value, equalSource);
     const itemOverride = itemEffects.speedOverride[key];
     const baseAfterOverride = itemOverride ? Math.max(baseAfterEqual, itemOverride.value) : baseAfterEqual;
     const itemBonus = itemEffects.speedBonus[key] || 0;
-    const subtotal = baseAfterOverride + speedPenalty + runtimeSpeedBonus + itemBonus;
+    // A mode equal to walking already carries walking's own bonuses.
+    const effectBonus = runtimeSpeed.walkingModes.has(key) && baseAfterEqual === equalSource ? 0 : (runtimeSpeed.bonus[key] || 0);
+    const subtotal = baseAfterOverride + speedPenalty + effectBonus + itemBonus;
     const multiplier = itemEffects.speedMultiplier[key]?.value || 1;
     const computed = subtotal * multiplier - exhaustionPenalty;
     return {

@@ -108,7 +108,7 @@ registerSubclassSheetEffects("Druid_Stars", [
   { type: "d20-floor", minRoll: 10, minLevel: 3,
     requiredChoice: { key: "stars_constellation", value: "Dragon" },
     note: "Starry Form: Dragon constellation for INT/WIS checks and Concentration saves." },
-  { type: "speed", speedType: "fly", value: 20, minLevel: 10,
+  { type: "speed", speedType: "fly", value: 20, situational: true, minLevel: 10,
     requiredChoice: { key: "stars_constellation", value: "Dragon" },
     note: "Twinkling Constellations: Dragon form fly speed with Hover." },
   { type: "resistance", damageTypes: ["Bludgeoning", "Piercing", "Slashing"], minLevel: 14, note: "Full of Stars while Starry Form is active." },

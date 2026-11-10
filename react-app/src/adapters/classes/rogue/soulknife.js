@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { levelTable, PSIONIC_DICE_COUNT } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -74,8 +75,9 @@ registerSubclassSheetResources("Rogue_Soulknife", [
     "name": "Psionic Energy Dice",
     "icon": "brain",
     "recharge": "LR",
-    "die": (lv) => lv >= 17 ? "d12" : lv >= 11 ? "d10" : lv >= 5 ? "d8" : "d6",
-    "max": (lv) => lv >= 17 ? 12 : lv >= 13 ? 10 : lv >= 9 ? 8 : lv >= 5 ? 6 : 4
+    "max": (lv) => levelTable(lv, PSIONIC_DICE_COUNT),
+    "pool": true,
+    "track": "used"
   },
   {
     "key": "psychic_veil",

@@ -73,7 +73,7 @@ registerSubclassSheetEffects("Sorcerer_Draconic", [
       green: 'Poison',
       silver: 'Cold', white: 'Cold',
     } },
-  { type: "speed", speedType: "fly", value: 60, minLevel: 14, note: "Dragon Wings while active." },
+  { type: "speed", speedType: "fly", value: 60, situational: true, minLevel: 14, note: "Dragon Wings while active." },
 
 ]);
 
