@@ -1,19 +1,14 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { SPELL_ABILITY_CHOICE } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Message (no Material components) and Augury (free 1/LR)
-  // are granted from the feat JSON additionalSpells; the adapter adds the
-  // spellcasting-ability choice and wires Unearthly Scream's limited uses.
+  // are granted from the feat JSON additionalSpells (its spellcasting-ability
+  // pick too); the adapter wires Unearthly Scream's limited uses.
   registerFeatAdapter('Gathered Whispers', function (feat) {
     return {
       ...feat,
-      choiceUi: {
-        ...(feat.choiceUi && typeof feat.choiceUi === 'object' ? feat.choiceUi : {}),
-        spellAbility: SPELL_ABILITY_CHOICE,
-      },
       spellGrantOverrides: {
         Message: {
           spell: { components: 'none' },

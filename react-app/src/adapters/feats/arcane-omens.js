@@ -1,9 +1,8 @@
-import { installFeatAdapter, withSpellAbilityChoice } from '../featAdapterHelpers.js';
+import { installFeatAdapter } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Arcane Omens',
-    adapt: withSpellAbilityChoice,
     actions: [{
       name: 'Helpful Premonition', cat: 'reaction', resKey: 'arcane_omens_premonition',
       rollers: [{ kind: 'utility', formula: '1d4', label: 'Saving throw bonus' }],

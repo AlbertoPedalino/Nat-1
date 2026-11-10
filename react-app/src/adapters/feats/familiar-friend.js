@@ -1,9 +1,8 @@
-import { installFeatAdapter, withSpellAbilityChoice } from '../featAdapterHelpers.js';
+import { installFeatAdapter } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Familiar Friend',
-    adapt: withSpellAbilityChoice,
     actions: [{
       name: 'Helpful Friend', cat: 'special', resKey: 'familiar_friend_helpful',
     }],

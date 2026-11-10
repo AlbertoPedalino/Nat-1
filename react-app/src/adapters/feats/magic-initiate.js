@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { SPELL_ABILITY_CHOICE } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const { registerFeatAdapter } = createAdapterBindings(registry, context);
@@ -77,7 +76,6 @@ export default function install(registry, context = {}) {
     out.choiceUi = {
       ...(out.choiceUi && typeof out.choiceUi === "object" ? out.choiceUi : {}),
       listLabel: "Choose list",
-      spellAbility: SPELL_ABILITY_CHOICE
     };
 
     return out;

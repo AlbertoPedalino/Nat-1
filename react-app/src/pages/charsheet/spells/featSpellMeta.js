@@ -1,3 +1,4 @@
+import { featSlotSpellAbility } from '../../../shared/character/spells/spellAbilityChoice.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { normalizeFreeCast } from '../../../shared/character/spells/spellFreeCasts.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
@@ -25,13 +26,7 @@ export function buildFeatMetaMap(C) {
   const addMeta = (slotKey, name) => {
     const snapshot = snapshotByName.get(lowerKey(name));
     if (!slotKey || !snapshot || map.has(slotKey)) return;
-    const abilityChoiceKey = `${slotKey}_spell_ability`;
-    const ability = abilityKey(
-      firstChoiceString(choices[abilityChoiceKey])
-      || firstChoiceString(choices[`${slotKey}_asi`])
-      || firstChoiceString(choices[`${slotKey}_first_asi`]),
-    );
-    map.set(slotKey, { name: snapshot.name, ability, snapshot });
+    map.set(slotKey, { name: snapshot.name, ability: featSlotSpellAbility(choices, slotKey), snapshot });
   };
 
   Object.entries(choices).forEach(([key, value]) => {

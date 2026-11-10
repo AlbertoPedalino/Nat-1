@@ -1,23 +1,4 @@
 import { createAdapterBindings } from './adapterBindings.js';
-import { ABILITY_NAMES } from '../shared/content/rulesVocabulary.js';
-
-// The Intelligence / Wisdom / Charisma pick a feat's granted spells are cast
-// with, as one choiceUi entry.
-export const SPELL_ABILITY_CHOICE = Object.freeze({
-  keySuffix: 'spell_ability',
-  label: 'Spellcasting Ability',
-  options: ['int', 'wis', 'cha'].map((value) => ({ value, label: ABILITY_NAMES[value] })),
-});
-
-export function withSpellAbilityChoice(feat) {
-  return {
-    ...feat,
-    choiceUi: {
-      ...(feat.choiceUi || {}),
-      spellAbility: SPELL_ABILITY_CHOICE,
-    },
-  };
-}
 
 // A feat adapter adding the pick of one damage resistance among `options`
 // (stored under the `resistance` choice key, read by a 'resistance-choice'

@@ -1,9 +1,8 @@
-import { installFeatAdapter, withSpellAbilityChoice } from '../featAdapterHelpers.js';
+import { installFeatAdapter } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Arcane Safeguard',
-    adapt: withSpellAbilityChoice,
     actions: [
       { name: 'Quick Resistance', cat: 'bonus', resKey: 'arcane_safeguard_resistance' },
     ],

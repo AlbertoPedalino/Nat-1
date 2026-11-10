@@ -1,23 +1,18 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { choiceSpellSlotKey, firstChoiceString } from './spellChoiceKeys.js';
 import { abilityKey } from '../../../shared/content/rulesVocabulary.js';
+import { featSlotSpellAbility } from '../../../shared/character/spells/spellAbilityChoice.js';
 
 // Which ability a spell is cast with: the character's default, a spell row's
 // own (its grant, its owning class), and a builder choice's chosen ability.
 
-// The ability chosen for a spell picked in a builder choice (feat slot's
-// `<slot>_spell_ability`, or the species spell ability), else null.
+// The ability chosen for a spell picked in a builder choice (a feat slot's
+// pick, or the ability the feat increased; or the species spell ability),
+// else null.
 export function getChoiceSpellAbility(C, key) {
   const slotKey = choiceSpellSlotKey(key);
-  if (slotKey) {
-    const abilityChoiceKey = `${slotKey}_spell_ability`;
-    const raw = C?.choices?.[abilityChoiceKey];
-    const val = firstChoiceString(raw);
-    if (val) {
-      const normalized = abilityKey(val);
-      if (normalized) return normalized;
-    }
-  }
+  const slotAbility = slotKey ? featSlotSpellAbility(C?.choices, slotKey) : null;
+  if (slotAbility) return slotAbility;
   if (String(key || '').startsWith('species_')) {
     const speciesAbility = C?.normalizedChoices?.species?.spellAbility
       || firstChoiceString(C?.choices?.species_spell_ability);

@@ -1,3 +1,4 @@
+import { spellAbilityChoiceUi } from '../../shared/character/spells/spellAbilityChoice.js';
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
@@ -103,6 +104,13 @@ export default function install(registry, context = {}) {
         ...(out._meta && typeof out._meta === "object" ? out._meta : {}),
         versionIndexByName: map
       };
+    }
+
+    // The spellcasting ability pick, when the data lets the player choose it
+    // (additionalSpells[].ability.choose) — no feat wires it by hand.
+    const spellAbility = spellAbilityChoiceUi(out);
+    if (spellAbility && !(out.choiceUi && out.choiceUi.spellAbility)) {
+      out.choiceUi = { ...(out.choiceUi && typeof out.choiceUi === "object" ? out.choiceUi : {}), spellAbility };
     }
 
     // Auto-detect ability score choice: feat.ability[].choose → choiceUi.abilityScoreIncrease

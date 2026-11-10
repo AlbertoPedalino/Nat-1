@@ -1,3 +1,4 @@
+import { spellAbilityChoiceKey } from '../../../shared/character/spells/spellAbilityChoice.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { SRC_COLOR, featSlotTone } from './spellSourceDisplay.js';
@@ -109,13 +110,13 @@ function findFeatNameByScanning(C, key) {
   if (!key || !C?.choices) return null;
   const keyPrefix = key.split('_spell_')[0];
   if (!keyPrefix || !keyPrefix.startsWith('feat_')) return null;
-  const abilityKey = `${keyPrefix}_spell_ability`;
+  const abilityKey = spellAbilityChoiceKey(keyPrefix);
   if (abilityKey in C.choices) {
     const val = C?.choices?.[keyPrefix];
     if (val && typeof val === 'string' && !val.startsWith('feat_')) return val;
   }
   for (const ck of Object.keys(C.choices)) {
-    if (ck === abilityKey || ck.startsWith(`${keyPrefix}_spell_ability`)) {
+    if (ck === abilityKey || ck.startsWith(abilityKey)) {
       const val = C?.choices?.[keyPrefix];
       if (val && typeof val === 'string' && !val.startsWith('feat_')) return val;
     }

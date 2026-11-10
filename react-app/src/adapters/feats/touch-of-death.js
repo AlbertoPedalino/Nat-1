@@ -1,19 +1,14 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { SPELL_ABILITY_CHOICE } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const { registerFeatAdapter } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Chill Touch (no components, Necrotic ignores Resistance)
-  // is granted from the feat JSON additionalSpells; the adapter adds the
-  // spellcasting-ability choice. Pull of the Grave is a passive drawback.
+  // is granted from the feat JSON additionalSpells. Pull of the Grave is a
+  // passive drawback.
   registerFeatAdapter('Touch of Death', function (feat) {
     return {
       ...feat,
-      choiceUi: {
-        ...(feat.choiceUi && typeof feat.choiceUi === 'object' ? feat.choiceUi : {}),
-        spellAbility: SPELL_ABILITY_CHOICE,
-      },
       spellGrantOverrides: {
         'Chill Touch': {
           spell: { components: 'none' },
