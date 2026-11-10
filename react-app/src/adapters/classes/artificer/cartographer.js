@@ -61,7 +61,7 @@ registerSubclassSheetResources("Artificer_Cartographer", [
     "name": "Faerie Fire (Mapping Magic)",
     "icon": "sparkles",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   },
   {
     "key": "superior_atlas_path",

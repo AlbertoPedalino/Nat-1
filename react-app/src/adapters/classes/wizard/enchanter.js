@@ -32,8 +32,8 @@ export default function install(registry, context = {}) {
     { name: 'Alter Memories', icon: 'brain', cat: 'action', uses: 'While target is Charmed', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Enchanter', [
-    { key: 'enchanter_presence', name: 'Hypnotic Presence', icon: 'eye', recharge: 'LR', minLevel: 3, max: (level, { int } = {}) => Math.max(1, int ?? 0) },
-    { key: 'enchanter_split', name: 'Split Enchantment', icon: 'split', recharge: 'LR', minLevel: 6, max: (level, { int } = {}) => Math.max(1, int ?? 0) },
+    { key: 'enchanter_presence', name: 'Hypnotic Presence', icon: 'eye', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
+    { key: 'enchanter_split', name: 'Split Enchantment', icon: 'split', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
     { key: 'enchanter_charm', name: 'Instinctive Charm', icon: 'shield', recharge: 'LR', minLevel: 10, max: 1 },
   ]);
   registerSubclassSheetEffects('Wizard_Enchanter', [

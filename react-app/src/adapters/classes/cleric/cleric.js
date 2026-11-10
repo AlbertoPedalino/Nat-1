@@ -252,7 +252,7 @@ registerClassSheetResources("Cleric", [
     "name": "Divine Intervention",
     "icon": "hands",
     "recharge": "LR",
-    "max": (lv)=>lv>=10?1:0
+    minLevel: 10, "max": 1
   }
 ]);
 

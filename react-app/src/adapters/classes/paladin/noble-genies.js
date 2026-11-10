@@ -61,7 +61,7 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
     "icon": "zap",
     "recharge": "LR",
     "minLevel": 15,
-    "max": (lv, { cha } = {}) => Math.max(1, cha ?? 0)
+    "max": "abilityMod:cha", "minMax": 1
   },
   {
     "key": "noble_genies_scion",

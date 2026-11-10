@@ -24,7 +24,7 @@ registerSubclassSheetEffects("Warlock_Archfey", [
 ]);
 registerSubclassSheetResources("Warlock_Archfey", [
   { key: "archfey_steps",    name: "Steps of the Fey",    icon: "sparkles", recharge: "LR",
-    max: (lv, { cha } = {}) => Math.max(1, cha ?? 0) },
+    max: 'abilityMod:cha', minMax: 1 },
   { key: "archfey_beguiling", name: "Beguiling Defenses", icon: "shield",   recharge: "LR", max: () => 1 },
 ]);
 

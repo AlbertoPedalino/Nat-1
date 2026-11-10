@@ -30,7 +30,7 @@ registerSubclassSheetActions("Cleric_War", [
 ]);
 registerSubclassSheetResources("Cleric_War", [
   { key: "war_priest", name: "War Priest", icon: "swords", recharge: "SR+LR",
-    max: (lv, { wis } = {}) => Math.max(1, wis ?? 0) },
+    max: 'abilityMod:wis', minMax: 1 },
 ]);
 registerSubclassRuntimeConfig("Cleric_War", {
   spellcasting: {

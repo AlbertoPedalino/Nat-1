@@ -78,7 +78,7 @@ registerSubclassSheetEffects("Cleric_Knowledge", [
 ]);
 registerSubclassSheetResources("Cleric_Knowledge", [
   { key: "divine_foreknowledge", name: "Divine Foreknowledge", icon: "brain", recharge: "LR",
-    max: (lv) => lv >= 17 ? 1 : 0 },
+    minLevel: 17, max: 1 },
 ]);
 
 }

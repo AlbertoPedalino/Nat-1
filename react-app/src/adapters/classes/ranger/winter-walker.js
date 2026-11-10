@@ -43,7 +43,7 @@ registerSubclassSheetResources("Ranger_Winter Walker", [
     "name": "Chilling Retribution",
     "icon": "zap",
     "recharge": "LR",
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   },
   {
     "key": "winter_walker_haunt",

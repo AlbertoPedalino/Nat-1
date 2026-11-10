@@ -24,7 +24,7 @@ registerSubclassSheetActions("Monk_Mercy", [
 ]);
 registerSubclassSheetResources("Monk_Mercy", [
   { key: "mercy_flurry", name: "Flurry of Healing and Harm", icon: "sparkles", recharge: "LR",
-    max: (lv, { wis } = {}) => Math.max(1, wis ?? 0) },
+    max: 'abilityMod:wis', minMax: 1 },
   { key: "mercy_ultimate", name: "Hand of Ultimate Mercy", icon: "heart", recharge: "LR", max: () => 1 },
 ]);
 registerSubclassSheetProficiencies("Monk_Mercy", [

@@ -18,9 +18,9 @@ registerSubclassSheetActions("Bard_Glamour", [
 ]);
 
 registerSubclassSheetResources("Bard_Glamour", [
-  { key: "glamour_beguiling",  name: "Beguiling Magic",   icon: "sparkles", recharge: "LR", max: (lv) => lv >= 3  ? 1 : 0 },
-  { key: "glamour_majesty",    name: "Mantle of Majesty",  icon: "crown",    recharge: "LR", max: (lv) => lv >= 6  ? 1 : 0 },
-  { key: "glamour_unbreakable",name: "Unbreakable Majesty",icon: "shield",   recharge: "SR", max: (lv) => lv >= 14 ? 1 : 0 },
+  { key: "glamour_beguiling",  name: "Beguiling Magic",   icon: "sparkles", recharge: "LR", minLevel: 3, max: 1 },
+  { key: "glamour_majesty",    name: "Mantle of Majesty",  icon: "crown",    recharge: "LR", minLevel: 6, max: 1 },
+  { key: "glamour_unbreakable",name: "Unbreakable Majesty",icon: "shield",   recharge: "SR", minLevel: 14, max: 1 },
 ]);
 registerSubclassRuntimeConfig("Bard_Glamour", {
   spellcasting: {

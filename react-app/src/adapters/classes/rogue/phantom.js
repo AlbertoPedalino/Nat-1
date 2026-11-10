@@ -53,7 +53,7 @@ export default function install(registry, context = {}) {
       icon: 'ghost',
       recharge: 'LR',
       minLevel: 3,
-      max: (lv, mods) => Math.max(1, mods?.dex ?? 1),
+      max: 'abilityMod:dex', minMax: 1,
     },
     {
       key: 'phantom_trinkets',

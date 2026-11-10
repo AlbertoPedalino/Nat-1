@@ -39,7 +39,7 @@ export default function install(registry, context = {}) {
   ]);
 
   registerSubclassSheetResources("Bard_Moon", [
-    { key: "moon_blessing", name: "Blessing of Moonlight", icon: "moon", recharge: "LR", actionName: "Blessing of Moonlight", max: (lv) => lv >= 6 ? 1 : 0 },
+    { key: "moon_blessing", name: "Blessing of Moonlight", icon: "moon", recharge: "LR", actionName: "Blessing of Moonlight", minLevel: 6, max: 1 },
   ]);
 
   registerSubclassSheetProficiencies("Bard_Moon", [

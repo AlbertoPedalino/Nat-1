@@ -36,7 +36,7 @@ registerSubclassSheetResources("Druid_Moon", [
     "name": "Moonlight Step",
     "icon": "moon",
     "recharge": "LR",
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   }
 ]);
 

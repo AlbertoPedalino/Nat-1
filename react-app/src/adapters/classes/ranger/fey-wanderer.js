@@ -67,7 +67,7 @@ registerSubclassSheetResources("Ranger_Fey Wanderer", [
     "name": "Misty Wanderer",
     "icon": "cloud",
     "recharge": "LR",
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   }
 ]);
 

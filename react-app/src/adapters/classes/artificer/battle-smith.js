@@ -48,7 +48,7 @@ registerSubclassSheetResources("Artificer_Battle Smith", [
     "name": "Arcane Jolt",
     "icon": "zap",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   }
 ]);
 registerSubclassSheetProficiencies("Artificer_Battle Smith", [

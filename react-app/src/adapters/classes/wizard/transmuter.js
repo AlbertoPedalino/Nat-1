@@ -42,7 +42,7 @@ export default function install(registry, context = {}) {
     { name: 'Master Transmuter', icon: 'gem', cat: 'action', uses: 'Consume stone', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Transmuter', [
-    { key: 'transmuter_empowered', name: 'Empowered Transmutation', icon: 'sparkles', recharge: 'LR', minLevel: 6, max: (level, { int } = {}) => Math.max(1, int ?? 0) },
+    { key: 'transmuter_empowered', name: 'Empowered Transmutation', icon: 'sparkles', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
   ]);
   registerSubclassSheetEffects('Wizard_Transmuter', [
     { type: 'reminder', minLevel: 3, note: "Transmuter's Stone always grants Constitution saving throw proficiency to its bearer." },

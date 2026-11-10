@@ -93,7 +93,7 @@ registerClassSheetResources("Ranger", [
     "icon": "heart",
     "recharge": "LR",
     "minLevel": 10,
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   },
   {
     "key": "natures_veil",
@@ -101,7 +101,7 @@ registerClassSheetResources("Ranger", [
     "icon": "eye-off",
     "recharge": "LR",
     "minLevel": 14,
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   }
 ]);
 

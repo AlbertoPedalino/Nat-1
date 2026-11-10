@@ -18,7 +18,7 @@ registerSubclassSheetActions("Monk_Open Hand", [
 ]);
 registerSubclassSheetResources("Monk_Open Hand", [
   { key: "open_hand_wholeness", name: "Wholeness of Body", icon: "heart", recharge: "LR",
-    max: (lv, { wis } = {}) => Math.max(1, wis ?? 0) },
+    max: 'abilityMod:wis', minMax: 1 },
 ]);
 
 registerSubclassSheetEffects("Monk_Open Hand", [

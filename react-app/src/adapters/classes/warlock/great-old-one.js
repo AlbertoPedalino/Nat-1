@@ -46,7 +46,7 @@ registerSubclassSheetEffects("Warlock_Great Old One", [
 ]);
 registerSubclassSheetResources("Warlock_Great Old One", [
   { key: "goo_awakened",   name: "Awakened Mind",        icon: "brain", recharge: "LR",
-    max: (lv, { cha } = {}) => Math.max(1, cha ?? 0) },
+    max: 'abilityMod:cha', minMax: 1 },
   { key: "goo_clairvoyant", name: "Clairvoyant Combatant", icon: "eye",   recharge: "SR", max: () => 1 },
   { key: "goo_create_thrall", name: "Create Thrall", icon: "brain", recharge: "LR", max: () => 1 },
 ]);

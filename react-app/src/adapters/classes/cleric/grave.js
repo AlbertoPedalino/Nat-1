@@ -46,7 +46,7 @@ export default function install(registry, context = {}) {
       icon: 'shield',
       recharge: 'LR',
       minLevel: 6,
-      max: (lv, mods) => Math.max(1, mods?.wis ?? 1),
+      max: 'abilityMod:wis', minMax: 1,
     },
     {
       key: 'grave_keeper',

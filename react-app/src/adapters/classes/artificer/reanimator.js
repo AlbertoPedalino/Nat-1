@@ -88,7 +88,7 @@ export default function install(registry, context = {}) {
       icon: 'zap',
       recharge: 'LR',
       minLevel: 3,
-      max: (lv, mods) => Math.max(1, mods?.int ?? 1),
+      max: 'abilityMod:int', minMax: 1,
     },
   ]);
 

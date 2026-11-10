@@ -55,7 +55,7 @@ registerSubclassSheetResources("Artificer_Alchemist", [
     "name": "Restorative Reagents",
     "icon": "flask-conical",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   },
   {
     "key": "chemical_mastery",

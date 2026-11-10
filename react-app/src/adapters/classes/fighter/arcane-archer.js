@@ -51,7 +51,7 @@ export default function install(registry, context = {}) {
   ]);
   registerSubclassSheetResources('Fighter_Arcane Archer', [
     { key: 'arcane_shot', name: 'Arcane Shot', icon: 'target', recharge: 'SR+LR', minLevel: 3,
-      max: (level, { int } = {}) => Math.max(1, int ?? 0),
+      max: 'abilityMod:int', minMax: 1,
       die: (level) => level >= 18 ? 'd12' : level >= 15 ? 'd10' : level >= 10 ? 'd8' : 'd6', pool: true, track: 'used' },
     { key: 'arcane_magical_ammunition', name: 'Magical Ammunition', icon: 'sparkles', recharge: 'SR+LR', minLevel: 7, max: 1 },
   ]);

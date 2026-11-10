@@ -72,11 +72,11 @@ registerClassSheetResources("Bard", [
   { key: 'bardic_insp', name: 'Bardic Inspiration', icon: 'music', recharge: 'SR',
     srMinLevel: 5,
     actionName: 'Bardic Inspiration',
-    max: (lv, { cha } = {}) => Math.max(1, cha ?? 0) },
+    max: 'abilityMod:cha', minMax: 1 },
   { key: 'bard_font_insp', name: 'Font of Inspiration', icon: 'refresh-ccw', recharge: 'SR',
     srMinLevel: 5,
     actionName: 'Font of Inspiration',
-    max: (lv) => lv >= 5 ? 1 : 0 },
+    minLevel: 5, max: 1 },
 ]);
 
 registerResourceSideEffect('bard_font_insp', ({ C, resources }) => {

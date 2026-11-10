@@ -23,7 +23,15 @@ function resourceAbilityMods(character) {
   };
 }
 
+// `minMax` is the floor of a computed maximum (an ability modifier's uses are
+// at least 1: `max: 'abilityMod:wis', minMax: 1`).
 export function normalizeResourceMax(def, character = null) {
+  const value = rawResourceMax(def, character);
+  const floor = Number(def?.minMax);
+  return Number.isFinite(floor) && Number.isFinite(value) ? Math.max(floor, value) : value;
+}
+
+function rawResourceMax(def, character) {
   const raw = def?.max ?? 1;
   if (typeof raw === 'string') {
     const resolved = resolveScalingFormula(raw, character);

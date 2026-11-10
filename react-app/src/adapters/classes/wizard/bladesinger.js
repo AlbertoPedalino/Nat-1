@@ -62,7 +62,7 @@ const _wizardBladesingerResources = [
     "name": "Bladesong",
     "icon": "music",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   }
 ];
 const _wizardBladesingerProficiencies = [

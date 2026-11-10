@@ -36,7 +36,7 @@ registerSubclassSheetEffects("Warlock_Fiend", [
 
 registerSubclassSheetResources("Warlock_Fiend", [
   { key: "fiend_luck", name: "Dark One's Own Luck", icon: "dice-6", recharge: "LR",
-    max: (lv, { cha } = {}) => Math.max(1, cha ?? 0) },
+    max: 'abilityMod:cha', minMax: 1 },
   { key: "fiend_hurl", name: "Hurl Through Hell", icon: "flame", recharge: "LR", max: () => 1 },
 ]);
 

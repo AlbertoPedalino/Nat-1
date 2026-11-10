@@ -40,7 +40,7 @@ export default function install(registry, context = {}) {
       icon: 'skull',
       recharge: 'LR',
       minLevel: 3,
-      max: (lv, mods) => Math.max(1, mods?.cha ?? 1),
+      max: 'abilityMod:cha', minMax: 1,
     },
     {
       key: 'undead_resuscitation',

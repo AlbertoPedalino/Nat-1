@@ -99,7 +99,7 @@ registerSubclassSheetResources("Druid_Stars", [
     "name": "Cosmic Omen",
     "icon": "sparkles",
     "recharge": "LR",
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   }
 ]);
 

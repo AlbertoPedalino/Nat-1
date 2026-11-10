@@ -28,9 +28,9 @@ registerSubclassSheetActions("Cleric_Light", [
 ]);
 registerSubclassSheetResources("Cleric_Light", [
   { key: "warding_flare", name: "Warding Flare", icon: "sun", recharge: "SR", srMinLevel: 6,
-    max: (lv, { wis } = {}) => Math.max(1, wis ?? 0) },
-  { key: "corona_light", name: "Corona of Light", icon: "sun", recharge: "LR",
-    max: (lv, { wis } = {}) => lv >= 17 ? Math.max(1, wis ?? 0) : 0 },
+    max: 'abilityMod:wis', minMax: 1 },
+  { key: "corona_light", name: "Corona of Light", icon: "sun", recharge: "LR", minLevel: 17,
+    max: 'abilityMod:wis', minMax: 1 },
 ]);
 registerSubclassRuntimeConfig("Cleric_Light", {
   spellcasting: {

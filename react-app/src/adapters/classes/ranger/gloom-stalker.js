@@ -34,7 +34,7 @@ registerSubclassSheetResources("Ranger_Gloom Stalker", [
     "name": "Dread Ambusher",
     "icon": "eye",
     "recharge": "LR",
-    "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
+    "max": "abilityMod:wis", "minMax": 1
   }
 ]);
 

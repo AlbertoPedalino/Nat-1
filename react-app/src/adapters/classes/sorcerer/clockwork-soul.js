@@ -49,7 +49,7 @@ registerSubclassSheetResources("Sorcerer_Clockwork Soul", [
     "name": "Restore Balance",
     "icon": "settings",
     "recharge": "LR",
-    "max": (lv, { cha } = {}) => Math.max(1, cha ?? 0)
+    "max": "abilityMod:cha", "minMax": 1
   },
   {
     "key": "clockwork_trance",

@@ -38,7 +38,7 @@ registerSubclassSheetResources("Rogue_Scion of the Three", [
     "name": "Bloodthirst",
     "icon": "crosshair",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   }
 ]);
 

@@ -179,7 +179,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "name": "Giant Stature",
     "icon": "maximize",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
+    "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
@@ -188,7 +188,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "name": "Perfected Guardian Pull",
     "icon": "magnet",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
+    "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
@@ -197,7 +197,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "name": "Infiltrator Fly",
     "icon": "feather",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
+    "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   }

@@ -291,7 +291,7 @@ registerClassSheetResources("Artificer", [
     "name": "Flash of Genius",
     "icon": "brain",
     "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+    "max": "abilityMod:int", "minMax": 1
   }
 ]);
 registerClassSheetEffects("Artificer", [
