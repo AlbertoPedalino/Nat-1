@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
+import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -60,7 +61,7 @@ registerSubclassAdapter("Fighter_Battle Master", function (cls, lv, specs, ctx =
 });
 
 registerSubclassSheetActions("Fighter_Battle Master", [
-  { name: "Combat Maneuvers", cat: "attack", resKey: "superiority_dice", minLevel: 3 },
+  { name: "Combat Maneuvers", cat: "attack", resKey: "superiority_dice", minLevel: 3, inlinePills: saveDcPills(["str", "dex"]) },
   { name: "Know Your Enemy", cat: "bonus", resKey: "know_your_enemy", minLevel: 7 },
   { name: "Relentless", cat: "action", minLevel: 15 },
 ]);

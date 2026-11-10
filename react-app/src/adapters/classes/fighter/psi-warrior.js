@@ -2,6 +2,7 @@ import { createAdapterBindings } from '../../adapterBindings.js';
 import { levelTable, PSIONIC_DIE, PSIONIC_DICE_COUNT } from '../../classAdapterHelpers.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -18,7 +19,9 @@ registerSubclassSheetActions("Fighter_Psi Warrior", [
   { name: "Psionic Strike", cat: "attack", resKey: "psi_dice", minLevel: 3,
     rollers: [{ kind: 'damage', formula: ({ character, ownerLevel }) => (
       withModifier(`1d${levelTable(ownerLevel, PSIONIC_DIE)}`, finalAbilityModifier(character, 'int'))
-    ), label: ({ formula }) => `+${formula} force` }] },
+    ), label: ({ formula }) => `+${formula} force` }],
+    // Telekinetic Thrust (level 7) adds a Strength save to the strike.
+    inlinePills: saveDcPills("int", { minLevel: 7 }) },
   { name: "Telekinetic Movement", cat: "action", resKey: "telekinetic_movement", minLevel: 3 },
   { name: "Psi-Powered Leap", cat: "bonus", resKey: "psi_leap", minLevel: 7 },
   { name: "Guarded Mind", cat: "action", resKey: "psi_dice", minLevel: 10 },

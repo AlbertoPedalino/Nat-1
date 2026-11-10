@@ -23,6 +23,12 @@ test('Raging Elements dice follow the Rage Damage bonus', () => {
   assert.equal(icefury.rollers[0].formula({ ownerLevel: 9 }), '3d8');
 });
 
+test('Icefury is a spell attack with Constitution, not Strength', () => {
+  const C = character('Barbarian', 'Elements', 5, { scoreMethod: 'manual', manualScores: { str: 18, con: 14 } });
+  const icefury = collectOwnerEntries(C, 'SheetActions').find(({ entry }) => entry.name === 'Icefury').entry;
+  assert.equal(icefury.attackBonus({ character: C }), 2 + 3);
+});
+
 test('Primordial Bond resists only while raging', () => {
   const resist = (rageActive) => collectOwnerEntries(character('Barbarian', 'Elements', 10, { rageActive }), 'SheetEffects')
     .filter(({ entry }) => entry.type === 'resistance').length;

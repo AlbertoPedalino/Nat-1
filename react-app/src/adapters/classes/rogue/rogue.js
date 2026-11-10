@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
@@ -80,17 +81,20 @@ registerClassSheetActions("Rogue", [
   {
     "name": "Cunning Strike",
     "cat": "attack",
-    "minLevel": 5
+    "minLevel": 5,
+    inlinePills: saveDcPills('dex')
   },
   {
     "name": "Improved Cunning Strike",
     "cat": "attack",
-    "minLevel": 11
+    "minLevel": 11,
+    inlinePills: saveDcPills('dex')
   },
   {
     "name": "Devious Strikes",
     "cat": "attack",
-    "minLevel": 14
+    "minLevel": 14,
+    inlinePills: saveDcPills('dex')
   },
   {
     "name": "Stroke of Luck",

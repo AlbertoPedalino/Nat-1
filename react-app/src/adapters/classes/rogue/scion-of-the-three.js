@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { saveDcPills } from '../../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetResources } = createAdapterBindings(registry, context);
@@ -25,7 +26,9 @@ registerSubclassSheetActions("Rogue_Scion of the Three", [
   {
     "name": "Strike Fear",
     "cat": "action",
-    "minLevel": 9
+    "minLevel": 9,
+    // Terrify is a Cunning Strike option: its DC.
+    inlinePills: saveDcPills('dex')
   }
 ]);
 registerSubclassSheetResources("Rogue_Scion of the Three", [

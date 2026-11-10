@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { saveDcPills } from '../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -17,6 +18,7 @@ export default function install(registry, context = {}) {
       cat: 'bonus',
       resKey: 'lupin_howl',
       minLevel: 1,
+      inlinePills: saveDcPills('con'),
     },
   ]);
 
