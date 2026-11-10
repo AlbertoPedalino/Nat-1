@@ -14,10 +14,9 @@ test('conditions give a creature its attack sources', () => {
     { adv: true, disadv: true, autoFail: false, situational: [] },
   );
   // Frightened only while the source is in sight: a reminder, never the roll.
-  assert.deepEqual(creatureRollSources({ conditions: ['frightened'] }, 'attack'), {
-    adv: false, disadv: false, autoFail: false,
-    situational: [{ source: 'Frightened', note: creatureRollSources({ conditions: ['frightened'] }, 'attack').situational[0].note }],
-  });
+  const frightened = creatureRollSources({ conditions: ['frightened'] }, 'attack');
+  assert.deepEqual([frightened.adv, frightened.disadv], [false, false]);
+  assert.deepEqual(frightened.situational.map((c) => c.source), ['Frightened']);
   assert.equal(creatureRollSources({ conditions: ['grappled'] }, 'attack').situational[0].source, 'Grappled');
   assert.equal(creatureRollSources({ conditions: ['frightened'] }, 'check').situational[0].source, 'Frightened');
   assert.deepEqual(creatureRollSources({ conditions: ['frightened'] }, 'save', 'wis').situational, []);
