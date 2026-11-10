@@ -59,5 +59,11 @@ export async function loadOptionalFeatures() {
   const data = await loadGameData('optionalfeatures.json');
   return (data.optionalfeature || [])
     .filter((f) => isAllowedSource(f.source, OPTIONAL_FEATURE_ALLOWED_SOURCES) && Array.isArray(f.entries))
-    .map((f) => ({ name: f.name, source: f.source, featureType: f.featureType, entries: stripTemplatedEntries(f.entries) }));
+    .map((f) => ({
+      name: f.name,
+      source: f.source,
+      featureType: f.featureType,
+      prerequisite: f.prerequisite || null,
+      entries: stripTemplatedEntries(f.entries),
+    }));
 }

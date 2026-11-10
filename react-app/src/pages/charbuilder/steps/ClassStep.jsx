@@ -20,8 +20,8 @@ export default function ClassStep({ state, dispatch }) {
   const activeExtra = activeExtraClass(character);
 
   const choiceSpecs = useMemo(
-    () => classChoiceSpecs(character, { items: state.data.items }),
-    [character, state.data.items, activeTab, activeExtra?.cls, state.adaptersVersion],
+    () => classChoiceSpecs(character, { items: state.data.items, optionalFeatures: state.data.optionalFeatures }),
+    [character, state.data.items, state.data.optionalFeatures, activeTab, activeExtra?.cls, state.adaptersVersion],
   );
 
   // Live 2024 optional-feature descriptions (XPHB/XDMG/EFA/FRAiF/FRHoF). Lookups are

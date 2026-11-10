@@ -9,12 +9,13 @@ import {
 import { registerChoiceLevelMap } from '../../../shared/character/progression/choiceLevels.js';
 import {
   buildOptionalFeatureEntryLookup,
+  optionalFeatureOptions,
 } from '../../../shared/character/progression/optionalFeatures.js';
 import { entriesToPlainText } from '../../../shared/content/entryText.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { pactSlots } from '../../../shared/character/spells/casterProgression.js';
 import {
-  INVOCATIONS, INVOCATION_SLOT_LEVELS, MODIFIER_CANTRIP_EFFECTS, MODIFIER_ELIGIBLE_CANTRIPS, warlockChoiceMatches,
+  REPEATABLE_INVOCATIONS, INVOCATION_SLOT_LEVELS, MODIFIER_CANTRIP_EFFECTS, MODIFIER_ELIGIBLE_CANTRIPS, warlockChoiceMatches,
 } from './invocations.js';
 import { clamp } from '../../../shared/numbers.js';
 
@@ -36,16 +37,11 @@ export default function install(registry, context = {}) {
 
 registerFeatOwnerKeyPattern(/^(?:mc\d+_)?warlock_lessons(?:_first_ones_origin)?_feat(?:_\d+)?$/i);
 
+// The invocations themselves (names, levels, prerequisites) come from the
+// optional-feature data (featureType EI); what it does not say: which ones can
+// be taken more than once.
 registerClassSheetChoiceMeta("Warlock", {
-  invocationData: INVOCATIONS.map(function (inv) {
-    return {
-      name: inv.name,
-      minLevel: inv.minLevel,
-      prereq: inv.prereq || null,
-      source: inv.source || 'XPHB',
-      repeatable: !!inv.repeatable,
-    };
-  }),
+  repeatableInvocations: REPEATABLE_INVOCATIONS,
 });
 
 function _warlockAdapterCharacter(localContext) {
@@ -130,11 +126,10 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
 
   INVOCATION_SLOT_LEVELS.forEach(function (threshold, i) {
     if (lv >= threshold) {
-      var slotInvocations = INVOCATIONS
+      var slotInvocations = optionalFeatureOptions(adapterContext.optionalFeatures, 'EI')
         .filter(function(inv) {
           if (Number(threshold || 0) < Number(inv.minLevel || 1)) return false;
-          if (!inv.prereq) return true;
-          return warlockHasInvocation(_charRef, inv.prereq, _choicePrefix);
+          return inv.prereqs.every(function (prereq) { return warlockHasInvocation(_charRef, prereq, _choicePrefix); });
         })
         .map(function(inv) { return inv.name; });
       if (slotInvocations.length) {

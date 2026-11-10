@@ -1,9 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-
-const ARCANE_SHOTS = [
-  'Banishing Shot', 'Beguiling Shot', 'Bursting Shot', 'Enfeebling Shot',
-  'Grasping Shot', 'Piercing Shot', 'Seeking Shot', 'Shadow Shot',
-];
+import { optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
 const SHOT_LEVELS = [3, 3, 7, 10, 15, 18];
 
 export default function install(registry, context = {}) {
@@ -15,7 +11,9 @@ export default function install(registry, context = {}) {
     registerSubclassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 
-  registerSubclassAdapter('Fighter_Arcane Archer', function (cls, level, specs) {
+  registerSubclassAdapter('Fighter_Arcane Archer', function (cls, level, specs, ctx = {}) {
+    // The Arcane Shot options of the optional-feature data (featureType AS).
+    const arcaneShots = optionalFeatureOptions(ctx.optionalFeatures, 'AS').map((option) => option.name);
     if (level >= 3) {
       specs.push({
         key: 'subclass_arcane_archer_cantrip', label: 'Arcane Archer Lore - Cantrip', type: 'spell_choice',
@@ -28,8 +26,8 @@ export default function install(registry, context = {}) {
       specs.push({
         key: `subclass_arcane_shot_${index + 1}`,
         label: `Arcane Shot Option ${index + 1}`,
-        type: 'generic_choice', from: ARCANE_SHOTS, count: 1, level: minLevel,
-        descSource: 'optionalFeature',
+        type: 'generic_choice', from: arcaneShots, count: 1, level: minLevel,
+        descSource: 'optionalFeature', featureType: 'AS',
       });
     });
   });

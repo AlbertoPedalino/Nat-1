@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
+import { optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -9,12 +10,6 @@ export default function install(registry, context = {}) {
     registerClassSheetEffects,
     registerResourceSideEffect,
   } = createAdapterBindings(registry, context);
-// Metamagic XPHB 2024
-const _METAMAGIC = [
-  'Careful Spell', 'Distant Spell', 'Empowered Spell', 'Extended Spell',
-  'Heightened Spell', 'Quickened Spell', 'Seeking Spell', 'Subtle Spell',
-  'Transmuted Spell', 'Twinned Spell',
-];
 
 registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
   if (lv >= 2) {
@@ -23,7 +18,10 @@ registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
       key: 'sorcerer_metamagic',
       label: 'Metamagic',
       type: 'generic_choice',
-      from: _METAMAGIC,
+      // The Metamagic options of the optional-feature data (featureType MM).
+      from: optionalFeatureOptions(ctx.optionalFeatures, 'MM').map((option) => option.name),
+      descSource: 'optionalFeature',
+      featureType: 'MM',
       count,
       level: 2
     });

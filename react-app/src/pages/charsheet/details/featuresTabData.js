@@ -1,6 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { warlockInvocationSelections } from '../../../shared/character/progression/warlockUtils.js';
-import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
+import { buildOptionalFeatureEntryLookup, optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
 import { classEntities } from '../../../shared/character/progression/classLevel.js';
 import { asArray } from '../../../shared/lists.js';
 import { choiceKey } from '../../../shared/content/nameKeys.js';
@@ -10,12 +10,11 @@ import { stripMarkup } from '../../../shared/content/markupText.js';
 // level, class/subclass identity and choice gates.
 
 export function collectWarlockInvocationFeatures(C) {
+  // Levels from the optional-feature data; which ones repeat from the adapter.
   const meta = adapterRegistry.getClassSheetChoiceMeta('Warlock');
-  const invocationData = Array.isArray(meta?.invocationData) ? meta.invocationData : [];
-  if (!invocationData.length) return [];
-
+  const repeatable = new Set((meta?.repeatableInvocations || []).map(choiceKey));
   const invByName = new Map(
-    invocationData.map((entry) => [choiceKey(entry?.name), entry]).filter(([key]) => key),
+    optionalFeatureOptions(C?.optionalFeatureEntries, 'EI').map((entry) => [choiceKey(entry.name), entry]),
   );
   // Live 2024 invocation descriptions (rich 5etools entries) from optionalfeatures.json.
   const liveEntries = buildOptionalFeatureEntryLookup(C?.optionalFeatureEntries, 'EI');
@@ -31,11 +30,10 @@ export function collectWarlockInvocationFeatures(C) {
     });
     counts.forEach((count, selectedName) => {
       const data = invByName.get(choiceKey(selectedName)) || null;
-      const repeatable = !!data?.repeatable;
       out.push({
         name: count > 1 ? `${selectedName} x${count}` : selectedName,
         level: Number(data?.minLevel || ownerLevel || 1),
-        source: repeatable ? 'Invocation - Repeatable' : 'Invocation',
+        source: repeatable.has(choiceKey(selectedName)) ? 'Invocation - Repeatable' : 'Invocation',
         sourceKind: 'class',
         entries: liveEntries(selectedName) || null,
       });

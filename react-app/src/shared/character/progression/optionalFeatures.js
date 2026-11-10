@@ -1,4 +1,6 @@
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { CORE_2024_SOURCE_PRIORITY } from '../../content/sourcePriority.js';
+import { compareText } from '../../lists.js';
 // Shared resolver for live optional-feature descriptions loaded from
 // optionalfeatures.json (see loadOptionalFeatures). Used by both the builder
 // (ClassStep) and the character sheet (FeaturesTab) so live 2024 entries render
@@ -23,4 +25,38 @@ export function buildOptionalFeatureEntryLookup(optionalFeatures, featureType = 
     if (!index.has(key)) index.set(key, feature.entries);
   });
   return (name) => index.get(matchKey(name)) || null;
+}
+
+function featureTypes(feature) {
+  return (Array.isArray(feature?.featureType) ? feature.featureType : [feature?.featureType])
+    .filter(Boolean)
+    .map((type) => String(type).toLowerCase());
+}
+
+function sourceRank(source) {
+  const index = CORE_2024_SOURCE_PRIORITY.indexOf(source);
+  return index < 0 ? CORE_2024_SOURCE_PRIORITY.length : index;
+}
+
+// The options a class feature offers, from the loaded optional features of one
+// `featureType` ('MV:B' Battle Master maneuvers, 'MM' Metamagic, 'AS' Arcane
+// Shots, 'EI' Eldritch Invocations), each once (the highest-priority source),
+// by name: { name, minLevel, prereqs } — the class level and the other options
+// its 5etools prerequisite asks for.
+export function optionalFeatureOptions(optionalFeatures, featureType) {
+  const wantType = String(featureType || '').toLowerCase();
+  const byName = new Map();
+  (optionalFeatures || []).forEach((feature) => {
+    if (!feature?.name || !featureTypes(feature).includes(wantType)) return;
+    const key = matchKey(feature.name);
+    const held = byName.get(key);
+    if (held && sourceRank(held.source) <= sourceRank(feature.source)) return;
+    byName.set(key, feature);
+  });
+  return [...byName.values()].map((feature) => {
+    const prerequisites = Array.isArray(feature.prerequisite) ? feature.prerequisite : [];
+    const minLevel = Math.max(1, ...prerequisites.map((p) => Number(p?.level?.level || 1)));
+    const prereqs = prerequisites.flatMap((p) => (p?.optionalfeature || []).map((ref) => stripSource(ref)));
+    return { name: feature.name, minLevel, prereqs };
+  }).sort((a, b) => compareText(a.name, b.name));
 }

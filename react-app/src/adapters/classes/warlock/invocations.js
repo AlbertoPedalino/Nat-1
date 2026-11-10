@@ -5,40 +5,12 @@ import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils
 // The Warlock's Eldritch Invocation data and the pure helpers its adapter
 // (warlock.js) builds on. A data module: it has no install function.
 
-// Eldritch Invocations XPHB 2024 — structural data only (name, minLevel, prereq
-// invocation, repeatable). Descriptions are NOT stored here: they are resolved live
-// from optionalfeatures.json (featureType 'EI') and rendered as rich text in both the
-// builder (ClassStep) and the sheet (FeaturesTab).
-export const INVOCATIONS = [
-  { name: 'Agonizing Blast', minLevel: 2, prereq: null },
-  { name: 'Armor of Shadows', minLevel: 1, prereq: null },
-  { name: 'Ascendant Step', minLevel: 5, prereq: null },
-  { name: 'Devil\'s Sight', minLevel: 2, prereq: null },
-  { name: 'Devouring Blade', minLevel: 12, prereq: 'Thirsting Blade' },
-  { name: 'Eldritch Mind', minLevel: 1, prereq: null },
-  { name: 'Eldritch Smite', minLevel: 5, prereq: 'Pact of the Blade' },
-  { name: 'Eldritch Spear', minLevel: 2, prereq: null },
-  { name: 'Fiendish Vigor', minLevel: 1, prereq: null },
-  { name: 'Gaze of Two Minds', minLevel: 5, prereq: null },
-  { name: 'Gift of the Depths', minLevel: 5, prereq: null },
-  { name: 'Gift of the Protectors', minLevel: 9, prereq: 'Pact of the Tome' },
-  { name: 'Investment of the Chain Master', minLevel: 5, prereq: 'Pact of the Chain' },
-  { name: 'Lessons of the First Ones', minLevel: 2, prereq: null, repeatable: true },
-  { name: 'Lifedrinker', minLevel: 9, prereq: 'Pact of the Blade' },
-  { name: 'Mask of Many Faces', minLevel: 1, prereq: null },
-  { name: 'Master of Myriad Forms', minLevel: 5, prereq: null },
-  { name: 'Misty Visions', minLevel: 1, prereq: null },
-  { name: 'One with Shadows', minLevel: 5, prereq: null },
-  { name: 'Otherworldly Leap', minLevel: 2, prereq: null },
-  { name: 'Pact of the Blade', minLevel: 1, prereq: null },
-  { name: 'Pact of the Chain', minLevel: 1, prereq: null },
-  { name: 'Pact of the Tome', minLevel: 1, prereq: null },
-  { name: 'Repelling Blast', minLevel: 2, prereq: null },
-  { name: 'Thirsting Blade', minLevel: 5, prereq: 'Pact of the Blade' },
-  { name: 'Visions of Distant Realms', minLevel: 9, prereq: null },
-  { name: 'Whispers of the Grave', minLevel: 7, prereq: null },
-  { name: 'Witch Sight', minLevel: 15, prereq: null },
-];
+// The Eldritch Invocations themselves — names, levels, prerequisites and
+// descriptions — come from optionalfeatures.json (featureType 'EI', read through
+// optionalFeatureOptions), in the builder (ClassStep) and the sheet (FeaturesTab).
+// Invocations that can be taken more than once (XPHB): the one fact about them
+// the optional-feature data does not carry.
+export const REPEATABLE_INVOCATIONS = Object.freeze(['Lessons of the First Ones']);
 
 // XPHB 2024 progression: total invocations per level [1,3,3,3,5,5,6,6,7,7,7,8,8,8,9,9,9,10,10,10]
 // Threshold when each invocation slot unlocks (slot 6 at lv7, slot 7 at lv9, slot 8 at lv12...):
