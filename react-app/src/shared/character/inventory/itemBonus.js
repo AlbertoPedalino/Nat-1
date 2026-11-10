@@ -20,6 +20,27 @@ export function weaponEnhancement(item) {
   };
 }
 
+// The extra damage a weapon's own text adds on a hit ("an extra
+// {@damage 2d12} Cold damage"): 5etools has no field for it. Each is rolled
+// apart from the weapon's damage, because many hold only sometimes (against
+// Undead, spending a charge, while transformed): the player rolls it when
+// it applies.
+export function weaponExtraDamage(item) {
+  if (!isItemEffectActive(item)) return [];
+  const text = JSON.stringify(item?.entries || []);
+  const seen = new Set();
+  const out = [];
+  for (const match of text.matchAll(/extra \{@damage ([^|}]+)[^}]*\} ([A-Za-z]+) damage/gi)) {
+    const formula = match[1].trim();
+    const type = match[2].toLowerCase();
+    const key = `${formula}|${type}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ formula, type });
+  }
+  return out;
+}
+
 export function armorEnhancement(item) {
   if (!isItemEffectActive(item)) return 0;
   return parseSignedBonus(item?.bonusAc);

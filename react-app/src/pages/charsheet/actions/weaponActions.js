@@ -8,7 +8,7 @@ import {
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/combat/weaponMastery.js';
 import { getWeaponDamageDice, canUseLightExtraAttack, getOffHandDamageMod, hasTwoWeaponFightingStyle, isTwoHandedWeapon, isThrownWeapon, isHeavyWeapon, isWieldingWeaponOrShield, isLightWeapon, isFinesseWeapon, isCrossbow, isPolearmMasterWeapon, hasEquippedShield } from '../inventory/equipmentSlots.js';
-import { weaponEnhancement } from '../../../shared/character/inventory/itemBonus.js';
+import { weaponEnhancement, weaponExtraDamage } from '../../../shared/character/inventory/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import {
   itemIdentityKey,
@@ -155,6 +155,15 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
   };
 }
 
+// A weapon card's damage buttons: the weapon's damage, then each extra damage
+// its text adds on a hit (Frostmourne's +2d12 Cold), rolled when it applies.
+function weaponDamageRollers(item, damageFormula, damageType) {
+  return [
+    { kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${damageType ? ` ${damageType}` : ''}` : 'Damage' },
+    ...weaponExtraDamage(item).map(({ formula, type }) => ({ kind: 'damage', formula, label: `+${formula} ${type}` })),
+  ];
+}
+
 function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, ctx = {}, opts = {}) {
   const { profSets, untrainedArmor } = ctx;
   const weaponOverride = matchingWeaponOverride(C, item, overrides);
@@ -203,7 +212,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     _source: 'Weapon',
     _weaponAttack: true,
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
-    rollers: [{ kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage' }],
+    rollers: weaponDamageRollers(item, damageFormula, dtype),
     rollLabelPrefix: opts.rollLabelPrefix || card.name,
     noDescription: true,
     _item: item,
@@ -322,7 +331,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _weaponAttack: true,
       _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
-      rollers: [{ kind: 'damage', formula: ohDamageFormula, label: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage' }],
+      rollers: weaponDamageRollers(offHandItem, ohDamageFormula, ohDtype),
       rollLabelPrefix: `Off-hand ${ohCard.name}`,
       noDescription: true,
       _item: offHandItem,
