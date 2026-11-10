@@ -7,9 +7,9 @@ export default function install(registry, context = {}) {
     registerSubclassSheetResources,
     registerSubclassSheetEffects,
   } = createAdapterBindings(registry, context);
-registerSubclassAdapter("Sorcerer_Aberrant Mind", function (cls, lv, specs) {});
+registerSubclassAdapter("Sorcerer_Aberrant", function (cls, lv, specs) {});
 
-registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
+registerSubclassSheetActions("Sorcerer_Aberrant", [
   {
     "name": "Telepathic Speech",
     "cat": "bonus",
@@ -35,7 +35,7 @@ registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
     rollers: [{ kind: 'damage', formula: "3d10", label: ({ formula }) => `${formula} force` }]
   }
 ]);
-registerSubclassSheetResources("Sorcerer_Aberrant Mind", [
+registerSubclassSheetResources("Sorcerer_Aberrant", [
   {
     "key": "aberrant_implosion",
     "name": "Warping Implosion",
@@ -44,7 +44,7 @@ registerSubclassSheetResources("Sorcerer_Aberrant Mind", [
   }
 ]);
 
-registerSubclassSheetEffects("Sorcerer_Aberrant Mind", [
+registerSubclassSheetEffects("Sorcerer_Aberrant", [
 
   { type: "telepathy", minLevel: 3, note: "Telepathic Speech: bonus action, range CHA modifier miles, duration Sorcerer level minutes." },
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 6, note: "Psychic Defenses." },

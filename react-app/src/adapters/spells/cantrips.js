@@ -63,16 +63,6 @@ export default function install(registry, context = {}) {
     
     
   });
-  registerCantripData("Booming Blade", {
-    range: "5 ft",
-    
-    
-  });
-  registerCantripData("Green-Flame Blade", {
-    range: "5 ft",
-    
-    
-  });
   // `weaponAttack`: the attack is made with a weapon the character picks on the
   // spell card, which rolls that weapon's attack and damage (SpellEntry).
   registerCantripData("True Strike", {
@@ -198,26 +188,6 @@ export default function install(registry, context = {}) {
   });
   registerCantripData("Word of Radiance", {
     range: "5 ft",
-    
-    
-  });
-  registerCantripData("Infestation", {
-    range: "30 ft",
-    
-    
-  });
-  registerCantripData("Create Bonfire", {
-    range: "60 ft",
-    
-    
-  });
-  registerCantripData("Frostbite", {
-    range: "60 ft",
-    
-    
-  });
-  registerCantripData("Lightning Lure", {
-    range: "15 ft",
     
     
   });

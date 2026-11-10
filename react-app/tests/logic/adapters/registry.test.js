@@ -18,9 +18,9 @@ test('class and feat entries are found by name in any case; subclasses also by a
   assert.equal(registry.getClassSheetActions('fighter'), actions);
 
   const adapter = () => null;
-  registry.registerSubclassAdapter('Wizard', 'Evoker', adapter);
-  assert.equal(registry.getSubclassAdapter('Wizard', 'School of Evocation'), adapter);
-  assert.equal(registry.getSubclassAdapter('Wizard', 'Diviner'), null);
+  registry.registerSubclassAdapter('Barbarian', 'Berserker', adapter);
+  assert.equal(registry.getSubclassAdapter('Barbarian', 'Path of the Berserker'), adapter);
+  assert.equal(registry.getSubclassAdapter('Barbarian', 'Zealot'), null);
 });
 
 test('runtime configs merge and feature filters append, both on the exact owner', () => {

@@ -22,7 +22,6 @@ function _wizardBladesingerAdapter(cls, lv, specs) {
   }
 }
 registerSubclassAdapter("Wizard_Bladesinger", _wizardBladesingerAdapter);
-registerSubclassAdapter("Wizard_Bladesinging", _wizardBladesingerAdapter);
 
 const _wizardBladesingerActions = [
   {
@@ -68,11 +67,8 @@ const _wizardBladesingerProficiencies = [
   }
 ];
 registerSubclassSheetActions("Wizard_Bladesinger", _wizardBladesingerActions);
-registerSubclassSheetActions("Wizard_Bladesinging", _wizardBladesingerActions);
 registerSubclassSheetResources("Wizard_Bladesinger", _wizardBladesingerResources);
-registerSubclassSheetResources("Wizard_Bladesinging", _wizardBladesingerResources);
 registerSubclassSheetProficiencies("Wizard_Bladesinger", _wizardBladesingerProficiencies);
-registerSubclassSheetProficiencies("Wizard_Bladesinging", _wizardBladesingerProficiencies);
 registerWeaponAbilityOverride({
   key: "bladesong_int_weapon",
   label: "Bladesong",
@@ -82,9 +78,9 @@ registerWeaponAbilityOverride({
   requiresProficiency: true,
   condition: function (C) {
     if (!C || C.bladesongActive !== true) return false;
-    return C.subclassShortName === "Bladesinger" || C.subclassShortName === "Bladesinging" ||
+    return C.subclassShortName === "Bladesinger" ||
       (C.extraClasses || []).some(function (ec) {
-        return ec.subclassShortName === "Bladesinger" || ec.subclassShortName === "Bladesinging";
+        return ec.subclassShortName === "Bladesinger";
       });
   }
 });

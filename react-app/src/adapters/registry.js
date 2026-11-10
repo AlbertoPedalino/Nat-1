@@ -7,17 +7,8 @@ function subclassKey(className, subclassShortName) {
 }
 
 function subclassAlias(value) {
-  const raw = matchKey(value)
+  return matchKey(value)
     .replace(/^(schoolof|collegeof|circleof|oathof|pathof|wayof|domainof|traditionof)/, '');
-  const aliases = {
-    abjuration: 'abjurer',
-    divination: 'diviner',
-    evocation: 'evoker',
-    illusion: 'illusionist',
-    transmutation: 'transmuter',
-    bladesinging: 'bladesinger',
-  };
-  return aliases[raw] || raw;
 }
 
 function getSubclassStore(store, className, subclassShortName) {
@@ -92,7 +83,7 @@ const OWNER_KINDS = {
     find: (store, [className, subclassName]) => getSubclassStore(store, className, subclassName),
     exact: (store, [className, subclassName]) => store.get(subclassKey(className, subclassName)),
     // The base subclass a skin's reprint stands on: its very short name, or a
-    // longer registered one it begins ("Aberrant" -> "Aberrant Mind"), never a
+    // longer registered one it begins, never a
     // shorter one inside it ("Demon Hunter" is not the Ranger's "Hunter").
     inherited: (store, [className, subclassName]) => {
       const exact = subclassKey(className, subclassName);

@@ -7,7 +7,7 @@ import { getProficiencyBonus } from '../../shared/character/progression/proficie
 // Each style is a 5etools feat in category "FS"; the feat text is loaded from
 // data, but the *rules* are these effect descriptors. Effects are registered by
 // feat name (case/spacing-insensitive in the registry), so every class that
-// grants a Fighting Style (Fighter, Ranger, Paladin, Bard College of Swords…)
+// grants a Fighting Style (Fighter, Ranger, Paladin…)
 // reuses the same rule with zero duplication.
 //
 // Effect contract (consumers live in the calc layer):
