@@ -85,25 +85,6 @@ registerSpeciesSheetResources("Dragonborn_XPHB", [
   },
 ]);
 
-registerSpeciesSheetEffects("Dragonborn_XPHB", [
-  {
-    type: 'resistance-choice',
-    key: 'species_version',
-    map: {
-      black: 'Acid',
-      copper: 'Acid',
-      blue: 'Lightning',
-      bronze: 'Lightning',
-      brass: 'Fire',
-      gold: 'Fire',
-      red: 'Fire',
-      green: 'Poison',
-      silver: 'Cold',
-      white: 'Cold',
-    },
-    minLevel: 1,
-    note: 'Draconic Resistance',
-  },
-]);
+// Draconic Resistance comes with the chosen colour's data (speciesVersion.js).
 
 }

@@ -83,8 +83,13 @@ export function genericSpeciesChoiceSpecs(species) {
     const sizeMap = { M: 'Medium', S: 'Small' };
     specs.push({ key: 'species_size', label: 'Size', type: 'generic_choice', from: species.size.map((size) => sizeMap[size] || size), count: 1, level: 1 });
   }
-  asArray(species?.resist).forEach((block, index) => {
-    add(choiceFromBlock(`species_resist_${index}`, 'Resistance', block, []));
-  });
+  // A species with versions (Tiefling legacies, Dragonborn colours) takes its
+  // resistance from the version chosen (speciesVersion.js): its base "choose"
+  // only sums the versions up.
+  if (!asArray(species?._versions).length) {
+    asArray(species?.resist).forEach((block, index) => {
+      add(choiceFromBlock(`species_resist_${index}`, 'Resistance', block, []));
+    });
+  }
   return specs;
 }

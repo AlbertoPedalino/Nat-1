@@ -29,27 +29,8 @@ registerSpeciesSheetCommonChoiceMeta("Tiefling_XPHB", {
     species_spell_ability: 'Spellcasting Ability (Tiefling)',
   },
 });
-registerSpeciesSheetEffects("Tiefling_XPHB", [
-  {
-    type: 'resistance-choice',
-    key: 'species_version',
-    map: {
-      abyssal: 'Poison',
-      chthonic: 'Necrotic',
-      infernal: 'Fire',
-    },
-    minLevel: 1,
-    note: 'Fiendish Legacy',
-  },
-  {
-    type: 'sense',
-    senseType: 'darkvision',
-    value: 120,
-    minLevel: 1,
-    note: 'Abyssal Legacy',
-    requiredChoice: { key: 'species_version', value: TIEFLING_LEGACY.ABYSSAL },
-  },
-]);
+// Each legacy's resistance and Abyssal's darkvision 120 ft come with its data
+// (speciesVersion.js).
 
 registerSpeciesRuntimeConfig("Tiefling_XPHB", {
   spellcasting: {

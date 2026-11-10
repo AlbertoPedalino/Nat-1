@@ -1,7 +1,9 @@
 import { characterClassFeatures } from '../../../shared/character/progression/classLevel.js';
+import { speciesWithVersion } from '../../../shared/character/progression/speciesVersion.js';
 
 export function buildPreviewSheetCharacter(character = {}) {
-  const species = character.speciesObj || character.speciesSnapshot || {};
+  // The lineage or colour chosen applies, as in the saved sheet.
+  const species = speciesWithVersion(character.speciesObj || character.speciesSnapshot, character.choices) || {};
   const extraClasses = (character.extraClasses || []).map((extra) => ({
     ...extra,
     clsSnapshot: extra.cls || extra.clsSnapshot || {},

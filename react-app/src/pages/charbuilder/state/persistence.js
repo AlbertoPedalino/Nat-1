@@ -19,6 +19,7 @@ import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { hpBonusPerLevelOf } from '../../../shared/character/combat/hp.js';
+import { speciesWithVersion } from '../../../shared/character/progression/speciesVersion.js';
 import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
@@ -88,6 +89,8 @@ export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
   character = withOwnedFeatSnapshots(character, data.feats);
   const primaryLevel = primaryClassLevel(character);
+  // The species as the character has it: the chosen lineage or colour applied.
+  const species = speciesWithVersion(character.speciesObj, character.choices);
   const ownedFeatNames = collectOwnedFeatNames(character);
   const ownedFeatSnapshots = character.allFeatSnapshots
     .map((feat) => {
@@ -234,11 +237,11 @@ export function makeSheetPayload(character, data) {
     clsSnapshot: character.cls ? makeClassSnapshot(character.cls) : (character.clsSnapshot || null),
     speciesSnapshot: {
       name: character.speciesName,
-      speed: character.speciesObj?.speed || 30,
-      size: character.speciesObj?.size || ['M'],
-      darkvision: character.speciesObj?.darkvision || 0,
-      resist: character.speciesObj?.resist || [],
-      immune: character.speciesObj?.immune || [],
+      speed: species?.speed || 30,
+      size: species?.size || ['M'],
+      darkvision: species?.darkvision || 0,
+      resist: species?.resist || [],
+      immune: species?.immune || [],
       languageProficiencies: [{ common: true }, ...(character.speciesObj?.languageProficiencies || [])],
       toolProficiencies: character.speciesObj?.toolProficiencies || [],
       armorProficiencies: character.speciesObj?.armorProficiencies,

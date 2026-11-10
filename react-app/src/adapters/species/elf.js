@@ -41,21 +41,8 @@ registerSpeciesSheetCommonChoiceMeta("Elf_XPHB", {
 registerSpeciesSheetEffects("Elf_XPHB", [
   // Fey Ancestry: Advantage on saves to avoid or end the Charmed condition.
   { type: 'advantage', target: 'save', conditions: ['Charmed'], minLevel: 1, note: 'Fey Ancestry' },
-  {
-    type: 'sense',
-    senseType: 'darkvision',
-    value: 120,
-    minLevel: 1,
-    note: 'Drow lineage',
-    requiredChoice: { key: 'species_version', value: ELF_LINEAGE.DROW },
-  },
-  {
-    type: 'speed',
-    value: 5,
-    minLevel: 1,
-    note: 'Wood Elf lineage (Speed 35)',
-    requiredChoice: { key: 'species_version', value: ELF_LINEAGE.WOOD_ELF },
-  },
+  // Drow darkvision 120 ft and Wood Elf Speed 35 come with the lineage's data
+  // (speciesVersion.js).
 ]);
 
 registerSpeciesRuntimeConfig("Elf_XPHB", {
