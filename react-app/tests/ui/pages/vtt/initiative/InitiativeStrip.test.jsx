@@ -101,3 +101,24 @@ test('the GM opens a creature from its entry, and drags one not on the board yet
   expect(onEntryPointerDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'd' }), expect.anything());
   expect(screen.getByRole('button', { name: 'Wolf' }).closest('li')).toHaveAttribute('title', expect.stringMatching(/drag it onto the map/));
 });
+
+test('a right click on an entry asks for its menu where the pointer is', () => {
+  const onEntryClick = vi.fn();
+  const onEntryContextMenu = vi.fn();
+  render(<InitiativeStrip entries={entries} onEntryClick={onEntryClick} onEntryContextMenu={onEntryContextMenu} />);
+  const entry = screen.getByRole('button', { name: 'Goblin Boss' });
+  const event = fireEvent.contextMenu(entry, { clientX: 120, clientY: 48 });
+  expect(event).toBe(false);
+  expect(onEntryContextMenu).toHaveBeenCalledWith(entries[1], { x: 120, y: 48 });
+  expect(onEntryClick).not.toHaveBeenCalled();
+  fireEvent.click(entry);
+  expect(onEntryClick).toHaveBeenCalledWith(entries[1]);
+});
+
+test('players get the menu on the entries too, without making them buttons', () => {
+  const onEntryContextMenu = vi.fn();
+  render(<InitiativeStrip entries={entries} onEntryContextMenu={onEntryContextMenu} />);
+  expect(screen.queryByRole('button', { name: 'Hero' })).not.toBeInTheDocument();
+  fireEvent.contextMenu(screen.getByText('Hero'));
+  expect(onEntryContextMenu).toHaveBeenCalledWith(entries[2], { x: 0, y: 0 });
+});

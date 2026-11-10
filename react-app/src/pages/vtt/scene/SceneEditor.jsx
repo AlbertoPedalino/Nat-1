@@ -295,6 +295,21 @@ export default function SceneEditor({
     roster, role, statBlock, statBlockRef, setStatBlockRef, statBlockOpenedAreaRef, openStatBlock,
     contentView, setContentView, mapFullscreen, gmPlayerPreview, setFloatingSheetOpen,
   });
+  // An initiative entry whose piece is on the board answers like the piece: a
+  // click opens its sheet or stat block, a right click its menu. A creature not
+  // on the board still opens its stat block.
+  const initiativeEntryToken = (entry) => (
+    entry?.tokenId ? visibleTokens.find((token) => token.id === entry.tokenId) || null : null
+  );
+  const handleInitiativeEntryClick = (entry) => {
+    const token = initiativeEntryToken(entry);
+    if (token) handleTokenClick(token);
+    else handleEntryClick(entry);
+  };
+  const handleInitiativeEntryMenu = (entry, at) => {
+    const token = initiativeEntryToken(entry);
+    if (token) setMenu({ tokenId: token.id, at });
+  };
   const sheetAreaContent = (placement) => {
     if (showsStatBlock) {
       return (
@@ -477,7 +492,8 @@ export default function SceneEditor({
             selectedKey={showsFight(shownTurns) ? `${shownTurns.instanceId}:${shownTurns.fightId}` : null}
             onStep={handleTurnStep}
             onChoose={handleChooseFight}
-            onEntryClick={gmTurnView ? handleEntryClick : null}
+            onEntryClick={gmTurnView ? handleInitiativeEntryClick : null}
+            onEntryContextMenu={!spectator && !gmPlayerPreview ? handleInitiativeEntryMenu : null}
             onEntryPointerDown={gmTurnView ? handleEntryPointerDown : null}
           />
         )}

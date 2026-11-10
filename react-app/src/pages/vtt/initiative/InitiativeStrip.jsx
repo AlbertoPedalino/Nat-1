@@ -18,8 +18,9 @@ import { DURATIONS } from '../../../shared/ui/motion.js';
 // the pieces the viewer can see (players, projector) or the whole shown fight
 // (the GM). Only the GM gets the controls — next/previous turn and the choice
 // of which fight the scene shows. `onEntryClick(entry)` makes the entries
-// buttons; `onEntryPointerDown(entry, event)` lets an entry marked `placeable`
-// be dragged onto the board.
+// buttons; `onEntryContextMenu(entry, { x, y })` answers a right click, like
+// the piece's own menu; `onEntryPointerDown(entry, event)` lets an entry marked
+// `placeable` be dragged onto the board.
 export default function InitiativeStrip({
   entries = [],
   round = null,
@@ -30,6 +31,7 @@ export default function InitiativeStrip({
   onStep,
   onChoose,
   onEntryClick = null,
+  onEntryContextMenu = null,
   onEntryPointerDown = null,
 }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -80,6 +82,13 @@ export default function InitiativeStrip({
                 type={onEntryClick ? 'button' : undefined}
                 aria-label={onEntryClick ? entry.name : undefined}
                 onClick={onEntryClick ? () => onEntryClick(entry) : undefined}
+                onContextMenu={onEntryContextMenu
+                  ? (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onEntryContextMenu(entry, { x: event.clientX, y: event.clientY });
+                  }
+                  : undefined}
                 onPointerDown={onEntryPointerDown && entry.placeable
                   ? (event) => onEntryPointerDown(entry, event)
                   : undefined}
