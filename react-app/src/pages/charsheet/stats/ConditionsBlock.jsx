@@ -9,6 +9,7 @@ import {
   ConditionPill,
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
+import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -53,14 +54,9 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
 
 export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaustion, conditionEntries }) {
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState([]);
   const active = CONDITIONS.filter((c) => sheet.activeConditions.includes(c.key));
-  const toggleCard = (key) => setExpanded((prev) => (
-    prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-  ));
-  // Derive open cards from the live active list so a removed condition's card
-  // disappears automatically (no stale-state pruning needed).
-  const openCards = active.filter((c) => expanded.includes(c.key) && conditionEntries?.[c.key]?.length);
+  const cards = useOpenConditionCards(active.map((c) => c.key), conditionEntries);
+  const openCards = active.filter((c) => cards.openKeys.includes(c.key));
 
   return (
     <Box sx={{ ...sheetBoxSx, flex: 1, minWidth: 140, p: '0.4rem 0.62rem' }}>
@@ -74,17 +70,17 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 key={c.key}
                 level={sheet.exhaustionLevel || 0}
                 onSet={onSetExhaustion}
-                hasDesc={!!conditionEntries?.[c.key]?.length}
-                isOpen={expanded.includes(c.key)}
-                onToggle={() => toggleCard(c.key)}
+                hasDesc={cards.hasDesc(c.key)}
+                isOpen={cards.isOpen(c.key)}
+                onToggle={() => cards.toggleCard(c.key)}
               />
             ) : (
               <ConditionPill
                 key={c.key}
                 label={c.label}
-                hasDesc={!!conditionEntries?.[c.key]?.length}
-                isOpen={expanded.includes(c.key)}
-                onToggle={() => toggleCard(c.key)}
+                hasDesc={cards.hasDesc(c.key)}
+                isOpen={cards.isOpen(c.key)}
+                onToggle={() => cards.toggleCard(c.key)}
                 onRemove={() => onToggle(c.key)}
                 sx={pillSx}
               />
@@ -95,7 +91,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
         {openCards.length > 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             {openCards.map((c) => (
-              <ConditionCard key={c.key} label={c.label} entries={conditionEntries[c.key]} onClose={() => toggleCard(c.key)} />
+              <ConditionCard key={c.key} label={c.label} entries={conditionEntries[c.key]} onClose={() => cards.toggleCard(c.key)} />
             ))}
           </Box>
         )}

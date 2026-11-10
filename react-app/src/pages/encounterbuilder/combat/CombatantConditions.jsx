@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Box } from '@mui/material';
 import {
   EXHAUSTION_KEY,
@@ -11,6 +10,7 @@ import {
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
+import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
@@ -30,18 +30,13 @@ const pillSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
 
 export default function CombatantConditions({ combatant }) {
   const { dispatch } = useEncounterBuilder();
-  const [expanded, setExpanded] = useState([]);
   const conditionEntries = useConditionEntries();
   const active = normalizeConditions(combatant.activeConditions);
   const assignable = active.filter((key) => key !== EXHAUSTION_KEY);
+  const cards = useOpenConditionCards(active, conditionEntries);
 
   const toggle = (key) => dispatch({ type: 'toggleCombatantCondition', id: combatant.id, key });
-  const toggleCard = (key) => setExpanded((prev) => (
-    prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-  ));
-  // Derived from the live active list, so removing a condition takes its card
-  // with it — no stale-state pruning needed.
-  const openCards = active.filter((key) => expanded.includes(key) && conditionEntries?.[key]?.length);
+  const openCards = cards.openKeys;
 
   return (
     <MarkerRow
@@ -54,9 +49,9 @@ export default function CombatantConditions({ combatant }) {
         <ConditionPill
           key={key}
           label={conditionLabel(key)}
-          hasDesc={!!conditionEntries?.[key]?.length}
-          isOpen={expanded.includes(key)}
-          onToggle={() => toggleCard(key)}
+          hasDesc={cards.hasDesc(key)}
+          isOpen={cards.isOpen(key)}
+          onToggle={() => cards.toggleCard(key)}
           onRemove={key === EXHAUSTION_KEY ? undefined : () => toggle(key)}
           readOnlyReason={key === EXHAUSTION_KEY ? 'Exhaustion is graded — set it on the character sheet' : null}
           sx={pillSx}
@@ -69,7 +64,7 @@ export default function CombatantConditions({ combatant }) {
               key={key}
               label={conditionLabel(key)}
               entries={conditionEntries[key]}
-              onClose={() => toggleCard(key)}
+              onClose={() => cards.toggleCard(key)}
               fontSize={FONT_SIZES.sm}
             />
           ))}
