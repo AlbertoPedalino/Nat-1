@@ -66,10 +66,6 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     case 'addCombatantEffect': v.activeEffects = addReminder(v.activeEffects, command.payload?.text); break;
     case 'removeCombatantEffect': v.activeEffects = removeEffect(v.activeEffects, command.effectId); break;
     case 'clearCombatantEffects': v.activeEffects = []; break;
-    case 'patch':
-      v = { ...v, ...command.patch };
-      recover = Object.hasOwn(command.patch, 'currentHP');
-      break;
     case 'setExhaustion':
       v.activeConditions = setConditionActive(v.activeConditions, EXHAUSTION, n > 0);
       if (n >= EXHAUSTION_MAX) v = withMortality(v, markDead(mortalityOf(v)));

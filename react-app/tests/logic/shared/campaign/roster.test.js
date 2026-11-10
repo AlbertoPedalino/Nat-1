@@ -2,41 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   placedCharacterIds,
-  toRoster,
-  toRosterEntry,
+  toCampaignMembers,
   withSheetVitals,
 } from '../../../../src/shared/campaign/roster.js';
 
 const row = (id, data) => ({ id, name: 'Row name', owner: 'u1', data });
-
-test('a roster entry prefers the sheet name and keeps its class and valid colour', () => {
-  const entry = toRosterEntry(row('c1', {
-    name: 'Aria', className: 'Wizard', classIconColor: '#AABBCC', deathSaves: { success: 2, fail: 1 },
-  }));
-  assert.equal(entry.characterId, 'c1');
-  assert.equal(entry.name, 'Aria');
-  assert.equal(entry.color, '#aabbcc');
-  assert.equal(entry.className, 'Wizard');
-  assert.deepEqual(entry.deathSaves, { success: 2, fail: 1 });
-  assert.equal(toRosterEntry(row('c2', {})).name, 'Row name');
-  assert.equal(toRosterEntry(row('c3', { classIconColor: 'red' })).color, null);
-  assert.equal(toRosterEntry(null), null);
-  assert.deepEqual(toRoster([null, row('c1', {})]).map((e) => e.characterId), ['c1']);
+// A roster entry as rosterEntryFromDigest builds it; hit points null until the
+// base maximum is known.
+const entry = (characterId, fields = {}) => ({
+  characterId, name: 'Aria', hpCurrent: null, hpMax: null, tempHp: 0, maxHpBonus: 0,
+  conditions: [], effects: [], deathSaves: { success: 0, fail: 0 }, ...fields,
 });
 
-// Max HP is derived from hit dice, Constitution and class features, so it is
-// never on the stored sheet. Reading `data.maxHP` returned undefined for almost
-// every character and the bar simply never appeared — readCampaignVitals fills
-// these in after loading the adapters.
-test('a roster entry starts with no hit points, because max HP is derived', () => {
-  const entry = toRosterEntry(row('c1', { name: 'Aria', currentHP: 9, maxHP: 22 }));
-  assert.equal(entry.hpMax, null);
-  assert.equal(entry.hpCurrent, null);
+test('the scene list counts a campaign by who is in it, nothing more', () => {
+  assert.deepEqual(toCampaignMembers([null, row('c1', { name: 'Aria' }), row('c2', {})]), [
+    { characterId: 'c1', name: 'Aria' },
+    { characterId: 'c2', name: 'Row name' },
+  ]);
 });
 
 test('derived hit points are overlaid onto the pieces that stand for characters', () => {
-  const roster = toRoster([row('c1', { name: 'Aria' })])
-    .map((entry) => ({ ...entry, hpCurrent: 9, hpMax: 22, tempHp: 4 }));
+  const roster = [entry('c1', { hpCurrent: 9, hpMax: 22, tempHp: 4 })];
   const tokens = [
     { id: 't1', characterId: 'c1', hpCurrent: null, hpMax: null },
     { id: 't2', characterId: null, hpCurrent: 4, hpMax: 7 },
@@ -60,7 +46,7 @@ test('derived hit points are overlaid onto the pieces that stand for characters'
 // once. Gating the second on the first left a character looking unafflicted
 // until the class adapters had loaded.
 test('conditions reach the piece even before the hit points can be derived', () => {
-  const roster = toRoster([row('c1', { name: 'Aria', activeConditions: ['prone'] })]);
+  const roster = [entry('c1', { conditions: ['prone'] })];
   const tokens = [{ id: 't1', characterId: 'c1', hpCurrent: 3, hpMax: 5 }];
   const merged = withSheetVitals(tokens, roster);
   assert.deepEqual(merged[0].conditions, ['prone']);
@@ -73,8 +59,7 @@ test('conditions reach the piece even before the hit points can be derived', () 
 // The sheet owns a character's conditions the way it owns their hit points: the
 // map shows them and writes back, it never keeps a second copy.
 test('sheet conditions replace whatever the piece was carrying', () => {
-  const roster = toRoster([row('c1', { name: 'Aria', activeConditions: ['blinded'] })])
-    .map((entry) => ({ ...entry, hpCurrent: 9, hpMax: 22 }));
+  const roster = [entry('c1', { conditions: ['blinded'], hpCurrent: 9, hpMax: 22 })];
   const merged = withSheetVitals([{ id: 't1', characterId: 'c1', conditions: ['prone'] }], roster);
   assert.deepEqual(merged[0].conditions, ['blinded']);
 });
@@ -88,7 +73,7 @@ test('placed character ids ignore pieces that stand for nobody', () => {
 // Reminders are the sheet's too: the piece shows them and never keeps its own
 // copy.
 test('sheet reminders replace whatever the piece was carrying', () => {
-  const roster = toRoster([row('c1', { name: 'Aria', activeEffects: [{ key: 'custom', text: 'Guidance' }] })]);
+  const roster = [entry('c1', { effects: [{ key: 'custom', text: 'Guidance' }] })];
   const tokens = [{ id: 't1', characterId: 'c1', effects: [{ key: 'custom', text: 'Bless' }] }];
   assert.deepEqual(withSheetVitals(tokens, roster)[0].effects, [{ key: 'custom', text: 'Guidance' }]);
   const monster = [{ id: 'm1', effects: [{ key: 'custom', text: 'Bless' }] }];

@@ -1,3 +1,5 @@
+import { tempHpAfter } from '../combat/vitals.js';
+
 // Druid Wild Shape — active form state + every rule of the form.
 //
 // When a Druid transforms, the resolved beast snapshot is stored directly on the
@@ -128,7 +130,7 @@ export function wildShapeSenses(C) {
 export function enterWildShapePatch(C, beast, druidLevel) {
   if (!beast) return null;
   const granted = Math.max(0, Number(druidLevel) || 0);
-  const tempHP = Math.max(Number(C?.tempHP || 0), granted);
+  const tempHP = tempHpAfter(C?.tempHP, 'grantTempHp', granted);
   return {
     wildShape: { beast },
     tempHP,

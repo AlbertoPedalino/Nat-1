@@ -134,8 +134,16 @@ export function useSheetDocument({
       const base = digest && confirmed
         ? { hpBasis: digest.hpBasis, baseMax: confirmed.baseMaxHP }
         : null;
-      commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch }, { digest, base })
-        .catch((error) => notify('error', failureMessage('Could not update hit points.', error)));
+      // Every vital change is a health command, applied by its rules
+      // (vitalCommands.js); raw values are never sent. One without a command
+      // is a bug, said out loud rather than written past the rules.
+      if (command) {
+        commandCharacterVitals(charId, command, { digest, base })
+          .catch((error) => notify('error', failureMessage('Could not update hit points.', error)));
+      } else {
+        console.error('Character vitals changed without a health command; not saved.', Object.keys(vitalPatch));
+        notify('error', 'That change to hit points or conditions was not saved.');
+      }
       patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
       if (!Object.keys(patch).length) return;
     }

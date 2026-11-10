@@ -1,42 +1,18 @@
-// Campaign character rows -> the little a map token needs to know about them.
-// Deliberately thinner than the encounter builder's `toEncounterPlayer`: a
-// piece on a map has no use for AC, HP or initiative, and pulling that mapper in
-// would drag the class adapters into the VTT bundle for nothing.
+// The battle map's roster of characters: entries built from character digests
+// (characterDigest.js rosterEntryFromDigest, the one shape), overlaid onto the
+// pieces that stand for them.
 
-import { normalizeConditions } from '../character/combat/conditions.js';
-import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../character/combat/vitals.js';
-import { normalizeHexColor } from '../ui/colors.js';
 
-export function toRosterEntry(row) {
+// A campaign's character row as the scene list counts it: who, nothing more.
+// Vitals come from the digests once a scene is open, never from here.
+export function toCampaignMember(row) {
   if (!row?.id) return null;
-  const sheet = row.data || {};
-  return {
-    characterId: row.id,
-    name: sheet.name || row.name || 'Character',
-    ownerId: row.owner || null,
-    ownerUsername: row.owner_username || null,
-    color: normalizeHexColor(sheet.classIconColor),
-    className: typeof sheet.className === 'string' ? sheet.className : null,
-    deathSaves: normalizeDeathSaves(sheet.deathSaves),
-    // The portrait belongs to the sheet, exactly as hit points and conditions
-    // do: the piece on the map shows what the sheet says and never the reverse.
-    portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,
-    // Hit points are deliberately absent here. Current HP is stored on the
-    // sheet but max HP is derived — from hit dice, Constitution and class
-    // features — so reading `data.maxHP` yields undefined for almost every
-    // character, and a bar with no maximum is no bar at all. On the battle map
-    // they come from character digests (shared/campaign/characterDigest.js).
-    hpCurrent: null,
-    hpMax: null,
-    tempHp: 0,
-    maxHpBonus: 0,
-    // Conditions ARE stored on the sheet — they are a synced vital, unlike max
-    // HP which is derived — so they can be read straight from the blob.
-    conditions: normalizeConditions(sheet.activeConditions),
-    // Advantage/disadvantage rulings are a synced vital too.
-    effects: normalizeEffects(sheet.activeEffects),
-  };
+  return { characterId: row.id, name: row.data?.name || row.name || 'Character' };
+}
+
+export function toCampaignMembers(rows) {
+  return (rows || []).map(toCampaignMember).filter(Boolean);
 }
 
 // Hit points for the pieces that stand for characters, keyed by character id.
@@ -104,10 +80,6 @@ export function withSheetVitals(tokens, roster) {
       fromSheet: true,
     };
   });
-}
-
-export function toRoster(rows) {
-  return (rows || []).map(toRosterEntry).filter(Boolean);
 }
 
 // Which roster entries already stand on the map, so the panel can offer the rest

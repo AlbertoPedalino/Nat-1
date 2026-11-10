@@ -8,15 +8,15 @@
 // which conditions imply which.
 
 export const CONDITIONS = [
-  { key: 'blinded', label: 'Blinded', icon: 'EyeOff' }, { key: 'charmed', label: 'Charmed', icon: 'Heart' },
-  { key: 'deafened', label: 'Deafened', icon: 'Ear' }, { key: 'frightened', label: 'Frightened', icon: 'Ghost' },
-  { key: 'grappled', label: 'Grappled', icon: 'Hand' }, { key: 'incapacitated', label: 'Incapacitated', icon: 'Pause' },
-  { key: 'invisible', label: 'Invisible', icon: 'CircleDashed' }, { key: 'paralyzed', label: 'Paralyzed', icon: 'Brain' },
-  { key: 'petrified', label: 'Petrified', icon: 'Mountain' }, { key: 'poisoned', label: 'Poisoned', icon: 'FlaskConical' },
-  { key: 'prone', label: 'Prone', icon: 'ArrowDown' }, { key: 'restrained', label: 'Restrained', icon: 'Link' },
-  { key: 'stunned', label: 'Stunned', icon: 'Zap' }, { key: 'unconscious', label: 'Unconscious', icon: 'Moon' },
-  { key: 'dead', label: 'Dead', icon: 'Skull' },
-  { key: 'exhaustion', label: 'Exhaustion', icon: 'BatteryLow' },
+  { key: 'blinded', label: 'Blinded' }, { key: 'charmed', label: 'Charmed' },
+  { key: 'deafened', label: 'Deafened' }, { key: 'frightened', label: 'Frightened' },
+  { key: 'grappled', label: 'Grappled' }, { key: 'incapacitated', label: 'Incapacitated' },
+  { key: 'invisible', label: 'Invisible' }, { key: 'paralyzed', label: 'Paralyzed' },
+  { key: 'petrified', label: 'Petrified' }, { key: 'poisoned', label: 'Poisoned' },
+  { key: 'prone', label: 'Prone' }, { key: 'restrained', label: 'Restrained' },
+  { key: 'stunned', label: 'Stunned' }, { key: 'unconscious', label: 'Unconscious' },
+  { key: 'dead', label: 'Dead' },
+  { key: 'exhaustion', label: 'Exhaustion' },
 ];
 
 // Conditions that inherently impose other conditions (XPHB 2024). Applying the

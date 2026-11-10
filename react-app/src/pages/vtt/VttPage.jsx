@@ -4,7 +4,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import { toRoster } from '../../shared/campaign/roster.js';
+import { toCampaignMembers } from '../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../shared/campaign/useGmCampaigns.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { fetchScene } from '../../shared/cloud/api/vttScenes.js';
@@ -55,7 +55,7 @@ export default function VttPage() {
     campaigns,
     error: campaignError,
     loading: loadingCampaigns,
-  } = useGmCampaigns({ mapRows: async (rows) => toRoster(rows) });
+  } = useGmCampaigns({ mapRows: async (rows) => toCampaignMembers(rows) });
   const runsCampaigns = campaigns.length > 0;
 
   const { scene: liveScene, loading: loadingSession } = useLiveSession({
