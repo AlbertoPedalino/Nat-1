@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { speciesWithVersion } from '../../../../src/shared/character/progression/speciesVersion.js';
+import { speciesWithVersion, versionChoiceLabel } from '../../../../src/shared/character/progression/speciesVersion.js';
 import { genericSpeciesChoiceSpecs } from '../../../../src/shared/character/progression/choiceBlocks.js';
 
 const tiefling = {
@@ -65,4 +65,10 @@ test("a species' spells come from its data, the chosen lineage's included", asyn
 test("the species spellcasting ability pick comes from its data", () => {
   const specs = genericSpeciesChoiceSpecs({ _versions: [{ name: 'X; Y', additionalSpells: [{ ability: { choose: ['int', 'cha'] } }] }] });
   assert.deepEqual(specs.find((s) => s.key === 'species_spell_ability').from, ['int', 'cha']);
+});
+
+test('a lineage is chosen by its short name', () => {
+  assert.equal(versionChoiceLabel({ name: 'Elf; High Elf Lineage' }), 'High Elf');
+  assert.equal(versionChoiceLabel({ name: 'Tiefling; Abyssal Legacy' }), 'Abyssal');
+  assert.equal(versionChoiceLabel({ name: 'Shifter; Beasthide' }), 'Beasthide');
 });

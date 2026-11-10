@@ -10,6 +10,12 @@ import {
 import { stripMarkup } from '../../content/markupText.js';
 import { capitalize } from '../../ui/textCase.js';
 import { asArray } from '../../lists.js';
+import {
+  additionalSpellChoiceGroups,
+  choiceGroupSpellFilter,
+  choiceGroupWhat,
+} from '../spells/additionalSpellChoices.js';
+import { versionChoiceLabel } from './speciesVersion.js';
 
 // 5etools proficiency "choose" blocks turned into builder choice specs — the
 // one parser for species, backgrounds, feats and multiclassing.
@@ -92,6 +98,8 @@ export function genericSpeciesChoiceSpecs(species) {
     specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability', type: 'ability_choice', from: [...new Set(abilities)], count: 1, level: 1 });
   }
 
+  specs.push(...speciesSpellChoiceSpecs(species));
+
   // A species with versions (Tiefling legacies, Dragonborn colours) takes its
   // resistance from the version chosen (speciesVersion.js): its base "choose"
   // only sums the versions up.
@@ -101,4 +109,50 @@ export function genericSpeciesChoiceSpecs(species) {
     });
   }
   return specs;
+}
+
+function lineageKeyPart(label) {
+  return String(label || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function spellChoiceSpec(group, key, lineage) {
+  const what = choiceGroupWhat(group);
+  const classes = group.classes.join('/');
+  return {
+    key,
+    label: `${[classes, what].filter(Boolean).join(' ')}${lineage ? ` (${lineage})` : ''}`,
+    type: 'spell_choice',
+    count: group.count,
+    level: group.minLevel,
+    spellFilter: choiceGroupSpellFilter(group),
+    classes: group.classes,
+    ...(lineage ? { requiredChoice: { key: 'species_version', value: lineage } } : {}),
+  };
+}
+
+// The spells a species or one of its lineages lets the player pick (High Elf:
+// a Wizard cantrip; Khoravar: a Cleric, Druid or Wizard cantrip), from its
+// additionalSpells "choose" items. A lineage pick is keyed
+// `species_<lineage>_cantrip` / `_spell` and counts only while that lineage is
+// chosen; a species-wide pick is `species_cantrip_<n>` / `species_spell_<n>`.
+// With versions, the base species' additionalSpells only sum them up.
+export function speciesSpellChoiceSpecs(species) {
+  const versions = asArray(species?._versions).filter((version) => !version?._abstract);
+  if (versions.length) {
+    return versions.flatMap((version) => {
+      const lineage = versionChoiceLabel(version);
+      const grants = asArray(version?.additionalSpells);
+      if (!lineage || grants.length !== 1) return [];
+      const part = lineageKeyPart(lineage);
+      return additionalSpellChoiceGroups(grants[0]).map((group, index) => {
+        const kind = group.level === 0 ? 'cantrip' : 'spell';
+        return spellChoiceSpec(group, `species_${part}_${kind}${index ? `_${index}` : ''}`, lineage);
+      });
+    });
+  }
+  const grants = asArray(species?.additionalSpells);
+  if (grants.length !== 1) return [];
+  return additionalSpellChoiceGroups(grants[0]).map((group, index) => (
+    spellChoiceSpec(group, `species_${group.level === 0 ? 'cantrip' : 'spell'}_${index}`, null)
+  ));
 }

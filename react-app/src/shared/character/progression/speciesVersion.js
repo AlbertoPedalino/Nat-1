@@ -32,6 +32,14 @@ function chosenVersion(species, choice) {
   return null;
 }
 
+// The name a lineage is chosen by: "Elf; High Elf Lineage" -> "High Elf",
+// "Tiefling; Abyssal Legacy" -> "Abyssal", "Shifter; Beasthide" -> "Beasthide".
+export function versionChoiceLabel(version) {
+  const name = String(version?.name || '');
+  const tail = (name.includes(';') ? name.split(';').slice(1).join(';') : name).trim();
+  return tail.replace(/\s+(Lineage|Legacy)$/i, '').trim();
+}
+
 export function speciesWithVersion(species, choices) {
   if (!species) return species;
   const raw = choices?.species_version;

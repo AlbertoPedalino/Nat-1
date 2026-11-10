@@ -16,16 +16,8 @@ registerSpeciesAdapter("Elf_XPHB", function (s) {
   const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Elf', suffixes: ['Lineage'], expect: Object.values(ELF_LINEAGE) });
 
   specs.push({ key: 'species_version', label: 'Elven Lineage', type: 'option', options: lineageOptions, count: 1, level: 1 });
-  specs.push({
-    key: 'species_high_elf_cantrip',
-    label: 'Wizard Cantrip (High Elf)',
-    type: 'spell_choice',
-    count: 1,
-    level: 1,
-    spellFilter: { spellLevels: [0], classes: ['Wizard'] },
-    classes: ['Wizard'],
-    requiredChoice: { key: 'species_version', value: ELF_LINEAGE.HIGH_ELF },
-  });
+  // The High Elf's Wizard cantrip comes from the lineage's data
+  // (speciesSpellChoiceSpecs).
   return specs;
 });
 

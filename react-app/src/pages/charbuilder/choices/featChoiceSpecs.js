@@ -11,82 +11,30 @@ import {
   specPush,
   choiceSpecsFromProficiencyBlocks,
 } from './choiceSpecHelpers.js';
+import {
+  additionalSpellChoiceGroups,
+  choiceGroupLabel,
+  choiceGroupSpellFilter,
+} from '../../../shared/character/spells/additionalSpellChoices.js';
 
 // The choices a feat asks for in the builder: its choiceUi, ability and
 // proficiency choose-blocks, and spell picks from additionalSpells.
 
-function parseChooseString(value) {
-  const out = { level: null, levels: [], classes: [], schools: [] };
-  String(value || '').split('|').forEach((part) => {
-    const [k, v] = part.split('=');
-    if (k === 'level') {
-      out.levels = String(v || '').split(';').map(Number).filter(Number.isFinite);
-      out.level = out.levels.length === 1 ? out.levels[0] : null;
-    }
-    if (k === 'class') out.classes = String(v || '').split(';').map((s) => s.trim()).filter(Boolean);
-    if (k === 'school') out.schools = String(v || '').split(';').map((s) => s.trim()).filter(Boolean);
-  });
-  return out;
-}
-
-function collectChooseEntries(obj) {
-  const entries = [];
-  if (Array.isArray(obj)) {
-    obj.forEach((item) => {
-      if (item && typeof item === 'object') {
-        if (item.choose) entries.push(item);
-        else entries.push(...collectChooseEntries(item));
-      }
-    });
-  } else if (obj && typeof obj === 'object') {
-    Object.values(obj).forEach((v) => entries.push(...collectChooseEntries(v)));
-  }
-  return entries;
-}
-
 function additionalSpellChoices(feat, slotKey, entryIdx) {
-  const out = [];
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
-  if (!additional.length) return out;
+  if (!additional.length) return [];
   const hasSelectedEntry = entryIdx != null && !Number.isNaN(Number(entryIdx));
-  if (additional.length > 1 && !hasSelectedEntry) return out;
+  if (additional.length > 1 && !hasSelectedEntry) return [];
   const resolvedEntryIdx = hasSelectedEntry ? Number(entryIdx) : 0;
   const grant = additional[Math.min(resolvedEntryIdx, additional.length - 1)];
-  if (!grant) return out;
-  let chooseCounter = 0;
-  ['known', 'innate', 'prepared', 'expanded'].forEach((mode) => {
-    const section = grant[mode];
-    if (!section || typeof section !== 'object') return;
-    Object.entries(section).forEach(([scope, list]) => {
-      const chooseEntries = collectChooseEntries(list);
-      if (!chooseEntries.length) return;
-      const grouped = new Map();
-      chooseEntries.forEach((entry) => {
-        if (!entry?.choose) return;
-        const parsed = parseChooseString(entry.choose);
-        const sigKey = `${parsed.levels.join(',') || '?'}|${parsed.classes.join(',')}|${parsed.schools.join(',')}`;
-        const current = grouped.get(sigKey) || { ...parsed, count: 0 };
-        current.count += entry.count || 1;
-        grouped.set(sigKey, current);
-      });
-      grouped.forEach((value, key) => {
-        out.push({
-          key: `${slotKey}_spell_${mode}_${chooseCounter}_${key}`,
-          label: `${feat.name} - ${value.level === 0 ? 'Cantrip' : value.level != null ? `Spell Lv.${value.level}` : `Spell Lv.${value.levels.join('/')}`}${value.classes.length ? ` (${value.classes.join('/')})` : ''}`,
-          type: 'spell_choice',
-          count: value.count,
-          spellFilter: {
-            spellLevels: value.levels.length ? value.levels : undefined,
-            classes: value.classes,
-            schools: value.schools.length ? value.schools : undefined,
-          },
-          classes: value.classes,
-        });
-        chooseCounter += 1;
-      });
-    });
-  });
-  return out;
+  return additionalSpellChoiceGroups(grant).map((group, index) => ({
+    key: `${slotKey}_spell_${group.mode}_${index}_${group.signature}`,
+    label: `${feat.name} - ${choiceGroupLabel(group)}`,
+    type: 'spell_choice',
+    count: group.count,
+    spellFilter: choiceGroupSpellFilter(group),
+    classes: group.classes,
+  }));
 }
 
 export function featChoiceSpecs(feat, options = {}) {
