@@ -1,5 +1,5 @@
 import { matchKey, stripSource } from '../../content/nameKeys.js';
-import { CORE_2024_SOURCE_PRIORITY } from '../../content/sourcePriority.js';
+import { CORE_2024_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
 import { compareText } from '../../lists.js';
 // Shared resolver for live optional-feature descriptions loaded from
 // optionalfeatures.json (see loadOptionalFeatures). Used by both the builder
@@ -33,11 +33,6 @@ function featureTypes(feature) {
     .map((type) => String(type).toLowerCase());
 }
 
-function sourceRank(source) {
-  const index = CORE_2024_SOURCE_PRIORITY.indexOf(source);
-  return index < 0 ? CORE_2024_SOURCE_PRIORITY.length : index;
-}
-
 // The options a class feature offers, from the loaded optional features of one
 // `featureType` ('MV:B' Battle Master maneuvers, 'MM' Metamagic, 'AS' Arcane
 // Shots, 'EI' Eldritch Invocations), each once (the highest-priority source),
@@ -50,7 +45,7 @@ export function optionalFeatureOptions(optionalFeatures, featureType) {
     if (!feature?.name || !featureTypes(feature).includes(wantType)) return;
     const key = matchKey(feature.name);
     const held = byName.get(key);
-    if (held && sourceRank(held.source) <= sourceRank(feature.source)) return;
+    if (held && sourceRank(held.source, CORE_2024_SOURCE_PRIORITY) <= sourceRank(feature.source, CORE_2024_SOURCE_PRIORITY)) return;
     byName.set(key, feature);
   });
   return [...byName.values()].map((feature) => {

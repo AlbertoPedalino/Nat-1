@@ -2,7 +2,7 @@ import { CREATURE_TYPES } from '../content/rulesVocabulary.js';
 // The monster sources the app loads, their labels, CR to XP, and the type and
 // size vocabulary of the bestiary.
 export const PROJECT_ALLOWED_SOURCES = Object.freeze([
-  'XPHB', 'XMM', 'XDMG', 'FRAIF', 'FRHOF', 'EFA', 'RWH', 'AU', 'AUD',
+  'XPHB', 'XMM', 'XDMG', 'FRAIF', 'FRHOF', 'EFA', 'RWH', 'AU', 'AUD', 'WOW',
 ]);
 
 export const PROJECT_TO_RAW_SOURCE = Object.freeze({
@@ -15,6 +15,7 @@ export const PROJECT_TO_RAW_SOURCE = Object.freeze({
   RWH: 'RHW',
   AU: 'AU',
   AUD: 'AUD',
+  WOW: 'WoW',
 });
 
 export const RAW_ALLOWED_SOURCES = Object.freeze(PROJECT_ALLOWED_SOURCES.map((source) => PROJECT_TO_RAW_SOURCE[source]));

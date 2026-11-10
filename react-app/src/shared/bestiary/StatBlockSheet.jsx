@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
-import { formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, getType, getTypeTags } from './monsterUtils.js';
+import { armorClassEntry, formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, displayType, getTypeTags } from './monsterUtils.js';
 import EntryRenderer from './EntryRenderer.jsx';
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
@@ -43,7 +43,7 @@ export function StatBlockHeader({ monster, onClose }) {
             {url ? <Link href={url} target="_blank" rel="noopener" color="inherit" underline="hover">{monster.name}</Link> : monster.name}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {[getSizeLabel(monster), getType(monster.type)].filter(Boolean).join(' ')}
+            {[getSizeLabel(monster), displayType(monster.type)].filter(Boolean).join(' ')}
             {getTypeTags(monster.type)}
             {formatAlignment(monster.alignment) ? `, ${formatAlignment(monster.alignment)}` : ''}
           </Typography>
@@ -61,8 +61,18 @@ export function StatBlockHeader({ monster, onClose }) {
 
 export function StatBlockSheet({ monster, legendaryGroups, conditions = null, onRoll, children = null }) {
   const legendaryGroup = getLegendaryGroup(monster, legendaryGroups);
+  // A Wild Shape form (Bear Form) or a summon template states its AC, Hit
+  // Points and ability scores as rules ("15 + your Wisdom modifier") and has
+  // no Challenge Rating.
+  const hasCr = monster.cr != null;
   const cr = crKey(monster.cr);
   const hpFormula = monster.hp?.formula;
+  const acSpecial = armorClassEntry(monster.ac).value == null ? armorClassEntry(monster.ac).special : '';
+  const hpSpecial = String(monster.hp?.special || '').trim();
+  const abilityRules = [...new Set(ABILITIES
+    .map((key) => monster[key])
+    .filter((score) => score && typeof score === 'object' && score.special)
+    .map((score) => String(score.special).trim()))];
   const spellcasting = groupSpellcasting(monster.spellcasting);
 
   const sourcesFor = useCallback((type) => {
@@ -86,9 +96,9 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
   return (
     <StatRollContext.Provider value={sourcesFor}>
       <Stack spacing={1.5}>
-        <Prop label="Armor Class">{getAC(monster.ac)}{getACDesc(monster.ac)}</Prop>
-        <Prop label="Hit Points">
-          {getHP(monster.hp)} {hpFormula ? (
+        <Prop label="Armor Class">{acSpecial ? <InlineText value={acSpecial} /> : <>{getAC(monster.ac)}{getACDesc(monster.ac)}</>}</Prop>
+        <Prop label={monster.hp?.isTemporary ? 'Temporary Hit Points' : 'Hit Points'}>
+          {hpSpecial ? <InlineText value={hpSpecial} /> : getHP(monster.hp)} {hpFormula ? (
             <>
               (
               <RollText notation={hpFormula} type="HP" onRoll={handleRoll}>{hpFormula}</RollText>
@@ -100,6 +110,14 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
           {ABILITIES.map((key) => {
             const label = ABILITY_ABBREVIATIONS[key];
+            if (typeof monster[key] === 'object' && monster[key]) {
+              return (
+                <Stack key={key} spacing={0} sx={{ alignItems: 'center', p: 1 }}>
+                  <Typography variant="caption">{label}</Typography>
+                  <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>—</Typography>
+                </Stack>
+              );
+            }
             const mod = signed(abilityModifier(monster[key]));
             const type = `${label} Check`;
             const sources = sourcesFor(type);
@@ -122,6 +140,9 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
             );
           })}
         </Box>
+        {abilityRules.map((rule) => (
+          <Typography key={rule} variant="body2" sx={{ color: 'text.secondary' }}><InlineText value={rule} /></Typography>
+        ))}
         <OptionalProp label="Saving Throws" value={monster.save} render={(save) => renderRollMap(save, 'Save', handleRoll)} />
         <OptionalProp label="Skills" value={monster.skill} render={(skills) => renderRollMap(skills, 'Check', handleRoll)} />
         <OptionalProp label="Damage Vulnerabilities" value={formatDamageList(monster.vulnerable, 'vulnerable')} />
@@ -130,8 +151,8 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         <OptionalProp label="Condition Immunities" value={formatDamageList(monster.conditionImmune, 'conditionImmune')} />
         <OptionalProp label="Senses" value={[...(monster.senses || []), monster.passive != null ? `passive Perception ${monster.passive}` : ''].filter(Boolean).join(', ')} />
         <Prop label="Languages">{Array.isArray(monster.languages) ? monster.languages.join(', ') : monster.languages || '—'}</Prop>
-        <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop>
-        <Prop label="Proficiency Bonus">{monster.pbNote || signed(crPB(cr))}</Prop>
+        {hasCr ? <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop> : null}
+        {monster.pbNote || hasCr ? <Prop label="Proficiency Bonus">{monster.pbNote ? <InlineText value={monster.pbNote} /> : signed(crPB(cr))}</Prop> : null}
         <Divider />
         <Section title="Traits" entries={monster.trait} extra={spellcasting.trait} onRoll={handleRoll} />
         <Section title="Actions" entries={monster.action} extra={spellcasting.action} onRoll={handleRoll} />

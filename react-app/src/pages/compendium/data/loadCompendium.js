@@ -65,7 +65,7 @@ export const loadCompendium = cachedLoader(() => {
         return;
       }
       if (kind === 'monster') {
-        records.monster = result.value.monsters;
+        records.monster = result.value.statBlocks;
         legendaryGroups = result.value.legendaryGroups || legendaryGroups;
       } else if (kind === 'spell') {
         records.spell = result.value.spells;

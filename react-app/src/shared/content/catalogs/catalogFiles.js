@@ -14,6 +14,15 @@ export const CLASS_FILES = [
   'class-warlock.json',
   'class-wizard.json',
   'class-artificer.json',
+  // World of Warcraft class skins (the others sit in the XPHB class files).
+  'class-deathknight.json',
+  'class-demonhunter.json',
+  'class-evoker.json',
+  'class-hunter.json',
+  'class-mage.json',
+  'class-priest.json',
+  'class-shaman.json',
+  'class-warrior.json',
 ];
 
 export const SPELL_FILES = [
@@ -21,6 +30,7 @@ export const SPELL_FILES = [
   'spells-frhof.json',
   'spells-efa.json',
   'spells-au.json',
+  'spells-wow.json',
 ];
 
 // Bestiary files for Wild Shape beast forms. The 2024 Monster Manual (XMM) is the
@@ -34,4 +44,5 @@ export const BEAST_FILES = [
   'bestiary/bestiary-fraif.json',
   'bestiary/bestiary-rhw.json',
   'bestiary/bestiary-efa.json',
+  'bestiary/bestiary-wow.json',
 ];

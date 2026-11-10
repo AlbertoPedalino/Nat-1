@@ -2,7 +2,7 @@
 // bestiary, read the way the encounter builder's bestiary reads them. Pure;
 // its columns are in catalogColumns.jsx.
 
-import { getHP, getAC, getSizeLabel } from '../../../shared/bestiary/monsterUtils.js';
+import { armorClassEntry, getHP, getAC, getSizeLabel } from '../../../shared/bestiary/monsterUtils.js';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from '../../../shared/bestiary/bestiaryConstants.js';
 import { monsterCrValue, monsterSizes, monsterTypeKey } from '../../../shared/bestiary/filters.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
@@ -10,8 +10,15 @@ import { crKey, crNumber } from '../../../shared/bestiary/challengeRating.js';
 
 export const MONSTER_SIZES = Object.freeze(Object.entries(SIZE_NAMES).map(([key, label]) => ({ key, label })));
 
+// A stat block without a CR, or whose AC / Hit Points are a rule (Bear Form:
+// "15 + your Wisdom modifier"), shows a dash there.
 export function monsterStats(monster) {
-  return { cr: crKey(monster?.cr), size: getSizeLabel(monster), ac: getAC(monster?.ac), hp: getHP(monster?.hp) };
+  return {
+    cr: monster?.cr == null ? '—' : crKey(monster.cr),
+    size: getSizeLabel(monster),
+    ac: armorClassEntry(monster?.ac).value == null ? '—' : getAC(monster?.ac),
+    hp: monster?.hp?.special ? '—' : getHP(monster?.hp),
+  };
 }
 
 export const MONSTER_CATALOG = Object.freeze({

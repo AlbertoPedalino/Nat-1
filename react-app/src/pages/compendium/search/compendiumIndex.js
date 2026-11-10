@@ -7,7 +7,7 @@
 import { normalizeSearchText } from '../../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../../shared/content/sourcePriority.js';
 import { decodeItemTypeLabel } from '../../../shared/character/inventory/itemCodes.js';
-import { getType } from '../../../shared/bestiary/monsterUtils.js';
+import { displayType } from '../../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { crKey } from '../../../shared/bestiary/challengeRating.js';
@@ -72,7 +72,7 @@ function itemSubtitle(item) {
 }
 
 function monsterSubtitle(monster) {
-  return [`CR ${crKey(monster.cr)}`, capitalize(getType(monster.type))].filter(Boolean).join(' · ');
+  return [monster.cr == null ? '' : `CR ${crKey(monster.cr)}`, capitalize(displayType(monster.type))].filter(Boolean).join(' · ');
 }
 
 const SUBTITLES = {

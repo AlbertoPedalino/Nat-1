@@ -18,6 +18,7 @@ export const CORE_2024_SOURCE_PRIORITY = frozenList([
   'RHW',
   'AU',
   'AUD',
+  'WoW',
 ]);
 
 // Content available across all 2024 manuals → membership derived from the
@@ -30,8 +31,9 @@ export const FEAT_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
 export const OPTIONAL_FEATURE_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
 export const INVENTORY_SOURCE_PRIORITY = frozenList([...CORE_2024_SOURCE_PRIORITY, 'Custom']);
 
-// Classes ship only in the 2024 core PHB and Eberron — kept deliberately narrow.
-export const CLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA']);
+// Classes ship only in the 2024 core PHB, Eberron and World of Warcraft (its
+// class skins) — kept deliberately narrow.
+export const CLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'WoW']);
 
 // Wild Shape beast forms. The 2024 Monster Manual (XMM) is the canonical beast
 // roster; the supported 2024 manuals add a few beasts of their own. XMM is not in
@@ -44,8 +46,8 @@ export const BEAST_ALLOWED_SOURCES = frozenList([
 
 // Order-sensitive dedup priorities (a source appearing in several books): the
 // ordering is intentional and independent of the membership lists above.
-export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'AU', 'XDMG']);
-export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'RHW', 'AU']);
+export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'AU', 'XDMG', 'WoW']);
+export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'RHW', 'AU', 'WoW']);
 
 export function normalizeSource(source) {
   return String(source || '').trim();
@@ -91,6 +93,7 @@ export const SOURCE_LABELS = Object.freeze({
   RHW: 'Ravenloft: The Horrors Within',
   AU: 'Arcana Unleashed',
   AUD: 'Arcana Unleashed: Deadfall',
+  WoW: 'World of Warcraft',
 });
 
 export function sourceLabel(source) {

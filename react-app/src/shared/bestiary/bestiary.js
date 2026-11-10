@@ -77,17 +77,18 @@ async function buildMonsterDatabase() {
     const file = index[source];
     const path = String(file || '').startsWith('bestiary/') ? file : `bestiary/${file}`;
     const data = await loadGameData(path);
-    return (data.monster || []).filter(isEncounterMonster);
+    return (data.monster || []).filter(isBestiaryStatBlock);
   }));
   const seen = new Set();
-  const monsters = loaded.flat().filter((monster) => {
+  const statBlocks = loaded.flat().filter((monster) => {
     const key = monsterKey(monster);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   }).sort(byName);
   return {
-    monsters,
+    monsters: statBlocks.filter(isEncounterMonster),
+    statBlocks,
     availableSources,
     legendaryGroups,
     sourceOptions: availableSources.map((source) => ({
@@ -97,13 +98,18 @@ async function buildMonsterDatabase() {
   };
 }
 
-// Summoned-creature templates intentionally have no Challenge Rating. They live
-// in bestiary files because 5etools renders them as statblocks, but they are not
-// independent encounter monsters and must not silently become CR 0 creatures.
+// Every stat block of the supported books: the compendium shows them all.
+export function isBestiaryStatBlock(monster) {
+  return Boolean(monster && RAW_ALLOWED_SOURCES.includes(monster.source));
+}
+
+// Summoned-creature templates and Wild Shape forms (Bear Form, Cat Form)
+// intentionally have no Challenge Rating. They live in bestiary files because
+// 5etools renders them as statblocks, but they are not independent encounter
+// monsters and must not silently become CR 0 creatures.
 export function isEncounterMonster(monster) {
   return Boolean(
-    monster
-    && RAW_ALLOWED_SOURCES.includes(monster.source)
+    isBestiaryStatBlock(monster)
     && monster.cr != null
     && String(typeof monster.cr === 'object' ? monster.cr.cr : monster.cr).trim(),
   );

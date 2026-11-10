@@ -18,6 +18,12 @@ export function getType(type) {
   return '';
 }
 
+// The type a stat block prints: none when the data hides it (Bear Form's
+// `special` type).
+export function displayType(type) {
+  return type && typeof type === 'object' && type.typeHidden ? '' : getType(type);
+}
+
 export function getTypeTags(type) {
   if (!type || typeof type !== 'object' || !Array.isArray(type.tags)) return '';
   const tags = type.tags
