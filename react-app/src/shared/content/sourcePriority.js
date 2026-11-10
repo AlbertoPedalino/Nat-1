@@ -55,6 +55,10 @@ export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'E
 // books are always on. A character without `books` uses every book.
 export const ALWAYS_ON_BOOKS = frozenList(['XPHB', 'XDMG', 'XMM']);
 export const SELECTABLE_BOOKS = frozenList(CORE_2024_SOURCE_PRIORITY.filter((source) => !ALWAYS_ON_BOOKS.includes(source)));
+// Universes Beyond: Wizards of the Coast's books set in another franchise's
+// world (World of Warcraft). They change the setting, not only the options,
+// so the builder shows them apart from the Dungeons & Dragons books.
+export const UNIVERSES_BEYOND_BOOKS = frozenList(['WoW']);
 
 // The selectable books a character uses (all of them without a choice).
 export function characterBooks(character) {
