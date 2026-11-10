@@ -5,7 +5,7 @@ import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { eligibleBeasts, beastRefValue, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
-import { wildShapeCrCap } from '../../../shared/character/forms/wildShapeForm.js';
+import { wildShapeCrCap } from '../../../shared/character/forms/wildShapeRules.js';
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';

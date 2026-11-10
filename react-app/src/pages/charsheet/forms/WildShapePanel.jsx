@@ -9,9 +9,8 @@ import {
   getActiveWildShape,
   enterWildShapePatch,
   exitWildShapePatch,
-  featureFormSnapshot,
-  wildShapeTempHp,
 } from '../../../shared/character/forms/wildShapeForm.js';
+import { featureFormSnapshot, wildShapeTempHp } from '../../../shared/character/forms/wildShapeRules.js';
 import { classLevel, hasClassFeature } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
@@ -65,7 +64,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
       if (usesLeft <= 0) return;
       onResChange(resKey, -1);
     }
-    onUpdateCharacter((prev) => ({ ...prev, ...enterWildShapePatch(prev, beast, druidLevel(prev)) }));
+    onUpdateCharacter((prev) => ({ ...prev, ...enterWildShapePatch(prev, beast, wildShapeTempHp(prev, beast, druidLevel(prev))) }));
     // The HP block reads Temp HP from sheet state, which isn't re-derived from the
     // character patch — mirror the Druid-level grant so it shows immediately.
     const granted = wildShapeTempHp(character, beast, druidLevel(character));

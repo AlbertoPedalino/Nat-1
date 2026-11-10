@@ -4,6 +4,7 @@ import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { wildShapeArmorClassWithRules } from '../forms/wildShapeRules.js';
 
 // The alternate AC formulas in force (Unarmored Defense, Draconic Resilience…):
 // sheet effects of type `acFormula`, gated like every other effect
@@ -57,7 +58,7 @@ export function computeAcFormulaValue(character, formula) {
 }
 
 export function computeBestArmorClass(character, items, shieldTrained) {
-  const beastAc = wildShapeArmorClass(character);
+  const beastAc = wildShapeArmorClassWithRules(character, wildShapeArmorClass(character));
   if (beastAc) return beastAc;
   const shield = getEquippedShield(character, items);
   const hasShield = !!shield;

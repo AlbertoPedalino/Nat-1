@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { featureFormRequirement } from '../../../../../src/shared/character/forms/beasts.js';
-import { enterWildShapePatch, featureFormSnapshot } from '../../../../../src/shared/character/forms/wildShapeForm.js';
+import { enterWildShapePatch } from '../../../../../src/shared/character/forms/wildShapeForm.js';
+import { featureFormSnapshot, wildShapeArmorClassWithRules, wildShapeCrCap, wildShapeTempHp } from '../../../../../src/shared/character/forms/wildShapeRules.js';
+import { wildShapeArmorClass } from '../../../../../src/shared/character/forms/wildShapeForm.js';
 import { hasClassFeature } from '../../../../../src/shared/character/progression/classLevel.js';
 
 // World of Warcraft's Bear Form, as 5etools has it: a Wild Shape form whose
@@ -53,21 +55,20 @@ test('Bear Form resolves with the druid Wisdom, level and spell attack', () => {
   const mangle = bear.actions[0].entries[0];
   assert.match(mangle, /\{@hit 7\}/);
   assert.match(mangle, /\{@damage 2d8 \+ 4\}/);
-  assert.equal(enterWildShapePatch({ tempHP: 0 }, bear, 5).tempHP, 15);
+  assert.equal(enterWildShapePatch({ tempHP: 0 }, bear, wildShapeTempHp(C, bear, 5)).tempHP, 15);
 });
 
 test('Circle Forms raises the CR cap, the AC floor and the Temporary Hit Points', async () => {
   const { adapterRegistry } = await import('../../../../../src/adapters/registry.js');
   const { default: installMoon } = await import('../../../../../src/adapters/classes/druid/moon.js');
-  const { wildShapeArmorClass, wildShapeCrCap, wildShapeTempHp } = await import('../../../../../src/shared/character/forms/wildShapeForm.js');
   installMoon(adapterRegistry);
   const wolf = { name: 'Wolf', ac: 12, hp: { average: 11 } };
   const moon = { ...moonDruid(6), wildShape: { beast: wolf } };
   assert.equal(wildShapeCrCap(moon, 6), 2);
-  assert.equal(wildShapeArmorClass(moon).value, 17);
+  assert.equal(wildShapeArmorClassWithRules(moon, wildShapeArmorClass(moon)).value, 17);
   assert.equal(wildShapeTempHp(moon, wolf, 6), 18);
   const land = { ...moon, subclassShortName: 'Land' };
   assert.equal(wildShapeCrCap(land, 6), 0.5);
-  assert.equal(wildShapeArmorClass(land).value, 12);
+  assert.equal(wildShapeArmorClassWithRules(land, wildShapeArmorClass(land)).value, 12);
   assert.equal(wildShapeTempHp(land, wolf, 6), 6);
 });
