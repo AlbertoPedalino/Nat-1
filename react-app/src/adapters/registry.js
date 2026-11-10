@@ -91,6 +91,16 @@ const OWNER_KINDS = {
     arity: 2,
     find: (store, [className, subclassName]) => getSubclassStore(store, className, subclassName),
     exact: (store, [className, subclassName]) => store.get(subclassKey(className, subclassName)),
+    // The base subclass a skin's reprint stands on: its very short name, or a
+    // longer registered one it begins ("Aberrant" -> "Aberrant Mind"), never a
+    // shorter one inside it ("Demon Hunter" is not the Ranger's "Hunter").
+    inherited: (store, [className, subclassName]) => {
+      const exact = subclassKey(className, subclassName);
+      if (!exact) return null;
+      if (store.has(exact)) return store.get(exact);
+      for (const [key, value] of store.entries()) if (key.startsWith(exact)) return value;
+      return null;
+    },
     write: (store, [className, subclassName], value) => store.set(subclassKey(className, subclassName), value),
   },
   Species: {
@@ -232,8 +242,10 @@ function keyedSlotMethods(slot, kindName, store, parentOf) {
       default: kind.write(store, key, value);
     }
   };
+  // An inherited record is looked up as its kind says (`inherited`, else
+  // exactly): a skin's subclass reprints the base subclass by its name.
   const read = (key, depth) => {
-    const own = kind.find(store, key);
+    const own = depth === 0 ? kind.find(store, key) : (kind.inherited || kind.exact)(store, key);
     const parent = depth < 4 ? parentOf(kindName, key) : null;
     if (!parent) return own;
     const inherited = read(parent.key, depth + 1);

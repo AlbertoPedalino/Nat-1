@@ -185,6 +185,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
     items: state.data.items,
     slotKey: spec.key,
     slotCategories: spec.categories,
+    classNames: (state.data.classes || []).map((cls) => cls.name),
   });
   const isAvailable = (feat) => (
     meetsFeatPrerequisites(feat, prerequisiteContext)

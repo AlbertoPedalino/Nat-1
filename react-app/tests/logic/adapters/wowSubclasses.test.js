@@ -37,6 +37,6 @@ test('Shadow Domain features arrive at their levels', () => {
 });
 
 test('Rakish Audacity adds the Charisma modifier to Initiative', () => {
-  const C = character('Rogue', 'Swashbuckler', 3, { baseScores: { cha: 16 }, manualScores: {} });
-  assert.ok(collectInitiativeModifiers(C).some((modifier) => modifier.source === 'Rakish Audacity'));
+  const C = character('Rogue', 'Swashbuckler', 3, { scoreMethod: 'manual', manualScores: { cha: 16 } });
+  assert.equal(collectInitiativeModifiers(C).find((modifier) => modifier.source === 'Rakish Audacity')?.amount, 3);
 });

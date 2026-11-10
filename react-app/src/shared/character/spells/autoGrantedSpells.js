@@ -5,6 +5,8 @@ import { enumerateFixedAdditionalSpells } from './additionalSpellGrants.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { classEntities } from '../progression/classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { readChoiceValue } from '../progression/choiceUtils.js';
+import { asArray } from '../../lists.js';
 
 /**
  * Shared enumeration of auto-granted spells from class/subclass/species runtime
@@ -245,15 +247,22 @@ export function subclassDataSpells(entity) {
   return Array.isArray(record?.additionalSpells) ? record.additionalSpells : [];
 }
 
+// The builder choice naming which of a subclass's spell lists applies
+// (choiceSpecs.js subclassSpellListSpec), saved under the class's prefix.
+export const SUBCLASS_SPELL_LIST_KEY = 'subclass_spell_list';
+
 /**
  * Grants from the subclass data: its always-prepared spells as 5etools lists
- * them, the way feats and species read theirs. A subclass whose list depends
- * on a choice (several entries: Circle of the Land's terrain) is left to its
- * adapter.
+ * them, the way feats and species read theirs. With several lists, the one
+ * picked under SUBCLASS_SPELL_LIST_KEY applies; without that pick (Circle of
+ * the Land's terrain) they are left to the subclass's adapter.
  */
-export function enumerateSubclassDataGrants(entity) {
-  const spells = subclassDataSpells(entity);
-  if (!entity?.subclassShortName || spells.length !== 1) return [];
+export function enumerateSubclassDataGrants(entity, character = entity?.entry) {
+  const all = subclassDataSpells(entity);
+  if (!entity?.subclassShortName || !all.length) return [];
+  const picked = stripSource(asArray(readChoiceValue(character, `${entity.choicePrefix || ''}${SUBCLASS_SPELL_LIST_KEY}`))[0]);
+  const spells = all.length === 1 ? all : all.filter((entry) => picked && matchKey(entry?.name) === matchKey(picked));
+  if (spells.length !== 1) return [];
   const level = Number(entity?.level || 1);
   return enumerateFixedAdditionalSpells(spells).filter((grant) => level >= grant.minLevel).map((grant) => ({
     name: grant.name,
@@ -324,7 +333,7 @@ export function enumerateClassDataGrants(entity) {
  * enumerateAutoGrantedSpells).
  */
 export function enumerateEntityGrants(entity, character) {
-  const subclassGrants = enumerateSubclassDataGrants(entity);
+  const subclassGrants = enumerateSubclassDataGrants(entity, character);
   const dataGrants = [...enumerateClassDataGrants(entity), ...subclassGrants];
   const fromData = new Set(dataGrants.map((r) => matchKey(r.name)));
   const configGrants = enumerateClassGrants(entity, character)

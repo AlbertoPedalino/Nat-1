@@ -34,14 +34,23 @@ function meetsProficiencyRequirement(requirement, context) {
   ));
 }
 
+// `race: [{ name: 'human' }]`: the species by name, whatever its book.
+function meetsSpeciesRequirement(requirement, speciesName) {
+  const species = String(speciesName || '').toLowerCase();
+  return asArray(requirement).some((race) => String(race?.name || '').toLowerCase() === species);
+}
+
 function meetsFeatureRequirement(requirement, context) {
   return asArray(requirement).some((value) => context.hasFeature(value));
 }
 
 function meetsPrerequisiteEntry(entry, context) {
   if (!entry || typeof entry !== 'object') return true;
-  // Campaign and otherSummary describe acquisition context; the builder has no
-  // campaign selector, while special acquisition is already constrained by slots.
+  // Campaign describes acquisition context (the builder has no campaign
+  // selector); a special acquisition only counts when it names a class the
+  // character lacks (Void Warrior: Demon Hunter), the slot constrains the rest.
+  if (entry.race && !meetsSpeciesRequirement(entry.race, context.speciesName)) return false;
+  if (entry.otherSummary && context.hasNamedClass?.(entry.otherSummary.entry) === false) return false;
   if (entry.level != null && context.level < Number(entry.level || 0)) return false;
   if (entry.ability && !meetsAbilityRequirement(entry.ability, context.scores)) return false;
   if (entry.feat && !meetsFeatRequirement(entry.feat, context.ownedFeatNames)) return false;

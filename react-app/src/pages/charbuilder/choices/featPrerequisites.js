@@ -73,6 +73,7 @@ export function buildFeatPrerequisiteContext({
   items = [],
   slotKey = '',
   slotCategories = [],
+  classNames = [],
 }) {
   const baseCharacter = characterWithoutFeatChoiceSlot(character || {}, slotKey);
   const ownedFeatNames = new Set(collectOwnedFeatNames(baseCharacter).map(matchKey));
@@ -88,8 +89,28 @@ export function buildFeatPrerequisiteContext({
   const hasPactMagic = hasSpellcastingProgression(baseCharacter, 'pact');
   const equipmentSets = collectEquipmentProficiencySets(sheetCharacter);
 
+  const ownClasses = new Set(classEntities(baseCharacter).flatMap((entity) => [entity.className, entity.ruleClassName]).map(matchKey));
+  const knownClasses = [...new Set(classNames.filter(Boolean))].sort((a, b) => b.length - a.length);
+
   return {
     level: Number(baseCharacter.level || 1),
+    speciesName: baseCharacter.speciesName || '',
+    // A special acquisition that names a class ("When Gaining the Level 2
+    // Demon Hunter Fighting Style Feature"): met only with that class. Null
+    // when the text names no class.
+    hasNamedClass: (text) => {
+      // Longest names first, each taken out once found: "Demon Hunter" is not
+      // also a "Hunter".
+      let rest = String(text || '');
+      const named = knownClasses.filter((name) => {
+        const pattern = new RegExp(`\\b${name}\\b`, 'gi');
+        if (!pattern.test(rest)) return false;
+        rest = rest.replace(pattern, ' ');
+        return true;
+      });
+      if (!named.length) return null;
+      return named.some((name) => ownClasses.has(matchKey(name)));
+    },
     scores: builtAbilityScores(baseCharacter),
     ownedFeatNames,
     ownedCategories,

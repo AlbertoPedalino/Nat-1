@@ -1,5 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { ownerEntries, speciesOwner } from '../../../shared/character/sheet/adapterOwners.js';
+import { SUBCLASS_SPELL_LIST_KEY } from '../../../shared/character/spells/autoGrantedSpells.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
 import {
@@ -208,6 +209,24 @@ function dedupSpecs(specs) {
   return out;
 }
 
+// A subclass whose data has several spell lists the player picks from
+// (Ebon Blade: a rune; Demon Hunter: a specialization) asks for it when its
+// runtime config says so (`spellListChoice: { label }`); the list's spells
+// then come from the data (autoGrantedSpells.js, SUBCLASS_SPELL_LIST_KEY).
+function subclassSpellListSpec(options, cls) {
+  const choice = adapterRegistry.getSubclassRuntimeConfig(options.className, options.subclassShortName)?.spellListChoice;
+  const lists = (options.subclass?.additionalSpells || []).map((entry) => entry?.name).filter(Boolean);
+  if (!choice || lists.length < 2) return null;
+  return {
+    key: SUBCLASS_SPELL_LIST_KEY,
+    label: choice.label || 'Subclass Spells',
+    type: 'option',
+    options: lists.map((name) => ({ key: name, label: name })),
+    count: 1,
+    level: cls?.subclassLevel || 3,
+  };
+}
+
 function buildClassSpecs(cls, classLevel, options) {
   const specs = [];
   const prof = cls?.startingProficiencies || {};
@@ -234,6 +253,8 @@ function buildClassSpecs(cls, classLevel, options) {
   if (options.subclassShortName) {
     const subclassAdapter = adapterRegistry.getSubclassAdapter(options.className, options.subclassShortName);
     if (typeof subclassAdapter === 'function') subclassAdapter(cls, classLevel, specs, options.context || {});
+    const spellListSpec = subclassSpellListSpec(options, cls);
+    if (spellListSpec) specs.push(spellListSpec);
   }
 
   injectAsiFeatSlots(specs, cls, classLevel, options.classFeatures || []);
@@ -265,6 +286,7 @@ export function classChoiceSpecs(character, context = {}) {
     all.push(...buildClassSpecs(cls, primaryLv, {
       className: character.className,
       subclassShortName: character.subclassShortName,
+      subclass: (character.subclasses || []).find((sub) => sub.shortName === character.subclassShortName),
       classFeatures: character.allFeatures || [],
       subclassFeatures: character.allSubFeatures || [],
       keyPrefix: '',
@@ -278,6 +300,7 @@ export function classChoiceSpecs(character, context = {}) {
       all.push(...buildClassSpecs(extra.cls, extra.level || 1, {
         className: extra.name,
         subclassShortName: extra.subclassShortName,
+        subclass: (extra.subclasses || []).find((sub) => sub.shortName === extra.subclassShortName),
         classFeatures: extra.allFeatures || [],
         subclassFeatures: extra.allSubFeatures || [],
         keyPrefix: ecPrefix,
