@@ -3,10 +3,12 @@ import { commitFightCombatantVitals, getInstanceFight } from '../../../shared/cl
 import { setTokenHp } from '../../../shared/cloud/api/vttTokens.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import {
+  creatureVitalsOfToken,
   linkedCombatant,
   monsterVitalsBase,
   monsterVitalsPatch,
   newerFightRow,
+  tokenVitalsOfCreature,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { applyCombatantEdit, applyCombatantHpCommand } from '../../../shared/encounter/combatantVitals.js';
 import { patchById } from '../../../shared/vtt/session/liveScene.js';
@@ -93,21 +95,13 @@ export function useTokenVitalCommands({
   // A loose piece starts from what the menu showed (`shown`) when it has it:
   // a value typed a moment ago may not be on the piece yet.
   const commitLoose = useCallback(async (token, command, shown) => {
-    const before = shown || {
-      hpCurrent: token.hpCurrent ?? null,
-      hpMax: token.hpMax ?? null,
-      tempHP: token.tempHp ?? 0,
-      maxHPBonus: token.maxHpBonus ?? 0,
-      activeConditions: token.conditions || [],
-    };
+    const before = shown || creatureVitalsOfToken(token);
     const after = applyCombatantHpCommand(before, command);
     const vitals = {
-      hpCurrent: after.hpCurrent ?? null,
-      hpMax: after.hpMax ?? null,
-      tempHp: after.tempHP ?? 0,
+      ...tokenVitalsOfCreature(after),
       // Such a piece has no base maximum but the one last typed: typing one
       // is a new base, stepping it shows how far it moved.
-      maxHpBonus: command.type === 'setMaxHp' ? 0 : (after.maxHPBonus ?? 0),
+      ...(command.type === 'setMaxHp' ? { maxHpBonus: 0 } : {}),
     };
     gmVitals.setLocal(token.id, vitals);
     try {

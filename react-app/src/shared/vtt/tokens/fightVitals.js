@@ -65,6 +65,28 @@ export function absorbMonsterVitals(combat, fight) {
   return changed ? { ...combat, combatants } : combat;
 }
 
+// A piece's hit points in a combatant's field names, and back: the one place
+// the map's `tempHp` / `maxHpBonus` / `conditions` meet the fight's `tempHP` /
+// `maxHPBonus` / `activeConditions`.
+export function creatureVitalsOfToken(token) {
+  return {
+    hpCurrent: token?.hpCurrent ?? null,
+    hpMax: token?.hpMax ?? null,
+    tempHP: token?.tempHp ?? 0,
+    maxHPBonus: token?.maxHpBonus ?? 0,
+    activeConditions: token?.conditions || [],
+  };
+}
+
+export function tokenVitalsOfCreature(creature) {
+  return {
+    hpCurrent: creature?.hpCurrent ?? null,
+    hpMax: creature?.hpMax ?? null,
+    tempHp: clampTempHp(creature?.tempHP),
+    maxHpBonus: Math.round(Number(creature?.maxHPBonus) || 0),
+  };
+}
+
 // The GM's view of real hit points, overlaid on the public rows at render: a
 // piece linked to a loaded cloud fight takes its combatant's, any other its
 // private values. `fights` maps fight id -> { instance_id, fight }.
@@ -72,16 +94,9 @@ export function withGmTokenVitals(tokens, { byToken = {}, fights = {} } = {}) {
   return (tokens || []).map((token) => {
     if (!token || token.characterId) return token;
     const combatant = linkedCombatant(fights, parseSourceRef(token.sourceRef));
-    const stored = combatant
-      ? { hpCurrent: combatant.hpCurrent, hpMax: combatant.hpMax, tempHp: combatant.tempHP, maxHpBonus: combatant.maxHPBonus }
-      : byToken[token.id];
+    const stored = combatant || (byToken[token.id] && creatureVitalsOfToken(byToken[token.id]));
     if (!stored) return token;
-    const real = {
-      hpCurrent: stored.hpCurrent ?? null,
-      hpMax: stored.hpMax ?? null,
-      tempHp: clampTempHp(stored.tempHp),
-      maxHpBonus: Math.round(Number(stored.maxHpBonus) || 0),
-    };
+    const real = tokenVitalsOfCreature(stored);
     if (Object.keys(real).every((key) => real[key] === token[key])) return token;
     return { ...token, ...real };
   });
