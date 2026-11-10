@@ -21,15 +21,6 @@ registerSubclassSheetResources("Wizard_Abjurer", [
   { key: "arcane_ward", name: "Arcane Ward", recharge: "LR",
     max: (lv, { int } = {}) => Math.max(1, (Number(lv) || 0) * 2 + (int ?? 0)) },
 ]);
-registerSubclassRuntimeConfig("Wizard_Abjurer", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Counterspell", minLevel: 10 },
-      { name: "Dispel Magic", minLevel: 10 },
-    ],
-  },
-});
-
 registerSubclassSheetEffects("Wizard_Abjurer", [
 
   { type: "advantage", target: "save", source: "spells", minLevel: 14, note: "Spell Resistance." },

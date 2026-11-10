@@ -40,22 +40,5 @@ registerSubclassSheetResources("Warlock_Fiend", [
   { key: "fiend_hurl", name: "Hurl Through Hell", recharge: "LR", max: () => 1 },
 ]);
 
-registerSubclassRuntimeConfig("Warlock_Fiend", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: 'Burning Hands', minLevel: 3, level: 1, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Command', minLevel: 3, level: 1, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Scorching Ray', minLevel: 3, level: 2, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Suggestion', minLevel: 3, level: 2, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Fireball', minLevel: 5, level: 3, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Stinking Cloud', minLevel: 5, level: 3, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Fire Shield', minLevel: 7, level: 4, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Wall of Fire', minLevel: 7, level: 4, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Geas', minLevel: 9, level: 5, source: 'Fiend', sourceType: 'subclass' },
-      { name: 'Insect Plague', minLevel: 9, level: 5, source: 'Fiend', sourceType: 'subclass' }
-    ],
-  },
-});
-
 }
 

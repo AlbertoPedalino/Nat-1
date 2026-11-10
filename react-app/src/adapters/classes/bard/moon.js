@@ -60,11 +60,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSubclassRuntimeConfig("Bard_Moon", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Moonbeam", minLevel: 6, level: 2, source: "Blessing of Moonlight" },
-      ],
-    },
-  });
 }

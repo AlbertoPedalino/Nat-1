@@ -18,9 +18,6 @@ registerSubclassSheetActions("Monk_Shadow", [
 registerSubclassRuntimeConfig("Monk_Shadow", {
   spellcasting: {
     ability: "wis",
-    alwaysKnownSpells: [
-      { name: "Minor Illusion", minLevel: 3, level: 0 },
-    ],
   },
 });
 

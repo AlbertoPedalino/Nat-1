@@ -22,18 +22,6 @@ registerSubclassSheetResources("Wizard_Illusionist", [
   { key: "phantasmal_creatures", name: "Phantasmal Creatures", recharge: "LR", max: () => 2 },
   { key: "illusory_self",        name: "Illusory Self",         recharge: "SR", max: () => 1 },
 ]);
-registerSubclassRuntimeConfig("Wizard_Illusionist", {
-  spellcasting: {
-    alwaysKnownSpells: [
-      { name: "Minor Illusion", minLevel: 3 },
-    ],
-    alwaysPreparedSpells: [
-      { name: "Summon Beast", minLevel: 6 },
-      { name: "Summon Fey", minLevel: 6 },
-    ],
-  },
-});
-
 registerSubclassSheetEffects("Wizard_Illusionist", [
   { type: "alwaysKnownSpell", spells: ["Minor Illusion"], minLevel: 3, note: "Improved Illusions." },
 ]);

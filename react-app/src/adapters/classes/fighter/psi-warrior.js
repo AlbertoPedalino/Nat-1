@@ -37,9 +37,6 @@ registerSubclassSheetResources("Fighter_Psi Warrior", [
 registerSubclassRuntimeConfig("Fighter_Psi Warrior", {
   spellcasting: {
     ability: "int",
-    alwaysPreparedSpells: [
-      { name: "Telekinesis", minLevel: 18, level: 5 },
-    ],
   },
 });
 

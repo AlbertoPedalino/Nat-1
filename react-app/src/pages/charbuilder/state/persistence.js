@@ -71,6 +71,13 @@ function makeClassSnapshot(cls = null) {
   };
 }
 
+// The chosen subclass's own spell list, kept on the sheet (autoGrantedSpells
+// subclassDataSpells) — the builder's subclass records are not saved.
+function selectedSubclassSpells(entry) {
+  const record = (entry?.subclasses || []).find((sub) => sub?.shortName === entry?.subclassShortName);
+  return Array.isArray(record?.additionalSpells) ? record.additionalSpells : (entry?.subclassAdditionalSpells || []);
+}
+
 function serializeExtraClass(extra = {}) {
   const source = extra && typeof extra === 'object' ? extra : {};
   const classFeatures = Array.isArray(source.allFeatures) && source.allFeatures.length
@@ -79,6 +86,7 @@ function serializeExtraClass(extra = {}) {
 
   return {
     ...source,
+    subclassAdditionalSpells: selectedSubclassSpells(source),
     clsSnapshot: source.cls ? makeClassSnapshot(source.cls) : (source.clsSnapshot || null),
     allClassFeatures: classFeatures,
     allSubFeatures: source.allSubFeatures || [],
@@ -214,6 +222,7 @@ export function makeSheetPayload(character, data) {
     className: character.className,
     classSource: character.classSource,
     subclassShortName: character.subclassShortName || null,
+    subclassAdditionalSpells: selectedSubclassSpells(character),
     subclassSource: character.subclassSource || null,
     extraClasses: (character.extraClasses || []).map(serializeExtraClass),
     speciesName: character.speciesName,

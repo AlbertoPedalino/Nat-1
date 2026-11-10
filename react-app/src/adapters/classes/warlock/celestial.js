@@ -37,24 +37,5 @@ registerSubclassSheetResources("Warlock_Celestial", [
   { key: "celestial_searing_ven", name: "Searing Vengeance", recharge: "LR", max: () => 1 },
 ]);
 
-registerSubclassRuntimeConfig("Warlock_Celestial", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: 'Aid', minLevel: 3, level: 2, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Cure Wounds', minLevel: 3, level: 1, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Guiding Bolt', minLevel: 3, level: 1, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Lesser Restoration', minLevel: 3, level: 2, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Light', minLevel: 3, level: 0, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Sacred Flame', minLevel: 3, level: 0, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Daylight', minLevel: 5, level: 3, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Revivify', minLevel: 5, level: 3, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Guardian of Faith', minLevel: 7, level: 4, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Wall of Fire', minLevel: 7, level: 4, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Greater Restoration', minLevel: 9, level: 5, source: 'Celestial', sourceType: 'subclass' },
-      { name: 'Summon Celestial', minLevel: 9, level: 5, source: 'Celestial', sourceType: 'subclass' }
-    ],
-  },
-});
-
 }
 

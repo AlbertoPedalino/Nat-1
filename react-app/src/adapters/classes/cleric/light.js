@@ -32,23 +32,5 @@ registerSubclassSheetResources("Cleric_Light", [
   { key: "corona_light", name: "Corona of Light", recharge: "LR", minLevel: 17,
     max: 'abilityMod:wis', minMax: 1 },
 ]);
-registerSubclassRuntimeConfig("Cleric_Light", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Burning Hands", minLevel: 3, level: 1 },
-      { name: "Faerie Fire", minLevel: 3, level: 1 },
-      { name: "Scorching Ray", minLevel: 3, level: 2 },
-      { name: "See Invisibility", minLevel: 3, level: 2 },
-      { name: "Daylight", minLevel: 5, level: 3 },
-      { name: "Fireball", minLevel: 5, level: 3 },
-      { name: "Arcane Eye", minLevel: 7, level: 4 },
-      { name: "Wall of Fire", minLevel: 7, level: 4 },
-      { name: "Flame Strike", minLevel: 9, level: 5 },
-      { name: "Scrying", minLevel: 9, level: 5 },
-    ],
-  },
-});
-
-
 }
 

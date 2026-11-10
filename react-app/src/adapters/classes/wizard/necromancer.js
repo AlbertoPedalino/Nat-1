@@ -17,9 +17,6 @@ export default function install(registry, context = {}) {
   });
   registerSubclassRuntimeConfig('Wizard_Necromancer', {
     spellcasting: {
-      alwaysKnownSpells: [
-        { name: 'Find Familiar', minLevel: 3, level: 1, source: 'Necromancy Spellbook', sourceType: 'subclass' },
-      ],
       alwaysPreparedSpells: [{
         name: 'Animate Dead', minLevel: 6, level: 3, source: 'Undead Thralls', sourceType: 'subclass',
         freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true },

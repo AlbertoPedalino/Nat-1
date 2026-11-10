@@ -43,23 +43,5 @@ registerSubclassSheetActions("Cleric_Life", [
       { label: "Pool", value: `${Math.max(1, Number(ownerLevel || 1) * 5)} HP` }
     ] },
 ]);
-registerSubclassRuntimeConfig("Cleric_Life", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Aid", minLevel: 3, level: 2 },
-      { name: "Bless", minLevel: 3, level: 1 },
-      { name: "Cure Wounds", minLevel: 3, level: 1 },
-      { name: "Lesser Restoration", minLevel: 3, level: 2 },
-      { name: "Mass Healing Word", minLevel: 5, level: 3 },
-      { name: "Revivify", minLevel: 5, level: 3 },
-      { name: "Aura of Life", minLevel: 7, level: 4 },
-      { name: "Death Ward", minLevel: 7, level: 4 },
-      { name: "Greater Restoration", minLevel: 9, level: 5 },
-      { name: "Mass Cure Wounds", minLevel: 9, level: 5 },
-    ],
-  },
-});
-
-
 }
 

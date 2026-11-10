@@ -20,9 +20,6 @@ registerSubclassSheetActions("Monk_Elements", [
 registerSubclassRuntimeConfig("Monk_Elements", {
   spellcasting: {
     ability: "wis",
-    alwaysKnownSpells: [
-      { name: "Elementalism", minLevel: 3, level: 0 },
-    ],
   },
 });
 

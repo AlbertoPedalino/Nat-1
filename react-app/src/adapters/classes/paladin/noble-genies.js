@@ -65,24 +65,6 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
   }
 ]);
 
-registerSubclassRuntimeConfig("Paladin_Noble Genies", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Chromatic Orb", minLevel: 3, level: 1 },
-      { name: "Elementalism", minLevel: 3, level: 0 },
-      { name: "Thunderous Smite", minLevel: 3, level: 1 },
-      { name: "Mirror Image", minLevel: 5, level: 2 },
-      { name: "Phantasmal Force", minLevel: 5, level: 2 },
-      { name: "Fly", minLevel: 9, level: 3 },
-      { name: "Gaseous Form", minLevel: 9, level: 3 },
-      { name: "Conjure Minor Elementals", minLevel: 13, level: 4 },
-      { name: "Summon Elemental", minLevel: 13, level: 4 },
-      { name: "Banishing Smite", minLevel: 17, level: 5 },
-      { name: "Contact Other Plane", minLevel: 17, level: 5 }
-    ],
-  },
-});
-
 registerSubclassSheetEffects("Paladin_Noble Genies", [
   { type: "acFormula", key: "paladin_noble_genies_genies_splendor", label: "Genie's Splendor", base: 10, abilities: ["dex", "cha"], allowShield: true, requiresNoArmor: true, minLevel: 3 },
 ]);

@@ -22,16 +22,6 @@ registerSubclassSheetResources("Bard_Glamour", [
   { key: "glamour_majesty",    name: "Mantle of Majesty",  recharge: "LR", minLevel: 6, max: 1 },
   { key: "glamour_unbreakable",name: "Unbreakable Majesty",recharge: "SR", minLevel: 14, max: 1 },
 ]);
-registerSubclassRuntimeConfig("Bard_Glamour", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Charm Person", minLevel: 3, level: 1 },
-      { name: "Mirror Image", minLevel: 3, level: 2 },
-      { name: "Command", minLevel: 6, level: 1 },
-    ],
-  },
-});
-
 registerSubclassSheetEffects("Bard_Glamour", [
 
   { type: "tempHp", minLevel: 3, note: "Mantle of Inspiration: grant Temporary HP and movement." },

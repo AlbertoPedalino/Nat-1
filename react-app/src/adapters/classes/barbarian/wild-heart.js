@@ -45,9 +45,6 @@ registerSubclassSheetActions("Barbarian_Wild Heart", [
 registerSubclassRuntimeConfig("Barbarian_Wild Heart", {
   spellcasting: {
     ability: "wis",
-    alwaysPreparedSpells: [
-      { name: "Commune with Nature", minLevel: 10, level: 5 },
-    ],
   },
 });
 

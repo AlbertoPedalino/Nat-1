@@ -66,7 +66,6 @@ registerSubclassSheetActions("Druid_Stars", [
 registerSubclassRuntimeConfig("Druid_Stars", {
   spellcasting: {
     alwaysPreparedSpells: [
-      { name: "Guidance", minLevel: 3, level: 0 },
       {
         name: "Guiding Bolt",
         minLevel: 3,

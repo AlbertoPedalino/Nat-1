@@ -237,24 +237,71 @@ export function enumerateSubclassFeatureSpells(entity) {
   return out;
 }
 
+// The subclass's own 5etools `additionalSpells`: saved on the sheet
+// (`subclassAdditionalSpells`), or read off the builder's subclass records.
+export function subclassDataSpells(entity) {
+  const entry = entity?.entry;
+  if (Array.isArray(entry?.subclassAdditionalSpells)) return entry.subclassAdditionalSpells;
+  const record = (entry?.subclasses || []).find((sub) => sub?.shortName === entity?.subclassShortName);
+  return Array.isArray(record?.additionalSpells) ? record.additionalSpells : [];
+}
+
 /**
- * All grants for one class entity: runtime config + subclass-feature text.
- * A feature-text scrape of a spell already granted by runtime config is dropped
- * (the config record is richer: gates, ability, free casts) — otherwise e.g.
- * Oath of Glory spells would tag twice. Single composition point for every
- * consumer that works per-entity (builder spell panel) or whole-character
- * (sheet, via enumerateAutoGrantedSpells).
+ * Grants from the subclass data: its always-prepared spells as 5etools lists
+ * them, the way feats and species read theirs. A subclass whose list depends
+ * on a choice (several entries: Circle of the Land's terrain) is left to its
+ * adapter.
+ */
+export function enumerateSubclassDataGrants(entity) {
+  const spells = subclassDataSpells(entity);
+  if (!entity?.subclassShortName || spells.length !== 1) return [];
+  const level = Number(entity?.level || 1);
+  return enumerateFixedAdditionalSpells(spells).filter((grant) => level >= grant.minLevel).map((grant) => ({
+    name: grant.name,
+    minLevel: grant.minLevel,
+    level: null,
+    mode: grant.mode === 'prepared' ? 'prepared' : 'known',
+    origin: 'class',
+    ownerClassName: entity?.className || null,
+    ownerLevel: level,
+    subclassShortName: entity.subclassShortName,
+    subclassName: subclassFullName(entity),
+    explicitSource: null,
+    sourceType: 'subclass',
+    ability: grant.ability || null,
+    entry: {
+      name: grant.name,
+      minLevel: grant.minLevel,
+      sourceType: 'subclass',
+      ...(grant.freeCast ? { freeCast: grant.freeCast } : {}),
+      ...(grant.ritualOnly ? { ritualOnly: true } : {}),
+    },
+  }));
+}
+
+/**
+ * All grants for one class entity: the subclass data first, then runtime
+ * config (what the data cannot say: class grants, free casts and modifiers of
+ * a feature, gated choices), then — for a subclass with no data list — the
+ * spells named in its feature text. A later source never repeats an earlier
+ * one's spell. Single composition point for every consumer that works
+ * per-entity (builder spell panel) or whole-character (sheet, via
+ * enumerateAutoGrantedSpells).
  */
 export function enumerateEntityGrants(entity, character) {
-  const configGrants = enumerateClassGrants(entity, character);
+  const dataGrants = enumerateSubclassDataGrants(entity);
+  const fromData = new Set(dataGrants.map((r) => matchKey(r.name)));
+  const configGrants = enumerateClassGrants(entity, character)
+    .filter((r) => !(r.subclassShortName && fromData.has(matchKey(r.name)) && !r.entry?.freeCast));
   const subclassSpellcasting = adapterRegistry.getSubclassRuntimeConfig(
     entity?.className,
     entity?.subclassShortName,
   )?.spellcasting;
-  if (subclassSpellcasting?.disableFeatureSpellScrape) return configGrants;
-  const granted = new Set(configGrants.map((r) => matchKey(r.name)));
+  const grants = [...dataGrants, ...configGrants];
+  if (dataGrants.length || subclassSpellcasting?.disableFeatureSpellScrape) return grants;
+  const granted = new Set(grants.map((r) => matchKey(r.name)));
   return [
-    ...configGrants,
+    ...grants,
     ...enumerateSubclassFeatureSpells(entity).filter((r) => !granted.has(matchKey(r.name))),
   ];
 }

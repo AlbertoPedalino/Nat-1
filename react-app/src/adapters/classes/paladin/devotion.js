@@ -24,23 +24,5 @@ registerSubclassSheetResources("Paladin_Devotion", [
   { key: "devotion_holy_nimbus", name: "Holy Nimbus", recharge: "LR", max: () => 1 },
 ]);
 
-registerSubclassRuntimeConfig("Paladin_Devotion", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Protection from Evil and Good", minLevel: 3, level: 1 },
-      { name: "Shield of Faith", minLevel: 3, level: 1 },
-      { name: "Aid", minLevel: 5, level: 2 },
-      { name: "Zone of Truth", minLevel: 5, level: 2 },
-      { name: "Beacon of Hope", minLevel: 9, level: 3 },
-      { name: "Dispel Magic", minLevel: 9, level: 3 },
-      { name: "Freedom of Movement", minLevel: 13, level: 4 },
-      { name: "Guardian of Faith", minLevel: 13, level: 4 },
-      { name: "Commune", minLevel: 17, level: 5 },
-      { name: "Flame Strike", minLevel: 17, level: 5 }
-    ],
-  },
-});
-
-
 }
 
