@@ -70,7 +70,8 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     });
   }, []);
 
-  const rollD20 = useCallback((bonus, label, advantage) => {
+  // `options.critOn`: an attack's improved critical range (getCritRange).
+  const rollD20 = useCallback((bonus, label, advantage, options = {}) => {
     // Exhaustion (XPHB 2024): −2 per level to every D20 Test. rollD20 is the single
     // executor for saves/checks/skills/attacks/initiative, so applying it here
     // covers all of them in one place.
@@ -79,7 +80,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     const result = rollD20Dice(bonus - exPenalty, {
       advantage: advantage === true ? true : advantage === false ? false : undefined,
     });
-    showDiceToast(finalLabel, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
+    showDiceToast(finalLabel, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result, options));
   }, [showDiceToast, sheet]);
 
   const rollSave = useCallback((stat, options = {}) => {

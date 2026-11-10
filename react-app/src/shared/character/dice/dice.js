@@ -69,10 +69,18 @@ export function formatD20Detail(result) {
   return `${expression} = ${result.total}`;
 }
 
-export function buildD20Meta(result) {
+// `critOn`: the lowest natural roll that is a critical (an attack with an
+// improved critical range); 20 is left out.
+export function buildD20Meta(result, { critOn = 20 } = {}) {
   const meta = { bonus: result.bonus, kept: result.kept };
   if (result.mode !== 'normal') meta.mode = result.mode;
+  if (Number(critOn) < 20) meta.critOn = Number(critOn);
   return meta;
+}
+
+// Whether a natural d20 is a critical for a roll with `meta` (see buildD20Meta).
+export function isCriticalD20(natural, meta) {
+  return Number(natural) >= Number(meta?.critOn || 20);
 }
 
 // What a formula asks for, without rolling it: one entry per die, plus the flat

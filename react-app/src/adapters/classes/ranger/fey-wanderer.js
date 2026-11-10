@@ -63,7 +63,7 @@ registerSubclassSheetResources("Ranger_Fey Wanderer", [
 
 registerSubclassSheetEffects("Ranger_Fey Wanderer", [
 
-  { type: "skillBonus", ability: "cha", bonusAbility: "wis", minLevel: 3, note: "Otherworldly Glamour: add WIS modifier to CHA checks." },
+  { type: "checkBonus", ability: "cha", bonusAbility: "wis", minBonus: 1, minLevel: 3, note: "Otherworldly Glamour" },
   { type: "advantage", target: "save", conditions: ["Charmed", "Frightened"], minLevel: 7, note: "Beguiling Twist." },
 
 ]);

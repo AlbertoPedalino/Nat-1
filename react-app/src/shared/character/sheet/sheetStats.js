@@ -53,8 +53,20 @@ export const getPB = getProficiencyBonus;
 
 // Whether YOUR class grants a save proficiency for `stat` (your own, computed
 // with your Proficiency Bonus). Wild Shape keeps these (RAW 2024).
+// A saving throw proficiency of the character's own: their first class's, a
+// `saveProficiency` sheet effect (Gloom Stalker's Iron Mind), or a feat's pick
+// (Resilient: the `<feat slot>_save_prof` choice).
 function hasOwnSaveProficiency(C, stat) {
-  return Boolean(C && (C.clsSnapshot?.proficiency || []).includes(stat));
+  if (!C) return false;
+  if ((C.clsSnapshot?.proficiency || []).includes(stat)) return true;
+  const picked = Object.entries(C.choices || {}).some(([key, value]) => (
+    /_save_prof$/.test(key) && asArray(value).some((entry) => String(entry).toLowerCase() === stat)
+  ));
+  if (picked) return true;
+  return collectSheetEffects(C).some((effect) => (
+    matchKey(effect.type) === 'saveproficiency'
+    && asArray(effect.abilities || effect.ability).some((ability) => String(ability).toLowerCase() === stat)
+  ));
 }
 
 export function hasSaveProficiency(C, stat) {
@@ -199,8 +211,26 @@ export function getSkillTraining(C, skillName) {
   return null;
 }
 
+// What `checkBonus` sheet effects add to every check of an ability, skills
+// included: a flat `value`, or another ability's modifier (`bonusAbility`, at
+// least `minBonus`) — Fey Wanderer's Otherworldly Glamour adds WIS to CHA.
+function abilityCheckEffectBonus(C, ability) {
+  return collectSheetEffects(C).reduce((sum, effect) => {
+    if (matchKey(effect.type) !== 'checkbonus' || String(effect.ability || '').toLowerCase() !== ability) return sum;
+    if (Number.isFinite(Number(effect.value))) return sum + Number(effect.value);
+    if (!effect.bonusAbility) return sum;
+    const bonus = getMod(getFinal(C, effect.bonusAbility));
+    return sum + Math.max(Number(effect.minBonus ?? -Infinity), bonus);
+  }, 0);
+}
+
+// An ability check's modifier: the ability's, plus what effects add to it.
+export function getAbilityCheckBonus(C, ability) {
+  return getMod(getFinal(C, ability)) + abilityCheckEffectBonus(C, ability);
+}
+
 export function getSkillBonus(C, skillName) {
-  const m = getMod(getFinal(C, SKILL_ABILITY[skillName]));
+  const m = getMod(getFinal(C, SKILL_ABILITY[skillName])) + abilityCheckEffectBonus(C, SKILL_ABILITY[skillName]);
   const training = getSkillTraining(C, skillName);
   let own = m;
   if (training === 'exp') own = m + getPB(C) * 2;

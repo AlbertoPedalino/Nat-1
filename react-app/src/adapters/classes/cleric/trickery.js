@@ -22,7 +22,7 @@ registerSubclassSheetActions("Cleric_Trickery", [
 ]);
 registerSubclassSheetEffects("Cleric_Trickery", [
 
-  { type: "skillAdvantage", skill: "Stealth", minLevel: 3, note: "Blessing of the Trickster." },
+  { type: "advantage", target: "skill", skill: "Stealth", minLevel: 3, note: "Blessing of the Trickster" },
 ]);
 
 }

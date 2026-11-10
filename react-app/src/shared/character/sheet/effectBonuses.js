@@ -199,6 +199,16 @@ export function getSpeedEffects(character = {}) {
   return { bonus, walkingModes };
 }
 
+// The lowest natural d20 that is a Critical Hit on a weapon or Unarmed Strike
+// attack: `critRange` effects (Champion's Improved / Superior Critical), else 20.
+export function getCritRange(character = {}) {
+  return collectSheetEffects(character).reduce((low, effect) => {
+    if (effectKey(effect.type) !== 'critrange') return low;
+    const value = Number(effect.value);
+    return Number.isFinite(value) && value >= 2 ? Math.min(low, value) : low;
+  }, 20);
+}
+
 // The Unarmed Strike from active effects (type `unarmedStrike`): the largest
 // damage die among them (`emptyHandedFace` while the character holds no weapon
 // or Shield, e.g. Unarmed Fighting's d8), whether it may use Dexterity

@@ -41,7 +41,6 @@ registerSubclassSheetActions("Warlock_Great Old One", [
 
 registerSubclassSheetEffects("Warlock_Great Old One", [
   { type: "telepathy", value: "CHA mod miles", minLevel: 3, note: "Awakened Mind" },
-  { type: "combatAdvantage", target: "attack", minLevel: 6, note: "Clairvoyant Combatant: Advantage on attacks vs creature contacted via Awakened Mind; it has Disadvantage on attacks against you." },
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 10, note: "Thought Shield" },
 ]);
 registerSubclassSheetResources("Warlock_Great Old One", [

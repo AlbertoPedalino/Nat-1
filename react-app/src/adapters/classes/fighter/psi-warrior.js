@@ -42,7 +42,6 @@ registerSubclassRuntimeConfig("Fighter_Psi Warrior", {
 
 registerSubclassSheetEffects("Fighter_Psi Warrior", [
 
-  { type: "conditionRemoval", conditions: ["Charmed", "Frightened"], minLevel: 10, note: "Guarded Mind." },
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 10, note: "Guarded Mind." },
 ]);
 

@@ -26,6 +26,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -108,6 +109,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                         tooltip={attackRoll.tooltip}
                         disadv={attackRoll.disadv}
                         notProficient={!!action._notProficient}
+                        critOn={action._weaponAttack ? getCritRange(C) : 20}
                         onRoll={onRoll}
                       />
                     ) : null}

@@ -35,7 +35,6 @@ registerSubclassSheetProficiencies("Monk_Mercy", [
 registerSubclassSheetEffects("Monk_Mercy", [
 
   { type: "healing", minLevel: 3, note: "Hand of Healing." },
-  { type: "conditionRemoval", conditions: ["Blinded", "Deafened", "Paralyzed", "Poisoned", "Stunned"], minLevel: 6, note: "Physician's Touch." },
 ]);
 
 }

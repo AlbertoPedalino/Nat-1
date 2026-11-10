@@ -1,6 +1,6 @@
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { getFinal, getMod, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { getAbilityCheckBonus, getFinal, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
@@ -29,7 +29,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
       }}>
         {ABILITIES.map(s => {
           const val = getFinal(C, s);
-          const mod = getMod(val);
+          const mod = getAbilityCheckBonus(C, s);
           const shownMod = effectiveD20Modifier(mod, sheet?.exhaustionLevel);
           const armorDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${s}-checks`);
           const checkDisadv = describeCheckDisadvantage(activeConditions, armorDisadv);

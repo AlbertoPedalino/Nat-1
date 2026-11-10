@@ -23,7 +23,6 @@ registerSubclassSheetResources("Wizard_Illusionist", [
   { key: "illusory_self",        name: "Illusory Self",         recharge: "SR", max: () => 1 },
 ]);
 registerSubclassSheetEffects("Wizard_Illusionist", [
-  { type: "alwaysKnownSpell", spells: ["Minor Illusion"], minLevel: 3, note: "Improved Illusions." },
 ]);
 
 }

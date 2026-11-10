@@ -1,4 +1,4 @@
-import { parseFormula } from './dice.js';
+import { isCriticalD20, parseFormula } from './dice.js';
 import { UI_COLORS, normalizeHexColor } from '../../ui/colors.js';
 import { COMBAT_LABEL_SHAPES } from '../../encounter/combatLabels.js';
 
@@ -15,7 +15,7 @@ export function rollOutcome(entry) {
   const d20s = dice.filter((die) => die.faces === 20 && die.kept !== false);
   const kept = d20s.find((die) => die.kept === true) || (d20s.length === 1 ? d20s[0] : null);
   const natural = kept?.v;
-  const kind = natural === 20 ? 'nat20' : natural === 1 ? 'nat1' : 'normal';
+  const kind = natural != null && isCriticalD20(natural, entry?.meta) ? 'nat20' : natural === 1 ? 'nat1' : 'normal';
   return { kind, color: ROLL_LOG_COLORS[kind], isCrit: kind === 'nat20', isFail: kind === 'nat1' };
 }
 

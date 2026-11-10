@@ -1,3 +1,4 @@
+import { isCriticalD20 } from './dice.js';
 import { signed } from '../../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
@@ -40,7 +41,7 @@ export function resolveToastLayout(toast) {
     ? signed(bonus)
     : (formulaMod && Number(formulaMod) !== 0 ? formulaMod : null);
 
-  const isCrit = keptD20?.v >= 20;
+  const isCrit = keptD20 ? isCriticalD20(keptD20.v, toast?.meta) : false;
   const isFail = keptD20?.v <= 1;
   let totalColor = 'text.primary';
   if (isCrit) totalColor = UI_COLORS.accentText;

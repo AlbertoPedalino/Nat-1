@@ -46,10 +46,6 @@ export default function install(registry, context = {}) {
     { type: "language", values: ["Druidic"], minLevel: 3 },
   ]);
 
-  registerSubclassSheetEffects("Bard_Moon", [
-    { type: "spellModifier", spellName: "Moonbeam", key: "moon_blessing_heal", minLevel: 6,
-      note: "Blessing of Moonlight: when a creature fails its save against your Moonbeam, one creature within 60 ft regains 2d4 HP (1/LR)." },
-  ]);
 
   registerSubclassSheetSpellModifiers("Bard_Moon", [
     {

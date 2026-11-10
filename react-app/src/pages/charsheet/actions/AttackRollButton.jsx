@@ -28,17 +28,22 @@ export default function AttackRollButton({
   tooltip = '',
   disadv = false,
   notProficient = false,
+  critOn = 20,
   sx,
   onRoll,
 }) {
+  // The improved critical range travels with the roll only when there is one.
+  const roll = (advantage) => (critOn < 20
+    ? onRoll?.(rawBonus, label, advantage, { critOn })
+    : onRoll?.(rawBonus, label, advantage));
   const button = (
     <RollModeArea
       component={Button}
       size="small"
       variant="outlined"
       sources={sources || sourcesFromAdvArg(advArg)}
-      onPick={(picked) => onRoll?.(rawBonus, label, picked)}
-      onClick={(e) => { e.stopPropagation(); onRoll?.(rawBonus, label, advArg); }}
+      onPick={(picked) => roll(picked)}
+      onClick={(e) => { e.stopPropagation(); roll(advArg); }}
       sx={{ ...inlineButtonSx, ...attackRollerToneSx({ disadv, notProficient }), ...sx }}
     >
       <Sword size={ICON_SIZES.xs} style={{ marginRight: 2 }} /> Hit {signed(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}

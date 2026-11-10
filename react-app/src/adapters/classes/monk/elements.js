@@ -26,7 +26,6 @@ registerSubclassRuntimeConfig("Monk_Elements", {
 registerSubclassSheetEffects("Monk_Elements", [
 
   { type: "reach", value: 10, minLevel: 3, note: "Elemental Attunement: elemental reach while active." },
-  { type: "damageTypeChoice", values: ["Acid", "Cold", "Fire", "Lightning", "Thunder"], minLevel: 3, note: "Elemental Attunement." },
   { type: "speed", speedType: "fly", value: "walking", situational: true, minLevel: 11, note: "Stride of the Elements." },
   { type: "resistance", damageTypes: ["Acid", "Cold", "Fire", "Lightning", "Thunder"], minLevel: 17, note: "Elemental Epitome while active." },
 ]);
