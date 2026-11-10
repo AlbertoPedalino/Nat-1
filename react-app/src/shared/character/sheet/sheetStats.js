@@ -12,6 +12,7 @@ import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { SKILLS } from '../../content/rulesVocabulary.js';
 import { asArray } from '../../lists.js';
 import { clamp } from '../../numbers.js';
+import { EXHAUSTION_MAX } from '../combat/conditions.js';
 
 const SKILL_ABILITY = Object.freeze(Object.fromEntries(SKILLS.map((skill) => [skill.name, skill.ability])));
 
@@ -19,7 +20,6 @@ const SKILL_ABILITY = Object.freeze(Object.fromEntries(SKILLS.map((skill) => [sk
 // sheet.exhaustionLevel rather than CONDITION_EFFECTS. Each level: −2 to every
 // D20 Test and −5 ft Speed; level 6 = death. The numbers live here as the single
 // source — consumers (rollD20, Movement) derive penalties from these helpers.
-export const EXHAUSTION_MAX = 6;
 const EXHAUSTION_D20_PER_LEVEL = 2;
 const EXHAUSTION_SPEED_PER_LEVEL = 5;
 export function clampExhaustion(level) {

@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { applyCombatantHpCommand } from '../../../shared/encounter/combatantVitals.js';
-import { DEAD_CONDITION_KEY, toggleCondition } from '../../../shared/character/combat/conditions.js';
+import { DEAD_CONDITION_KEY } from '../../../shared/character/combat/conditions.js';
 import {
-  clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
+  clickedDeathSaveCount, resolveMortality, toggleMortalCondition, withDeathSave,
 } from '../../../shared/character/combat/mortality.js';
 import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
 
@@ -237,22 +237,21 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
   };
 
   const clickCondition = (key) => {
-    const next = toggleCondition(conditions, key);
-    setConditions(next);
+    const next = toggleMortalCondition(
+      { player: Boolean(token.characterId), hp: hpCurrent, deathSaves, conditions },
+      key,
+    );
+    setConditions(next.conditions);
     if (key !== DEAD_CONDITION_KEY) {
-      save({ conditions: next });
+      save({ conditions: next.conditions });
       return;
     }
-    const mortal = { player: Boolean(token.characterId), deathSaves, conditions: next };
-    const { hp: nextHp, deathSaves: nextDeathSaves } = next.includes(DEAD_CONDITION_KEY)
-      ? markDead(mortal)
-      : revive(mortal);
-    setHpCurrent(nextHp);
-    setDeathSaves(nextDeathSaves);
+    setHpCurrent(next.hp);
+    setDeathSaves(next.deathSaves);
     save({
-      conditions: next,
-      hpCurrent: nextHp,
-      deathSaves: nextDeathSaves,
+      conditions: next.conditions,
+      hpCurrent: next.hp,
+      deathSaves: next.deathSaves,
     });
   };
 

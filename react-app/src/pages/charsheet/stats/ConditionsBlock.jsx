@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Typography, Chip, Button, alpha } from '@mui/material';
 import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
-import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
+import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
 import {
   CONDITION_ACCENT as COND_ACCENT,
@@ -69,7 +69,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs, borderStyle: 'dashed' }} />}
           {active.map((c) => (
-            c.key === 'exhaustion' ? (
+            c.key === EXHAUSTION_KEY ? (
               <ExhaustionPill
                 key={c.key}
                 level={sheet.exhaustionLevel || 0}

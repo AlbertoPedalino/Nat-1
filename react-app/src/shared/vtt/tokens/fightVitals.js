@@ -6,7 +6,7 @@
 // Everything here is pure: the callers own the requests and the state.
 
 import { parseSourceRef } from './encounterSync.js';
-import { clampTempHp } from '../../encounter/combatantVitals.js';
+import { clampTempHp } from '../../character/combat/vitals.js';
 
 // Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([

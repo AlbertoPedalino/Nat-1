@@ -1,14 +1,14 @@
 import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
 import {
   normalizeConditions,
-  toggleCondition as toggleConditionKey,
   DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
 } from '../character/combat/conditions.js';
 import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
+import { clampTempHp } from '../character/combat/vitals.js';
 import { clamp, clampInt, numberOr } from '../numbers.js';
 import {
-  clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
+  clickedDeathSaveCount, markDead, resolveMortality, revive, toggleMortalCondition, withDeathSave,
 } from '../character/combat/mortality.js';
 
 // A combatant's vitals in a running fight: hit points, temporary and maximum
@@ -25,25 +25,14 @@ function updateCombatant(combat, id, updater) {
   };
 }
 
-export function clampTempHp(value) {
-  return Math.max(0, Math.round(numberOr(value, 0)));
-}
 
 // Conditions are per-combatant; for a player linked to a sheet they ride the
 // vitals sync, so a GM's call lands on the player's own sheet.
 export function toggleCombatantCondition(combat, id, key) {
   if (key === EXHAUSTION_KEY) return combat; // graded, and its level is not ours to set
-  if (key === DEAD_CONDITION_KEY) {
-    return updateCombatant(combat, id, (combatant) => (
-      normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
-        ? reviveCombatant(combatant)
-        : killCombatant(combatant)
-    ));
-  }
-  return updateCombatant(combat, id, (combatant) => ({
-    ...combatant,
-    activeConditions: normalizeConditions(toggleConditionKey(combatant.activeConditions, key)),
-  }));
+  return updateCombatant(combat, id, (combatant) => (
+    fromMortal(combatant, toggleMortalCondition(mortalState(combatant), key))
+  ));
 }
 
 // Clears what this surface can set. Exhaustion survives: the encounter never

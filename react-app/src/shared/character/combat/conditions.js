@@ -86,6 +86,8 @@ export const CONDITION_KEYS = CONDITIONS.map((c) => c.key);
 // (`exhaustionLevel`), so a surface that does not own the level must not offer
 // it as a toggle: switching it off there would leave a level with no condition.
 export const EXHAUSTION_KEY = 'exhaustion';
+// Its last level (XPHB 2024): death.
+export const EXHAUSTION_MAX = 6;
 export const DEAD_CONDITION_KEY = 'dead';
 export const ASSIGNABLE_CONDITIONS = CONDITIONS.filter((c) => c.key !== EXHAUSTION_KEY);
 

@@ -5,7 +5,8 @@ import { resolveCombatVitals } from './sheetSync.js';
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { clampInt, numberOr } from '../numbers.js';
-import { clampTempHp, restoreCombatantMortality } from './combatantVitals.js';
+import { restoreCombatantMortality } from './combatantVitals.js';
+import { clampTempHp } from '../character/combat/vitals.js';
 import {
   rollInitiative, initiativeKey, creatureInitiativeSources, resortKeepingTurn, sortCombatants,
 } from './initiative.js';
@@ -264,6 +265,13 @@ export function snapshotFight(combat) {
   };
 }
 
+// The bestiary entry a stored combatant names (fights keep only a reference).
+export function combatantMonster(monsters, combatant) {
+  return combatant?.monsterRef
+    ? findMonster(Array.isArray(monsters) ? monsters : [], combatant.monsterRef, { strictSource: true })
+    : null;
+}
+
 export function restoreFight(entry, monsters) {
   const db = Array.isArray(monsters) ? monsters : [];
   const fight = entry?.fight || entry;
@@ -276,9 +284,7 @@ export function restoreFight(entry, monsters) {
       // Fights snapshotted before conditions existed have no list at all.
       activeConditions: normalizeConditions(combatant.activeConditions),
       activeEffects: normalizeEffects(combatant.activeEffects),
-      monsterData: combatant.monsterRef
-        ? findMonster(db, combatant.monsterRef, { strictSource: true })
-        : null,
+      monsterData: combatantMonster(db, combatant),
     })),
     currentTurn: fight?.currentTurn || 0,
     round: fight?.round || 1,

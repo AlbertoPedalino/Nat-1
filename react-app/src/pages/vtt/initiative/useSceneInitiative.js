@@ -2,7 +2,9 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { combatantToToken } from '../../../shared/vtt/tokens/encounterImport.js';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { FIGHT_UNAVAILABLE, commitFightTurn } from '../../../shared/cloud/api/encounterFights.js';
-import { makeSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
+import { combatantRollActor } from '../../../shared/encounter/rollActor.js';
+import { combatantMonster } from '../../../shared/encounter/combat.js';
+import { linkedCombatant } from '../../../shared/vtt/tokens/fightVitals.js';
 import {
   sceneFightChoices,
   showsFight,
@@ -11,7 +13,6 @@ import {
   turnEntriesFromTokens,
 } from '../../../shared/vtt/tokens/initiative.js';
 import { previewToken } from '../../../shared/vtt/tokens/placement.js';
-import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // The initiative strip and creature stat blocks on the map. The GM reads the
@@ -81,17 +82,11 @@ export function useSceneInitiative({
   const [statBlockRef, setStatBlockRef] = useState(null);
   // Whether the sheet area was opened for the stat block, and so closes with it.
   const statBlockOpenedAreaRef = useRef(false);
-  const combatantFor = useCallback((ref) => {
-    const row = ref ? gmVitals.fights[String(ref.fightId)] : null;
-    if (!row || String(row.instance_id) !== String(ref.instanceId)) return null;
-    return (row.fight?.combatants || []).find((entry) => (
-      String(entry?.id) === String(ref.combatantId) && entry.type !== 'player'
-    )) || null;
-  }, [gmVitals.fights]);
-  const monsterFor = useCallback((combatant) => {
-    const wanted = combatant?.monsterRef;
-    return wanted ? findMonster(monsterDb.monsters, wanted, { strictSource: true }) : null;
-  }, [monsterDb.monsters]);
+  const combatantFor = useCallback((ref) => linkedCombatant(gmVitals.fights, ref), [gmVitals.fights]);
+  const monsterFor = useCallback(
+    (combatant) => combatantMonster(monsterDb.monsters, combatant),
+    [monsterDb.monsters],
+  );
   const statBlockFor = useCallback((ref) => {
     const combatant = combatantFor(ref);
     const monster = monsterFor(combatant);
@@ -119,16 +114,7 @@ export function useSceneInitiative({
   const handleStatBlockRoll = useCallback((roll) => {
     if (!statBlock) return;
     const { combatant, ref } = statBlock;
-    handleCreatureRoll({
-      ...roll,
-      actor: {
-        actorName: combatant.name,
-        actorColor: combatant.shapeClr || combatant.color || null,
-        actorShape: combatant.shape || null,
-        actorLabel: combatant.label || '',
-        sourceRef: makeSourceRef(ref.instanceId, ref.fightId, ref.combatantId),
-      },
-    });
+    handleCreatureRoll({ ...roll, actor: combatantRollActor(combatant, ref) });
   }, [handleCreatureRoll, statBlock]);
 
   // The GM's entries: clicking a creature opens its block; one added to the

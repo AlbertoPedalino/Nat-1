@@ -30,6 +30,11 @@ function clampNonNegativeInt(value, fallback = 0) {
   return Math.max(0, Math.round(numberOr(value, fallback)));
 }
 
+// Temporary hit points: a whole number, never negative — sheets and fights.
+export function clampTempHp(value) {
+  return clampNonNegativeInt(value);
+}
+
 function getDeathSave(raw, sheetKey, combatKey) {
   if (!raw || typeof raw !== 'object') return 0;
   return clampInt(raw[sheetKey] ?? raw[combatKey], 0, 3, 0);
@@ -111,14 +116,8 @@ export const SYNCED_VITALS = [
   {
     data: 'deathSaves',
     combat: 'deathSaves',
-    toCombat: (src) => {
-      const ds = src.deathSaves || {};
-      return { success: getDeathSave(ds, 'success', 's'), fail: getDeathSave(ds, 'fail', 'f') };
-    },
-    toData: (c) => {
-      const ds = c.deathSaves || {};
-      return { success: getDeathSave(ds, 'success', 's'), fail: getDeathSave(ds, 'fail', 'f') };
-    },
+    toCombat: (src) => normalizeDeathSaves(src.deathSaves),
+    toData: (c) => normalizeDeathSaves(c.deathSaves),
     clampData: (value, fallback) => ({
       success: clampInt(value?.success ?? fallback?.success, 0, 3, 0),
       fail: clampInt(value?.fail ?? fallback?.fail, 0, 3, 0),

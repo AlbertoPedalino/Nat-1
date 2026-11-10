@@ -5,7 +5,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { atDeathsDoor, clickedDeathSaveCount, resolveMortality } from '../../../shared/character/combat/mortality.js';
-import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
+import { EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { HP_TONE_COLORS, UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';

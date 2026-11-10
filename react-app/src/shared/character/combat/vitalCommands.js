@@ -1,6 +1,8 @@
 import { clampCharacterVitals, maxHpFor } from './vitals.js';
-import { clickedDeathSaveCount, markDead, revive, withDeathSave } from './mortality.js';
-import { setConditionActive, toggleCondition } from './conditions.js';
+import { clickedDeathSaveCount, markDead, toggleMortalCondition, withDeathSave } from './mortality.js';
+import {
+  DEAD_CONDITION_KEY as DEAD, EXHAUSTION_KEY as EXHAUSTION, EXHAUSTION_MAX, setConditionActive,
+} from './conditions.js';
 import { addReminder, effectId, normalizeEffects, removeEffect } from './combatEffects.js';
 
 // Apply an intent to the vitals a command starts from — the character digest
@@ -35,7 +37,7 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     case 'longRest':
       v.currentHP = maxHP;
       v.tempHP = 0;
-      if ((command.exhaustionLevel ?? Math.max(0, (Number(data.exhaustionLevel) || 0) - 1)) === 0) v.activeConditions = v.activeConditions.filter((key) => key !== 'exhaustion');
+      if ((command.exhaustionLevel ?? Math.max(0, (Number(data.exhaustionLevel) || 0) - 1)) === 0) v.activeConditions = v.activeConditions.filter((key) => key !== EXHAUSTION);
       recover = true;
       break;
     case 'setDeathSave': {
@@ -53,14 +55,11 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       if (v.deathSaves.fail >= 3) v = withMortality(v, markDead(mortalityOf(v)));
       break;
     case 'toggleCombatantCondition':
-      if (command.key === 'dead') {
-        const dead = !v.activeConditions.includes('dead');
-        v = withMortality(v, (dead ? markDead : revive)(mortalityOf(v)));
-      } else v.activeConditions = toggleCondition(v.activeConditions, command.key);
+      v = withMortality(v, toggleMortalCondition(mortalityOf(v), command.key));
       break;
     case 'clearCombatantConditions':
-      if (v.activeConditions.includes('dead')) { v.currentHP = 1; recover = true; }
-      v.activeConditions = command.clearExhaustion ? [] : v.activeConditions.filter((k) => k === 'exhaustion');
+      if (v.activeConditions.includes(DEAD)) { v.currentHP = 1; recover = true; }
+      v.activeConditions = command.clearExhaustion ? [] : v.activeConditions.filter((k) => k === EXHAUSTION);
       break;
     // Reminders: the encounter builder's own action names, so its dispatch
     // forwards them unchanged. Set by hand, never expired.
@@ -72,9 +71,8 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       recover = Object.hasOwn(command.patch, 'currentHP');
       break;
     case 'setExhaustion':
-      v.activeConditions = setConditionActive(v.activeConditions, 'exhaustion', n > 0);
-      // Level 6 is death (XPHB 2024).
-      if (n >= 6) v = withMortality(v, markDead(mortalityOf(v)));
+      v.activeConditions = setConditionActive(v.activeConditions, EXHAUSTION, n > 0);
+      if (n >= EXHAUSTION_MAX) v = withMortality(v, markDead(mortalityOf(v)));
       break;
     case 'editToken':
       if (Object.hasOwn(command.patch, 'currentHP')) { v.currentHP = command.patch.currentHP; recover = true; }
@@ -86,12 +84,12 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       }
       if (command.addEffects?.length) v.activeEffects = normalizeEffects([...v.activeEffects, ...command.addEffects]);
       v.deathSaves = { ...v.deathSaves, ...command.deathSaves };
-      if (command.removeConditions?.includes('dead') && !command.deathSaves) {
+      if (command.removeConditions?.includes(DEAD) && !command.deathSaves) {
         if (!Object.hasOwn(command.patch, 'currentHP')) v.currentHP = Math.max(1, v.currentHP);
         v.deathSaves = { success: 0, fail: 0 };
         recover = true;
       }
-      if (command.addConditions?.includes('dead') || Number(command.deathSaves?.fail) >= 3) {
+      if (command.addConditions?.includes(DEAD) || Number(command.deathSaves?.fail) >= 3) {
         v = withMortality(v, markDead(mortalityOf(v)));
       }
       break;
@@ -100,7 +98,7 @@ export function applyVitalCommand(data, command, baseMaxHP) {
   v = clampCharacterVitals(v, { maxHP: maxFor(v.maxHPBonus) });
   if (recover && v.currentHP > 0) {
     v.deathSaves = { success: 0, fail: 0 };
-    v.activeConditions = setConditionActive(v.activeConditions, 'dead', false);
+    v.activeConditions = setConditionActive(v.activeConditions, DEAD, false);
   }
   return v;
 }

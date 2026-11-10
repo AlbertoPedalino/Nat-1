@@ -1,4 +1,4 @@
-import { makeSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
+import { combatantRollActor } from '../../../shared/encounter/rollActor.js';
 
 export function encounterRollActor({ selectedStatblock, combat, instanceId }) {
   const selected = selectedStatblock;
@@ -6,12 +6,5 @@ export function encounterRollActor({ selectedStatblock, combat, instanceId }) {
     ? combat?.combatants?.find((entry) => entry.id === selected.combatantId)
     : !selected?.monster ? combat?.combatants?.[combat.currentTurn || 0] : null;
   if (!combatant) return { actorName: selected?.monster?.name || 'GM' };
-  return {
-    actorName: combatant.name,
-    actorColor: combatant.shapeClr || combatant.iconColor || combatant.color || null,
-    actorShape: combatant.shape || null,
-    actorLabel: combatant.label || '',
-    characterId: combatant.type === 'player' ? combatant.sourceId || null : null,
-    sourceRef: makeSourceRef(instanceId, combat.fightId, combatant.id),
-  };
+  return combatantRollActor(combatant, { instanceId, fightId: combat.fightId });
 }

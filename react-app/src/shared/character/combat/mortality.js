@@ -1,4 +1,6 @@
-import { DEAD_CONDITION_KEY, normalizeConditions, setConditionActive } from './conditions.js';
+import {
+  DEAD_CONDITION_KEY, EXHAUSTION_KEY, normalizeConditions, setConditionActive, toggleCondition,
+} from './conditions.js';
 import { clampDeathSaveCount, normalizeDeathSaves } from './vitals.js';
 
 // Whether a creature at `hp` is dead, and the Dead condition and death saves
@@ -57,6 +59,23 @@ export function revive({ player, deathSaves, conditions }) {
     deathSaves: player ? { success: 0, fail: 0 } : deathSaves,
     conditions: setConditionActive(conditions, DEAD_CONDITION_KEY, false),
     dead: false,
+  };
+}
+
+// A condition clicked on or off, the way every surface does it: Dead kills
+// or revives (markDead / revive), Exhaustion is graded and left to whoever
+// owns its level, any other just toggles. Returns { hp, deathSaves,
+// conditions, dead }.
+export function toggleMortalCondition(state, key) {
+  const conditions = normalizeConditions(state.conditions);
+  if (key === DEAD_CONDITION_KEY) {
+    return (conditions.includes(DEAD_CONDITION_KEY) ? revive : markDead)({ ...state, conditions });
+  }
+  return {
+    hp: state.hp,
+    deathSaves: state.deathSaves,
+    conditions: key === EXHAUSTION_KEY ? conditions : normalizeConditions(toggleCondition(conditions, key)),
+    dead: conditions.includes(DEAD_CONDITION_KEY),
   };
 }
 
