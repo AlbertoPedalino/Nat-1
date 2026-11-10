@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
+import { isBookAllowed } from '../../../shared/content/sourcePriority.js';
 import { Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
@@ -26,8 +27,10 @@ export default function SubclassPanel({ character, dispatch }) {
   const isExtra = tab > 0;
   const extraIdx = tab - 1;
   const extra = activeExtraClass(character);
-  const { cls, subclasses = [], allSubFeatures = [] } = activeClassCharacter(character);
+  const { cls, subclasses: allSubclasses = [], allSubFeatures = [] } = activeClassCharacter(character);
   const subclassShortName = isExtra ? (extra?.subclassShortName || '') : (character.subclassShortName || '');
+  // Only the subclasses of the books the character uses (the current one kept).
+  const subclasses = allSubclasses.filter((sub) => isBookAllowed(character, sub.source) || sub.shortName === subclassShortName);
   const unlockLevel = cls?.subclassLevel || 3;
   const currentLevel = isExtra ? (extra?.level || 1) : primaryClassLevel(character);
   // A hero class whose subclass is fixed (Death Knight, Demon Hunter) takes it

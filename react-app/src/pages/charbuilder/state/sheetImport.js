@@ -54,6 +54,7 @@ function buildBuilderStateFromSheetPayload(data) {
     backgroundName,
     backgroundSource,
     backgroundObj: data.backgroundObj || backgroundSnapshot,
+    ...(Array.isArray(data.books) ? { books: data.books } : {}),
     backgroundAbilities,
     backgroundPattern,
 

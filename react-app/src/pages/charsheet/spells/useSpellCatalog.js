@@ -10,6 +10,7 @@ export function useSpellCatalog(classNameList) {
   const [spellDb, setSpellDb] = useState([]);
   const [spellVersions, setSpellVersions] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
+  const [classSpellBooks, setClassSpellBooks] = useState(null);
   const [catalogStatus, setCatalogStatus] = useState('loading');
   const [adapterRevision, setAdapterRevision] = useState(0);
   const classKey = JSON.stringify(classNameList);
@@ -37,6 +38,7 @@ export function useSpellCatalog(classNameList) {
           setSpellDb(result.spells || []);
           setSpellVersions(result.spellVersions || result.spells || []);
           setClassSpellIndex(result.classSpellIndex || {});
+          setClassSpellBooks(result.classSpellBooks || null);
           if (!result.failedFiles?.length) {
             setCatalogStatus('ready');
             return;
@@ -51,5 +53,5 @@ export function useSpellCatalog(classNameList) {
     return () => { alive = false; };
   }, []);
 
-  return { spellDb, spellVersions, classSpellIndex, catalogStatus, adapterRevision };
+  return { spellDb, spellVersions, classSpellIndex, classSpellBooks, catalogStatus, adapterRevision };
 }

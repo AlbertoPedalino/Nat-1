@@ -14,10 +14,10 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
 // ability an item with a choice raises. Each part renders only for its items.
-export default function ItemExtras({ item, onWriteScroll, onConsumeTome, onPickAbility }) {
+export default function ItemExtras({ item, character = null, onWriteScroll, onConsumeTome, onPickAbility }) {
   return (
     <>
-      <ScrollSpellPicker item={item} onWrite={onWriteScroll} />
+      <ScrollSpellPicker item={item} character={character} onWrite={onWriteScroll} />
       {isConsumableTome(item) ? <TomeConsumePanel item={item} onConsume={onConsumeTome} /> : null}
       {hasAbilityChoice(item) ? <AbilityChoicePanel item={item} onPick={onPickAbility} /> : null}
     </>

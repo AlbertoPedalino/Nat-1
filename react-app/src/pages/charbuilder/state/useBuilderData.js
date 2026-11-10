@@ -25,7 +25,12 @@ const BUILDER_DATA = {
   }],
   backgrounds: [loadBackgrounds, (backgrounds) => ({ backgrounds })],
   feats: [loadFeats, (feats) => ({ feats })],
-  spells: [loadSpells, (result) => ({ spells: result.spells, classSpellIndex: result.classSpellIndex })],
+  spells: [loadSpells, (result) => ({
+    spells: result.spells,
+    spellVersions: result.spellVersions,
+    classSpellIndex: result.classSpellIndex,
+    classSpellBooks: result.classSpellBooks,
+  })],
   items: [loadItems, (items) => ({ items })],
   optionalFeatures: [loadOptionalFeatures, (optionalFeatures) => ({ optionalFeatures })],
   beasts: [loadBeasts, (beasts) => ({ beasts })],

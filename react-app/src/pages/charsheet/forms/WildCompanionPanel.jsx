@@ -34,6 +34,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { filterByBooks } from '../../../shared/content/booksView.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -64,7 +65,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     : (canWildShape ? 'ws' : 'slot');
 
   const active = getActiveWildCompanion(character);
-  const familiars = useMemo(() => findFamiliarBeasts(beastsDb), [beastsDb]);
+  const familiars = useMemo(() => findFamiliarBeasts(filterByBooks(beastsDb, character)), [beastsDb, character]);
   // Match the app-wide search behaviour (accent-folding, multi-term) and the
   // builder's beast picker by searching name + CR + size through filterOptions.
   const visible = useMemo(

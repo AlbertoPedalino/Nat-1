@@ -8,20 +8,25 @@ import { byName } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { spellsForBooks } from '../../../shared/content/booksView.js';
 
 // A catalog with files missing is not kept: the next scroll opened asks again
 // for what failed.
 const loadSpellCatalogCached = cachedLoader(loadSpells, { failed: (result) => result?.failedFiles?.length > 0 });
-const loadSpellsCached = async () => (await loadSpellCatalogCached())?.spells || [];
+const loadSpellVersionsCached = async () => {
+  const result = await loadSpellCatalogCached();
+  return result?.spellVersions?.length ? result.spellVersions : (result?.spells || []);
+};
 
 // The spell written on a Spell Scroll: any spell of the scroll's level. Once
 // picked it is cast from the Spells tab; the card keeps the scroll's own text.
 // Its save DC and attack bonus are typed by hand (a scribed scroll's are its
 // scribe's); left blank, a found scroll's fixed ones apply.
-export default function ScrollSpellPicker({ item, onWrite }) {
+export default function ScrollSpellPicker({ item, character = null, onWrite }) {
   const level = spellScrollLevel(item);
-  const spellsLoad = useLoaded(() => (level == null ? null : loadSpellsCached()), [level]);
-  const spells = spellsLoad.status === 'error' ? [] : spellsLoad.data;
+  const spellsLoad = useLoaded(() => (level == null ? null : loadSpellVersionsCached()), [level]);
+  // Spells of the character's books, each once.
+  const spells = useMemo(() => (spellsLoad.status === 'error' ? [] : spellsForBooks(spellsLoad.data || [], character)), [spellsLoad.status, spellsLoad.data, character]);
 
   const options = useMemo(() => (spells || [])
     .filter((spell) => Number(spell.level ?? 0) === level)

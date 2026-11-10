@@ -49,6 +49,27 @@ export const BEAST_ALLOWED_SOURCES = frozenList([
 export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'AU', 'XDMG', 'WoW']);
 export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'RHW', 'AU', 'WoW']);
 
+// ── Books a character is built from ───────────────────────────────────────
+// The player picks them in the builder; the choice is saved on the character
+// (`books`: the selectable books chosen) and the sheet honours it. The core
+// books are always on. A character without `books` uses every book.
+export const ALWAYS_ON_BOOKS = frozenList(['XPHB', 'XDMG', 'XMM']);
+export const SELECTABLE_BOOKS = frozenList(CORE_2024_SOURCE_PRIORITY.filter((source) => !ALWAYS_ON_BOOKS.includes(source)));
+
+// The selectable books a character uses (all of them without a choice).
+export function characterBooks(character) {
+  return Array.isArray(character?.books)
+    ? SELECTABLE_BOOKS.filter((source) => character.books.includes(source))
+    : SELECTABLE_BOOKS.slice();
+}
+
+// Whether content of `source` is offered to the character: everything except
+// a selectable book the character does not use.
+export function isBookAllowed(character, source) {
+  const book = normalizeSource(source);
+  return !SELECTABLE_BOOKS.includes(book) || characterBooks(character).includes(book);
+}
+
 export function normalizeSource(source) {
   return String(source || '').trim();
 }

@@ -79,6 +79,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           <ItemReferenceBody item={item} />
           <ItemExtras
             item={item}
+            character={character}
             onWriteScroll={(patch) => actions.writeScroll(index, patch)}
             onConsumeTome={() => actions.consumeTome(index)}
             onPickAbility={(groupIdx, abilities) => actions.abilityChoice(index, groupIdx, abilities)}

@@ -18,6 +18,7 @@ import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { tempHpAfter } from '../../../shared/character/combat/vitals.js';
+import { filterByBooks } from '../../../shared/content/booksView.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -51,7 +52,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     .filter((f) => f.parsed), [refs, beastsDb]);
   // Forms a feature gives (Circle Forms: Bear Form, Cat Form), resolved for
   // this druid; no pick in the builder.
-  const extraForms = useMemo(() => featureForms
+  const extraForms = useMemo(() => filterByBooks(featureForms, character)
     .filter((form) => hasClassFeature(character, form.requiresFeature))
     .map((form) => ({ form, snapshot: featureFormSnapshot(character, form) }))
     .filter((entry) => entry.snapshot), [featureForms, character]);

@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useMemo, useReducer } from 'react';
 import {
   Box,
   Button,
@@ -34,6 +34,7 @@ import { FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
+import { builderDataForBooks } from '../../shared/content/booksView.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -85,6 +86,12 @@ export default function CharBuilder() {
 
   const reloadData = useBuilderData(dispatch);
   useBuilderAdapters(state, dispatch, notify);
+  // What the steps offer comes from the books the character is built from;
+  // the reducer keeps the full data, which finds earlier picks of any book.
+  const viewState = useMemo(
+    () => ({ ...state, data: builderDataForBooks(state.data, state.character) }),
+    [state],
+  );
 
   // The class, species and background objects (and every class's features)
   // are rebuilt from the loaded data by `data/adapt`, which runs again after
@@ -134,7 +141,7 @@ export default function CharBuilder() {
             </Stack>
 
             <ActiveStep
-              state={state}
+              state={viewState}
               dispatch={dispatch}
               sheetProps={{
                 importDraft,

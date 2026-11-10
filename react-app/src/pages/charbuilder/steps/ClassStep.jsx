@@ -8,6 +8,7 @@ import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progr
 import NamePanel from '../layout/NamePanel.jsx';
 import XpPanel from '../progression/XpPanel.jsx';
 import ClassPanel from '../progression/ClassPanel.jsx';
+import BooksPanel from '../progression/BooksPanel.jsx';
 import LevelPanel from '../progression/LevelPanel.jsx';
 import SubclassPanel from '../progression/SubclassPanel.jsx';
 import SpellSlotsPanel from '../spells/SpellSlotsPanel.jsx';
@@ -56,6 +57,7 @@ export default function ClassStep({ state, dispatch }) {
     <Stack spacing={2}>
       <NamePanel character={character} dispatch={dispatch} />
       <XpPanel character={character} dispatch={dispatch} />
+      <BooksPanel character={character} dispatch={dispatch} />
       <ClassPanel state={state} character={character} dispatch={dispatch} />
       <LevelPanel character={character} dispatch={dispatch} />
       <SubclassPanel character={character} dispatch={dispatch} />

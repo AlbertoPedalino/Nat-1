@@ -249,6 +249,8 @@ export function makeSheetPayload(character, data) {
     speciesSource: character.speciesSource,
     backgroundName: character.backgroundName,
     backgroundSource: character.backgroundSource,
+    // The selectable books the character is built from (none saved = all).
+    ...(Array.isArray(character.books) ? { books: character.books.slice() } : {}),
     backgroundAbilities: character.backgroundAbilities,
     backgroundPattern: character.backgroundPattern || [...DEFAULT_BACKGROUND_PATTERN],
     scoreMethod: character.scoreMethod,

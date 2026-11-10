@@ -15,6 +15,7 @@ import InventoryStats from './InventoryStats.jsx';
 import InventoryAddPanel from './InventoryAddPanel.jsx';
 import InventoryList from './InventoryList.jsx';
 import { useItemsDb } from './useItemsDb.js';
+import { filterByBooks } from '../../../shared/content/booksView.js';
 
 // The sheet's inventory tab: coins, carried weight and attunement, the add-item
 // search (InventoryAddPanel) and the owned items (InventoryList). Every change
@@ -24,6 +25,8 @@ export default function InventoryTab({ C, sheet }) {
     onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onNotice,
   } = useSheetActions();
   const itemsDb = useItemsDb();
+  // Items to add come from the character's books; owned ones resolve in all.
+  const bookItems = useMemo(() => filterByBooks(itemsDb, C), [itemsDb, C]);
   const inv = sheet?.sheetInventory || [];
   const currency = sheet?.sheetCurrency || {};
   const attunementState = useMemo(() => getCharacterAttunementState(C), [C]);
@@ -68,7 +71,7 @@ export default function InventoryTab({ C, sheet }) {
 
       <InventoryStats inv={inv} currency={currency} character={C} attunementLimit={attunementState.limit} />
 
-      <InventoryAddPanel itemsDb={itemsDb} onAddItem={addItem} />
+      <InventoryAddPanel itemsDb={bookItems} onAddItem={addItem} />
 
       <InventoryList
         inv={inv}

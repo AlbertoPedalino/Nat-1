@@ -1,6 +1,6 @@
 import { SPELL_FILES } from './catalogFiles.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../character/spells/spellNormalization.js';
-import { CLASS_ALLOWED_SOURCES, SPELL_SOURCE_PRIORITY } from '../sourcePriority.js';
+import { CLASS_ALLOWED_SOURCES, SPELL_SOURCE_PRIORITY, isBookAllowed } from '../sourcePriority.js';
 import { matchKey } from '../nameKeys.js';
 import { loadGameData } from '../gameData.js';
 import { byName } from '../../lists.js';
@@ -38,12 +38,14 @@ export async function loadSpells() {
   }
 
   let classSpellIndex = {};
+  let classSpellBooks = null;
 
   // Try to load gendata first (if it exists)
   try {
     const lookup = await loadGameData('generated/gendata-spell-source-lookup.json');
     debugLog('[loadSpells] Using gendata');
-    classSpellIndex = buildClassSpellIndex(lookup);
+    classSpellBooks = buildClassSpellBooks(lookup);
+    classSpellIndex = classSpellIndexForBooks(classSpellBooks);
   } catch (err) {
     debugLog('[loadSpells] gendata not found, error:', err.message);
     debugLog('[loadSpells] building from spell metadata');
@@ -64,6 +66,9 @@ export async function loadSpells() {
     // Item references can explicitly request a lower-priority printing.
     spellVersions: spells,
     classSpellIndex,
+    // Per book (buildClassSpellBooks), for a character's own books; null when
+    // the lists come from the spells themselves (their own books apply).
+    classSpellBooks,
     failedFiles: SPELL_FILES.filter((_, index) => entries[index].status === 'rejected'),
   };
 }
@@ -136,23 +141,24 @@ export function buildClassSpellIndexFromSpells(spells) {
   return result;
 }
 
-export function buildClassSpellIndex(node) {
+// Which books put a spell on a class's list: { class: { spell: [book…] } } —
+// the class's own book for its core list, the defining book for an addition
+// (AU's Battle Familiar on the Druid list). A character's books narrow it
+// (classSpellIndexForBooks).
+export function buildClassSpellBooks(node) {
   const out = {};
-  if (!node || typeof node !== 'object') {
-    debugLog('[buildClassSpellIndex] Invalid node');
-    return out;
-  }
+  if (!node || typeof node !== 'object') return out;
 
-  debugLog('[buildClassSpellIndex] Processing gendata with', Object.keys(node).length, 'sources');
-
-  const collect = (className, spellName) => {
+  const collect = (className, spellName, books) => {
     const key = matchKey(className);
     if (!key) return;
-    if (!out[key]) out[key] = new Set();
-    out[key].add(String(spellName || '').toLowerCase());
+    const spell = String(spellName || '').toLowerCase();
+    if (!out[key]) out[key] = {};
+    out[key][spell] = [...new Set([...(out[key][spell] || []), ...books])];
   };
 
-  // Track which classes have entries in info.class (core class list)
+  // Classes that have their own list (the rest — Fighter, Rogue — take the
+  // lists of their spellcasting subclasses).
   const hasClassSpells = new Set();
 
   const visitClassMap = (classMap, visitor, { variant = false } = {}) => {
@@ -161,46 +167,54 @@ export function buildClassSpellIndex(node) {
       if (!bySource || typeof bySource !== 'object' || !isSupportedClassSource(classSource)) return;
       Object.entries(bySource).forEach(([className, metadata]) => {
         if (variant && !isSupportedClassVariant(metadata)) return;
-        visitor(className);
+        const books = variant
+          ? classVariantSources(metadata).filter((source) => SPELL_SOURCE_PRIORITY.includes(String(source || '').trim()))
+          : [classSource];
+        visitor(className, books);
       });
     });
   };
 
-  // PASS 1: Collect core class lists and supported source-book additions.
   Object.values(node).forEach((sourceBlock) => {
     if (!sourceBlock || typeof sourceBlock !== 'object') return;
     Object.entries(sourceBlock).forEach(([spellName, info]) => {
       if (!info || typeof info !== 'object') return;
-      const collectClassSpell = (className) => {
+      const collectClassSpell = (className, books) => {
         hasClassSpells.add(matchKey(className));
-        collect(className, spellName);
+        collect(className, spellName, books);
       };
       visitClassMap(info.class, collectClassSpell);
       visitClassMap(info.classVariant, collectClassSpell, { variant: true });
     });
   });
 
-  // PASS 2: Collect from info.subclass only for classes WITHOUT their own class spell list
-  // (e.g., Fighter/Eldritch Knight, Rogue/Arcane Trickster - they have no core class spells)
   Object.values(node).forEach((sourceBlock) => {
     if (!sourceBlock || typeof sourceBlock !== 'object') return;
     Object.entries(sourceBlock).forEach(([spellName, info]) => {
-      if (!info || typeof info !== 'object') return;
-      const subclassMap = info.subclass;
-      if (subclassMap && typeof subclassMap === 'object') {
-        Object.entries(subclassMap).forEach(([classSource, bySource]) => {
-          if (!bySource || typeof bySource !== 'object' || !isSupportedClassSource(classSource)) return;
-          Object.keys(bySource).forEach((className) => {
-            if (!hasClassSpells.has(matchKey(className))) {
-              collect(className, spellName);
-            }
-          });
+      const subclassMap = info?.subclass;
+      if (!subclassMap || typeof subclassMap !== 'object') return;
+      Object.entries(subclassMap).forEach(([classSource, bySource]) => {
+        if (!bySource || typeof bySource !== 'object' || !isSupportedClassSource(classSource)) return;
+        Object.keys(bySource).forEach((className) => {
+          if (!hasClassSpells.has(matchKey(className))) collect(className, spellName, [classSource]);
         });
-      }
+      });
     });
   });
+  return out;
+}
 
-  const result = Object.fromEntries(Object.entries(out).map(([key, value]) => [key, [...value]]));
-  debugLog('[buildClassSpellIndex] Final result keys:', Object.keys(result), 'total spells by class:', result);
-  return result;
+// The class lists ({ class: [spell…] }) of the books a character uses — every
+// book when `character` is null.
+export function classSpellIndexForBooks(classSpellBooks, character = null) {
+  return Object.fromEntries(Object.entries(classSpellBooks || {}).map(([className, spells]) => [
+    className,
+    Object.entries(spells)
+      .filter(([, books]) => !character || books.some((book) => isBookAllowed(character, book)))
+      .map(([spell]) => spell),
+  ]));
+}
+
+export function buildClassSpellIndex(node) {
+  return classSpellIndexForBooks(buildClassSpellBooks(node));
 }

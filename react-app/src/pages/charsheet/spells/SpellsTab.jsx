@@ -27,6 +27,7 @@ import { useSpellSlotState } from './useSpellSlotState.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -35,8 +36,15 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const {
-    spellDb, spellVersions, classSpellIndex, catalogStatus, adapterRevision,
+    spellDb, spellVersions, classSpellIndex: allClassSpellIndex, classSpellBooks, catalogStatus, adapterRevision,
   } = useSpellCatalog(classNames(C));
+  // The picker offers the spells of the character's books; known spells are
+  // looked up in the whole catalog.
+  const bookSpells = useMemo(() => (spellVersions.length ? spellsForBooks(spellVersions, C) : spellDb), [spellVersions, spellDb, C]);
+  const classSpellIndex = useMemo(
+    () => classSpellIndexForCharacter({ classSpellBooks, classSpellIndex: allClassSpellIndex }, C),
+    [classSpellBooks, allClassSpellIndex, C],
+  );
 
   const { slotUsed, createdSlots, toggleSlot } = useSpellSlotState(sheet, { readOnly, onUpdateSheet, onUpdateCharacter });
 
@@ -151,7 +159,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         C={C}
-        catalog={{ spellDb, spellIndex, classSpellIndex, adapterRevision }}
+        catalog={{ spellDb: bookSpells, spellIndex, classSpellIndex, adapterRevision }}
         lockedSourceBySpell={lockedSourceBySpell}
       />
     </Box>
