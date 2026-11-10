@@ -21,7 +21,7 @@ registerSubclassAdapter("Bard_Swords", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Bard_Swords", [
-  { name: "Blade Flourish",    icon: "", cat: "attack", uses: "Per attack action", minLevel: 3 },
+  { name: "Blade Flourish",    cat: "attack", minLevel: 3 },
 ]);
 registerSubclassSheetProficiencies("Bard_Swords", [
   { type: "armor", values: ["Medium"], minLevel: 3 },

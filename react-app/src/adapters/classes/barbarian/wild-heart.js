@@ -23,30 +23,30 @@ registerSubclassAdapter("Barbarian_Wild Heart", function (cls, lv, specs) {
 registerSubclassSheetActions("Barbarian_Wild Heart", [
   {
     name: "Animal Speaker",
-    icon: "",
+    
     cat: "action",
-    uses: "Ritual",
+    
     minLevel: 3
   },
   {
     name: "Rage of the Wilds",
-    icon: "",
+    
     cat: "bonus",
-    uses: "Choose per Rage",
+    
     minLevel: 3
   },
   {
     name: "Nature Speaker",
-    icon: "",
+    
     cat: "action",
-    uses: "Ritual / LR",
+    
     minLevel: 10
   },
   {
     name: "Power of the Wilds",
-    icon: "",
+    
     cat: "bonus",
-    uses: "Choose per Rage",
+    
     minLevel: 14
   }
 ]);

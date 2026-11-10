@@ -26,14 +26,14 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Enchanter', [
-    { name: 'Hypnotic Presence', icon: 'eye', cat: 'action', uses: 'INT mod / LR', resKey: 'enchanter_presence', minLevel: 3 },
-    { name: 'Split Enchantment', icon: 'split', cat: 'special', uses: 'INT mod / LR', resKey: 'enchanter_split', minLevel: 6 },
-    { name: 'Instinctive Charm', icon: 'shield', cat: 'reaction', uses: '1 / LR', resKey: 'enchanter_charm', minLevel: 10 },
-    { name: 'Alter Memories', icon: 'brain', cat: 'action', uses: 'While target is Charmed', minLevel: 14 },
+    { name: 'Hypnotic Presence', cat: 'action', resKey: 'enchanter_presence', minLevel: 3 },
+    { name: 'Split Enchantment', cat: 'special', resKey: 'enchanter_split', minLevel: 6 },
+    { name: 'Instinctive Charm', cat: 'reaction', resKey: 'enchanter_charm', minLevel: 10 },
+    { name: 'Alter Memories', cat: 'action', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Enchanter', [
-    { key: 'enchanter_presence', name: 'Hypnotic Presence', icon: 'eye', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
-    { key: 'enchanter_split', name: 'Split Enchantment', icon: 'split', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
-    { key: 'enchanter_charm', name: 'Instinctive Charm', icon: 'shield', recharge: 'LR', minLevel: 10, max: 1 },
+    { key: 'enchanter_presence', name: 'Hypnotic Presence', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
+    { key: 'enchanter_split', name: 'Split Enchantment', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
+    { key: 'enchanter_charm', name: 'Instinctive Charm', recharge: 'LR', minLevel: 10, max: 1 },
   ]);
 }

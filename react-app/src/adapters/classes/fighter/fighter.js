@@ -47,9 +47,9 @@ registerClassAdapter("Fighter", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Fighter", [
   {
     name: 'Second Wind',
-    icon: '',
+    
     cat: 'bonus',
-    uses: '1-3 / SR',
+    
     resKey: 'second_wind',
     rollers: [{ kind: 'heal', formula: ({ ownerLevel }) => {
       const lvNum = Number(ownerLevel || 1);
@@ -59,26 +59,26 @@ registerClassSheetActions("Fighter", [
   },
   {
     name: 'Action Surge',
-    icon: '',
+    
     cat: 'action',
-    uses: '1-2 / SR',
+    
     resKey: 'action_surge',
     minLevel: 2
   },
   {
     name: 'Tactical Mind',
-    icon: '',
+    
     cat: 'special',
-    uses: 'Second Wind',
+    
     minLevel: 2,
     rollers: [{ kind: 'utility', formula: '1d10', label: '1d10', title: 'Bonus' }],
     rollLabelPrefix: 'Tactical Mind'
   },
   {
     name: 'Indomitable',
-    icon: '',
+    
     cat: 'special',
-    uses: '1-3 / LR',
+    
     resKey: 'indomitable',
     minLevel: 9
   }
@@ -87,21 +87,21 @@ registerClassSheetResources("Fighter", [
   {
     key: 'second_wind',
     name: 'Second Wind',
-    icon: 'wind',
+    
     recharge: 'SR',
     max: (lv)=>lv>=10?4:lv>=4?3:2
   },
   {
     key: 'action_surge',
     name: 'Action Surge',
-    icon: 'zap',
+    
     recharge: 'SR',
     max: (lv)=>lv>=17?2:1
   },
   {
     key: 'indomitable',
     name: 'Indomitable',
-    icon: 'shield',
+    
     recharge: 'LR',
     max: (lv)=>lv>=17?3:lv>=13?2:1
   }

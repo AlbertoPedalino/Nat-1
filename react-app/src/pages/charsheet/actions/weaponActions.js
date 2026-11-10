@@ -200,7 +200,6 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   return {
     name: opts.name || card.name,
     cat: opts.cat || 'action',
-    uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
     rollers: [{ kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage' }],
@@ -236,7 +235,6 @@ function pushWeaponExtraAttacks(out, mainAction, item, C, overrides) {
       ...mainAction,
       name: ov.name || mainAction.name,
       cat: ov.cat || 'bonus',
-      uses: ov.uses || 'Bonus Action',
       _colorBarCat: 'attack',
       _extraAttackKey: ov.key,
     });
@@ -319,7 +317,6 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     weaponActions.push({
       name: ohCard.name,
       cat: isNick ? 'action' : 'bonus',
-      uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
       _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
@@ -353,7 +350,6 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     name: 'Unarmed Strike',
     cat: 'action',
     _colorBarCat: 'attack',
-    uses: unarmed.uses || 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,
     rollers: [{

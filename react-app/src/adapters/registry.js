@@ -121,7 +121,6 @@ export const KEYED_SLOTS = [
   { register: 'SheetEffects', get: 'SheetEffects', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
   { register: 'RuntimeConfig', get: 'RuntimeConfig', kinds: ['Class', 'Subclass', 'Species'], mode: 'merge', empty: {} },
   { register: 'SheetChoiceMeta', get: 'SheetChoiceMeta', kinds: ['Class', 'Subclass', 'Species'], mode: 'object', empty: {} },
-  { register: 'SheetFeatureFilter', get: 'SheetFeatureFilters', kinds: ['Class', 'Subclass', 'Species'], mode: 'append', empty: [] },
   { register: 'SheetProficiencies', get: 'SheetProficiencies', kinds: ['Class', 'Subclass', 'Species'], mode: 'list', empty: [] },
   { register: 'SheetSpellModifiers', get: 'SheetSpellModifiers', kinds: ['Class', 'Subclass', 'Species'], mode: 'list', empty: [] },
   // Spell riders: factories `(ctx) => rider | null` that attach an extra roller /
@@ -153,10 +152,6 @@ function keyedSlotMethods(slot, kindName, store) {
       case 'list': kind.write(store, key, Array.isArray(value) ? value : []); break;
       case 'object': kind.write(store, key, value && typeof value === 'object' ? value : {}); break;
       case 'merge': kind.write(store, key, mergeRuntimeConfig(kind.exact(store, key), value)); break;
-      case 'append':
-        if (typeof value === 'function') kind.write(store, key, [...(kind.exact(store, key) || []), value]);
-        break;
-      case 'number': kind.write(store, key, Number(value) || 0); break;
       default: kind.write(store, key, value);
     }
   };

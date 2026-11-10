@@ -47,10 +47,10 @@ test('Dazzling Footwork: Unarmored Defense and the Bardic die on unarmed strikes
   assert.ok(collectOwnerEntries(bard(), 'SheetEffects').length > 0);
   const ac = collectAcFormulas(bard());
   assert.deepEqual(ac.map((f) => [f.label, f.abilities, f.allowShield]), [['Dazzling Footwork', ['dex', 'cha'], false]]);
-  assert.deepEqual(getUnarmedStrike(bard()), { face: 8, dexterity: true, uses: 'Bardic Damage' });
+  assert.deepEqual(getUnarmedStrike(bard()), { face: 8, dexterity: true });
   assert.equal(getUnarmedStrike(bard({ level: 15 })).face, 12);
   const shielded = bard({ inventory: [{ type: 'S', equipped: true }] });
-  assert.deepEqual(getUnarmedStrike(shielded), { face: 1, dexterity: false, uses: null });
+  assert.deepEqual(getUnarmedStrike(shielded), { face: 1, dexterity: false });
 });
 
 test('speed effects: bonuses per mode, "walking" modes, situational ones only listed', async () => {

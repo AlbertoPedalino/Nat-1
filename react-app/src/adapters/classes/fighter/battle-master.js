@@ -63,16 +63,16 @@ registerSubclassAdapter("Fighter_Battle Master", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Fighter_Battle Master", [
-  { name: "Combat Maneuvers", icon: "", cat: "attack", uses: "Superiority Dice", resKey: "superiority_dice", minLevel: 3 },
-  { name: "Know Your Enemy", icon: "", cat: "bonus", uses: "1 / LR or Superiority Die", resKey: "know_your_enemy", minLevel: 7 },
-  { name: "Relentless", icon: "", cat: "action", uses: "1 / turn", minLevel: 15 },
+  { name: "Combat Maneuvers", cat: "attack", resKey: "superiority_dice", minLevel: 3 },
+  { name: "Know Your Enemy", cat: "bonus", resKey: "know_your_enemy", minLevel: 7 },
+  { name: "Relentless", cat: "action", minLevel: 15 },
 ]);
 registerSubclassSheetResources("Fighter_Battle Master", [
-  { key: "superiority_dice", name: "Superiority Dice", actionName: "Combat Maneuvers", icon: "swords", recharge: "SR",
+  { key: "superiority_dice", name: "Superiority Dice", actionName: "Combat Maneuvers", recharge: "SR",
     max: (lv) => lv >= 15 ? 6 : lv >= 7 ? 5 : 4,
     die: (lv) => lv >= 18 ? "d12" : lv >= 10 ? "d10" : "d8",
     pool: true, track: "used" },
-  { key: "know_your_enemy", name: "Know Your Enemy", icon: "eye", recharge: "LR", max: () => 1 },
+  { key: "know_your_enemy", name: "Know Your Enemy", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassSheetEffects("Fighter_Battle Master", [

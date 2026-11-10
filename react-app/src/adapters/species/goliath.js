@@ -34,18 +34,18 @@ registerSpeciesSheetCommonChoiceMeta("Goliath_XPHB", {
 registerSpeciesSheetActions("Goliath_XPHB", [
   {
     name: "Cloud's Jaunt",
-    icon: '',
+    
     cat: 'bonus',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Cloud's Jaunt" },
   },
   {
     name: "Fire's Burn",
-    icon: '',
+    
     cat: 'special',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d10' }],
     minLevel: 1,
@@ -53,9 +53,9 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: "Frost's Chill",
-    icon: '',
+    
     cat: 'special',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d6' }],
     minLevel: 1,
@@ -63,31 +63,31 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: "Hill's Tumble",
-    icon: '',
+    
     cat: 'special',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Hill's Tumble" },
   },
   {
     name: "Stone's Endurance",
-    icon: '',
+    
     cat: 'reaction',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Stone's Endurance" },
     inlinePills: ({ character }) => {
       const conMod = finalAbilityModifier(character, 'con');
-      return [{ icon: 'shield', label: 'Reduction', value: withModifier('1d12', conMod) }];
+      return [{ label: 'Reduction', value: withModifier('1d12', conMod) }];
     },
   },
   {
     name: "Storm's Thunder",
-    icon: '',
+    
     cat: 'reaction',
-    uses: 'PB / LR',
+    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d8' }],
     minLevel: 1,
@@ -95,14 +95,14 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: 'Large Form',
-    icon: '',
+    
     cat: 'bonus',
-    uses: '1 / LR',
+    
     resKey: 'goliath_large_form',
     minLevel: 5,
     inlinePills: [
-      { icon: 'timer', label: 'Duration', value: '10 min' },
-      { icon: 'footprints', label: 'Speed', value: '+10 ft' },
+      { label: 'Duration', value: '10 min' },
+      { label: 'Speed', value: '+10 ft' },
     ],
   },
 ]);
@@ -110,14 +110,14 @@ registerSpeciesSheetResources("Goliath_XPHB", [
   {
     key: 'goliath_giant_ancestry',
     name: 'Giant Ancestry',
-    icon: 'mountain',
+    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },
   {
     key: 'goliath_large_form',
     name: 'Large Form',
-    icon: 'maximize',
+    
     recharge: 'LR',
     minLevel: 5,
     max: 1,

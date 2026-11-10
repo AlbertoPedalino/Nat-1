@@ -10,11 +10,11 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Barbarian_Berserker", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Barbarian_Berserker", [
-  { name: "Frenzy", icon: "", cat: "attack", uses: "With Reckless Attack", minLevel: 3 },
-  { name: "Intimidating Presence", icon: "", cat: "bonus", uses: "1 / LR or Rage use", resKey: "barb_intimidating", minLevel: 14 },
+  { name: "Frenzy", cat: "attack", minLevel: 3 },
+  { name: "Intimidating Presence", cat: "bonus", resKey: "barb_intimidating", minLevel: 14 },
 ]);
 registerSubclassSheetResources("Barbarian_Berserker", [
-  { key: "barb_intimidating", name: "Intimidating Presence", icon: "skull", recharge: "LR", max: () => 1 },
+  { key: "barb_intimidating", name: "Intimidating Presence", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassSheetEffects("Barbarian_Berserker", [

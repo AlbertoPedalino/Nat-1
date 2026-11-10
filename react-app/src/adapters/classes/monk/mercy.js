@@ -14,18 +14,18 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Monk_Mercy", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Monk_Mercy", [
-  { name: "Hand of Harm", icon: "", cat: "attack", uses: "1 Focus Point / turn", resKey: "ki", minLevel: 3,
+  { name: "Hand of Harm", cat: "attack", resKey: "ki", minLevel: 3,
     rollers: [{ kind: 'damage', formula: ({ character, ownerLevel }) => (
       withModifier(`1d${levelTable(ownerLevel, MARTIAL_ARTS_DIE)}`, finalAbilityModifier(character, 'wis'))
     ), label: ({ formula }) => `+${formula} necrotic` }] },
-  { name: "Hand of Healing", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3 },
-  { name: "Flurry of Healing and Harm", icon: "", cat: "bonus", uses: "WIS mod / LR", resKey: "mercy_flurry", minLevel: 11 },
-  { name: "Hand of Ultimate Mercy", icon: "", cat: "action", uses: "1 / LR", resKey: "mercy_ultimate", minLevel: 17 },
+  { name: "Hand of Healing", cat: "action", resKey: "ki", minLevel: 3 },
+  { name: "Flurry of Healing and Harm", cat: "bonus", resKey: "mercy_flurry", minLevel: 11 },
+  { name: "Hand of Ultimate Mercy", cat: "action", resKey: "mercy_ultimate", minLevel: 17 },
 ]);
 registerSubclassSheetResources("Monk_Mercy", [
-  { key: "mercy_flurry", name: "Flurry of Healing and Harm", icon: "sparkles", recharge: "LR",
+  { key: "mercy_flurry", name: "Flurry of Healing and Harm", recharge: "LR",
     max: 'abilityMod:wis', minMax: 1 },
-  { key: "mercy_ultimate", name: "Hand of Ultimate Mercy", icon: "heart", recharge: "LR", max: () => 1 },
+  { key: "mercy_ultimate", name: "Hand of Ultimate Mercy", recharge: "LR", max: () => 1 },
 ]);
 registerSubclassSheetProficiencies("Monk_Mercy", [
   { type: "skill",  values: ["Insight", "Medicine"], minLevel: 3 },

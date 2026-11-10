@@ -11,9 +11,9 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Monk_Elements", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Monk_Elements", [
-  { name: "Manipulate Elements", icon: "", cat: "action", uses: "At will", minLevel: 3 },
-  { name: "Elemental Attunement", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3 },
-  { name: "Elemental Burst", icon: "", cat: "action", uses: "2 Focus Points", resKey: "ki", minLevel: 6,
+  { name: "Manipulate Elements", cat: "action", minLevel: 3 },
+  { name: "Elemental Attunement", cat: "action", resKey: "ki", minLevel: 3 },
+  { name: "Elemental Burst", cat: "action", resKey: "ki", minLevel: 6,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => `3d${levelTable(ownerLevel, MARTIAL_ARTS_DIE)}`,
       label: ({ formula }) => `${formula} elemental` }] },
 ]);

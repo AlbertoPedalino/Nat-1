@@ -30,9 +30,9 @@ registerSubclassAdapter("Druid_Stars", function (cls, lv, specs) {});
 registerSubclassSheetActions("Druid_Stars", [
   {
     "name": "Starry Form",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "Wild Shape charge",
+    
     "resKey": "wild_shape",
     "minLevel": 3,
     "choiceKey": "stars_constellation",
@@ -48,9 +48,9 @@ registerSubclassSheetActions("Druid_Stars", [
   },
   {
     "name": "Starry Form: Archer",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "While in Starry Form",
+    
     "minLevel": 3,
     "noDescription": true,
     "requiresChoice": { "key": "stars_constellation", "value": "Archer" },
@@ -62,9 +62,9 @@ registerSubclassSheetActions("Druid_Stars", [
   },
   {
     "name": "Cosmic Omen",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "WIS mod / LR",
+    
     "resKey": "stars_cosmic_omen",
     "minLevel": 6
   }
@@ -97,7 +97,7 @@ registerSubclassSheetResources("Druid_Stars", [
   {
     "key": "stars_cosmic_omen",
     "name": "Cosmic Omen",
-    "icon": "sparkles",
+    
     "recharge": "LR",
     "max": "abilityMod:wis", "minMax": 1
   }

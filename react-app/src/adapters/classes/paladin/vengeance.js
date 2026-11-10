@@ -5,12 +5,12 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Paladin_Vengeance", function (cls, lv, specs, ctx = {}) {});
 
 registerSubclassSheetActions("Paladin_Vengeance", [
-  { name: "Vow of Enmity", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div" },
-  { name: "Soul of Vengeance", icon: "", cat: "reaction", uses: "At will", minLevel: 15 },
-  { name: "Avenging Angel", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "vengeance_avenging_angel", minLevel: 20 },
+  { name: "Vow of Enmity", cat: "action", resKey: "paladin_channel_div" },
+  { name: "Soul of Vengeance", cat: "reaction", minLevel: 15 },
+  { name: "Avenging Angel", cat: "bonus", resKey: "vengeance_avenging_angel", minLevel: 20 },
 ]);
 registerSubclassSheetResources("Paladin_Vengeance", [
-  { key: "vengeance_avenging_angel", name: "Avenging Angel", icon: "feather", recharge: "LR", max: () => 1 },
+  { key: "vengeance_avenging_angel", name: "Avenging Angel", recharge: "LR", max: () => 1 },
 ]);
 
 }

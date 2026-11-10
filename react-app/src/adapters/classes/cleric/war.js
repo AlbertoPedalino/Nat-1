@@ -24,12 +24,12 @@ registerSubclassAdapter("Cleric_War", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Cleric_War", [
-  { name: "War Priest", icon: "", cat: "bonus", uses: "WIS mod / SR+LR", resKey: "war_priest", minLevel: 3 },
-  { name: "Guided Strike", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 3 },
-  { name: "War God's Blessing", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 6 },
+  { name: "War Priest", cat: "bonus", resKey: "war_priest", minLevel: 3 },
+  { name: "Guided Strike", cat: "reaction", resKey: "channel_div", minLevel: 3 },
+  { name: "War God's Blessing", cat: "reaction", resKey: "channel_div", minLevel: 6 },
 ]);
 registerSubclassSheetResources("Cleric_War", [
-  { key: "war_priest", name: "War Priest", icon: "swords", recharge: "SR+LR",
+  { key: "war_priest", name: "War Priest", recharge: "SR+LR",
     max: 'abilityMod:wis', minMax: 1 },
 ]);
 registerSubclassRuntimeConfig("Cleric_War", {

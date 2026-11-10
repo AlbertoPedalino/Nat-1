@@ -18,11 +18,11 @@ function unarmed(character, inventory = []) {
   const C = { scoreMethod: 'manual', manualScores: scores, ...character };
   const card = makeWeaponActions(C, inventory, inventory, [], collectEquipmentProficiencySets(C))
     .find((action) => action.name === 'Unarmed Strike');
-  return { damage: card.rollers[0].formula, uses: card.uses };
+  return { damage: card.rollers[0].formula };
 }
 
 test('without any feature: 1 + Strength', () => {
-  expect(unarmed({ className: 'Fighter', classLevel: 1, level: 1 })).toEqual({ damage: '1+2', uses: 'Attack' });
+  expect(unarmed({ className: 'Fighter', classLevel: 1, level: 1 })).toEqual({ damage: '1+2' });
 });
 
 test('Martial Arts: the die grows with Monk level and uses Dexterity when higher', () => {
@@ -32,7 +32,6 @@ test('Martial Arts: the die grows with Monk level and uses Dexterity when higher
   expect(monk(5)).toBe('1d8+3');
   expect(monk(11)).toBe('1d10+3');
   expect(monk(17)).toBe('1d12+3');
-  expect(unarmed({ className: 'Monk', classLevel: 1, level: 1 }).uses).toBe('Martial Arts');
 });
 
 test('Martial Arts follows the Monk levels of a multiclass character', () => {

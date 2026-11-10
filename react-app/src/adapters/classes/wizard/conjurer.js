@@ -16,11 +16,11 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Conjurer', [
-    { name: 'Benign Transposition', icon: 'move', cat: 'bonus', uses: 'INT mod / LR', resKey: 'conjurer_transposition', minLevel: 3 },
-    { name: 'Splintered Summons', icon: 'copy-plus', cat: 'special', uses: '1 / LR', resKey: 'conjurer_splintered', minLevel: 14 },
+    { name: 'Benign Transposition', cat: 'bonus', resKey: 'conjurer_transposition', minLevel: 3 },
+    { name: 'Splintered Summons', cat: 'special', resKey: 'conjurer_splintered', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Conjurer', [
-    { key: 'conjurer_transposition', name: 'Benign Transposition', icon: 'move', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
-    { key: 'conjurer_splintered', name: 'Splintered Summons', icon: 'copy-plus', recharge: 'LR', minLevel: 14, max: 1 },
+    { key: 'conjurer_transposition', name: 'Benign Transposition', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
+    { key: 'conjurer_splintered', name: 'Splintered Summons', recharge: 'LR', minLevel: 14, max: 1 },
   ]);
 }

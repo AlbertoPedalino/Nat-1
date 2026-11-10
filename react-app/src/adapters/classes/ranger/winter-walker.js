@@ -7,25 +7,25 @@ registerSubclassAdapter("Ranger_Winter Walker", function (cls, lv, specs) {});
 registerSubclassSheetActions("Ranger_Winter Walker", [
   {
     "name": "Fortifying Soul",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "winter_walker_fortify",
     "minLevel": 7
   },
   {
     "name": "Chilling Retribution",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "WIS mod / LR",
+    
     "resKey": "winter_walker_retribution",
     "minLevel": 11
   },
   {
     "name": "Frozen Haunt",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "winter_walker_haunt",
     "minLevel": 15
   }
@@ -34,21 +34,21 @@ registerSubclassSheetResources("Ranger_Winter Walker", [
   {
     "key": "winter_walker_fortify",
     "name": "Fortifying Soul",
-    "icon": "heart",
+    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "winter_walker_retribution",
     "name": "Chilling Retribution",
-    "icon": "zap",
+    
     "recharge": "LR",
     "max": "abilityMod:wis", "minMax": 1
   },
   {
     "key": "winter_walker_haunt",
     "name": "Frozen Haunt",
-    "icon": "eye-off",
+    
     "recharge": "LR",
     "max": () => 1
   }

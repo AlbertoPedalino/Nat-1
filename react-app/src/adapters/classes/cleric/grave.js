@@ -15,25 +15,25 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Cleric_Grave', [
     {
       name: 'Path to the Grave',
-      icon: 'skull',
+      
       cat: 'bonus',
-      uses: '1 Channel',
+      
       resKey: 'channel_div',
       minLevel: 3,
     },
     {
       name: "Sentinel at Death's Door",
-      icon: 'shield',
+      
       cat: 'reaction',
-      uses: 'WIS mod / LR',
+      
       resKey: 'grave_sentinel',
       minLevel: 6,
     },
     {
       name: 'Keeper of Souls',
-      icon: 'heart',
+      
       cat: 'special',
-      uses: '1 / SR-LR',
+      
       resKey: 'grave_keeper',
       minLevel: 17,
     },
@@ -43,7 +43,7 @@ export default function install(registry, context = {}) {
     {
       key: 'grave_sentinel',
       name: "Sentinel at Death's Door",
-      icon: 'shield',
+      
       recharge: 'LR',
       minLevel: 6,
       max: 'abilityMod:wis', minMax: 1,
@@ -51,7 +51,7 @@ export default function install(registry, context = {}) {
     {
       key: 'grave_keeper',
       name: 'Keeper of Souls',
-      icon: 'heart',
+      
       recharge: 'SR+LR',
       minLevel: 17,
       max: 1,

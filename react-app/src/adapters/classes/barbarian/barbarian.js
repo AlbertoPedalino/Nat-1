@@ -58,9 +58,9 @@ registerClassSheetEffects("Barbarian", [
 registerClassSheetActions("Barbarian", [
   {
     "name": "Rage",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "2+ / LR (+1 SR)",
+    
     "resKey": "rage",
     "_toggleKey": "rage",
     "_toggleCondition": function (ctx) {
@@ -73,40 +73,40 @@ registerClassSheetActions("Barbarian", [
   },
   {
     "name": "Reckless Attack",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "Unlimited",
+    
     "minLevel": 2
   },
   {
     "name": "Brutal Strike",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "While Raging",
+    
     "minLevel": 9,
     rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }]
   },
   {
     "name": "Improved Brutal Strike",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "While Raging",
+    
     "minLevel": 13,
     rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }]
   },
   {
     "name": "Brutal Strike (lv17 upgrade)",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "While Raging",
+    
     "minLevel": 17,
     rollers: [{ kind: 'damage', formula: "2d10", label: "+2d10" }]
   },
   {
     "name": "Relentless Rage",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "DC 10+ CON",
+    
     "minLevel": 11
   }
 ]);
@@ -114,7 +114,7 @@ registerClassSheetResources("Barbarian", [
   {
     "key": "rage",
     "name": "Rage",
-    "icon": "angry",
+    
     "recharge": "LR",
     "max": (lv)=>lv>=20?Infinity:lv>=17?6:lv>=12?5:lv>=6?4:lv>=3?3:2,
     "srRecover": 1

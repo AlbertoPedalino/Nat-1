@@ -50,25 +50,25 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Artificer_Reanimator', [
     {
       name: 'Reanimated Companion',
-      icon: 'skull',
+      
       cat: 'action',
-      uses: '1 / LR',
+      
       resKey: 'reanimator_companion',
       minLevel: 3,
     },
     {
       name: 'Jolt to Life',
-      icon: 'zap',
+      
       cat: 'special',
-      uses: 'INT mod / LR',
+      
       resKey: 'reanimator_jolt',
       minLevel: 3,
     },
     {
       name: 'Life Transfer',
-      icon: 'heart',
+      
       cat: 'reaction',
-      uses: 'Special',
+      
       minLevel: 15,
     },
   ]);
@@ -77,7 +77,7 @@ export default function install(registry, context = {}) {
     {
       key: 'reanimator_companion',
       name: 'Reanimated Companion',
-      icon: 'skull',
+      
       recharge: 'LR',
       minLevel: 3,
       max: 1,
@@ -85,7 +85,7 @@ export default function install(registry, context = {}) {
     {
       key: 'reanimator_jolt',
       name: 'Jolt to Life',
-      icon: 'zap',
+      
       recharge: 'LR',
       minLevel: 3,
       max: 'abilityMod:int', minMax: 1,

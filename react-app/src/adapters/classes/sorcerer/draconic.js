@@ -29,17 +29,17 @@ registerSubclassAdapter("Sorcerer_Draconic", function (cls, lv, specs) {
 registerSubclassSheetActions("Sorcerer_Draconic", [
   {
     "name": "Dragon Wings",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1 / LR",
+    
     "resKey": "draconic_wings",
     "minLevel": 14
   },
   {
     "name": "Dragon Companion",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR (free slot)",
+    
     "resKey": "draconic_companion",
     "minLevel": 18
   }
@@ -48,14 +48,14 @@ registerSubclassSheetResources("Sorcerer_Draconic", [
   {
     "key": "draconic_wings",
     "name": "Dragon Wings",
-    "icon": "feather",
+    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "draconic_companion",
     "name": "Dragon Companion (free cast)",
-    "icon": "star",
+    
     "recharge": "LR",
     "max": () => 1
   }

@@ -27,9 +27,9 @@ registerSubclassAdapter("Fighter_Banneret", function (cls, lv, specs) {
 registerSubclassSheetActions("Fighter_Banneret", [
   {
     "name": "Shared Resilience",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "1 Indomitable",
+    
     "minLevel": 15
   }
 ]);

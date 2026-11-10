@@ -26,9 +26,9 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Dhampir_RHW', [
     {
       name: 'Vampiric Bite',
-      icon: 'fang',
+      
       cat: 'special',
-      uses: 'PB / LR',
+      
       resKey: 'dhampir_bite',
       minLevel: 1,
       rollers: [{ kind: 'damage', formula: ({ character }) => biteDamageFormula(character), label: ({ formula }) => `${formula} piercing` }],
@@ -40,7 +40,7 @@ export default function install(registry, context = {}) {
     {
       key: 'dhampir_bite',
       name: 'Vampiric Bite (Empower)',
-      icon: 'fang',
+      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

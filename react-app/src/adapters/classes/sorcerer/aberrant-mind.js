@@ -12,32 +12,32 @@ registerSubclassAdapter("Sorcerer_Aberrant Mind", function (cls, lv, specs) {});
 registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
   {
     "name": "Telepathic Speech",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "At will",
+    
     "minLevel": 3
   },
   {
     "name": "Psionic Sorcery",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "Sorcery Points",
+    
     "resKey": "sorc_pts",
     "minLevel": 6
   },
   {
     "name": "Revelation in Flesh",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1+ Sorcery Points",
+    
     "resKey": "sorc_pts",
     "minLevel": 14
   },
   {
     "name": "Warping Implosion",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "aberrant_implosion",
     "minLevel": 18,
     rollers: [{ kind: 'damage', formula: "3d10", label: ({ formula }) => `${formula} force` }]
@@ -47,7 +47,7 @@ registerSubclassSheetResources("Sorcerer_Aberrant Mind", [
   {
     "key": "aberrant_implosion",
     "name": "Warping Implosion",
-    "icon": "zap",
+    
     "recharge": "LR",
     "max": () => 1
   }

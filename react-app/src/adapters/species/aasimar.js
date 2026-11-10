@@ -30,18 +30,18 @@ registerSpeciesSheetCommonChoiceMeta("Aasimar_XPHB", {
 registerSpeciesSheetActions("Aasimar_XPHB", [
   {
     name: 'Healing Hands',
-    icon: 'cross',
+    
     cat: 'action',
-    uses: '1 / LR',
+    
     resKey: 'aasimar_healing_hands',
     rollers: [{ kind: 'heal', formula: ({ character }) => `${getProficiencyBonus(character)}d4` }],
     minLevel: 1,
   },
   {
     name: 'Celestial Revelation',
-    icon: '',
+    
     cat: 'bonus',
-    uses: '1 / LR',
+    
     resKey: 'aasimar_revelation',
     minLevel: 3,
   },
@@ -50,14 +50,14 @@ registerSpeciesSheetResources("Aasimar_XPHB", [
   {
     key: 'aasimar_healing_hands',
     name: 'Healing Hands',
-    icon: 'cross',
+    
     recharge: 'LR',
     max: 1,
   },
   {
     key: 'aasimar_revelation',
     name: 'Celestial Revelation',
-    icon: 'sparkles',
+    
     recharge: 'LR',
     max: 1,
   },

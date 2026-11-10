@@ -14,9 +14,9 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Warlock_Undead', [
     {
       name: 'Form of Dread',
-      icon: 'skull',
+      
       cat: 'bonus',
-      uses: 'CHA mod / LR',
+      
       resKey: 'undead_form_of_dread',
       minLevel: 3,
       // Facsimile of Life: 1d10 + Warlock level Temp HP, as a clickable roller.
@@ -24,9 +24,9 @@ export default function install(registry, context = {}) {
     },
     {
       name: 'Unholy Resuscitation',
-      icon: 'skull',
+      
       cat: 'special',
-      uses: '1 / SR-LR',
+      
       resKey: 'undead_resuscitation',
       minLevel: 10,
       rollers: [{ kind: 'damage', formula: '2d10', label: ({ formula }) => `${formula} + CHA necrotic` }],
@@ -37,7 +37,7 @@ export default function install(registry, context = {}) {
     {
       key: 'undead_form_of_dread',
       name: 'Form of Dread',
-      icon: 'skull',
+      
       recharge: 'LR',
       minLevel: 3,
       max: 'abilityMod:cha', minMax: 1,
@@ -45,7 +45,7 @@ export default function install(registry, context = {}) {
     {
       key: 'undead_resuscitation',
       name: 'Unholy Resuscitation',
-      icon: 'skull',
+      
       recharge: 'SR+LR',
       minLevel: 10,
       max: 1,

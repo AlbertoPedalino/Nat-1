@@ -66,30 +66,30 @@ registerClassAdapter("Wizard", function (cls, lv, specs) {
 registerClassSheetActions("Wizard", [
   {
     "name": "Arcane Recovery",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "arc_recovery"
   },
   {
     "name": "Memorize Spell",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1 / SR",
+    
     "minLevel": 5
   },
   {
     "name": "Spell Mastery",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "At will",
+    
     "minLevel": 18
   },
   {
     "name": "Signature Spells",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / SR each",
+    
     "minLevel": 20
   }
 ]);
@@ -97,7 +97,7 @@ registerClassSheetResources("Wizard", [
   {
     "key": "arc_recovery",
     "name": "Arcane Recovery",
-    "icon": "book-open",
+    
     "recharge": "LR",
     "max": ()=>1
   }

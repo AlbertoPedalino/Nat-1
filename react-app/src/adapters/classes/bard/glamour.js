@@ -11,16 +11,16 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Bard_Glamour", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Bard_Glamour", [
-  { name: "Beguiling Magic", icon: "", cat: "bonus", uses: "1 / LR", resKey: "glamour_beguiling", minLevel: 3 },
-  { name: "Mantle of Inspiration", icon: "", cat: "bonus", uses: "With Bardic Insp.", minLevel: 3 },
-  { name: "Mantle of Majesty", icon: "", cat: "bonus", uses: "1 / LR", resKey: "glamour_majesty", minLevel: 6 },
-  { name: "Unbreakable Majesty", icon: "", cat: "bonus", uses: "1 / SR", resKey: "glamour_unbreakable", minLevel: 14 },
+  { name: "Beguiling Magic", cat: "bonus", resKey: "glamour_beguiling", minLevel: 3 },
+  { name: "Mantle of Inspiration", cat: "bonus", minLevel: 3 },
+  { name: "Mantle of Majesty", cat: "bonus", resKey: "glamour_majesty", minLevel: 6 },
+  { name: "Unbreakable Majesty", cat: "bonus", resKey: "glamour_unbreakable", minLevel: 14 },
 ]);
 
 registerSubclassSheetResources("Bard_Glamour", [
-  { key: "glamour_beguiling",  name: "Beguiling Magic",   icon: "sparkles", recharge: "LR", minLevel: 3, max: 1 },
-  { key: "glamour_majesty",    name: "Mantle of Majesty",  icon: "crown",    recharge: "LR", minLevel: 6, max: 1 },
-  { key: "glamour_unbreakable",name: "Unbreakable Majesty",icon: "shield",   recharge: "SR", minLevel: 14, max: 1 },
+  { key: "glamour_beguiling",  name: "Beguiling Magic",   recharge: "LR", minLevel: 3, max: 1 },
+  { key: "glamour_majesty",    name: "Mantle of Majesty",  recharge: "LR", minLevel: 6, max: 1 },
+  { key: "glamour_unbreakable",name: "Unbreakable Majesty",recharge: "SR", minLevel: 14, max: 1 },
 ]);
 registerSubclassRuntimeConfig("Bard_Glamour", {
   spellcasting: {

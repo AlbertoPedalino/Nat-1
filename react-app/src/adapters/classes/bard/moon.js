@@ -33,13 +33,13 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions("Bard_Moon", [
-    { name: "Moon's Inspiration", icon: "", cat: "bonus", uses: "With Bardic Insp.", minLevel: 3 },
-    { name: "Blessing of Moonlight", icon: "", cat: "action", uses: "1 / LR", resKey: "moon_blessing", minLevel: 6,
+    { name: "Moon's Inspiration", cat: "bonus", minLevel: 3 },
+    { name: "Blessing of Moonlight", cat: "action", resKey: "moon_blessing", minLevel: 6,
       rollers: [{ kind: 'heal', formula: "2d4" }] },
   ]);
 
   registerSubclassSheetResources("Bard_Moon", [
-    { key: "moon_blessing", name: "Blessing of Moonlight", icon: "moon", recharge: "LR", actionName: "Blessing of Moonlight", minLevel: 6, max: 1 },
+    { key: "moon_blessing", name: "Blessing of Moonlight", recharge: "LR", actionName: "Blessing of Moonlight", minLevel: 6, max: 1 },
   ]);
 
   registerSubclassSheetProficiencies("Bard_Moon", [

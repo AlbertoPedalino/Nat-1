@@ -1,6 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -8,7 +7,6 @@ export default function install(registry, context = {}) {
     registerSubclassSheetActions,
     registerSubclassSheetEffects,
     registerSubclassRuntimeConfig,
-    registerSubclassSheetFeatureFilter,
     registerSubclassSheetSpellModifiers,
   } = createAdapterBindings(registry, context);
 // Life Domain (XPHB): tutte le feature sono passive, nessuna scelta di build.
@@ -17,33 +15,6 @@ export default function install(registry, context = {}) {
 // L17: Supreme Healing
 registerSubclassAdapter("Cleric_Life", function (cls, lv, specs) {
   // nessuna spec
-});
-
-registerSubclassSheetFeatureFilter("Cleric_Life", function (ctx, features) {
-  const out = Array.isArray(features) ? features.map(f => ({ ...f })) : [];
-  const classLevel = Number(ctx?.classLevel || ctx?.character?.classLevel || ctx?.character?.level || 1);
-  if (classLevel < 3) return out;
-
-  const desc =
-    "When a spell you cast with a spell slot restores Hit Points to a creature, that creature regains additional Hit Points on the turn you cast the spell. The additional Hit Points equal 2 plus the spell slot's level.";
-
-  const idx = out.findIndex(f => matchKey(f?.name) === "discipleoflife");
-  if (idx >= 0) {
-    const cur = out[idx] || {};
-    out[idx] = {
-      ...cur,
-      level: Number(cur.level || 3),
-      entries: Array.isArray(cur.entries) && cur.entries.length ? cur.entries : [desc],
-    };
-    return out;
-  }
-
-  out.push({
-    name: "Disciple of Life",
-    level: 3,
-    entries: [desc],
-  });
-  return out;
 });
 
 registerSubclassSheetSpellModifiers("Cleric_Life", [
@@ -67,9 +38,9 @@ registerSubclassSheetSpellModifiers("Cleric_Life", [
 ]);
 
 registerSubclassSheetActions("Cleric_Life", [
-  { name: "Preserve Life", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
+  { name: "Preserve Life", cat: "action", resKey: "channel_div",
     inlinePills: ({ ownerLevel }) => [
-      { icon: "heart", label: "Pool", value: `${Math.max(1, Number(ownerLevel || 1) * 5)} HP` }
+      { label: "Pool", value: `${Math.max(1, Number(ownerLevel || 1) * 5)} HP` }
     ] },
 ]);
 registerSubclassRuntimeConfig("Cleric_Life", {

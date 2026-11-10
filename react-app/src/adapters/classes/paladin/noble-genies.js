@@ -24,32 +24,32 @@ registerSubclassAdapter("Paladin_Noble Genies", function (cls, lv, specs) {
 registerSubclassSheetActions("Paladin_Noble Genies", [
   {
     "name": "Elemental Smite",
-    "icon": "flame",
+    
     "cat": "action",
-    "uses": "1 Channel",
+    
     "resKey": "paladin_channel_div",
     "minLevel": 3,
     "subOptions": [
-      { "name": "Dao's Crush", "icon": "hand", "desc": "The target is Grappled (escape DC = spell save DC) and Restrained while Grappled." },
-      { "name": "Djinni's Escape", "icon": "move", "desc": "Teleport up to 30 ft to an unoccupied space you can see. Until end of your next turn you are semi-incorporeal (Resistance to Bludgeoning/Piercing/Slashing; immune to Grappled/Prone/Restrained)." },
-      { "name": "Efreeti's Fury", "icon": "flame", "desc": "Deal an extra 2d4 Fire damage to the target, and deal 2d4 Fire damage to one creature of your choice within 30 ft of the target.", "rollers": [{ kind: 'damage', formula: "2d4", label: "2d4 fire" }] },
-      { "name": "Marid's Surge", "icon": "waves", "desc": "Each creature within a 10-ft Emanation of the target must succeed on a STR saving throw (spell save DC) or be pushed up to 15 ft from the target and knocked Prone." }
+      { "name": "Dao's Crush", "desc": "The target is Grappled (escape DC = spell save DC) and Restrained while Grappled." },
+      { "name": "Djinni's Escape", "desc": "Teleport up to 30 ft to an unoccupied space you can see. Until end of your next turn you are semi-incorporeal (Resistance to Bludgeoning/Piercing/Slashing; immune to Grappled/Prone/Restrained)." },
+      { "name": "Efreeti's Fury", "desc": "Deal an extra 2d4 Fire damage to the target, and deal 2d4 Fire damage to one creature of your choice within 30 ft of the target.", "rollers": [{ kind: 'damage', formula: "2d4", label: "2d4 fire" }] },
+      { "name": "Marid's Surge", "desc": "Each creature within a 10-ft Emanation of the target must succeed on a STR saving throw (spell save DC) or be pushed up to 15 ft from the target and knocked Prone." }
     ]
   },
   {
     "name": "Elemental Rebuke",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "CHA mod / LR",
+    
     "resKey": "noble_genies_rebuke",
     "minLevel": 15,
     rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `${formula} + CHA elemental` }]
   },
   {
     "name": "Noble Scion",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1 / LR",
+    
     "resKey": "noble_genies_scion",
     "minLevel": 20
   }
@@ -58,7 +58,7 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
   {
     "key": "noble_genies_rebuke",
     "name": "Elemental Rebuke",
-    "icon": "zap",
+    
     "recharge": "LR",
     "minLevel": 15,
     "max": "abilityMod:cha", "minMax": 1
@@ -66,7 +66,7 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
   {
     "key": "noble_genies_scion",
     "name": "Noble Scion",
-    "icon": "crown",
+    
     "recharge": "LR",
     "minLevel": 20,
     "max": () => 1

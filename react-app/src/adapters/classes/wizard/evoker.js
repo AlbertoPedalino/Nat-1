@@ -14,10 +14,10 @@ registerSubclassAdapter("Wizard_Evoker", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Wizard_Evoker", [
-  { name: "Overchannel", icon: "", cat: "action", uses: "1st use free / LR", resKey: "overchannel", minLevel: 14 },
+  { name: "Overchannel", cat: "action", resKey: "overchannel", minLevel: 14 },
 ]);
 registerSubclassSheetResources("Wizard_Evoker", [
-  { key: "overchannel", name: "Overchannel", icon: "zap", recharge: "LR", max: () => 1 },
+  { key: "overchannel", name: "Overchannel", recharge: "LR", max: () => 1 },
 ]);
 
 

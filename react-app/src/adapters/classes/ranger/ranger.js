@@ -71,17 +71,17 @@ registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Ranger", [
   {
     "name": "Tireless",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "WIS mod / LR",
+    
     "resKey": "ranger_tireless",
     "minLevel": 10
   },
   {
     "name": "Nature's Veil",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "WIS mod / LR",
+    
     "resKey": "natures_veil",
     "minLevel": 14
   }
@@ -90,7 +90,7 @@ registerClassSheetResources("Ranger", [
   {
     "key": "ranger_tireless",
     "name": "Tireless",
-    "icon": "heart",
+    
     "recharge": "LR",
     "minLevel": 10,
     "max": "abilityMod:wis", "minMax": 1
@@ -98,7 +98,7 @@ registerClassSheetResources("Ranger", [
   {
     "key": "natures_veil",
     "name": "Nature's Veil",
-    "icon": "eye-off",
+    
     "recharge": "LR",
     "minLevel": 14,
     "max": "abilityMod:wis", "minMax": 1

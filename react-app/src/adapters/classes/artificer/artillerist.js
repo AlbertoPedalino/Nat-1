@@ -27,9 +27,9 @@ registerSubclassAdapter("Artificer_Artillerist", function (cls, lv, specs, ctx =
 registerSubclassSheetActions("Artificer_Artillerist", [
   {
     "name": "Eldritch Cannon",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "eldritch_cannon",
     "minLevel": 3,
     detailType: 'eldritchCannon',
@@ -43,7 +43,7 @@ registerSubclassSheetResources("Artificer_Artillerist", [
   {
     "key": "eldritch_cannon",
     "name": "Eldritch Cannon",
-    "icon": "crosshair",
+    
     "recharge": "LR",
     "max": () => 1
   }

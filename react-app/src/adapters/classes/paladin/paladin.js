@@ -40,32 +40,32 @@ registerClassAdapter("Paladin", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Paladin", [
   {
     "name": "Divine Sense",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1 Channel",
+    
     "resKey": "paladin_channel_div",
     "minLevel": 3
   },
   {
     "name": "Lay on Hands",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "Pool / LR",
+    
     "resKey": "lay_on_hands"
   },
   {
     "name": "Abjure Foes",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 Channel",
+    
     "resKey": "paladin_channel_div",
     "minLevel": 9
   },
   {
     "name": "Restoring Touch",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Pool / LR",
+    
     "resKey": "lay_on_hands",
     "minLevel": 14
   }
@@ -74,7 +74,7 @@ registerClassSheetResources("Paladin", [
   {
     "key": "lay_on_hands",
     "name": "Lay on Hands",
-    "icon": "hands",
+    
     "recharge": "LR",
     "max": (lv)=>lv*5,
     "pool": true,
@@ -84,7 +84,7 @@ registerClassSheetResources("Paladin", [
     "key": "paladin_channel_div",
     "name": "Channel Divinity",
     "actionGroup": "Channel Divinity",
-    "icon": "sparkles",
+    
     "recharge": "SR",
     "max": (lv)=>lv>=11?3:lv>=3?2:0
   }

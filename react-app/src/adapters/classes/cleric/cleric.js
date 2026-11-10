@@ -99,17 +99,17 @@ registerClassSheetProficiencies("Cleric", [
 registerClassSheetActions("Cleric", [
   {
     "name": "Turn Undead",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 Channel",
+    
     "resKey": "channel_div",
     "minLevel": 2
   },
   {
     "name": "Divine Spark",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1+ Channel",
+    
     "resKey": "channel_div",
     "minLevel": 2,
     "rollers": [
@@ -137,9 +137,9 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Sear Undead",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "With Turn Undead",
+    
     "resKey": "channel_div",
     "minLevel": 5,
     rollers: [{ kind: 'damage', formula: ({ character }) => {
@@ -149,17 +149,17 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Divine Intervention",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "divine_intervention",
     "minLevel": 10
   },
   {
     "name": "Blessed Strikes: Divine Strike",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "Once/turn",
+    
     "minLevel": 7,
     "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Divine Strike"),
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
@@ -173,24 +173,24 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Blessed Strikes: Potent Spellcasting",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Cantrip damage",
+    
     "minLevel": 7,
     "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Potent Spellcasting")
   },
   {
     "name": "Improved Blessed Strikes",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Reminder",
+    
     "minLevel": 14
   },
   {
     "name": "Greater Divine Intervention",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "divine_intervention",
     "minLevel": 20
   }
@@ -235,14 +235,14 @@ registerClassSheetResources("Cleric", [
     "key": "channel_div",
     "name": "Channel Divinity",
     "actionGroup": "Channel Divinity",
-    "icon": "sun",
+    
     "recharge": "SR",
     "max": (lv)=>lv>=18?4:lv>=6?3:2
   },
   {
     "key": "divine_intervention",
     "name": "Divine Intervention",
-    "icon": "hands",
+    
     "recharge": "LR",
     minLevel: 10, "max": 1
   }

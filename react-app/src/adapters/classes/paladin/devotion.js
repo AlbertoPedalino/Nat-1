@@ -13,15 +13,15 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Paladin_Devotion", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Paladin_Devotion", [
-  { name: "Sacred Weapon", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div" },
-  { name: "Holy Nimbus", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "devotion_holy_nimbus", minLevel: 20,
+  { name: "Sacred Weapon", cat: "action", resKey: "paladin_channel_div" },
+  { name: "Holy Nimbus", cat: "bonus", resKey: "devotion_holy_nimbus", minLevel: 20,
     inlinePills: ({ ownerLevel, character }) => {
       const cha = Number(finalAbilityModifier(character, "cha") || 0);
-      return [{ icon: "sun", label: "Radiant/turn", value: cha + getProficiencyBonus(character) }];
+      return [{ label: "Radiant/turn", value: cha + getProficiencyBonus(character) }];
     } },
 ]);
 registerSubclassSheetResources("Paladin_Devotion", [
-  { key: "devotion_holy_nimbus", name: "Holy Nimbus", icon: "sun", recharge: "LR", max: () => 1 },
+  { key: "devotion_holy_nimbus", name: "Holy Nimbus", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassRuntimeConfig("Paladin_Devotion", {

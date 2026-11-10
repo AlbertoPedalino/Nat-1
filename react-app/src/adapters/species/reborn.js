@@ -19,9 +19,9 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Reborn_RHW', [
     {
       name: 'Knowledge from a Past Life',
-      icon: 'brain',
+      
       cat: 'special',
-      uses: 'PB / LR',
+      
       resKey: 'reborn_knowledge',
       minLevel: 1,
     },
@@ -31,7 +31,7 @@ export default function install(registry, context = {}) {
     {
       key: 'reborn_knowledge',
       name: 'Knowledge from a Past Life',
-      icon: 'brain',
+      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

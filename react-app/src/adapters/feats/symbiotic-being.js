@@ -8,9 +8,9 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Symbiotic Being', [
     {
       name: 'Sustained Symbiosis',
-      icon: 'heart',
+      
       cat: 'reaction',
-      uses: 'PB / LR',
+      
       resKey: 'symbiotic_sustain',
     },
   ]);
@@ -19,7 +19,7 @@ export default function install(registry, context = {}) {
     {
       key: 'symbiotic_sustain',
       name: 'Sustained Symbiosis',
-      icon: 'heart',
+      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

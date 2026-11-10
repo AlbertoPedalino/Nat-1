@@ -52,9 +52,9 @@ registerSpeciesSheetCommonChoiceMeta("Dragonborn_XPHB", {
 registerSpeciesSheetActions("Dragonborn_XPHB", [
   {
     name: 'Breath Weapon',
-    icon: '',
+    
     cat: 'action',
-    uses: 'PB / LR',
+    
     resKey: 'dragonborn_breath',
     rollers: [{ kind: 'damage', formula: ({ character }) => {
       const lv = Number(character?.level || 1);
@@ -64,15 +64,15 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
     inlinePills: ({ character }) => {
       const pb = getProficiencyBonus(character);
       const conMod = finalAbilityModifier(character, 'con');
-      return [{ icon: 'shield', label: 'Save DC', value: 8 + pb + conMod }];
+      return [{ label: 'Save DC', value: 8 + pb + conMod }];
     },
     minLevel: 1,
   },
   {
     name: 'Draconic Flight',
-    icon: '',
+    
     cat: 'bonus',
-    uses: '1 / LR',
+    
     resKey: 'dragonborn_flight',
     minLevel: 5,
   },
@@ -81,14 +81,14 @@ registerSpeciesSheetResources("Dragonborn_XPHB", [
   {
     key: 'dragonborn_breath',
     name: 'Breath Weapon',
-    icon: 'flame',
+    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },
   {
     key: 'dragonborn_flight',
     name: 'Draconic Flight',
-    icon: 'wing',
+    
     recharge: 'LR',
     minLevel: 5,
     max: 1,

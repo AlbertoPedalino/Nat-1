@@ -13,12 +13,12 @@ registerSubclassAdapter("Wizard_Diviner", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Wizard_Diviner", [
-  { name: "Portent", icon: "", cat: "action", uses: "2–3 / LR", resKey: "portent", minLevel: 3 },
-  { name: "The Third Eye", icon: "", cat: "bonus", uses: "1 / SR+LR", resKey: "third_eye", minLevel: 10 },
+  { name: "Portent", cat: "action", resKey: "portent", minLevel: 3 },
+  { name: "The Third Eye", cat: "bonus", resKey: "third_eye", minLevel: 10 },
 ]);
 registerSubclassSheetResources("Wizard_Diviner", [
-  { key: "portent",    name: "Portent",     icon: "eye",  recharge: "LR", max: (lv) => lv >= 14 ? 3 : 2 },
-  { key: "third_eye",  name: "The Third Eye", icon: "eye", recharge: "SR", max: () => 1 },
+  { key: "portent",    name: "Portent",     recharge: "LR", max: (lv) => lv >= 14 ? 3 : 2 },
+  { key: "third_eye",  name: "The Third Eye", recharge: "SR", max: () => 1 },
 ]);
 
 registerSubclassSheetEffects("Wizard_Diviner", [

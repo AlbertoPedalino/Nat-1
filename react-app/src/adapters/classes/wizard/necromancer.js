@@ -28,12 +28,12 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Necromancer', [
-    { name: 'Harvest Undead', icon: 'heart', cat: 'reaction', uses: 'Controlled Undead', minLevel: 10 },
-    { name: 'Bolster Undead', icon: 'shield-plus', cat: 'bonus', uses: '1 / LR', resKey: 'necromancer_bolster', minLevel: 14 },
-    { name: 'Extinguish Undead', icon: 'burst', cat: 'special', uses: 'Special', minLevel: 14 },
+    { name: 'Harvest Undead', cat: 'reaction', minLevel: 10 },
+    { name: 'Bolster Undead', cat: 'bonus', resKey: 'necromancer_bolster', minLevel: 14 },
+    { name: 'Extinguish Undead', cat: 'special', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Necromancer', [
-    { key: 'necromancer_bolster', name: 'Bolster Undead', icon: 'shield-plus', recharge: 'LR', minLevel: 14, max: 1 },
+    { key: 'necromancer_bolster', name: 'Bolster Undead', recharge: 'LR', minLevel: 14, max: 1 },
   ]);
   registerSubclassSheetEffects('Wizard_Necromancer', [
     { type: 'resistance', damageTypes: ['Necrotic'], minLevel: 3, note: 'Necromancy Spellbook' },

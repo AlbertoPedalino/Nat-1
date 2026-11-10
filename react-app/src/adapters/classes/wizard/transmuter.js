@@ -37,11 +37,11 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Transmuter', [
-    { name: "Transmuter's Stone", icon: 'gem', cat: 'special', uses: 'On Long Rest', minLevel: 3 },
-    { name: 'Empowered Transmutation', icon: 'sparkles', cat: 'special', uses: 'INT mod / LR', resKey: 'transmuter_empowered', minLevel: 6 },
-    { name: 'Master Transmuter', icon: 'gem', cat: 'action', uses: 'Consume stone', minLevel: 14 },
+    { name: "Transmuter's Stone", cat: 'special', minLevel: 3 },
+    { name: 'Empowered Transmutation', cat: 'special', resKey: 'transmuter_empowered', minLevel: 6 },
+    { name: 'Master Transmuter', cat: 'action', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Transmuter', [
-    { key: 'transmuter_empowered', name: 'Empowered Transmutation', icon: 'sparkles', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
+    { key: 'transmuter_empowered', name: 'Empowered Transmutation', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
   ]);
 }

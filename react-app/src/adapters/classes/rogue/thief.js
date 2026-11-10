@@ -7,16 +7,16 @@ registerSubclassAdapter("Rogue_Thief", function (cls, lv, specs) {});
 registerSubclassSheetActions("Rogue_Thief", [
   {
     "name": "Fast Hands",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "Unlimited",
+    
     "minLevel": 3
   },
   {
     "name": "Supreme Sneak",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Cunning Strike option",
+    
     "minLevel": 9
   }
 ]);

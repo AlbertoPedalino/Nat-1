@@ -5,7 +5,6 @@ import {
   REPLICATE_GENERAL_CHOICE_KEY,
   isReplicateArmorItem,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
@@ -18,7 +17,6 @@ export default function install(registry, context = {}) {
     registerSubclassSheetResources,
     registerSubclassSheetEffects,
     registerItemFlagDef,
-    registerSubclassSheetFeatureFilter,
     registerSubclassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Artificer_Armorer", function (cls, lv, specs, ctx = {}) {
@@ -65,18 +63,18 @@ registerSubclassAdapter("Artificer_Armorer", function (cls, lv, specs, ctx = {})
 registerSubclassSheetActions("Artificer_Armorer", [
   {
     "name": "Arcane Armor",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "At will",
+    
     "minLevel": 3,
     "choiceKey": "armorer_model",
     "choiceLabel": "Arcane Armor Model"
   },
   {
     "name": "Thunder Pulse",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "At will",
+    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -92,18 +90,18 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Defensive Field",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "At will (while Bloodied)",
+    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "name": "Lightning Launcher",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "At will",
+    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -119,9 +117,9 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Force Demolisher",
-    "icon": "",
+    
     "cat": "attack",
-    "uses": "At will",
+    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -137,9 +135,9 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Giant Stature",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "INT mod / LR",
+    
     "resKey": "armorer_giant_stature",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
@@ -147,27 +145,27 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Perfected Armor (Guardian)",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "INT mod / LR",
+    
     "resKey": "perfected_guardian",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" }
   },
   {
     "name": "Perfected Armor (Infiltrator)",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "INT mod / LR",
+    
     "resKey": "perfected_infiltrator",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" }
   },
   {
     "name": "Perfected Armor (Dreadnaught)",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "INT mod / LR",
+    
     "resKey": "armorer_giant_stature",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" }
@@ -177,7 +175,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "armorer_giant_stature",
     "name": "Giant Stature",
-    "icon": "maximize",
+    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
@@ -186,7 +184,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "perfected_guardian",
     "name": "Perfected Guardian Pull",
-    "icon": "magnet",
+    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
@@ -195,7 +193,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "perfected_infiltrator",
     "name": "Infiltrator Fly",
-    "icon": "feather",
+    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
@@ -210,7 +208,7 @@ registerItemFlagDef("arcaneArmor", {
   label: "Arcane Armor",
   activeLabel: "Arcane",
   tone: "#58b879",
-  icon: "shield",
+  
   types: ['LA','MA','HA'],
   maxCount: 1,
   requireClass: "Artificer",
@@ -226,27 +224,5 @@ registerSubclassSheetEffects("Artificer_Armorer", [
     requiredChoice: { key: "armorer_model", value: "Infiltrator" },
     requiredItemFlag: { flag: "arcaneArmor", itemType: ["LA", "MA", "HA"], equipped: true }, note: "Dampening Field" },
 ]);
-registerSubclassSheetFeatureFilter("Artificer_Armorer", (ctx, features) => {
-  const prefix = String(ctx?.choicePrefix || "");
-  const choiceKey = prefix + "armorer_model";
-  const raw = ctx?.choices?.[choiceKey];
-  const first = Array.isArray(raw) ? raw[0] : raw;
-  const nk = matchKey(first);
-  let selected = "";
-  if (nk === "dreadnaught" || nk.includes("dreadnought")) selected = "dreadnought";
-  else if (nk.includes("guardian")) selected = "guardian";
-  else if (nk.includes("infiltrator")) selected = "infiltrator";
-  if (!selected) return features || [];
-  return (features || []).filter(f => {
-    const fk = matchKey(f?.name);
-    let tag = "";
-    if (fk === "dreadnaught" || fk.includes("dreadnought")) tag = "dreadnought";
-    else if (fk.includes("guardian")) tag = "guardian";
-    else if (fk.includes("infiltrator")) tag = "infiltrator";
-    if (!tag) return true;
-    return tag === selected;
-  });
-});
-
 }
 

@@ -25,18 +25,18 @@ registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Warlock_Great Old One", [
-  { name: "Awakened Mind", icon: "brain", cat: "bonus", uses: "CHA mod / LR", resKey: "goo_awakened", minLevel: 3,
+  { name: "Awakened Mind", cat: "bonus", resKey: "goo_awakened", minLevel: 3,
     inlinePills: ({ ownerLevel, character }) => {
       const lv = Number(ownerLevel || 1);
       const cha = Number(finalAbilityModifier(character, "cha") || 0);
       return [
-        { icon: "radio", label: "Range", value: Math.max(1, cha) + " mi" },
-        { icon: "clock", label: "Duration", value: lv + " min" },
+        { label: "Range", value: Math.max(1, cha) + " mi" },
+        { label: "Duration", value: lv + " min" },
       ];
     } },
-  { name: "Clairvoyant Combatant", icon: "eye", cat: "action", uses: "1 / SR or Pact Magic slot", resKey: "goo_clairvoyant", minLevel: 6 },
-  { name: "Create Thrall", icon: "brain", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "goo_create_thrall", minLevel: 14,
-    inlinePills: ({ ownerLevel }) => [{ icon: "shield", label: "Aberration THP", value: Number(ownerLevel || 1) }] },
+  { name: "Clairvoyant Combatant", cat: "action", resKey: "goo_clairvoyant", minLevel: 6 },
+  { name: "Create Thrall", cat: "action", resKey: "goo_create_thrall", minLevel: 14,
+    inlinePills: ({ ownerLevel }) => [{ label: "Aberration THP", value: Number(ownerLevel || 1) }] },
 ]);
 
 registerSubclassSheetEffects("Warlock_Great Old One", [
@@ -45,10 +45,10 @@ registerSubclassSheetEffects("Warlock_Great Old One", [
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 10, note: "Thought Shield" },
 ]);
 registerSubclassSheetResources("Warlock_Great Old One", [
-  { key: "goo_awakened",   name: "Awakened Mind",        icon: "brain", recharge: "LR",
+  { key: "goo_awakened",   name: "Awakened Mind",        recharge: "LR",
     max: 'abilityMod:cha', minMax: 1 },
-  { key: "goo_clairvoyant", name: "Clairvoyant Combatant", icon: "eye",   recharge: "SR", max: () => 1 },
-  { key: "goo_create_thrall", name: "Create Thrall", icon: "brain", recharge: "LR", max: () => 1 },
+  { key: "goo_clairvoyant", name: "Clairvoyant Combatant", recharge: "SR", max: () => 1 },
+  { key: "goo_create_thrall", name: "Create Thrall", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassRuntimeConfig("Warlock_Great Old One", {

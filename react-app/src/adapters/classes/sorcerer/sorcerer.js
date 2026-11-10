@@ -36,60 +36,60 @@ registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Sorcerer", [
   {
     "name": "Innate Sorcery",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "2 / LR",
+    
     "resKey": "innate_sorcery",
     "_toggleKey": "innate_sorcery",
     "minLevel": 1
   },
   {
     "name": "Font of Magic",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Sorcery Points",
+    
     "resKey": "sorc_pts",
     "minLevel": 2
   },
   {
     "name": "Metamagic",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Sorcery Points",
+    
     "resKey": "sorc_pts",
     "minLevel": 2
   },
   {
     "name": "Sorcerous Restoration",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "sorc_restoration",
     "minLevel": 5
   },
   {
     "name": "Create Spell Slot (Font of Magic)",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Sorcery Points",
+    
     "resKey": "sorc_create_slot",
     "minLevel": 2,
     "buttonLabel": "Create Slot"
   },
   {
     "name": "Convert Spell Slot (Font of Magic)",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Spell slot",
+    
     "resKey": "sorc_convert_slot",
     "minLevel": 2,
     "buttonLabel": "Convert Slot"
   },
   {
     "name": "Sorcery Incarnate",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "2 SP",
+    
     "resKey": "sorc_pts",
     "minLevel": 7
   }
@@ -108,21 +108,21 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_restoration",
     "name": "Sorcerous Restoration",
-    "icon": "refresh-cw",
+    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "innate_sorcery",
     "name": "Innate Sorcery",
-    "icon": "sparkles",
+    
     "recharge": "LR",
     "max": () => 2
   },
   {
     "key": "sorc_pts",
     "name": "Sorcery Points",
-    "icon": "orbit",
+    
     "recharge": "LR",
     "max": (lv)=>lv,
     "pool": true
@@ -130,7 +130,7 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_create_slot",
     "name": "Create/Restore Slot",
-    "icon": "sparkles",
+    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true
@@ -138,7 +138,7 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_convert_slot",
     "name": "Convert Spell Slot",
-    "icon": "refresh-cw",
+    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true

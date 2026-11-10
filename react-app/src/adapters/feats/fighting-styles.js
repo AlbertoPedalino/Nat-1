@@ -55,14 +55,14 @@ const FIGHTING_STYLES = {
 // canonical getProficiencyBonus, so magic-item PB bonuses are included).
 const FIGHTING_STYLE_ACTIONS = {
   Protection: [
-    { name: 'Protection', cat: 'reaction', uses: 'Reaction', icon: 'shield' },
+    { name: 'Protection', cat: 'reaction', },
   ],
   Interception: [
     {
       name: 'Interception',
       cat: 'reaction',
-      uses: 'Reaction',
-      icon: 'shield',
+      
+      
       rollers: [{ kind: 'utility', formula: ({ character }) => `1d10+${getProficiencyBonus(character)}`, label: ({ character }) => `Reduce 1d10+${getProficiencyBonus(character)}`, title: 'Reduction' }],
       rollLabelPrefix: 'Interception',
     },

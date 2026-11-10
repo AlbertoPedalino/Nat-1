@@ -5,8 +5,8 @@ export default function install(registry, context = {}) {
     name: 'Arcane Overload',
     adapt: withSpellAbilityChoice,
     actions: [{
-      name: 'Power Surge', icon: 'zap', cat: 'special', uses: '1 / LR', resKey: 'arcane_overload_surge',
+      name: 'Power Surge', cat: 'special', resKey: 'arcane_overload_surge',
     }],
-    resources: [{ key: 'arcane_overload_surge', name: 'Power Surge', icon: 'zap', recharge: 'LR', max: 1 }],
+    resources: [{ key: 'arcane_overload_surge', name: 'Power Surge', recharge: 'LR', max: 1 }],
   });
 }

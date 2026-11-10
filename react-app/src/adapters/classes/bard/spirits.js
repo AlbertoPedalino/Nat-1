@@ -45,16 +45,16 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Bard_Spirits', [
     {
       name: 'Spirits from Beyond',
-      icon: 'ghost',
+      
       cat: 'bonus',
-      uses: 'Bardic Inspiration',
+      
       minLevel: 3,
     },
     {
       name: 'Spiritual Manifestation',
-      icon: 'shield',
+      
       cat: 'special',
-      uses: '1 / SR or LR',
+      
       resKey: 'spirits_manifestation_cover',
       minLevel: 6,
     },
@@ -64,7 +64,7 @@ export default function install(registry, context = {}) {
     {
       key: 'spirits_manifestation_cover',
       name: 'Spiritual Manifestation',
-      icon: 'shield',
+      
       recharge: 'SR+LR',
       minLevel: 6,
       max: 1,

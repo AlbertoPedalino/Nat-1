@@ -45,23 +45,23 @@ registerSubclassAdapter("Rogue_Arcane Trickster", function (cls, lv, specs) {
 registerSubclassSheetActions("Rogue_Arcane Trickster", [
   {
     "name": "Mage Hand Legerdemain",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "Unlimited",
+    
     "minLevel": 3
   },
   {
     "name": "Versatile Trickster",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "Cunning Strike option",
+    
     "minLevel": 13
   },
   {
     "name": "Spell Thief",
-    "icon": "",
+    
     "cat": "reaction",
-    "uses": "1 / LR",
+    
     "resKey": "spell_thief",
     "minLevel": 17
   }
@@ -70,7 +70,7 @@ registerSubclassSheetResources("Rogue_Arcane Trickster", [
   {
     "key": "spell_thief",
     "name": "Spell Thief",
-    "icon": "wand",
+    
     "recharge": "LR",
     "max": () => 1
   }

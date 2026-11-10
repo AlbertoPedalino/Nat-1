@@ -44,15 +44,15 @@ export default function install(registry, context = {}) {
     { type: 'skill', values: ['Arcana', 'Nature'], minLevel: 3 },
   ]);
   registerSubclassSheetActions('Fighter_Arcane Archer', [
-    { name: 'Arcane Shot', icon: 'target', cat: 'special', uses: 'INT mod / SR or LR', resKey: 'arcane_shot', minLevel: 3 },
-    { name: 'Curving Shot', icon: 'undo-2', cat: 'bonus', uses: 'After a miss', minLevel: 7 },
-    { name: 'Magical Ammunition', icon: 'sparkles', cat: 'action', uses: '1 / SR or LR', resKey: 'arcane_magical_ammunition', minLevel: 7 },
-    { name: 'Masterful Shots', icon: 'crosshair', cat: 'reaction', uses: 'Reaction', minLevel: 18 },
+    { name: 'Arcane Shot', cat: 'special', resKey: 'arcane_shot', minLevel: 3 },
+    { name: 'Curving Shot', cat: 'bonus', minLevel: 7 },
+    { name: 'Magical Ammunition', cat: 'action', resKey: 'arcane_magical_ammunition', minLevel: 7 },
+    { name: 'Masterful Shots', cat: 'reaction', minLevel: 18 },
   ]);
   registerSubclassSheetResources('Fighter_Arcane Archer', [
-    { key: 'arcane_shot', name: 'Arcane Shot', icon: 'target', recharge: 'SR+LR', minLevel: 3,
+    { key: 'arcane_shot', name: 'Arcane Shot', recharge: 'SR+LR', minLevel: 3,
       max: 'abilityMod:int', minMax: 1,
       die: (level) => level >= 18 ? 'd12' : level >= 15 ? 'd10' : level >= 10 ? 'd8' : 'd6', pool: true, track: 'used' },
-    { key: 'arcane_magical_ammunition', name: 'Magical Ammunition', icon: 'sparkles', recharge: 'SR+LR', minLevel: 7, max: 1 },
+    { key: 'arcane_magical_ammunition', name: 'Magical Ammunition', recharge: 'SR+LR', minLevel: 7, max: 1 },
   ]);
 }

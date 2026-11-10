@@ -14,13 +14,13 @@ registerSubclassAdapter("Wizard_Illusionist", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Wizard_Illusionist", [
-  { name: "Phantasmal Creatures", icon: "", cat: "action", uses: "2 / LR", resKey: "phantasmal_creatures", minLevel: 6 },
-  { name: "Illusory Self", icon: "", cat: "reaction", uses: "1 / SR+LR or lv2+ slot", resKey: "illusory_self", minLevel: 10 },
-  { name: "Illusory Reality", icon: "", cat: "bonus", uses: "With Illusion slot", minLevel: 14 },
+  { name: "Phantasmal Creatures", cat: "action", resKey: "phantasmal_creatures", minLevel: 6 },
+  { name: "Illusory Self", cat: "reaction", resKey: "illusory_self", minLevel: 10 },
+  { name: "Illusory Reality", cat: "bonus", minLevel: 14 },
 ]);
 registerSubclassSheetResources("Wizard_Illusionist", [
-  { key: "phantasmal_creatures", name: "Phantasmal Creatures", icon: "ghost", recharge: "LR", max: () => 2 },
-  { key: "illusory_self",        name: "Illusory Self",         icon: "user",  recharge: "SR", max: () => 1 },
+  { key: "phantasmal_creatures", name: "Phantasmal Creatures", recharge: "LR", max: () => 2 },
+  { key: "illusory_self",        name: "Illusory Self",         recharge: "SR", max: () => 1 },
 ]);
 registerSubclassRuntimeConfig("Wizard_Illusionist", {
   spellcasting: {

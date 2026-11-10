@@ -5,9 +5,9 @@ export default function install(registry, context = {}) {
     name: 'Portal Jumper',
     adapt: withResistanceChoice(['Necrotic', 'Psychic', 'Radiant']),
     actions: [{
-      name: 'Portal Step', icon: 'move', cat: 'special', uses: 'PB / LR', resKey: 'portal_jumper_step',
+      name: 'Portal Step', cat: 'special', resKey: 'portal_jumper_step',
     }],
-    resources: [{ key: 'portal_jumper_step', name: 'Portal Step', icon: 'move', recharge: 'LR', max: 'proficiencyBonus' }],
+    resources: [{ key: 'portal_jumper_step', name: 'Portal Step', recharge: 'LR', max: 'proficiencyBonus' }],
     effects: [{ type: 'resistance-choice', choiceKeySuffix: 'resistance', note: 'Otherworldly Resilience' }],
   });
 }

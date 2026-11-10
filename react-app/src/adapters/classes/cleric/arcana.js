@@ -54,13 +54,13 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Cleric_Arcana', [
-    { name: 'Fortifying Spell', icon: 'shield-plus', cat: 'special', uses: '1 Channel Divinity', resKey: 'channel_div', minLevel: 3,
+    { name: 'Fortifying Spell', cat: 'special', resKey: 'channel_div', minLevel: 3,
       rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => `1d8+${Number(ownerLevel || 0)}`, label: 'Temporary HP' }] },
-    { name: 'Tenacious Spell', icon: 'sparkles', cat: 'special', uses: '1 Channel Divinity', resKey: 'channel_div', minLevel: 3,
+    { name: 'Tenacious Spell', cat: 'special', resKey: 'channel_div', minLevel: 3,
       rollers: [{ kind: 'utility', formula: '1d8', label: 'Save reduction' }] },
-    { name: 'Dispelling Recovery', icon: 'wand-sparkles', cat: 'special', uses: '1 / SR or LR', resKey: 'arcana_dispelling_recovery', minLevel: 6 },
+    { name: 'Dispelling Recovery', cat: 'special', resKey: 'arcana_dispelling_recovery', minLevel: 6 },
   ]);
   registerSubclassSheetResources('Cleric_Arcana', [
-    { key: 'arcana_dispelling_recovery', name: 'Dispelling Recovery', icon: 'wand-sparkles', recharge: 'SR+LR', minLevel: 6, max: 1 },
+    { key: 'arcana_dispelling_recovery', name: 'Dispelling Recovery', recharge: 'SR+LR', minLevel: 6, max: 1 },
   ]);
 }

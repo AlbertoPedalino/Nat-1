@@ -39,19 +39,19 @@ registerSpeciesSheetCommonChoiceMeta("Shifter_EFA", {
 registerSpeciesSheetActions("Shifter_EFA", [
   {
     name: 'Shift',
-    icon: '',
+    
     cat: 'bonus',
-    uses: 'PB / LR',
+    
     resKey: 'shifter_shift',
     minLevel: 1,
-    inlinePills: ({ character }) => [{ icon: 'heart', label: 'Temp HP', value: 2 * getProficiencyBonus(character) }],
+    inlinePills: ({ character }) => [{ label: 'Temp HP', value: 2 * getProficiencyBonus(character) }],
   },
 ]);
 registerSpeciesSheetResources("Shifter_EFA", [
   {
     key: 'shifter_shift',
     name: 'Shift',
-    icon: 'moon',
+    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },

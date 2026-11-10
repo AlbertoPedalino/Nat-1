@@ -4,7 +4,7 @@ export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Elemental Familiar',
     actions: [{
-      name: 'Energy Pulse', icon: 'zap', cat: 'bonus', uses: "Familiar's Reaction",
+      name: 'Energy Pulse', cat: 'bonus', 
       rollers: [{ kind: 'damage', formula: '2d4', label: 'Elemental damage' }],
     }],
   });

@@ -17,19 +17,19 @@ registerSubclassAdapter("Cleric_Light", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Cleric_Light", [
-  { name: "Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / LR", resKey: "warding_flare", minLevel: 3 },
-  { name: "Improved Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / SR+LR", resKey: "warding_flare", minLevel: 6 },
-  { name: "Radiance of the Dawn", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
+  { name: "Warding Flare", cat: "reaction", resKey: "warding_flare", minLevel: 3 },
+  { name: "Improved Warding Flare", cat: "reaction", resKey: "warding_flare", minLevel: 6 },
+  { name: "Radiance of the Dawn", cat: "action", resKey: "channel_div",
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return `2d10+${lv}`;
     }, label: ({ formula }) => `${formula} radiant` }] },
-  { name: "Corona of Light", icon: "", cat: "action", uses: "WIS mod / LR", resKey: "corona_light", minLevel: 17 },
+  { name: "Corona of Light", cat: "action", resKey: "corona_light", minLevel: 17 },
 ]);
 registerSubclassSheetResources("Cleric_Light", [
-  { key: "warding_flare", name: "Warding Flare", icon: "sun", recharge: "SR", srMinLevel: 6,
+  { key: "warding_flare", name: "Warding Flare", recharge: "SR", srMinLevel: 6,
     max: 'abilityMod:wis', minMax: 1 },
-  { key: "corona_light", name: "Corona of Light", icon: "sun", recharge: "LR", minLevel: 17,
+  { key: "corona_light", name: "Corona of Light", recharge: "LR", minLevel: 17,
     max: 'abilityMod:wis', minMax: 1 },
 ]);
 registerSubclassRuntimeConfig("Cleric_Light", {

@@ -60,19 +60,19 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Warlock_Vestige', [
-    { name: 'Command Vestige Companion', icon: 'ghost', cat: 'bonus', uses: 'At will', minLevel: 3,
+    { name: 'Command Vestige Companion', cat: 'bonus', minLevel: 3,
       detailType: 'summonedCreature',
       summonedCreature: {
         name: 'Vestige Companion', source: 'AU', levelClass: 'Warlock', ability: 'cha',
         variantChoiceKey: 'subclass_vestige_companion_type',
         divinePowerResourceKey: 'vestige_power',
       } },
-    { name: 'Vestige Recovery', icon: 'heart-pulse', cat: 'reaction', uses: '1 / LR', resKey: 'vestige_recovery', minLevel: 10 },
-    { name: 'Semblance of Life', icon: 'sparkles', cat: 'bonus', uses: '1 / LR', resKey: 'vestige_semblance', minLevel: 14 },
+    { name: 'Vestige Recovery', cat: 'reaction', resKey: 'vestige_recovery', minLevel: 10 },
+    { name: 'Semblance of Life', cat: 'bonus', resKey: 'vestige_semblance', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Warlock_Vestige', [
-    { key: 'vestige_power', name: 'Divine Power', icon: 'sparkles', recharge: 'SR+LR', minLevel: 3, srMinLevel: 6, lrMinLevel: 6, max: 1 },
-    { key: 'vestige_recovery', name: 'Vestige Recovery', icon: 'heart-pulse', recharge: 'LR', minLevel: 10, max: 1 },
-    { key: 'vestige_semblance', name: 'Semblance of Life', icon: 'ghost', recharge: 'LR', minLevel: 14, max: 1 },
+    { key: 'vestige_power', name: 'Divine Power', recharge: 'SR+LR', minLevel: 3, srMinLevel: 6, lrMinLevel: 6, max: 1 },
+    { key: 'vestige_recovery', name: 'Vestige Recovery', recharge: 'LR', minLevel: 10, max: 1 },
+    { key: 'vestige_semblance', name: 'Semblance of Life', recharge: 'LR', minLevel: 14, max: 1 },
   ]);
 }

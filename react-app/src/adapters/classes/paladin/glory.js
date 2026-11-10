@@ -11,15 +11,15 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Paladin_Glory", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Paladin_Glory", [
-  { name: "Inspiring Smite", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div" },
-  { name: "Peerless Athlete", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div" },
-  { name: "Glorious Defense", icon: "", cat: "reaction", uses: "CHA mod / LR", resKey: "glory_glorious_defense", minLevel: 15 },
-  { name: "Living Legend", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "glory_living_legend", minLevel: 20 },
+  { name: "Inspiring Smite", cat: "bonus", resKey: "paladin_channel_div" },
+  { name: "Peerless Athlete", cat: "bonus", resKey: "paladin_channel_div" },
+  { name: "Glorious Defense", cat: "reaction", resKey: "glory_glorious_defense", minLevel: 15 },
+  { name: "Living Legend", cat: "bonus", resKey: "glory_living_legend", minLevel: 20 },
 ]);
 registerSubclassSheetResources("Paladin_Glory", [
-  { key: "glory_glorious_defense", name: "Glorious Defense", icon: "shield", recharge: "LR",
+  { key: "glory_glorious_defense", name: "Glorious Defense", recharge: "LR",
     max: 'abilityMod:cha', minMax: 1 },
-  { key: "glory_living_legend", name: "Living Legend", icon: "crown", recharge: "LR", max: () => 1 },
+  { key: "glory_living_legend", name: "Living Legend", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassRuntimeConfig("Paladin_Glory", {

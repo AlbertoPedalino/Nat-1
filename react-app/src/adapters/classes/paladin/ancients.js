@@ -11,13 +11,13 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Paladin_Ancients", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Paladin_Ancients", [
-  { name: "Nature's Wrath", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div" },
-  { name: "Undying Sentinel", icon: "", cat: "action", uses: "1 / LR", resKey: "ancients_undying_sentinel", minLevel: 15 },
-  { name: "Elder Champion", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "ancients_elder_champion", minLevel: 20 },
+  { name: "Nature's Wrath", cat: "action", resKey: "paladin_channel_div" },
+  { name: "Undying Sentinel", cat: "action", resKey: "ancients_undying_sentinel", minLevel: 15 },
+  { name: "Elder Champion", cat: "bonus", resKey: "ancients_elder_champion", minLevel: 20 },
 ]);
 registerSubclassSheetResources("Paladin_Ancients", [
-  { key: "ancients_undying_sentinel", name: "Undying Sentinel", icon: "shield", recharge: "LR", max: () => 1 },
-  { key: "ancients_elder_champion",   name: "Elder Champion",   icon: "leaf",   recharge: "LR", max: () => 1 },
+  { key: "ancients_undying_sentinel", name: "Undying Sentinel", recharge: "LR", max: () => 1 },
+  { key: "ancients_elder_champion",   name: "Elder Champion",   recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassRuntimeConfig("Paladin_Ancients", {

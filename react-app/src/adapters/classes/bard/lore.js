@@ -31,8 +31,8 @@ registerSubclassAdapter("Bard_Lore", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Bard_Lore", [
-  { name: "Cutting Words", icon: "", cat: "reaction", uses: "With Bardic Insp.", minLevel: 3 },
-  { name: "Peerless Skill", icon: "", cat: "action", uses: "With Bardic Insp.", minLevel: 14 },
+  { name: "Cutting Words", cat: "reaction", minLevel: 3 },
+  { name: "Peerless Skill", cat: "action", minLevel: 14 },
 ]);
 
 registerSubclassSheetEffects("Bard_Lore", [

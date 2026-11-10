@@ -4,7 +4,7 @@ export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Spell Subterfuge',
     actions: [
-      { name: 'Shrouding Spells', icon: 'footprints', cat: 'bonus', uses: 'Chosen ability mod / LR' },
+      { name: 'Shrouding Spells', cat: 'bonus',  },
     ],
   });
 }

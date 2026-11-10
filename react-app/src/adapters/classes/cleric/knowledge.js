@@ -33,16 +33,16 @@ registerSubclassAdapter("Cleric_Knowledge", function (cls, lv, specs) {
 registerSubclassSheetActions("Cleric_Knowledge", [
   {
     "name": "Mind Magic",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 Channel",
+    
     "resKey": "channel_div"
   },
   {
     "name": "Divine Foreknowledge",
-    "icon": "",
+    
     "cat": "bonus",
-    "uses": "1 / LR",
+    
     "resKey": "divine_foreknowledge",
     "minLevel": 17
   }
@@ -74,7 +74,7 @@ registerSubclassSheetEffects("Cleric_Knowledge", [
   { type: "advantage", target: "d20Tests", minLevel: 17, note: "Divine Foreknowledge: BA, 1 hour Advantage on all D20 Tests." },
 ]);
 registerSubclassSheetResources("Cleric_Knowledge", [
-  { key: "divine_foreknowledge", name: "Divine Foreknowledge", icon: "brain", recharge: "LR",
+  { key: "divine_foreknowledge", name: "Divine Foreknowledge", recharge: "LR",
     minLevel: 17, max: 1 },
 ]);
 

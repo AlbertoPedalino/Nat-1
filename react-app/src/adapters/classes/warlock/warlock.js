@@ -230,64 +230,64 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
 registerClassSheetActions("Warlock", [
   {
     "name": "Magical Cunning",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "magical_cunning",
     "minLevel": 2
   },
   {
     "name": "Contact Patron",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "resKey": "contact_patron",
     "minLevel": 9
   },
   {
     "name": "Mystic Arcanum",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR each",
+    
     "minLevel": 11
   },
   {
     "name": "Eldritch Master",
-    "icon": "",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "minLevel": 20
   },
 
   {
     "name": "Pact of the Blade",
-    "icon": "swords",
+    
     "cat": "bonus",
-    "uses": "Bonus Action",
+    
     "minLevel": 1,
     "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Blade'); }
   },
   {
     "name": "Pact of the Chain",
-    "icon": "sparkles",
+    
     "cat": "action",
-    "uses": "Magic Action",
+    
     "minLevel": 1,
     "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Investment of the Chain Master",
-    "icon": "sparkles",
+    
     "cat": "bonus",
-    "uses": "Bonus Action / Reaction",
+    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Investment of the Chain Master') && warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Gift of the Protectors",
-    "icon": "shield",
+    
     "cat": "reaction",
-    "uses": "1 / LR",
+    
     "resKey": "gift_of_the_protectors",
     "minLevel": 9,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); }
@@ -297,34 +297,34 @@ registerClassSheetActions("Warlock", [
 
   {
     "name": "One with Shadows",
-    "icon": "moon",
+    
     "cat": "action",
-    "uses": "Magic Action",
+    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'One with Shadows'); }
   },
   {
     "name": "Gift of the Depths",
-    "icon": "waves",
+    
     "cat": "action",
-    "uses": "1 / LR",
+    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); }
   },
   {
     "name": "Gaze of Two Minds",
-    "icon": "eye",
+    
     "cat": "bonus",
-    "uses": "Bonus Action",
+    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gaze of Two Minds'); }
   },
 
   {
     "name": "Eldritch Smite",
-    "icon": "zap",
+    
     "cat": "action",
-    "uses": "Spend a Pact Slot on hit",
+    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Eldritch Smite') && warlockHasInvocation(C, 'Pact of the Blade'); },
     rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
@@ -335,7 +335,7 @@ registerItemFlagDef("pactWeapon", {
   label: "Pact Weapon",
   activeLabel: "Pact",
   tone: "#9d7fb8",
-  icon: "swords",
+  
   types: ['M', 'R', 'WEAPON'],
   maxCount: 1,
   requireClass: "Warlock",
@@ -447,7 +447,7 @@ registerClassSheetResources("Warlock", [
   {
     "key": "magical_cunning",
     "name": "Magical Cunning",
-    "icon": "sparkles",
+    
     "actionName": "Magical Cunning",
     "recharge": "LR",
     "minLevel": 2,
@@ -456,7 +456,7 @@ registerClassSheetResources("Warlock", [
   {
     "key": "contact_patron",
     "name": "Contact Patron",
-    "icon": "eye",
+    
     "recharge": "LR",
     "minLevel": 9,
     "max": function() { return 1; }
@@ -464,7 +464,7 @@ registerClassSheetResources("Warlock", [
   {
     "key": "gift_of_the_depths",
     "name": "Gift of the Depths — Water Breathing",
-    "icon": "waves",
+    
     "recharge": "LR",
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); },
@@ -473,16 +473,16 @@ registerClassSheetResources("Warlock", [
   {
     "key": "gift_of_the_protectors",
     "name": "Gift of the Protectors",
-    "icon": "shield",
+    
     "recharge": "LR",
     "minLevel": 9,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); },
     "max": function() { return 1; }
   },
-  { "key": "mystic_arcanum_6", "name": "Mystic Arcanum VI",   "icon": "sparkles", "recharge": "LR", "minLevel": 11, "max": function() { return 1; } },
-  { "key": "mystic_arcanum_7", "name": "Mystic Arcanum VII",  "icon": "sparkles", "recharge": "LR", "minLevel": 13, "max": function() { return 1; } },
-  { "key": "mystic_arcanum_8", "name": "Mystic Arcanum VIII", "icon": "sparkles", "recharge": "LR", "minLevel": 15, "max": function() { return 1; } },
-  { "key": "mystic_arcanum_9", "name": "Mystic Arcanum IX",   "icon": "sparkles", "recharge": "LR", "minLevel": 17, "max": function() { return 1; } },
+  { "key": "mystic_arcanum_6", "name": "Mystic Arcanum VI",   "recharge": "LR", "minLevel": 11, "max": function() { return 1; } },
+  { "key": "mystic_arcanum_7", "name": "Mystic Arcanum VII",  "recharge": "LR", "minLevel": 13, "max": function() { return 1; } },
+  { "key": "mystic_arcanum_8", "name": "Mystic Arcanum VIII", "recharge": "LR", "minLevel": 15, "max": function() { return 1; } },
+  { "key": "mystic_arcanum_9", "name": "Mystic Arcanum IX",   "recharge": "LR", "minLevel": 17, "max": function() { return 1; } },
 ]);
 
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.

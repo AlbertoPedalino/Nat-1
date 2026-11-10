@@ -10,10 +10,10 @@ export default function install(registry, context = {}) {
 registerSubclassAdapter("Monk_Shadow", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Monk_Shadow", [
-  { name: "Shadow Arts", icon: "", cat: "action", uses: "1 Focus Point (Darkness)", resKey: "ki", minLevel: 3 },
-  { name: "Shadow Step", icon: "", cat: "bonus", uses: "At will", minLevel: 6 },
-  { name: "Improved Shadow Step", icon: "", cat: "bonus", uses: "1 Focus Point", resKey: "ki", minLevel: 11 },
-  { name: "Cloak of Shadows", icon: "", cat: "action", uses: "3 Focus Points / 1 min", resKey: "ki", minLevel: 17 },
+  { name: "Shadow Arts", cat: "action", resKey: "ki", minLevel: 3 },
+  { name: "Shadow Step", cat: "bonus", minLevel: 6 },
+  { name: "Improved Shadow Step", cat: "bonus", resKey: "ki", minLevel: 11 },
+  { name: "Cloak of Shadows", cat: "action", resKey: "ki", minLevel: 17 },
 ]);
 registerSubclassRuntimeConfig("Monk_Shadow", {
   spellcasting: {

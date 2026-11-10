@@ -26,8 +26,8 @@ registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
 
 registerSubclassSheetActions("Warlock_Fiend", [
 
-  { name: "Dark One's Own Luck", icon: "dice-6", cat: "reaction", uses: "CHA mod / LR", resKey: "fiend_luck", minLevel: 6 },
-  { name: "Hurl Through Hell", icon: "flame", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "fiend_hurl", minLevel: 14,
+  { name: "Dark One's Own Luck", cat: "reaction", resKey: "fiend_luck", minLevel: 6 },
+  { name: "Hurl Through Hell", cat: "action", resKey: "fiend_hurl", minLevel: 14,
     rollers: [{ kind: 'damage', formula: "8d10", label: "Hurl Through Hell 8d10 Psychic" }] },
 ]);
 registerSubclassSheetEffects("Warlock_Fiend", [
@@ -35,9 +35,9 @@ registerSubclassSheetEffects("Warlock_Fiend", [
 ]);
 
 registerSubclassSheetResources("Warlock_Fiend", [
-  { key: "fiend_luck", name: "Dark One's Own Luck", icon: "dice-6", recharge: "LR",
+  { key: "fiend_luck", name: "Dark One's Own Luck", recharge: "LR",
     max: 'abilityMod:cha', minMax: 1 },
-  { key: "fiend_hurl", name: "Hurl Through Hell", icon: "flame", recharge: "LR", max: () => 1 },
+  { key: "fiend_hurl", name: "Hurl Through Hell", recharge: "LR", max: () => 1 },
 ]);
 
 registerSubclassRuntimeConfig("Warlock_Fiend", {

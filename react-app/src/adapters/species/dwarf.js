@@ -19,14 +19,14 @@ registerSpeciesSheetCommonChoiceMeta("Dwarf_XPHB");
 registerSpeciesSheetActions("Dwarf_XPHB", [
   {
     name: 'Stonecunning',
-    icon: '',
+    
     cat: 'bonus',
-    uses: 'PB / LR',
+    
     resKey: 'dwarf_stonecunning',
     minLevel: 1,
     inlinePills: [
-      { icon: 'radar', label: 'Sense', value: 'Tremorsense 60 ft' },
-      { icon: 'timer', label: 'Duration', value: '10 min' },
+      { label: 'Sense', value: 'Tremorsense 60 ft' },
+      { label: 'Duration', value: '10 min' },
     ],
   },
 ]);
@@ -34,7 +34,7 @@ registerSpeciesSheetResources("Dwarf_XPHB", [
   {
     key: 'dwarf_stonecunning',
     name: 'Stonecunning',
-    icon: 'radar',
+    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },

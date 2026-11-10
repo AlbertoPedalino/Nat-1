@@ -22,9 +22,9 @@ registerSpeciesSheetCommonChoiceMeta("Changeling_EFA");
 registerSpeciesSheetActions("Changeling_EFA", [
   {
     name: 'Shape-Shifter',
-    icon: '',
+    
     cat: 'action',
-    uses: 'At will',
+    
     minLevel: 1,
   },
 ]);

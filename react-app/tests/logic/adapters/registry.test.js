@@ -29,12 +29,6 @@ test('runtime configs merge and feature filters append, both on the exact owner'
   registry.registerClassRuntimeConfig('Druid', { wildShape: { beasts: true } });
   assert.deepEqual(registry.getClassRuntimeConfig('Druid'), { wildShape: { uses: 2, beasts: true } });
 
-  const first = () => true;
-  const second = () => false;
-  registry.registerSpeciesSheetFeatureFilter('Elf', 'XPHB', first);
-  registry.registerSpeciesSheetFeatureFilter('Elf', 'XPHB', second);
-  registry.registerSpeciesSheetFeatureFilter('Elf', 'XPHB', 'not a function');
-  assert.deepEqual(registry.getSpeciesSheetFeatureFilters('Elf', 'XPHB'), [first, second]);
 });
 
 test('an empty result is a fresh value each time', () => {

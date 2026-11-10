@@ -26,9 +26,9 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Hexblood_RHW', [
     {
       name: 'Eerie Token',
-      icon: 'eye',
+      
       cat: 'bonus',
-      uses: '1 / LR',
+      
       resKey: 'hexblood_token',
       minLevel: 1,
     },
@@ -38,7 +38,7 @@ export default function install(registry, context = {}) {
     {
       key: 'hexblood_token',
       name: 'Eerie Token',
-      icon: 'eye',
+      
       recharge: 'LR',
       max: 1,
     },

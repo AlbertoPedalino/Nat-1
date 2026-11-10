@@ -202,17 +202,15 @@ export function getSpeedEffects(character = {}) {
 // The Unarmed Strike from active effects (type `unarmedStrike`): the largest
 // damage die among them (`emptyHandedFace` while the character holds no weapon
 // or Shield, e.g. Unarmed Fighting's d8), whether it may use Dexterity
-// (Martial Arts) and the card's usage label. With none: a flat 1, Strength.
+// (Martial Arts). With none: a flat 1, Strength.
 export function getUnarmedStrike(character = {}, { emptyHanded = false } = {}) {
   let face = 1;
   let dexterity = false;
-  let uses = null;
   collectSheetEffects(character).forEach((effect) => {
     if (effectKey(effect.type) !== 'unarmedstrike') return;
     const value = Number(emptyHanded && effect.emptyHandedFace ? effect.emptyHandedFace : effect.face) || 0;
     if (value > face) face = value;
     if (effect.dexterity) dexterity = true;
-    if (effect.uses && !uses) uses = effect.uses;
   });
-  return { face, dexterity, uses };
+  return { face, dexterity };
 }

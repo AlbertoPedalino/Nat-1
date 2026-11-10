@@ -35,7 +35,7 @@ export default function install(registry, context = {}) {
     },
   });
   registerSubclassSheetActions('Monk_Mystic Arts', [
-    { name: 'Convert Spell Slot to Focus', icon: 'refresh-cw', cat: 'special', uses: 'Spell slot', minLevel: 6 },
-    { name: 'Recover Spell Slot', icon: 'refresh-cw', cat: 'special', uses: 'Focus Points', resKey: 'ki', minLevel: 6 },
+    { name: 'Convert Spell Slot to Focus', cat: 'special', minLevel: 6 },
+    { name: 'Recover Spell Slot', cat: 'special', resKey: 'ki', minLevel: 6 },
   ]);
 }

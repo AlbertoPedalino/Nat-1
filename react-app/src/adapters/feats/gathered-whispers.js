@@ -34,9 +34,9 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Gathered Whispers', [
     {
       name: 'Unearthly Scream',
-      icon: 'shield',
+      
       cat: 'reaction',
-      uses: 'PB / LR',
+      
       resKey: 'gathered_whispers_scream',
     },
   ]);
@@ -45,7 +45,7 @@ export default function install(registry, context = {}) {
     {
       key: 'gathered_whispers_scream',
       name: 'Unearthly Scream',
-      icon: 'shield',
+      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

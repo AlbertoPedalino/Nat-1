@@ -14,11 +14,11 @@ registerSubclassAdapter("Wizard_Abjurer", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Wizard_Abjurer", [
-  { name: "Arcane Ward", icon: "", cat: "action", uses: "Ward HP", resKey: "arcane_ward", minLevel: 3 },
-  { name: "Projected Ward", icon: "", cat: "reaction", uses: "Reaction", minLevel: 6 },
+  { name: "Arcane Ward", cat: "action", resKey: "arcane_ward", minLevel: 3 },
+  { name: "Projected Ward", cat: "reaction", minLevel: 6 },
 ]);
 registerSubclassSheetResources("Wizard_Abjurer", [
-  { key: "arcane_ward", name: "Arcane Ward", icon: "shield", recharge: "LR",
+  { key: "arcane_ward", name: "Arcane Ward", recharge: "LR",
     max: (lv, { int } = {}) => Math.max(1, (Number(lv) || 0) * 2 + (int ?? 0)) },
 ]);
 registerSubclassRuntimeConfig("Wizard_Abjurer", {

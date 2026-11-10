@@ -16,9 +16,9 @@ registerSubclassAdapter("Cleric_Trickery", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Cleric_Trickery", [
-  { name: "Blessing of the Trickster", icon: "", cat: "action", uses: "1 hour or reuse", minLevel: 3 },
-  { name: "Invoke Duplicity", icon: "", cat: "bonus", uses: "1 Channel / 1 min (C)", resKey: "channel_div" },
-  { name: "Cloak of Shadows", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div", minLevel: 6 },
+  { name: "Blessing of the Trickster", cat: "action", minLevel: 3 },
+  { name: "Invoke Duplicity", cat: "bonus", resKey: "channel_div" },
+  { name: "Cloak of Shadows", cat: "action", resKey: "channel_div", minLevel: 6 },
 ]);
 registerSubclassRuntimeConfig("Cleric_Trickery", {
   spellcasting: {
