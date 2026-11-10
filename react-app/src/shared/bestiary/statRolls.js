@@ -31,9 +31,17 @@ export function useStatRollSources() {
   return useContext(StatRollContext);
 }
 
-// " ADV" / " DIS" after a roller whose creature rolls that way on its own.
-export function advTag(advArg) {
+// " ADV" / " DIS" after a roller whose creature rolls that way on its own;
+// " DIS?" when only a situational disadvantage may apply (the sheet's tag).
+export function advTag(advArg, situational = []) {
   if (advArg === true) return ' ADV';
   if (advArg === false) return ' DIS';
-  return '';
+  return situational?.length ? ' DIS?' : '';
+}
+
+// The roller's tooltip for those situational disadvantages, or ''.
+export function situationalNote(situational = []) {
+  return situational?.length
+    ? `Situational disadvantage: ${situational.map((c) => `${c.source} (${c.note})`).join('; ')}`
+    : '';
 }

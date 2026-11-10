@@ -68,7 +68,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
   const sourcesFor = useCallback((type) => {
     const info = d20RollKind(type);
     if (!info) return null;
-    if (!conditions || !info.kind) return { adv: false, disadv: false, autoFail: false };
+    if (!conditions || !info.kind) return { adv: false, disadv: false, autoFail: false, situational: [] };
     return creatureRollSources({ conditions }, info.kind, info.ability);
   }, [conditions]);
 
