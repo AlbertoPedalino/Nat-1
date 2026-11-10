@@ -109,6 +109,17 @@ export function characterClassFeatures(C) {
   ]);
 }
 
+// Whether the character has a class or subclass feature by name at its
+// current level ("Circle Forms").
+export function hasClassFeature(C, featureName) {
+  const wanted = String(featureName || '').trim().toLowerCase();
+  if (!wanted) return false;
+  return classEntities(C).some((entity) => [
+    ...(entity.entry?.allFeatures || entity.entry?.allClassFeatures || []),
+    ...(entity.entry?.allSubFeatures || []).filter((feature) => feature?.subclassShortName === entity.subclassShortName),
+  ].some((feature) => String(feature?.name || '').trim().toLowerCase() === wanted && Number(feature?.level || 0) <= entity.level));
+}
+
 // The names of the character's classes, primary first.
 export function classNames(C) {
   return [C?.className, ...(C?.extraClasses || []).map((extra) => extra?.name)].filter(Boolean);

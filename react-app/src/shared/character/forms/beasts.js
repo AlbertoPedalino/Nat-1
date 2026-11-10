@@ -50,6 +50,13 @@ function isSwarm(raw) {
   return /\bswarm\b/i.test(String(raw?.name || ''));
 }
 
+// The class feature a non-beast form needs, from its type note ("Requires
+// {@subclassFeature Circle Forms|Druid|XPHB|Moon|…}": World of Warcraft's Bear
+// Form and Cat Form), or null.
+export function featureFormRequirement(raw) {
+  return String(raw?.typeNote || '').match(/Requires \{@(?:sub)?classFeature ([^|}]+)/i)?.[1]?.trim() || null;
+}
+
 export function recordIsBeast(raw) {
   return Boolean(raw?.name) && isBeastType(raw) && !isSwarm(raw);
 }

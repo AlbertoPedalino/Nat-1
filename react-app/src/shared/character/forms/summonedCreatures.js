@@ -1,6 +1,6 @@
 import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
-import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
+import { ABILITIES, SKILLS, sizeName } from '../../content/rulesVocabulary.js';
 import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
 // Bestiary files holding creatures a spell or class feature summons (their
@@ -11,8 +11,13 @@ const SUMMONED_CREATURE_FILES = ['bestiary-au.json', 'bestiary-xphb.json'];
 // modifier", "{@damage 1d8 + 2} plus your Charisma modifier".
 const ABILITY_NAME = '(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)';
 const ABILITY_MODIFIER = new RegExp(`${ABILITY_NAME} modifier`, 'i');
-const DAMAGE_PLUS_ABILITY = new RegExp(String.raw`\{@damage ([^}]+)\}\s+plus your ${ABILITY_NAME} modifier`, 'gi');
-const DICE_PLUS_ABILITY = new RegExp(String.raw`\{@dice ([^}]+)\}\s+plus your ${ABILITY_NAME} modifier`, 'gi');
+const DAMAGE_PLUS_ABILITY = new RegExp(String.raw`\{@damage ([^}]+)\}\s*(?:plus|\+) your ${ABILITY_NAME} modifier`, 'gi');
+const DICE_PLUS_ABILITY = new RegExp(String.raw`\{@dice ([^}]+)\}\s*(?:plus|\+) your ${ABILITY_NAME} modifier`, 'gi');
+// "{@damage 1d8} … damage. This damage increases by {@damage 1d8} when you
+// reach Druid levels 5 ({@damage 2d8}), 11 ({@damage 3d8}), and 17 (…)."
+const LEVEL_SCALED_DAMAGE = /\{@damage ([^}]+)\}([^.]*?)\.(\s*(?:This|The extra) damage increases by \{@damage [^}]+\} when you reach \w+ levels ([^.]+?)\.)/gi;
+const SKILL_ABILITIES = Object.fromEntries(SKILLS.map((skill) => [skill.name.toLowerCase().replace(/[^a-z]/g, ''), skill.ability]));
+const ABILITY_KEYS = { strength: 'str', dexterity: 'dex', constitution: 'con', intelligence: 'int', wisdom: 'wis', charisma: 'cha' };
 const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
 const clone = (value) => {
@@ -112,6 +117,12 @@ function resolveHp(hp, { spellLevel, classLevel }) {
     return { average: Number(hp.average), formula: String(hp.formula || '') };
   }
   const special = String(hp?.special || '').trim();
+  // "3 times your Druid level" (a Wild Shape form's Temporary Hit Points).
+  const timesClassLevel = special.match(/^(\w+)\s+times your \w+ level$/i);
+  if (timesClassLevel) {
+    const per = NUMBER_WORDS[timesClassLevel[1].toLowerCase()] ?? Number(timesClassLevel[1]);
+    if (Number.isFinite(per)) return { average: per * classLevel, formula: '', temporary: Boolean(hp?.isTemporary) };
+  }
   const scaled = special.match(/^(\d+)\s*\+\s*(\d+)\s+for each spell level above\s+(\d+)/i);
   if (scaled) {
     const [, base, perLevel, minimum] = scaled.map(Number);
@@ -158,23 +169,56 @@ function formulaWithAbilityModifier(formula, abilityMod) {
   return `${base} ${modifier > 0 ? '+' : '-'} ${Math.abs(modifier)}`;
 }
 
-function resolveEntryText(node, { spellLevel, spellAttackBonus, spellSaveDc, abilityMod }) {
+// The damage dice at a class level, from the sentence that lists them.
+function scaleDamageByLevel(text, classLevel) {
+  return text.replace(LEVEL_SCALED_DAMAGE, (match, base, rest, increase, steps) => {
+    let dice = base;
+    for (const [, level, formula] of steps.matchAll(/(\d+)\s*\(\{@damage ([^}]+)\}\)/g)) {
+      if (classLevel >= Number(level)) dice = formula;
+    }
+    return `{@damage ${dice}}${rest}.${increase}`;
+  });
+}
+
+function resolveEntryText(node, context) {
+  const { spellLevel, spellAttackBonus, spellSaveDc, abilityMod, classLevel = 0 } = context;
   if (typeof node === 'string') {
-    return node
+    return scaleDamageByLevel(node, classLevel)
       .replace(/\{@hitYourSpellAttack Bonus equals your spell attack modifier\}/gi, `{@hit ${spellAttackBonus}}`)
       .replace(DAMAGE_PLUS_ABILITY, (_, formula) => `{@damage ${formulaWithAbilityModifier(formula, abilityMod)}}`)
       .replace(DICE_PLUS_ABILITY, (_, formula) => `{@dice ${formulaWithAbilityModifier(formula, abilityMod)}}`)
       .replace(/summonSpellLevel/g, String(spellLevel))
       .replace(/your spell save DC/gi, String(spellSaveDc));
   }
-  if (Array.isArray(node)) return node.map((entry) => resolveEntryText(entry, { spellLevel, spellAttackBonus, spellSaveDc, abilityMod }));
+  if (Array.isArray(node)) return node.map((entry) => resolveEntryText(entry, context));
   if (node && typeof node === 'object') {
-    return Object.fromEntries(Object.entries(node).map(([key, value]) => [
-      key,
-      resolveEntryText(value, { spellLevel, spellAttackBonus, spellSaveDc, abilityMod }),
-    ]));
+    return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, resolveEntryText(value, context)]));
   }
   return node;
+}
+
+// An ability score a form states as a rule: "equal to your Wisdom score",
+// "… don't change" (your own). `scores` are the character's.
+function resolveAbilityScore(value, ability, scores) {
+  if (Number.isFinite(Number(value))) return Number(value);
+  const special = String(value?.special || '');
+  const equal = special.match(new RegExp(`equal to your (${ABILITY_NAME}) score`, 'i'));
+  if (equal && scores) return Number(scores[ABILITY_KEYS[equal[1].toLowerCase()]] ?? 10);
+  if (/don't change/i.test(special) && scores) return Number(scores[ability] ?? 10);
+  return 10;
+}
+
+// Skills a form states as a rule ("You have proficiency in {@skill Stealth}"):
+// the form's modifier plus the Proficiency Bonus.
+function resolveSkills(skill, abilities, proficiencyBonus) {
+  const special = String(skill?.special || '');
+  const out = {};
+  [...special.matchAll(/\{@skill ([^}|]+)/gi)].forEach(([, name]) => {
+    const key = name.toLowerCase().replace(/[^a-z]/g, '');
+    const ability = SKILL_ABILITIES[key];
+    if (ability) out[key] = Math.floor((abilities[ability] - 10) / 2) + Number(proficiencyBonus || 0);
+  });
+  return out;
 }
 
 export function normalizeSummonedCreature(record, options = {}) {
@@ -184,9 +228,9 @@ export function normalizeSummonedCreature(record, options = {}) {
   const abilityMod = Number(options.abilityMod || 0);
   const spellAttackBonus = Number(options.spellAttackBonus || 0);
   const spellSaveDc = Number(options.spellSaveDc || (8 + spellAttackBonus));
-  const replacementContext = { spellLevel, spellAttackBonus, spellSaveDc, abilityMod };
+  const replacementContext = { spellLevel, spellAttackBonus, spellSaveDc, abilityMod, classLevel };
   const abilities = {};
-  ABILITIES.forEach((ability) => { abilities[ability] = Number(record[ability] ?? 10); });
+  ABILITIES.forEach((ability) => { abilities[ability] = resolveAbilityScore(record[ability], ability, options.abilityScores); });
 
   return {
     name: String(record.name || 'Summoned Creature'),
@@ -198,7 +242,7 @@ export function normalizeSummonedCreature(record, options = {}) {
     hp: resolveHp(record.hp, { spellLevel, classLevel }),
     abilities,
     saves: {},
-    skills: {},
+    skills: resolveSkills(record.skill, abilities, options.proficiencyBonus),
     speed: creatureSpeeds(record.speed),
     senses: asArray(record.senses),
     passivePerception: Number(record.passive) || null,

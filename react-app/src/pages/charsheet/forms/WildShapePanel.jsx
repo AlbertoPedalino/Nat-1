@@ -4,13 +4,14 @@ import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { findBeast, parseBeastRef } from '../../../shared/character/forms/beasts.js';
 import { BeastNameLink, BeastStatBlock, BeastPickerRow, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
-import { useBeastsDb } from './useBeastsDb.js';
+import { useBeastsDb, useFeatureForms } from './useBeastsDb.js';
 import {
   getActiveWildShape,
   enterWildShapePatch,
   exitWildShapePatch,
+  featureFormSnapshot,
 } from '../../../shared/character/forms/wildShapeForm.js';
-import { classLevel } from '../../../shared/character/progression/classLevel.js';
+import { classLevel, hasClassFeature } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
@@ -38,6 +39,7 @@ function knownFormRefs(C) {
 export default function WildShapePanel({ action, character, sheet, resources, onResChange }) {
   const { onUpdateCharacter, onUpdateSheet } = useSheetActions();
   const beastsDb = useBeastsDb();
+  const featureForms = useFeatureForms();
   const resKey = action?.resKey;
   const usesLeft = resKey ? Number(resources?.[resKey] ?? 0) : Infinity;
 
@@ -47,6 +49,12 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   const forms = useMemo(() => refs
     .map((ref) => ({ ref, beast: findBeast(beastsDb, ref), parsed: parseBeastRef(ref) }))
     .filter((f) => f.parsed), [refs, beastsDb]);
+  // Forms a feature gives (Circle Forms: Bear Form, Cat Form), resolved for
+  // this druid; no pick in the builder.
+  const extraForms = useMemo(() => featureForms
+    .filter((form) => hasClassFeature(character, form.requiresFeature))
+    .map((form) => ({ form, snapshot: featureFormSnapshot(character, form) }))
+    .filter((entry) => entry.snapshot), [featureForms, character]);
 
   const transform = (beast) => {
     if (!beast || !onUpdateCharacter) return;
@@ -59,7 +67,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     onUpdateCharacter((prev) => ({ ...prev, ...enterWildShapePatch(prev, beast, druidLevel(prev)) }));
     // The HP block reads Temp HP from sheet state, which isn't re-derived from the
     // character patch — mirror the Druid-level grant so it shows immediately.
-    const granted = Math.max(0, druidLevel(character));
+    const granted = Math.max(0, Number(beast.tempHpGrant ?? druidLevel(character)) || 0);
     onUpdateSheet?.({ tempHP: tempHpAfter(sheet?.tempHP, 'grantTempHp', granted) });
   };
   const revert = () => {
@@ -80,7 +88,9 @@ export default function WildShapePanel({ action, character, sheet, resources, on
             Revert to normal form
           </Button>
         </Box>
-        <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />
+        {b.tempHpGrant != null
+          ? <BeastStatBlock b={b} typeLabel="Wild Shape form" hpLabel="Temp HP" showCr={false} />
+          : <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />}
         <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
         </Typography>
@@ -94,7 +104,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
       </Box>
-      {!forms.length ? (
+      {!forms.length && !extraForms.length ? (
         <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>
           No forms chosen yet — pick beasts in the character builder (Class Choices → Wild Shape).
         </Typography>
@@ -115,6 +125,20 @@ export default function WildShapePanel({ action, character, sheet, resources, on
               actionDisabled={!beast || usesLeft <= 0}
               typeLabel="Beast"
               hpLabel="Form HP"
+            />
+          ))}
+          {extraForms.map(({ form, snapshot }) => (
+            <BeastPickerRow
+              key={`${form.name}|${form.source}`}
+              beast={snapshot}
+              name={form.name}
+              source={form.source}
+              summary={`${form.requiresFeature} · ${snapshot.size} · AC ${snapshot.ac ?? '—'} · Temp HP ${snapshot.tempHpGrant ?? 0}`}
+              actionLabel="Transform"
+              onAction={() => transform(snapshot)}
+              actionDisabled={usesLeft <= 0}
+              typeLabel="Wild Shape form"
+              hpLabel="Temp HP"
             />
           ))}
         </Stack>

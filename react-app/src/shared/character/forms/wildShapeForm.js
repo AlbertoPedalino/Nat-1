@@ -1,4 +1,10 @@
 import { tempHpAfter } from '../combat/vitals.js';
+import { classLevel } from '../progression/classLevel.js';
+import { normalizeSummonedCreature } from './summonedCreatures.js';
+import { spellcastingNumbers } from '../spells/spellcastingNumbers.js';
+import { getProficiencyBonus } from '../progression/proficiency.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { abilityScore } from '../progression/abilityScores.js';
 
 // Druid Wild Shape — active form state + every rule of the form.
 //
@@ -129,11 +135,39 @@ export function wildShapeSenses(C) {
 // after the form's temp HP took damage).
 export function enterWildShapePatch(C, beast, druidLevel) {
   if (!beast) return null;
-  const granted = Math.max(0, Number(druidLevel) || 0);
+  // A feature form states its own Temporary Hit Points (Bear Form: three
+  // times your Druid level).
+  const granted = Math.max(0, Number(beast.tempHpGrant ?? druidLevel) || 0);
   const tempHP = tempHpAfter(C?.tempHP, 'grantTempHp', granted);
   return {
     wildShape: { beast },
     tempHP,
+  };
+}
+
+// A feature form (Bear Form, Cat Form) as the druid who takes it has it: its
+// rule-stated AC, scores, skills and attacks resolved with the druid's
+// Wisdom, Druid level and spellcasting numbers, in the beast snapshot shape.
+export function featureFormSnapshot(C, form) {
+  if (!form?.record) return null;
+  const level = classLevel(C, 'Druid');
+  const numbers = spellcastingNumbers(C, 'wis');
+  const abilityScores = Object.fromEntries(ABILITIES.map((ability) => [ability, abilityScore(C, ability, { ignoreWildShape: true })]));
+  const creature = normalizeSummonedCreature(form.record, {
+    classLevel: level,
+    abilityMod: numbers.abilityModifier,
+    spellAttackBonus: numbers.attack,
+    spellSaveDc: numbers.dc,
+    abilityScores,
+    proficiencyBonus: getProficiencyBonus(C),
+  });
+  if (!creature) return null;
+  return {
+    ...creature,
+    crNum: null,
+    cr: '—',
+    acFrom: '',
+    tempHpGrant: creature.hp?.temporary ? Number(creature.hp.average) || 0 : null,
   };
 }
 
