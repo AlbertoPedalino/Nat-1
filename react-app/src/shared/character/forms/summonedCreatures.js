@@ -1,6 +1,7 @@
 import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
-import { ABILITIES, SKILLS, sizeName } from '../../content/rulesVocabulary.js';
+import { ABILITIES, SKILLS, abilityKey, sizeName } from '../../content/rulesVocabulary.js';
+import { abilityModifier } from '../progression/abilityModifier.js';
 import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
 // Bestiary files holding creatures a spell or class feature summons (their
@@ -17,7 +18,6 @@ const DICE_PLUS_ABILITY = new RegExp(String.raw`\{@dice ([^}]+)\}\s*(?:plus|\+) 
 // reach Druid levels 5 ({@damage 2d8}), 11 ({@damage 3d8}), and 17 (…)."
 const LEVEL_SCALED_DAMAGE = /\{@damage ([^}]+)\}([^.]*?)\.(\s*(?:This|The extra) damage increases by \{@damage [^}]+\} when you reach \w+ levels ([^.]+?)\.)/gi;
 const SKILL_ABILITIES = Object.fromEntries(SKILLS.map((skill) => [skill.name.toLowerCase().replace(/[^a-z]/g, ''), skill.ability]));
-const ABILITY_KEYS = { strength: 'str', dexterity: 'dex', constitution: 'con', intelligence: 'int', wisdom: 'wis', charisma: 'cha' };
 const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
 const clone = (value) => {
@@ -203,7 +203,7 @@ function resolveAbilityScore(value, ability, scores) {
   if (Number.isFinite(Number(value))) return Number(value);
   const special = String(value?.special || '');
   const equal = special.match(new RegExp(`equal to your (${ABILITY_NAME}) score`, 'i'));
-  if (equal && scores) return Number(scores[ABILITY_KEYS[equal[1].toLowerCase()]] ?? 10);
+  if (equal && scores) return Number(scores[abilityKey(equal[1])] ?? 10);
   if (/don't change/i.test(special) && scores) return Number(scores[ability] ?? 10);
   return 10;
 }
@@ -216,7 +216,7 @@ function resolveSkills(skill, abilities, proficiencyBonus) {
   [...special.matchAll(/\{@skill ([^}|]+)/gi)].forEach(([, name]) => {
     const key = name.toLowerCase().replace(/[^a-z]/g, '');
     const ability = SKILL_ABILITIES[key];
-    if (ability) out[key] = Math.floor((abilities[ability] - 10) / 2) + Number(proficiencyBonus || 0);
+    if (ability) out[key] = abilityModifier(abilities[ability]) + Number(proficiencyBonus || 0);
   });
   return out;
 }
