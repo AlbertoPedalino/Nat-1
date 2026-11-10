@@ -74,3 +74,12 @@ test('cantrip damage is rolled at the character level, one roll per scaling line
 
   expect(cantripScalingDamages(null, 5)).toEqual([]);
 });
+
+test('a magic weapon used through the spell keeps its extra damage button', () => {
+  const sunStaff = {
+    ...quarterstaff, name: 'Staff of Thunder and Lightning', equipped: true, equippedSlot: 'twoHands',
+    entries: ['You can cause the target to take an extra {@damage 2d6} Lightning damage (no action required).'],
+  };
+  const strike = spellWeaponAttack(character, sunStaff, { ability: 'int', inventory: [sunStaff] });
+  expect(strike.extraRollers.map((roller) => roller.label)).toEqual(['+2d6 lightning']);
+});

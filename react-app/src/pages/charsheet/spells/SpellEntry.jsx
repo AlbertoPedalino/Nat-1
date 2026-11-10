@@ -207,7 +207,7 @@ export default function SpellEntry({
     kind: 'damage',
     formula: weaponStrike.damageFormula,
     title: `Damage (${weaponStrike.damageType ? `${weaponStrike.damageType} or ` : ''}radiant)`,
-  }] : []) : [
+  }, ...weaponStrike.extraRollers] : []) : [
     ...scaledDamages.map((damage, index) => ({
       key: `damage-${index}`,
       kind: 'damage',

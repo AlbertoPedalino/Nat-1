@@ -151,16 +151,25 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
     attackBonus: getPB(C) + mod + enhancement.attack + bonus.attack,
     damageFormula,
     damageType: weaponDamageType(item),
+    extraRollers: weaponExtraDamageRollers(item),
     disadvantage: isHeavyWeapon(item) && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13,
   };
 }
 
-// A weapon card's damage buttons: the weapon's damage, then each extra damage
-// its text adds on a hit (Frostmourne's +2d12 Cold), rolled when it applies.
+// The extra damage a weapon's text adds on a hit (Frostmourne's +2d12 Cold),
+// one button each, rolled when it applies: on its attack card and on an
+// attack made with it through a spell (True Strike).
+export function weaponExtraDamageRollers(item) {
+  return weaponExtraDamage(item).map(({ formula, type }) => ({
+    key: `extra-${formula}-${type}`, kind: 'damage', formula, label: `+${formula} ${type}`,
+  }));
+}
+
+// A weapon card's damage buttons: the weapon's damage, then its extra damage.
 function weaponDamageRollers(item, damageFormula, damageType) {
   return [
     { kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${damageType ? ` ${damageType}` : ''}` : 'Damage' },
-    ...weaponExtraDamage(item).map(({ formula, type }) => ({ kind: 'damage', formula, label: `+${formula} ${type}` })),
+    ...weaponExtraDamageRollers(item),
   ];
 }
 
