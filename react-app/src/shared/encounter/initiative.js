@@ -39,9 +39,17 @@ export function rerollInitiative(combat, rng = Math.random) {
   };
 }
 
-// One turn forward (+1) or back (-1), skipping the dead while anyone is alive.
-// Passing the top of the order starts the next round; going back past it
-// returns to the previous one (never below round 1).
+// Whose turn is passed over: a dead monster. A character keeps their turn
+// dead or alive (user decision 2026-11-10): death is often not the end of
+// them, and the GM moves on with one click. Must match fight_turn_step in
+// supabase/27_turn_skips_dead_monsters.sql.
+export function skipsTurn(combatant) {
+  return Boolean(combatant?.isDead) && combatant.type !== 'player';
+}
+
+// One turn forward (+1) or back (-1), passing over dead monsters while anyone
+// is left to act. Passing the top of the order starts the next round; going
+// back past it returns to the previous one (never below round 1).
 function stepTurn(combat, direction) {
   const combatants = combat.combatants || [];
   if (!combatants.length) return combat;
@@ -54,7 +62,7 @@ function stepTurn(combat, direction) {
     if (direction > 0 && currentTurn === 0) round += 1;
     if (direction < 0 && currentTurn === count - 1) round = Math.max(1, round - 1);
     safety += 1;
-  } while (combatants[currentTurn]?.isDead && combatants.some((c) => !c.isDead) && safety < count);
+  } while (skipsTurn(combatants[currentTurn]) && combatants.some((c) => !skipsTurn(c)) && safety < count);
   return { ...combat, currentTurn, round };
 }
 

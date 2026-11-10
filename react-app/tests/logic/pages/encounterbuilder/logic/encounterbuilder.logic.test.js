@@ -21,7 +21,7 @@ import { calculateDifficulty } from '../../../../../src/pages/encounterbuilder/b
 import {
   buildCombat, initiativeRoster, restoreFight, snapshotFight,
 } from '../../../../../src/shared/encounter/combat.js';
-import { nextTurn, rerollInitiative } from '../../../../../src/shared/encounter/initiative.js';
+import { nextTurn, prevTurn, rerollInitiative } from '../../../../../src/shared/encounter/initiative.js';
 import {
   addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, applyHpCommand, removeCombatantEffect, setDeathSave, toggleCombatantCondition,
 } from '../../../../../src/shared/encounter/combatantVitals.js';
@@ -1348,4 +1348,23 @@ test('a reroll keeps each creature\'s own advantage or disadvantage on initiativ
   const highFirst = () => { let i = 0; return () => [0.95, 0.45][i++ % 2]; };
   const combat = { currentTurn: 0, combatants: [{ id: 0, name: 'Aria', initMod: 0, initiative: 3, activeConditions: ['poisoned'] }] };
   assert.equal(rerollInitiative(combat, highFirst()).combatants[0].initiative, 10);
+});
+
+// User decision 2026-11-10: only a dead monster is passed over; a character
+// keeps their turn dead or alive.
+test('next turn passes over dead monsters but never a character', () => {
+  const combat = {
+    currentTurn: 0,
+    round: 1,
+    combatants: [
+      { id: 0, type: 'monster', isDead: false },
+      { id: 1, type: 'monster', isDead: true },
+      { id: 2, type: 'player', isDead: true },
+      { id: 3, type: 'monster', isDead: false },
+    ],
+  };
+  const first = nextTurn(combat);
+  assert.equal(first.currentTurn, 2, 'the dead goblin is passed over, the dead hero is not');
+  assert.equal(nextTurn(first).currentTurn, 3);
+  assert.equal(prevTurn(first).currentTurn, 0);
 });
