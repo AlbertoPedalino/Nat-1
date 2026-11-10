@@ -10,6 +10,7 @@ import {
   enterWildShapePatch,
   exitWildShapePatch,
   featureFormSnapshot,
+  wildShapeTempHp,
 } from '../../../shared/character/forms/wildShapeForm.js';
 import { classLevel, hasClassFeature } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -67,7 +68,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     onUpdateCharacter((prev) => ({ ...prev, ...enterWildShapePatch(prev, beast, druidLevel(prev)) }));
     // The HP block reads Temp HP from sheet state, which isn't re-derived from the
     // character patch — mirror the Druid-level grant so it shows immediately.
-    const granted = Math.max(0, Number(beast.tempHpGrant ?? druidLevel(character)) || 0);
+    const granted = wildShapeTempHp(character, beast, druidLevel(character));
     onUpdateSheet?.({ tempHP: tempHpAfter(sheet?.tempHP, 'grantTempHp', granted) });
   };
   const revert = () => {
@@ -90,7 +91,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         </Box>
         {b.tempHpGrant != null
           ? <BeastStatBlock b={b} typeLabel="Wild Shape form" hpLabel="Temp HP" showCr={false} />
-          : <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />}
+          : <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={wildShapeTempHp(character, b, lv)} />}
         <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
         </Typography>

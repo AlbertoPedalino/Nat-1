@@ -3,8 +3,9 @@ import { Box, List, ListItemButton, ListItemText, Paper, Typography } from '@mui
 import { Check } from 'lucide-react';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import { eligibleBeasts, beastRefValue, wildShapeMaxCr, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
+import { eligibleBeasts, beastRefValue, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
+import { wildShapeCrCap } from '../../../shared/character/forms/wildShapeForm.js';
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
 import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
@@ -23,11 +24,11 @@ function druidLevel(character) {
 
 export default function BeastChoice({ spec, character, dispatch, beasts }) {
   const lv = druidLevel(character);
-  const cap = wildShapeMaxCr(lv);
-  const options = useMemo(() => eligibleBeasts(beasts, lv).map((beast) => ({
+  const cap = wildShapeCrCap(character, lv);
+  const options = useMemo(() => eligibleBeasts(beasts, lv, cap).map((beast) => ({
     value: beastRefValue(beast),
     beast,
-  })), [beasts, lv]);
+  })), [beasts, lv, cap]);
 
   const selected = useMemo(() => {
     const raw = character?.choices?.[spec.key];

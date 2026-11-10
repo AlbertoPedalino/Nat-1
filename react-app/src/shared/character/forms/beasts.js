@@ -165,8 +165,7 @@ export function beastHasFlySpeed(beast) {
 // Beasts a Druid of `druidLevel` may assume: CR ≤ cap, no swarms (already
 // excluded at normalize time), and no Fly Speed before level 8. Sorted by CR
 // then name.
-export function eligibleBeasts(beastsDb, druidLevel) {
-  const cap = wildShapeMaxCr(druidLevel);
+export function eligibleBeasts(beastsDb, druidLevel, cap = wildShapeMaxCr(druidLevel)) {
   const allowFly = Number(druidLevel || 0) >= 8;
   return (beastsDb || [])
     .filter((b) => b.crNum != null && b.crNum <= cap && (allowFly || !beastHasFlySpeed(b)))
