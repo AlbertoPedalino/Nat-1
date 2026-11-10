@@ -6,11 +6,10 @@ export default function install(registry, context = {}) {
     registerSpeciesAdapter,
     registerSpeciesSheetCommonChoiceMeta,
     registerSpeciesLongRestGrants,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 // Human XPHB: Skillful + Versatile — one skill proficiency and one extra Origin Feat.
 registerSpeciesAdapter("Human_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
+  let specs = [];
   const skillNames = SKILL_NAMES;
 
   if (!specs.some(function (spec) { return spec.type === 'skill_choice' || String(spec.key || '').startsWith('species_skill_'); })) {

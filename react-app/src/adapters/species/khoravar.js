@@ -6,10 +6,9 @@ export default function install(registry, context = {}) {
     _ALL_TOOLS,
     registerSpeciesAdapter,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Khoravar_EFA", function (s) {
-  const specs = getGenericSpeciesChoiceSpecs(s);
+  const specs = [];
 
   // Skill Versatility: choose 1 skill or tool (replaceable on Long Rest)
   const skillsAndTools = [

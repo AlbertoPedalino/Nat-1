@@ -1,8 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    getGenericSpeciesChoiceSpecs,
+  const {
     registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
@@ -12,9 +11,6 @@ export default function install(registry, context = {}) {
   // Knowledge from a Past Life (skill choice) and Strange Endurance (resistance
   // choice from Cold/Necrotic/Poison) are parsed from the species JSON; only the
   // limited-use d6 reroll aid needs wiring.
-  registerSpeciesAdapter('Reborn_RHW', function (s) {
-    return getGenericSpeciesChoiceSpecs(s);
-  });
 
   registerSpeciesSheetActions('Reborn_RHW', [
     {

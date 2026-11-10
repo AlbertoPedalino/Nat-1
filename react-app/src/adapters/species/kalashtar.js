@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerSpeciesAdapter, registerSpeciesSheetCommonChoiceMeta, getGenericSpeciesChoiceSpecs } = createAdapterBindings(registry, context);
-registerSpeciesAdapter("Kalashtar_EFA", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
-});
+  const { registerSpeciesAdapter, registerSpeciesSheetCommonChoiceMeta } = createAdapterBindings(registry, context);
 
 registerSpeciesSheetCommonChoiceMeta("Kalashtar_EFA");
 

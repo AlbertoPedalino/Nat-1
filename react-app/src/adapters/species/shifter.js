@@ -9,14 +9,13 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetResources,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 // Canonical lineage tokens — single source for both the choice options
 // (validated against _versions via `expect`) and the requiredChoice predicates.
 const SHIFTER_LINEAGE = { BEASTHIDE: 'Beasthide', LONGTOOTH: 'Longtooth', SWIFTSTRIDE: 'Swiftstride', WILDHUNT: 'Wildhunt' };
 
 registerSpeciesAdapter("Shifter_EFA", function (s) {
-  const specs = getGenericSpeciesChoiceSpecs(s);
+  const specs = [];
   const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Shifter', expect: Object.values(SHIFTER_LINEAGE) });
 
   specs.push({

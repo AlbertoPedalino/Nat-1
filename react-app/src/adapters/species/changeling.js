@@ -5,10 +5,9 @@ export default function install(registry, context = {}) {
     registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Changeling_EFA", function (s) {
-  const specs = getGenericSpeciesChoiceSpecs(s);
+  const specs = [];
   const instincts = specs.find(function (spec) { return spec.key === 'species_skill_0'; });
   if (instincts && Array.isArray(instincts.from) && !instincts.from.some(function (name) {
     return String(name || '').toLowerCase() === 'performance';

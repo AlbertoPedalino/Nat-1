@@ -5,11 +5,7 @@ export default function install(registry, context = {}) {
     registerSpeciesAdapter,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
-registerSpeciesAdapter("Halfling_XPHB", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
-});
 
 registerSpeciesSheetCommonChoiceMeta("Halfling_XPHB");
 

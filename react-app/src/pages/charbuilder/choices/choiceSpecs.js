@@ -13,12 +13,13 @@ import {
 import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { asArray } from '../../../shared/lists.js';
+import { specPush } from './choiceSpecHelpers.js';
 import {
+  choiceFromBlock,
+  genericSpeciesChoiceSpecs,
   specSan,
   specUniq,
-  specPush,
-  choiceFromBlock,
-} from './choiceSpecHelpers.js';
+} from '../../../shared/character/progression/choiceBlocks.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 function asiLevelsFromClass(cls, classFeatures) {
@@ -301,23 +302,13 @@ export function speciesChoiceSpecs(character) {
     count: 2,
     level: 1,
   });
+  // What the species data offers, for every species; an adapter adds only
+  // what the data cannot say (lineages, spell abilities…).
+  specs.push(...genericSpeciesChoiceSpecs(species));
   const adapter = adapterRegistry.getSpeciesAdapter(character.speciesName, character.speciesSource);
-  if (adapter) {
-    const adapterSpecs = adapter(species);
-    if (Array.isArray(adapterSpecs)) {
-      return dedupSpecs(filterByRequiredChoice([...specs, ...adapterSpecs], character));
-    }
-  }
-  (species.skillProficiencies || []).forEach((block, index) => {
-    const spec = choiceFromBlock(`species_skill_${index}`, 'Species Skill', block, SKILL_NAMES);
-    if (spec) specs.push({ ...spec, type: 'skill_choice' });
-  });
-  (species.languageProficiencies || []).forEach((block, index) => {
-    const spec = choiceFromBlock(`species_language_${index}`, 'Species Language', block, STANDARD_LANGUAGES);
-    if (spec) specs.push({ ...spec, type: 'language_choice' });
-    else if (block.anyStandard) specs.push({ key: `species_language_${index}`, label: 'Species Language', type: 'language_choice', from: STANDARD_LANGUAGES, count: block.anyStandard });
-  });
-  return specs;
+  const adapterSpecs = typeof adapter === 'function' ? adapter(species) : null;
+  if (Array.isArray(adapterSpecs)) specs.push(...adapterSpecs);
+  return dedupSpecs(filterByRequiredChoice(specs, character));
 }
 
 export function backgroundChoiceSpecs(character) {

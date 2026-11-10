@@ -1,8 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    getGenericSpeciesChoiceSpecs,
+  const {
     registerSpeciesAdapter,
     registerSpeciesSheetCommonChoiceMeta,
     registerSpeciesSheetActions,
@@ -11,7 +10,7 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 
   registerSpeciesAdapter('Hexblood_RHW', function (s) {
-    const specs = getGenericSpeciesChoiceSpecs(s);
+    const specs = [];
     // Hex Magic lets you pick the spellcasting ability for Disguise Self / Hex.
     specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Hexblood)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
     return specs;

@@ -9,10 +9,9 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetResources,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Dragonborn_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
+  let specs = [];
   // Draconic Resistance is determined by the ancestry choice; do not render a separate resistance choice.
   specs = specs.filter(function (x) { return !String(x.key || '').startsWith('species_resist'); });
 

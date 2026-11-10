@@ -7,11 +7,7 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetResources,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
-registerSpeciesAdapter("Dwarf_XPHB", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
-});
 
 registerSpeciesSheetCommonChoiceMeta("Dwarf_XPHB");
 

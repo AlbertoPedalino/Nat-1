@@ -7,11 +7,7 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
-registerSpeciesAdapter("Orc_XPHB", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
-});
 
 registerSpeciesSheetCommonChoiceMeta("Orc_XPHB");
 registerSpeciesSheetActions("Orc_XPHB", [

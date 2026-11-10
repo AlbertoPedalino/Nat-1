@@ -5,11 +5,7 @@ export default function install(registry, context = {}) {
     registerSpeciesAdapter,
     registerSpeciesSheetEffects,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
-registerSpeciesAdapter("Warforged_EFA", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
-});
 
 registerSpeciesSheetCommonChoiceMeta("Warforged_EFA");
 registerSpeciesSheetEffects("Warforged_EFA", [

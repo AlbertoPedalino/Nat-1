@@ -7,14 +7,13 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetEffects,
     registerSpeciesRuntimeConfig,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 // Canonical legacy tokens — single source for both the choice options
 // (validated against _versions via `expect`) and the requiredChoice predicates.
 const TIEFLING_LEGACY = { ABYSSAL: 'Abyssal', CHTHONIC: 'Chthonic', INFERNAL: 'Infernal' };
 
 registerSpeciesAdapter("Tiefling_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
+  let specs = [];
   specs = specs.filter(function (x) { return !String(x.key || '').startsWith('species_resist'); });
 
   const legacyOptions = buildLineageOptions(s._versions, { parentName: 'Tiefling', suffixes: ['Legacy'], expect: Object.values(TIEFLING_LEGACY) });

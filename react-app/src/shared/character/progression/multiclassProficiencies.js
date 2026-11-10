@@ -1,6 +1,6 @@
 import { strip5eMarkup } from '../../content/entryText.js';
 import { matchKey } from '../../content/nameKeys.js';
-import { MUSICAL_INSTRUMENTS } from '../../content/rulesVocabulary.js';
+import { choiceFromBlock } from './choiceBlocks.js';
 
 const ARMOR_LABELS = { light: 'Light armor', medium: 'Medium armor', heavy: 'Heavy armor', shield: 'Shields', shields: 'Shields' };
 const WEAPON_LABELS = { simple: 'Simple weapons', martial: 'Martial weapons' };
@@ -102,17 +102,6 @@ function classSkillList(cls) {
   return [...new Set(out)].filter(Boolean);
 }
 
-function choiceFromBlock(key, label, block, fallbackFrom = []) {
-  if (!block || typeof block !== 'object') return null;
-  const choose = block.choose;
-  if (!choose) return null;
-  let from = choose.from;
-  if (from === 'classSkillList') from = fallbackFrom;
-  if (!Array.isArray(from) || !from.length) from = fallbackFrom;
-  const count = Number(choose.count || block.anyMusicalInstrument || block.any || 1);
-  if (!from.length || !count) return null;
-  return { key, label, type: 'generic_choice', from, count, level: 1 };
-}
 
 export function getMulticlassChoiceSpecs(className, keyPrefix = '', cls = null) {
   const profs = getMulticlassProficiencies(className, cls);
@@ -120,14 +109,12 @@ export function getMulticlassChoiceSpecs(className, keyPrefix = '', cls = null) 
 
   (profs?.skills || []).forEach((block, index) => {
     const spec = choiceFromBlock(`${keyPrefix}mc_skill_${index}`, 'Multiclass Skill', block, classSkillList(cls));
-    if (spec) specs.push({ ...spec, type: 'skill_choice' });
+    if (spec) specs.push({ ...spec, type: 'skill_choice', level: 1 });
   });
 
   [...(profs?.toolProficiencies || [])].forEach((block, index) => {
-    const spec = block?.anyMusicalInstrument
-      ? { key: `${keyPrefix}mc_tool_${index}`, label: 'Multiclass Tool', type: 'generic_choice', from: MUSICAL_INSTRUMENTS, count: Number(block.anyMusicalInstrument || 1), level: 1 }
-      : choiceFromBlock(`${keyPrefix}mc_tool_${index}`, 'Multiclass Tool', block, []);
-    if (spec) specs.push(spec);
+    const spec = choiceFromBlock(`${keyPrefix}mc_tool_${index}`, 'Multiclass Tool', block, []);
+    if (spec) specs.push({ ...spec, level: 1 });
   });
 
   return specs;

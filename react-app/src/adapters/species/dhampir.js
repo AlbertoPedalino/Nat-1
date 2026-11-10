@@ -10,7 +10,6 @@ function biteDamageFormula(character) {
 
 export default function install(registry, context = {}) {
   const {
-    getGenericSpeciesChoiceSpecs,
     registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
@@ -19,9 +18,6 @@ export default function install(registry, context = {}) {
 
   // Size (Medium/Small), Necrotic Resistance and the Climb Speed are read straight
   // from the species JSON; only the limited-use Vampiric Bite needs wiring here.
-  registerSpeciesAdapter('Dhampir_RHW', function (s) {
-    return getGenericSpeciesChoiceSpecs(s);
-  });
 
   registerSpeciesSheetActions('Dhampir_RHW', [
     {

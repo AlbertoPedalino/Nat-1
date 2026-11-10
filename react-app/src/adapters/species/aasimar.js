@@ -8,10 +8,9 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetResources,
     registerSpeciesRuntimeConfig,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Aasimar_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
+  let specs = [];
   // Aasimar XPHB has fixed Celestial Resistance; avoid showing it as a build choice.
   // Also remove a generic size spec, if parsed from the raw JSON, so we do not show it twice.
   specs = specs.filter(function (x) {

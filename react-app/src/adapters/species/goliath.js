@@ -8,12 +8,11 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
     registerSpeciesSheetCommonChoiceMeta,
-    getGenericSpeciesChoiceSpecs,
   } = createAdapterBindings(registry, context);
 // Goliath XPHB: Giant Ancestry, the giant whose benefit the character has
 // (PB uses per Long Rest, shared); each action is gated on the choice.
 registerSpeciesAdapter("Goliath_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
+  let specs = [];
   const ancestryOpts = [
     { key: "Cloud's Jaunt",    label: "Cloud Giant — Teleport (Intelligence)" },
     { key: "Fire's Burn",      label: "Fire Giant — Bonus Fire Damage (Strength)" },
