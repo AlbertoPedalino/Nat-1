@@ -1,6 +1,6 @@
 import { resolveCopyRecords } from '../copyRecords.js';
 import { asArray } from '../../lists.js';
-import { recordKey, splitNameSource, stripSource } from '../nameKeys.js';
+import { lowerKey, recordKey, splitNameSource, stripSource } from '../nameKeys.js';
 
 // Classes as the builder and the sheet use them: each with its own features
 // and the subclasses it offers, read from the class's `classFeatures` and each
@@ -8,10 +8,6 @@ import { recordKey, splitNameSource, stripSource } from '../nameKeys.js';
 // point at), so a World of Warcraft class skin — a record that copies an XPHB
 // class (`_copy` + `reskinOf`) and may swap some of its features — gets its
 // base class's features and subclasses without a hand-written list.
-
-function lower(value) {
-  return String(value || '').trim().toLowerCase();
-}
 
 function refString(ref, field) {
   return typeof ref === 'string' ? ref : ref?.[field] || '';
@@ -21,11 +17,11 @@ function refString(ref, field) {
 function classFeatureRefKey(ref) {
   const [name, className, classSource, level, source] = String(ref).split('|');
   const cs = classSource || 'PHB';
-  return [name, className, cs, level, source || cs].map(lower).join('|');
+  return [name, className, cs, level, source || cs].map(lowerKey).join('|');
 }
 
 function classFeatureKey(feature) {
-  return [feature.name, feature.className, feature.classSource, feature.level, feature.source].map(lower).join('|');
+  return [feature.name, feature.className, feature.classSource, feature.level, feature.source].map(lowerKey).join('|');
 }
 
 // "Name|Class|ClassSource|Subclass|SubclassSource|Level|Source".
@@ -33,14 +29,14 @@ function subclassFeatureRefKey(ref) {
   const [name, className, classSource, shortName, subclassSource, level, source] = String(ref).split('|');
   const cs = classSource || 'PHB';
   const ss = subclassSource || 'PHB';
-  return [name, className, cs, shortName, ss, level, source || ss].map(lower).join('|');
+  return [name, className, cs, shortName, ss, level, source || ss].map(lowerKey).join('|');
 }
 
 function subclassFeatureKey(feature) {
   return [
     feature.name, feature.className, feature.classSource, feature.subclassShortName,
     feature.subclassSource, feature.level, feature.source,
-  ].map(lower).join('|');
+  ].map(lowerKey).join('|');
 }
 
 function classKey(record) {
@@ -53,14 +49,14 @@ function parseClassRef(ref) {
 }
 
 function subclassKey(record) {
-  return [record?.shortName, record?.className, record?.classSource, record?.source].map(lower).join('|');
+  return [record?.shortName, record?.className, record?.classSource, record?.source].map(lowerKey).join('|');
 }
 
 function subclassCopyKey(copy, record) {
   return [
     copy.shortName || record.shortName, copy.className || record.className,
     copy.classSource || record.classSource, copy.source || record.source,
-  ].map(lower).join('|');
+  ].map(lowerKey).join('|');
 }
 
 // The references an entry tree points at (`refClassFeature` / `refSubclassFeature`).
@@ -107,8 +103,8 @@ export function resolveClassData({ allClasses, classes, allSubclasses, subclasse
     const ruleClass = parseClassRef(asArray(cls.reskinOf)[0]);
     if (!ruleClass) return cls;
     const base = baseByKey.get(classKey(ruleClass));
-    const own = new Set(featureNames(cls).map(lower));
-    const removedFeatures = featureNames(base).filter((name) => !own.has(lower(name)));
+    const own = new Set(featureNames(cls).map(lowerKey));
+    const removedFeatures = featureNames(base).filter((name) => !own.has(lowerKey(name)));
     // The spells of the features it brings (Death Knight: Rune Strike, Find
     // Steed); the base class's own come with the base class's rules.
     const skinSpells = classes[index]?.additionalSpells;
@@ -158,9 +154,9 @@ function isClass(record, name, source) {
 export function classScopedData(data, cls) {
   if (!cls?.name) return { subclasses: [], allFeatures: [], allSubFeatures: [] };
   const own = asArray(data?.subclasses).filter((sub) => isClass(sub, cls.name, cls.source));
-  const shortNames = new Set(own.map((sub) => lower(sub.shortName)));
+  const shortNames = new Set(own.map((sub) => lowerKey(sub.shortName)));
   const included = asArray(cls.includeSubclassesFrom).map(parseClassRef).filter(Boolean).flatMap((ref) => (
-    asArray(data?.subclasses).filter((sub) => isClass(sub, ref.name, ref.source) && !shortNames.has(lower(sub.shortName)))
+    asArray(data?.subclasses).filter((sub) => isClass(sub, ref.name, ref.source) && !shortNames.has(lowerKey(sub.shortName)))
   ));
   const subclasses = [...own, ...included.map((sub) => ({ ...sub, className: cls.name, classSource: cls.source }))];
 

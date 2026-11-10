@@ -1,5 +1,5 @@
 import { asArray } from '../../lists.js';
-import { choiceKey } from '../../content/nameKeys.js';
+import { choiceKey, stripSource } from '../../content/nameKeys.js';
 import { classEntities } from './classLevel.js';
 // A choice is saved under its base key, or under a multiclass-prefixed copy
 // (`mc1_<key>`) when its class was added as a multiclass.
@@ -145,4 +145,16 @@ export function classChoiceValue(choices, key, keyPrefix = '') {
 export function classChoiceIs(choices, key, expected, keyPrefix = '') {
   const wanted = choiceKey(expected);
   return asArray(classChoiceValue(choices, key, keyPrefix)).some((value) => choiceKey(value) === wanted);
+}
+
+// The names picked in a character's choices, as name keys (sources dropped):
+// every choice, or one class's (`prefix`: '' for the primary class, `mc<i>_`
+// for an extra class).
+export function choiceValueNames(character, { prefix = null } = {}) {
+  const names = new Set();
+  Object.entries(character?.choices || {}).forEach(([key, value]) => {
+    if (prefix != null && (prefix ? !key.startsWith(prefix) : /^mc\d+_/.test(key))) return;
+    asArray(value).forEach((item) => { if (typeof item === 'string') names.add(choiceKey(stripSource(item))); });
+  });
+  return names;
 }

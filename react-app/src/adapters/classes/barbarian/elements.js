@@ -1,12 +1,11 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
-import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
+import { featureSaveDc } from '../../../shared/character/progression/featureSaveDc.js';
 import { rageDamageBonus } from './rageDamage.js';
 
 // Path of the Elements (World of Warcraft). Echo of the Elements' spells come
 // from the subclass data.
 function elementsSaveDc({ character }) {
-  return [{ label: 'Save DC', value: 8 + finalAbilityModifier(character, 'con') + getProficiencyBonus(character) }];
+  return [{ label: 'Save DC', value: featureSaveDc(character, 'con') }];
 }
 
 function rageDice(face) {

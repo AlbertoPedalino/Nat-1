@@ -1,5 +1,5 @@
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
-import { classEntities } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, ownedClassFeatureNames } from '../../../shared/character/progression/classLevel.js';
 import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
 import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../../shared/character/proficiency/armorRules.js';
 import { getWeaponCategory, weaponMatchesRule } from '../../../shared/character/proficiency/weaponRules.js';
@@ -18,19 +18,7 @@ function featCategories(feat) {
 }
 
 function collectFeatureNames(character, slotCategories) {
-  const names = new Set();
-  const addAvailable = (features, level) => {
-    (features || []).forEach((feature) => {
-      if ((Number(feature?.level) || 0) > level) return;
-      const name = matchKey(feature?.name);
-      if (name) names.add(name);
-    });
-  };
-
-  classEntities(character).forEach(({ entry, level }) => {
-    addAvailable(entry?.allFeatures, level);
-    addAvailable(entry?.allSubFeatures, level);
-  });
+  const names = ownedClassFeatureNames(character);
   if (asArray(slotCategories).some((category) => String(category).startsWith('FS'))) {
     names.add('fightingstyle');
   }

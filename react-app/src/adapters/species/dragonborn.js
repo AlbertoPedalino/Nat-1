@@ -1,6 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { finalAbilityModifier } from '../../shared/character/progression/abilityScores.js';
-import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
+import { featureSaveDc } from '../../shared/character/progression/featureSaveDc.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -49,11 +48,7 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
       const dice = lv >= 17 ? 4 : lv >= 11 ? 3 : lv >= 5 ? 2 : 1;
       return `${dice}d10`;
     } }],
-    inlinePills: ({ character }) => {
-      const pb = getProficiencyBonus(character);
-      const conMod = finalAbilityModifier(character, 'con');
-      return [{ label: 'Save DC', value: 8 + pb + conMod }];
-    },
+    inlinePills: ({ character }) => [{ label: 'Save DC', value: featureSaveDc(character, 'con') }],
     minLevel: 1,
   },
   {

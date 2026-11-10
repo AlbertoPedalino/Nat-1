@@ -1,4 +1,4 @@
-import { recordKey } from './nameKeys.js';
+import { lowerKey, recordKey } from './nameKeys.js';
 
 // 5etools `_copy` records: a record that copies another one ("Dwarf|WoW"
 // copies "Dwarf|XPHB", "Shaman|WoW" copies "Barbarian|XPHB") and changes it
@@ -10,10 +10,6 @@ export function cloneJson(value) {
   if (value == null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(cloneJson);
   return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, cloneJson(child)]));
-}
-
-function lower(value) {
-  return String(value || '').trim().toLowerCase();
 }
 
 // What a copy does not take from the record it copies unless `_preserve`
@@ -59,7 +55,7 @@ function targetIndex(current, replace) {
     if (typeof replace === 'object' && replace.regex) {
       return new RegExp(replace.regex, replace.flags || '').test(String(text));
     }
-    return lower(text) === lower(replace);
+    return lowerKey(text) === lowerKey(replace);
   };
   return current.findIndex(matches);
 }
@@ -132,13 +128,26 @@ function applyModification(target, path, rawModification) {
     const index = targetIndex(current, modification.replace ?? modification.index);
     if (!Number.isFinite(index) || index < 0 || index >= current.length) return;
     parent[key] = [...current.slice(0, index), ...items, ...current.slice(index + 1)];
+  } else if (modification.mode === 'renameArr') {
+    const renames = arrayItems(modification.renames);
+    parent[key] = current.map((entry) => {
+      const rename = renames.find((item) => lowerKey(item?.rename) === lowerKey(entry?.name));
+      return rename ? { ...entry, name: rename.with } : entry;
+    });
   } else if (modification.mode === 'removeArr') {
-    const names = arrayItems(modification.names).map(lower);
+    const names = arrayItems(modification.names).map(lowerKey);
     parent[key] = current.filter((entry) => {
-      if (names.length) return !names.includes(lower(typeof entry === 'string' ? entry : entry?.name));
+      if (names.length) return !names.includes(lowerKey(typeof entry === 'string' ? entry : entry?.name));
       return !items.some((item) => sameJsonValue(entry, item));
     });
   }
+}
+
+// A record's `_mod`s applied in place ({ prop: modification | [modification] }):
+// a copy's, or a stat block version's (a summon's "Beast of the Air").
+export function applyCopyMods(target, mods) {
+  Object.entries(mods || {}).forEach(([path, modification]) => applyModification(target, path, modification));
+  return target;
 }
 
 const defaultKeyOf = (record) => recordKey(record?.name, record?.source);
@@ -173,9 +182,7 @@ export function resolveCopyRecords(records, { keyOf = defaultKeyOf, copyKeyOf = 
         const preserve = copy._preserve || {};
         NOT_INHERITED.forEach((field) => { if (!preserve[field]) delete result[field]; });
       }
-      Object.entries(copy._mod || {}).forEach(([path, modification]) => {
-        applyModification(result, path, modification);
-      });
+      applyCopyMods(result, copy._mod);
     }
 
     Object.entries(record).forEach(([field, value]) => {

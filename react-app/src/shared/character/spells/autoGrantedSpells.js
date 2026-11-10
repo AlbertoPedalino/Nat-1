@@ -4,8 +4,8 @@ import { speciesWithVersion } from '../progression/speciesVersion.js';
 import { enumerateFixedAdditionalSpells } from './additionalSpellGrants.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { classEntities } from '../progression/classLevel.js';
-import { matchKey, stripSource } from '../../content/nameKeys.js';
-import { readChoiceValue } from '../progression/choiceUtils.js';
+import { choiceKey, matchKey, stripSource } from '../../content/nameKeys.js';
+import { choiceValueNames, readChoiceValue } from '../progression/choiceUtils.js';
 import { asArray } from '../../lists.js';
 
 /**
@@ -327,13 +327,8 @@ export function enumerateClassDataGrants(entity) {
 // name is a value of one of its choices (its `mc<i>_` prefix, or none for the
 // primary class). Their data is saved with the sheet (`optionalFeatureSnapshots`).
 function ownedOptionalFeatures(entity, character) {
-  const prefix = entity?.choicePrefix || '';
-  const picked = new Set();
-  Object.entries(character?.choices || {}).forEach(([key, value]) => {
-    const own = prefix ? key.startsWith(prefix) : !/^mc\d+_/.test(key);
-    if (own) asArray(value).forEach((item) => { if (typeof item === 'string') picked.add(matchKey(stripSource(item))); });
-  });
-  return asArray(character?.optionalFeatureSnapshots).filter((feature) => picked.has(matchKey(feature?.name)));
+  const picked = choiceValueNames(character, { prefix: entity?.choicePrefix || '' });
+  return asArray(character?.optionalFeatureSnapshots).filter((feature) => picked.has(choiceKey(feature?.name)));
 }
 
 /**

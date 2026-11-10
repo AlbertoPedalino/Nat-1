@@ -4,6 +4,7 @@ import { ABILITIES, SKILLS, abilityKey, sizeName } from '../../content/rulesVoca
 import { abilityModifier } from '../progression/abilityModifier.js';
 import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
+import { applyCopyMods } from '../../content/copyRecords.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
@@ -41,30 +42,6 @@ export function findSummonedCreature(records, name, source = '') {
   )) || null;
 }
 
-function applyArrayMod(value, mod) {
-  const current = Array.isArray(value) ? value.slice() : [];
-  const names = new Set(asArray(mod?.names).map((name) => String(name).toLowerCase()));
-  if (mod?.mode === 'removeArr') {
-    return current.filter((entry) => !names.has(String(entry?.name || '').toLowerCase()));
-  }
-  if (mod?.mode === 'renameArr') {
-    const rename = mod.renames?.rename;
-    const replacement = mod.renames?.with;
-    return current.map((entry) => (
-      entry?.name === rename ? { ...entry, name: replacement } : entry
-    ));
-  }
-  if (mod?.mode === 'replaceArr') {
-    const items = asArray(mod.items);
-    const index = current.findIndex((entry) => entry?.name === mod.replace);
-    if (index < 0) return [...current, ...items];
-    return [...current.slice(0, index), ...items, ...current.slice(index + 1)];
-  }
-  if (mod?.mode === 'appendArr') return [...current, ...asArray(mod.items)];
-  if (mod?.mode === 'prependArr') return [...asArray(mod.items), ...current];
-  return current;
-}
-
 export function applySummonedCreatureVersion(baseRecord, version) {
   if (!baseRecord || !version) return clone(baseRecord);
   const patch = clone(version);
@@ -72,12 +49,7 @@ export function applySummonedCreatureVersion(baseRecord, version) {
   delete patch._mod;
   const resolved = { ...clone(baseRecord), ...patch };
   delete resolved._versions;
-  Object.entries(mods).forEach(([property, rawMods]) => {
-    let value = resolved[property];
-    asArray(rawMods).forEach((mod) => { value = applyArrayMod(value, mod); });
-    resolved[property] = value;
-  });
-  return resolved;
+  return applyCopyMods(resolved, mods);
 }
 
 export function getSummonedCreatureVersions(record) {

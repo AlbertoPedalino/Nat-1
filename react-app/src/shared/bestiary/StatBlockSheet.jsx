@@ -67,7 +67,8 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
   const hasCr = monster.cr != null;
   const cr = crKey(monster.cr);
   const hpFormula = monster.hp?.formula;
-  const acSpecial = armorClassEntry(monster.ac).value == null ? armorClassEntry(monster.ac).special : '';
+  const acEntry = armorClassEntry(monster.ac);
+  const acSpecial = acEntry.value == null ? acEntry.special : '';
   const hpSpecial = String(monster.hp?.special || '').trim();
   const abilityRules = [...new Set(ABILITIES
     .map((key) => monster[key])

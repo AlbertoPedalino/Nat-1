@@ -24,8 +24,7 @@ function chosenVersion(species, choice) {
       if (impl) return impl;
       continue;
     }
-    const name = String(version?.name || '');
-    const label = (name.includes(';') ? name.split(';').slice(1).join(';') : name).trim();
+    const label = versionTail(version);
     const tail = matchKey(label);
     if (tail && tail.startsWith(wanted)) return { ...version, versionName: label };
   }
@@ -34,10 +33,14 @@ function chosenVersion(species, choice) {
 
 // The name a lineage is chosen by: "Elf; High Elf Lineage" -> "High Elf",
 // "Tiefling; Abyssal Legacy" -> "Abyssal", "Shifter; Beasthide" -> "Beasthide".
-export function versionChoiceLabel(version) {
+// A version's name after its species: "Elf; High Elf Lineage" -> "High Elf Lineage".
+function versionTail(version) {
   const name = String(version?.name || '');
-  const tail = (name.includes(';') ? name.split(';').slice(1).join(';') : name).trim();
-  return tail.replace(/\s+(Lineage|Legacy)$/i, '').trim();
+  return (name.includes(';') ? name.split(';').slice(1).join(';') : name).trim();
+}
+
+export function versionChoiceLabel(version) {
+  return versionTail(version).replace(/\s+(Lineage|Legacy)$/i, '').trim();
 }
 
 export function speciesWithVersion(species, choices) {

@@ -1,4 +1,6 @@
 import { clamp } from '../../numbers.js';
+import { ruleClassOf } from '../../content/catalogs/classScope.js';
+import { matchKey } from '../../content/nameKeys.js';
 // Canonical class-level accessors — the ONE home for two questions that were
 // previously hand-copied across the builder, sheet and adapters:
 //
@@ -44,7 +46,7 @@ export function primaryClassLevel(C) {
 // ("Death Knight" -> "Paladin", from its `reskinOf`), else the class itself.
 // `entry` is the character (primary class) or an extra class.
 export function ruleClassName(entry, className = entry?.className || entry?.name) {
-  return (entry?.cls || entry?.clsSnapshot)?.ruleClass?.name || className || '';
+  return ruleClassOf({ ...(entry?.cls || entry?.clsSnapshot), name: className });
 }
 
 // Levels in a class, by its name or by the class it reskins: a Hunter (skin of
@@ -109,15 +111,25 @@ export function characterClassFeatures(C) {
   ]);
 }
 
-// Whether the character has a class or subclass feature by name at its
-// current level ("Circle Forms").
+// The class and subclass features the character has at its current levels,
+// by name key (its subclass's only).
+export function ownedClassFeatureNames(C) {
+  const names = new Set();
+  classEntities(C).forEach((entity) => {
+    [
+      ...(entity.entry?.allFeatures || entity.entry?.allClassFeatures || []),
+      ...(entity.entry?.allSubFeatures || []).filter((feature) => feature?.subclassShortName === entity.subclassShortName),
+    ].forEach((feature) => {
+      if (Number(feature?.level || 0) <= entity.level && feature?.name) names.add(matchKey(feature.name));
+    });
+  });
+  return names;
+}
+
+// Whether the character has a class or subclass feature by name ("Circle Forms").
 export function hasClassFeature(C, featureName) {
-  const wanted = String(featureName || '').trim().toLowerCase();
-  if (!wanted) return false;
-  return classEntities(C).some((entity) => [
-    ...(entity.entry?.allFeatures || entity.entry?.allClassFeatures || []),
-    ...(entity.entry?.allSubFeatures || []).filter((feature) => feature?.subclassShortName === entity.subclassShortName),
-  ].some((feature) => String(feature?.name || '').trim().toLowerCase() === wanted && Number(feature?.level || 0) <= entity.level));
+  const wanted = matchKey(featureName);
+  return Boolean(wanted) && ownedClassFeatureNames(C).has(wanted);
 }
 
 // The names of the character's classes, primary first.
