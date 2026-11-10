@@ -86,3 +86,18 @@ test('fight choices come from the imported pieces, newest first', () => {
     ['12', 'Bridge'],
   ]);
 });
+
+// A character's death is their sheet's: the fight row only keeps a copy,
+// refreshed while a builder tab runs. The GM's strip reads the piece.
+test('in the GM order a character is dead or alive as their sheet says', () => {
+  const fightRow = { fight: { currentTurn: 0, combatants: [
+    { id: 0, type: 'player', sourceId: 'pc', name: 'Hero', isDead: false },
+    { id: 1, type: 'player', sourceId: 'pc2', name: 'Revived', isDead: true },
+    { id: 2, type: 'player', sourceId: 'away', name: 'Away', isDead: true },
+  ] } };
+  const tokens = [
+    { id: 'h', characterId: 'pc', conditions: ['dead'] },
+    { id: 'r', characterId: 'pc2', conditions: [] },
+  ];
+  assert.deepEqual(turnEntriesFromFight(fightRow, tokens, turns).map((entry) => entry.dead), [true, false, true]);
+});

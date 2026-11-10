@@ -12,6 +12,7 @@
 
 import { combatantLabel } from './encounterImport.js';
 import { parseSourceRef } from './encounterSync.js';
+import { DEAD_CONDITION_KEY, normalizeConditions } from '../../character/combat/conditions.js';
 
 function wholeNumber(value, fallback) {
   const number = Number(value);
@@ -56,13 +57,17 @@ export function turnEntriesFromTokens(tokens) {
       name: token.secretLabel || token.label || '',
       color: token.color || null,
       imageUrl: token.imageUrl || null,
-      dead: (token.conditions || []).includes('dead'),
+      dead: isTokenDead(token),
       tokenId: token.id,
       onBoard: true,
       hiddenFromPlayers: Boolean(token.hiddenFromPlayers || token.layer === 'gm'),
     });
   }
   return [...bySlot.values()].sort((a, b) => a.order - b.order);
+}
+
+function isTokenDead(token) {
+  return normalizeConditions(token?.conditions).includes(DEAD_CONDITION_KEY);
 }
 
 function tokenForCombatant(tokens, combatant, { instanceId, fightId }) {
@@ -97,7 +102,11 @@ export function turnEntriesFromFight(fightRow, tokens, turns) {
       name: token?.secretLabel || token?.label || combatantLabel(combatant),
       color: token?.color || combatant?.color || null,
       imageUrl: token?.imageUrl || null,
-      dead: Boolean(combatant?.isDead),
+      // A character's state is their sheet's, which their piece carries; the
+      // fight keeps only a copy, refreshed while a builder tab runs.
+      dead: combatant?.type === 'player' && token
+        ? isTokenDead(token)
+        : Boolean(combatant?.isDead),
       tokenId: token?.id || null,
       onBoard: Boolean(token),
       hiddenFromPlayers: !token || Boolean(token.hiddenFromPlayers || token.layer === 'gm'),
