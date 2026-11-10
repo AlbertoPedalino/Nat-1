@@ -81,10 +81,6 @@ test('the World of Warcraft invocations bring their cards, spells and uses', asy
     scoreMethod: 'manual', manualScores: { cha: 18 },
   };
   const names = collectOwnerEntries(C, 'SheetActions').map(({ entry }) => entry.name);
-  assert.ok(['Pact of the Legion', 'Legion Summoning', 'Health Funnel'].every((name) => names.includes(name)));
+  assert.ok(['Pact of the Legion', 'Health Funnel'].every((name) => names.includes(name)));
   assert.ok(!names.includes('Call of the Void'));
-  const resources = collectOwnerEntries(C, 'SheetResources').map(({ entry }) => entry.key);
-  assert.ok(resources.includes('legion_summoning'));
-  const atWill = adapterRegistry.getClassAtWillSpells('Warlock').filter((entry) => entry.invocation === 'Pact of the Legion');
-  assert.deepEqual(atWill.map((entry) => entry.spell), ['Find Familiar']);
 });

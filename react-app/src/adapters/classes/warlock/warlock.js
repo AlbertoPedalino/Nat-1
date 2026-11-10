@@ -29,7 +29,6 @@ export default function install(registry, context = {}) {
     registerClassSheetChoiceMeta,
     registerItemFlagDef,
     registerWeaponAbilityOverride,
-    registerClassAtWillSpells,
     registerResourceSideEffect,
     getCantripData,
     registerCantripDataModifier,
@@ -335,13 +334,6 @@ registerClassSheetActions("Warlock", [
     "minLevel": 9,
     "condition": function(C) { return warlockHasInvocation(C, 'Expendable Minions'); },
     inlinePills: function(ctx) { return [{ label: 'Healing', value: Number(ctx.ownerLevel || 0) + finalAbilityModifier(ctx.character, 'cha') }]; }
-  },
-  {
-    "name": "Legion Summoning",
-    "cat": "action",
-    "resKey": "legion_summoning",
-    "minLevel": 9,
-    "condition": function(C) { return warlockHasInvocation(C, 'Legion Summoning') && warlockHasInvocation(C, 'Pact of the Legion'); }
   }
 ]);
 
@@ -375,20 +367,8 @@ registerClassSheetEffects("Warlock", [
     condition: function(C){ return warlockHasInvocation(C, "Gift of the Depths"); } },
 ]);
 
-registerClassAtWillSpells('Warlock', [
-  { invocation: 'Armor of Shadows',          spell: 'Mage Armor',      minLevel: 1  },
-  { invocation: 'Fiendish Vigor',            spell: 'False Life',      minLevel: 1  },
-  { invocation: 'Mask of Many Faces',        spell: 'Disguise Self',   minLevel: 1  },
-  { invocation: 'Misty Visions',             spell: 'Silent Image',    minLevel: 1  },
-  { invocation: 'One with Shadows',          spell: 'Invisibility',   minLevel: 5  },
-  { invocation: 'Otherworldly Leap',         spell: 'Jump',            minLevel: 2  },
-  { invocation: 'Ascendant Step',            spell: 'Levitate',        minLevel: 5  },
-  { invocation: 'Master of Myriad Forms',    spell: 'Alter Self',      minLevel: 5  },
-  { invocation: 'Whispers of the Grave',     spell: 'Speak with Dead', minLevel: 7  },
-  { invocation: 'Visions of Distant Realms', spell: 'Arcane Eye',      minLevel: 9  },
-  { invocation: 'Pact of the Chain',         spell: 'Find Familiar',  minLevel: 1  },
-  { invocation: 'Pact of the Legion',        spell: 'Find Familiar',  minLevel: 1  },
-]);
+// Invocation spells (Armor of Shadows, Gift of the Depths, Pact of the Chain…)
+// come from the invocations' data (autoGrantedSpells.js).
 
 // Eldritch Blast invocation effects — adapter sets flags, sheet computes numeric values
 function _pushCantripModifierMeta(out, meta) {
@@ -472,22 +452,6 @@ registerClassSheetResources("Warlock", [
     "name": "Contact Patron",
     "recharge": "LR",
     "minLevel": 9,
-    "max": function() { return 1; }
-  },
-  {
-    "key": "gift_of_the_depths",
-    "name": "Gift of the Depths — Water Breathing",
-    "recharge": "LR",
-    "minLevel": 5,
-    "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); },
-    "max": function() { return 1; }
-  },
-  {
-    "key": "legion_summoning",
-    "name": "Legion Summoning",
-    "recharge": "LR",
-    "minLevel": 9,
-    "condition": function(C) { return warlockHasInvocation(C, 'Legion Summoning') && warlockHasInvocation(C, 'Pact of the Legion'); },
     "max": function() { return 1; }
   },
   {

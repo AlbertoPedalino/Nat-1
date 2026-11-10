@@ -11,7 +11,6 @@ import {
   getFeatFreeCastTemplate,
 } from '../../../shared/character/spells/spellFreeCasts.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
-import { classEntities } from '../../../shared/character/progression/classLevel.js';
 import { lowerKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { SRC_COLOR, featSlotTone, unionSpellSources } from './spellSourceDisplay.js';
 import {
@@ -26,6 +25,7 @@ import { buildFeatMetaMap } from './featSpellMeta.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { asArray } from '../../../shared/lists.js';
+import { titleCase } from '../../../shared/ui/textCase.js';
 
 // Spells the character has through a grant rather than its class list, each
 // with its source tag: at-will invocations, auto-granted spells (class,
@@ -33,23 +33,22 @@ import { asArray } from '../../../shared/lists.js';
 // invocations). Fixed feat spells: featSpellMeta.js. Items and scrolls:
 // shared/character/inventory/.
 
+// Spells cast at will, without a slot or a limit: those of picked optional
+// features (invocations), from their data.
 export function collectAtWillSpells(C) {
-  const out = [];
-  classEntities(C).forEach((entity) => {
-    (adapterRegistry.getClassAtWillSpells(entity.className) || []).forEach((entry) => {
-      if (entity.level < Number(entry.minLevel || 1)) return;
-      if (!isGrantUnlocked(entry, C)) return;
-      out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: SRC_COLOR.choice, kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });
-    });
-  });
-  return out;
+  return enumerateAutoGrantedSpells(C)
+    .filter((grant) => grant.atWill)
+    .map((grant) => ({
+      name: titleCase(grant.name),
+      source: { label: grant.explicitSource || 'At Will', color: SRC_COLOR.choice, kind: 'atWill', originType: 'invocation', originLabel: grant.explicitSource || 'At Will' },
+    }));
 }
 
 export function collectAutoGrantedSpells(C) {
   // Single shared entry point: class runtime config + subclass-feature text +
   // species, all gated & level-filtered. Project each canonical record into the
   // sheet's source-object shape (branching only on species vs class origin).
-  const runtimeOut = enumerateAutoGrantedSpells(C).map((r) => {
+  const runtimeOut = enumerateAutoGrantedSpells(C).filter((r) => !r.atWill).map((r) => {
     if (r.origin === 'species') {
       const srcLabel = grantSourceLabel(r, C?.speciesName || 'Species');
       const sourceType = r.sourceType || 'species';

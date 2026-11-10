@@ -60,6 +60,16 @@ export async function loadClassIndex() {
   };
 }
 
+// Upstream data bugs in an optional feature's structured spells, fixed by the
+// feature's own text: Pact of the Chain (XPHB) is cast "as a Magic action
+// without expending a spell slot", not as a ritual only.
+function fixedAdditionalSpells(feature) {
+  if (feature.name === 'Pact of the Chain' && feature.source === 'XPHB') {
+    return [{ ability: 'cha', innate: { _: ['find familiar|xphb'] } }];
+  }
+  return Array.isArray(feature.additionalSpells) ? feature.additionalSpells : null;
+}
+
 export async function loadOptionalFeatures() {
   const data = await loadGameData('optionalfeatures.json');
   return (data.optionalfeature || [])
@@ -69,6 +79,7 @@ export async function loadOptionalFeatures() {
       source: f.source,
       featureType: f.featureType,
       prerequisite: f.prerequisite || null,
+      additionalSpells: fixedAdditionalSpells(f),
       entries: stripTemplatedEntries(f.entries),
     }));
 }

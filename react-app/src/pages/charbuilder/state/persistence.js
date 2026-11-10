@@ -14,7 +14,7 @@ import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/i
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
 import { asArray } from '../../../shared/lists.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
@@ -83,6 +83,19 @@ function makeClassSnapshot(cls = null) {
 function selectedSubclassSpells(entry) {
   const record = (entry?.subclasses || []).find((sub) => sub?.shortName === entry?.subclassShortName);
   return Array.isArray(record?.additionalSpells) ? record.additionalSpells : (entry?.subclassAdditionalSpells || []);
+}
+
+// The optional features the character picked (invocations…) that grant spells,
+// with their data: the sheet reads their spells from it (autoGrantedSpells.js
+// enumerateOptionalFeatureGrants), the way it reads feats' from allFeatSnapshots.
+function pickedOptionalFeatureSnapshots(character, optionalFeatures) {
+  const picked = new Set(Object.values(character?.choices || {})
+    .flatMap((value) => asArray(value))
+    .filter((value) => typeof value === 'string')
+    .map((value) => matchKey(stripSource(value))));
+  return asArray(optionalFeatures)
+    .filter((feature) => feature?.additionalSpells?.length && picked.has(matchKey(feature.name)))
+    .map(({ name, source, featureType, additionalSpells }) => ({ name, source, featureType, additionalSpells }));
 }
 
 function serializeExtraClass(extra = {}) {
@@ -280,6 +293,7 @@ export function makeSheetPayload(character, data) {
       entries: character.backgroundObj?.entries || [],
     },
     allFeatSnapshots: ownedFeatSnapshots,
+    optionalFeatureSnapshots: pickedOptionalFeatureSnapshots(character, data?.optionalFeatures),
     allClassFeatures: character.allFeatures || [],
     allSubFeatures: character.allSubFeatures || [],
     adapterRuntime: {

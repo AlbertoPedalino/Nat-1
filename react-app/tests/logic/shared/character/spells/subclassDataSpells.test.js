@@ -41,3 +41,24 @@ test('a class skin grants the spells of its own features, prepared with a free c
   assert.equal(grants[0].entry.freeCast.maxUses, 1);
   assert.equal(enumerateClassDataGrants({ ...entity, level: 3 }).length, 1);
 });
+
+test('a picked invocation grants its spells from its data', async () => {
+  const { enumerateOptionalFeatureGrants } = await import('../../../../../src/shared/character/spells/autoGrantedSpells.js');
+  const snapshots = [
+    { name: 'Armor of Shadows', additionalSpells: [{ innate: { _: ['mage armor|xphb'] } }] },
+    { name: 'Gift of the Depths', additionalSpells: [{ innate: { _: { daily: { '1e': ['water breathing|xphb'] } } } }] },
+    { name: 'Misty Visions', additionalSpells: [{ innate: { _: ['silent image|xphb'] } }] },
+  ];
+  const C = {
+    className: 'Warlock', level: 5, optionalFeatureSnapshots: snapshots,
+    choices: { warlock_invocation_1: ['Armor of Shadows'], warlock_invocation_2: ['Gift of the Depths|XPHB'], mc0_warlock_invocation_1: ['Misty Visions'] },
+  };
+  const grants = enumerateOptionalFeatureGrants({ className: 'Warlock', level: 5, choicePrefix: '' }, C);
+  assert.deepEqual(grants.map((g) => [g.name, g.atWill, g.explicitSource]), [
+    ['mage armor', true, 'Armor of Shadows'],
+    ['water breathing', false, 'Gift of the Depths'],
+  ]);
+  assert.equal(grants[1].entry.freeCast.maxUses, 1);
+  const extra = enumerateOptionalFeatureGrants({ className: 'Warlock', level: 2, choicePrefix: 'mc0_' }, C);
+  assert.deepEqual(extra.map((g) => g.name), ['silent image']);
+});

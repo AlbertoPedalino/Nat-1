@@ -323,6 +323,50 @@ export function enumerateClassDataGrants(entity) {
   }));
 }
 
+// The optional features (invocations…) a class entity has picked: those whose
+// name is a value of one of its choices (its `mc<i>_` prefix, or none for the
+// primary class). Their data is saved with the sheet (`optionalFeatureSnapshots`).
+function ownedOptionalFeatures(entity, character) {
+  const prefix = entity?.choicePrefix || '';
+  const picked = new Set();
+  Object.entries(character?.choices || {}).forEach(([key, value]) => {
+    const own = prefix ? key.startsWith(prefix) : !/^mc\d+_/.test(key);
+    if (own) asArray(value).forEach((item) => { if (typeof item === 'string') picked.add(matchKey(stripSource(item))); });
+  });
+  return asArray(character?.optionalFeatureSnapshots).filter((feature) => picked.has(matchKey(feature?.name)));
+}
+
+/**
+ * Grants from the class's picked optional features, from their data
+ * (Armor of Shadows: Mage Armor at will; Gift of the Depths: Water Breathing
+ * once per Long Rest). A spell cast without a slot and without a limit is
+ * `atWill`.
+ */
+export function enumerateOptionalFeatureGrants(entity, character) {
+  const level = Number(entity?.level || 1);
+  return ownedOptionalFeatures(entity, character).flatMap((feature) => (
+    enumerateFixedAdditionalSpells(feature.additionalSpells).map((grant) => ({
+      name: grant.name,
+      minLevel: 1,
+      level: null,
+      mode: grant.mode === 'prepared' ? 'prepared' : 'known',
+      atWill: grant.mode === 'innate' && !grant.freeCast && !grant.ritualOnly,
+      origin: 'class',
+      ownerClassName: entity?.className || null,
+      ownerLevel: level,
+      explicitSource: feature.name,
+      sourceType: 'invocation',
+      ability: grant.ability || null,
+      entry: {
+        name: grant.name,
+        sourceType: 'invocation',
+        ...(grant.freeCast ? { freeCast: grant.freeCast } : {}),
+        ...(grant.ritualOnly ? { ritualOnly: true } : {}),
+      },
+    }))
+  ));
+}
+
 /**
  * All grants for one class entity: the class and subclass data first, then runtime
  * config (what the data cannot say: class grants, free casts and modifiers of
@@ -342,7 +386,7 @@ export function enumerateEntityGrants(entity, character) {
     entity?.className,
     entity?.subclassShortName,
   )?.spellcasting;
-  const grants = [...dataGrants, ...configGrants];
+  const grants = [...dataGrants, ...configGrants, ...enumerateOptionalFeatureGrants(entity, character)];
   if (subclassGrants.length || subclassSpellcasting?.disableFeatureSpellScrape) return grants;
   const granted = new Set(grants.map((r) => matchKey(r.name)));
   return [

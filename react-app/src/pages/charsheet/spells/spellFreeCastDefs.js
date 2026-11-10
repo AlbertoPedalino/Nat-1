@@ -1,5 +1,5 @@
 import { classEntities } from '../../../shared/character/progression/classLevel.js';
-import { enumerateClassGrants, enumerateSpeciesGrants } from '../../../shared/character/spells/autoGrantedSpells.js';
+import { enumerateEntityGrants, enumerateSpeciesGrants } from '../../../shared/character/spells/autoGrantedSpells.js';
 import {
   collectFreeCastsForGrant,
   mergeFreeCastsById,
@@ -21,7 +21,7 @@ export function getFreeCastDefsForCharacter(C) {
   // way: a rest recovers exactly the free casts the tab shows.
   [
     ...enumerateSpeciesGrants(C),
-    ...classEntities(C).flatMap((entity) => enumerateClassGrants(entity, C)),
+    ...classEntities(C).flatMap((entity) => enumerateEntityGrants(entity, C)),
   ].forEach((grant) => {
     const sourceType = grant.origin === 'species' ? 'species' : (grant.subclassShortName ? 'subclass' : 'class');
     const source = grant.origin === 'species' ? C?.speciesName : (grant.subclassShortName || grant.ownerClassName);
