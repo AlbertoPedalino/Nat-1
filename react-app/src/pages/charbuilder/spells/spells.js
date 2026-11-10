@@ -62,6 +62,8 @@ export function collectAutoGrantedSpells(character) {
     subclassShortName: character?.subclassShortName,
     level: getClassSpellLevel(character),
     allSubFeatures: character?.allSubFeatures || [],
+    // The class data (subclass records, the skin's spells) the grants read.
+    entry: character,
   };
   return uniqueBy(
     [...enumerateEntityGrants(entity, character), ...enumerateSpeciesGrants(character)]

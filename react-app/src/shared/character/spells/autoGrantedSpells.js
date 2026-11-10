@@ -93,6 +93,27 @@ function subclassFullName(entity) {
   )?.subclassName || null;
 }
 
+// The species trait that names each spell ({@spell …} in its text), so a grant
+// reads "Light Bearer" rather than "Aasimar": the first named entry wins.
+function speciesSpellTraits(species) {
+  const traits = new Map();
+  const walk = (node, trait) => {
+    if (!node) return;
+    if (typeof node === 'string') {
+      const names = [];
+      pushSpellTags(node, names);
+      names.forEach((name) => { if (trait && !traits.has(matchKey(name))) traits.set(matchKey(name), trait); });
+      return;
+    }
+    if (Array.isArray(node)) { node.forEach((child) => walk(child, trait)); return; }
+    if (typeof node !== 'object') return;
+    const own = node.name && (node.entries || node.items) ? node.name : trait;
+    ['entries', 'items', 'rows', 'entry'].forEach((key) => walk(node[key], own));
+  };
+  walk(species?.entries, null);
+  return traits;
+}
+
 /**
  * Grants from the character's species: its 5etools `additionalSpells` with the
  * chosen lineage applied (speciesWithVersion), the way feats read theirs, plus
@@ -104,11 +125,13 @@ export function enumerateSpeciesGrants(character) {
   const chosenAbility = character?.normalizedChoices?.species?.spellAbility || null;
   const level = Number(character?.level || 1);
   const species = speciesWithVersion(character?.speciesSnapshot || character?.speciesObj, character?.choices);
-  const source = species?.versionName || character?.speciesName || null;
+  const speciesSource = species?.versionName || character?.speciesName || null;
+  const traits = speciesSpellTraits(species);
   const fromData = enumerateFixedAdditionalSpells(species?.additionalSpells, {
     chosenAbility,
     defaultCanAlsoUseSlots: true,
   }).filter((grant) => level >= grant.minLevel).map((grant) => {
+    const source = traits.get(matchKey(grant.name)) || speciesSource;
     const entry = {
       name: grant.name,
       minLevel: grant.minLevel,

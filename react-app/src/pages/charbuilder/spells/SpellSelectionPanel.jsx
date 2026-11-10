@@ -35,7 +35,11 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter);
   const query = state.search.spells;
   const levels = [0, ...Array.from({ length: Math.max(0, maxLevel) }, (_, index) => index + 1)];
-  const classNames = [activeCharacter.className].filter(Boolean);
+  // The class list only when there is something to pick from it: a class
+  // without spellcasting (a Barbarian, whose list is its subclasses' fixed
+  // spells) shows only the spells it is granted.
+  const picksSpells = cantrips > 0 || spells > 0;
+  const classNames = picksSpells ? [activeCharacter.className].filter(Boolean) : [];
   const spellIndex = useMemo(() => {
     const map = new Map();
     state.data.spells.forEach((spell) => {
@@ -44,8 +48,8 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     });
     return map;
   }, [state.data.spells]);
-  const autoNames = new Set(autoGrantedSpells.map((spell) => spell.name));
-  const autoByName = new Map(autoGrantedSpells.map((spell) => [spell.name, spell]));
+  // Grant names come from 5etools tags ("light"): matched by key, not case.
+  const autoByName = new Map(autoGrantedSpells.map((spell) => [matchKey(spell.name), spell]));
   const autoPool = autoGrantedSpells.map((auto) => ({
     ...(spellIndex.get(matchKey(auto.name)) || { name: auto.name, level: auto.level ?? 0 }),
     _autoGranted: auto,
@@ -112,7 +116,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
             <Paper variant="outlined" sx={{ maxHeight: 460, overflow: 'auto' }}>
               <List dense disablePadding>
                 {pool.map((spell) => {
-                  const autoSelected = autoNames.has(spell.name);
+                  const autoSelected = autoByName.has(matchKey(spell.name));
                   const manualSelected = level === 0
                     ? containsSpellName(selectedCantrips, spell.name)
                     : containsSpellName(selectedSpells[level] || [], spell.name);
@@ -122,7 +126,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
                   const requiresWizardBook = activeIsWizard && !wizardBookMode && !autoSelected && !inWizardBook;
                   const disabled = wizardBookMode ? false : (autoSelected || atLimit || requiresWizardBook);
-                  const autoSource = autoByName.get(spell.name) || spell._autoGranted;
+                  const autoSource = autoByName.get(matchKey(spell.name)) || spell._autoGranted;
                   const autoLabel = autoSelected
                     ? getAutoGrantedLabel(autoSource, activeCharacter)
                     : null;
