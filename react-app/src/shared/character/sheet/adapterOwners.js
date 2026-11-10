@@ -4,6 +4,7 @@ import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { matchesRequiredChoice } from '../progression/lineageMatch.js';
 import { inventoryHasFlag } from '../progression/choiceUtils.js';
 import { asArray } from '../../lists.js';
+import { stripSource } from '../../content/nameKeys.js';
 
 // The one road from a character to the adapter behaviour that applies to them.
 //
@@ -120,8 +121,28 @@ function itemFlagPasses(entry, C, sheet) {
   return inventoryHasFlag(sheet?.sheetInventory || C?.inventory || [], requirement);
 }
 
+// `requiredArmor`: the armor the entry holds without, each kind `false` —
+// `{ heavy: false }` (Fast Movement, Roving), `{ body: false, shield: false }`
+// (Unarmored Movement). Body armor is Light, Medium or Heavy.
+const ARMOR_KINDS = {
+  body: (type) => ['LA', 'MA', 'HA'].includes(type),
+  heavy: (type) => type === 'HA',
+  shield: (type) => type === 'S',
+};
+
+function armorPasses(entry, C, sheet) {
+  const requirement = entry.requiredArmor;
+  if (!requirement || typeof requirement !== 'object') return true;
+  const worn = (sheet?.sheetInventory || C?.inventory || [])
+    .filter((item) => item?.equipped)
+    .map((item) => stripSource(item.type).toUpperCase());
+  return Object.entries(requirement).every(([kind, allowed]) => (
+    allowed !== false || !worn.some((type) => ARMOR_KINDS[kind]?.(type))
+  ));
+}
+
 // Whether an entry is in force: its owner's level reaches `minLevel`, its
-// choice and item requirements are met and its `condition` holds. A
+// choice, item and armor requirements are met and its `condition` holds. A
 // requirement that throws counts as unmet.
 export function entryApplies(entry, C, { owner = null, sheet = null, level = owner?.level } = {}) {
   if (!entry || typeof entry !== 'object') return false;
@@ -130,6 +151,7 @@ export function entryApplies(entry, C, { owner = null, sheet = null, level = own
   try {
     if (!choicePasses(entry, C, owner)) return false;
     if (!itemFlagPasses(entry, C, sheet)) return false;
+    if (!armorPasses(entry, C, sheet)) return false;
   } catch {
     return false;
   }

@@ -2,6 +2,7 @@ import { createAdapterBindings } from '../../adapterBindings.js';
 import { levelTable, MARTIAL_ARTS_DIE } from '../../classAdapterHelpers.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -31,6 +32,9 @@ registerClassAdapter("Monk", function (cls, lv, specs) {
 
 registerClassSheetEffects("Monk", [
   { type: "acFormula", key: "monk_unarmored_defense", label: "Unarmored Defense", base: 10, abilities: ["dex", "wis"], allowShield: false, minLevel: 1, requiresNoArmor: true },
+  { type: "speed", value: (level) => level >= 18 ? 30 : level >= 14 ? 25 : level >= 10 ? 20 : level >= 6 ? 15 : 10,
+    minLevel: 2, requiredArmor: { body: false, shield: false }, note: "Unarmored Movement" },
+  { type: "saveProficiency", abilities: ABILITIES, minLevel: 14, note: "Disciplined Survivor" },
   // Martial Arts: the Unarmed Strike die grows with Monk level and may use Dexterity.
   ...MARTIAL_ARTS_DIE.map(([minLevel, face]) => (
     { type: "unarmedStrike", face, dexterity: true, minLevel, note: "Martial Arts" }

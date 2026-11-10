@@ -11,6 +11,7 @@ export default function install(registry, context = {}) {
     registerClassAdapter,
     registerClassSheetActions,
     registerClassSheetResources,
+    registerClassSheetEffects,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
   const skills = SKILL_NAMES;
@@ -97,6 +98,13 @@ registerClassSheetResources("Ranger", [
     "minLevel": 14,
     "max": "abilityMod:wis", "minMax": 1
   }
+]);
+
+registerClassSheetEffects("Ranger", [
+  // Roving: +10 ft Speed and Climb and Swim Speeds equal to it, without Heavy armor.
+  { type: "speed", value: 10, minLevel: 6, requiredArmor: { heavy: false }, note: "Roving" },
+  { type: "speed", speedType: "climb", value: "walking", minLevel: 6, requiredArmor: { heavy: false }, note: "Roving" },
+  { type: "speed", speedType: "swim", value: "walking", minLevel: 6, requiredArmor: { heavy: false }, note: "Roving" },
 ]);
 
 }

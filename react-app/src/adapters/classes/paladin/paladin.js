@@ -9,6 +9,7 @@ export default function install(registry, context = {}) {
     registerClassAdapter,
     registerClassSheetActions,
     registerClassSheetResources,
+    registerClassSheetEffects,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Paladin", function (cls, lv, specs, ctx = {}) {
   if (lv >= 1) {
@@ -78,6 +79,11 @@ registerClassSheetResources("Paladin", [
     "recharge": "SR",
     "max": (lv)=>lv>=11?3:lv>=3?2:0
   }
+]);
+
+registerClassSheetEffects("Paladin", [
+  // Aura of Courage: you (and allies in your aura) are immune to Frightened.
+  { type: "immunity", conditions: ["Frightened"], minLevel: 10, note: "Aura of Courage" },
 ]);
 
 }

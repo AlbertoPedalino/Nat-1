@@ -2,9 +2,13 @@ import { collectOwnerEntries } from './adapterOwners.js';
 import { asArray } from '../../lists.js';
 import { effectKey, displayLabel, effectSummary } from './sheetEffectText.js';
 
+// An effect with its owner. A `value` given as a function of the owner's level
+// (Unarmored Movement: +10 ft, then +15… +30) is read here, once, so every
+// reader sees the number.
 function annotate(effect, meta) {
   return {
     ...effect,
+    ...(typeof effect.value === 'function' ? { value: effect.value(Number(meta.ownerLevel || 1)) } : {}),
     ownerName: meta.ownerName,
     ownerType: meta.ownerType,
     ownerLevel: meta.ownerLevel,
@@ -19,6 +23,8 @@ function dedupeEffects(effects) {
     const key = [
       effectKey(effect.type),
       effectKey(effect.key || effect.note || effect.senseType || effect.speedType || effect.ability || effect.target || ''),
+      // One note can name several modes (Roving: walking, climb and swim).
+      effectKey(effect.speedType || ''),
       effectKey(asArray(effect.damageTypes).join(',')),
       effectKey(asArray(effect.conditions).join(',')),
       effectKey(effect.ownerName),

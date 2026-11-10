@@ -10,6 +10,7 @@ export default function install(registry, context = {}) {
     registerClassAdapter,
     registerClassSheetActions,
     registerClassSheetResources,
+    registerClassSheetEffects,
     registerClassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
@@ -116,6 +117,10 @@ registerClassSheetProficiencies("Rogue", [
     minLevel: 1
   },
   { type: "language", values: ["Thieves' Cant"], minLevel: 1 }
+]);
+
+registerClassSheetEffects("Rogue", [
+  { type: "saveProficiency", abilities: ["wis", "cha"], minLevel: 15, note: "Slippery Mind" },
 ]);
 
 }
