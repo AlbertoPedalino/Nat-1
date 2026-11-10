@@ -1,4 +1,4 @@
-import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, playerColor } from './combatLabels.js';
+import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, combatLetter, playerColor } from './combatLabels.js';
 import { findMonster, getAC, getHP } from '../bestiary/monsterUtils.js';
 import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { resolveCombatVitals } from './sheetSync.js';
@@ -11,7 +11,6 @@ import {
   rollInitiative, initiativeKey, creatureInitiativeSources, resortKeepingTurn, sortCombatants,
 } from './initiative.js';
 
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // Who rolls initiative when an encounter launches, one row per creature in
 // launch order — never "Goblin x3" — so the GM can give just one of them
@@ -32,9 +31,7 @@ export function initiativeRoster(encounter, players) {
   const items = Array.isArray(encounter) ? encounter : [];
   const nameOf = (item) => item?.monsterData?.name || item?.name || 'Monster';
   const qtyOf = (item) => clampInt(item?.qty, 0, 99, 0);
-  // The same letters the tracker will show; only needed where a name repeats.
-  const totals = new Map();
-  items.forEach((item) => totals.set(nameOf(item), (totals.get(nameOf(item)) || 0) + qtyOf(item)));
+  // The same letters the tracker will show, a lone creature's included.
   items.forEach((item, itemIndex) => {
     const name = nameOf(item);
     for (let n = 0; n < qtyOf(item); n += 1) {
@@ -42,7 +39,7 @@ export function initiativeRoster(encounter, players) {
       rows.push({
         key: initiativeKey('monster', itemIndex, n),
         side: 'monsters',
-        name: totals.get(name) > 1 ? `${name} ${label}` : name,
+        name: `${name} ${label}`,
         sources: { adv: false, disadv: false },
       });
     }
@@ -74,7 +71,7 @@ function createLabeler(existing = []) {
     }
     const entry = entries.get(name);
     const label = {
-      label: LETTERS[entry.count % LETTERS.length],
+      label: combatLetter(entry.count),
       shape: entry.shape,
       shapeClr: entry.clr,
     };

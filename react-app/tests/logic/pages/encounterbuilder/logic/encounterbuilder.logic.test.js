@@ -1308,7 +1308,7 @@ test("the launch roster lists every creature on its own, with the tracker's lett
     ['party', 'Aria', 'player:0'],
     ['monsters', 'Goblin A', 'monster:0:0'],
     ['monsters', 'Goblin B', 'monster:0:1'],
-    ['monsters', 'Ogre', 'monster:1:0'],
+    ['monsters', 'Ogre A', 'monster:1:0'],
   ]);
   assert.deepEqual(rows[0].sources, { adv: false, disadv: true }, 'a player brings their own conditions');
 });

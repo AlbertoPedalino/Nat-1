@@ -90,8 +90,8 @@ test('a group gets the letters that make it usable at the table', () => {
   const monster = { name: 'Goblin', source: 'XMM', hp: { average: 7 } };
   const group = monsterGroupTokens(monster, 3);
   assert.deepEqual(group.map((token) => token.label), ['Goblin A', 'Goblin B', 'Goblin C']);
-  // A lone creature keeps its plain name: "Goblin A" on its own reads as a typo.
-  assert.deepEqual(monsterGroupTokens(monster, 1).map((token) => token.label), ['Goblin']);
+  // A lone creature too: the same name as the builder gives it (user decision).
+  assert.deepEqual(monsterGroupTokens(monster, 1).map((token) => token.label), ['Goblin A']);
   assert.equal(monsterGroupTokens(monster, 0).length, 1);
   assert.equal(monsterGroupTokens(monster, 999).length, 24, 'a slip on the keyboard cannot flood the scene');
 });
@@ -143,4 +143,11 @@ test('a large creature reserves every square it covers', () => {
   for (const token of placed.slice(1)) {
     assert.equal(covered.has(`${token.x}:${token.y}`), false, 'a piece landed inside the ogre');
   }
+});
+
+test("an imported creature's piece wears the builder's colour for it", () => {
+  const piece = combatantToToken({ id: 0, name: 'Goblin', label: 'A', shapeClr: '#123456' });
+  assert.equal(piece.color, '#123456');
+  assert.equal(piece.label, 'Goblin A');
+  assert.match(combatantToToken({ id: 1, name: 'Goblin' }).color, /^#/, 'none stored: the name picks one');
 });

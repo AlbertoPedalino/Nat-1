@@ -8,6 +8,7 @@ import { getHP, getMonsterTokenUrls } from '../../bestiary/monsterUtils.js';
 import { makeSourceRef } from './encounterSync.js';
 import { clamp, numberOrNull } from '../../numbers.js';
 import { SWATCH_COLORS } from '../../ui/swatches.js';
+import { combatLetter } from '../../encounter/combatLabels.js';
 
 // D&D creature sizes in squares. A Large creature is the first that stops
 // fitting in one, and Tiny still gets a whole square: two goblins sharing a
@@ -67,7 +68,7 @@ export function combatantToToken(combatant, { layer = 'tokens', instanceId, figh
     label: combatantLabel(combatant),
     // The colour is the ring around the art, and the fallback when the bestiary
     // image cannot be fetched.
-    color: colorForName(combatant?.name),
+    color: combatant?.shapeClr || colorForName(combatant?.name),
     // The real bestiary token, not a coloured circle: recognising a creature at
     // a glance is most of what a piece is for.
     image_url: artwork || null,
@@ -113,14 +114,14 @@ export function monsterToToken(monster, { layer = 'tokens', label } = {}) {
   };
 }
 
-// Several copies of the same creature get the letters the encounter builder
-// would have given them, because "Goblin" three times over is unusable.
+// The letters the encounter builder gives, a lone creature's included, so a
+// creature is named the same however it reached the map.
 export function monsterGroupTokens(monster, count, options = {}) {
   const total = clamp(Math.round(Number(count) || 1), 1, 24);
   const name = monster?.name || 'Creature';
   return Array.from({ length: total }, (_, index) => monsterToToken(monster, {
     ...options,
-    label: total > 1 ? `${name} ${String.fromCharCode(65 + (index % 26))}` : name,
+    label: `${name} ${combatLetter(index)}`,
   }));
 }
 

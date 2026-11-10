@@ -100,7 +100,7 @@ export function turnEntriesFromFight(fightRow, tokens, turns) {
       order: index + 1,
       active: index === currentTurn,
       name: token?.secretLabel || token?.label || combatantLabel(combatant),
-      color: token?.color || combatant?.color || null,
+      color: token?.color || combatant?.shapeClr || combatant?.color || null,
       imageUrl: token?.imageUrl || null,
       // A character's state is their sheet's, which their piece carries; the
       // fight keeps only a copy, refreshed while a builder tab runs.
