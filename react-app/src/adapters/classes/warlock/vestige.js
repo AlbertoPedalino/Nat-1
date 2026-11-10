@@ -75,7 +75,4 @@ export default function install(registry, context = {}) {
     { key: 'vestige_recovery', name: 'Vestige Recovery', icon: 'heart-pulse', recharge: 'LR', minLevel: 10, max: 1 },
     { key: 'vestige_semblance', name: 'Semblance of Life', icon: 'ghost', recharge: 'LR', minLevel: 14, max: 1 },
   ]);
-  registerSubclassSheetEffects('Warlock_Vestige', [
-    { type: 'reminder', minLevel: 6, note: "Vestige Power: within 30 ft of your companion, you gain all damage Resistances in its stat block." },
-  ]);
 }

@@ -47,12 +47,8 @@ export default function install(registry, context = {}) {
   ]);
 
   registerSubclassSheetEffects("Bard_Moon", [
-    { type: "healingSpellModifier", key: "moon_lunar_vitality", minLevel: 3,
-      note: "Lunar Vitality: once per turn when you restore HP with a spell, expend Bardic Inspiration to add the BI die to the healing. Target gains +10 ft Speed until end of your next turn." },
     { type: "spellModifier", spellName: "Moonbeam", key: "moon_blessing_heal", minLevel: 6,
       note: "Blessing of Moonlight: when a creature fails its save against your Moonbeam, one creature within 60 ft regains 2d4 HP (1/LR)." },
-    { type: "passiveUpgrade", key: "moon_eventide_splendor", minLevel: 14,
-      note: "Eventide's Splendor: Inspired Eclipse also affects BI target. Lunar Vitality can roll 1d6 without expending BI." },
   ]);
 
   registerSubclassSheetSpellModifiers("Bard_Moon", [

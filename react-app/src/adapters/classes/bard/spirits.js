@@ -75,16 +75,4 @@ export default function install(registry, context = {}) {
     { type: 'tool', values: ['Playing Card Set'], minLevel: 3 },
   ]);
 
-  registerSubclassSheetEffects('Bard_Spirits', [
-    {
-      type: 'reminder',
-      minLevel: 6,
-      note: 'Spiritual Manifestation: you always have Spirit Guardians prepared and can cast it once per Long Rest without a slot. When you cast it, you can have it also grant you and allies in its Emanation Half Cover (once per Short or Long Rest).',
-    },
-    {
-      type: 'reminder',
-      minLevel: 14,
-      note: 'Mystical Connection: when you roll on the Spirits from Beyond table, roll twice and choose which effect to bestow. On a tie, choose any effect on the table.',
-    },
-  ]);
 }

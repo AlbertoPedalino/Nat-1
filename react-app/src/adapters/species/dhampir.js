@@ -46,11 +46,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSpeciesSheetEffects('Dhampir_RHW', [
-    {
-      type: 'reminder',
-      minLevel: 1,
-      note: 'Spider Climb: you have a Climb Speed equal to your Speed. From character level 3, you can move up, down, and across vertical surfaces and along ceilings while leaving your hands free.',
-    },
-  ]);
 }

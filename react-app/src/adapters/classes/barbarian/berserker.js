@@ -19,10 +19,8 @@ registerSubclassSheetResources("Barbarian_Berserker", [
 
 registerSubclassSheetEffects("Barbarian_Berserker", [
 
-  { type: "rageDamage", minLevel: 3, note: "Frenzy: once per turn while raging, deal extra damage with Reckless Attack." },
   { type: "immunity", conditions: ["Charmed", "Frightened"], minLevel: 6, note: "Mindless Rage while raging.",
     condition: (C) => C?.rageActive === true },
-  { type: "reactionAttack", minLevel: 10, note: "Retaliation." },
 ]);
 
 }

@@ -96,14 +96,6 @@ registerClassSheetProficiencies("Cleric", [
   { type: "armor",  values: ["Heavy"],   minLevel: 1, requiredChoice: { key: "cleric_divine_order", value: "Protector" } },
   { type: "weapon", values: ["Martial"], minLevel: 1, requiredChoice: { key: "cleric_divine_order", value: "Protector" } }
 ]);
-registerClassSheetEffects("Cleric", [
-  {
-    type: "passiveNote",
-    minLevel: 1,
-    requiredChoice: { key: "cleric_divine_order", value: "Thaumaturge" },
-    note: "Thaumaturge: choose Arcana or Religion; add your WIS modifier, minimum +1, to Intelligence checks with the chosen skill."
-  }
-]);
 registerClassSheetActions("Cleric", [
   {
     "name": "Turn Undead",

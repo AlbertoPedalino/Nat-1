@@ -99,9 +99,6 @@ registerSubclassSheetResources("Sorcerer_Wild Magic", [
 
 registerSubclassSheetEffects("Sorcerer_Wild Magic", [
   { type: "advantage", target: "d20", minLevel: 3, note: "Tides of Chaos." },
-  { type: "rollModifier", minLevel: 6, note: "Bend Luck: add/subtract 1d4." },
-  { type: "passiveNote", minLevel: 14, note: "Controlled Chaos: roll twice on Wild Magic Surge table and pick either result." },
-  { type: "passiveNote", minLevel: 18, note: "Tamed Surge: pick a non-final Wild Magic Surge effect 1/LR instead of rolling." },
 ]);
 
 function getSorcererLevel(C) {
@@ -109,7 +106,7 @@ function getSorcererLevel(C) {
 }
 
 registerResourceSideEffect('wild_magic', function (ctx = {}) {
-  const C = ctx.character || ctx.C;
+  const C = ctx.character;
   const sorcererLevel = getSorcererLevel(C);
   if (sorcererLevel < 3) return null;
   const resources = ctx.resources || {};

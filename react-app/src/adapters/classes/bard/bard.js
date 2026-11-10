@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { choiceText } from '../../../shared/content/nameKeys.js';
 import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
@@ -79,9 +78,8 @@ registerClassSheetResources("Bard", [
     minLevel: 5, max: 1 },
 ]);
 
-registerResourceSideEffect('bard_font_insp', ({ C, resources }) => {
-  const chaMod = finalAbilityModifier(C, 'cha');
-  const biMax = Math.max(1, chaMod);
+registerResourceSideEffect('bard_font_insp', ({ resources, resourceMax }) => {
+  const biMax = Number(resourceMax?.bardic_insp ?? 1);
   const biCur = Number(resources?.['bardic_insp'] ?? biMax);
   if (biCur >= biMax) {
     return { type: 'recover_resource', targetResourceKey: 'bardic_insp', amount: 0, label: 'Font of Inspiration' };
@@ -114,13 +112,6 @@ registerClassSheetEffects("Bard", [
     resourceKey: "bardic_insp",
     floor: 2,
     note: "When you roll Initiative and have fewer than 2 uses of Bardic Inspiration, you regain uses until you have 2.",
-  },
-  {
-    type: "spellGrant",
-    key: "bard_words_of_creation",
-    label: "Words of Creation",
-    minLevel: 20,
-    note: "Power Word Heal and Power Word Kill are always prepared. When you cast either, you can target a second creature within 10 ft of the first.",
   },
 ]);
 

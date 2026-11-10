@@ -40,8 +40,6 @@ registerSubclassRuntimeConfig("Cleric_Trickery", {
 registerSubclassSheetEffects("Cleric_Trickery", [
 
   { type: "skillAdvantage", skill: "Stealth", minLevel: 3, note: "Blessing of the Trickster." },
-  { type: "invisibility", minLevel: 6, note: "Cloak of Shadows: become Invisible until end of next turn." },
-  { type: "passiveNote", minLevel: 17, note: "Improved Duplicity: create up to 4 duplicates with Invoke Duplicity." },
 ]);
 
 }

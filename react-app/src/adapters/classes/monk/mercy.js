@@ -35,9 +35,7 @@ registerSubclassSheetProficiencies("Monk_Mercy", [
 registerSubclassSheetEffects("Monk_Mercy", [
 
   { type: "healing", minLevel: 3, note: "Hand of Healing." },
-  { type: "necroticDamage", minLevel: 3, note: "Hand of Harm." },
   { type: "conditionRemoval", conditions: ["Blinded", "Deafened", "Paralyzed", "Poisoned", "Stunned"], minLevel: 6, note: "Physician's Touch." },
-  { type: "revive", minLevel: 17, note: "Hand of Ultimate Mercy." },
 ]);
 
 }

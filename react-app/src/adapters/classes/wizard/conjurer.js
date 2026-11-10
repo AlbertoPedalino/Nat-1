@@ -23,8 +23,4 @@ export default function install(registry, context = {}) {
     { key: 'conjurer_transposition', name: 'Benign Transposition', icon: 'move', recharge: 'LR', minLevel: 3, max: 'abilityMod:int', minMax: 1 },
     { key: 'conjurer_splintered', name: 'Splintered Summons', icon: 'copy-plus', recharge: 'LR', minLevel: 14, max: 1 },
   ]);
-  registerSubclassSheetEffects('Wizard_Conjurer', [
-    { type: 'reminder', minLevel: 6, note: 'Durable Summons: summoned creature THP = 2 x Wizard level.' },
-    { type: 'reminder', minLevel: 10, note: 'Focused Conjuration: damage cannot break Concentration on Conjuration spells.' },
-  ]);
 }

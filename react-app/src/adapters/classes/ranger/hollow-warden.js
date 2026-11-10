@@ -57,21 +57,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSubclassSheetEffects('Ranger_Hollow Warden', [
-    {
-      type: 'reminder',
-      minLevel: 3,
-      note: 'Hungering Might: +Wisdom modifier (minimum +1) to Constitution saving throws. Once per turn, when you hit while transformed and Bloodied, regain 1d10 + your Wisdom modifier Hit Points.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 11,
-      note: 'Rot and Violence (while transformed): a creature that fails its save vs Unnerving Aura also can\'t regain HP or take Reactions until the start of your next turn. Strangling Roots: on a weapon hit you can also activate the Sap or Slow mastery in addition to another mastery.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 15,
-      note: 'Ominous Strikes: when you hit a Frightened creature, the attack deals extra damage equal to your Wisdom modifier. Timeless: you have Immunity to the Exhaustion condition.',
-    },
-  ]);
 }

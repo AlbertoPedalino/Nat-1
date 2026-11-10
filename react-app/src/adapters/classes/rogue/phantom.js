@@ -73,21 +73,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSubclassSheetEffects('Rogue_Phantom', [
-    {
-      type: 'reminder',
-      minLevel: 9,
-      note: 'Tokens of the Departed: keep up to two soul trinkets (3 at level 13, 4 at level 17). Death\'s Knell: destroy a trinket on a Sneak Attack to use Wails from the Grave for free. Life Essence: while you have a trinket, Advantage on Death Saves and Constitution saves. Spirit Query: destroy a trinket (Magic action) to cast Augury (Constitution) or question the associated spirit.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 9,
-      note: 'Voice of Death: cast Speak with Dead once per Short or Long Rest without a slot or components (Dexterity), optionally targeting one of your soul trinkets.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 17,
-      note: "Death's Friend — Draw of Death: when you roll Initiative with no soul trinkets remaining, you gain one.",
-    },
-  ]);
 }

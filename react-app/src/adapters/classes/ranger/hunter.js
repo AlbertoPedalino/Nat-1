@@ -42,13 +42,6 @@ registerSubclassSheetActions("Ranger_Hunter", [
   }
 ]);
 
-registerSubclassSheetEffects("Ranger_Hunter", [
-
-  { type: "damageRider", minLevel: 3, note: "Hunter's Prey choice." },
-  { type: "defenseReaction", minLevel: 7, note: "Defensive Tactics choice." },
-  { type: "cleaveDamage", minLevel: 11, note: "Superior Hunter's Prey." },
-  { type: "damageResistanceReaction", minLevel: 15, note: "Superior Hunter's Defense." },
-]);
 
 }
 

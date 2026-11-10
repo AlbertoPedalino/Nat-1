@@ -27,7 +27,6 @@ registerSubclassSheetEffects("Bard_Dance", [
   )),
   // Tandem Footwork (L6) is conditional (expend Bardic Inspiration; bonus = die rolled),
   // not a passive modifier — covered by its feature action above, no sheet effect.
-  { type: "evasion", minLevel: 14, note: "Evasion." },
 ]);
 
 }

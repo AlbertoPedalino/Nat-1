@@ -32,11 +32,7 @@ registerSubclassRuntimeConfig("Wizard_Abjurer", {
 
 registerSubclassSheetEffects("Wizard_Abjurer", [
 
-  { type: "ward", key: "arcane_ward", minLevel: 3, note: "Arcane Ward max HP = 2 × Wizard level + INT modifier." },
-  { type: "reactionDefense", minLevel: 6, note: "Projected Ward." },
-  { type: "spellSlotRefund", minLevel: 10, note: "Spell Breaker: Counterspell/Dispel Magic slot not expended if spell fails." },
   { type: "advantage", target: "save", source: "spells", minLevel: 14, note: "Spell Resistance." },
-  { type: "passiveNote", minLevel: 14, note: "Spell Resistance: Resistance to damage of spells." },
 ]);
 
 }

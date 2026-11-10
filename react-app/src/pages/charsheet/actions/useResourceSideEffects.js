@@ -52,7 +52,9 @@ export function useResourceSideEffects(ctx) {
         let result = null;
         try {
           const slots = getSpellSlots(C);
-          result = sideEffect({ character: C, C, sheet, resources: res, slots });
+          // `resourceMax`: the resolved maximum of each resource, so a side
+          // effect never re-derives one (resMaxMap).
+          result = sideEffect({ character: C, sheet, resources: res, resourceMax: resMaxMap, slots });
         } catch {
           result = null;
         }

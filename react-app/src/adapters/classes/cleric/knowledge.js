@@ -71,9 +71,6 @@ registerSubclassRuntimeConfig("Cleric_Knowledge", {
 
 registerSubclassSheetEffects("Cleric_Knowledge", [
 
-  { type: "passiveNote", minLevel: 3, note: "Blessings of Knowledge: gain proficiency in 2 skills (Arcana, History, Nature, or Religion) and one Artisan's Tool of your choice." },
-  { type: "passiveNote", minLevel: 3, note: "Mind Magic: as a Magic action, expend 1 Channel Divinity to cast a prepared Divination spell from your Domain Spells without a spell slot or Material components." },
-  { type: "passiveNote", minLevel: 6, note: "Unfettered Mind: Telepathy 60 ft; proficiency in INT saves." },
   { type: "advantage", target: "d20Tests", minLevel: 17, note: "Divine Foreknowledge: BA, 1 hour Advantage on all D20 Tests." },
 ]);
 registerSubclassSheetResources("Cleric_Knowledge", [

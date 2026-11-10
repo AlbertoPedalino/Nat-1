@@ -41,11 +41,6 @@ registerSubclassRuntimeConfig("Paladin_Devotion", {
   },
 });
 
-registerSubclassSheetEffects("Paladin_Devotion", [
-
-  { type: "aura", key: "holy_nimbus", minLevel: 20, note: "Holy Nimbus: bright sunlight aura; enemies in aura take Radiant damage and have Disadvantage against relevant saves while active." },
-
-]);
 
 }
 

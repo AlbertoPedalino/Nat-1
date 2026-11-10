@@ -45,8 +45,6 @@ registerSubclassRuntimeConfig("Fighter_Psi Warrior", {
 
 registerSubclassSheetEffects("Fighter_Psi Warrior", [
 
-  { type: "damageReduction", minLevel: 3, note: "Protective Field: reduce damage to a creature within 30 ft by Psionic Energy Die + INT mod." },
-  { type: "forceDamage", minLevel: 3, note: "Psionic Strike: extra Force damage using Psionic Energy Die + INT mod." },
   { type: "conditionRemoval", conditions: ["Charmed", "Frightened"], minLevel: 10, note: "Guarded Mind." },
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 10, note: "Guarded Mind." },
 ]);

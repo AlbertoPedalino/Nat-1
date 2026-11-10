@@ -53,16 +53,6 @@ export default function install(registry, context = {}) {
   ]);
 
   registerSubclassSheetEffects('Warlock_Undead', [
-    {
-      type: 'reminder',
-      minLevel: 6,
-      note: 'Grave Touched: your Necrotic damage ignores Resistance to Necrotic, and once per turn you can change a damage spell\'s damage type to Necrotic. Dreaded Necrosis: while in Form of Dread, once per turn add one extra damage die to Necrotic damage you deal on a hit. Undead Endurance: no Exhaustion from dehydration/malnutrition/suffocation; no need to sleep, and magic can\'t put you to sleep.',
-    },
     { type: 'resistance', damageTypes: ['Necrotic'], minLevel: 10, note: 'Necrotic Resilience (Immunity while in Form of Dread).' },
-    {
-      type: 'reminder',
-      minLevel: 14,
-      note: 'Superior Dread (while in Form of Dread): Resistance to Bludgeoning, Piercing, and Slashing damage; a Fly Speed equal to your Speed with hover and incorporeal movement; and you cast Conjuration/Necromancy Warlock spells without V/S/M components (except costly or consumed materials).',
-    },
   ]);
 }

@@ -37,16 +37,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSpeciesSheetEffects('Reborn_RHW', [
-    {
-      type: 'reminder',
-      minLevel: 1,
-      note: 'Escaped Death: you have Advantage on Death Saving Throws.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 1,
-      note: "Everlasting: you don't gain Exhaustion from dehydration, malnutrition, or suffocation; you don't need to sleep and magic can't put you to sleep; you can finish a Long Rest in 4 hours of inactive rest while remaining conscious.",
-    },
-  ]);
 }

@@ -36,9 +36,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
 
 registerSubclassSheetEffects("Fighter_Banneret", [
 
-  { type: "healingSideEffect", minLevel: 3, note: "Rallying Cry: when you use Second Wind, allies regain HP." },
   { type: "skillExpertise", values: ["Persuasion"], minLevel: 7, note: "Royal Envoy." },
-  { type: "reactionAttackGrant", minLevel: 10, note: "Inspiring Surge: when you Action Surge, ally can make one weapon attack." },
 ]);
 
 }

@@ -22,7 +22,6 @@ registerSubclassSheetEffects("Fighter_Champion", [
   { type: "advantage", target: "initiative", minLevel: 3, note: "Remarkable Athlete / Heroic Warrior." },
   { type: "speed", value: 10, minLevel: 7, note: "Remarkable Athlete: Speed increases by 10 ft." },
   { type: "critRange", value: 18, minLevel: 15, note: "Superior Critical." },
-  { type: "regeneration", minLevel: 18, note: "Survivor: regain HP at the start of your turn if Bloodied and not Incapacitated." },
 ]);
 
 }

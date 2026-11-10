@@ -58,11 +58,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSubclassSheetEffects('Cleric_Grave', [
-    {
-      type: 'reminder',
-      minLevel: 3,
-      note: 'Pull of Death: once per turn, when you deal damage to a creature missing any Hit Points (by a spell or an attack roll), it takes an extra 1d4 Necrotic damage (1d6 at Cleric level 11).',
-    },
-  ]);
 }

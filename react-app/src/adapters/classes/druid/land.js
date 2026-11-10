@@ -76,7 +76,7 @@ registerSubclassSheetEffects("Druid_Land", [
 ]);
 
 registerResourceSideEffect('natural_recovery', function (ctx = {}) {
-  const C = ctx.character || ctx.C;
+  const C = ctx.character;
   const druidLv = classLevel(C, 'Druid');
   if (!druidLv) return null;
   const budget = Math.ceil(druidLv / 2);

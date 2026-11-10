@@ -68,10 +68,5 @@ export default function install(registry, context = {}) {
   registerSubclassSheetEffects('Sorcerer_Shadow', [
     { type: 'sense', senseType: 'darkvision', value: 120, minLevel: 3, note: 'Eyes of the Dark.' },
     { type: 'sense', senseType: 'blindsight', value: 10, minLevel: 3, note: 'Eyes of the Dark.' },
-    {
-      type: 'reminder',
-      minLevel: 3,
-      note: 'Eyes of the Dark: if a spell you cast creates an area of Darkness, you can see normally through that Darkness.',
-    },
   ]);
 }

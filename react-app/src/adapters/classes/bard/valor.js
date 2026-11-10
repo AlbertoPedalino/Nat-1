@@ -19,10 +19,6 @@ registerSubclassSheetProficiencies("Bard_Valor", [
   { type: "weapon", values: ["Martial"], minLevel: 3 },
 ]);
 
-registerSubclassSheetEffects("Bard_Valor", [
-  { type: "bardicInspirationUpgrade", minLevel: 3, note: "Combat Inspiration." },
-  { type: "extraAttack", minLevel: 6, note: "Extra Attack." },
-]);
 
 }
 

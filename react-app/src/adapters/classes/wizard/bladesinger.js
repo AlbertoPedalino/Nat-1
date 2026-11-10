@@ -131,8 +131,6 @@ registerSubclassSheetEffects("Wizard_Bladesinger", [
     note: "Bladesong",
     condition: bladesingerConditionActive,
   },
-  { type: "extraAttackCantripReplacement", minLevel: 6, note: "Extra Attack." },
-  { type: "damageReduction", minLevel: 10, note: "Song of Defense." },
 ]);
 
 }

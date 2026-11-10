@@ -27,13 +27,6 @@ registerSubclassSheetActions("Ranger_Beast Master", [
   }
 ]);
 
-registerSubclassSheetEffects("Ranger_Beast Master", [
-
-  { type: "companion", key: "primal_companion", minLevel: 3, note: "Primal Companion: Land/Sea/Sky choice." },
-  { type: "companionAction", minLevel: 7, note: "Exceptional Training." },
-  { type: "companionExtraAttack", minLevel: 11, note: "Bestial Fury." },
-  { type: "shareSpells", minLevel: 15, note: "Share Spells." },
-]);
 
 }
 

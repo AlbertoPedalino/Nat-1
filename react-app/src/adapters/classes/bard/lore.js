@@ -38,8 +38,6 @@ registerSubclassSheetActions("Bard_Lore", [
 registerSubclassSheetEffects("Bard_Lore", [
 
   { type: "skillProficiency", count: 3, minLevel: 3, note: "Bonus Proficiencies." },
-  { type: "reactionPenalty", minLevel: 3, note: "Cutting Words: subtract Bardic Inspiration die from enemy roll/damage." },
-  { type: "selfInspiration", minLevel: 14, note: "Peerless Skill." },
 ]);
 
 }

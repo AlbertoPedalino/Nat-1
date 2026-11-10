@@ -146,7 +146,7 @@ registerClassSheetResources("Sorcerer", [
 ]);
 
 registerResourceSideEffect('sorc_restoration', function (ctx = {}) {
-  const C = ctx.character || ctx.C;
+  const C = ctx.character;
   const sorcLv = classLevel(C, 'Sorcerer');
   if (!sorcLv) return null;
   return {
@@ -158,7 +158,7 @@ registerResourceSideEffect('sorc_restoration', function (ctx = {}) {
 });
 
 registerResourceSideEffect('sorc_create_slot', function (ctx = {}) {
-  const C = ctx.character || ctx.C;
+  const C = ctx.character;
   const res = ctx.resources || {};
   const currentSP = Number(res.sorc_pts || 0);
   if (currentSP < 2) return null;

@@ -21,13 +21,6 @@ registerSubclassSheetResources("Monk_Open Hand", [
     max: 'abilityMod:wis', minMax: 1 },
 ]);
 
-registerSubclassSheetEffects("Monk_Open Hand", [
-
-  { type: "flurryUpgrade", minLevel: 3, note: "Open Hand Technique: add rider effects to Flurry of Blows." },
-  { type: "selfHealing", minLevel: 6, note: "Wholeness of Body." },
-  { type: "reactionDefense", minLevel: 11, note: "Fleet Step / Tranquility style feature depending on adapter data." },
-  { type: "saveOrDie", minLevel: 17, note: "Quivering Palm." },
-]);
 
 }
 

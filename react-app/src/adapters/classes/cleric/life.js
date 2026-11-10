@@ -89,11 +89,6 @@ registerSubclassRuntimeConfig("Cleric_Life", {
   },
 });
 
-registerSubclassSheetEffects("Cleric_Life", [
-  { type: "passiveNote", minLevel: 3, note: "Disciple of Life: healing spell with a slot restores +2 + slot level HP." },
-  { type: "passiveNote", minLevel: 6, note: "Blessed Healer: when healing another creature with a spell slot, regain 2 + slot level HP." },
-  { type: "healingMaximized", minLevel: 17, note: "Supreme Healing: use maximum values on healing dice." },
-]);
 
 }
 

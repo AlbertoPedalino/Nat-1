@@ -35,8 +35,6 @@ registerSubclassRuntimeConfig("Bard_Glamour", {
 registerSubclassSheetEffects("Bard_Glamour", [
 
   { type: "tempHp", minLevel: 3, note: "Mantle of Inspiration: grant Temporary HP and movement." },
-  { type: "charm", minLevel: 6, note: "Mantle of Majesty: Command as Bonus Action while active." },
-  { type: "defense", minLevel: 14, note: "Unbreakable Majesty: attackers may fail to attack you." },
 ]);
 
 }

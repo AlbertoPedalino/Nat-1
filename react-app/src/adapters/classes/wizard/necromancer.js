@@ -37,7 +37,5 @@ export default function install(registry, context = {}) {
   ]);
   registerSubclassSheetEffects('Wizard_Necromancer', [
     { type: 'resistance', damageTypes: ['Necrotic'], minLevel: 3, note: 'Necromancy Spellbook' },
-    { type: 'reminder', minLevel: 6, note: 'Grave Power: Arcane Recovery reduces Exhaustion by 1; Wizard spells/features ignore Necrotic Resistance.' },
-    { type: 'reminder', minLevel: 6, note: 'Undead Thralls: summoned/created Undead gain HP and damage bonuses based on INT and Wizard level.' },
   ]);
 }

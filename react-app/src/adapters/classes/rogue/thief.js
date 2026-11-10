@@ -23,11 +23,9 @@ registerSubclassSheetActions("Rogue_Thief", [
 
 registerSubclassSheetEffects("Rogue_Thief", [
 
-  { type: "bonusActionUtilize", minLevel: 3, note: "Fast Hands." },
   { type: "speed", speedType: "climb", value: "walking", minLevel: 3, note: "Second-Story Work." },
   { type: "jumpUsesDex", minLevel: 3, note: "Second-Story Work." },
   { type: "attunementSlots", value: 4, minLevel: 13, note: "Use Magic Device." },
-  { type: "extraTurn", minLevel: 17, note: "Thief's Reflexes." },
 ]);
 
 }

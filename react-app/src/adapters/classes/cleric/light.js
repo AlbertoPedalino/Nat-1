@@ -49,12 +49,6 @@ registerSubclassRuntimeConfig("Cleric_Light", {
   },
 });
 
-registerSubclassSheetEffects("Cleric_Light", [
-
-  { type: "reactionDefense", key: "warding_flare", minLevel: 3, note: "Warding Flare: impose Disadvantage on an attack within 30 ft." },
-  { type: "reactionDefense", key: "warding_flare", minLevel: 6, note: "Improved Warding Flare: can also protect allies." },
-  { type: "aura", key: "corona_light", minLevel: 17, note: "Corona of Light: enemies in bright light have Disadvantage on saves against Fire/Radiant spells." },
-]);
 
 }
 

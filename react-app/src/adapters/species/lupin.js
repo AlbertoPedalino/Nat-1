@@ -36,11 +36,4 @@ export default function install(registry, context = {}) {
     },
   ]);
 
-  registerSpeciesSheetEffects('Lupin_RHW', [
-    {
-      type: 'reminder',
-      minLevel: 1,
-      note: 'Feral Pounce: your Unarmed Strikes deal Slashing damage. When you hit with an Unarmed Strike as part of the Attack action on your turn, you can use both the Damage and Shove options (once per turn).',
-    },
-  ]);
 }

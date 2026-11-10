@@ -96,16 +96,4 @@ export default function install(registry, context = {}) {
     { type: 'tool', values: ["Alchemist's Supplies"], minLevel: 3 },
   ]);
 
-  registerSubclassSheetEffects('Artificer_Reanimator', [
-    {
-      type: 'reminder',
-      minLevel: 5,
-      note: 'Strange Modifications: when you create your companion, it gains one option (Arcane Conduit or Ferocity). Two options at level 9 (Macabre Modifications adds Bloated, Gaunt, Moist), three at level 15.',
-    },
-    {
-      type: 'reminder',
-      minLevel: 9,
-      note: 'Improved Reanimation: your companion\'s Death Burst increases to 4d4, and Necrotic damage it deals ignores Resistance.',
-    },
-  ]);
 }

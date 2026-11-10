@@ -60,9 +60,7 @@ registerSubclassRuntimeConfig("Barbarian_Wild Heart", {
 });
 
 registerSubclassSheetEffects("Barbarian_Wild Heart", [
-  { type: "passiveNote", minLevel: 3, note: "Rage of the Wilds: Bear → Resistance to all damage except Psychic while raging. Eagle/Wolf grant utility, not damage resistance." },
   { type: "mobility", minLevel: 6, note: "Aspect of the Wilds: animal aspect utility." },
-  { type: "rageAura", minLevel: 14, note: "Power of the Wilds: enhanced rage aspect." },
 ]);
 
 }

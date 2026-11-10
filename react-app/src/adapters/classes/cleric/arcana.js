@@ -63,7 +63,4 @@ export default function install(registry, context = {}) {
   registerSubclassSheetResources('Cleric_Arcana', [
     { key: 'arcana_dispelling_recovery', name: 'Dispelling Recovery', icon: 'wand-sparkles', recharge: 'SR+LR', minLevel: 6, max: 1 },
   ]);
-  registerSubclassSheetEffects('Cleric_Arcana', [
-    { type: 'reminder', minLevel: 17, note: 'Magical Mastery: the four selected Wizard spells (levels 6-9) are always prepared as Cleric spells.' },
-  ]);
 }

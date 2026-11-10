@@ -487,7 +487,7 @@ registerClassSheetResources("Warlock", [
 
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.
 registerResourceSideEffect('magical_cunning', function (ctx = {}) {
-  const C = ctx.character || ctx.C;
+  const C = ctx.character;
   const wlv = clamp(warlockLevel(C), 0, 20);
   if (!wlv) return null;
 

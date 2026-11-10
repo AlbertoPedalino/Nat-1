@@ -36,7 +36,4 @@ export default function install(registry, context = {}) {
     { key: 'enchanter_split', name: 'Split Enchantment', icon: 'split', recharge: 'LR', minLevel: 6, max: 'abilityMod:int', minMax: 1 },
     { key: 'enchanter_charm', name: 'Instinctive Charm', icon: 'shield', recharge: 'LR', minLevel: 10, max: 1 },
   ]);
-  registerSubclassSheetEffects('Wizard_Enchanter', [
-    { type: 'reminder', minLevel: 3, note: 'Enchanting Conversationalist: add INT modifier (minimum +1) to checks with the selected social skill.' },
-  ]);
 }

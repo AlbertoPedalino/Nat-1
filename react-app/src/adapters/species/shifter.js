@@ -57,31 +57,5 @@ registerSpeciesSheetResources("Shifter_EFA", [
   },
 ]);
 
-registerSpeciesSheetEffects("Shifter_EFA", [
-  {
-    type: 'reminder',
-    minLevel: 1,
-    note: 'Beasthide (while shifted): +1d6 extra Temporary Hit Points on Shift, +1 AC.',
-    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.BEASTHIDE },
-  },
-  {
-    type: 'reminder',
-    minLevel: 1,
-    note: 'Longtooth (while shifted): on Shift and as a Bonus Action on other turns, make an Unarmed Strike with elongated fangs; on hit, deal 1d6 + STR Piercing damage.',
-    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.LONGTOOTH },
-  },
-  {
-    type: 'reminder',
-    minLevel: 1,
-    note: 'Swiftstride (while shifted): Speed +10 ft; once per round move up to 10 ft as a Reaction when a creature ends its turn within 5 ft (no Opportunity Attacks provoked).',
-    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.SWIFTSTRIDE },
-  },
-  {
-    type: 'reminder',
-    minLevel: 1,
-    note: 'Wildhunt (while shifted): Advantage on Wisdom checks; no creature within 30 ft can have Advantage on attack rolls against you unless you are Incapacitated.',
-    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.WILDHUNT },
-  },
-]);
 
 }

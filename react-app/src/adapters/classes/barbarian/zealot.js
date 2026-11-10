@@ -25,8 +25,6 @@ registerSubclassSheetResources("Barbarian_Zealot", [
 
 registerSubclassSheetEffects("Barbarian_Zealot", [
 
-  { type: "radiantOrNecroticDamage", minLevel: 3, note: "Divine Fury: extra damage once each turn while raging." },
-  { type: "reroll", minLevel: 6, note: "Fanatical Focus: reroll a failed save while raging." },
   { type: "speed", speedType: "fly", value: "walking", situational: true, minLevel: 14, note: "Rage of the Gods: fly speed and resistance-related benefits while raging." },
 ]);
 

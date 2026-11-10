@@ -23,8 +23,6 @@ registerSubclassSheetResources("Wizard_Diviner", [
 
 registerSubclassSheetEffects("Wizard_Diviner", [
 
-  { type: "d20Replacement", key: "portent", minLevel: 3, note: "Portent." },
-  { type: "spellSlotRecovery", minLevel: 6, note: "Expert Divination." },
   { type: "senseChoice", minLevel: 10, note: "The Third Eye: Darkvision 120 ft, read any language, or See Invisibility." },
 ]);
 
