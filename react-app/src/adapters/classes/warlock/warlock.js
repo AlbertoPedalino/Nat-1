@@ -18,6 +18,7 @@ import {
   REPEATABLE_INVOCATIONS, INVOCATION_SLOT_LEVELS, MODIFIER_CANTRIP_EFFECTS, MODIFIER_ELIGIBLE_CANTRIPS, warlockChoiceMatches,
 } from './invocations.js';
 import { clamp } from '../../../shared/numbers.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -298,7 +299,50 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Eldritch Smite') && warlockHasInvocation(C, 'Pact of the Blade'); },
-    rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
+    rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],},
+
+  // ── INVOCATIONS: World of Warcraft (demonology) ───────────────────────────
+
+  {
+    "name": "Pact of the Legion",
+    "cat": "action",
+    "minLevel": 1,
+    "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Legion'); }
+  },
+  {
+    "name": "Call of the Void",
+    "cat": "bonus",
+    "minLevel": 5,
+    "condition": function(C) { return warlockHasInvocation(C, 'Call of the Void') && warlockHasInvocation(C, 'Pact of the Legion'); }
+  },
+  {
+    "name": "Health Funnel",
+    "cat": "bonus",
+    "minLevel": 2,
+    "condition": function(C) { return warlockHasInvocation(C, 'Health Funnel'); },
+    inlinePills: function(ctx) { return [{ label: 'Per Hit Point Die', value: '+' + finalAbilityModifier(ctx.character, 'cha') }]; }
+  },
+  {
+    "name": "Curse of Corruption",
+    "cat": "special",
+    "minLevel": 2,
+    "condition": function(C) { return warlockHasInvocation(C, 'Curse of Corruption'); },
+    inlinePills: function(ctx) { return [{ label: 'Necrotic', value: finalAbilityModifier(ctx.character, 'cha') }]; }
+  },
+  {
+    "name": "Expendable Minions",
+    "cat": "special",
+    "minLevel": 9,
+    "condition": function(C) { return warlockHasInvocation(C, 'Expendable Minions'); },
+    inlinePills: function(ctx) { return [{ label: 'Healing', value: Number(ctx.ownerLevel || 0) + finalAbilityModifier(ctx.character, 'cha') }]; }
+  },
+  {
+    "name": "Legion Summoning",
+    "cat": "action",
+    "resKey": "legion_summoning",
+    "minLevel": 9,
+    "condition": function(C) { return warlockHasInvocation(C, 'Legion Summoning') && warlockHasInvocation(C, 'Pact of the Legion'); }
+  }
 ]);
 
 // Pact Weapon: unified via `pactWeapon` item flag. Weapon override `pact_blade` binds to it.
@@ -343,6 +387,7 @@ registerClassAtWillSpells('Warlock', [
   { invocation: 'Whispers of the Grave',     spell: 'Speak with Dead', minLevel: 7  },
   { invocation: 'Visions of Distant Realms', spell: 'Arcane Eye',      minLevel: 9  },
   { invocation: 'Pact of the Chain',         spell: 'Find Familiar',  minLevel: 1  },
+  { invocation: 'Pact of the Legion',        spell: 'Find Familiar',  minLevel: 1  },
 ]);
 
 // Eldritch Blast invocation effects — adapter sets flags, sheet computes numeric values
@@ -435,6 +480,14 @@ registerClassSheetResources("Warlock", [
     "recharge": "LR",
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); },
+    "max": function() { return 1; }
+  },
+  {
+    "key": "legion_summoning",
+    "name": "Legion Summoning",
+    "recharge": "LR",
+    "minLevel": 9,
+    "condition": function(C) { return warlockHasInvocation(C, 'Legion Summoning') && warlockHasInvocation(C, 'Pact of the Legion'); },
     "max": function() { return 1; }
   },
   {

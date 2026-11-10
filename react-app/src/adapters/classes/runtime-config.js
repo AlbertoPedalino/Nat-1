@@ -166,6 +166,7 @@ export default function install(registry, context = {}) {
       alwaysKnownSpells: [
         { name: "Find Familiar", minLevel: 1, level: 1, source: "Pact of the Chain", sourceType: "class", invocation: "Pact of the Chain" },
         { name: "Water Breathing", minLevel: 5, level: 3, source: "Gift of the Depths", sourceType: "class", invocation: "Gift of the Depths" },
+        { name: "Planar Binding", minLevel: 9, level: 5, source: "Legion Summoning", sourceType: "class", invocation: "Legion Summoning" },
       ],
       choiceSpellSources: {
         warlock_tome_cantrip_1: { label: "Pact of the Tome", ability: "cha" },

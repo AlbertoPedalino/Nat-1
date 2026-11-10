@@ -70,3 +70,21 @@ test('feat prerequisites read the species and a named class', () => {
   assert.equal(meetsFeatPrerequisites(voidWarrior, { hasNamedClass: () => true }), true);
   assert.equal(meetsFeatPrerequisites(voidWarrior, { hasNamedClass: () => null }), true);
 });
+
+test('the World of Warcraft invocations bring their cards, spells and uses', async () => {
+  const { default: installWarlock } = await import('../../../src/adapters/classes/warlock/warlock.js');
+  installWarlock(adapterRegistry);
+  const C = {
+    className: 'Warlock', classSource: 'WoW', classLevel: 9, level: 9, choices: {
+      warlock_invocation_1: ['Pact of the Legion'], warlock_invocation_2: ['Legion Summoning'], warlock_invocation_3: ['Health Funnel'],
+    },
+    scoreMethod: 'manual', manualScores: { cha: 18 },
+  };
+  const names = collectOwnerEntries(C, 'SheetActions').map(({ entry }) => entry.name);
+  assert.ok(['Pact of the Legion', 'Legion Summoning', 'Health Funnel'].every((name) => names.includes(name)));
+  assert.ok(!names.includes('Call of the Void'));
+  const resources = collectOwnerEntries(C, 'SheetResources').map(({ entry }) => entry.key);
+  assert.ok(resources.includes('legion_summoning'));
+  const atWill = adapterRegistry.getClassAtWillSpells('Warlock').filter((entry) => entry.invocation === 'Pact of the Legion');
+  assert.deepEqual(atWill.map((entry) => entry.spell), ['Find Familiar']);
+});
