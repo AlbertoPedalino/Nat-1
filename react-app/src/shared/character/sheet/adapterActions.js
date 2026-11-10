@@ -164,10 +164,15 @@ function buildFeatureMapFromRecords(records, scope) {
     if (Array.isArray(node.entries)) node.entries.forEach(indexNamedNode);
     if (Array.isArray(node.items)) node.items.forEach(indexNamedNode);
   };
-  (records || []).forEach((feature) => {
-    if (!feature?.name || !Array.isArray(feature.entries)) return;
-    indexNamedNode(feature);
-  });
+  // Lowest level first: when a later feature reuses a name (Elemental
+  // Overload's Icefury rider at 14 after Raging Elements' Icefury at 3), the
+  // card shows the feature itself, whatever order the snapshot was saved in.
+  [...(records || [])]
+    .sort((a, b) => Number(a?.level || 0) - Number(b?.level || 0))
+    .forEach((feature) => {
+      if (!feature?.name || !Array.isArray(feature.entries)) return;
+      indexNamedNode(feature);
+    });
   return map;
 }
 

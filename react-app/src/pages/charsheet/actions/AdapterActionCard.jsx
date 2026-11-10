@@ -175,7 +175,8 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
 
       {hasRes ? (
         <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, OPACITY.wash), true, open)}>
-          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
+          {/* `resLabel`: the resource covers only part of the card (Totems: the Primal Knowledge Totem). */}
+          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{action.resLabel || (resTrack === 'used' ? 'Spent' : 'Uses')}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
               <Button

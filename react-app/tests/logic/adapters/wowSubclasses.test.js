@@ -46,3 +46,17 @@ test('Rakish Audacity adds the Charisma modifier to Initiative', () => {
   const C = character('Rogue', 'Swashbuckler', 3, { scoreMethod: 'manual', manualScores: { cha: 16 } });
   assert.equal(collectInitiativeModifiers(C).find((modifier) => modifier.source === 'Rakish Audacity')?.amount, 3);
 });
+
+test('a card shows the lowest-level feature of its name, whatever the snapshot order', async () => {
+  const { collectAdapterActions } = await import('../../../src/shared/character/sheet/adapterActions.js');
+  const option = (text) => ({ type: 'entries', name: 'Icefury', entries: [text] });
+  const C = character('Barbarian', 'Elements', 14, {
+    // Saved before nested features followed their parent: level 14 first.
+    allSubFeatures: [
+      { name: 'Elemental Overload', level: 14, entries: [option('rider')] },
+      { name: 'Raging Elements', level: 3, entries: [option('base')] },
+    ],
+  });
+  const icefury = collectAdapterActions(C, {}).find((action) => action.name === 'Icefury');
+  assert.deepEqual([...icefury.entries], ['base']);
+});
