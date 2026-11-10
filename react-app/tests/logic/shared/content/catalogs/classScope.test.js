@@ -59,7 +59,8 @@ test('a skin lists its own and kept base features, named after it', () => {
   const data = load();
   const dk = data.classes.find((cls) => cls.name === 'Death Knight');
   const { allFeatures } = classScopedData(data, dk);
-  assert.deepEqual(allFeatures.map((f) => f.name), ['Death Coil', 'Channel Divinity', 'Death Knight Subclass', 'Divine Sense']);
+  // A nested feature follows its parent (Divine Sense inside Channel Divinity).
+  assert.deepEqual(allFeatures.map((f) => f.name), ['Death Coil', 'Channel Divinity', 'Divine Sense', 'Death Knight Subclass']);
   assert.ok(allFeatures.every((f) => f.className === 'Death Knight'));
 });
 

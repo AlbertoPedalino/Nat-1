@@ -69,18 +69,22 @@ function nestedRefs(node, type, field, out = []) {
   return out;
 }
 
+// The listed features with the ones they nest, in reading order: a nested
+// feature follows its parent (Raging Elements right after Path of the
+// Elements, before the level 14 Elemental Overload that reuses its option
+// names), so a name lookup that keeps the first match finds the base text.
 function featureClosure(refs, index, refKey, type, field) {
   const seen = new Set();
   const out = [];
-  const queue = refs.map((ref) => refString(ref, field)).filter(Boolean);
-  while (queue.length) {
-    const key = refKey(queue.shift());
+  const stack = refs.map((ref) => refString(ref, field)).filter(Boolean);
+  while (stack.length) {
+    const key = refKey(stack.shift());
     if (seen.has(key)) continue;
     seen.add(key);
     const feature = index.get(key);
     if (!feature) continue;
     out.push(feature);
-    queue.push(...nestedRefs(feature.entries, type, field));
+    stack.unshift(...nestedRefs(feature.entries, type, field));
   }
   return out;
 }
