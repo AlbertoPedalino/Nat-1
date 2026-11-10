@@ -1,6 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from '../../../shared/character/sheet/sheetStats.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { characterOwners, ownerEntries } from '../../../shared/character/sheet/adapterOwners.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { ABILITIES, SPELL_SCHOOL_NAMES } from '../../../shared/content/rulesVocabulary.js';
@@ -39,26 +39,18 @@ export function collectSpellRiders(C, { hasHeal = false, hasDamage = false, entr
     });
   };
 
-  spellModifierEntities(C).forEach((entity) => {
-    const ctx = {
+  // Every owner's riders (adapterOwners.js): classes, subclasses, species and
+  // owned feats; the ctx names the granting owner.
+  characterOwners(C).forEach((owner) => {
+    run(ownerEntries(owner, 'SpellRiders'), {
       character: C,
       hasHeal,
       hasDamage,
       entry,
-      ownerLevel: entity.level,
-      ownerClassName: entity.className,
-      ownerSubclassShortName: entity.subclassShortName,
-    };
-    run(adapterRegistry.getClassSpellRiders(entity.className), ctx);
-    if (entity.subclassShortName) {
-      run(adapterRegistry.getSubclassSpellRiders(entity.className, entity.subclassShortName), ctx);
-    }
-  });
-
-  const baseCtx = { character: C, hasHeal, hasDamage, entry, ownerLevel: Number(C?.level || 1) };
-  run(adapterRegistry.getSpeciesSpellRiders(C?.speciesName, C?.speciesSource), baseCtx);
-  (C?.allFeatSnapshots || []).forEach((feat) => {
-    if (feat?.name) run(adapterRegistry.getFeatSpellRiders(feat.name), baseCtx);
+      ownerLevel: owner.level,
+      ownerClassName: owner.className || null,
+      ownerSubclassShortName: owner.entity?.subclassShortName || null,
+    });
   });
 
   return out;
@@ -89,13 +81,6 @@ export function resolveDmgBonusValue(C, dmgBonus, getModFn, getFinalFn) {
   return Number.isFinite(n) ? n : 0;
 }
 
-export function spellModifierEntities(C) {
-  if (!C) return [];
-  const out = [{ className: C.className, subclassShortName: C.subclassShortName, level: primaryClassLevel(C) }];
-  (C.extraClasses || []).forEach((ec) => out.push({ className: ec.name, subclassShortName: ec.subclassShortName, level: ec.level || 1 }));
-  return out.filter((entry) => entry.className);
-}
-
 function normalizeSpellSchool(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -107,34 +92,15 @@ function schoolMatches(spellSchool, modifierSchool) {
   return normalizeSpellSchool(spellSchool) === normalizeSpellSchool(modifierSchool);
 }
 
-function collectSpellModifiers(C, ctx = {}) {
-  const out = [];
-  spellModifierEntities(C).forEach((entity) => {
-    out.push(...((adapterRegistry.getClassSheetSpellModifiers(entity.className) || []).map((mod) => ({
-      mod,
-      modifierOwnerType: 'class',
-      ownerLevel: entity.level,
-      ownerClassName: entity.className,
-      ownerSubclassShortName: null,
-    }))));
-    out.push(...((adapterRegistry.getSubclassSheetSpellModifiers(entity.className, entity.subclassShortName) || []).map((mod) => ({
-      mod,
-      modifierOwnerType: 'subclass',
-      ownerLevel: entity.level,
-      ownerClassName: entity.className,
-      ownerSubclassShortName: entity.subclassShortName,
-    }))));
-  });
-  if (C?.speciesName) {
-    out.push(...((adapterRegistry.getSpeciesSheetSpellModifiers(C.speciesName, C.speciesSource) || []).map((mod) => ({
-      mod,
-      modifierOwnerType: 'species',
-      ownerLevel: C.level || 1,
-      ownerClassName: null,
-      ownerSubclassShortName: null,
-    }))));
-  }
-  return out;
+// Every owner's spell modifiers, with the owner they come from.
+function collectSpellModifiers(C) {
+  return characterOwners(C).flatMap((owner) => (ownerEntries(owner, 'SheetSpellModifiers') || []).map((mod) => ({
+    mod,
+    modifierOwnerType: owner.kind,
+    ownerLevel: owner.level,
+    ownerClassName: owner.className || null,
+    ownerSubclassShortName: owner.kind === 'subclass' ? owner.name : null,
+  })));
 }
 
 export function applySpellModifiers(C, ctx) {
@@ -143,7 +109,7 @@ export function applySpellModifiers(C, ctx) {
   const spellOwnerSubclass = ctx.ownerSubclassShortName || ctx.spell?.ownerSubclassShortName || null;
   let formula = ctx.formula;
 
-  collectSpellModifiers(C, ctx).forEach(({ mod, modifierOwnerType, ownerLevel, ownerClassName, ownerSubclassShortName }) => {
+  collectSpellModifiers(C).forEach(({ mod, modifierOwnerType, ownerLevel, ownerClassName, ownerSubclassShortName }) => {
     if (!mod) return;
 
     if (modifierOwnerType === 'class' && spellOwnerClass && matchKey(ownerClassName) !== matchKey(spellOwnerClass)) return;

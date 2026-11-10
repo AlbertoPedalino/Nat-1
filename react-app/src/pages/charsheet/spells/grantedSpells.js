@@ -11,7 +11,7 @@ import {
   getFeatFreeCastTemplate,
 } from '../../../shared/character/spells/spellFreeCasts.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities } from '../../../shared/character/progression/classLevel.js';
 import { lowerKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { SRC_COLOR, featSlotTone, unionSpellSources } from './spellSourceDisplay.js';
 import {
@@ -35,9 +35,8 @@ import { asArray } from '../../../shared/lists.js';
 
 export function collectAtWillSpells(C) {
   const out = [];
-  const entities = [{ name: C?.className, level: primaryClassLevel(C) }, ...(C?.extraClasses || []).map((ec) => ({ name: ec.name, level: ec.level || 1 }))];
-  entities.forEach((entity) => {
-    (adapterRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
+  classEntities(C).forEach((entity) => {
+    (adapterRegistry.getClassAtWillSpells(entity.className) || []).forEach((entry) => {
       if (entity.level < Number(entry.minLevel || 1)) return;
       if (!isGrantUnlocked(entry, C)) return;
       out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: SRC_COLOR.choice, kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });

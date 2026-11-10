@@ -1,5 +1,5 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
-import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
+import { classEntities } from '../../../shared/character/progression/classLevel.js';
+import { enumerateClassGrants, enumerateSpeciesGrants } from '../../../shared/character/spells/autoGrantedSpells.js';
 import {
   collectFreeCastsForGrant,
   mergeFreeCastsById,
@@ -8,7 +8,6 @@ import {
 } from '../../../shared/character/spells/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
-import { spellModifierEntities } from './spellModifiers.js';
 import { choiceKeyIsCantripChoice, featSpellSlotKey } from './spellChoiceKeys.js';
 import { buildFeatMetaMap, collectFixedFeatSpells } from './featSpellMeta.js';
 import { asArray } from '../../../shared/lists.js';
@@ -18,40 +17,21 @@ import { asArray } from '../../../shared/lists.js';
 
 export function getFreeCastDefsForCharacter(C) {
   const defs = [];
-  const speciesCfg = adapterRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
-  filterByRequiredChoice([
-    ...(speciesCfg.alwaysKnownSpells || []),
-    ...(speciesCfg.alwaysPreparedSpells || []),
-  ], C).forEach((entry) => {
-    if (Number(C?.level || 1) < Number(entry.minLevel || 1)) return;
-    defs.push(...collectFreeCastsForGrant(entry, {
+  // The same grants the spells tab lists (autoGrantedSpells.js), gated the same
+  // way: a rest recovers exactly the free casts the tab shows.
+  [
+    ...enumerateSpeciesGrants(C),
+    ...classEntities(C).flatMap((entity) => enumerateClassGrants(entity, C)),
+  ].forEach((grant) => {
+    const sourceType = grant.origin === 'species' ? 'species' : (grant.subclassShortName ? 'subclass' : 'class');
+    const source = grant.origin === 'species' ? C?.speciesName : (grant.subclassShortName || grant.ownerClassName);
+    defs.push(...collectFreeCastsForGrant(grant.entry, {
       character: C,
-      ownerLevel: Number(C?.level || 1),
-      source: entry.source || C?.speciesName,
-      sourceType: entry.sourceType || 'species',
-      spellName: entry.name,
+      ownerLevel: grant.ownerLevel,
+      source: grant.explicitSource || source,
+      sourceType: grant.sourceType || sourceType,
+      spellName: grant.name,
     }));
-  });
-
-  spellModifierEntities(C).forEach(({ className, subclassShortName, level }) => {
-    const cfgs = [
-      { cfg: adapterRegistry.getClassRuntimeConfig(className), type: 'class', label: className },
-      { cfg: adapterRegistry.getSubclassRuntimeConfig(className, subclassShortName), type: 'subclass', label: subclassShortName || className },
-    ];
-    cfgs.forEach(({ cfg, type, label }) => {
-      const sp = cfg?.spellcasting;
-      if (!sp) return;
-      [...(sp.alwaysKnownSpells || []), ...(sp.alwaysPreparedSpells || [])].forEach((entry) => {
-        if (Number(level || 1) < Number(entry?.minLevel || 1)) return;
-        defs.push(...collectFreeCastsForGrant(entry, {
-          character: C,
-          ownerLevel: Number(level || 1),
-          source: entry.source || label,
-          sourceType: entry.sourceType || type,
-          spellName: entry.name,
-        }));
-      });
-    });
   });
 
   const featMeta = buildFeatMetaMap(C);

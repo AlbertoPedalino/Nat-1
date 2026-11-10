@@ -1,4 +1,4 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
+import { characterOwners, ownerEntries } from '../../../shared/character/sheet/adapterOwners.js';
 import {
   enforceAttunementRules,
   resolveAttunementLimit,
@@ -12,22 +12,8 @@ function hasSpellcastingConfig(config) {
 export function characterCanCastSpells(character) {
   if ((character?.spellSnapshots || []).length) return true;
 
-  const classes = [
-    { name: character?.className, subclass: character?.subclassShortName },
-    ...((character?.extraClasses || []).map((entry) => ({
-      name: entry?.name,
-      subclass: entry?.subclassShortName,
-    }))),
-  ].filter((entry) => entry.name);
-
-  if (classes.some((entry) => (
-    hasSpellcastingConfig(adapterRegistry.getClassRuntimeConfig(entry.name))
-    || hasSpellcastingConfig(adapterRegistry.getSubclassRuntimeConfig(entry.name, entry.subclass))
-  ))) return true;
-
-  return hasSpellcastingConfig(
-    adapterRegistry.getSpeciesRuntimeConfig(character?.speciesName, character?.speciesSource),
-  );
+  // Any class, subclass or species with a spellcasting config (feats have none).
+  return characterOwners(character).some((owner) => hasSpellcastingConfig(ownerEntries(owner, 'RuntimeConfig')));
 }
 
 export function getCharacterAttunementState(character) {

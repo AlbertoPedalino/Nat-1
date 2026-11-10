@@ -1,4 +1,3 @@
-import { adapterRegistry } from '../../../adapters/registry.js';
 import { extractFixedProficiencyLabels } from '../progression/typedProficiencies.js';
 import { wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../forms/wildShapeForm.js';
 import { getProficiencyBonus } from '../progression/proficiency.js';
@@ -150,39 +149,10 @@ function collectFixedSkillLabels(C) {
   return collectFixedProficiencyLabels(C, ['skillProficiencies', 'skillToolLanguageProficiencies']);
 }
 
-function characterClassEntities(C) {
-  if (!C) return [];
-  const out = [];
-  if (C.className) {
-    out.push({
-      className: C.className,
-      subclassShortName: C.subclassShortName || '',
-      level: primaryClassLevel(C),
-    });
-  }
-  (C.extraClasses || []).forEach((extra) => {
-    if (!extra?.name) return;
-    out.push({
-      className: extra.name,
-      subclassShortName: extra.subclassShortName || '',
-      level: Number(extra.level || 1),
-    });
-  });
-  return out;
-}
-
+// The effects in force (collectSheetEffects), plus those a saved sheet carries
+// for adapters that could not load.
 function collectRuntimeEffects(C) {
-  const effects = [];
-  characterClassEntities(C).forEach((entity) => {
-    (adapterRegistry.getClassSheetEffects(entity.className) || []).forEach((effect) => {
-      if (entity.level >= Number(effect?.minLevel || 1)) effects.push(effect);
-    });
-    if (entity.subclassShortName) {
-      (adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName) || []).forEach((effect) => {
-        if (entity.level >= Number(effect?.minLevel || 1)) effects.push(effect);
-      });
-    }
-  });
+  const effects = [...collectSheetEffects(C)];
 
   const serialized = C?.adapterRuntime || {};
   [
