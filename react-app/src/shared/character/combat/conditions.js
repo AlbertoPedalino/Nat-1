@@ -59,7 +59,8 @@ export const CONDITION_IMPLIES = {
 // sense/hearing auto-fail, action economy) are accurate reference data — wire a
 // consumer before relying on them.
 // Exhaustion is graded/numeric (−2 per level to d20 tests, −5 ft Speed) and is
-// modelled elsewhere (calculations.js), not here.
+// modelled elsewhere (sheet.exhaustionLevel; penalties in
+// shared/character/sheet/sheetStats.js), not here.
 const IN_SIGHT = 'while the source of fear is in sight';
 export const CONDITION_EFFECTS = {
   blinded:       { yourAttacksDisadv: true, attacksAgainstHaveAdv: true, autoFailSight: true },

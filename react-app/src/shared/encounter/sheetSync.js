@@ -1,5 +1,5 @@
-import { SYNCED_VITALS } from '../character/combat/vitals.js';
-import { clamp, clampInt, numberOr } from '../numbers.js';
+import { SYNCED_VITALS, clampCombatHpMax } from '../character/combat/vitals.js';
+import { clamp, numberOr } from '../numbers.js';
 import { resolveMortality } from '../character/combat/mortality.js';
 
 // The synced-field contract (which fields, how they map/clamp) lives in
@@ -8,7 +8,7 @@ import { resolveMortality } from '../character/combat/mortality.js';
 
 function clampHpMax(value) {
   const hpMax = numberOr(value, null);
-  return hpMax == null ? null : clampInt(hpMax, 1, 999, 10);
+  return hpMax == null ? null : clampCombatHpMax(hpMax);
 }
 
 // Normalize any data/combat source into the combat-vitals shape (derived hpMax +
@@ -25,7 +25,7 @@ export function sheetVitalsToCombat(source = {}) {
 // (buildCombat) and live sync (applySheetVitals).
 export function resolveCombatVitals(combatant = {}, vitals = {}) {
   const mapped = sheetVitalsToCombat(vitals);
-  const hpMax = mapped.hpMax ?? clampInt(combatant.hpMax, 1, 999, 10);
+  const hpMax = mapped.hpMax ?? clampCombatHpMax(combatant.hpMax);
   const out = { hpMax };
   for (const field of SYNCED_VITALS) {
     const fromVitals = mapped[field.combat];

@@ -21,7 +21,7 @@ import {
 import {
   hydrateEncounterItems, monsterKey, toEncounterMonster,
 } from '../../../shared/bestiary/monsterUtils.js';
-import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
+import { absorbMonsterVitals } from '../../../shared/encounter/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
 import { makeId } from '../../../shared/ids.js';

@@ -5,8 +5,8 @@ import {
   EXHAUSTION_KEY,
 } from '../character/combat/conditions.js';
 import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
-import { changeHp, clampTempHp, tempHpAfter } from '../character/combat/vitals.js';
-import { clamp, clampInt, numberOr } from '../numbers.js';
+import { changeHp, clampCombatHpMax, clampTempHp, tempHpAfter } from '../character/combat/vitals.js';
+import { clamp, numberOr } from '../numbers.js';
 import {
   clickedDeathSaveCount, markDead, resolveMortality, revive, toggleMortalCondition, withDeathSave,
 } from '../character/combat/mortality.js';
@@ -119,7 +119,7 @@ export function hpCommandFields(before, command) {
       return hpCommandFields(before, { type: 'setMaxHp', value: baseMax + n });
     }
     case 'setMaxHp': {
-      const max = clampInt(n, 1, 999, hpMax ?? 1);
+      const max = clampCombatHpMax(n, hpMax ?? 1);
       if (max === hpMax) return {};
       return {
         hpMax: max,

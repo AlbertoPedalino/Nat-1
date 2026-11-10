@@ -3,7 +3,7 @@ import { freeId, makeFightEntry } from '../../../shared/encounter/fightRecord.js
 import { applySheetVitals } from '../../../shared/encounter/combatantVitals.js';
 import { makeSavedEncounter } from './storage.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
-import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
+import { absorbMonsterVitals } from '../../../shared/encounter/fightVitals.js';
 
 // The encounter builder's running fight: launching and closing it, writing it
 // back into the fight list, and absorbing vitals and turns that changed

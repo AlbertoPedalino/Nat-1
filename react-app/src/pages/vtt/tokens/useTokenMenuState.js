@@ -18,11 +18,12 @@ export const STEP_TARGETS = {
   temp: { command: 'modifyTempHp', plusLabel: 'Add temp HP', minusLabel: 'Remove temp HP' },
 };
 
+// A character's saves as the menu shows them: a dead one shows three failures
+// (resolveMortality). Death saves are a character's only, so this runs at 0 HP.
 function deathSavesForToken(value, conditions, characterId) {
-  const normalized = normalizeDeathSaves(value);
-  return characterId && (conditions || []).includes(DEAD_CONDITION_KEY)
-    ? { ...normalized, fail: 3 }
-    : normalized;
+  return normalizeDeathSaves(resolveMortality({
+    player: Boolean(characterId), hp: 0, deathSaves: value, conditions,
+  }).deathSaves);
 }
 
 // The piece menu's fields and how each one writes: loaded once per opening,

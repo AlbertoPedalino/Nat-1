@@ -1,5 +1,6 @@
 import { requireClient } from '../supabaseClient.js';
 import { normalizeConditions } from '../../character/combat/conditions.js';
+import { normalizeEffects } from '../../character/combat/combatEffects.js';
 import { normalizeLayer, toToken, toTokenPatch } from '../../vtt/scene/scene.js';
 import { deleteMapImage } from './vttMapImages.js';
 
@@ -161,7 +162,7 @@ export async function setTokenEffects(tokenId, effects) {
   const supabase = requireClient();
   const { data, error } = await supabase.rpc('set_token_effects', {
     p_token: tokenId,
-    p_effects: effects || [],
+    p_effects: normalizeEffects(effects),
   });
   if (error) throw error;
   return toToken(Array.isArray(data) ? data[0] : data);

@@ -10,7 +10,7 @@ import {
   isMonsterCombatant,
   monsterVitalsBase,
   monsterVitalsPatch,
-} from '../../../shared/vtt/tokens/fightVitals.js';
+} from '../../../shared/encounter/fightVitals.js';
 import { snapshotFight } from '../../../shared/encounter/combat.js';
 import { HP_COMMANDS, MARK_COMMANDS } from '../../../shared/encounter/combatantVitals.js';
 import { encounterReducer } from '../state/reducer.js';

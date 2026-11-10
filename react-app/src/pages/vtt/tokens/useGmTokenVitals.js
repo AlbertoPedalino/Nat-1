@@ -4,7 +4,7 @@ import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vttTo
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
-import { newerFightRow, withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
+import { newerFightRow, withGmTokenVitals } from '../../../shared/encounter/fightVitals.js';
 
 // The GM's real hit points for the pieces of a scene. Public rows carry HP
 // only while a bar is shown, so the GM reads the private sources instead:

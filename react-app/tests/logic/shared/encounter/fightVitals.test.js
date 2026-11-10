@@ -4,11 +4,11 @@ import {
   monsterVitalsPatch,
   newerFightRow,
   withGmTokenVitals,
-} from '../../../../../src/shared/vtt/tokens/fightVitals.js';
+} from '../../../../src/shared/encounter/fightVitals.js';
 import {
   applyCombatantEdit,
   applyCombatantHpCommand as applyMonsterVitalCommand,
-} from '../../../../../src/shared/encounter/combatantVitals.js';
+} from '../../../../src/shared/encounter/combatantVitals.js';
 
 // The battle map's copy of a fight row: a recovery read that left before a
 // realtime event arrived must not put the older enemy vitals back.

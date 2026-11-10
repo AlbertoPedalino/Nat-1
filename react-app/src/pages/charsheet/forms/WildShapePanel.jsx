@@ -16,6 +16,7 @@ import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { tempHpAfter } from '../../../shared/character/combat/vitals.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -59,7 +60,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     // The HP block reads Temp HP from sheet state, which isn't re-derived from the
     // character patch — mirror the Druid-level grant so it shows immediately.
     const granted = Math.max(0, druidLevel(character));
-    onUpdateSheet?.({ tempHP: Math.max(Number(sheet?.tempHP || 0), granted) });
+    onUpdateSheet?.({ tempHP: tempHpAfter(sheet?.tempHP, 'grantTempHp', granted) });
   };
   const revert = () => {
     if (!onUpdateCharacter) return;

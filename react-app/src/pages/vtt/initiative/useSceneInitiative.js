@@ -4,7 +4,7 @@ import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { FIGHT_UNAVAILABLE, commitFightTurn } from '../../../shared/cloud/api/encounterFights.js';
 import { combatantRollActor } from '../../../shared/encounter/rollActor.js';
 import { combatantMonster } from '../../../shared/encounter/combat.js';
-import { linkedCombatant } from '../../../shared/vtt/tokens/fightVitals.js';
+import { linkedCombatant } from '../../../shared/encounter/fightVitals.js';
 import {
   sceneFightChoices,
   showsFight,

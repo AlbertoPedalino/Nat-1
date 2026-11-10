@@ -6,7 +6,7 @@ import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { clampInt, numberOr } from '../numbers.js';
 import { restoreCombatantMortality } from './combatantVitals.js';
-import { clampTempHp } from '../character/combat/vitals.js';
+import { clampCombatHpMax, clampTempHp } from '../character/combat/vitals.js';
 import {
   rollInitiative, initiativeKey, creatureInitiativeSources, resortKeepingTurn, sortCombatants,
 } from './initiative.js';
@@ -88,7 +88,7 @@ export function clampPlayerStats({ initMod, ac, hpMax }) {
   return {
     initMod: clampInt(initMod, -20, 30, 0),
     ac: clampInt(ac, 1, 99, 10),
-    hpMax: clampInt(hpMax, 1, 999, 10),
+    hpMax: clampCombatHpMax(hpMax),
   };
 }
 

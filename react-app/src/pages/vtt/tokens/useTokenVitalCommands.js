@@ -9,7 +9,7 @@ import {
   monsterVitalsPatch,
   newerFightRow,
   tokenVitalsOfCreature,
-} from '../../../shared/vtt/tokens/fightVitals.js';
+} from '../../../shared/encounter/fightVitals.js';
 import { applyCombatantEdit, applyCombatantHpCommand } from '../../../shared/encounter/combatantVitals.js';
 import { patchById } from '../../../shared/vtt/session/liveScene.js';
 import { createKeyedQueue } from '../../../shared/cloud/sync/keyed.js';

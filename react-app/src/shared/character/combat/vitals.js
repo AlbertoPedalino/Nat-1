@@ -10,7 +10,7 @@ import { clamp, clampInt, numberOr } from '../../numbers.js';
 // its own mapping + clamps, so heterogeneous shapes (scalars, nested objects,
 // future arrays) each handle their quirks while every consumer stays generic:
 // the sheet-side helpers below and the encounter combat mappers in
-// pages/encounterbuilder/logic/sheetSync.js both iterate this list.
+// shared/encounter/sheetSync.js both iterate this list.
 //
 // To sync a NEW field: add ONE descriptor here, add its `data` key to
 // character_vital_keys() in supabase/13_character_vitals.sql (the health
@@ -28,6 +28,12 @@ import { clamp, clampInt, numberOr } from '../../numbers.js';
 
 function clampNonNegativeInt(value, fallback = 0) {
   return Math.max(0, Math.round(numberOr(value, fallback)));
+}
+
+// The hit point maximum a fight's combatant may have: 1-999.
+export const COMBAT_HP_MAX = 999;
+export function clampCombatHpMax(value, fallback = 10) {
+  return clampInt(value, 1, COMBAT_HP_MAX, fallback);
 }
 
 // Temporary hit points: a whole number, never negative — sheets and fights.
