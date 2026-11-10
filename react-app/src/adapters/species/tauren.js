@@ -1,6 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { finalAbilityModifier } from '../../shared/character/progression/abilityScores.js';
-import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 // World of Warcraft. The lineage pick and Taunka's Cold Resistance come from
 // the species data; the lineage's saving throw DC uses Strength, Constitution
@@ -35,9 +33,6 @@ export default function install(registry, context = {}) {
       cat: 'action',
       minLevel: 1,
       requiredChoice: { key: 'species_version', value: 'Highmountain' },
-      inlinePills: ({ character }) => [
-        { label: 'Damage', value: getProficiencyBonus(character) + finalAbilityModifier(character, 'str') },
-      ],
     },
   ]);
 

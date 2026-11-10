@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -20,7 +19,6 @@ registerSpeciesSheetActions("Shifter_EFA", [
     cat: 'bonus',
     resKey: 'shifter_shift',
     minLevel: 1,
-    inlinePills: ({ character }) => [{ label: 'Temp HP', value: 2 * getProficiencyBonus(character) }],
   },
 ]);
 registerSpeciesSheetResources("Shifter_EFA", [

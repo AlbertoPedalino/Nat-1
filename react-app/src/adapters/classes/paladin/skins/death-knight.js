@@ -19,10 +19,6 @@ export default function install(registry, context = {}) {
       resKey: 'death_coil',
       minLevel: 1,
       rollers: [{ kind: 'damage', formula: ({ character }) => `${deathCoilDice(character)}d8`, label: ({ formula }) => `${formula} necrotic` }],
-      inlinePills: ({ character, ownerLevel }) => [
-        { label: 'Max dice', value: deathCoilDice(character) },
-        ...(Number(ownerLevel) >= 14 ? [{ label: 'Extra necrotic', value: deathCoilDice(character) }] : []),
-      ],
     },
     {
       name: 'Runic Strikes',

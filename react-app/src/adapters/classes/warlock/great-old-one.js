@@ -26,8 +26,7 @@ registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
 registerSubclassSheetActions("Warlock_Great Old One", [
   { name: "Awakened Mind", cat: "bonus", resKey: "goo_awakened", minLevel: 3 },
   { name: "Clairvoyant Combatant", cat: "action", resKey: "goo_clairvoyant", minLevel: 6 },
-  { name: "Create Thrall", cat: "action", resKey: "goo_create_thrall", minLevel: 14,
-    inlinePills: ({ ownerLevel }) => [{ label: "Aberration THP", value: Number(ownerLevel || 1) }] },
+  { name: "Create Thrall", cat: "action", resKey: "goo_create_thrall", minLevel: 14 },
 ]);
 
 registerSubclassSheetEffects("Warlock_Great Old One", [

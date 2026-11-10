@@ -19,6 +19,7 @@ import {
 } from './invocations.js';
 import { clamp } from '../../../shared/numbers.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -319,21 +320,21 @@ registerClassSheetActions("Warlock", [
     "cat": "bonus",
     "minLevel": 2,
     "condition": function(C) { return warlockHasInvocation(C, 'Health Funnel'); },
-    inlinePills: function(ctx) { return [{ label: 'Per Hit Point Die', value: '+' + finalAbilityModifier(ctx.character, 'cha') }]; }
+    // One roll per Hit Point Die expended (the Warlock's d8).
+    rollers: [{ kind: 'tempHp', formula: function(ctx) { return withModifier('1d8', finalAbilityModifier(ctx.character, 'cha')); },
+      label: function(ctx) { return ctx.formula + ' per die'; } }]
   },
   {
     "name": "Curse of Corruption",
     "cat": "special",
     "minLevel": 2,
-    "condition": function(C) { return warlockHasInvocation(C, 'Curse of Corruption'); },
-    inlinePills: function(ctx) { return [{ label: 'Necrotic', value: finalAbilityModifier(ctx.character, 'cha') }]; }
+    "condition": function(C) { return warlockHasInvocation(C, 'Curse of Corruption'); }
   },
   {
     "name": "Expendable Minions",
     "cat": "special",
     "minLevel": 9,
-    "condition": function(C) { return warlockHasInvocation(C, 'Expendable Minions'); },
-    inlinePills: function(ctx) { return [{ label: 'Healing', value: Number(ctx.ownerLevel || 0) + finalAbilityModifier(ctx.character, 'cha') }]; }
+    "condition": function(C) { return warlockHasInvocation(C, 'Expendable Minions'); }
   }
 ]);
 

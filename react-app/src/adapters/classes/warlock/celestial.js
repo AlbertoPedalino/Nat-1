@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -14,15 +13,7 @@ registerSubclassAdapter("Warlock_Celestial", function (cls, lv, specs) {});
 registerSubclassSheetActions("Warlock_Celestial", [
   { name: "Healing Light", cat: "bonus", resKey: "celestial_heal_light", minLevel: 3,
     rollers: [{ kind: 'heal', formula: "1d6" }] },
-  { name: "Celestial Resilience", cat: "action", minLevel: 10,
-    inlinePills: ({ ownerLevel, character }) => {
-      const lv = Number(ownerLevel || 1);
-      const cha = Number(finalAbilityModifier(character, "cha") || 0);
-      return [
-        { label: "Self THP", value: Math.max(1, lv + cha) },
-        { label: "Ally THP", value: Math.max(1, Math.floor(lv / 2) + cha) },
-      ];
-    } },
+  { name: "Celestial Resilience", cat: "action", minLevel: 10 },
   { name: "Searing Vengeance", cat: "reaction", resKey: "celestial_searing_ven", minLevel: 14,
     rollers: [{ kind: 'damage', formula: "2d8", label: "Searing Vengeance 2d8 Radiant" }] },
 ]);

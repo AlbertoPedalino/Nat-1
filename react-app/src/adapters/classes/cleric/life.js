@@ -38,10 +38,7 @@ registerSubclassSheetSpellModifiers("Cleric_Life", [
 ]);
 
 registerSubclassSheetActions("Cleric_Life", [
-  { name: "Preserve Life", cat: "action", resKey: "channel_div",
-    inlinePills: ({ ownerLevel }) => [
-      { label: "Pool", value: `${Math.max(1, Number(ownerLevel || 1) * 5)} HP` }
-    ] },
+  { name: "Preserve Life", cat: "action", resKey: "channel_div" },
 ]);
 }
 

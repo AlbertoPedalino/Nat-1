@@ -25,9 +25,6 @@ export default function install(registry, context = {}) {
       cat: 'bonus',
       resKey: 'channel_div',
       minLevel: 6,
-      inlinePills: ({ character, ownerLevel }) => [
-        { label: 'Temp HP', value: Number(ownerLevel || 0) + finalAbilityModifier(character, 'wis') },
-      ],
     },
   ]);
 }

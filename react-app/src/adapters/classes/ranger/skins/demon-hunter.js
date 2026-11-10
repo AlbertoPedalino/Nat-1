@@ -39,9 +39,6 @@ export default function install(registry, context = {}) {
           label: ({ formula }) => `${formula} psychic`,
         },
       ],
-      inlinePills: ({ character }) => [
-        { label: 'Healing', value: finalAbilityModifier(character, 'wis') },
-      ],
     },
     { name: 'Double Jump', cat: 'special', resKey: 'soul_fragments', minLevel: 3 },
     { name: 'Disrupt', cat: 'reaction', resKey: 'soul_fragments', minLevel: 11 },

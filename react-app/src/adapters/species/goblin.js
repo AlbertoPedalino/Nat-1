@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 // World of Warcraft.
 export default function install(registry, context = {}) {
@@ -11,7 +10,6 @@ export default function install(registry, context = {}) {
       cat: 'special',
       resKey: 'goblin_fury_of_the_small',
       minLevel: 1,
-      inlinePills: ({ character }) => [{ label: 'Extra damage', value: getProficiencyBonus(character) }],
     },
   ]);
   registerSpeciesSheetResources('Goblin_WoW', [

@@ -1,4 +1,3 @@
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import {
   ACTION_COLORS,
   CHIP_TONES,
@@ -28,7 +27,6 @@ const TAG_TONES = {
   mastery:    CHIP_TONES.mastery,    // active weapon mastery
   noprof:     CHIP_TONES.negative,   // warning: non-proficient
   slot:       CHIP_TONES.info,       // neutral fact: weapon hand
-  inlinePill: CHIP_TONES.info,       // neutral fact: range/DC/etc.
   wildShape:  ENTITY_COLORS.class,   // source: form-granted (class colour)
   weaponNote: ENTITY_COLORS.feat,    // source: feat rule reminder (e.g. GWM)
   itemProperty: ITEM_ATTUNEMENT,     // source: rule an item plan adds (Repeating Shot)
@@ -40,9 +38,8 @@ function tagBadge(key, tone, label) {
   return { key, label, color };
 }
 
-export function buildActionTags(action, C) {
+export function buildActionTags(action) {
   const tags = [];
-  const ownerLevel = action.ownerLevel ?? primaryClassLevel(C);
 
   if (action._wildShapeTag) {
     tags.push(tagBadge('wildshape', 'wildShape', 'Wild Shape'));
@@ -68,22 +65,8 @@ export function buildActionTags(action, C) {
     tags.push(tagBadge('slot', 'slot', action._weaponSlot));
   }
 
-  // Convention: an adapter's `inlinePills` are for amounts the action's
-  // resource bar and rollers can't show (THP, healing…). Never a fact the
-  // card's text already states (area, duration, range, cost) nor a save DC:
-  // the feature text gives the formula, as for Grapple or Shove. Never a pill
-  // that just restates the action's own resource-bar value — e.g. a
-  // "Pool = level×5 HP" pill on an action whose resKey already tracks that
-  // pool; let the bar own the number.
-  const pills = typeof action.inlinePills === 'function'
-    ? action.inlinePills({ character: C, ownerLevel })
-    : (Array.isArray(action.inlinePills) ? action.inlinePills : []);
-  pills.forEach((pill, idx) => {
-    const label = `${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim();
-    if (label) {
-      tags.push(tagBadge(`pill-${idx}`, 'inlinePill', label));
-    }
-  });
-
+  // No adapter "fact" chips: what is fixed (area, duration, save DC, a THP or
+  // damage amount) is read from the card's text, as for Grapple or Shove;
+  // what is rolled (attack, damage, healing, Temporary HP) is a roller.
   return { ...action, tags };
 }

@@ -67,10 +67,8 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Stone's Endurance" },
-    inlinePills: ({ character }) => {
-      const conMod = finalAbilityModifier(character, 'con');
-      return [{ label: 'Reduction', value: withModifier('1d12', conMod) }];
-    },
+    rollers: [{ kind: 'utility', formula: ({ character }) => withModifier('1d12', finalAbilityModifier(character, 'con')),
+      label: ({ formula }) => `${formula} reduce`, title: 'Reduction' }],
   },
   {
     name: "Storm's Thunder",

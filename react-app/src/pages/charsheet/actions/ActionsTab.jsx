@@ -90,7 +90,7 @@ export default function ActionsTab({ C, sheet, resources }) {
     ...collectAdapterActions(C, sheet),
     ...makeWildShapeActions(C),
   ].map((action) => resolveActionFormulas(action, C))
-   .map((action) => buildActionTags(action, C));
+   .map(buildActionTags);
   const showAttacks = false;
   const matchesSearch = (action) => matchesQuery(search, action.name, action.desc);
   const actionSections = SECTION_DEFS
