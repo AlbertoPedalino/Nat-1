@@ -4,7 +4,7 @@ import {
   enumerateAutoGrantedSpells, enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel,
 } from '../../../shared/character/spells/autoGrantedSpells.js';
 import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { clamp } from '../../../shared/numbers.js';
 
 // The spellcasting profile of the class being edited (shared spellcasting.js).
@@ -56,17 +56,12 @@ function uniqueBy(list, keyOf) {
 
 // The spells the builder's spell panel shows as granted for the class being
 // edited (its class and subclass) and the species.
+// `character` is activeClassCharacter's view: the class being edited as the
+// primary one, so its entity is the first.
 export function collectAutoGrantedSpells(character) {
-  const entity = {
-    className: character?.className,
-    subclassShortName: character?.subclassShortName,
-    level: getClassSpellLevel(character),
-    allSubFeatures: character?.allSubFeatures || [],
-    // The class data (subclass records, the skin's spells) the grants read.
-    entry: character,
-  };
+  const entity = classEntities(character)[0];
   return uniqueBy(
-    [...enumerateEntityGrants(entity, character), ...enumerateSpeciesGrants(character)]
+    [...(entity ? enumerateEntityGrants(entity, character) : []), ...enumerateSpeciesGrants(character)]
       .map((record) => builderGrant(record, character)),
     (spell) => `${String(spell.name || '').toLowerCase()}-${spell.mode || ''}`,
   );

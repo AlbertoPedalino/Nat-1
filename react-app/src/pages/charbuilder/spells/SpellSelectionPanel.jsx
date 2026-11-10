@@ -4,6 +4,7 @@ import { BookOpen } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -35,11 +36,11 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter);
   const query = state.search.spells;
   const levels = [0, ...Array.from({ length: Math.max(0, maxLevel) }, (_, index) => index + 1)];
-  // The class list only when there is something to pick from it: a class
-  // without spellcasting (a Barbarian, whose list is its subclasses' fixed
-  // spells) shows only the spells it is granted.
-  const picksSpells = cantrips > 0 || spells > 0;
-  const classNames = picksSpells ? [activeCharacter.className].filter(Boolean) : [];
+  // The class list only for a spellcasting class, as in the sheet's picker: a
+  // Barbarian's "list" is its subclasses' fixed spells, so it shows only the
+  // spells it is granted.
+  const castsSpells = hasSpellcastingProfile(profile);
+  const classNames = castsSpells ? [activeCharacter.className].filter(Boolean) : [];
   const spellIndex = useMemo(() => {
     const map = new Map();
     state.data.spells.forEach((spell) => {
@@ -65,7 +66,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     limit: 120,
     findSpell: (name) => spellIndex.get(matchKey(name)),
   });
-  const isCaster = !!profile.casterProgression || cantrips > 0 || spells > 0 || maxLevel > 0 || autoGrantedSpells.length > 0;
+  const isCaster = castsSpells || autoGrantedSpells.length > 0;
   const wizardBookMode = activeIsWizard && wizardMode === 'book';
 
   useEffect(() => {
