@@ -35,13 +35,12 @@ test('the owners of a character: classes with their subclasses, then species', (
   ]);
 });
 
-test('one gate for every spelling of a requirement', () => {
-  const C = { level: 3, choices: { mc0_order: ['Thaumaturge'], model: ['Guardian'] }, inventory: [{ flags: ['focus'], equipped: true }] };
+test('one gate for choice, item flag, level and condition requirements', () => {
+  const C = { level: 3, choices: { mc0_order: ['Thaumaturge'] }, inventory: [{ flags: ['focus'], equipped: true }] };
   const owner = { kind: 'class', name: 'Cleric', level: 3, choicePrefix: 'mc0_' };
   assert.equal(entryApplies({ requiredChoice: { key: 'order', value: 'Thaumaturge' } }, C, { owner }), true);
-  assert.equal(entryApplies({ requiresChoice: { key: 'order', value: 'Protector' } }, C, { owner }), false);
-  assert.equal(entryApplies({ choiceKey: 'model', model: ['guardian'] }, C, { owner }), true);
-  assert.equal(entryApplies({ requiresInventoryFlag: 'focus' }, C, { owner }), true);
+  assert.equal(entryApplies({ requiredChoice: { key: 'order', value: 'Protector' } }, C, { owner }), false);
+  assert.equal(entryApplies({ requiredItemFlag: 'focus' }, C, { owner }), true);
   assert.equal(entryApplies({ requiredItemFlag: 'wand' }, C, { owner }), false);
   assert.equal(entryApplies({ minLevel: 5 }, C, { owner }), false);
   assert.equal(entryApplies({ condition: () => { throw new Error('x'); } }, C, { owner }), false);

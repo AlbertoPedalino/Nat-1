@@ -49,7 +49,7 @@ registerSubclassSheetActions("Druid_Stars", [
     "cat": "bonus",
     "minLevel": 3,
     "noDescription": true,
-    "requiresChoice": { "key": "stars_constellation", "value": "Archer" },
+    "requiredChoice": { "key": "stars_constellation", "value": "Archer" },
     "attackBonus": ({ character }) => {
       try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'wis'); } catch { return 0; }
     },

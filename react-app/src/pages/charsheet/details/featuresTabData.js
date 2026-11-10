@@ -2,12 +2,11 @@ import { adapterRegistry } from '../../../adapters/registry.js';
 import { warlockInvocationSelections } from '../../../shared/character/progression/warlockUtils.js';
 import { buildOptionalFeatureEntryLookup, optionalFeatureOptions } from '../../../shared/character/progression/optionalFeatures.js';
 import { classEntities } from '../../../shared/character/progression/classLevel.js';
-import { asArray } from '../../../shared/lists.js';
 import { choiceKey } from '../../../shared/content/nameKeys.js';
 import { stripMarkup } from '../../../shared/content/markupText.js';
 
 // Which class, subclass and invocation features the Features tab shows:
-// level, class/subclass identity and choice gates.
+// level and class/subclass identity.
 
 export function collectWarlockInvocationFeatures(C) {
   // Levels from the optional-feature data; which ones repeat from the adapter.
@@ -49,13 +48,11 @@ export function collectWarlockInvocationFeatures(C) {
 
 export function collectClassBuckets(C) {
   return classEntities(C).map((entity) => {
-    const { className, subclassShortName, level, choicePrefix, entry } = entity;
+    const { className, subclassShortName, level, entry } = entity;
     const classFeatures = collectValidClassFeatures({
       features: entry?.allClassFeatures || entry?.allFeatures || [],
       className,
       level,
-      character: C,
-      choicePrefix,
     }).map((feature) => ({ ...feature, source: className || 'Class', sourceKind: 'class' }));
 
     const subclassFeatures = collectValidSubclassFeatures({
@@ -63,8 +60,6 @@ export function collectClassBuckets(C) {
       className,
       subclassName: subclassShortName,
       level,
-      character: C,
-      choicePrefix,
     }).map((feature) => ({ ...feature, source: subclassShortName || 'Subclass', sourceKind: 'subclass' }));
 
     const subtitle = subclassShortName ? ` - ${subclassShortName}` : '';
@@ -80,21 +75,19 @@ export function collectClassBuckets(C) {
   }).filter((bucket) => bucket.features.length);
 }
 
-function collectValidClassFeatures({ features, className, level, character, choicePrefix }) {
+function collectValidClassFeatures({ features, className, level }) {
   return (features || [])
     .filter((feature) => featureIsAvailable(feature, level))
     .filter((feature) => featureMatchesClass(feature, className))
-    .filter((feature) => !hasSubclassIdentity(feature))
-    .filter((feature) => featurePassesChoiceGates(feature, character, choicePrefix));
+    .filter((feature) => !hasSubclassIdentity(feature));
 }
 
-function collectValidSubclassFeatures({ features, className, subclassName, level, character, choicePrefix }) {
+function collectValidSubclassFeatures({ features, className, subclassName, level }) {
   if (!subclassName) return [];
   return (features || [])
     .filter((feature) => featureIsAvailable(feature, level))
     .filter((feature) => featureMatchesClass(feature, className))
-    .filter((feature) => featureMatchesSubclass(feature, subclassName))
-    .filter((feature) => featurePassesChoiceGates(feature, character, choicePrefix));
+    .filter((feature) => featureMatchesSubclass(feature, subclassName));
 }
 
 
@@ -159,43 +152,6 @@ function parseFeatureRefSubclass(ref) {
   const parts = ref.split('|').map((part) => part.trim()).filter(Boolean);
   // Subclass refs usually include: Name|Class|ClassSource|Subclass|SubclassSource|Level
   return parts.length >= 4 ? parts[3] : '';
-}
-
-function featurePassesChoiceGates(feature, character, choicePrefix = '') {
-  const gates = [
-    ...asArray(feature?.requiredChoice),
-    ...asArray(feature?.requiredChoices),
-    ...asArray(feature?.choiceRequirement),
-    ...asArray(feature?.choiceRequirements),
-  ];
-  if (!gates.length) return true;
-  return gates.every((gate) => choiceGatePasses(gate, character, choicePrefix));
-}
-
-function choiceGatePasses(gate, character, choicePrefix = '') {
-  if (!gate) return true;
-  if (typeof gate === 'function') {
-    try { return !!gate(character); } catch { return false; }
-  }
-  if (typeof gate === 'string') return hasChoiceValue(character, gate, null, choicePrefix);
-  const key = gate.key || gate.choiceKey || gate.id;
-  if (!key) return true;
-  const expected = gate.value ?? gate.values ?? gate.option ?? gate.options ?? null;
-  return hasChoiceValue(character, key, expected, choicePrefix);
-}
-
-function hasChoiceValue(character, key, expected, choicePrefix = '') {
-  const choices = character?.choices || {};
-  const direct = choices[key];
-  const prefixed = choices[`${choicePrefix}${key}`];
-  const stored = prefixed != null ? prefixed : direct;
-  if (stored == null || stored === '') return false;
-  if (expected == null) return true;
-
-  const storedValues = asArray(stored).map(cleanChoiceText).map(choiceKey).filter(Boolean);
-  const expectedValues = asArray(expected).map(cleanChoiceText).map(choiceKey).filter(Boolean);
-  if (!expectedValues.length) return true;
-  return expectedValues.some((value) => storedValues.includes(value));
 }
 
 function dedupeFeatures(features) {

@@ -70,17 +70,6 @@ export function setChoiceValuePatch(C, key, value, { className = '' } = {}) {
   return { choices };
 }
 
-export function matchesChoiceRequirement(C, requirement) {
-  if (!requirement) return true;
-  const key = requirement.key;
-  if (!key) return true;
-  const raw = getChoiceValue(C, key);
-  if (!raw) return false;
-  const selected = raw.toLowerCase();
-  const values = asArray(requirement.value);
-  return values.some((v) => String(v).toLowerCase() === selected);
-}
-
 export function inventoryHasFlag(inventory, requirement) {
   if (!requirement || !inventory) return false;
   const spec = typeof requirement === 'string' ? { flag: requirement } : requirement;
@@ -97,34 +86,6 @@ export function inventoryHasFlag(inventory, requirement) {
     }
     return (item.flags || []).includes(flag);
   });
-}
-
-// Whether an adapter entry (action, resource) applies: entries without any
-// requirement always do; a requirement that throws counts as unmet.
-export function adapterEntryApplies(def, C, sheet) {
-  if (typeof def?.condition !== 'function' && !def?.requiresChoice && !(def?.choiceKey && def?.model) && !def?.requiresInventoryFlag) return true;
-  try { return hasActionRequirement(def, C, sheet); } catch { return false; }
-}
-
-export function hasActionRequirement(action, C, sheet) {
-  if (typeof action?.condition === 'function') {
-    try { if (!action.condition(C)) return false; } catch { return false; }
-  }
-  if (action.requiresChoice) {
-    if (!matchesChoiceRequirement(C, action.requiresChoice)) return false;
-  }
-  if (action.choiceKey && action.model) {
-    const raw = getChoiceValue(C, action.choiceKey);
-    if (!raw) return false;
-    const selected = raw.toLowerCase();
-    const models = asArray(action.model);
-    if (!models.some((m) => String(m).toLowerCase() === selected)) return false;
-  }
-  if (action.requiresInventoryFlag) {
-    const inv = sheet?.sheetInventory || C?.inventory || [];
-    if (!inventoryHasFlag(inv, action.requiresInventoryFlag)) return false;
-  }
-  return true;
 }
 
 // Whether a character's stored choice holds `expected` (names compared without

@@ -14,7 +14,7 @@ import { lowerKey } from '../../content/nameKeys.js';
 //   requireSubclass       subclass of that class (short name)
 //   requireInvocation     Eldritch Invocation the character must know
 //
-// Rules effects read the flag itself (`requiresInventoryFlag`, weapon overrides);
+// Rules effects read the flag itself (`requiredItemFlag`, weapon overrides);
 // this module only decides who may set it and on what.
 
 export function itemFlagsOf(item) {

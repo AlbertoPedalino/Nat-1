@@ -72,8 +72,8 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "name": "Thunder Pulse",
     "cat": "attack",
     "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
+    "requiredChoice": { "key": "armorer_model", "value": "Guardian" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
@@ -88,15 +88,15 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "name": "Defensive Field",
     "cat": "bonus",
     "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
+    "requiredChoice": { "key": "armorer_model", "value": "Guardian" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "name": "Lightning Launcher",
     "cat": "attack",
     "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
+    "requiredChoice": { "key": "armorer_model", "value": "Infiltrator" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
@@ -111,8 +111,8 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "name": "Force Demolisher",
     "cat": "attack",
     "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
+    "requiredChoice": { "key": "armorer_model", "value": "Dreadnaught" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
@@ -128,29 +128,29 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "cat": "bonus",
     "resKey": "armorer_giant_stature",
     "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
+    "requiredChoice": { "key": "armorer_model", "value": "Dreadnaught" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "name": "Perfected Armor (Guardian)",
     "cat": "reaction",
     "resKey": "perfected_guardian",
     "minLevel": 15,
-    "requiresChoice": { "key": "armorer_model", "value": "Guardian" }
+    "requiredChoice": { "key": "armorer_model", "value": "Guardian" }
   },
   {
     "name": "Perfected Armor (Infiltrator)",
     "cat": "bonus",
     "resKey": "perfected_infiltrator",
     "minLevel": 15,
-    "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" }
+    "requiredChoice": { "key": "armorer_model", "value": "Infiltrator" }
   },
   {
     "name": "Perfected Armor (Dreadnaught)",
     "cat": "bonus",
     "resKey": "armorer_giant_stature",
     "minLevel": 15,
-    "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" }
+    "requiredChoice": { "key": "armorer_model", "value": "Dreadnaught" }
   }
 ]);
 registerSubclassSheetResources("Artificer_Armorer", [
@@ -159,24 +159,24 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "name": "Giant Stature",
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
-    "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
+    "requiredChoice": { "key": "armorer_model", "value": "Dreadnaught" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "key": "perfected_guardian",
     "name": "Perfected Guardian Pull",
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
-    "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
+    "requiredChoice": { "key": "armorer_model", "value": "Guardian" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "key": "perfected_infiltrator",
     "name": "Infiltrator Fly",
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
-    "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
+    "requiredChoice": { "key": "armorer_model", "value": "Infiltrator" },
+    "requiredItemFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   }
 ]);
 registerSubclassSheetProficiencies("Artificer_Armorer", [

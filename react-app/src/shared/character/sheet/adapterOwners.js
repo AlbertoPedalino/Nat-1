@@ -105,20 +105,17 @@ function conditionPasses(entry, C, context) {
   }
 }
 
-// A requirement on a stored choice, in any of the spellings adapters use:
-// `requiredChoice` (effects, proficiencies, spells), `requiresChoice`
-// (actions, resources), `choiceKey` + `model` (Armorer). The owner's own
-// multiclass copy of the choice is read first.
+// `requiredChoice`: a stored choice the entry needs (any adapter entry). The
+// owner's own multiclass copy of the choice is read first.
 function choicePasses(entry, C, owner) {
-  const requirement = entry.requiredChoice
-    || entry.requiresChoice
-    || (entry.choiceKey && entry.model ? { key: entry.choiceKey, value: entry.model } : null);
+  const requirement = entry.requiredChoice;
   if (!requirement?.key) return true;
   return matchesRequiredChoice(C, requirement, { prefix: owner?.choicePrefix || '' });
 }
 
+// `requiredItemFlag`: an item flag the inventory must hold.
 function itemFlagPasses(entry, C, sheet) {
-  const requirement = entry.requiredItemFlag || entry.requiresInventoryFlag;
+  const requirement = entry.requiredItemFlag;
   if (!requirement) return true;
   return inventoryHasFlag(sheet?.sheetInventory || C?.inventory || [], requirement);
 }
