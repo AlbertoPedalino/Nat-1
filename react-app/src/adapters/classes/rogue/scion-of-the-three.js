@@ -18,17 +18,13 @@ registerSubclassAdapter("Rogue_Scion of the Three", function (cls, lv, specs) {
 registerSubclassSheetActions("Rogue_Scion of the Three", [
   {
     "name": "Bloodthirst",
-    
     "cat": "reaction",
-    
     "resKey": "scion_bloodthirst",
     "minLevel": 3
   },
   {
     "name": "Strike Fear",
-    
     "cat": "action",
-    
     "minLevel": 9
   }
 ]);
@@ -36,7 +32,6 @@ registerSubclassSheetResources("Rogue_Scion of the Three", [
   {
     "key": "scion_bloodthirst",
     "name": "Bloodthirst",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   }

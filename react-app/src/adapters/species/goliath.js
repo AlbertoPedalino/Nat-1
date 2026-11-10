@@ -33,18 +33,14 @@ registerSpeciesSheetCommonChoiceMeta("Goliath_XPHB", {
 registerSpeciesSheetActions("Goliath_XPHB", [
   {
     name: "Cloud's Jaunt",
-    
     cat: 'bonus',
-    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Cloud's Jaunt" },
   },
   {
     name: "Fire's Burn",
-    
     cat: 'special',
-    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d10' }],
     minLevel: 1,
@@ -52,9 +48,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: "Frost's Chill",
-    
     cat: 'special',
-    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d6' }],
     minLevel: 1,
@@ -62,18 +56,14 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: "Hill's Tumble",
-    
     cat: 'special',
-    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Hill's Tumble" },
   },
   {
     name: "Stone's Endurance",
-    
     cat: 'reaction',
-    
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     requiredChoice: { key: 'species_version', value: "Stone's Endurance" },
@@ -84,9 +74,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: "Storm's Thunder",
-    
     cat: 'reaction',
-    
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d8' }],
     minLevel: 1,
@@ -94,9 +82,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   },
   {
     name: 'Large Form',
-    
     cat: 'bonus',
-    
     resKey: 'goliath_large_form',
     minLevel: 5,
     inlinePills: [
@@ -109,14 +95,12 @@ registerSpeciesSheetResources("Goliath_XPHB", [
   {
     key: 'goliath_giant_ancestry',
     name: 'Giant Ancestry',
-    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },
   {
     key: 'goliath_large_form',
     name: 'Large Form',
-    
     recharge: 'LR',
     minLevel: 5,
     max: 1,

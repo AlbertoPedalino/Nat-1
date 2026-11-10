@@ -7,24 +7,18 @@ registerSubclassAdapter("Druid_Sea", function (cls, lv, specs) {});
 registerSubclassSheetActions("Druid_Sea", [
   {
     "name": "Wrath of the Sea",
-    
     "cat": "bonus",
-    
     "resKey": "wild_shape",
     "minLevel": 3
   },
   {
     "name": "Stormborn",
-    
     "cat": "action",
-    
     "minLevel": 10
   },
   {
     "name": "Oceanic Gift",
-    
     "cat": "bonus",
-    
     "resKey": "wild_shape",
     "minLevel": 14
   }

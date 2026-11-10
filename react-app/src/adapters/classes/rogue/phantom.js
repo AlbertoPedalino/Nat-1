@@ -30,17 +30,13 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Rogue_Phantom', [
     {
       name: 'Wails from the Grave',
-      
       cat: 'special',
-      
       resKey: 'phantom_wails',
       minLevel: 3,
     },
     {
       name: 'Ghost Walk',
-      
       cat: 'bonus',
-      
       resKey: 'phantom_ghostwalk',
       minLevel: 13,
     },
@@ -50,7 +46,6 @@ export default function install(registry, context = {}) {
     {
       key: 'phantom_wails',
       name: 'Wails from the Grave',
-      
       recharge: 'LR',
       minLevel: 3,
       max: 'abilityMod:dex', minMax: 1,
@@ -58,7 +53,6 @@ export default function install(registry, context = {}) {
     {
       key: 'phantom_trinkets',
       name: 'Soul Trinkets',
-      
       recharge: 'LR',
       minLevel: 9,
       max: (lv) => (lv >= 17 ? 4 : lv >= 13 ? 3 : 2),
@@ -66,7 +60,6 @@ export default function install(registry, context = {}) {
     {
       key: 'phantom_ghostwalk',
       name: 'Ghost Walk',
-      
       recharge: 'LR',
       minLevel: 13,
       max: 1,

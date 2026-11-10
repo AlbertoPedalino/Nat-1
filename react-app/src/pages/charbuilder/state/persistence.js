@@ -242,6 +242,9 @@ export function makeSheetPayload(character, data) {
       darkvision: species?.darkvision || 0,
       resist: species?.resist || [],
       immune: species?.immune || [],
+      // The species' spells as its data grants them (the lineage's, once chosen).
+      additionalSpells: species?.additionalSpells || [],
+      versionName: species?.versionName || null,
       languageProficiencies: [{ common: true }, ...(character.speciesObj?.languageProficiencies || [])],
       toolProficiencies: character.speciesObj?.toolProficiencies || [],
       armorProficiencies: character.speciesObj?.armorProficiencies,

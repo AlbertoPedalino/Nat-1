@@ -33,16 +33,12 @@ registerSubclassAdapter("Cleric_Knowledge", function (cls, lv, specs) {
 registerSubclassSheetActions("Cleric_Knowledge", [
   {
     "name": "Mind Magic",
-    
     "cat": "action",
-    
     "resKey": "channel_div"
   },
   {
     "name": "Divine Foreknowledge",
-    
     "cat": "bonus",
-    
     "resKey": "divine_foreknowledge",
     "minLevel": 17
   }

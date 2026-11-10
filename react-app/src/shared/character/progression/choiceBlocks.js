@@ -83,6 +83,15 @@ export function genericSpeciesChoiceSpecs(species) {
     const sizeMap = { M: 'Medium', S: 'Small' };
     specs.push({ key: 'species_size', label: 'Size', type: 'generic_choice', from: species.size.map((size) => sizeMap[size] || size), count: 1, level: 1 });
   }
+  // The spellcasting ability of its spells, when the data lets the player
+  // choose it (the base species' or any lineage's additionalSpells).
+  const abilities = [species, ...asArray(species?._versions)]
+    .flatMap((record) => asArray(record?.additionalSpells))
+    .flatMap((grant) => asArray(grant?.ability?.choose));
+  if (abilities.length) {
+    specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability', type: 'ability_choice', from: [...new Set(abilities)], count: 1, level: 1 });
+  }
+
   // A species with versions (Tiefling legacies, Dragonborn colours) takes its
   // resistance from the version chosen (speciesVersion.js): its base "choose"
   // only sums the versions up.

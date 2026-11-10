@@ -28,16 +28,12 @@ registerSubclassAdapter("Ranger_Hunter", function (cls, lv, specs) {
 registerSubclassSheetActions("Ranger_Hunter", [
   {
     "name": "Superior Hunter's Prey",
-    
     "cat": "attack",
-    
     "minLevel": 11
   },
   {
     "name": "Superior Hunter's Defense",
-    
     "cat": "reaction",
-    
     "minLevel": 15
   }
 ]);

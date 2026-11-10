@@ -27,9 +27,7 @@ registerSubclassAdapter("Fighter_Banneret", function (cls, lv, specs) {
 registerSubclassSheetActions("Fighter_Banneret", [
   {
     "name": "Shared Resilience",
-    
     "cat": "reaction",
-    
     "minLevel": 15
   }
 ]);

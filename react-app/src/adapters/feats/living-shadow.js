@@ -19,9 +19,7 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Living Shadow', [
     {
       name: 'Lengthened Strike',
-      
       cat: 'special',
-      
       resKey: 'living_shadow_reach',
     },
   ]);
@@ -30,7 +28,6 @@ export default function install(registry, context = {}) {
     {
       key: 'living_shadow_reach',
       name: 'Lengthened Strike',
-      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

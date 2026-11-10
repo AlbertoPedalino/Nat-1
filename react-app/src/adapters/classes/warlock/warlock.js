@@ -230,64 +230,48 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
 registerClassSheetActions("Warlock", [
   {
     "name": "Magical Cunning",
-    
     "cat": "action",
-    
     "resKey": "magical_cunning",
     "minLevel": 2
   },
   {
     "name": "Contact Patron",
-    
     "cat": "action",
-    
     "resKey": "contact_patron",
     "minLevel": 9
   },
   {
     "name": "Mystic Arcanum",
-    
     "cat": "action",
-    
     "minLevel": 11
   },
   {
     "name": "Eldritch Master",
-    
     "cat": "action",
-    
     "minLevel": 20
   },
 
   {
     "name": "Pact of the Blade",
-    
     "cat": "bonus",
-    
     "minLevel": 1,
     "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Blade'); }
   },
   {
     "name": "Pact of the Chain",
-    
     "cat": "action",
-    
     "minLevel": 1,
     "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Investment of the Chain Master",
-    
     "cat": "bonus",
-    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Investment of the Chain Master') && warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Gift of the Protectors",
-    
     "cat": "reaction",
-    
     "resKey": "gift_of_the_protectors",
     "minLevel": 9,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); }
@@ -297,34 +281,26 @@ registerClassSheetActions("Warlock", [
 
   {
     "name": "One with Shadows",
-    
     "cat": "action",
-    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'One with Shadows'); }
   },
   {
     "name": "Gift of the Depths",
-    
     "cat": "action",
-    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); }
   },
   {
     "name": "Gaze of Two Minds",
-    
     "cat": "bonus",
-    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gaze of Two Minds'); }
   },
 
   {
     "name": "Eldritch Smite",
-    
     "cat": "action",
-    
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Eldritch Smite') && warlockHasInvocation(C, 'Pact of the Blade'); },
     rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
@@ -335,7 +311,6 @@ registerItemFlagDef("pactWeapon", {
   label: "Pact Weapon",
   activeLabel: "Pact",
   tone: "#9d7fb8",
-  
   types: ['M', 'R', 'WEAPON'],
   maxCount: 1,
   requireClass: "Warlock",
@@ -447,7 +422,6 @@ registerClassSheetResources("Warlock", [
   {
     "key": "magical_cunning",
     "name": "Magical Cunning",
-    
     "actionName": "Magical Cunning",
     "recharge": "LR",
     "minLevel": 2,
@@ -456,7 +430,6 @@ registerClassSheetResources("Warlock", [
   {
     "key": "contact_patron",
     "name": "Contact Patron",
-    
     "recharge": "LR",
     "minLevel": 9,
     "max": function() { return 1; }
@@ -464,7 +437,6 @@ registerClassSheetResources("Warlock", [
   {
     "key": "gift_of_the_depths",
     "name": "Gift of the Depths — Water Breathing",
-    
     "recharge": "LR",
     "minLevel": 5,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); },
@@ -473,7 +445,6 @@ registerClassSheetResources("Warlock", [
   {
     "key": "gift_of_the_protectors",
     "name": "Gift of the Protectors",
-    
     "recharge": "LR",
     "minLevel": 9,
     "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); },

@@ -24,25 +24,17 @@ export default function install(registry, context = {}) {
 
   /* ── Damaging — attack roll ─────────────────────────────────── */
   registerCantripData("Fire Bolt", {
-    
-    
     range: "120 ft",
     
     
   });
   registerCantripData("Ray of Frost", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Eldritch Blast", {
-    
-    
     range: "120 ft",
-    
-    
     beamCount: function (lv) {
       var level = Number(lv || 1);
       if (level >= 17) return 4;
@@ -52,43 +44,31 @@ export default function install(registry, context = {}) {
     },
   });
   registerCantripData("Chill Touch", {
-    
-    
     range: "Touch",
     
     
   });
   registerCantripData("Shocking Grasp", {
-    
-    
     range: "Touch",
     
     
   });
   registerCantripData("Produce Flame", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Thorn Whip", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Booming Blade", {
-    
-    
     range: "5 ft",
     
     
   });
   registerCantripData("Green-Flame Blade", {
-    
-    
     range: "5 ft",
     
     
@@ -96,60 +76,43 @@ export default function install(registry, context = {}) {
   // `weaponAttack`: the attack is made with a weapon the character picks on the
   // spell card, which rolls that weapon's attack and damage (SpellEntry).
   registerCantripData("True Strike", {
-    
-    
     range: "Self",
-    
     weaponAttack: true,
     
   });
 
   /* ── Damaging — saving throw ────────────────────────────────── */
   registerCantripData("Sacred Flame", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Toll the Dead", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Mind Sliver", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Poison Spray", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Vicious Mockery", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Acid Splash", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Thunderclap", {
-    
-    
     range: "5 ft",
     
     
@@ -157,146 +120,103 @@ export default function install(registry, context = {}) {
 
   /* ── Utility — no attack, no save ───────────────────────────── */
   registerCantripData("Blade Ward", {
-    
-    
     range: "Self",
-    
     concentration: true,
     
   });
   registerCantripData("Guidance", {
-    
-    
     range: "Touch",
-    
     concentration: true,
     utilityDie: "1d4",
     utilityLabel: "Bonus",
     
   });
   registerCantripData("Light", {
-    
-    
     range: "Touch",
     
     
   });
   registerCantripData("Mending", {
-    
-    
     range: "Touch",
     
     
   });
   registerCantripData("Message", {
-    
-    
     range: "120 ft",
     
     
   });
   registerCantripData("Prestidigitation", {
-    
-    
     range: "10 ft",
     
     
   });
   registerCantripData("Druidcraft", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Thaumaturgy", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Spare the Dying", {
-    
-    
     range: "15 ft",
     
     
   });
   registerCantripData("Dancing Lights", {
-    
-    
     range: "120 ft",
     
     
   });
   registerCantripData("Friends", {
-    
-    
     range: "Self",
     
     
   });
   registerCantripData("Minor Illusion", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Mage Hand", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Resistance", {
-    
-    
     range: "Touch",
-    
     concentration: true,
     
   });
   registerCantripData("Shillelagh", {
-    
-    
     range: "Self",
     
     
   });
   registerCantripData("Word of Radiance", {
-    
-    
     range: "5 ft",
     
     
   });
   registerCantripData("Infestation", {
-    
-    
     range: "30 ft",
     
     
   });
   registerCantripData("Create Bonfire", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Frostbite", {
-    
-    
     range: "60 ft",
     
     
   });
   registerCantripData("Lightning Lure", {
-    
-    
     range: "15 ft",
     
     

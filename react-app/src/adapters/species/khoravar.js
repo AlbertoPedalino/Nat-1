@@ -17,28 +17,12 @@ registerSpeciesAdapter("Khoravar_EFA", function (s) {
   ];
   specs.push({
     key: 'khoravar_skill_versatility',
-    label: 'Skill Versatility — Skill o Tool (sostituibile dopo Long Rest)',
+    label: 'Skill Versatility — Skill or Tool (replaceable after a Long Rest)',
     type: 'generic_choice',
     from: skillsAndTools,
     count: 1,
     level: 1,
   });
-
-  const abilityChoices = (s.additionalSpells || [])
-    .flatMap(g => g?.ability?.choose || [])
-    .filter(Boolean);
-  const uniqueAbilities = [...new Set(abilityChoices)];
-
-  if (uniqueAbilities.length) {
-    specs.push({
-      key: 'species_spell_ability',
-      label: 'Spellcasting Ability (Khoravar)',
-      type: 'ability_choice',
-      from: uniqueAbilities,
-      count: 1,
-      level: 1,
-    });
-  }
 
   return specs;
 });

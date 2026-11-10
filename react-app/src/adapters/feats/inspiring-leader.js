@@ -8,7 +8,6 @@ export default function install(registry, context = {}) {
     {
       key: "inspiring_speech",
       name: "Inspiring Speech",
-      
       recharge: "LR",
       max: function () { return 1; }
     }
@@ -17,7 +16,6 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions("Inspiring Leader", [
     {
       name: "Inspiring Speech",
-      
       cat: "action",
       resKey: "inspiring_speech"
     }

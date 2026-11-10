@@ -26,31 +26,23 @@ registerSubclassAdapter("Artificer_Cartographer", function (cls, lv, specs, ctx 
 registerSubclassSheetActions("Artificer_Cartographer", [
   {
     "name": "Adventurer's Atlas",
-    
     "cat": "action",
-    
     "minLevel": 3
   },
   {
     "name": "Mapping Magic",
-    
     "cat": "action",
-    
     "resKey": "mapping_magic_faerie",
     "minLevel": 3
   },
   {
     "name": "Guided Precision",
-    
     "cat": "attack",
-    
     "minLevel": 5
   },
   {
     "name": "Superior Atlas",
-    
     "cat": "action",
-    
     "resKey": "superior_atlas_path",
     "minLevel": 15
   }
@@ -59,14 +51,12 @@ registerSubclassSheetResources("Artificer_Cartographer", [
   {
     "key": "mapping_magic_faerie",
     "name": "Faerie Fire (Mapping Magic)",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   },
   {
     "key": "superior_atlas_path",
     "name": "Unerring Path",
-    
     "recharge": "LR",
     "max": () => 1
   }

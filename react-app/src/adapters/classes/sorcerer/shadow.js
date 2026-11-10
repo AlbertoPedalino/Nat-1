@@ -15,32 +15,24 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Sorcerer_Shadow', [
     {
       name: 'Strength of the Grave',
-      
       cat: 'special',
-      
       resKey: 'shadow_strength',
       minLevel: 3,
     },
     {
       name: 'Beasts of Ill Omen',
-      
       cat: 'bonus',
-      
       resKey: 'sorc_pts',
       minLevel: 6,
     },
     {
       name: 'Shadow Walk',
-      
       cat: 'bonus',
-      
       minLevel: 14,
     },
     {
       name: 'Umbral Form',
-      
       cat: 'special',
-      
       resKey: 'shadow_umbral',
       minLevel: 18,
     },
@@ -50,7 +42,6 @@ export default function install(registry, context = {}) {
     {
       key: 'shadow_strength',
       name: 'Strength of the Grave',
-      
       recharge: 'LR',
       minLevel: 3,
       max: 1,
@@ -58,7 +49,6 @@ export default function install(registry, context = {}) {
     {
       key: 'shadow_umbral',
       name: 'Umbral Form',
-      
       recharge: 'LR',
       minLevel: 18,
       max: 1,

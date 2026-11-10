@@ -15,9 +15,7 @@ registerSpeciesSheetCommonChoiceMeta("Dwarf_XPHB");
 registerSpeciesSheetActions("Dwarf_XPHB", [
   {
     name: 'Stonecunning',
-    
     cat: 'bonus',
-    
     resKey: 'dwarf_stonecunning',
     minLevel: 1,
     inlinePills: [
@@ -30,7 +28,6 @@ registerSpeciesSheetResources("Dwarf_XPHB", [
   {
     key: 'dwarf_stonecunning',
     name: 'Stonecunning',
-    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },

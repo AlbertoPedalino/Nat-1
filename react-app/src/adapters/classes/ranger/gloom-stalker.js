@@ -13,18 +13,14 @@ registerSubclassAdapter("Ranger_Gloom Stalker", function (cls, lv, specs) {});
 registerSubclassSheetActions("Ranger_Gloom Stalker", [
   {
     "name": "Dread Ambusher",
-    
     "cat": "attack",
-    
     "resKey": "dread_ambusher",
     "minLevel": 3,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "2d8" : "2d6", label: ({ formula }) => `+${formula} psychic` }]
   },
   {
     "name": "Shadowy Dodge",
-    
     "cat": "reaction",
-    
     "minLevel": 15
   }
 ]);
@@ -32,7 +28,6 @@ registerSubclassSheetResources("Ranger_Gloom Stalker", [
   {
     "key": "dread_ambusher",
     "name": "Dread Ambusher",
-    
     "recharge": "LR",
     "max": "abilityMod:wis", "minMax": 1
   }

@@ -46,7 +46,6 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Crafter', [
     {
       name: 'Fast Crafting',
-      
       cat: 'special',
       
       // Description lives in the Features tab; the card drives the create panel.

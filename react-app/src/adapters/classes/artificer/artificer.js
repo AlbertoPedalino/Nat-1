@@ -189,9 +189,7 @@ const _TINKER_MAGIC_ITEMS = [
 registerClassSheetActions("Artificer", [
   {
     "name": "Tinker's Magic",
-    
     "cat": "action",
-    
     "minLevel": 1,
     // Description resolves from the official EFA feature entries (auto-lookup by
     // name) and renders in the card's collapsible disclosure above the create panel.
@@ -209,9 +207,7 @@ registerClassSheetActions("Artificer", [
   },
   {
     "name": "Replicate Magic Item",
-    
     "cat": "action",
-    
     "minLevel": 2,
     // Description resolves from the official EFA feature entries (auto-lookup by
     // name) and shows in the card's collapsible disclosure above the create panel.
@@ -249,25 +245,19 @@ registerClassSheetActions("Artificer", [
   },
   {
     "name": "Magic Item Tinker",
-    
     "cat": "action",
-    
     "minLevel": 6,
     detailType: 'magicItemTinker',
   },
   {
     "name": "Flash of Genius",
-    
     "cat": "reaction",
-    
     "resKey": "flash_genius",
     "minLevel": 7
   },
   {
     "name": "Spell-Storing Item",
-    
     "cat": "action",
-    
     "minLevel": 11
   }
 ]);
@@ -289,7 +279,6 @@ registerClassSheetResources("Artificer", [
   {
     "key": "flash_genius",
     "name": "Flash of Genius",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   }

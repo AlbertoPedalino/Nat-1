@@ -1,4 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
+import { speciesWithVersion } from '../progression/speciesVersion.js';
+import { enumerateFixedAdditionalSpells } from './additionalSpellGrants.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { classEntities } from '../progression/classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
@@ -88,7 +90,11 @@ function subclassFullName(entity) {
   )?.subclassName || null;
 }
 
-/** Grants from the character's species. */
+/**
+ * Grants from the character's species: its 5etools `additionalSpells` with the
+ * chosen lineage applied (speciesWithVersion), the way feats read theirs, plus
+ * whatever an adapter's runtime config still adds.
+ */
 export function enumerateSpeciesGrants(character) {
   const spellcasting = adapterRegistry.getSpeciesRuntimeConfig(
     character?.speciesName,
@@ -96,7 +102,35 @@ export function enumerateSpeciesGrants(character) {
   )?.spellcasting || {};
   const chosenAbility = character?.normalizedChoices?.species?.spellAbility || null;
   const level = Number(character?.level || 1);
-  return gatedEntries(spellcasting, character, level).map((entry) => ({
+  const species = speciesWithVersion(character?.speciesSnapshot || character?.speciesObj, character?.choices);
+  const source = species?.versionName || character?.speciesName || null;
+  const fromData = enumerateFixedAdditionalSpells(species?.additionalSpells, {
+    chosenAbility,
+    defaultCanAlsoUseSlots: true,
+  }).filter((grant) => level >= grant.minLevel).map((grant) => {
+    const entry = {
+      name: grant.name,
+      minLevel: grant.minLevel,
+      source,
+      sourceType: 'species',
+      ...(grant.freeCast ? { freeCast: grant.freeCast } : {}),
+    };
+    return {
+      name: grant.name,
+      minLevel: grant.minLevel,
+      level: null,
+      mode: grant.mode === 'prepared' ? 'prepared' : 'known',
+      origin: 'species',
+      ownerClassName: null,
+      ownerLevel: level,
+      subclassShortName: null,
+      explicitSource: source,
+      sourceType: 'species',
+      ability: grant.ability || chosenAbility || null,
+      entry,
+    };
+  });
+  const fromConfig = gatedEntries(spellcasting, character, level).map((entry) => ({
     name: entry.name,
     minLevel: Number(entry.minLevel || 1),
     level: entry.level ?? null,
@@ -110,6 +144,7 @@ export function enumerateSpeciesGrants(character) {
     ability: entry.ability || spellcasting.ability || chosenAbility || null,
     entry,
   }));
+  return [...fromData, ...fromConfig];
 }
 
 // --- Subclass-feature spell scraping ------------------------------------------

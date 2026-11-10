@@ -99,17 +99,13 @@ registerClassSheetProficiencies("Cleric", [
 registerClassSheetActions("Cleric", [
   {
     "name": "Turn Undead",
-    
     "cat": "action",
-    
     "resKey": "channel_div",
     "minLevel": 2
   },
   {
     "name": "Divine Spark",
-    
     "cat": "action",
-    
     "resKey": "channel_div",
     "minLevel": 2,
     "rollers": [
@@ -137,9 +133,7 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Sear Undead",
-    
     "cat": "action",
-    
     "resKey": "channel_div",
     "minLevel": 5,
     rollers: [{ kind: 'damage', formula: ({ character }) => {
@@ -149,17 +143,13 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Divine Intervention",
-    
     "cat": "action",
-    
     "resKey": "divine_intervention",
     "minLevel": 10
   },
   {
     "name": "Blessed Strikes: Divine Strike",
-    
     "cat": "attack",
-    
     "minLevel": 7,
     "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Divine Strike"),
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
@@ -173,24 +163,18 @@ registerClassSheetActions("Cleric", [
   },
   {
     "name": "Blessed Strikes: Potent Spellcasting",
-    
     "cat": "action",
-    
     "minLevel": 7,
     "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Potent Spellcasting")
   },
   {
     "name": "Improved Blessed Strikes",
-    
     "cat": "action",
-    
     "minLevel": 14
   },
   {
     "name": "Greater Divine Intervention",
-    
     "cat": "action",
-    
     "resKey": "divine_intervention",
     "minLevel": 20
   }
@@ -235,14 +219,12 @@ registerClassSheetResources("Cleric", [
     "key": "channel_div",
     "name": "Channel Divinity",
     "actionGroup": "Channel Divinity",
-    
     "recharge": "SR",
     "max": (lv)=>lv>=18?4:lv>=6?3:2
   },
   {
     "key": "divine_intervention",
     "name": "Divine Intervention",
-    
     "recharge": "LR",
     minLevel: 10, "max": 1
   }

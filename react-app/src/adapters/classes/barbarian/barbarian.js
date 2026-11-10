@@ -58,9 +58,7 @@ registerClassSheetEffects("Barbarian", [
 registerClassSheetActions("Barbarian", [
   {
     "name": "Rage",
-    
     "cat": "bonus",
-    
     "resKey": "rage",
     "_toggleKey": "rage",
     "_toggleCondition": function (ctx) {
@@ -73,40 +71,30 @@ registerClassSheetActions("Barbarian", [
   },
   {
     "name": "Reckless Attack",
-    
     "cat": "attack",
-    
     "minLevel": 2
   },
   {
     "name": "Brutal Strike",
-    
     "cat": "attack",
-    
     "minLevel": 9,
     rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }]
   },
   {
     "name": "Improved Brutal Strike",
-    
     "cat": "attack",
-    
     "minLevel": 13,
     rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }]
   },
   {
     "name": "Brutal Strike (lv17 upgrade)",
-    
     "cat": "attack",
-    
     "minLevel": 17,
     rollers: [{ kind: 'damage', formula: "2d10", label: "+2d10" }]
   },
   {
     "name": "Relentless Rage",
-    
     "cat": "reaction",
-    
     "minLevel": 11
   }
 ]);
@@ -114,7 +102,6 @@ registerClassSheetResources("Barbarian", [
   {
     "key": "rage",
     "name": "Rage",
-    
     "recharge": "LR",
     "max": (lv)=>lv>=20?Infinity:lv>=17?6:lv>=12?5:lv>=6?4:lv>=3?3:2,
     "srRecover": 1

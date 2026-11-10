@@ -25,8 +25,9 @@ function chosenVersion(species, choice) {
       continue;
     }
     const name = String(version?.name || '');
-    const tail = matchKey(name.includes(';') ? name.split(';').slice(1).join(';') : name);
-    if (tail && tail.startsWith(wanted)) return version;
+    const label = (name.includes(';') ? name.split(';').slice(1).join(';') : name).trim();
+    const tail = matchKey(label);
+    if (tail && tail.startsWith(wanted)) return { ...version, versionName: label };
   }
   return null;
 }
@@ -36,7 +37,7 @@ export function speciesWithVersion(species, choices) {
   const raw = choices?.species_version;
   const version = chosenVersion(species, Array.isArray(raw) ? raw[0] : raw);
   if (!version) return species;
-  const out = { ...species };
+  const out = { ...species, versionName: version.versionName || null };
   VERSION_FIELDS.forEach((field) => {
     if (version[field] !== undefined) out[field] = version[field];
   });

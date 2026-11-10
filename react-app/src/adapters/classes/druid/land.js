@@ -25,9 +25,7 @@ registerSubclassAdapter("Druid_Land", function (cls, lv, specs) {
 registerSubclassSheetActions("Druid_Land", [
   {
     "name": "Land's Aid",
-    
     "cat": "action",
-    
     "resKey": "wild_shape",
     "minLevel": 3,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
@@ -37,17 +35,13 @@ registerSubclassSheetActions("Druid_Land", [
   },
   {
     "name": "Natural Recovery",
-    
     "cat": "action",
-    
     "resKey": "natural_recovery",
     "minLevel": 6
   },
   {
     "name": "Nature's Sanctuary",
-    
     "cat": "action",
-    
     "resKey": "wild_shape",
     "minLevel": 14
   }
@@ -56,7 +50,6 @@ registerSubclassSheetResources("Druid_Land", [
   {
     "key": "natural_recovery",
     "name": "Natural Recovery",
-    
     "recharge": "LR",
     "max": () => 1
   }

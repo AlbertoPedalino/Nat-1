@@ -6,7 +6,6 @@ export default function install(registry, context = {}) {
     registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
-    registerSpeciesRuntimeConfig,
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Aasimar_XPHB", function (s) {
@@ -29,18 +28,14 @@ registerSpeciesSheetCommonChoiceMeta("Aasimar_XPHB", {
 registerSpeciesSheetActions("Aasimar_XPHB", [
   {
     name: 'Healing Hands',
-    
     cat: 'action',
-    
     resKey: 'aasimar_healing_hands',
     rollers: [{ kind: 'heal', formula: ({ character }) => `${getProficiencyBonus(character)}d4` }],
     minLevel: 1,
   },
   {
     name: 'Celestial Revelation',
-    
     cat: 'bonus',
-    
     resKey: 'aasimar_revelation',
     minLevel: 3,
   },
@@ -49,26 +44,15 @@ registerSpeciesSheetResources("Aasimar_XPHB", [
   {
     key: 'aasimar_healing_hands',
     name: 'Healing Hands',
-    
     recharge: 'LR',
     max: 1,
   },
   {
     key: 'aasimar_revelation',
     name: 'Celestial Revelation',
-    
     recharge: 'LR',
     max: 1,
   },
 ]);
-
-registerSpeciesRuntimeConfig("Aasimar_XPHB", {
-  spellcasting: {
-    ability: 'cha',
-    alwaysKnownSpells: [
-      { name: 'Light', level: 0, source: 'Light Bearer', sourceType: 'species', ability: 'cha' },
-    ],
-  },
-});
 
 }

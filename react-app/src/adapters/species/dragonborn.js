@@ -42,9 +42,7 @@ registerSpeciesSheetCommonChoiceMeta("Dragonborn_XPHB", {
 registerSpeciesSheetActions("Dragonborn_XPHB", [
   {
     name: 'Breath Weapon',
-    
     cat: 'action',
-    
     resKey: 'dragonborn_breath',
     rollers: [{ kind: 'damage', formula: ({ character }) => {
       const lv = Number(character?.level || 1);
@@ -60,9 +58,7 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
   },
   {
     name: 'Draconic Flight',
-    
     cat: 'bonus',
-    
     resKey: 'dragonborn_flight',
     minLevel: 5,
   },
@@ -71,14 +67,12 @@ registerSpeciesSheetResources("Dragonborn_XPHB", [
   {
     key: 'dragonborn_breath',
     name: 'Breath Weapon',
-    
     recharge: 'LR',
     max: 'proficiencyBonus',
   },
   {
     key: 'dragonborn_flight',
     name: 'Draconic Flight',
-    
     recharge: 'LR',
     minLevel: 5,
     max: 1,

@@ -63,18 +63,14 @@ registerSubclassAdapter("Artificer_Armorer", function (cls, lv, specs, ctx = {})
 registerSubclassSheetActions("Artificer_Armorer", [
   {
     "name": "Arcane Armor",
-    
     "cat": "action",
-    
     "minLevel": 3,
     "choiceKey": "armorer_model",
     "choiceLabel": "Arcane Armor Model"
   },
   {
     "name": "Thunder Pulse",
-    
     "cat": "attack",
-    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -90,18 +86,14 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Defensive Field",
-    
     "cat": "bonus",
-    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "name": "Lightning Launcher",
-    
     "cat": "attack",
-    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -117,9 +109,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Force Demolisher",
-    
     "cat": "attack",
-    
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -135,9 +125,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Giant Stature",
-    
     "cat": "bonus",
-    
     "resKey": "armorer_giant_stature",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
@@ -145,27 +133,21 @@ registerSubclassSheetActions("Artificer_Armorer", [
   },
   {
     "name": "Perfected Armor (Guardian)",
-    
     "cat": "reaction",
-    
     "resKey": "perfected_guardian",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" }
   },
   {
     "name": "Perfected Armor (Infiltrator)",
-    
     "cat": "bonus",
-    
     "resKey": "perfected_infiltrator",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" }
   },
   {
     "name": "Perfected Armor (Dreadnaught)",
-    
     "cat": "bonus",
-    
     "resKey": "armorer_giant_stature",
     "minLevel": 15,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" }
@@ -175,7 +157,6 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "armorer_giant_stature",
     "name": "Giant Stature",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
@@ -184,7 +165,6 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "perfected_guardian",
     "name": "Perfected Guardian Pull",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
@@ -193,7 +173,6 @@ registerSubclassSheetResources("Artificer_Armorer", [
   {
     "key": "perfected_infiltrator",
     "name": "Infiltrator Fly",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
@@ -208,7 +187,6 @@ registerItemFlagDef("arcaneArmor", {
   label: "Arcane Armor",
   activeLabel: "Arcane",
   tone: "#58b879",
-  
   types: ['LA','MA','HA'],
   maxCount: 1,
   requireClass: "Artificer",

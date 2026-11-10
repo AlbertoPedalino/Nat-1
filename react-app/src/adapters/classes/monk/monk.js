@@ -40,42 +40,32 @@ registerClassSheetEffects("Monk", [
 registerClassSheetActions("Monk", [
   {
     name: 'Uncanny Metabolism',
-    
     cat: 'special',
-    
     resKey: 'uncanny_metabolism',
     minLevel: 2
   },
   {
     name: 'Flurry of Blows',
-    
     cat: 'bonus',
-    
     resKey: 'ki',
     minLevel: 2,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => `2d${levelTable(ownerLevel, MARTIAL_ARTS_DIE)}` }]
   },
   {
     name: 'Patient Defense',
-    
     cat: 'bonus',
-    
     resKey: 'ki',
     minLevel: 2
   },
   {
     name: 'Step of the Wind',
-    
     cat: 'bonus',
-    
     resKey: 'ki',
     minLevel: 2
   },
   {
     name: 'Deflect Attacks',
-    
     cat: 'reaction',
-    
     resKey: 'ki',
     minLevel: 3,
     rollers: [{ kind: 'utility', formula: ({ ownerLevel, character }) => {
@@ -88,25 +78,19 @@ registerClassSheetActions("Monk", [
   },
   {
     name: 'Stunning Strike',
-    
     cat: 'special',
-    
     resKey: 'ki',
     minLevel: 5
   },
   {
     name: 'Disciplined Survivor',
-    
     cat: 'special',
-    
     resKey: 'ki',
     minLevel: 14
   },
   {
     name: 'Superior Defense',
-    
     cat: 'special',
-    
     resKey: 'ki',
     minLevel: 18
   }
@@ -115,7 +99,6 @@ registerClassSheetResources("Monk", [
   {
     key: 'ki',
     name: 'Focus Points',
-    
     recharge: 'SR',
     max: (lv) => lv,
     pool: true,
@@ -124,7 +107,6 @@ registerClassSheetResources("Monk", [
   {
     key: 'uncanny_metabolism',
     name: 'Uncanny Metabolism',
-    
     recharge: 'LR',
     minLevel: 2,
     max: () => 1

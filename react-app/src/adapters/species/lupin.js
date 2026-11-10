@@ -14,9 +14,7 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Lupin_RHW', [
     {
       name: 'Howl',
-      
       cat: 'bonus',
-      
       resKey: 'lupin_howl',
       minLevel: 1,
     },
@@ -26,7 +24,6 @@ export default function install(registry, context = {}) {
     {
       key: 'lupin_howl',
       name: 'Howl',
-      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

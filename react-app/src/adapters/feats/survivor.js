@@ -8,9 +8,7 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Survivor', [
     {
       name: 'Steel Yourself',
-      
       cat: 'reaction',
-      
       resKey: 'survivor_steel',
     },
   ]);
@@ -19,7 +17,6 @@ export default function install(registry, context = {}) {
     {
       key: 'survivor_steel',
       name: 'Steel Yourself',
-      
       recharge: 'LR',
       max: 1,
     },

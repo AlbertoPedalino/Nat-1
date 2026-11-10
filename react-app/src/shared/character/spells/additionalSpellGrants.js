@@ -14,9 +14,11 @@ function normalizeAbility(value, chosenAbility = null) {
   return chosenAbility;
 }
 
-function parseUsesKey(value) {
+// A `daily` / `rest` key: a count ("1", "2e") or "pb" (Proficiency Bonus uses).
+function usesFromKey(value) {
+  if (/^pb$/i.test(String(value || '').trim())) return { maxUses: 1, usesFormula: 'proficiencyBonus' };
   const match = String(value || '').match(/^(\d+)/);
-  return match ? Math.max(1, Number(match[1])) : 1;
+  return { maxUses: match ? Math.max(1, Number(match[1])) : 1 };
 }
 
 function walkFixedSpells(node, context, out) {
@@ -41,7 +43,7 @@ function walkFixedSpells(node, context, out) {
         walkFixedSpells(spells, {
           ...context,
           freeCast: {
-            maxUses: parseUsesKey(usesKey),
+            ...usesFromKey(usesKey),
             recharge: key === 'rest' ? 'shortOrLongRest' : 'longRest',
             canAlsoUseSlots: context.defaultCanAlsoUseSlots ?? context.mode === 'prepared',
           },

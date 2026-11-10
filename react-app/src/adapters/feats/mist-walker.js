@@ -8,9 +8,7 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Mist Walker', [
     {
       name: 'Mist Walk',
-      
       cat: 'reaction',
-      
       resKey: 'mist_walker_walk',
     },
   ]);
@@ -19,7 +17,6 @@ export default function install(registry, context = {}) {
     {
       key: 'mist_walker_walk',
       name: 'Mist Walk',
-      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

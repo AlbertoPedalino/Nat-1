@@ -8,7 +8,6 @@ export default function install(registry, context = {}) {
     {
       key: "chef_treats",
       name: "Bolstering Treats",
-      
       recharge: "LR",
       max: 'proficiencyBonus'
     }
@@ -17,13 +16,11 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions("Chef", [
     {
       name: "Replenishing Meal",
-      
       cat: "action",
       
     },
     {
       name: "Bolstering Treats",
-      
       cat: "action",
       resKey: "chef_treats",
       

@@ -44,7 +44,6 @@ export function createAdapterBindings(registry, context = {}) {
     ...registry,
     ...splitRegisters,
     registerSpeciesSheetCommonChoiceMeta: (rawKey, meta = {}) => splitRegisters.registerSpeciesSheetChoiceMeta(rawKey, meta),
-
     _ARTISAN_TOOLS: ARTISAN_TOOLS,
     _MUSICAL_INSTRUMENTS: MUSICAL_INSTRUMENTS,
     _ALL_LANGS: ALL_LANGUAGES,

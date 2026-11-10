@@ -8,7 +8,6 @@ export default function install(registry, context = {}) {
     {
       key:      'lucky_points',
       name:     'Lucky',
-      
       recharge: 'LR',
       max:      'proficiencyBonus', // XPHB 2024: Luck Points = Proficiency Bonus
     },
@@ -17,9 +16,7 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions("Lucky", [
     {
       name:   'Lucky',
-      
       cat:    'special',
-      
       resKey: 'lucky_points',
     },
   ]);

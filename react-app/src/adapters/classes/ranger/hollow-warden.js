@@ -15,24 +15,18 @@ export default function install(registry, context = {}) {
   registerSubclassSheetActions('Ranger_Hollow Warden', [
     {
       name: 'Wrath of the Wild',
-      
       cat: 'bonus',
-      
       minLevel: 3,
     },
     {
       name: 'Fortifying Soul',
-      
       cat: 'action',
-      
       resKey: 'hollow_fortify',
       minLevel: 7,
     },
     {
       name: 'Persistent Wrath',
-      
       cat: 'special',
-      
       resKey: 'hollow_persist',
       minLevel: 15,
     },
@@ -42,7 +36,6 @@ export default function install(registry, context = {}) {
     {
       key: 'hollow_fortify',
       name: 'Fortifying Soul',
-      
       recharge: 'LR',
       minLevel: 7,
       max: 1,
@@ -50,7 +43,6 @@ export default function install(registry, context = {}) {
     {
       key: 'hollow_persist',
       name: 'Persistent Wrath',
-      
       recharge: 'LR',
       minLevel: 15,
       max: 1,

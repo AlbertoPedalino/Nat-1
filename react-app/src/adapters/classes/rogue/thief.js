@@ -7,16 +7,12 @@ registerSubclassAdapter("Rogue_Thief", function (cls, lv, specs) {});
 registerSubclassSheetActions("Rogue_Thief", [
   {
     "name": "Fast Hands",
-    
     "cat": "bonus",
-    
     "minLevel": 3
   },
   {
     "name": "Supreme Sneak",
-    
     "cat": "action",
-    
     "minLevel": 9
   }
 ]);

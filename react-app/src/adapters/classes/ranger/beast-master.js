@@ -18,9 +18,7 @@ registerSubclassAdapter("Ranger_Beast Master", function (cls, lv, specs) {
 registerSubclassSheetActions("Ranger_Beast Master", [
   {
     "name": "Primal Companion",
-    
     "cat": "bonus",
-    
     "minLevel": 3,
     // Interactive card: beast choice, HP, revive and its rollable stat block.
     "detailType": "primalCompanion"

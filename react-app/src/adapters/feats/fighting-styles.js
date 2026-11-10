@@ -61,8 +61,6 @@ const FIGHTING_STYLE_ACTIONS = {
     {
       name: 'Interception',
       cat: 'reaction',
-      
-      
       rollers: [{ kind: 'utility', formula: ({ character }) => `1d10+${getProficiencyBonus(character)}`, label: ({ character }) => `Reduce 1d10+${getProficiencyBonus(character)}`, title: 'Reduction' }],
       rollLabelPrefix: 'Interception',
     },

@@ -24,9 +24,7 @@ registerSubclassAdapter("Paladin_Noble Genies", function (cls, lv, specs) {
 registerSubclassSheetActions("Paladin_Noble Genies", [
   {
     "name": "Elemental Smite",
-    
     "cat": "action",
-    
     "resKey": "paladin_channel_div",
     "minLevel": 3,
     "subOptions": [
@@ -38,18 +36,14 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
   },
   {
     "name": "Elemental Rebuke",
-    
     "cat": "reaction",
-    
     "resKey": "noble_genies_rebuke",
     "minLevel": 15,
     rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `${formula} + CHA elemental` }]
   },
   {
     "name": "Noble Scion",
-    
     "cat": "bonus",
-    
     "resKey": "noble_genies_scion",
     "minLevel": 20
   }
@@ -58,7 +52,6 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
   {
     "key": "noble_genies_rebuke",
     "name": "Elemental Rebuke",
-    
     "recharge": "LR",
     "minLevel": 15,
     "max": "abilityMod:cha", "minMax": 1
@@ -66,7 +59,6 @@ registerSubclassSheetResources("Paladin_Noble Genies", [
   {
     "key": "noble_genies_scion",
     "name": "Noble Scion",
-    
     "recharge": "LR",
     "minLevel": 20,
     "max": () => 1

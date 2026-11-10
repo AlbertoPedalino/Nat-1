@@ -15,9 +15,7 @@ registerSubclassAdapter("Sorcerer_Wild Magic", function (cls, lv, specs) {});
 registerSubclassSheetActions("Sorcerer_Wild Magic", [
   {
     "name": "Wild Magic",
-    
     "cat": "action",
-    
     "minLevel": 3,
     "detailType": "panel",
     "detail": {
@@ -65,9 +63,7 @@ registerSubclassSheetActions("Sorcerer_Wild Magic", [
   },
   {
     "name": "Bend Luck",
-    
     "cat": "reaction",
-    
     "resKey": "sorc_pts",
     "minLevel": 6
   }
@@ -76,7 +72,6 @@ registerSubclassSheetResources("Sorcerer_Wild Magic", [
   {
     "key": "wild_magic",
     "name": "Wild Magic",
-    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true
@@ -84,14 +79,12 @@ registerSubclassSheetResources("Sorcerer_Wild Magic", [
   {
     "key": "wild_tides",
     "name": "Tides of Chaos",
-    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "wild_tamed",
     "name": "Tamed Surge",
-    
     "recharge": "LR",
     "max": () => 1
   }

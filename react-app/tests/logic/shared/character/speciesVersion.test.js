@@ -38,3 +38,31 @@ test('a species with versions offers no separate resistance pick', () => {
   assert.equal(genericSpeciesChoiceSpecs(tiefling).some((s) => s.key.startsWith('species_resist')), false);
   assert.equal(genericSpeciesChoiceSpecs({ resist: [{ choose: { from: ['fire'] } }] }).length, 1);
 });
+
+test("a species' spells come from its data, the chosen lineage's included", async () => {
+  const { enumerateSpeciesGrants } = await import('../../../../src/shared/character/spells/autoGrantedSpells.js');
+  const gnome = {
+    name: 'Gnome',
+    _versions: [{ name: 'Gnome; Forest Gnome Lineage', additionalSpells: [{
+      ability: { choose: ['int', 'wis', 'cha'] },
+      known: { 1: ['minor illusion|xphb#c'] },
+      innate: { 1: { daily: { pb: ['speak with animals|xphb'] } } },
+    }] }],
+  };
+  const grants = enumerateSpeciesGrants({
+    speciesName: 'Gnome', speciesSource: 'XPHB', level: 3, speciesObj: gnome,
+    choices: { species_version: ['Forest Gnome'], species_spell_ability: ['wis'] },
+    normalizedChoices: { species: { spellAbility: 'wis' } },
+  });
+  assert.deepEqual(grants.map((g) => [g.name, g.explicitSource, g.ability]), [
+    ['minor illusion', 'Forest Gnome Lineage', 'wis'],
+    ['speak with animals', 'Forest Gnome Lineage', 'wis'],
+  ]);
+  // Proficiency Bonus uses per Long Rest, as the data says.
+  assert.equal(grants[1].entry.freeCast.usesFormula, 'proficiencyBonus');
+});
+
+test("the species spellcasting ability pick comes from its data", () => {
+  const specs = genericSpeciesChoiceSpecs({ _versions: [{ name: 'X; Y', additionalSpells: [{ ability: { choose: ['int', 'cha'] } }] }] });
+  assert.deepEqual(specs.find((s) => s.key === 'species_spell_ability').from, ['int', 'cha']);
+});

@@ -1,7 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
+  const {
     registerSpeciesAdapter,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
@@ -15,9 +15,7 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Reborn_RHW', [
     {
       name: 'Knowledge from a Past Life',
-      
       cat: 'special',
-      
       resKey: 'reborn_knowledge',
       minLevel: 1,
     },
@@ -27,7 +25,6 @@ export default function install(registry, context = {}) {
     {
       key: 'reborn_knowledge',
       name: 'Knowledge from a Past Life',
-      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

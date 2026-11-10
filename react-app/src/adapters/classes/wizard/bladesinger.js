@@ -27,9 +27,7 @@ registerSubclassAdapter("Wizard_Bladesinging", _wizardBladesingerAdapter);
 const _wizardBladesingerActions = [
   {
     "name": "Bladesong",
-    
     "cat": "bonus",
-    
     "resKey": "bladesong",
     "_toggleKey": "bladesong",
     "_toggleCondition": function (ctx) {
@@ -43,16 +41,12 @@ const _wizardBladesingerActions = [
   },
   {
     "name": "Song of Defense",
-    
     "cat": "reaction",
-    
     "minLevel": 10
   },
   {
     "name": "Song of Victory",
-    
     "cat": "bonus",
-    
     "minLevel": 14
   }
 ];
@@ -60,7 +54,6 @@ const _wizardBladesingerResources = [
   {
     "key": "bladesong",
     "name": "Bladesong",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   }

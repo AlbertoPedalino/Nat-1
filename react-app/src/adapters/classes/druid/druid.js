@@ -71,26 +71,20 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Druid", [
   {
     "name": "Wild Shape",
-    
     "cat": "bonus",
-    
     "resKey": "wild_shape",
     "minLevel": 2,
     detailType: 'wildShape'
   },
   {
     "name": "Wild Companion",
-    
     "cat": "action",
-    
     "minLevel": 2,
     detailType: 'wildCompanion'
   },
   {
     "name": "Wild Resurgence",
-    
     "cat": "bonus",
-    
     "resKey": "wild_resurgence",
     "minLevel": 5
   }
@@ -99,7 +93,6 @@ registerClassSheetResources("Druid", [
   {
     "key": "wild_shape",
     "name": "Wild Shape",
-    
     "recharge": "LR",
     "srRecover": 1,
     "max": (lv)=>lv>=17?4:lv>=6?3:2
@@ -107,7 +100,6 @@ registerClassSheetResources("Druid", [
   {
     "key": "wild_resurgence",
     "name": "Wild Resurgence",
-    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true

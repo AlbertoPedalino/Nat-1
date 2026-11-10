@@ -26,16 +26,12 @@ registerSubclassAdapter("Artificer_Battle Smith", function (cls, lv, specs, ctx 
 registerSubclassSheetActions("Artificer_Battle Smith", [
   {
     "name": "Steel Defender",
-    
     "cat": "bonus",
-    
     "minLevel": 3
   },
   {
     "name": "Arcane Jolt",
-    
     "cat": "attack",
-    
     "resKey": "arcane_jolt",
     "minLevel": 9,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 15 ? '4d6' : '2d6', label: ({ formula }) => `+${formula} force` }],
@@ -46,7 +42,6 @@ registerSubclassSheetResources("Artificer_Battle Smith", [
   {
     "key": "arcane_jolt",
     "name": "Arcane Jolt",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   }

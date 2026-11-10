@@ -36,60 +36,46 @@ registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Sorcerer", [
   {
     "name": "Innate Sorcery",
-    
     "cat": "bonus",
-    
     "resKey": "innate_sorcery",
     "_toggleKey": "innate_sorcery",
     "minLevel": 1
   },
   {
     "name": "Font of Magic",
-    
     "cat": "action",
-    
     "resKey": "sorc_pts",
     "minLevel": 2
   },
   {
     "name": "Metamagic",
-    
     "cat": "action",
-    
     "resKey": "sorc_pts",
     "minLevel": 2
   },
   {
     "name": "Sorcerous Restoration",
-    
     "cat": "action",
-    
     "resKey": "sorc_restoration",
     "minLevel": 5
   },
   {
     "name": "Create Spell Slot (Font of Magic)",
-    
     "cat": "action",
-    
     "resKey": "sorc_create_slot",
     "minLevel": 2,
     "buttonLabel": "Create Slot"
   },
   {
     "name": "Convert Spell Slot (Font of Magic)",
-    
     "cat": "action",
-    
     "resKey": "sorc_convert_slot",
     "minLevel": 2,
     "buttonLabel": "Convert Slot"
   },
   {
     "name": "Sorcery Incarnate",
-    
     "cat": "bonus",
-    
     "resKey": "sorc_pts",
     "minLevel": 7
   }
@@ -108,21 +94,18 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_restoration",
     "name": "Sorcerous Restoration",
-    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "innate_sorcery",
     "name": "Innate Sorcery",
-    
     "recharge": "LR",
     "max": () => 2
   },
   {
     "key": "sorc_pts",
     "name": "Sorcery Points",
-    
     "recharge": "LR",
     "max": (lv)=>lv,
     "pool": true
@@ -130,7 +113,6 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_create_slot",
     "name": "Create/Restore Slot",
-    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true
@@ -138,7 +120,6 @@ registerClassSheetResources("Sorcerer", [
   {
     "key": "sorc_convert_slot",
     "name": "Convert Spell Slot",
-    
     "recharge": "LR",
     "max": () => Infinity,
     "pool": true

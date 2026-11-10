@@ -12,33 +12,25 @@ registerSubclassAdapter("Sorcerer_Clockwork Soul", function (cls, lv, specs) {})
 registerSubclassSheetActions("Sorcerer_Clockwork Soul", [
   {
     "name": "Restore Balance",
-    
     "cat": "reaction",
-    
     "resKey": "clockwork_restore",
     "minLevel": 3
   },
   {
     "name": "Bastion of Law",
-    
     "cat": "action",
-    
     "resKey": "sorc_pts",
     "minLevel": 6
   },
   {
     "name": "Trance of Order",
-    
     "cat": "bonus",
-    
     "resKey": "clockwork_trance",
     "minLevel": 14
   },
   {
     "name": "Clockwork Cavalcade",
-    
     "cat": "action",
-    
     "resKey": "clockwork_cavalcade",
     "minLevel": 18
   }
@@ -47,21 +39,18 @@ registerSubclassSheetResources("Sorcerer_Clockwork Soul", [
   {
     "key": "clockwork_restore",
     "name": "Restore Balance",
-    
     "recharge": "LR",
     "max": "abilityMod:cha", "minMax": 1
   },
   {
     "key": "clockwork_trance",
     "name": "Trance of Order",
-    
     "recharge": "LR",
     "max": () => 1
   },
   {
     "key": "clockwork_cavalcade",
     "name": "Clockwork Cavalcade",
-    
     "recharge": "LR",
     "max": () => 1
   }

@@ -27,24 +27,18 @@ registerSubclassAdapter("Artificer_Alchemist", function (cls, lv, specs, ctx = {
 registerSubclassSheetActions("Artificer_Alchemist", [
   {
     "name": "Experimental Elixir",
-    
     "cat": "action",
-    
     "minLevel": 3
   },
   {
     "name": "Restorative Reagents",
-    
     "cat": "action",
-    
     "resKey": "restorative_reagents",
     "minLevel": 9
   },
   {
     "name": "Chemical Mastery",
-    
     "cat": "action",
-    
     "resKey": "chemical_mastery",
     "minLevel": 15
   }
@@ -53,14 +47,12 @@ registerSubclassSheetResources("Artificer_Alchemist", [
   {
     "key": "restorative_reagents",
     "name": "Restorative Reagents",
-    
     "recharge": "LR",
     "max": "abilityMod:int", "minMax": 1
   },
   {
     "key": "chemical_mastery",
     "name": "Conjured Cauldron",
-    
     "recharge": "LR",
     "max": () => 1
   }

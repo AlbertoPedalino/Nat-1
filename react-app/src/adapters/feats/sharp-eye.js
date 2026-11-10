@@ -8,9 +8,7 @@ export default function install(registry, context = {}) {
   registerFeatSheetActions('Sharp Eye', [
     {
       name: 'Sharp Eye',
-      
       cat: 'special',
-      
       resKey: 'sharp_eye',
     },
   ]);
@@ -19,7 +17,6 @@ export default function install(registry, context = {}) {
     {
       key: 'sharp_eye',
       name: 'Sharp Eye',
-      
       recharge: 'LR',
       max: 'proficiencyBonus',
     },

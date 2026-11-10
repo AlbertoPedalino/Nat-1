@@ -54,9 +54,7 @@ registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
 registerClassSheetActions("Rogue", [
   {
     "name": "Sneak Attack",
-    
     "cat": "attack",
-    
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const dice = Math.max(1, Math.ceil(lv / 2));
@@ -66,51 +64,37 @@ registerClassSheetActions("Rogue", [
   },
   {
     "name": "Cunning Action",
-    
     "cat": "bonus",
-    
     "minLevel": 2
   },
   {
     "name": "Steady Aim",
-    
     "cat": "bonus",
-    
     "minLevel": 3
   },
   {
     "name": "Uncanny Dodge",
-    
     "cat": "reaction",
-    
     "minLevel": 5
   },
   {
     "name": "Cunning Strike",
-    
     "cat": "attack",
-    
     "minLevel": 5
   },
   {
     "name": "Improved Cunning Strike",
-    
     "cat": "attack",
-    
     "minLevel": 11
   },
   {
     "name": "Devious Strikes",
-    
     "cat": "attack",
-    
     "minLevel": 14
   },
   {
     "name": "Stroke of Luck",
-    
     "cat": "action",
-    
     "resKey": "stroke_of_luck",
     "minLevel": 20
   }
@@ -119,7 +103,6 @@ registerClassSheetResources("Rogue", [
   {
     "key": "stroke_of_luck",
     "name": "Stroke of Luck",
-    
     "recharge": "LR",
     "max": () => 1
   }

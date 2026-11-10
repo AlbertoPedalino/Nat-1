@@ -5,7 +5,6 @@ export default function install(registry, context = {}) {
   const {
     registerSpeciesAdapter,
     registerSpeciesSheetEffects,
-    registerSpeciesRuntimeConfig,
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
 // Canonical lineage tokens — single source for both the choice options
@@ -17,7 +16,6 @@ registerSpeciesAdapter("Elf_XPHB", function (s) {
   const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Elf', suffixes: ['Lineage'], expect: Object.values(ELF_LINEAGE) });
 
   specs.push({ key: 'species_version', label: 'Elven Lineage', type: 'option', options: lineageOptions, count: 1, level: 1 });
-  specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Elf)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
   specs.push({
     key: 'species_high_elf_cantrip',
     label: 'Wizard Cantrip (High Elf)',
@@ -44,23 +42,5 @@ registerSpeciesSheetEffects("Elf_XPHB", [
   // Drow darkvision 120 ft and Wood Elf Speed 35 come with the lineage's data
   // (speciesVersion.js).
 ]);
-
-registerSpeciesRuntimeConfig("Elf_XPHB", {
-  spellcasting: {
-    alwaysKnownSpells: [
-      // Drow Lineage
-      { name: 'Dancing Lights', level: 0, minLevel: 1, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.DROW } },
-      { name: 'Faerie Fire',    level: 1, minLevel: 3, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.DROW } },
-      { name: 'Darkness',       level: 2, minLevel: 5, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.DROW } },
-      // High Elf Lineage
-      { name: 'Detect Magic',   level: 1, minLevel: 3, source: 'High Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.HIGH_ELF } },
-      { name: 'Misty Step',     level: 2, minLevel: 5, source: 'High Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.HIGH_ELF } },
-      // Wood Elf Lineage
-      { name: 'Druidcraft',     level: 0, minLevel: 1, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.WOOD_ELF } },
-      { name: 'Longstrider',    level: 1, minLevel: 3, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.WOOD_ELF } },
-      { name: 'Pass Without Trace', level: 2, minLevel: 5, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: ELF_LINEAGE.WOOD_ELF } },
-    ],
-  },
-});
 
 }

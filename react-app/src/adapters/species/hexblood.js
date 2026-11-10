@@ -1,20 +1,11 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerSpeciesAdapter,
+  const {
     registerSpeciesSheetCommonChoiceMeta,
     registerSpeciesSheetActions,
     registerSpeciesSheetResources,
-    registerSpeciesRuntimeConfig,
   } = createAdapterBindings(registry, context);
-
-  registerSpeciesAdapter('Hexblood_RHW', function (s) {
-    const specs = [];
-    // Hex Magic lets you pick the spellcasting ability for Disguise Self / Hex.
-    specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Hexblood)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
-    return specs;
-  });
 
   registerSpeciesSheetCommonChoiceMeta('Hexblood_RHW', {
     labels: {
@@ -25,9 +16,7 @@ export default function install(registry, context = {}) {
   registerSpeciesSheetActions('Hexblood_RHW', [
     {
       name: 'Eerie Token',
-      
       cat: 'bonus',
-      
       resKey: 'hexblood_token',
       minLevel: 1,
     },
@@ -37,7 +26,6 @@ export default function install(registry, context = {}) {
     {
       key: 'hexblood_token',
       name: 'Eerie Token',
-      
       recharge: 'LR',
       max: 1,
     },
@@ -45,12 +33,4 @@ export default function install(registry, context = {}) {
 
   // Hex Magic: Disguise Self and Hex always prepared, each castable once per Long
   // Rest without a slot (or with slots you have). Ability comes from species_spell_ability.
-  registerSpeciesRuntimeConfig('Hexblood_RHW', {
-    spellcasting: {
-      alwaysKnownSpells: [
-        { name: 'Disguise Self', level: 1, minLevel: 1, source: 'Hex Magic', sourceType: 'species', freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
-        { name: 'Hex', level: 1, minLevel: 1, source: 'Hex Magic', sourceType: 'species', freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
-      ],
-    },
-  });
 }
