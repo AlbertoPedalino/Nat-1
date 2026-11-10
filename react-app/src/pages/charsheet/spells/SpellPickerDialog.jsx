@@ -14,7 +14,8 @@ import {
 import { compactInputSx, levelToggleSx } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
+import { spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import {
@@ -94,7 +95,7 @@ export function SpellPickerDialog({
       : null,
     query: pickerSearch,
     // A spellbook spell missing from the catalog is still known by its snapshot.
-    findSpell: (name) => spellIndex.get(lowerKey(name)),
+    findSpell: (name) => spellIndex.get(matchKey(name)),
   }) : []), [spellDb, spellIndex, pickerLevel, pickerSearch, classSpellIndex, activePicker, activeIsWizard, pickerWizardMode]);
 
   const {
@@ -180,7 +181,7 @@ export function SpellPickerDialog({
           // so it always carries a source badge. `locked` = not user-editable in the
           // current mode. In Wizard "book" mode the row stays editable (you manage the
           // spellbook), but the badge must still show — hence the two are decoupled.
-          const autoEntry = lockedSourceBySpell.get(`${lowerKey(spell.name)}|${lowerKey(spell.source)}`);
+          const autoEntry = lockedSourceBySpell.get(spellSourceKey(spell.name, spell.source));
           const autoGranted = !!autoEntry;
           const locked = pickerWizardMode === 'book' ? false : autoGranted;
           const inWizardBook = activeIsWizard && isInWizardBook(activePicker?.bucket, spell.name, Number(spell.level || 0));

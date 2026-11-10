@@ -8,6 +8,7 @@ import { classChoiceSpecs } from '../../../../src/pages/charbuilder/choices/choi
 import { makeSheetPayload } from '../../../../src/pages/charbuilder/state/persistence.js';
 import { getFinal } from '../../../../src/shared/character/sheet/sheetStats.js';
 import { buildSpellInfo } from '../../../../src/pages/charsheet/spells/spellsTabLogic.js';
+import { spellNameIndex } from '../../../../src/shared/character/spells/spellNameIndex.js';
 
 installArtificer(adapterRegistry);
 
@@ -58,10 +59,10 @@ test('Fey-Touched on an Artificer grants its +1, keeps its snapshot and lists bo
   assert.equal(getFinal(saved, 'int'), 17);
   assert.deepEqual(saved.allFeatSnapshots.map((feat) => feat.name), ['Fey-Touched']);
 
-  const spellIndex = new Map([
-    ['misty step', { name: 'Misty Step', source: 'XPHB', level: 2 }],
-    ['hex', { name: 'Hex', source: 'XPHB', level: 1 }],
-  ]);
+  const spellIndex = spellNameIndex({ spells: [
+    { name: 'Misty Step', source: 'XPHB', level: 2 },
+    { name: 'Hex', source: 'XPHB', level: 1 },
+  ] });
   const spells = Object.values(buildSpellInfo(saved, spellIndex).leveled).flat()
     .map((spell) => ({
       name: spell.name,

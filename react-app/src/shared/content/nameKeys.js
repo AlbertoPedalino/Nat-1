@@ -10,8 +10,9 @@ export function matchKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Lowercase and trimmed, punctuation kept: for comparing values whose
-// punctuation matters (item flags, spell ids).
+// Lowercase and trimmed, punctuation kept: for ids whose punctuation matters
+// (5etools record keys built from references, copy modifications). Names —
+// spells, classes, feats, labels — compare with matchKey.
 export function lowerKey(value) {
   return String(value || '').trim().toLowerCase();
 }

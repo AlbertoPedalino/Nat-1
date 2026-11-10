@@ -2,7 +2,8 @@ import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/sp
 import { mergeFreeCastsById, normalizeFreeCast } from '../../../shared/character/spells/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
 import { collectScrollSpells, scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
+import { spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
 import {
   SRC_COLOR,
   isGenericSpellSourceLabel,
@@ -92,11 +93,11 @@ export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
   const freeCastsByKey = new Map();
-  const rowKey = (spell, castLevel) => `${lowerKey(spell.name)}|${lowerKey(spell.source)}|${castLevel || spell.level}`;
+  const rowKey = (spell, castLevel) => `${matchKey(spell.name)}|${matchKey(spell.source)}|${castLevel || spell.level}`;
   const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null, grantMeta = null) => {
     const full = grantMeta?.spellSource
-      ? spellIndex.get(`${lowerKey(name)}|${lowerKey(grantMeta.spellSource)}`)
-      : spellIndex.get(lowerKey(name));
+      ? spellIndex.get(spellSourceKey(name, grantMeta.spellSource))
+      : spellIndex.get(matchKey(name));
     // Item cards require the referenced record; never substitute another edition
     // or render an unresolved reference as a level-zero spell.
     if (source?.originType === 'item' && !full) return;
@@ -125,7 +126,7 @@ export function buildSpellInfo(C, spellIndex) {
     rows.set(key, mergeRow(existing, row, locked));
     if (locked) {
       lockedNames.add(name);
-      lockedNames.add(lowerKey(name));
+      lockedNames.add(matchKey(name));
     }
     if (Array.isArray(freeCasts) && freeCasts.length) {
       freeCastsByKey.set(key, mergeFreeCastsById(freeCastsByKey.get(key) || [], freeCasts));
@@ -143,9 +144,9 @@ export function buildSpellInfo(C, spellIndex) {
     });
   });
 
-  if (lowerKey(C?.className) === 'wizard') pushWizardRitualBook(C, C.className);
+  if (matchKey(C?.className) === 'wizard') pushWizardRitualBook(C, C.className);
   (C?.extraClasses || []).forEach((ec) => {
-    if (lowerKey(ec?.name) === 'wizard') pushWizardRitualBook(ec, ec.name);
+    if (matchKey(ec?.name) === 'wizard') pushWizardRitualBook(ec, ec.name);
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
@@ -201,7 +202,7 @@ export function buildSpellInfo(C, spellIndex) {
   return { cantrips, atWill, leveled, lockedNames, freeCastDefs, lockedEntries: all.filter((entry) => entry.locked) };
 
   function pushKnown(name, level, source, ownerClassName) {
-    const full = spellIndex.get(lowerKey(name));
+    const full = spellIndex.get(matchKey(name));
     if (full) push(name, source, false, null, 0, ownerClassName);
     else {
       const key = rowKey({ name, level }, null);
@@ -285,8 +286,8 @@ export function expandSpellInfoBySlots(C, spellInfo, slots) {
     if (!result.leveled[lv]) result.leveled[lv] = [];
     const castLv = Number(nextEntry?.castLevel || nextEntry?.level || lv);
     const idx = result.leveled[lv].findIndex((existing) => (
-      lowerKey(existing?.name) === lowerKey(nextEntry?.name)
-      && lowerKey(existing?.source) === lowerKey(nextEntry?.source)
+      matchKey(existing?.name) === matchKey(nextEntry?.name)
+      && matchKey(existing?.source) === matchKey(nextEntry?.source)
       && Number(existing?.castLevel || existing?.level || lv) === castLv
     ));
     if (idx >= 0) {

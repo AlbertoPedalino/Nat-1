@@ -1,5 +1,5 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // How a spell row is held: its origin, its preparation state (prepared, known,
 // always prepared, granted, at will, ritual book, Mystic Arcanum, item, cantrip)
@@ -8,7 +8,7 @@ import { lowerKey } from '../../../shared/content/nameKeys.js';
 const PREP_MODE_CACHE = new Map();
 function getPrepMode(className) {
   if (!className) return null;
-  const key = lowerKey(className);
+  const key = matchKey(className);
   let mode = PREP_MODE_CACHE.get(key);
   if (mode === undefined) {
     try {

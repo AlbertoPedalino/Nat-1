@@ -11,7 +11,7 @@ import {
   getFeatFreeCastTemplate,
 } from '../../../shared/character/spells/spellFreeCasts.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
-import { lowerKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { SRC_COLOR, featSlotTone, unionSpellSources } from './spellSourceDisplay.js';
 import {
   choiceKeyIsCantripChoice,
@@ -83,7 +83,7 @@ export function collectAutoGrantedSpells(C) {
   // a Forest Gnome Druid's Speak with Animals — keeps all its source tags.
   const runtimeByName = new Map();
   runtimeOut.forEach((entry) => {
-    const key = lowerKey(entry.name);
+    const key = matchKey(entry.name);
     if (!key) return;
     const existing = runtimeByName.get(key);
     if (existing) {
@@ -101,13 +101,13 @@ export function collectAutoGrantedSpells(C) {
 
   (C?.autoGrantedSpells || []).forEach((entry) => {
     if (!entry?.name) return;
-    const key = lowerKey(entry.name);
+    const key = matchKey(entry.name);
     if (runtimeByName.has(key)) return;
     // Check invocation requirement from runtime config before falling back to saved data
     const ownerClass = entry.ownerClassName || C?.className;
     const cfg = ownerClass ? adapterRegistry.getClassRuntimeConfig(ownerClass)?.spellcasting : null;
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
-    const cfgEntry = allCfgSpells.find((s) => lowerKey(s?.name || '') === key);
+    const cfgEntry = allCfgSpells.find((s) => matchKey(s?.name || '') === key);
     if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;
     const fallbackSource = { label: entry.source || 'Auto', color: SRC_COLOR[entry.sourceType] || SRC_COLOR.granted, originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
@@ -135,12 +135,12 @@ export function collectChoiceSpells(C, spellIndex) {
       if (typeof entry !== 'string') return;
       const name = stripSource(entry);
       if (!name) return;
-      if (!spellIndex.has(lowerKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
-      if (ABILITIES.includes(lowerKey(name))) return;
+      if (!spellIndex.has(matchKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
+      if (ABILITIES.includes(matchKey(name))) return;
       const slotKey = featSpellSlotKey(C, key);
       const meta = slotKey ? featMetaMap.get(slotKey) : null;
       const ownerClassName = ownerClassFromChoiceKey(C, key);
-      const spellLevelInfo = spellIndex.get(lowerKey(name));
+      const spellLevelInfo = spellIndex.get(matchKey(name));
       const isCantrip = Number(spellLevelInfo?.level || 0) === 0 || choiceKeyIsCantripChoice(key);
       if (meta) {
         const featTpl = getFeatFreeCastTemplate(meta.name, { isCantrip });

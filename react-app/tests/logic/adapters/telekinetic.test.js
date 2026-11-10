@@ -6,6 +6,7 @@ import { initialBuilderState } from '../../../src/pages/charbuilder/state/initia
 import { makeSheetPayload } from '../../../src/pages/charbuilder/state/persistence.js';
 import { buildSpellInfo } from '../../../src/pages/charsheet/spells/spellsTabLogic.js';
 import { getSpellMetaFields } from '../../../src/shared/character/spells/spellMeta.js';
+import { spellNameIndex } from '../../../src/shared/character/spells/spellNameIndex.js';
 
 installTelekinetic(adapterRegistry);
 
@@ -34,9 +35,9 @@ test('Mage Hand from Telekinetic has no components, 60 ft range and the increase
     },
     { ...initialBuilderState.data, feats: [telekinetic] },
   );
-  const spellIndex = new Map([['mage hand', {
+  const spellIndex = spellNameIndex({ spells: [{
     name: 'Mage Hand', source: 'XPHB', level: 0, components: { v: true, s: true }, rangeLabel: '30 feet',
-  }]]);
+  }] });
   const [mageHand] = buildSpellInfo(saved, spellIndex).cantrips;
 
   assert.equal(mageHand.name, 'Mage Hand');

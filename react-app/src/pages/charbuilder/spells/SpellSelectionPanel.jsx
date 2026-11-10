@@ -10,6 +10,7 @@ import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } f
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { spellNameIndex } from '../../../shared/character/spells/spellNameIndex.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
@@ -41,14 +42,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   // spells it is granted.
   const castsSpells = hasSpellcastingProfile(profile);
   const classNames = castsSpells ? [activeCharacter.className].filter(Boolean) : [];
-  const spellIndex = useMemo(() => {
-    const map = new Map();
-    state.data.spells.forEach((spell) => {
-      if (!spell?.name) return;
-      map.set(matchKey(spell.name), spell);
-    });
-    return map;
-  }, [state.data.spells]);
+  const spellIndex = useMemo(() => spellNameIndex({ spells: state.data.spells }), [state.data.spells]);
   // Grant names come from 5etools tags ("light"): matched by key, not case.
   const autoByName = new Map(autoGrantedSpells.map((spell) => [matchKey(spell.name), spell]));
   const autoPool = autoGrantedSpells.map((auto) => ({

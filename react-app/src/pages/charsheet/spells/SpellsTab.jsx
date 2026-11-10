@@ -17,7 +17,8 @@ import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
+import { spellNameIndex, spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
@@ -48,19 +49,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   const { slotUsed, createdSlots, toggleSlot } = useSpellSlotState(sheet, { readOnly, onUpdateSheet, onUpdateCharacter });
 
-  const spellIndex = useMemo(() => {
-    const map = new Map();
-    spellDb.forEach((spell) => { if (spell?.name) map.set(lowerKey(spell.name), spell); });
-    spellVersions.forEach((spell) => {
-      if (spell?.name && spell.source) map.set(`${lowerKey(spell.name)}|${lowerKey(spell.source)}`, spell);
-    });
-    (C?.spellSnapshots || []).forEach((spell) => {
-      if (spell?.name && !map.has(lowerKey(spell.name))) map.set(lowerKey(spell.name), spell);
-      const key = `${lowerKey(spell?.name)}|${lowerKey(spell?.source)}`;
-      if (spell?.name && spell.source && !map.has(key)) map.set(key, spell);
-    });
-    return map;
-  }, [spellDb, spellVersions, C?.spellSnapshots]);
+  const spellIndex = useMemo(
+    () => spellNameIndex({ spells: spellDb, versions: spellVersions, snapshots: C?.spellSnapshots || [] }),
+    [spellDb, spellVersions, C?.spellSnapshots],
+  );
 
   const spellInfo = useMemo(() => buildSpellInfo(C, spellIndex), [C, spellIndex, adapterRevision]);
   const slots = useMemo(() => getSpellSlots(C), [C, adapterRevision]);
@@ -68,7 +60,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const lockedSourceBySpell = useMemo(() => {
     const map = new Map();
     (spellInfo?.lockedEntries || []).forEach((entry) => {
-      if (entry?.name) map.set(`${lowerKey(entry.name)}|${lowerKey(entry.source)}`, entry);
+      if (entry?.name) map.set(spellSourceKey(entry.name, entry.source), entry);
     });
     return map;
   }, [spellInfo]);
@@ -82,7 +74,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
 
   const matchSpell = (entry) => (
-    (catalogStatus === 'ready' || spellIndex.has(lowerKey(entry.name)))
+    (catalogStatus === 'ready' || spellIndex.has(matchKey(entry.name)))
     && (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
     && matchesQuery(spellSearch, entry?.name)
   );

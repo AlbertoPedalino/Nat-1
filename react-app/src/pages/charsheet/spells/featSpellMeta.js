@@ -1,7 +1,7 @@
 import { featSlotSpellAbility } from '../../../shared/character/spells/spellAbilityChoice.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { normalizeFreeCast } from '../../../shared/character/spells/spellFreeCasts.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 import {
   choiceSpellSlotKey,
   firstChoiceString,
@@ -22,9 +22,9 @@ export function buildFeatMetaMap(C) {
   const map = new Map();
   const choices = C?.choices || {};
   const snapshots = Array.isArray(C?.allFeatSnapshots) ? C.allFeatSnapshots : [];
-  const snapshotByName = new Map(snapshots.map((feat) => [lowerKey(feat?.name), feat]));
+  const snapshotByName = new Map(snapshots.map((feat) => [matchKey(feat?.name), feat]));
   const addMeta = (slotKey, name) => {
-    const snapshot = snapshotByName.get(lowerKey(name));
+    const snapshot = snapshotByName.get(matchKey(name));
     if (!slotKey || !snapshot || map.has(slotKey)) return;
     map.set(slotKey, { name: snapshot.name, ability: featSlotSpellAbility(choices, slotKey), snapshot });
   };
@@ -43,9 +43,9 @@ export function buildFeatMetaMap(C) {
     addMeta(slotKey, findFeatName(C, slotKey));
   });
 
-  const mappedNames = new Set([...map.values()].map((meta) => lowerKey(meta.name)));
+  const mappedNames = new Set([...map.values()].map((meta) => matchKey(meta.name)));
   snapshots.forEach((snapshot, index) => {
-    if (!snapshot?.name || mappedNames.has(lowerKey(snapshot.name))) return;
+    if (!snapshot?.name || mappedNames.has(matchKey(snapshot.name))) return;
     map.set(`feat_snapshot_${index}`, { name: snapshot.name, ability: null, snapshot });
   });
   return map;

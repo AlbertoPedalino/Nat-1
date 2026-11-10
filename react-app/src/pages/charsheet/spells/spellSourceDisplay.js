@@ -1,6 +1,6 @@
 import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 import { featSlotOrigin } from '../../../shared/character/progression/featChoiceKeys.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // A spell row's source tags: their colors, generic labels, and how the tags of
 // merged duplicates combine.
@@ -62,7 +62,7 @@ export function unionSpellSources(a, b) {
   const seen = new Set();
   [...(a || []), ...(b || [])].forEach((src) => {
     if (!src) return;
-    const key = lowerKey(src.originLabel || src.label || '');
+    const key = matchKey(src.originLabel || src.label || '');
     if (!key || seen.has(key)) return;
     seen.add(key);
     out.push(src);

@@ -1,4 +1,4 @@
-import { lowerKey } from '../../content/nameKeys.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 // The spell record stored on the character (`C.spellSnapshots`) and the
 // one-record-per-name rule for spell lists.
@@ -31,7 +31,7 @@ export function toSnapshot(spell) {
 }
 
 export function upsertSnapshot(snapshots, snapshot) {
-  const idx = snapshots.findIndex((entry) => lowerKey(entry.name) === lowerKey(snapshot.name));
+  const idx = snapshots.findIndex((entry) => matchKey(entry.name) === matchKey(snapshot.name));
   if (idx >= 0) return snapshots.map((entry, index) => (index === idx ? { ...entry, ...snapshot } : entry));
   return [...snapshots, snapshot];
 }
@@ -39,7 +39,7 @@ export function upsertSnapshot(snapshots, snapshot) {
 export function dedupeSpells(spells) {
   const seen = new Set();
   return (spells || []).filter((spell) => {
-    const key = lowerKey(spell?.name);
+    const key = matchKey(spell?.name);
     if (!key || seen.has(key)) return false;
     seen.add(key);
     return true;
