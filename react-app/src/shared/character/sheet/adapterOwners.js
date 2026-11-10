@@ -161,11 +161,14 @@ export function entryApplies(entry, C, { owner = null, sheet = null, level = own
 }
 
 // Every entry of `slot` in force on the character, each with its owner, in
-// owner order (classes and their subclasses, species, feats).
-export function collectOwnerEntries(C, slot, { sheet = null } = {}) {
+// owner order (classes and their subclasses, species, feats). `only` picks
+// the entries to check before their requirements run, so a reader of one kind
+// of entry (ability scores) never evaluates the others' conditions.
+export function collectOwnerEntries(C, slot, { sheet = null, only = null } = {}) {
   const out = [];
   characterOwners(C).forEach((owner) => {
     asArray(ownerEntries(owner, slot)).forEach((entry) => {
+      if (only && !only(entry)) return;
       if (entryApplies(entry, C, { owner, sheet })) out.push({ entry, owner });
     });
   });

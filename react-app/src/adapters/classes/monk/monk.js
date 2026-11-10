@@ -35,6 +35,7 @@ registerClassSheetEffects("Monk", [
   { type: "speed", value: (level) => level >= 18 ? 30 : level >= 14 ? 25 : level >= 10 ? 20 : level >= 6 ? 15 : 10,
     minLevel: 2, requiredArmor: { body: false, shield: false }, note: "Unarmored Movement" },
   { type: "saveProficiency", abilities: ABILITIES, minLevel: 14, note: "Disciplined Survivor" },
+  { type: "abilityScore", abilities: ["dex", "wis"], value: 4, max: 25, minLevel: 20, note: "Body and Mind" },
   // Martial Arts: the Unarmed Strike die grows with Monk level and may use Dexterity.
   ...MARTIAL_ARTS_DIE.map(([minLevel, face]) => (
     { type: "unarmedStrike", face, dexterity: true, minLevel, note: "Martial Arts" }

@@ -3,15 +3,20 @@ import { abilityModifier } from './abilityModifier.js';
 import { getFinalAbilityScore } from '../inventory/itemEffects.js';
 import { wildShapeAbilityScore } from '../forms/wildShapeForm.js';
 import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { collectOwnerEntries } from '../sheet/adapterOwners.js';
+import { asArray } from '../../lists.js';
+import { matchKey } from '../../content/nameKeys.js';
+import { clamp } from '../../numbers.js';
 
 // A character's ability scores, in one place. The layers, in order:
 //   base        what the player bought, assigned or rolled (8 until set)
 //   background  the background's +2/+1 or +1/+1/+1, as the player chose it
 //   feats/ASI   Ability Score Improvements and feats with an ability increase
+//   features    class features that raise a score past 20 (Primal Champion)
 //   items       equipped/attuned item bonuses and overrides, consumed Tomes
 //   Wild Shape  replaces STR/DEX/CON with the beast's while transformed
-// The first three are the score the character was built with (the builder
-// shows it); all five are the score the sheet, AC, Hit Points, formulas and
+// The first four are the score the character was built with (the builder
+// shows it); all six are the score the sheet, AC, Hit Points, formulas and
 // adapters use. Scores are always computed from the choices, never stored.
 
 const BASE_SCORE_FIELDS = {
@@ -43,17 +48,36 @@ export function backgroundAbilityBonus(character, stat) {
   return Number(pattern[index]) || 0;
 }
 
+// Class features that raise scores: `abilityScore` sheet effects
+// { abilities, value, max } (Primal Champion: STR and CON +4, to a maximum of
+// 25), each up to its own maximum. Only those effects are checked: other
+// effects' conditions may read the scores.
+function featureAbilityBonuses(character, stat, scoreBefore) {
+  let score = scoreBefore;
+  return collectOwnerEntries(character, 'SheetEffects', { only: (entry) => matchKey(entry?.type) === 'abilityscore' })
+    .filter(({ entry }) => asArray(entry.abilities).includes(stat))
+    .map(({ entry }) => {
+      const value = clamp(Number(entry.value) || 0, 0, Number(entry.max ?? 20) - score);
+      score += value;
+      return { source: entry.note || 'Class Feature', value };
+    })
+    .filter((bonus) => bonus.value > 0);
+}
+
 // The bonuses on top of the base score, by source, for the builder's breakdown.
 export function abilityScoreBonuses(character, stat) {
   const bonuses = [];
   const background = backgroundAbilityBonus(character, stat);
   if (background) bonuses.push({ source: 'Background', value: background });
-  const feats = getFeatAsiBonus(character, stat, baseAbilityScore(character, stat) + background);
+  const beforeFeats = baseAbilityScore(character, stat) + background;
+  const feats = getFeatAsiBonus(character, stat, beforeFeats);
   if (feats) bonuses.push({ source: 'Feat/ASI', value: feats });
+  bonuses.push(...featureAbilityBonuses(character, stat, beforeFeats + feats));
   return bonuses;
 }
 
-// The score the character was built with: base, background and feats/ASI.
+// The score the character was built with: base, background, feats/ASI and
+// class features.
 export function builtAbilityScore(character, stat) {
   return abilityScoreBonuses(character, stat)
     .reduce((sum, bonus) => sum + bonus.value, baseAbilityScore(character, stat));

@@ -42,3 +42,15 @@ test('Slippery Mind and Disciplined Survivor give their saving throw proficienci
   assert.equal(hasSaveProficiency(character('Rogue', 15), 'cha'), true);
   assert.equal(hasSaveProficiency(character('Monk', 14), 'int'), true);
 });
+
+test('Primal Champion and Body and Mind raise their scores by 4, to a maximum of 25', async () => {
+  const { abilityScore, abilityScoreBonuses } = await import('../../../src/shared/character/progression/abilityScores.js');
+  const scores = (className, level, manualScores) => ({ ...character(className, level), scoreMethod: 'manual', manualScores });
+  const barbarian = scores('Barbarian', 20, { str: 20, con: 23, dex: 14 });
+  assert.equal(abilityScore(scores('Barbarian', 19, { str: 20 }), 'str'), 20);
+  assert.equal(abilityScore(barbarian, 'str'), 24);
+  assert.equal(abilityScore(barbarian, 'con'), 25);
+  assert.equal(abilityScore(barbarian, 'dex'), 14);
+  assert.deepEqual(abilityScoreBonuses(barbarian, 'con'), [{ source: 'Primal Champion', value: 2 }]);
+  assert.equal(abilityScore(scores('Monk', 20, { wis: 18 }), 'wis'), 22);
+});
