@@ -143,9 +143,16 @@ function collectNamedEntries(entries, scope) {
   return map;
 }
 
+// A name's text is the lowest-level feature that has it: when a later feature
+// reuses the name (Elemental Overload's Icefury at 14 after Raging Elements'
+// Icefury at 3), the card shows the option itself, whatever order the
+// snapshot was saved in. That later text is kept as an upgrade (`_upgrades`)
+// the card adds once the character reaches its level — only from a different
+// feature: a feature listed again at a higher level (Action Surge at 17) is a
+// reprint of the same text.
 function buildFeatureMapFromRecords(records, scope) {
   const map = new Map();
-  const indexNamedNode = (node) => {
+  const indexNamedNode = (node, feature) => {
     if (!node || typeof node !== 'object') return;
     const entriesArr = Array.isArray(node.entries)
       ? node.entries
@@ -154,26 +161,38 @@ function buildFeatureMapFromRecords(records, scope) {
       const key = nameKey(node.name);
       if (key) {
         const existing = map.get(key);
+        const level = Number(feature.level || 0);
         if (!existing) {
-          map.set(key, Object.assign(entriesArr.slice(), { _name: node.name }));
+          map.set(key, Object.assign(entriesArr.slice(), { _name: node.name, _level: level, _upgrades: [] }));
         } else if (existing._name !== node.name) {
           reportKeyConflict(scope, key, existing._name, node.name);
+        } else if (level > existing._level && nameKey(feature.name) !== key
+          && JSON.stringify(entriesArr) !== JSON.stringify([...existing])) {
+          existing._upgrades.push({ feature: feature.name, level, entries: entriesArr });
         }
       }
     }
-    if (Array.isArray(node.entries)) node.entries.forEach(indexNamedNode);
-    if (Array.isArray(node.items)) node.items.forEach(indexNamedNode);
+    if (Array.isArray(node.entries)) node.entries.forEach((child) => indexNamedNode(child, feature));
+    if (Array.isArray(node.items)) node.items.forEach((child) => indexNamedNode(child, feature));
   };
-  // Lowest level first: when a later feature reuses a name (Elemental
-  // Overload's Icefury rider at 14 after Raging Elements' Icefury at 3), the
-  // card shows the feature itself, whatever order the snapshot was saved in.
   [...(records || [])]
     .sort((a, b) => Number(a?.level || 0) - Number(b?.level || 0))
     .forEach((feature) => {
       if (!feature?.name || !Array.isArray(feature.entries)) return;
-      indexNamedNode(feature);
+      indexNamedNode(feature, feature);
     });
   return map;
+}
+
+// The text with the upgrades the owner's level has reached, each under the
+// name and level of the feature that adds it.
+function withReachedUpgrades(entries, level) {
+  const reached = (entries?._upgrades || []).filter((upgrade) => upgrade.level <= level);
+  if (!reached.length) return entries;
+  return [
+    ...entries,
+    ...reached.map((upgrade) => ({ type: 'entries', name: `${upgrade.feature} (Level ${upgrade.level})`, entries: upgrade.entries })),
+  ];
 }
 
 function warnMissingDescription(action, source) {
@@ -235,7 +254,7 @@ export function collectAdapterActions(C, sheet) {
     return null;
   };
 
-  const resolveOfficialEntries = (action, source) => {
+  const resolveOfficialEntries = (action, source, level) => {
     if (action.entries) return action.entries;
     const ownerCandidates = nameKeyCandidates(action.ownerName || source);
     for (const candidate of ownerCandidates) {
@@ -248,7 +267,7 @@ export function collectAdapterActions(C, sheet) {
     const actionCandidates = nameKeyCandidates(action.name);
     for (const candidate of actionCandidates) {
       const entries = lookupByName(candidate);
-      if (entries) return entries;
+      if (entries) return withReachedUpgrades(entries, level);
     }
     return null;
   };
@@ -260,7 +279,7 @@ export function collectAdapterActions(C, sheet) {
       const lv = Number(a.ownerLevel ?? ownerLevel ?? C?.level ?? 1);
       if (!checked && !entryApplies(a, C, { level: lv, sheet })) return;
       if (!isExecutableAction(a)) return;
-      const officialEntries = resolveOfficialEntries(a, source);
+      const officialEntries = resolveOfficialEntries(a, source, lv);
       if (!officialEntries && !a.noDescription) {
         warnMissingDescription(a, source);
       }

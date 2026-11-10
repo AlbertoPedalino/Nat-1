@@ -58,5 +58,30 @@ test('a card shows the lowest-level feature of its name, whatever the snapshot o
     ],
   });
   const icefury = collectAdapterActions(C, {}).find((action) => action.name === 'Icefury');
-  assert.deepEqual([...icefury.entries], ['base']);
+  assert.equal(icefury.entries[0], 'base');
+  assert.equal(icefury.entries[1].name, 'Elemental Overload (Level 14)');
+});
+
+test('a later feature upgrading an option joins its card once the level is reached', async () => {
+  const { collectAdapterActions } = await import('../../../src/shared/character/sheet/adapterActions.js');
+  const option = (text) => ({ type: 'entries', name: 'Icefury', entries: [text] });
+  const features = [
+    { name: 'Raging Elements', level: 3, entries: [option('base')] },
+    { name: 'Elemental Overload', level: 14, entries: [option('rider')] },
+  ];
+  const icefury = (level) => collectAdapterActions(character('Barbarian', 'Elements', level, { allSubFeatures: features }), {})
+    .find((action) => action.name === 'Icefury').entries;
+  assert.deepEqual([...icefury(13)], ['base']);
+  assert.deepEqual(icefury(14), ['base', { type: 'entries', name: 'Elemental Overload (Level 14)', entries: ['rider'] }]);
+});
+
+test('a feature listed again at a higher level is not added twice', async () => {
+  const { collectAdapterActions } = await import('../../../src/shared/character/sheet/adapterActions.js');
+  const C = character('Barbarian', 'Elements', 14, {
+    allSubFeatures: [
+      { name: 'Icefury', level: 3, entries: ['once'] },
+      { name: 'Icefury', level: 14, entries: ['once', 'more uses'] },
+    ],
+  });
+  assert.deepEqual([...collectAdapterActions(C, {}).find((action) => action.name === 'Icefury').entries], ['once']);
 });
