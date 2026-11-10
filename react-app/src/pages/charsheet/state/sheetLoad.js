@@ -1,7 +1,7 @@
 import { ensureSheetRuntimeAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
 import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { loadOptionalFeatures } from '../../../shared/content/catalogs/classData.js';
-import { loadConditions } from '../../../shared/content/catalogs/rulesData.js';
+import { loadConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { reconcileInventoryWithItemsDb } from '../../../shared/content/catalogs/inventoryReconcile.js';
 import {
   collectReplicatePlanChoices,
@@ -25,7 +25,6 @@ import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 // work between every sheet mounted in this tab; a failed load is evicted so a
 // later character can still retry it.
 const loadCachedOptionalFeatures = cachedLoader(loadOptionalFeatures);
-const loadCachedConditions = cachedLoader(loadConditions);
 
 // The adapters for this character and the reference data, each failing soft:
 // a failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
@@ -35,7 +34,7 @@ export async function loadSheetReferenceData(character) {
     ensureSheetRuntimeAdapters(character),
     loadItems().catch(() => []),
     loadCachedOptionalFeatures().catch(() => []),
-    loadCachedConditions().catch(() => ({})),
+    loadConditionEntries().catch(() => ({})),
   ]);
   return { itemsDb, optionalFeatures, conditionEntries: conditionEntries || {} };
 }

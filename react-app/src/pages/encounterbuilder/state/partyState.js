@@ -1,4 +1,4 @@
-import { PLAYER_COLORS } from '../../../shared/encounter/combatLabels.js';
+import { playerColor } from '../../../shared/encounter/combatLabels.js';
 import { clampPlayerStats } from '../../../shared/encounter/combat.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
@@ -20,7 +20,7 @@ function placeholderPlayer(index) {
     initMod: [2, 1, 3, 0][index] ?? 0,
     ac: [15, 14, 16, 18][index] ?? 10,
     hpMax: [30, 25, 28, 35][index] ?? 30,
-    color: PLAYER_COLORS[index % PLAYER_COLORS.length],
+    color: playerColor(null, index),
   };
 }
 
@@ -87,7 +87,8 @@ export function importCampaignPlayers(state, campaignPlayers) {
       ...pickCharacterVitals(player),
       iconColor: player.iconColor,
       portraitPath: player.portraitPath || null,
-      color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
+      // An imported character wears their sheet's colour.
+      color: playerColor({ iconColor: player.iconColor }, players.length),
     }, players.length);
     const existingIndex = players.findIndex((item) => item.sourceId === next.sourceId);
     if (existingIndex >= 0) {
@@ -126,7 +127,7 @@ function normalizePlayer(player, index) {
     ...player,
     name: String(player.name || `Player ${index + 1}`),
     ...stats,
-    color: normalizeHexColor(player.color, '') || normalizeHexColor(player.iconColor, '') || PLAYER_COLORS[index % PLAYER_COLORS.length],
+    color: playerColor(player, index),
     iconColor: normalizeHexColor(player.iconColor, '') || null,
   };
   // Only clamp what the player actually carries: a party member typed straight

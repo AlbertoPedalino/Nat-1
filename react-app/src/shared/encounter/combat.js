@@ -1,4 +1,4 @@
-import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './combatLabels.js';
+import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, playerColor } from './combatLabels.js';
 import { findMonster, getAC, getHP } from '../bestiary/monsterUtils.js';
 import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { resolveCombatVitals } from './sheetSync.js';
@@ -159,7 +159,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       label: null,
       shape: null,
       shapeClr: null,
-      color: player.color || player.iconColor || PLAYER_COLORS[index % PLAYER_COLORS.length],
+      color: playerColor(player, index),
       portraitPath: player.portraitPath || null,
     });
   });
