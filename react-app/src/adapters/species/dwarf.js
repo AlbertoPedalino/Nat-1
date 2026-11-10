@@ -18,10 +18,6 @@ registerSpeciesSheetActions("Dwarf_XPHB", [
     cat: 'bonus',
     resKey: 'dwarf_stonecunning',
     minLevel: 1,
-    inlinePills: [
-      { label: 'Sense', value: 'Tremorsense 60 ft' },
-      { label: 'Duration', value: '10 min' },
-    ],
   },
 ]);
 registerSpeciesSheetResources("Dwarf_XPHB", [

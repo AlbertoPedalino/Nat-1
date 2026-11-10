@@ -13,7 +13,7 @@ export default function install(registry, context = {}) {
       minLevel: 3,
       rollers: [{ kind: 'damage', formula: '1d10', label: ({ formula }) => `${formula} necrotic` }],
     },
-    { name: 'Shadowform', cat: 'bonus', resKey: 'channel_div', minLevel: 3, inlinePills: [{ label: 'Duration', value: '1 min' }] },
+    { name: 'Shadowform', cat: 'bonus', resKey: 'channel_div', minLevel: 3 },
     { name: 'Dispersion', cat: 'reaction', resKey: 'shadow_dispersion', minLevel: 6 },
   ]);
   registerSubclassSheetResources('Cleric_Shadow', [

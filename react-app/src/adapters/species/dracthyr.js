@@ -6,7 +6,7 @@ export default function install(registry, context = {}) {
   const { registerSpeciesSheetActions, registerSpeciesSheetResources } = createAdapterBindings(registry, context);
 
   registerSpeciesSheetActions('Dracthyr_WoW', [
-    { name: 'Draconic Flight', cat: 'bonus', resKey: 'dracthyr_flight', minLevel: 5, inlinePills: [{ label: 'Duration', value: '10 min' }] },
+    { name: 'Draconic Flight', cat: 'bonus', resKey: 'dracthyr_flight', minLevel: 5 },
   ]);
   registerSpeciesSheetResources('Dracthyr_WoW', [
     { key: 'dracthyr_flight', name: 'Draconic Flight', recharge: 'LR', minLevel: 5, max: 1 },

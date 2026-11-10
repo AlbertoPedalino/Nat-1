@@ -8,7 +8,7 @@ export default function install(registry, context = {}) {
   const { registerClassSheetActions, registerClassSheetResources } = createAdapterBindings(registry, context);
 
   registerClassSheetActions('Shaman', [
-    { name: 'Totems', cat: 'bonus', minLevel: 3, inlinePills: [{ label: 'Area', value: '30-ft Emanation' }, { label: 'Duration', value: '1 min' }] },
+    { name: 'Totems', cat: 'bonus', minLevel: 3 },
     { name: 'Primal Knowledge Totem', cat: 'bonus', resKey: 'shaman_primal_knowledge_totem', minLevel: 3 },
   ]);
   registerClassSheetResources('Shaman', [

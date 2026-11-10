@@ -29,7 +29,6 @@ export default function install(registry, context = {}) {
       cat: 'special',
       minLevel: 1,
       requiredChoice: { key: 'species_version', value: 'Mulgore' },
-      inlinePills: [{ label: 'Area', value: '5-ft Emanation' }],
     },
     {
       name: 'Highmountain Tauren',

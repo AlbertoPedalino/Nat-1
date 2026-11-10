@@ -13,7 +13,6 @@ export default function install(registry, context = {}) {
       minLevel: 1,
       inlinePills: ({ character }) => [
         { label: 'Temp HP', value: 2 * getProficiencyBonus(character) },
-        { label: 'Duration', value: '1 min' },
       ],
     },
   ]);

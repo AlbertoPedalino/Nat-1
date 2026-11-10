@@ -25,7 +25,6 @@ export default function install(registry, context = {}) {
       minLevel: 3,
       requiredChoice: rune('Frost'),
       rollers: [{ kind: 'damage', formula: '2d6', label: ({ formula }) => `${formula} cold` }],
-      inlinePills: [{ label: 'Area', value: '10-ft Emanation' }],
     },
     {
       name: 'Runic Power: Unholy',
@@ -43,10 +42,9 @@ export default function install(registry, context = {}) {
       minLevel: 15,
       requiredChoice: rune('Frost'),
       rollers: [{ kind: 'damage', formula: '8d6', label: ({ formula }) => `${formula} cold` }],
-      inlinePills: [{ label: 'Area', value: '30-ft Cone' }],
     },
     { name: 'Runic Mastery: Unholy', cat: 'special', resKey: 'ebon_blade_runic_mastery', minLevel: 15, requiredChoice: rune('Unholy') },
-    { name: 'Aspect of the Horsemen', cat: 'bonus', resKey: 'ebon_blade_horsemen', minLevel: 20, inlinePills: [{ label: 'Duration', value: '10 min' }] },
+    { name: 'Aspect of the Horsemen', cat: 'bonus', resKey: 'ebon_blade_horsemen', minLevel: 20 },
   ]);
   registerSubclassSheetResources('Death Knight_Ebon Blade', [
     { key: 'ebon_blade_runic_mastery', name: 'Runic Mastery', recharge: 'LR', max: 1, minLevel: 15 },

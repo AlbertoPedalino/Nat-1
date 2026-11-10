@@ -14,7 +14,6 @@ export default function install(registry, context = {}) {
         { kind: 'heal', formula: '1d10' },
         { kind: 'damage', formula: '1d10', label: ({ formula }) => `${formula} radiant` },
       ],
-      inlinePills: [{ label: 'Area', value: '15-ft Cone' }],
     },
   ]);
   registerSpeciesSheetEffects('Earthen_WoW', [

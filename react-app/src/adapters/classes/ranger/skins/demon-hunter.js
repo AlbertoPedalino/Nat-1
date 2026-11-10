@@ -41,11 +41,10 @@ export default function install(registry, context = {}) {
       ],
       inlinePills: ({ character }) => [
         { label: 'Healing', value: finalAbilityModifier(character, 'wis') },
-        { label: 'Area', value: '10-ft Emanation' },
       ],
     },
     { name: 'Double Jump', cat: 'special', resKey: 'soul_fragments', minLevel: 3 },
-    { name: 'Disrupt', cat: 'reaction', resKey: 'soul_fragments', minLevel: 11, inlinePills: [{ label: 'Cost', value: '2 fragments' }] },
+    { name: 'Disrupt', cat: 'reaction', resKey: 'soul_fragments', minLevel: 11 },
     { name: 'Warglaive Mastery', cat: 'bonus', resKey: 'soul_fragments', minLevel: 11 },
   ]);
   registerSubclassSheetResources('Demon Hunter_Demon Hunter', [

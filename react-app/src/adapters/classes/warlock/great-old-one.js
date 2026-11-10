@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
@@ -25,15 +24,7 @@ registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
 });
 
 registerSubclassSheetActions("Warlock_Great Old One", [
-  { name: "Awakened Mind", cat: "bonus", resKey: "goo_awakened", minLevel: 3,
-    inlinePills: ({ ownerLevel, character }) => {
-      const lv = Number(ownerLevel || 1);
-      const cha = Number(finalAbilityModifier(character, "cha") || 0);
-      return [
-        { label: "Range", value: Math.max(1, cha) + " mi" },
-        { label: "Duration", value: lv + " min" },
-      ];
-    } },
+  { name: "Awakened Mind", cat: "bonus", resKey: "goo_awakened", minLevel: 3 },
   { name: "Clairvoyant Combatant", cat: "action", resKey: "goo_clairvoyant", minLevel: 6 },
   { name: "Create Thrall", cat: "action", resKey: "goo_create_thrall", minLevel: 14,
     inlinePills: ({ ownerLevel }) => [{ label: "Aberration THP", value: Number(ownerLevel || 1) }] },

@@ -68,13 +68,13 @@ export function buildActionTags(action, C) {
     tags.push(tagBadge('slot', 'slot', action._weaponSlot));
   }
 
-  // Convention: an adapter's `inlinePills` are for facts the action's resource
-  // bar can't show (range, duration, THP amount, a chosen damage type, etc.).
-  // No save DC pills: the feature text gives the formula, as for Grapple or
-  // Shove, and a pill on every saving throw card would crowd the tab. Never
-  // add a pill that just restates the action's own resource-bar
-  // value — e.g. a "Pool = level×5 HP" pill on an action whose resKey already
-  // tracks that pool. That's redundant; let the bar own the number.
+  // Convention: an adapter's `inlinePills` are for amounts the action's
+  // resource bar and rollers can't show (THP, healing…). Never a fact the
+  // card's text already states (area, duration, range, cost) nor a save DC:
+  // the feature text gives the formula, as for Grapple or Shove. Never a pill
+  // that just restates the action's own resource-bar value — e.g. a
+  // "Pool = level×5 HP" pill on an action whose resKey already tracks that
+  // pool; let the bar own the number.
   const pills = typeof action.inlinePills === 'function'
     ? action.inlinePills({ character: C, ownerLevel })
     : (Array.isArray(action.inlinePills) ? action.inlinePills : []);

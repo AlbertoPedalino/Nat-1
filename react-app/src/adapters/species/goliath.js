@@ -85,10 +85,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     cat: 'bonus',
     resKey: 'goliath_large_form',
     minLevel: 5,
-    inlinePills: [
-      { label: 'Duration', value: '10 min' },
-      { label: 'Speed', value: '+10 ft' },
-    ],
   },
 ]);
 registerSpeciesSheetResources("Goliath_XPHB", [
