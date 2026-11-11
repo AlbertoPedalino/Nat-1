@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
@@ -26,6 +26,17 @@ export const panelTitleSx = {
   fontSize: FONT_SIZES.xs,
   color: 'primary.main',
 };
+
+// The name on a card or row (an action, a chosen species or background): the
+// body face, bold, a step over the body text.
+export const cardTitleSx = {
+  fontSize: FONT_SIZES.lg,
+  fontWeight: FONT_WEIGHTS.bold,
+  color: 'text.primary',
+};
+
+// The body of a panel under its PanelHeader.
+export const panelBodySx = { px: 1, py: 0.75 };
 
 // The caption over a group of controls or a list (a selector's name, a
 // history's title): small, uppercase, quiet.

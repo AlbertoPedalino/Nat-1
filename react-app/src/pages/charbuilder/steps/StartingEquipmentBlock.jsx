@@ -14,6 +14,7 @@ import {
   resolveEquipmentItems,
   collectEquipmentTypeSlots,
 } from './startingEquipment.js';
+import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // One source's starting-equipment choices (class or background) in the
 // builder's equipment step.
@@ -40,7 +41,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
   if (!eq) return null;
   return (
     <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Typography variant="h2" sx={{ mb: 1 }}>{title}</Typography>
+      <Typography sx={{ ...sheetBoxTitleSx, mb: 1 }}>{title}</Typography>
       <Stack spacing={1}>
         {blocks.map((block) => (
           <Paper key={block.key} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>

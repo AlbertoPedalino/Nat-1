@@ -1,25 +1,22 @@
-import { Box, Paper, Stack, Typography } from '@mui/material';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { Box, Paper, Typography } from '@mui/material';
+import PanelHeader, { panelBodySx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
-export default function BuilderPanel({ id, title, icon: Icon, note, action, children, sx }) {
+// A builder step's panel: the sheet's panel (PanelHeader over the body), its
+// `note` the first line of the body and `action` at the end of the bar.
+export default function BuilderPanel({ id, title, icon, note, action, children, sx }) {
   return (
-    <Paper id={id} variant="outlined" sx={{ p: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden', ...sx }}>
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start', mb: 0.75, pb: 0.5, borderBottom: 1, borderColor: 'divider' }}>
-        {Icon ? <Icon size={ICON_SIZES.sm} color={UI_COLORS.accent} /> : null}
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="h2" sx={{ color: 'primary.main', ...TEXT_STYLES.label }}>{title}</Typography>
-          {note ? (
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25, fontSize: FONT_SIZES.sm }}>
-              {note}
-            </Typography>
-          ) : null}
-        </Box>
-        {action}
-      </Stack>
-      {children}
+    <Paper id={id} variant="outlined" sx={{ overflow: 'hidden', ...sx }}>
+      <PanelHeader icon={icon} title={title}>
+        {action ? <Box sx={{ ml: 'auto' }}>{action}</Box> : null}
+      </PanelHeader>
+      <Box sx={panelBodySx}>
+        {note ? (
+          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm, mb: 0.75 }}>{note}</Typography>
+        ) : null}
+        {children}
+      </Box>
     </Paper>
   );
 }

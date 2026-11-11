@@ -10,6 +10,7 @@ import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../..
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -52,7 +53,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
           }}
         >
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h2" sx={{ color: ready ? 'primary.main' : 'text.secondary' }}>
+            <Typography sx={{ ...cardTitleSx, color: ready ? 'primary.main' : 'text.secondary' }}>
               {ready ? 'Character sheet ready' : 'Character sheet not ready'}
             </Typography>
             <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>

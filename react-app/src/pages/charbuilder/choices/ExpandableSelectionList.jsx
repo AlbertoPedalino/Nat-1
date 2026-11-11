@@ -5,6 +5,7 @@ import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -27,7 +28,7 @@ export default function ExpandableSelectionList({
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ ...sheetBoxTitleSx, flex: 1, minWidth: 0 }}>
             {title}
           </Typography>
           {status ? (

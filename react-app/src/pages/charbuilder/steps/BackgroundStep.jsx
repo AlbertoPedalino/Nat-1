@@ -19,6 +19,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -92,7 +93,7 @@ function BackgroundDetailCard({ background }) {
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0, color: 'primary.main' }}>{background.name}</Typography>
+          <Typography sx={{ ...cardTitleSx, flex: 1, minWidth: 0 }}>{background.name}</Typography>
           <MiniBadge label={background.source || ''} color={UI_COLORS.textSecondary} />
         </Stack>
         {lore ? (

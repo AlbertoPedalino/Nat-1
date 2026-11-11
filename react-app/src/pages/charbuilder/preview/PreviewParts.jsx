@@ -1,11 +1,11 @@
 import {
   Box,
-  Card,
-  CardContent,
   Chip,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material';
+import PanelHeader, { panelBodySx } from '../../../shared/ui/PanelHeader.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
@@ -13,7 +13,6 @@ import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
@@ -21,19 +20,6 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 
 export const PROFICIENCY_TONE = UI_COLORS.accentText;
-
-export const SECTION_CARD_SX = {
-  minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.fill),
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
-  backgroundImage: 'none',
-};
-
-export const SECTION_HEADER_SX = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.sm,
-  lineHeight: LINE_HEIGHTS.tight,
-};
 
 function EmptyCaption({ children }) {
   return (
@@ -43,29 +29,20 @@ function EmptyCaption({ children }) {
   );
 }
 
-export function PreviewSection({ icon: Icon, title, subtitle, tone = UI_COLORS.accentText, children, emptyText }) {
+// A preview section: the sheet's panel (PanelHeader over the body), its
+// `subtitle` the first line of the body.
+export function PreviewSection({ icon, title, subtitle, tone = UI_COLORS.accentText, children, emptyText }) {
   const hasContent = Boolean(children);
   return (
-    <Card variant="outlined" sx={SECTION_CARD_SX}>
-      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-            {Icon ? <Icon size={ICON_SIZES.sm} color={tone} /> : null}
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography sx={{ ...SECTION_HEADER_SX, color: tone }} noWrap>
-                {title}
-              </Typography>
-              {subtitle ? (
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.tight }} noWrap>
-                  {subtitle}
-                </Typography>
-              ) : null}
-            </Box>
-          </Stack>
-          {hasContent ? children : emptyText ? <EmptyCaption>{emptyText}</EmptyCaption> : null}
-        </Stack>
-      </CardContent>
-    </Card>
+    <Paper variant="outlined" sx={{ overflow: 'hidden', minWidth: 0 }}>
+      <PanelHeader icon={icon} title={title} tone={tone} />
+      <Stack spacing={0.75} sx={{ ...panelBodySx, minWidth: 0 }}>
+        {subtitle ? (
+          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm }} noWrap>{subtitle}</Typography>
+        ) : null}
+        {hasContent ? children : emptyText ? <EmptyCaption>{emptyText}</EmptyCaption> : null}
+      </Stack>
+    </Paper>
   );
 }
 

@@ -29,11 +29,12 @@ import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { collectPreviewProficiencies, collectPreviewFeats } from './previewData.js';
 import {
-  PROFICIENCY_TONE, SECTION_CARD_SX, SECTION_HEADER_SX, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
+  PROFICIENCY_TONE, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { captionLabelSx, sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 
 const PANEL_SX = {
   p: 1.25,
@@ -58,14 +59,13 @@ function PreviewHeader({ character, hp }) {
   ];
 
   return (
-    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line) }}>
+    <Card variant="outlined" sx={{ ...sheetBoxSx, minWidth: 0 }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <Typography sx={{ ...SECTION_HEADER_SX, color: 'primary.main' }}>Preview</Typography>
+          <Typography sx={{ ...captionLabelSx, color: 'primary.main' }}>Preview</Typography>
           <Typography
-            variant="h2"
             noWrap
-            sx={{ color: UI_COLORS.accentText, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight, fontWeight: FONT_WEIGHTS.heavy }}
+            sx={{ ...TEXT_STYLES.title, color: UI_COLORS.accentText, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -81,12 +81,12 @@ function AbilityScoreGrid({ scores }) {
     <Grid container spacing={0.5}>
       {ABILITIES.map((stat) => (
         <Grid key={stat} size={{ xs: 4 }}>
-          <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
+          <Card variant="outlined" sx={{ ...sheetBoxSx, textAlign: 'center', minWidth: 0 }}>
             <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 } }}>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.sm }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
-              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHTS.tight, color: 'text.primary' }}>
+              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHTS.tight, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm }}>

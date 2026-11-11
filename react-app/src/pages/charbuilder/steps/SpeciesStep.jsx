@@ -9,6 +9,7 @@ import { speciesChoiceSpecs } from '../choices/choiceSpecs.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
@@ -19,7 +20,7 @@ function SpeciesDetailCard({ species }) {
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{species.name}</Typography>
+          <Typography sx={{ ...cardTitleSx, flex: 1, minWidth: 0 }}>{species.name}</Typography>
           <MiniBadge label={species.source || ''} color={UI_COLORS.textSecondary} />
         </Stack>
         <Divider />

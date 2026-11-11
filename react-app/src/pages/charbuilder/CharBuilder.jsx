@@ -19,7 +19,6 @@ import { useBuilderAdapters } from './state/useBuilderAdapters.js';
 import { useBuilderPersistence } from './state/useBuilderPersistence.js';
 import { createInitialBuilderState } from './state/builderStartup.js';
 import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
-import { builderRootSx } from './layout/builderDensity.js';
 import { builderReducer } from './state/state.js';
 import BackgroundStep from './steps/BackgroundStep.jsx';
 import ClassStep from './steps/ClassStep.jsx';
@@ -98,7 +97,7 @@ export default function CharBuilder() {
   // each load and each restored character.
 
   return (
-    <Box sx={builderRootSx}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <BuilderAppBar
         canUploadDraft={importDraft && cloudActive}
         onUploadDraft={handleUploadToCloud}

@@ -25,6 +25,7 @@ import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -244,7 +245,7 @@ export default function EquipmentStep({ state, dispatch }) {
           </Paper>
 
           <Divider />
-          <Typography variant="h2">Current Inventory</Typography>
+          <Typography sx={sheetSectionHeaderSx()}>Current Inventory</Typography>
           {character.inventory.length ? (
             <>
               <SearchField
