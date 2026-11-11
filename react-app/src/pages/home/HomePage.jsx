@@ -17,6 +17,7 @@ import { DURATIONS } from '../../shared/ui/motion.js';
 import { UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import NatOneDie from './NatOneDie.jsx';
+import { useFirstArrival } from './useFirstArrival.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
@@ -39,6 +40,7 @@ export const TOOLS = [
 
 export default function HomePage() {
   const { notify } = useToast();
+  const arriving = useFirstArrival();
   const [appDataCount, setAppDataCount] = useState(0);
 
   const refreshAppDataCount = useCallback(() => {
@@ -65,7 +67,7 @@ export default function HomePage() {
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
         <NatOneDie sx={heroLogoSx} />
-        <Typography component="h1" sx={heroTitleSx}>Nat-1</Typography>
+        <Typography component="h1" sx={arriving ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT) } : heroTitleSx}>Nat-1</Typography>
         <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
 
@@ -128,9 +130,12 @@ const heroLogoSx = {
   mb: '0.25rem',
 };
 
+// The name's tilt; it cheers into it on arriving on the site (useFirstArrival).
+const HERO_TITLE_TILT = 'rotate(-4deg)';
+
 const heroTitleSx = {
   ...TEXT_STYLES.cover,
-  ...bubbleCheerSx('rotate(-4deg)'),
+  transform: HERO_TITLE_TILT,
   fontSize: 'clamp(3.5rem, 12vw, 6.5rem)',
   lineHeight: LINE_HEIGHTS.tight,
   color: UI_COLORS.accent,

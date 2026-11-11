@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box } from '@mui/material';
 import { LOGO_COLORS, OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
+import { useFirstArrival } from './useFirstArrival.js';
 
 // The app's logo on the home cover: the inked, cel-shaded d20 (the same
 // drawing as public/favicon.svg). It spins in, all but settled on a 20… and
@@ -53,16 +54,12 @@ const numeralSx = {
   textAnchor: 'middle',
 };
 
-// Rolled once per visit: arriving on the site rolls the die, coming back to
-// the home page from elsewhere in the app finds it already down on its 1.
-// Lives as long as the page does, so a reload is a new arrival.
-let rolledThisVisit = false;
-
 export default function NatOneDie({ sx }) {
   // A new key replays the animation from the start.
   const [roll, setRoll] = useState(0);
-  const [still, setStill] = useState(() => rolledThisVisit);
-  useEffect(() => { rolledThisVisit = true; }, []);
+  // Rolled on arriving on the site, at rest on its 1 when coming back.
+  const arriving = useFirstArrival();
+  const [still, setStill] = useState(!arriving);
   const rollAgain = () => {
     setStill(false);
     setRoll((value) => value + 1);
