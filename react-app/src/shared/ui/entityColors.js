@@ -118,6 +118,14 @@ export const PANEL_TONES = Object.freeze({
   reminders: UI_COLORS.spell,
 });
 
+// A skill's training dot: half and full proficiency in the accent, expertise
+// in a colour well apart from it (a lime next to the sunflower read as one).
+export const TRAINING_TONES = Object.freeze({
+  half: UI_COLORS.accent,
+  prof: UI_COLORS.accent,
+  exp: UI_COLORS.info,
+});
+
 // The colour a roll's toast and log line wear, by the kind of roll (the
 // toast's `meta.kind`): a check or save the colour of the panel it was rolled
 // from, an attack, damage, healing or temporary hit points the colour of its
@@ -167,8 +175,8 @@ export function attackRollerToneSx({ disadv = false, notProficient = false } = {
   return rollerToneSx(notProficient ? ROLL_TONES.attackNotProficient : ROLL_TONES.attack);
 }
 
-// Single recipe for the translucent tint+border chip look. Both the theme's
-// MuiChip color overrides and entityChipSx derive from this, so the visual
+// Single recipe for the translucent tint+border chip look. The theme's MuiChip
+// colour overrides and every tinted chip derive from this, so the visual
 // language stays in one place.
 export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPACITY.heavy, text = tone } = {}) {
   return {
@@ -176,12 +184,6 @@ export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPAC
     borderColor: alpha(tone, borderAlpha),
     color: text,
   };
-}
-
-// Chip sx for tagging an entity kind. Border width/weight come from the theme's
-// MuiChip root override; this only sets the kind's tint.
-export function entityChipSx(kind) {
-  return chipTintStyle(ENTITY_COLORS[kind] || ENTITY_COLORS.class);
 }
 
 // Standard tint for the action-tab entry chips (tag chips + Active/Suppressed

@@ -14,13 +14,13 @@ import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { PANEL_TONES, TRAINING_TONES } from '../../../shared/ui/entityColors.js';
 import { ROW_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 
 function SkillProficiencyDot({ training }) {
-  const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
+  const dotColor = TRAINING_TONES[training] || 'divider';
 
   return (
     <Box
@@ -32,7 +32,7 @@ function SkillProficiencyDot({ training }) {
         borderColor: dotColor,
         bgcolor: training === 'prof' || training === 'exp' ? dotColor : 'transparent',
         background: training === 'half'
-          ? (theme) => `linear-gradient(90deg, ${theme.palette.primary.main} 50%, transparent 50%)`
+          ? `linear-gradient(90deg, ${TRAINING_TONES.half} 50%, transparent 50%)`
           : undefined,
       }}
     />
