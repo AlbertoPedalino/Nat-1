@@ -11,7 +11,8 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../ui/bubble.js';
 import { inkOn } from '../../ui/pressable.js';
-import { celebrateNatural20, lamentNatural1 } from '../../ui/celebrate.js';
+import { celebrateNatural20 } from '../../ui/celebrate.js';
+import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -41,14 +42,12 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
-  // A natural 20 throws confetti from the toast's corner, a natural 1 sheds
-  // debris, once a throw.
-  const shown = toast && !hidden ? resolveToastLayout(toast) : null;
-  const moment = shown?.isCrit ? 'crit' : shown?.isFail ? 'fail' : null;
+  // A natural 20 throws confetti from the toast's corner, once a throw (a
+  // natural 1 leaves the bubble seeing stars instead, below).
+  const crit = Boolean(toast && !hidden && resolveToastLayout(toast).isCrit);
   useEffect(() => {
-    if (moment === 'crit') celebrateNatural20();
-    if (moment === 'fail') lamentNatural1();
-  }, [moment, toast?.timestamp]);
+    if (crit) celebrateNatural20();
+  }, [crit, toast?.timestamp]);
 
   // Keep the expiry running while hidden so returning to the map cannot revive
   // an old result that arrived during the background view.
@@ -66,7 +65,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), transform: SHOUT_TILT } : {}),
       ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
     }}>
-      <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
+      {layout.isFail ? <BubbleDizzy key={seed} /> : null}
+      <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary', zIndex: 3 }}>
         <X size={ICON_SIZES.sm} />
       </IconButton>
 

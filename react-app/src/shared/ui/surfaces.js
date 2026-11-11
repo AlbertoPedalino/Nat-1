@@ -5,6 +5,10 @@ import { UI_SHADOWS } from './shadows.js';
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
 // changes every panel, well or card from here.
+// A comic print's faint halftone dots, behind the page and the map's panels.
+const HALFTONE = `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} 1px, transparent 1.4px)`;
+const HALFTONE_SIZE = '7px 7px';
+
 export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({
@@ -27,8 +31,8 @@ export const SURFACES = Object.freeze({
   // halftone dots.
   page: Object.freeze({
     bgcolor: 'background.default',
-    backgroundImage: `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} 1px, transparent 1.4px)`,
-    backgroundSize: '7px 7px',
+    backgroundImage: HALFTONE,
+    backgroundSize: HALFTONE_SIZE,
   }),
   // A sunken well inside a panel: the details under a row, a field group.
   inset: Object.freeze({
@@ -48,15 +52,19 @@ export const SURFACES = Object.freeze({
   // No backdrop blur: the surface is 95% opaque, so a blur behind it cannot be
   // seen, and over a map where something always moves it is redone every
   // frame — measured at ~100ms a frame on desktop under the roll toast.
+  // Drawn like every panel: the ink edge, a solid shadow, the halftone dots.
   map: Object.freeze({
     bgcolor: 'gmboard.vtt.surface',
-    backgroundImage: 'none',
-    border: '1px solid',
-    borderColor: 'gmboard.vtt.accentBorder',
+    backgroundImage: HALFTONE,
+    backgroundSize: HALFTONE_SIZE,
+    border: `2px solid ${UI_COLORS.edge}`,
+    boxShadow: UI_SHADOWS.box,
   }),
-  // A small control on the map (round icon buttons, corner toggles).
+  // A small control on the map (round icon buttons, corner toggles): the
+  // raised button's edge and press.
   mapControl: Object.freeze({
     bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-    border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
+    border: `2px solid ${UI_COLORS.edge}`,
+    boxShadow: UI_SHADOWS.press,
   }),
 });

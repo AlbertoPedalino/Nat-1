@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
@@ -12,6 +13,8 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BUBBLE_SHAKE_SX, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
+import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
+import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -25,6 +28,17 @@ import { inkOn } from '../../../shared/ui/pressable.js';
 // back. The little cross only says that it can be closed.
 export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
   const layout = resolveToastLayout(rollToast(roll));
+  // A natural 20 throws its confetti from the bubble, over the token that
+  // rolled it, once when the bubble appears; a natural 1 leaves it seeing stars.
+  const bubbleRef = useRef(null);
+  const crit = layout.isCrit;
+  useEffect(() => {
+    if (!crit || !bubbleRef.current) return;
+    const rect = bubbleRef.current.getBoundingClientRect();
+    celebrateNatural20({
+      origin: { x: (rect.left + rect.width / 2) / window.innerWidth, y: rect.top / window.innerHeight },
+    });
+  }, [crit, roll.id]);
 
   return (
     // Outer box owns the position; the transform here must stay untouched, so
@@ -35,6 +49,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
       transform: `translate(${x}px, ${y}px) translate(-50%, -100%)`,
     }}>
       <Box
+        ref={bubbleRef}
         {...(onDismiss ? {
           role: 'button',
           tabIndex: 0,
@@ -59,6 +74,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           ...(onDismiss ? dismissableSx : {}),
         }}
       >
+        {layout.isFail ? <BubbleDizzy /> : null}
         {onDismiss ? (
           <Box aria-hidden sx={closeSx}>
             <X size={ICON_SIZES.xxs} strokeWidth={2.6} />
@@ -147,6 +163,7 @@ const dismissableSx = {
 
 const closeSx = {
   position: 'absolute',
+  zIndex: 3,
   top: 4,
   right: 4,
   width: 16,
