@@ -40,7 +40,12 @@ export const TOOLS = [
 
 export default function HomePage() {
   const { notify } = useToast();
+  // The cover rolls on arriving on the site (at rest when coming back) and on
+  // every click on the die: the die and the name together.
   const arriving = useFirstArrival();
+  const [roll, setRoll] = useState(0);
+  const rollCover = useCallback(() => setRoll((value) => value + 1), []);
+  const coverRolls = arriving || roll > 0;
   const [appDataCount, setAppDataCount] = useState(0);
 
   const refreshAppDataCount = useCallback(() => {
@@ -66,8 +71,8 @@ export default function HomePage() {
       {/* Home already has the Compendium card. */}
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
-        <NatOneDie sx={heroLogoSx} />
-        <Typography component="h1" sx={arriving ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT, { delay: NAT_ONE_LANDED_MS }) } : heroTitleSx}>Nat-1</Typography>
+        <NatOneDie roll={roll} animate={coverRolls} onRoll={rollCover} sx={heroLogoSx} />
+        <Typography key={`name-${roll}`} component="h1" sx={coverRolls ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT, { delay: NAT_ONE_LANDED_MS }) } : heroTitleSx}>Nat-1</Typography>
         <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
 
@@ -130,8 +135,8 @@ const heroLogoSx = {
   mb: '0.25rem',
 };
 
-// The name's tilt; on arriving on the site (useFirstArrival) the name waits
-// for the die to land on its 1, then cheers into it.
+// The name's tilt; when the cover rolls the name waits for the die to land on
+// its 1, then cheers into it.
 const HERO_TITLE_TILT = 'rotate(-4deg)';
 
 const heroTitleSx = {

@@ -1,14 +1,12 @@
-import { useState } from 'react';
 import { Box } from '@mui/material';
 import { LOGO_COLORS, OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
-import { useFirstArrival } from './useFirstArrival.js';
 
 // The app's logo on the home cover: the inked, cel-shaded d20 (the same
 // drawing as public/favicon.svg). It spins in, all but settled on a 20… and
-// flips over onto a 1, the app's name. A click rolls it again. Flat on purpose: a 2D drawing
-// that turns, no 3D die.
+// flips over onto a 1, the app's name. A click rolls it again, and the
+// cover's name with it. Flat on purpose: a 2D drawing that turns, no 3D die.
 
 const INK = UI_COLORS.edge;
 
@@ -56,22 +54,17 @@ const numeralSx = {
   textAnchor: 'middle',
 };
 
-export default function NatOneDie({ sx }) {
-  // A new key replays the animation from the start.
-  const [roll, setRoll] = useState(0);
-  // Rolled on arriving on the site, at rest on its 1 when coming back.
-  const arriving = useFirstArrival();
-  const [still, setStill] = useState(!arriving);
-  const rollAgain = () => {
-    setStill(false);
-    setRoll((value) => value + 1);
-  };
+// Driven by the cover (HomePage), which rolls the name with it: `roll` counts
+// the rolls (a new one replays the animation from the start), `animate` is
+// false for a die at rest on its 1, `onRoll` asks for another roll.
+export default function NatOneDie({ roll = 0, animate = true, onRoll, sx }) {
+  const still = !animate;
   return (
     <Box
       component="button"
       type="button"
       aria-label="Roll the die"
-      onClick={rollAgain}
+      onClick={onRoll}
       sx={{ ...buttonSx, ...sx }}
     >
       <Box key={roll} component="svg" viewBox="20 20 472 480" sx={still ? { ...svgSx, ...STILL_SX } : svgSx} aria-hidden="true">
