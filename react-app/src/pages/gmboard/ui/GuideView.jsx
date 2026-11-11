@@ -1,25 +1,19 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
 }
 
-function GuideCard({ title, icon: Icon, children }) {
-  const theme = useTheme();
+// A card of the guide: the app's Panel, its rows spaced under the bar.
+function GuideCard({ title, icon, children }) {
   return (
-    <Box sx={cardSx}>
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 1 }}>
-        {Icon ? <Icon size={ICON_SIZES.sm} color={theme.palette.primary.main} /> : null}
-        <Typography sx={cardTitleSx}>{title}</Typography>
-      </Stack>
+    <Panel icon={icon} title={title}>
       <Stack spacing={0.75}>{children}</Stack>
-    </Box>
+    </Panel>
   );
 }
 
@@ -112,14 +106,6 @@ export default function GuideView() {
     </Stack>
   );
 }
-
-const cardSx = boardPanelSx;
-
-const cardTitleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xxl,
-  color: 'primary.main',
-};
 
 const rowWrapSx = {
   display: 'flex',

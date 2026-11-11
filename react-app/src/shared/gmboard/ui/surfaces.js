@@ -1,13 +1,6 @@
-import { SURFACES } from '../../ui/surfaces.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 // The GM Board's two surfaces, here so the board, the battle map's hexcrawl
 // and the guide draw them alike.
-
-// A panel (BoardPanel, a guide card): a bordered paper box.
-export const boardPanelSx = {
-  ...SURFACES.panel,
-  p: 1.5,
-};
 
 // A bordered box inside a panel: a quest's header, the roll history, a hex
 // result, the table being edited.
