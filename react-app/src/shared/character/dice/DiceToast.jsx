@@ -9,7 +9,7 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../u
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
-import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../ui/bubble.js';
+import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../ui/bubble.js';
 import { inkOn } from '../../ui/pressable.js';
 import { celebrateNatural20 } from '../../ui/celebrate.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
@@ -62,7 +62,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     <Box sx={{
       ...toastRootSx,
       // A natural 20 or 1 throws its shadow in its own colour.
-      ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), transform: SHOUT_TILT } : {}),
+      ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), ...bubbleCheerSx(SHOUT_TILT) } : {}),
       ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
     }}>
       {layout.isFail ? <BubbleDizzy key={seed} /> : null}

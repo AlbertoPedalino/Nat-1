@@ -106,6 +106,30 @@ export function splatSx(color = UI_COLORS.danger) {
 }
 
 // A bubble that groans (a natural 1): it shakes once instead of popping in.
+// A bubble that cheers (a natural 20): it leaps up stretched, lands squashed
+// like a spring, rocks twice and settles at `end` — the larger shouting tilt
+// on the dice toast, the bubble's own tilt over a token.
+export function bubbleCheerSx(end = SHOUT_TILT) {
+  return {
+    transform: end,
+    animation: `gbBubbleCheer ${DURATIONS.slow * 4}ms cubic-bezier(0.3, 0.9, 0.4, 1)`,
+    '@keyframes gbBubbleCheer': {
+      // No fade: the bubble is there from the first frame, only small.
+      '0%': { transform: 'translateY(12px) scale(0.6) rotate(-6deg)' },
+      '22%': { transform: 'translateY(-18px) scale(0.94, 1.14) rotate(3deg)' },
+      '40%': { transform: 'translateY(2px) scale(1.14, 0.88) rotate(-3deg)' },
+      '56%': { transform: 'translateY(-6px) scale(0.98, 1.05) rotate(2.5deg)' },
+      '72%': { transform: 'translateY(0) scale(1.04, 0.97) rotate(-2deg)' },
+      '86%': { transform: 'rotate(1deg)' },
+      '100%': { transform: end },
+    },
+    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  };
+}
+
+// The bubble's own resting tilt, for a cheer that settles back into it.
+export const BUBBLE_REST = `rotate(${TILT})`;
+
 export const BUBBLE_SHAKE_SX = Object.freeze({
   animation: `gbBubbleShake ${DURATIONS.slow * 2}ms ease-in-out`,
   '@keyframes gbBubbleShake': {

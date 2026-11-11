@@ -11,7 +11,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
-import { BUBBLE_SHAKE_SX, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
@@ -177,7 +177,8 @@ const closeSx = {
 };
 
 // A natural 20 or 1 throws the bubble's shadow in its own colour.
-const critSx = { boxShadow: comicShadow(VTT_COLORS.accent, 4) };
+// A natural 20 cheers: the bubble leaps and springs, then rests on the token.
+const critSx = { boxShadow: comicShadow(VTT_COLORS.accent, 4), ...bubbleCheerSx(BUBBLE_REST) };
 
 const failSx = { boxShadow: comicShadow(VTT_COLORS.danger), ...BUBBLE_SHAKE_SX };
 
