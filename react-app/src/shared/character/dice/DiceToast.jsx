@@ -62,6 +62,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     <Box sx={{
       ...toastRootSx,
       // A natural 20 or 1 throws its shadow in its own colour.
+      // The roll's colour throws the bubble's shadow; a 20 or a 1 its own.
+      ...(layout.tone ? { boxShadow: comicShadow(layout.tone) } : {}),
       ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), ...bubbleCheerSx(SHOUT_TILT) } : {}),
       ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
     }}>
@@ -70,7 +72,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={ICON_SIZES.sm} />
       </IconButton>
 
-      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: 'text.secondary', mb: 0.25 }}>
+      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: layout.tone || 'text.secondary', mb: 0.25 }}>
         {layout.label}
       </Typography>
 
@@ -96,6 +98,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         key={seed}
         dice={layout.dice}
         modifier={layout.modifier}
+        modifierColor={layout.modifierColor}
         size={58}
         seed={seed}
         // The whole solid, however many faces it has: a toast shows one roll at

@@ -103,6 +103,37 @@ export const ROLL_TONES = {
   tempHp: '#3e8e5a',
 };
 
+// The colour of each sheet panel (its badge, title and screentone), by what it
+// is about. A roll made from a panel wears its panel's colour (ROLL_KIND_TONES).
+export const PANEL_TONES = Object.freeze({
+  abilityScores: UI_COLORS.secondary,
+  hitPoints: UI_COLORS.success,
+  savingThrows: ENTITY_COLORS.skill,
+  skills: ENTITY_COLORS.skill,
+  senses: UI_COLORS.info,
+  movement: UI_COLORS.secondary,
+  proficiencies: ENTITY_COLORS.tool,
+  defenses: ENTITY_COLORS.background,
+  conditions: UI_COLORS.danger,
+  reminders: UI_COLORS.spell,
+});
+
+// The colour a roll's toast and log line wear, by the kind of roll (the
+// toast's `meta.kind`): a check or save the colour of the panel it was rolled
+// from, an attack, damage, healing or temporary hit points the colour of its
+// roll button, Initiative the accent of its tile. A roll of no known kind (a
+// free roll, an old saved one) has none and stays neutral.
+export const ROLL_KIND_TONES = Object.freeze({
+  abilityCheck: PANEL_TONES.abilityScores,
+  save: PANEL_TONES.savingThrows,
+  skill: PANEL_TONES.skills,
+  initiative: UI_COLORS.accent,
+  attack: ROLL_TONES.attack,
+  damage: ROLL_TONES.damage,
+  heal: ROLL_TONES.heal,
+  tempHp: ROLL_TONES.tempHp,
+});
+
 // Kind tags in the compendium. No hue of its own: each kind wears the one it
 // already has elsewhere in the app (an item the attunement bordeaux, a feat
 // its entity red…), so a tag reads the same as on the sheet.

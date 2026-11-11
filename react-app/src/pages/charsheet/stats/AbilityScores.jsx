@@ -15,6 +15,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -22,7 +23,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
   const activeConditions = sheet?.activeConditions || [];
 
   return (
-    <Panel icon={GAME_ICONS.abilityScores} title="Ability Scores" tone={UI_COLORS.secondary} sx={{ height: '100%' }} bodySx={{ p: '0.45rem' }}>
+    <Panel icon={GAME_ICONS.abilityScores} title="Ability Scores" tone={PANEL_TONES.abilityScores} sx={{ height: '100%' }} bodySx={{ p: '0.45rem' }}>
       <Box sx={{
         display: 'grid', gridTemplateColumns: { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' },
         gap: '0.6rem', minWidth: 0,
@@ -48,9 +49,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
             : `Situational disadvantage: ${condNotes.join('; ')}`;
           const advArg = hasDisadv ? false : undefined;
           return (
-            <RollModeArea key={s} onClick={() => onRoll(mod, ABILITY_NAMES[s] + ' Check', advArg)}
+            <RollModeArea key={s} onClick={() => onRoll(mod, ABILITY_NAMES[s] + ' Check', advArg, { kind: 'abilityCheck' })}
               sources={{ adv: false, disadv: hasDisadv }}
-              onPick={(picked) => onRoll(mod, ABILITY_NAMES[s] + ' Check', picked)}
+              onPick={(picked) => onRoll(mod, ABILITY_NAMES[s] + ' Check', picked, { kind: 'abilityCheck' })}
               sx={{
                 ...tileSx({ clickable: true, tone: advArg === false ? 'warning.main' : null }),
                 display: 'flex', flexDirection: 'column', alignItems: 'center', p: '0.4rem 0.25rem',

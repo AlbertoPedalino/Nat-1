@@ -52,10 +52,10 @@ test('the attack button adds a one-off source on right-click, cancelling against
   const onRoll = vi.fn();
   render(<AttackRollButton rawBonus={5} label="Longsword" advArg={roll.advArg} sources={roll.sources} onRoll={onRoll} />);
   fireEvent.click(screen.getByRole('button', { name: /Hit/ }));
-  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', false);
+  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', false, { kind: 'attack' });
   fireEvent.contextMenu(screen.getByRole('button', { name: /Hit/ }));
   fireEvent.click(screen.getByRole('menuitem', { name: /\+ Advantage/ }));
-  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', undefined);
+  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', undefined, { kind: 'attack' });
   expect(onRoll).toHaveBeenCalledTimes(2);
 });
 

@@ -9,6 +9,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -39,8 +40,9 @@ export default function RollLogList({
 function RollLogRow({ entry }) {
   const { title, rest } = splitTitle(entry.label, entry.detail);
   const outcome = rollOutcome(entry);
+  const tone = ROLL_KIND_TONES[entry?.meta?.kind];
   return (
-    <Box sx={rowSx}>
+    <Box sx={{ ...rowSx, ...(tone ? { borderLeft: `3px solid ${tone}` } : null) }}>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', minWidth: 0 }}>
         <RollActorLabel entry={entry} />
         <Typography sx={labelSx}>{title}</Typography>

@@ -81,3 +81,16 @@ test('a zero d20 modifier is omitted from the toast layout', () => {
 
   assert.equal(layout.modifier, null);
 });
+
+// A roll wears the colour of where it was rolled from: a check or save its
+// panel's, an attack, damage or healing its roll button's; no kind, no colour.
+test('a roll is coloured by its kind, a natural 20 or 1 keeping its own', async () => {
+  const { PANEL_TONES, ROLL_TONES } = await import('../../../../../src/shared/ui/entityColors.js');
+  const d20 = (v, kind) => ({ total: v + 2, rolls: [{ v, faces: 20, kept: true }], meta: { bonus: 2, kind } });
+  assert.equal(resolveToastLayout(d20(10, 'save')).tone, PANEL_TONES.savingThrows);
+  assert.equal(resolveToastLayout(d20(10, 'skill')).totalColor, PANEL_TONES.skills);
+  assert.equal(resolveToastLayout(d20(10, 'attack')).tone, ROLL_TONES.attack);
+  assert.equal(resolveToastLayout(d20(10)).tone, null);
+  assert.equal(resolveToastLayout(d20(20, 'save')).totalColor, UI_COLORS.accentText);
+  assert.equal(resolveToastLayout(d20(10, 'save')).modifierColor, UI_COLORS.successText);
+});

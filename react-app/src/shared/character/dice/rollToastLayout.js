@@ -1,6 +1,7 @@
 import { isCriticalD20 } from './dice.js';
 import { signed } from '../../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -43,9 +44,13 @@ export function resolveToastLayout(toast) {
 
   const isCrit = keptD20 ? isCriticalD20(keptD20.v, toast?.meta) : false;
   const isFail = keptD20?.v <= 1;
-  let totalColor = 'text.primary';
+  // The roll's colour, by its kind (null: neutral). A natural 20 or 1 keeps
+  // its own colours over it.
+  const tone = ROLL_KIND_TONES[toast?.meta?.kind] || null;
+  let totalColor = tone || 'text.primary';
   if (isCrit) totalColor = UI_COLORS.accentText;
   else if (isFail) totalColor = UI_COLORS.danger;
+  const modifierColor = modifier ? (String(modifier).startsWith('-') || String(modifier).startsWith('−') ? UI_COLORS.dangerText : UI_COLORS.successText) : null;
 
   return {
     label: toast?.label,
@@ -60,7 +65,9 @@ export function resolveToastLayout(toast) {
       dimmed: r.kept === false,
     })),
     modifier,
+    modifierColor,
     total: toast?.total != null && toast?.total !== '' ? toast.total : null,
     totalColor,
+    tone,
   };
 }

@@ -15,6 +15,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -108,7 +109,7 @@ export default function HPBlock({
   const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.25 };
 
   return (
-    <Panel icon={GAME_ICONS.hitPoints} title="Hit Points" tone={UI_COLORS.success} sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }} bodySx={{}}>
+    <Panel icon={GAME_ICONS.hitPoints} title="Hit Points" tone={PANEL_TONES.hitPoints} sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }} bodySx={{}}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
 
         {dead && (

@@ -20,7 +20,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { chipTintStyle, PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
@@ -101,7 +101,7 @@ export default function Movement({ C, sheet }) {
   const reason = reasons.join(' • ');
 
   return (
-    <Panel icon={GAME_ICONS.movement} title="Movement" tone={hasPenalty ? UI_COLORS.warning : UI_COLORS.secondary} sx={{ mb: '0.6rem' }} bodySx={{}} action={hasPenalty ? (
+    <Panel icon={GAME_ICONS.movement} title="Movement" tone={hasPenalty ? UI_COLORS.warning : PANEL_TONES.movement} sx={{ mb: '0.6rem' }} bodySx={{}} action={hasPenalty ? (
       <Tooltip title={reason}>
         <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty }} />
       </Tooltip>

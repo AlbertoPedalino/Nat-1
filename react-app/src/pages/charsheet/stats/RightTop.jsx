@@ -83,7 +83,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
       : `d20${advText} ${bonusText} = ${total}`;
 
     if (typeof onShowToast === 'function') {
-      onShowToast('Initiative', toastDetail, total, dice, { bonus: initMod, kept: d20 });
+      onShowToast('Initiative', toastDetail, total, dice, { bonus: initMod, kept: d20, kind: 'initiative' });
     }
   }, [C, resources, setResources, onShowToast, initMod]);
 

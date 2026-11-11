@@ -70,7 +70,7 @@ export default function RollerButtons({
             roller.formula,
             total,
             rolls,
-            modifier ? { bonus: modifier } : undefined,
+            { ...(modifier ? { bonus: modifier } : null), kind: normalizeRollerKind(roller.kind) },
           );
         }}
         sx={{ ...buttonSx, ...presentation.tone }}

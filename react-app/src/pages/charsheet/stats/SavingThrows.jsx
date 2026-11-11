@@ -20,7 +20,7 @@ import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { ROW_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
@@ -75,7 +75,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   };
 
   return (
-    <Panel icon={GAME_ICONS.savingThrows} title="Saving Throws" tone={ENTITY_COLORS.skill} sx={{ mb: '0.6rem' }} bodySx={{}}>
+    <Panel icon={GAME_ICONS.savingThrows} title="Saving Throws" tone={PANEL_TONES.savingThrows} sx={{ mb: '0.6rem' }} bodySx={{}}>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {ABILITIES.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;

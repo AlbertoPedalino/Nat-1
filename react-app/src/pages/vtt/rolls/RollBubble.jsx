@@ -69,6 +69,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         } : null)}
         sx={{
           ...rollBubbleSx,
+          ...(layout.tone ? { boxShadow: comicShadow(layout.tone) } : {}),
           ...(layout.isCrit ? critSx : {}),
           ...(layout.isFail ? failSx : {}),
           ...(onDismiss ? dismissableSx : {}),
@@ -83,7 +84,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
 
         {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
 
-        <Typography sx={labelSx}>{layout.label}</Typography>
+        <Typography sx={{ ...labelSx, ...(layout.tone ? { color: layout.tone } : null) }}>{layout.label}</Typography>
 
         {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.accent }}>NATURAL 20!</Typography>}
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
@@ -95,6 +96,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         <DiceRow
           dice={layout.dice}
           modifier={layout.modifier}
+          modifierColor={layout.modifierColor}
           size={40}
           justify="center"
           seed={roll.id}

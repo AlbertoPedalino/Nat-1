@@ -33,9 +33,7 @@ export default function AttackRollButton({
   onRoll,
 }) {
   // The improved critical range travels with the roll only when there is one.
-  const roll = (advantage) => (critOn < 20
-    ? onRoll?.(rawBonus, label, advantage, { critOn })
-    : onRoll?.(rawBonus, label, advantage));
+  const roll = (advantage) => onRoll?.(rawBonus, label, advantage, critOn < 20 ? { kind: 'attack', critOn } : { kind: 'attack' });
   const button = (
     <RollModeArea
       component={Button}

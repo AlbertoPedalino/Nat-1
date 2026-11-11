@@ -15,6 +15,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -46,7 +47,7 @@ export default function Senses({ C }) {
   };
 
   return (
-    <Panel icon={GAME_ICONS.senses} title="Senses" tone={UI_COLORS.info} sx={{ mb: '0.6rem' }} bodySx={{}}>
+    <Panel icon={GAME_ICONS.senses} title="Senses" tone={PANEL_TONES.senses} sx={{ mb: '0.6rem' }} bodySx={{}}>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         <SenseRow value={passPerc} label="Passive Perception" />
         <SenseRow value={passInv} label="Passive Investigation" />

@@ -14,7 +14,7 @@ import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { ROW_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
@@ -61,7 +61,7 @@ export default function Skills({ C, sheet, onRoll }) {
   const activeConditions = sheet?.activeConditions || [];
 
   return (
-    <Panel icon={GAME_ICONS.skills} title="Skills" tone={ENTITY_COLORS.skill} bodySx={{}}>
+    <Panel icon={GAME_ICONS.skills} title="Skills" tone={PANEL_TONES.skills} bodySx={{}}>
       <Box sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
         <span></span>
         <span>Prof.</span>

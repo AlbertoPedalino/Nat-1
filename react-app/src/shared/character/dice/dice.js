@@ -71,10 +71,12 @@ export function formatD20Detail(result) {
 
 // `critOn`: the lowest natural roll that is a critical (an attack with an
 // improved critical range); 20 is left out.
-export function buildD20Meta(result, { critOn = 20 } = {}) {
+// `kind`: what the roll is (ROLL_KIND_TONES), which colours its toast.
+export function buildD20Meta(result, { critOn = 20, kind } = {}) {
   const meta = { bonus: result.bonus, kept: result.kept };
   if (result.mode !== 'normal') meta.mode = result.mode;
   if (Number(critOn) < 20) meta.critOn = Number(critOn);
+  if (kind) meta.kind = kind;
   return meta;
 }
 

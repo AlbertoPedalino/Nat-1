@@ -10,7 +10,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 //
 // `seed` must identify the roll, not the render — it is what keeps the dice
 // from re-throwing themselves every time React comes back around.
-export default function DiceRow({ dice, modifier, seed, size, solid = false, justify = 'flex-start' }) {
+export default function DiceRow({ dice, modifier, modifierColor, seed, size, solid = false, justify = 'flex-start' }) {
   if (!dice?.length && !modifier) return null;
 
   return (
@@ -37,7 +37,7 @@ export default function DiceRow({ dice, modifier, seed, size, solid = false, jus
           />
         )
       ))}
-      {modifier ? <Typography sx={modifierSx}>{modifier}</Typography> : null}
+      {modifier ? <Typography sx={{ ...modifierSx, ...(modifierColor ? { color: modifierColor } : null) }}>{modifier}</Typography> : null}
     </Box>
   );
 }

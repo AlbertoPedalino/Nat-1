@@ -89,11 +89,11 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     // Wild Shape: merged equipment grants no save bonus.
     const bonus = getSaveBonus(C, stat) + characterItemBonuses(C, inventory).savingThrow;
     const lbl = capitalize(stat) + ' Save';
-    rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
+    rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined), { kind: 'save' });
   }, [C, sheet, rollD20]);
 
   const rollSkill = useCallback((skillName, bonus, options = {}) => {
-    rollD20(bonus, skillName + ' Check', options.disadvantage ? false : (options.advantage || undefined));
+    rollD20(bonus, skillName + ' Check', options.disadvantage ? false : (options.advantage || undefined), { kind: 'skill' });
   }, [rollD20]);
 
   return {

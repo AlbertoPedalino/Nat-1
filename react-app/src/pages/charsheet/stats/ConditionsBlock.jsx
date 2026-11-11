@@ -17,6 +17,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -60,7 +61,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
   const openCards = active.filter((c) => cards.openKeys.includes(c.key));
 
   return (
-    <Panel icon={GAME_ICONS.conditions} title="Conditions" tone={UI_COLORS.danger} sx={{ flex: 1, minWidth: 140 }} bodySx={{ p: '0.4rem 0.62rem' }}>
+    <Panel icon={GAME_ICONS.conditions} title="Conditions" tone={PANEL_TONES.conditions} sx={{ flex: 1, minWidth: 140 }} bodySx={{ p: '0.4rem 0.62rem' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs, borderStyle: 'dashed' }} />}
