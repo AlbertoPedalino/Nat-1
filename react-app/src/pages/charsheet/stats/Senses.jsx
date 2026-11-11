@@ -6,13 +6,14 @@ import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -60,13 +61,12 @@ export default function Senses({ C }) {
 function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
   const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ ...SURFACES.panel, mb: 0.25, overflow: 'hidden' }}>
+    <Box sx={{ ...(clickable ? CARD_SX : SURFACES.card), mb: 0.25, overflow: 'hidden' }}>
       <Box
         onClick={clickable ? onToggle : undefined}
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
           cursor: clickable ? 'pointer' : 'default',
-          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } : undefined,
         }}
       >
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: color || UI_COLORS.accentText, flexShrink: 0 }}>

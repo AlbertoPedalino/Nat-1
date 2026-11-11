@@ -52,7 +52,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     <Box sx={{
       ...toastRootSx,
       // A natural 20 or 1 throws its shadow in its own colour.
-      ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 6), transform: SHOUT_TILT } : {}),
+      ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), transform: SHOUT_TILT } : {}),
       ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger) } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>

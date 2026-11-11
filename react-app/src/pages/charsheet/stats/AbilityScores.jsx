@@ -13,6 +13,7 @@ import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { tileSx } from '../../../shared/ui/interactive.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -52,10 +53,8 @@ export default function AbilityScores({ C, sheet, onRoll }) {
               sources={{ adv: false, disadv: hasDisadv }}
               onPick={(picked) => onRoll(mod, ABILITY_NAMES[s] + ' Check', picked)}
               sx={{
-                bgcolor: 'background.paper', border: 1, borderColor: advArg === false ? 'warning.main' : 'divider', borderRadius: 1,
+                ...tileSx({ clickable: true, tone: advArg === false ? 'warning.main' : null }),
                 display: 'flex', flexDirection: 'column', alignItems: 'center', p: '0.4rem 0.25rem',
-                cursor: 'pointer', transition: 'border-color 0.15s',
-                '&:hover': { borderColor: 'primary.main' },
               }}>
               <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mb: 0.25 }}>
                 {ABILITY_ABBREVIATIONS[s]}

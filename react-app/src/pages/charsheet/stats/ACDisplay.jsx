@@ -18,8 +18,19 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, flexShrink: 0 }}>
       <Tooltip title={tooltipText}>
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0, borderRadius: 1, border: shieldUnproficient ? 1 : 'none', borderColor: shieldUnproficient ? 'warning.main' : 'transparent' }}>
-          <Shield size={ICON_SIZES.giant} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', color: shieldUnproficient ? uiAlpha(UI_COLORS.penalty, OPACITY.shade) : uiAlpha(UI_COLORS.accent, OPACITY.fill) }} />
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0 }}>
+          {/* A drawn shield: filled, inked, set on its own solid shadow like the
+              tiles beside it; an untrained Shield turns it to the penalty colour. */}
+          <Shield
+            size={ICON_SIZES.giant}
+            strokeWidth={2.4}
+            fill={shieldUnproficient ? uiAlpha(UI_COLORS.penalty, OPACITY.shade) : UI_COLORS.surfaceHeader}
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              color: shieldUnproficient ? UI_COLORS.penalty : UI_COLORS.edge,
+              filter: `drop-shadow(2px 2px 0 ${UI_COLORS.edge})`,
+            }}
+          />
           <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
             <Typography sx={statValueSx}>{value}</Typography>
             <Typography sx={statLabelSx}>AC</Typography>

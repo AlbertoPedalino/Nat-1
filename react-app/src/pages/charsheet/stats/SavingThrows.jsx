@@ -14,7 +14,7 @@ import {
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
@@ -22,6 +22,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { ROW_SX } from '../../../shared/ui/interactive.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -91,7 +92,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5, cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
+              sx={{ ...ROW_SX, display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}

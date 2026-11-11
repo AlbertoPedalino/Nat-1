@@ -28,10 +28,11 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
 import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { sectionLabelSx, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { tileSx } from '../../../shared/ui/interactive.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -141,17 +142,21 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   );
 }
 
-function SquareStat({ value, label, clickable }) {
+// Initiative, Proficiency Bonus and Inspiration: the same square tile, a figure
+// (or Inspiration's spark) over its name.
+function SquareStat({ value, label, clickable, active, onClick }) {
   return (
     <Box
+      onClick={onClick}
       sx={{
-        width: 62, height: 62, borderRadius: 1, border: 2, borderColor: 'divider',
+        ...tileSx({ clickable, active }),
+        width: 62, height: 62,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        bgcolor: UI_COLORS.surfaceHeader,
-        ...(clickable ? { cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } } : {}),
       }}>
-      <Typography sx={statValueSx}>{value}</Typography>
-      <Typography sx={{ ...statLabelSx, mt: 0.25 }}>{label}</Typography>
+      {typeof value === 'string' || typeof value === 'number'
+        ? <Typography sx={statValueSx}>{value}</Typography>
+        : value}
+      <Typography sx={{ ...statLabelSx, mt: 0.25, ...(active ? { color: 'primary.main' } : null) }}>{label}</Typography>
     </Box>
   );
 }
@@ -159,12 +164,13 @@ function SquareStat({ value, label, clickable }) {
 function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
-    <Box onClick={onToggle} sx={{ minWidth: 90, maxWidth: 110, bgcolor: UI_COLORS.surfaceHeader, border: 1, borderColor: insp ? 'primary.main' : 'divider', borderRadius: 1, p: '0.4rem 0.62rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.25, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' }, ...(insp ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.fill) } : {}) }}>
-      <Sparkles size={ICON_SIZES.xl} style={{ color: insp ? UI_COLORS.accentText : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.accent, OPACITY.strong)})` : 'none' }} />
-      <Typography sx={{ ...sectionLabelSx, color: insp ? 'primary.main' : 'text.secondary', textAlign: 'center' }}>
-        {insp ? 'Insp.' : 'No Insp.'}
-      </Typography>
-    </Box>
+    <SquareStat
+      clickable
+      active={insp}
+      onClick={onToggle}
+      label={insp ? 'Insp.' : 'No Insp.'}
+      value={<Sparkles size={ICON_SIZES.lg} style={{ color: insp ? UI_COLORS.accentText : UI_COLORS.textSecondary }} />}
+    />
   );
 }
 

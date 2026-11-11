@@ -13,6 +13,7 @@ import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -178,7 +179,6 @@ export function BeastPickerRow({
         sx={{
           display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75,
           cursor: expandable ? 'pointer' : 'default',
-          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } : undefined,
         }}
       >
         {expandable
@@ -353,7 +353,7 @@ export const creatureHpBoxSx = {
 };
 
 export const rowSx = {
-  ...SURFACES.panel,
+  ...CARD_SX,
   display: 'flex',
   alignItems: 'center',
   gap: 1,

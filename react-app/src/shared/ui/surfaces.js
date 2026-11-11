@@ -14,6 +14,15 @@ export const SURFACES = Object.freeze({
     borderRadius: 1,
     boxShadow: UI_SHADOWS.box,
   }),
+  // A card inside a panel: the drawn edge, lifted a little off the panel
+  // (interactive.js CARD_SX lights it under the cursor).
+  card: Object.freeze({
+    bgcolor: 'background.paper',
+    border: 2,
+    borderColor: UI_COLORS.edge,
+    borderRadius: 1,
+    boxShadow: UI_SHADOWS.box,
+  }),
   // The page behind everything: the background with a comic print's faint
   // halftone dots.
   page: Object.freeze({

@@ -8,6 +8,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { detailPanelSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -19,7 +20,7 @@ function getClassLevel(C, className) {
 
 function FeatureBox({ title, accent, children }) {
   return (
-    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
+    <Box sx={{ ...SURFACES.card, p: 1.25 }}>
       <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.sm, color: accent || UI_COLORS.accentText, mb: 0.5 }}>
         {title}
       </Typography>

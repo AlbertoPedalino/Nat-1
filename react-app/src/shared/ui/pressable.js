@@ -10,7 +10,7 @@ export const PRESSABLE_EDGE_SX = Object.freeze({
   border: `2px solid ${UI_COLORS.edge}`,
   boxShadow: UI_SHADOWS.press,
   '&:hover': { boxShadow: UI_SHADOWS.press },
-  '&:active': { transform: 'translateY(2px)', boxShadow: UI_SHADOWS.pressed },
+  '&:active': { transform: 'translateY(1px)', boxShadow: UI_SHADOWS.pressed },
 });
 
 // The ink that reads best on `fill`: the edge colour on a light fill, the

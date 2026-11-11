@@ -8,8 +8,8 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -53,7 +53,7 @@ function FeatureItem({ feature, tone }) {
     <Box
       className={open ? 'open' : ''}
       sx={{
-        ...SURFACES.panel,
+        ...CARD_SX,
         borderLeft: `3px solid ${borderTone}`,
         mb: 0.25,
         overflow: 'hidden',
@@ -67,7 +67,6 @@ function FeatureItem({ feature, tone }) {
           px: 1.25,
           py: 0.75,
           cursor: 'pointer',
-          '&:hover': { bgcolor: UI_COLORS.surfaceRaised },
         }}>
         <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>{feature.name}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

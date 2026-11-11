@@ -4,7 +4,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 export const panelRootSx = {
   display: 'grid',
   gap: 1,
@@ -31,7 +31,7 @@ export const levelHeaderSx = {
 };
 
 export const spellRowSx = {
-  ...SURFACES.panel,
+  ...CARD_SX,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
@@ -41,8 +41,6 @@ export const spellRowSx = {
   color: 'text.primary',
   cursor: 'pointer',
   minWidth: 0,
-  transition: `border-color ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
-  '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), bgcolor: UI_COLORS.surfaceRaised },
 };
 
 export const spellBodySx = {

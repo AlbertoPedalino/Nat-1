@@ -30,6 +30,7 @@ import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx'
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -68,12 +69,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   const chargeMaximum = itemChargeMaximum(item);
   const chargeCurrent = itemChargeCurrent(item);
 
-  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.secondaryStrong : (!carried ? UI_COLORS.outline : 'divider'));
+  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.secondaryStrong : (!carried ? UI_COLORS.outline : UI_COLORS.edge));
 
   return (
     <ExpandableCard
       containerSx={{ mb: 0.5, overflow: 'hidden' }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, bgcolor: UI_COLORS.surfaceSunken, border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: 1.25, py: 0.75, mt: 0, mb: 0 }}
+      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, bgcolor: UI_COLORS.surfaceSunken, border: 2, borderTop: 'none', borderColor: rowBorderColor, borderRadius: cornerRadius(0, 0, 1, 1), px: 1.25, py: 0.75, mt: 0, mb: 0 }}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -87,7 +88,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : OPACITY.veil, '&:hover': { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line) } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), border: 2, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : OPACITY.veil, transition: CARD_SX.transition, '&:hover': CARD_SX['&:hover'] }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>

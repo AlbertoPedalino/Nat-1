@@ -9,13 +9,13 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx, panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { ROW_SX } from '../../../shared/ui/interactive.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -102,7 +102,7 @@ export default function Skills({ C, sheet, onRoll }) {
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
             onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
-            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', py: 0.5, alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash) } }}>
+            sx={{ ...ROW_SX, display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, mx: 0.5, py: 0.5, alignItems: 'center' }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
