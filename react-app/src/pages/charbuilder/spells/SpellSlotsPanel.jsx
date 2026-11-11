@@ -4,6 +4,7 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { activeClassCharacter } from '../state/activeClass.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function SpellSlotsPanel({ character }) {
   const isMulticlass = (character.extraClasses || []).length > 0;
@@ -13,7 +14,7 @@ export default function SpellSlotsPanel({ character }) {
   const hasSlots = slots.some((value) => value > 0) || pact;
   if (!hasSlots) return null;
   return (
-    <BuilderPanel id="panel-slots" title={isMulticlass ? `Spell Slots — ${activeCharacter.className}` : 'Spell Slots'} icon={Wand2}>
+    <BuilderPanel id="panel-slots" tone={UI_COLORS.spell} title={isMulticlass ? `Spell Slots — ${activeCharacter.className}` : 'Spell Slots'} icon={Wand2}>
       <Grid container spacing={1}>
         {SPELL_LEVEL_LABELS.slice(1).map((label, index) => (
           <Grid key={label} size={{ xs: 4, sm: 3, md: 2 }}>

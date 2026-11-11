@@ -4,6 +4,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
+import { UI_SHADOWS } from './shadows.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -40,6 +41,16 @@ export const panelTitleSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
   color: 'primary.main',
+  textShadow: UI_SHADOWS.inkText,
+};
+
+// A main panel (a sheet panel, a builder step's panel): the comic panel's
+// thicker ink frame and its solid shadow. Boxes inside it keep the thinner
+// edge, so the panels read first.
+export const panelFrameSx = {
+  border: `3px solid ${UI_COLORS.edge}`,
+  boxShadow: UI_SHADOWS.panel,
+  overflow: 'hidden',
 };
 
 // The name on a card or row (an action, a chosen species or background): the

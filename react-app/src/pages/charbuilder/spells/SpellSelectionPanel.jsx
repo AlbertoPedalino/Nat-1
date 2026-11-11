@@ -15,6 +15,7 @@ import { spellPickerPool } from '../../../shared/character/spells/spellPickerPoo
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -74,7 +75,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   }, [activeTab]);
 
   return (
-    <BuilderPanel id="panel-spells" title="Spells" icon={BookOpen} note={profile.preparedMode ? `${profile.preparedMode} casting` : 'Known/prepared spell selection'}>
+    <BuilderPanel id="panel-spells" tone={UI_COLORS.spell} title="Spells" icon={BookOpen} note={profile.preparedMode ? `${profile.preparedMode} casting` : 'Known/prepared spell selection'}>
       <Stack spacing={1.5}>
         {!isCaster ? (
           <Typography sx={{ color: 'text.secondary' }}>No spellcasting for current class/subclass.</Typography>

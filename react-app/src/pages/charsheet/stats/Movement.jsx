@@ -17,7 +17,7 @@ import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wi
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -99,8 +99,8 @@ export default function Movement({ C, sheet }) {
   const reason = reasons.join(' • ');
 
   return (
-    <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : 'primary.main'}>
+    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
+      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : UI_COLORS.secondary}>
         {hasPenalty ? (
           <Tooltip title={reason}>
             <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />

@@ -10,6 +10,7 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
@@ -45,7 +46,7 @@ export default function SpeciesStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-species" title="Species" icon={Sparkles} note="Pick a species; the card below shows its full details.">
+      <BuilderPanel id="panel-species" tone={ENTITY_COLORS.species} title="Species" icon={Sparkles} note="Pick a species; the card below shows its full details.">
         <SearchList
           value={search.species}
           placeholder="Search species"
@@ -56,7 +57,7 @@ export default function SpeciesStep({ state, dispatch }) {
         />
       </BuilderPanel>
 
-      <BuilderPanel id="panel-species-detail" title="Species Detail" icon={ScrollText} note="Traits, speeds, description.">
+      <BuilderPanel id="panel-species-detail" tone={ENTITY_COLORS.species} title="Species Detail" icon={ScrollText} note="Traits, speeds, description.">
         {selectedSpecies ? (
           <SpeciesDetailCard species={selectedSpecies} />
         ) : (
@@ -64,7 +65,7 @@ export default function SpeciesStep({ state, dispatch }) {
         )}
       </BuilderPanel>
 
-      <BuilderPanel id="panel-species-choices" title="Species Choices" icon={Sparkles}>
+      <BuilderPanel id="panel-species-choices" tone={ENTITY_COLORS.species} title="Species Choices" icon={Sparkles}>
         <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
           Active species: {character.speciesName}
         </Typography>

@@ -304,7 +304,7 @@ const focusVisibleSx = { outline: '2px solid', outlineColor: 'primary.main', out
 
 const rootSx = {
   minHeight: '100vh',
-  bgcolor: 'background.default',
+  ...SURFACES.page,
   overflowX: 'hidden',
   pt: APP_TOP_BAR_HEIGHT,
 };

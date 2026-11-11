@@ -25,7 +25,7 @@ export default function ScoresStep({ state, dispatch }) {
   const spent = pointBuySpent(character.pbScores);
 
   return (
-    <BuilderPanel id="panel-scores" title="Ability Scores" icon={Dumbbell} note="Point buy, standard array, dice, or manual scores.">
+    <BuilderPanel id="panel-scores" tone={UI_COLORS.secondary} title="Ability Scores" icon={Dumbbell} note="Point buy, standard array, dice, or manual scores.">
       <Stack spacing={2}>
         <Tabs value={character.scoreMethod} onChange={(_, method) => dispatch({ type: 'score/method', method })} variant="scrollable">
           <Tab value="pointbuy" label="Point Buy" />

@@ -5,7 +5,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import PanelHeader, { panelBodySx } from '../../../shared/ui/PanelHeader.jsx';
+import PanelHeader, { panelBodySx, panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
@@ -34,7 +34,7 @@ function EmptyCaption({ children }) {
 export function PreviewSection({ icon, title, subtitle, tone = UI_COLORS.accentText, children, emptyText }) {
   const hasContent = Boolean(children);
   return (
-    <Paper variant="outlined" sx={{ overflow: 'hidden', minWidth: 0 }}>
+    <Paper variant="outlined" sx={{ ...panelFrameSx, minWidth: 0 }}>
       <PanelHeader icon={icon} title={title} tone={tone} titleSx={BUILDER_TEXT.panelTitle} />
       <Stack spacing={0.75} sx={{ ...panelBodySx, minWidth: 0 }}>
         {subtitle ? (

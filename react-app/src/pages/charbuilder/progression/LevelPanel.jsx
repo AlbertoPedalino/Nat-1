@@ -5,6 +5,7 @@ import { getProficiencyBonus } from '../../../shared/character/progression/profi
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -31,7 +32,7 @@ export default function LevelPanel({ character, dispatch }) {
   };
   if (isExtra && !extraClass?.name) return null;
   return (
-    <BuilderPanel
+    <BuilderPanel tone={ENTITY_COLORS.class}
       id="panel-level"
       title={`Level - ${isExtra ? extraClass.name : (character.className || 'Primary')}`}
       icon={HeartPulse}

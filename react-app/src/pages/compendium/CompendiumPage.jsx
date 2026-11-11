@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 // Spells, items, monsters and rules of the supported manuals, in one search,
 // and links to the manuals on 5etools.
@@ -21,7 +22,7 @@ const rootSx = {
   height: '100dvh',
   display: 'flex',
   flexDirection: 'column',
-  bgcolor: 'background.default',
+  ...SURFACES.page,
 };
 
 const bodySx = {

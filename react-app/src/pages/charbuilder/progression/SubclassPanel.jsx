@@ -54,7 +54,7 @@ export default function SubclassPanel({ character, dispatch }) {
     else dispatch({ type: 'subclass/select', subclassShortName: value });
   };
   return (
-    <BuilderPanel id="panel-subclass" title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={Sparkles} note={`Unlock level ${unlockLevel}`}>
+    <BuilderPanel id="panel-subclass" tone={ENTITY_COLORS.subclass} title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={Sparkles} note={`Unlock level ${unlockLevel}`}>
       <Stack spacing={1.5}>
         <FormControl fullWidth size="small">
           <InputLabel>{title}</InputLabel>

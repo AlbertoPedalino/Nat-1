@@ -1,4 +1,5 @@
 import { UI_FONTS, LETTER_SPACINGS, FONT_WEIGHTS } from './fonts.js';
+import { UI_SHADOWS } from './shadows.js';
 
 // The interface's text treatments, by role. Each fixes the typeface, weight,
 // spacing and case; size and colour stay with the place that uses it
@@ -18,9 +19,11 @@ export const TEXT_STYLES = Object.freeze({
     fontWeight: FONT_WEIGHTS.bold,
   }),
   // A number or short value in the display face: HP, AC, a count, a die.
+  // Inked like a comic's lettering.
   figure: Object.freeze({
     fontFamily: UI_FONTS.display,
     fontWeight: FONT_WEIGHTS.bold,
+    textShadow: UI_SHADOWS.inkText,
   }),
   // A quiet aside in the body face: a hint, an empty state, a rules note.
   note: Object.freeze({

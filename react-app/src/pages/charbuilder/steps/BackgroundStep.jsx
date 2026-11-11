@@ -127,7 +127,7 @@ export default function BackgroundStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-bg" title="Background" icon={Feather} note="Pick a background; the card below shows its full details.">
+      <BuilderPanel id="panel-bg" tone={ENTITY_COLORS.background} title="Background" icon={Feather} note="Pick a background; the card below shows its full details.">
         <SearchList
           value={search.background}
           placeholder="Search background"
@@ -152,7 +152,7 @@ export default function BackgroundStep({ state, dispatch }) {
         />
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-detail" title="Background Detail" icon={ScrollText} note="Granted proficiencies, origin feat, description.">
+      <BuilderPanel id="panel-bg-detail" tone={ENTITY_COLORS.background} title="Background Detail" icon={ScrollText} note="Granted proficiencies, origin feat, description.">
         {selectedBackground ? (
           <BackgroundDetailCard background={selectedBackground} />
         ) : (
@@ -160,7 +160,7 @@ export default function BackgroundStep({ state, dispatch }) {
         )}
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-ability" title="Background Ability Bonus" icon={SlidersHorizontal}>
+      <BuilderPanel id="panel-bg-ability" tone={ENTITY_COLORS.background} title="Background Ability Bonus" icon={SlidersHorizontal}>
         <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
           Choose +2/+1 or +1/+1/+1 from selected background ability pool.
         </Typography>
@@ -194,7 +194,7 @@ export default function BackgroundStep({ state, dispatch }) {
         </Stack>
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-choices" title="Background Choices" icon={GraduationCap} note="Origin feat + skill/tool/language picks.">
+      <BuilderPanel id="panel-bg-choices" tone={ENTITY_COLORS.background} title="Background Choices" icon={GraduationCap} note="Origin feat + skill/tool/language picks.">
         <Stack spacing={1.5}>
           {backgroundChoiceSpecs(character).map((spec) => (
             <ChoiceSpec key={spec.key} spec={spec} state={state} dispatch={dispatch} />

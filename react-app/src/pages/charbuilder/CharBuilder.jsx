@@ -33,6 +33,7 @@ import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -96,7 +97,7 @@ export default function CharBuilder() {
   // each load and each restored character.
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ ...SURFACES.page, minHeight: '100vh' }}>
       <BuilderAppBar
         canUploadDraft={importDraft && cloudActive}
         onUploadDraft={handleUploadToCloud}

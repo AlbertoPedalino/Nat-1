@@ -148,7 +148,7 @@ export default function ClassPanel({ state, character, dispatch }) {
   };
 
   return (
-    <BuilderPanel
+    <BuilderPanel tone={ENTITY_COLORS.class}
       title="Class"
       icon={PanelIcon}
       note={activeExtra ? 'Selecting multiclass class' : 'Selecting primary class'}

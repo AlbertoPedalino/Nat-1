@@ -60,7 +60,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               maxWidth: 360,
               // A speech bubble, its shadow in the notice's colour, its tail
               // pointing up at the bar it drops from.
-              ...bubbleSx({ tone: color }),
+              ...bubbleSx({ tone: color, pop: false }),
               ...bubbleTailSx({ side: 'top', at: '82%' }),
               position: 'relative',
               overflow: 'visible',

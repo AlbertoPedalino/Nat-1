@@ -157,7 +157,7 @@ const closeSx = {
 };
 
 // A natural 20 or 1 throws the bubble's shadow in its own colour.
-const critSx = { boxShadow: comicShadow(VTT_COLORS.accent) };
+const critSx = { boxShadow: comicShadow(VTT_COLORS.accent, 6) };
 
 const failSx = { boxShadow: comicShadow(VTT_COLORS.danger) };
 

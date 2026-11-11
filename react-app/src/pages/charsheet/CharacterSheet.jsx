@@ -23,6 +23,7 @@ import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetDocument } from './state/useSheetDocument.js';
 import { useSheetEditors } from './state/useSheetEditors.js';
 import { FONT_SIZES } from '../../shared/ui/fonts.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 const noopEffect = () => {};
 
@@ -122,7 +123,7 @@ export default function CharacterSheet({
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
     {/* No bottom padding: the dice dock is the sheet's last row and holds it. */}
-    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', width: '100%' }}>
+    <Box sx={{ ...SURFACES.page, minHeight: embedded ? 'auto' : '100vh', width: '100%' }}>
       <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
       <Box sx={{ ...sheetColumnSx(embedded), overflow: 'hidden' }}>
         {sheetConflict ? (

@@ -19,7 +19,7 @@ describe('RollsButton', () => {
     expect(roll).toHaveAccessibleName('Roll dice');
     expect(log).toHaveAccessibleName('Roll log, 1 roll');
     // A visible rule between the halves, so the pill does not read as one button.
-    expect(log).toHaveStyle({ borderLeftWidth: '1px', borderLeftStyle: 'solid' });
+    expect(log).toHaveStyle({ borderLeftWidth: '2px', borderLeftStyle: 'solid' });
     expect(roll).not.toHaveStyle({ borderLeftStyle: 'solid' });
   });
 

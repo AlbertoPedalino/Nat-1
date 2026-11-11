@@ -8,7 +8,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -44,8 +44,8 @@ export default function Senses({ C }) {
   };
 
   return (
-    <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <PanelHeader icon={Eye} title="Senses" />
+    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
+      <PanelHeader icon={Eye} title="Senses" tone={UI_COLORS.info} />
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         <SenseRow value={passPerc} label="Passive Perception" />
         <SenseRow value={passInv} label="Passive Investigation" />

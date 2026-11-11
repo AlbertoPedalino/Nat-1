@@ -16,11 +16,12 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -72,8 +73,8 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   };
 
   return (
-    <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <PanelHeader icon={Dice5} title="Saving Throws" />
+    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
+      <PanelHeader icon={Dice5} title="Saving Throws" tone={ENTITY_COLORS.skill} />
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {ABILITIES.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;

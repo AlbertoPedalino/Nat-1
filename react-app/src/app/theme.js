@@ -9,6 +9,7 @@ import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { PRESSABLE_EDGE_SX } from '../shared/ui/pressable.js';
+import { SURFACES } from '../shared/ui/surfaces.js';
 
 const SELECTED_OPTION_SX = {
   color: UI_COLORS.accentText,
@@ -140,6 +141,16 @@ export const theme = createTheme({
     },
   },
   components: {
+    // The page's halftone behind every route (SURFACES.page).
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: UI_COLORS.page,
+          backgroundImage: SURFACES.page.backgroundImage,
+          backgroundSize: SURFACES.page.backgroundSize,
+        },
+      },
+    },
     MuiModal: {
       defaultProps: { container: activePortalContainer },
     },

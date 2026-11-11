@@ -11,10 +11,11 @@ import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/ite
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import PanelHeader, { sectionLabelSx, panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -58,8 +59,8 @@ export default function Skills({ C, sheet, onRoll }) {
   const activeConditions = sheet?.activeConditions || [];
 
   return (
-    <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
-      <PanelHeader title="Skills" />
+    <Paper variant="outlined" sx={panelFrameSx}>
+      <PanelHeader title="Skills" tone={ENTITY_COLORS.skill} />
       <Box sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
         <span></span>
         <span>Prof.</span>

@@ -1,5 +1,6 @@
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { VTT_COLORS, vttAlpha } from '../vtt/colors.js';
+import { UI_SHADOWS } from './shadows.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
@@ -11,6 +12,14 @@ export const SURFACES = Object.freeze({
     border: 2,
     borderColor: UI_COLORS.edge,
     borderRadius: 1,
+    boxShadow: UI_SHADOWS.box,
+  }),
+  // The page behind everything: the background with a comic print's faint
+  // halftone dots.
+  page: Object.freeze({
+    bgcolor: 'background.default',
+    backgroundImage: `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} 1px, transparent 1.4px)`,
+    backgroundSize: '7px 7px',
   }),
   // A sunken well inside a panel: the details under a row, a field group.
   inset: Object.freeze({
