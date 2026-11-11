@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Chip, List, ListItemButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
@@ -17,6 +17,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -110,7 +111,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                 <Chip label={`Spellbook ${activeSpellbookSize}`} size="small" />
               </Stack>
             ) : null}
-            <Paper variant="outlined" sx={{ maxHeight: 460, overflow: 'auto' }}>
+            <Box sx={scrollWellSx(460)}>
               <List dense disablePadding>
                 {pool.map((spell) => {
                   const autoSelected = autoByName.has(matchKey(spell.name));
@@ -150,7 +151,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                   );
                 })}
               </List>
-            </Paper>
+            </Box>
             {!pool.length ? (
               <Typography sx={{ color: 'text.secondary' }}>
                 {activeIsWizard && !wizardBookMode ? 'No spells in this Wizard spellbook level.' : 'No spells found for this level/filter.'}

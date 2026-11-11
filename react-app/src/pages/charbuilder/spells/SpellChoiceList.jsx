@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { List, ListItemButton, Paper, Typography } from '@mui/material';
+import { Box, List, ListItemButton, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -10,6 +10,7 @@ import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -84,7 +85,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
       {showSearch ? (
         <SelectionSearch value={query} onChange={setQuery} placeholder="Search spells" />
       ) : null}
-      <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
+      <Box sx={scrollWellSx(260)}>
         <List dense disablePadding>
           {pool.map((spell) => {
             const active = selected.includes(spell.name);
@@ -121,7 +122,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             );
           })}
         </List>
-      </Paper>
+      </Box>
       {!pool.length ? <Typography sx={BUILDER_TEXT.hint}>No spells found for this filter.</Typography> : null}
     </ChoiceFrame>
   );

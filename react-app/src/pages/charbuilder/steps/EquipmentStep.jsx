@@ -1,8 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import {
-  Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -29,6 +26,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -238,14 +236,14 @@ export default function EquipmentStep({ state, dispatch }) {
             {sortedItems.length} of {state.data.items.length} items
           </Typography>
 
-          <Paper variant="outlined" {...addPage.listProps} sx={{ maxHeight: 430, overflow: 'auto' }}>
+          <Box {...addPage.listProps} sx={scrollWellSx(430)}>
             <List dense disablePadding>
               {addPage.visible.map((item) => (
                 <AddItemRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
               ))}
             </List>
             <ShowMoreButton page={addPage} sx={{ py: 1 }} />
-          </Paper>
+          </Box>
 
           <Divider />
           <Typography sx={BUILDER_TEXT.sectionHeader}>Current Inventory</Typography>
@@ -266,7 +264,7 @@ export default function EquipmentStep({ state, dispatch }) {
               <ItemFilterPanel {...currentList.panelProps} />
             </>
           ) : null}
-          <Paper variant="outlined" {...currentPage.listProps} sx={{ maxHeight: 430, overflow: 'auto' }}>
+          <Box {...currentPage.listProps} sx={scrollWellSx(430)}>
             <List dense disablePadding>
               {currentPage.visible.map(({ item, index }) => (
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
@@ -278,7 +276,7 @@ export default function EquipmentStep({ state, dispatch }) {
               ) : null}
             </List>
             <ShowMoreButton page={currentPage} sx={{ py: 1 }} />
-          </Paper>
+          </Box>
         </Stack>
       </BuilderPanel>
     </Stack>

@@ -19,3 +19,13 @@ test('builder text sizes come only from builderText.js', () => {
   assert.deepEqual(sourceLinesMatching(/fontSize\s*:/, { allow: ['pages/charbuilder/layout/builderText.js'] }).filter(inBuilder), []);
   assert.deepEqual(sourceLinesMatching(/variant="(body1|body2|caption|subtitle1|subtitle2|overline)"/).filter(inBuilder), []);
 });
+
+// Every builder box takes a shared shape: a panel is Panel (BuilderPanel), a
+// box inside it BuilderBox (layout/BuilderBox.jsx), a list that scrolls
+// scrollWellSx, a nested block SURFACES.inset. A Paper drawn by hand there
+// keeps its own padding and background and a restyle never reaches it; the
+// one left is the steps' bar, built from the panel's frame.
+test('builder boxes take a shared shape, not a hand-drawn Paper', () => {
+  const hits = sourceLinesMatching(/<Paper\b(?![^>]*panelFrameSx)/).filter((hit) => hit.startsWith('pages/charbuilder/'));
+  assert.deepEqual(hits, []);
+});

@@ -1,15 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Collapse,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Collapse, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/combat/weaponMastery.js';
@@ -27,6 +17,8 @@ import { heldProficiencyLabels } from '../../../shared/character/proficiency/hel
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -185,7 +177,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={max}>
       {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
-      <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
+      <Box sx={scrollWellSx(210)}>
         {visibleOptions.length ? (
         <List dense disablePadding>
           {visibleOptions.map(({ value, label }) => {
@@ -197,7 +189,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
             const desc = getOptionDescription ? getOptionDescription(value) : null;
             const isOpen = expanded.has(value);
             return (
-              <Box key={`${spec.key}-${value}`} sx={{ borderBottom: isOpen ? 0 : 1, borderColor: 'divider' }}>
+              <Box key={`${spec.key}-${value}`} sx={isOpen ? null : LIST_ROW_RULE_SX}>
                 <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
                   <ListItemButton
                     selected={active}
@@ -249,7 +241,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
             <Typography sx={BUILDER_TEXT.hint}>No matches.</Typography>
           </Box>
         )}
-      </Paper>
+      </Box>
     </ChoiceFrame>
   );
 }

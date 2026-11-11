@@ -1,4 +1,5 @@
-import { Chip, Paper, Stack, Typography } from '@mui/material';
+import { Chip, Stack, Typography } from '@mui/material';
+import BuilderBox from '../layout/BuilderBox.jsx';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 
@@ -10,22 +11,20 @@ export default function ChoiceFrame({
 }) {
   const full = max > 0 && count >= max;
   return (
-    <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
-      <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.75} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography sx={labelSx}>{label}</Typography>
-          {max != null ? (
-            <Chip
-              size="small"
-              label={countLabel || `${count}/${max}`}
-              color={full ? 'primary' : 'default'}
-              variant={full ? 'filled' : 'outlined'}
-            />
-          ) : null}
-        </Stack>
-        {children}
+    <BuilderBox spacing={0.75}>
+      <Stack direction="row" spacing={0.75} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+        <Typography sx={labelSx}>{label}</Typography>
+        {max != null ? (
+          <Chip
+            size="small"
+            label={countLabel || `${count}/${max}`}
+            color={full ? 'primary' : 'default'}
+            variant={full ? 'filled' : 'outlined'}
+          />
+        ) : null}
       </Stack>
-    </Paper>
+      {children}
+    </BuilderBox>
   );
 }
 

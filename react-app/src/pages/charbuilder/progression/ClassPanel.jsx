@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -20,6 +20,7 @@ import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -193,7 +194,7 @@ export default function ClassPanel({ state, character, dispatch }) {
           size="medium"
           iconSize={14}
         />
-        <Paper variant="outlined" sx={{ maxHeight: 390, overflow: 'auto' }}>
+        <Box sx={scrollWellSx(390)}>
           <List dense disablePadding>
             {visibleClasses.map((cls) => {
               const selected = activeExtra
@@ -252,7 +253,7 @@ export default function ClassPanel({ state, character, dispatch }) {
               </Typography>
             ) : null}
           </List>
-        </Paper>
+        </Box>
       </Stack>
       {pendingConfirm && (
         <SheetDialog

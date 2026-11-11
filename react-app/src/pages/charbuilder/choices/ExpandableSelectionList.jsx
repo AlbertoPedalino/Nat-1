@@ -1,4 +1,4 @@
-import { Box, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Box, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
@@ -6,6 +6,8 @@ import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import BuilderBox from '../layout/BuilderBox.jsx';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -25,18 +27,10 @@ export default function ExpandableSelectionList({
   const { query, setQuery, showSearch, visibleOptions } = useOptionSearch(options);
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
-      <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
-          <Typography sx={{ ...BUILDER_TEXT.boxTitle, flex: 1, minWidth: 0 }}>
-            {title}
-          </Typography>
-          {status ? (
-            <Typography sx={{ ...BUILDER_TEXT.hint, flexShrink: 0 }}>
-              {status}
-            </Typography>
-          ) : null}
-        </Stack>
+    <BuilderBox
+      title={title}
+      aside={status ? <Typography sx={{ ...BUILDER_TEXT.hint, flexShrink: 0 }}>{status}</Typography> : null}
+    >
 
         {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
 
@@ -49,7 +43,7 @@ export default function ExpandableSelectionList({
             <Typography sx={{ color: 'text.secondary' }}>No matches.</Typography>
           </Box>
         ) : (
-          <Paper variant="outlined" sx={{ maxHeight, overflow: 'auto', bgcolor: 'background.default' }}>
+          <Box sx={scrollWellSx(maxHeight)}>
             <List dense disablePadding>
               {visibleOptions.map((option) => (
                 <ExpandableCard
@@ -96,9 +90,8 @@ export default function ExpandableSelectionList({
                 />
               ))}
             </List>
-          </Paper>
+          </Box>
         )}
-      </Stack>
-    </Paper>
+    </BuilderBox>
   );
 }

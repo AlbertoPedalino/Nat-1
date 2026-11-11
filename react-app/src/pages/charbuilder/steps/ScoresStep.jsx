@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dice5 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
@@ -13,6 +13,8 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import BuilderBox from '../layout/BuilderBox.jsx';
+import { tileSx } from '../../../shared/ui/interactive.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -70,7 +72,7 @@ export default function ScoresStep({ state, dispatch }) {
 
             return (
               <Grid key={stat} size={{ xs: 12, md: 6 }}>
-                <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
+                <BuilderBox sx={{ height: '100%' }}>
                   <Stack direction="row" spacing={1.25} sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography sx={BUILDER_TEXT.boxTitle}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
@@ -90,10 +92,7 @@ export default function ScoresStep({ state, dispatch }) {
                         minWidth: 58,
                         px: 1,
                         py: 0.75,
-                        borderRadius: 1,
-                        bgcolor: 'action.selected',
-                        border: '2px solid',
-                        borderColor: UI_COLORS.edge,
+                        ...tileSx(),
                         textAlign: 'center',
                       }}
                     >
@@ -139,7 +138,7 @@ export default function ScoresStep({ state, dispatch }) {
                       />
                     </Box>
                   )}
-                </Paper>
+                </BuilderBox>
               </Grid>
             );
           })}

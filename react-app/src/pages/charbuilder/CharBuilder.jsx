@@ -1,15 +1,5 @@
 import { useMemo, useReducer } from 'react';
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Divider, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BuilderAppBar from './layout/BuilderAppBar.jsx';
 import PreviewPane from './preview/PreviewPane.jsx';
@@ -35,6 +25,7 @@ import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
+import { panelBarSx, panelFrameSx, panelScreentone } from '../../shared/ui/PanelHeader.jsx';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -118,19 +109,23 @@ export default function CharBuilder() {
         >
           {/* The steps head the left column, level with the preview's top. */}
           <Box sx={{ minWidth: 0 }}>
-            <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden' }}>
-              <Tabs
-                value={state.tab}
-                onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
-                // The steps fill the bar; on a phone, too narrow for six, they scroll.
-                variant={isPhone ? 'scrollable' : 'fullWidth'}
-                scrollButtons="auto"
-                aria-label="Character builder steps"
-              >
-                {STEPS.map((step, index) => (
-                  <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
-                ))}
-              </Tabs>
+            {/* The steps' bar: a panel's bar, as the sheet's tab bar. */}
+            <Paper variant="outlined" sx={{ ...panelFrameSx, mb: 1 }}>
+              <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(UI_COLORS.accent), borderBottom: 0 }}>
+                <Tabs
+                  sx={{ flex: 1, minWidth: 0 }}
+                  value={state.tab}
+                  onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
+                  // The steps fill the bar; on a phone, too narrow for six, they scroll.
+                  variant={isPhone ? 'scrollable' : 'fullWidth'}
+                  scrollButtons="auto"
+                  aria-label="Character builder steps"
+                >
+                  {STEPS.map((step, index) => (
+                    <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
+                  ))}
+                </Tabs>
+              </Box>
             </Paper>
             <BuilderDataAlert errors={state.errors} onRetry={reloadData} />
             {cloudConflict ? (

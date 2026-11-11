@@ -1,10 +1,4 @@
-import {
-  Button,
-  Chip,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { equipmentTypeCandidates } from '../../../shared/content/catalogs/equipmentTypes.js';
 import {
   cpToCoins,
@@ -15,6 +9,8 @@ import {
   collectEquipmentTypeSlots,
 } from './startingEquipment.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import BuilderBox from '../layout/BuilderBox.jsx';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // One source's starting-equipment choices (class or background) in the
 // builder's equipment step.
@@ -40,11 +36,10 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
   const typeSlots = collectEquipmentTypeSlots(eq, prefix, blocks, character.equipChoices);
   if (!eq) return null;
   return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Typography sx={{ ...BUILDER_TEXT.boxTitle, mb: 1 }}>{title}</Typography>
+    <BuilderBox title={title}>
       <Stack spacing={1}>
         {blocks.map((block) => (
-          <Paper key={block.key} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
+          <Box key={block.key} sx={{ ...SURFACES.inset, p: 1.25 }}>
             <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>{block.label}</Typography>
             <Stack spacing={0.75}>
               {block.options.map((option) => {
@@ -72,14 +67,14 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
                 );
               })}
             </Stack>
-          </Paper>
+          </Box>
         ))}
         {typeSlots.map((slot) => {
           const candidates = equipmentTypeCandidates(slot.code, items);
           if (!candidates.length) return null;
           const selectedRef = character.equipChoices[slot.slotKey] || null;
           return (
-            <Paper key={slot.slotKey} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
+            <Box key={slot.slotKey} sx={{ ...SURFACES.inset, p: 1.25 }}>
               <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>
                 Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
               </Typography>
@@ -105,11 +100,11 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
                   );
                 })}
               </Stack>
-            </Paper>
+            </Box>
           );
         })}
         {!blocks.length ? summary.map((line, index) => <Chip key={`${line}-${index}`} label={line} sx={{ justifyContent: 'flex-start' }} />) : null}
       </Stack>
-    </Paper>
+    </BuilderBox>
   );
 }

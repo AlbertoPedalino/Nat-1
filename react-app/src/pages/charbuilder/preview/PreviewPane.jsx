@@ -1,15 +1,5 @@
 import { memo } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, Chip, Divider, Grid, Stack, Typography } from '@mui/material';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
@@ -35,16 +25,17 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { captionLabelSx, sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
+// The preview column: the sunken well its panels sit in, kept in view.
 const PANEL_SX = {
+  ...SURFACES.inset,
   p: 1.25,
   position: { md: 'sticky' },
   top: 64,
   maxHeight: { md: 'calc(100vh - 76px)' },
   overflow: 'auto',
   minWidth: 0,
-  borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade),
-  bgcolor: uiAlpha(UI_COLORS.surfaceSunken, OPACITY.heavy),
 };
 
 function PreviewHeader({ character, hp }) {
@@ -269,7 +260,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
   const background = character.backgroundObj || character.backgroundSnapshot;
 
   return (
-    <Paper variant="outlined" sx={PANEL_SX}>
+    <Box sx={PANEL_SX}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <PreviewHeader character={character} hp={hp} />
 
@@ -347,7 +338,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
         ) : null}
 
       </Stack>
-    </Paper>
+    </Box>
   );
 }
 

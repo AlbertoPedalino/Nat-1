@@ -27,6 +27,12 @@ export function coverRaysSx(color = UI_COLORS.accent) {
   };
 }
 
+// A list that scrolls inside a panel (the builder's options, a picker's
+// results): the sunken well, its height capped at `maxHeight`.
+export function scrollWellSx(maxHeight) {
+  return { ...SURFACES.inset, maxHeight, overflow: 'auto' };
+}
+
 export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Button, Chip, Stack, Typography } from '@mui/material';
 import { Lock } from 'lucide-react';
 import ChoiceSpec from './ChoiceSpec.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
@@ -15,6 +15,7 @@ import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { asArray } from '../../../shared/lists.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import BuilderBox from '../layout/BuilderBox.jsx';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -140,13 +141,10 @@ function FeatChoicesPanel({ feat, slotKey, character, state, dispatch, lockedLis
   const grants = feat ? featChoiceSpecs(feat, { slotKey, entryIdx }) : [];
   if (!multiList && grants.length === 0) return null;
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
-      <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Typography sx={BUILDER_TEXT.boxTitle}>{feat.name} Choices</Typography>
-        <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} locked={locked} />
-        {grants.map((grant) => <ChoiceSpec key={grant.key} spec={grant} state={state} dispatch={dispatch} />)}
-      </Stack>
-    </Paper>
+    <BuilderBox title={`${feat.name} Choices`}>
+      <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} locked={locked} />
+      {grants.map((grant) => <ChoiceSpec key={grant.key} spec={grant} state={state} dispatch={dispatch} />)}
+    </BuilderBox>
   );
 }
 
@@ -156,12 +154,9 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
   const feat = findFeat(feats, spec.fixed);
   return (
     <Stack spacing={1.5} sx={{ minWidth: 0 }}>
-      <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
-        <Stack spacing={1} sx={{ minWidth: 0 }}>
-          <Typography sx={BUILDER_TEXT.boxTitle}>{feat ? feat.name : spec.fixed}</Typography>
-          <FeatDescriptionRows feat={feat} />
-        </Stack>
-      </Paper>
+      <BuilderBox title={feat ? feat.name : spec.fixed}>
+        <FeatDescriptionRows feat={feat} />
+      </BuilderBox>
       <FeatChoicesPanel feat={feat} slotKey={spec.key} character={character} state={state} dispatch={dispatch} lockedListClass={spec.classHint} />
     </Stack>
   );
