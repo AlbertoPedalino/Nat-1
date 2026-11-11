@@ -57,3 +57,37 @@ export function bubbleTailSx({ fill = UI_COLORS.surfaceRaised, side = 'bottom', 
     '&::after': piece(7, 10, 10, fill),
   };
 }
+
+// The comic starburst behind a total that shouts (a natural 20): a spiky
+// star of `color` drawn behind the number, its points cut by clip-path.
+const BURST_POINTS = (() => {
+  const points = [];
+  const spikes = 12;
+  for (let index = 0; index < spikes * 2; index += 1) {
+    const radius = index % 2 === 0 ? 50 : 34;
+    const angle = (Math.PI * index) / spikes - Math.PI / 2;
+    points.push(`${(50 + radius * Math.cos(angle)).toFixed(1)}% ${(50 + radius * Math.sin(angle)).toFixed(1)}%`);
+  }
+  return `polygon(${points.join(', ')})`;
+})();
+
+export function starburstSx(color = UI_COLORS.accent) {
+  return {
+    position: 'relative',
+    isolation: 'isolate',
+    display: 'inline-block',
+    px: 1.5,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      width: '2.2em',
+      height: '2.2em',
+      transform: 'translate(-50%, -50%) rotate(-8deg)',
+      clipPath: BURST_POINTS,
+      bgcolor: color,
+      zIndex: -1,
+    },
+  };
+}

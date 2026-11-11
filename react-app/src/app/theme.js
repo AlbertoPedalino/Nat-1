@@ -188,7 +188,7 @@ export const theme = createTheme({
         root: ({ ownerState }) => (ownerState.variant === 'text' ? {} : { boxShadow: UI_SHADOWS.press }),
         grouped: {
           boxShadow: 'none',
-          '&:hover': { boxShadow: 'none' },
+          '&:hover': { boxShadow: 'none', transform: 'none' },
           '&:active': { transform: 'none', boxShadow: 'none' },
         },
       },

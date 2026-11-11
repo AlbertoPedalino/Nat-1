@@ -9,7 +9,9 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../u
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
-import { SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow } from '../../ui/bubble.js';
+import { SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow, starburstSx } from '../../ui/bubble.js';
+import { inkOn } from '../../ui/pressable.js';
+import { celebrateNatural20 } from '../../ui/celebrate.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -39,6 +41,12 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
+  // A natural 20 throws confetti from the toast's corner, once a throw.
+  const crit = Boolean(toast && !hidden && resolveToastLayout(toast).isCrit);
+  useEffect(() => {
+    if (crit) celebrateNatural20();
+  }, [crit, toast?.timestamp]);
+
   // Keep the expiry running while hidden so returning to the map cannot revive
   // an old result that arrived during the background view.
   if (!toast || hidden) return null;
@@ -64,12 +72,12 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, mb: 0.25 }}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: UI_COLORS.accentText, mb: 0.25 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lg, color: UI_COLORS.danger, mb: 0.25 }}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: UI_COLORS.danger, mb: 0.25 }}>
           NATURAL 1
         </Typography>
       )}
@@ -95,13 +103,16 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       />
 
       {layout.total != null && (
-        <Typography sx={{
-          ...TEXT_STYLES.figure, lineHeight: LINE_HEIGHTS.none, textAlign: 'center', my: 0.25,
-          fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
-          color: layout.totalColor,
-        }}>
-          {layout.total}
-        </Typography>
+        <Box sx={{ textAlign: 'center', my: 0.25 }}>
+          <Typography component="span" sx={{
+            ...TEXT_STYLES.figure, lineHeight: LINE_HEIGHTS.none,
+            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
+            color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.totalColor,
+            ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), textShadow: 'none' } : { display: 'inline-block' }),
+          }}>
+            {layout.total}
+          </Typography>
+        </Box>
       )}
 
       {layout.total == null && layout.dice.length === 0 && layout.detail && (

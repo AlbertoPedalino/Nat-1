@@ -25,6 +25,13 @@ export const TEXT_STYLES = Object.freeze({
     fontWeight: FONT_WEIGHTS.bold,
     textShadow: UI_SHADOWS.inkText,
   }),
+  // What a roll shouts (NATURAL 20!, NATURAL 1): comic lettering, inked.
+  shout: Object.freeze({
+    fontFamily: UI_FONTS.shout,
+    fontWeight: FONT_WEIGHTS.regular,
+    letterSpacing: LETTER_SPACINGS.md,
+    textShadow: UI_SHADOWS.inkText,
+  }),
   // A quiet aside in the body face: a hint, an empty state, a rules note.
   note: Object.freeze({
     fontStyle: 'italic',

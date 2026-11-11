@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { UI_COLORS } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
@@ -20,6 +20,13 @@ export const panelBarSx = {
   borderBottom: 2,
   borderColor: UI_COLORS.edge,
 };
+
+// A panel bar's screentone: fine diagonal hatching in the panel's own colour,
+// so each kind of panel carries its texture. `tone` is a palette colour (hex).
+export function panelScreentone(tone = UI_COLORS.accent) {
+  const ink = String(tone).startsWith('#') ? tone : UI_COLORS.accent;
+  return `repeating-linear-gradient(-45deg, ${uiAlpha(ink, OPACITY.soft)} 0 2px, transparent 2px 7px)`;
+}
 
 // The icon's badge in a panel bar: the tone filled, edged in ink.
 export function panelBadgeSx(tone = 'primary.main') {
@@ -134,9 +141,9 @@ export const sectionLabelSx = {
 
 // `titleSx` resizes the title for a page whose panels are its main content (the
 // builder); the sheet keeps panelTitleSx as it is.
-export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', titleSx, children }) {
+export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
   return (
-    <Box sx={{ ...panelBarSx, px: '0.8rem', py: '0.48rem' }}>
+    <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(tone), px: '0.8rem', py: '0.48rem' }}>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={ICON_SIZES.sm} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}

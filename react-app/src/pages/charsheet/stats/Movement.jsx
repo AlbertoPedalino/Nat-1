@@ -101,7 +101,7 @@ export default function Movement({ C, sheet }) {
 
   return (
     <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
-      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : UI_COLORS.secondary}>
+      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? UI_COLORS.warning : UI_COLORS.secondary}>
         {hasPenalty ? (
           <Tooltip title={reason}>
             <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />

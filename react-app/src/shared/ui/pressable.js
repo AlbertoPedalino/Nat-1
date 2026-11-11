@@ -1,16 +1,20 @@
 import { getContrastRatio, lighten } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { UI_SHADOWS } from './shadows.js';
+import { DURATIONS } from './motion.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
 // while pressed. The one recipe for every filled button: the theme's
 // contained buttons take the edge (PRESSABLE_EDGE_SX) over their own colour,
 // and a button of any colour (a roll on a card) takes pressableSx(fill).
+// It hops up a little under the cursor and squashes when pressed.
 export const PRESSABLE_EDGE_SX = Object.freeze({
   border: `2px solid ${UI_COLORS.edge}`,
   boxShadow: UI_SHADOWS.press,
-  '&:hover': { boxShadow: UI_SHADOWS.press },
-  '&:active': { transform: 'translateY(1px)', boxShadow: UI_SHADOWS.pressed },
+  transition: `transform ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
+  '&:hover': { boxShadow: UI_SHADOWS.lifted, transform: 'translateY(-1px)' },
+  '&:active': { transform: 'translateY(1px) scale(0.97)', boxShadow: UI_SHADOWS.pressed },
+  '@media (prefers-reduced-motion: reduce)': { '&:hover': { transform: 'none' }, '&:active': { transform: 'none' } },
 });
 
 // The ink that reads best on `fill`: the edge colour on a light fill, the

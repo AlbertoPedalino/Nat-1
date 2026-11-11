@@ -10,7 +10,8 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
-import { bubbleSx, bubbleTailSx, comicShadow } from '../../../shared/ui/bubble.js';
+import { bubbleSx, bubbleTailSx, comicShadow, starburstSx } from '../../../shared/ui/bubble.js';
+import { inkOn } from '../../../shared/ui/pressable.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -87,7 +88,8 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           <Typography sx={{
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.title,
-            color: layout.totalColor,
+            color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.totalColor,
+            ...(layout.isCrit ? { ...starburstSx(VTT_COLORS.accent), textShadow: 'none' } : null),
           }}>
             {layout.total}
           </Typography>
@@ -176,8 +178,8 @@ const labelSx = {
 };
 
 const natSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.sm,
+  ...TEXT_STYLES.shout,
+  fontSize: FONT_SIZES.lg,
   mb: 0.25,
 };
 

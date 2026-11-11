@@ -7,6 +7,8 @@ export const UI_FONTS = Object.freeze({
   display: '"Rubik", "Nunito Sans", system-ui, sans-serif',
   prose: '"Nunito Sans", system-ui, sans-serif',
   body: '"Nunito Sans", system-ui, sans-serif',
+  // Comic lettering, only for what a roll shouts (NATURAL 20!).
+  shout: '"Bangers", "Rubik", system-ui, sans-serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 

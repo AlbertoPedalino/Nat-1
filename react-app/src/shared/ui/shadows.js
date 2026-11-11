@@ -20,6 +20,8 @@ export const UI_SHADOWS = Object.freeze({
   // look's depth; `pressed` is the same button pushed down.
   press: `0 2px 0 ${UI_COLORS.edge}`,
   pressed: `0 1px 0 ${UI_COLORS.edge}`,
+  // The same button lifted under the cursor.
+  lifted: `0 3px 0 ${UI_COLORS.edge}`,
   // The comic panel's solid shadow, set off to the lower right: a main panel
   // (`panel`) and a box on the page (`box`).
   panel: inkShadow(),
