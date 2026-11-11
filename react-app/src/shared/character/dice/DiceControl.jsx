@@ -8,9 +8,9 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { UI_SHADOWS } from '../../ui/shadows.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { KEY_BAR_SX } from '../../ui/pressable.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -87,7 +87,7 @@ export default function DiceControl({
 // The icon pill is one raised button, as a button group is.
 const iconGroupSx = {
   ...SURFACES.panel,
-  boxShadow: UI_SHADOWS.press,
+  ...KEY_BAR_SX,
   display: 'inline-flex',
   alignItems: 'stretch',
   borderRadius: 999,

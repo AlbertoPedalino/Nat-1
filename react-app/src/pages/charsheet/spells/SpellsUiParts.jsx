@@ -1,19 +1,10 @@
 import { Box, Typography } from '@mui/material';
-import { levelHeaderSx, panelSurfaceSx, statBoxSx } from './spellsTabStyles.js';
+import { levelHeaderSx, panelSurfaceSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-
-export function StatBox({ value, label }) {
-  return (
-    <Box sx={statBoxSx}>
-      <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: UI_COLORS.accentText }}>{value}</Box>
-      <Box sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>{label}</Box>
-    </Box>
-  );
-}
 
 export function Empty({ text }) {
   return (

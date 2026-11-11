@@ -10,7 +10,7 @@ import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { OPACITY } from '../../ui/colors.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 const META_LABEL_SX = {
   ...TEXT_STYLES.label,
@@ -60,7 +60,7 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
   const headingBlock = headingIdx >= 0 ? blocks[headingIdx] : null;
   const bodyBlocks = headingIdx >= 0 ? blocks.filter((_, i) => i !== headingIdx) : blocks;
   return (
-    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider', ...sx }}>
+    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX, ...sx }}>
       <Box sx={SECTION_HEADING_SX}>
         {headingBlock?.tokens?.length
           ? <RichInline tokens={headingBlock.tokens} keyPrefix="hl-heading" />

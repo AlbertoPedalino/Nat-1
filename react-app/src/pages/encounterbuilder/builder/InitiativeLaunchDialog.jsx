@@ -114,13 +114,14 @@ function ModeToggle({ label, value, onChange }) {
       aria-label={`${label} initiative`}
       sx={{ flexShrink: 0 }}
     >
-      <ToggleButton value="disadv" color="error" aria-label={`${label}: disadvantage`} sx={toggleSx}>DIS</ToggleButton>
-      <ToggleButton value="none" aria-label={`${label}: normal`} sx={toggleSx}>—</ToggleButton>
-      <ToggleButton value="adv" color="success" aria-label={`${label}: advantage`} sx={toggleSx}>ADV</ToggleButton>
+      <ToggleButton value="disadv" color="error" aria-label={`${label}: disadvantage`} sx={toggleSizeSx}>DIS</ToggleButton>
+      <ToggleButton value="none" aria-label={`${label}: normal`} sx={toggleSizeSx}>—</ToggleButton>
+      <ToggleButton value="adv" color="success" aria-label={`${label}: advantage`} sx={toggleSizeSx}>ADV</ToggleButton>
     </ToggleButtonGroup>
   );
 }
 
 const rowSx = { display: 'flex', alignItems: 'center', gap: 1 };
 
-const toggleSx = { px: 1, py: 0.25, fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.heavy, letterSpacing: LETTER_SPACINGS.md, minWidth: 38 };
+// The size of the ADV / — / DIS keys; their look is the theme's.
+const toggleSizeSx = { px: 1, py: 0.25, fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.heavy, letterSpacing: LETTER_SPACINGS.md, minWidth: 38 };

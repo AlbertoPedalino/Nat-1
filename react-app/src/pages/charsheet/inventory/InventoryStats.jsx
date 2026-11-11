@@ -12,9 +12,11 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { tileSx } from '../../../shared/ui/interactive.js';
 
+// A total read at the top of the inventory: flat.
 const statPillSx = {
-  ...SURFACES.panel,
+  ...tileSx(),
   px: 1.25,
   py: 0.5,
   fontSize: FONT_SIZES.xl,

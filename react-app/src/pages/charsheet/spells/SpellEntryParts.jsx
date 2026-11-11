@@ -6,6 +6,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -86,7 +87,7 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
     );
   }
   return (
-    <Box sx={{ mt: 0.75, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+    <Box sx={{ mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.25 }}>
         Weapon
       </Typography>

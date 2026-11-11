@@ -116,7 +116,7 @@ export function ReminderField({ effects, onAdd }) {
           slotProps={{ htmlInput: { maxLength: MAX_EFFECT_TEXT, 'aria-label': 'Reminder' } }}
           sx={fieldSx}
         />
-        <Button size="small" onClick={() => add(text)} disabled={full || !text.trim()} sx={addSx}>Add</Button>
+        <Button size="small" variant="outlined" onClick={() => add(text)} disabled={full || !text.trim()} sx={addSx}>Add</Button>
       </Box>
       {suggestions.length ? (
         <Box sx={chipsSx} role="group" aria-label="Recent reminders">
@@ -154,7 +154,6 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
           fontSize: FONT_SIZES.xxs,
           maxWidth: '100%',
           color: alpha(accent, OPACITY.veil),
-          borderStyle: 'dashed',
           borderColor: alpha(accent, OPACITY.strong),
           '& .MuiChip-deleteIcon': { color: alpha(accent, OPACITY.strong), '&:hover': { color: accent } },
         };

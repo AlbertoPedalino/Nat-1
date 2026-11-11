@@ -10,12 +10,11 @@ import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -59,14 +58,19 @@ export default function Senses({ C }) {
   );
 }
 
+// A sense is a row of the list, as a saving throw or a skill: no box of its
+// own. One that opens its details (Darkvision) is a card you click, as an
+// action or a spell is.
+const SENSE_ROW_SX = { borderRadius: 1, px: 0.75 };
+
 function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
   const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ ...(clickable ? CARD_SX : SURFACES.card), mb: 0.25, overflow: 'hidden' }}>
+    <Box sx={{ ...(clickable ? { ...CARD_SX, px: 0.75, mb: 0.25 } : SENSE_ROW_SX), overflow: 'hidden' }}>
       <Box
         onClick={clickable ? onToggle : undefined}
         sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, py: 0.25,
           cursor: clickable ? 'pointer' : 'default',
         }}
       >

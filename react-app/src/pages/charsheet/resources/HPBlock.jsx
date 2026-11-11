@@ -10,12 +10,12 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { HP_TONE_COLORS, UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { readoutSx, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -23,8 +23,10 @@ import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 const FILL_CONTENT_WIDTH = 'min(100%, clamp(260px, 90%, 680px))';
 const FILL_COLUMN_GAP = 'clamp(0.4rem, 12%, 5rem)';
 
+// The name of a value in the block (TEMP, MAX MOD): read, so flat; the value
+// in it is what you click to type a new one.
 const chipSx = {
-  ...SURFACES.panel,
+  ...readoutSx(),
   color: 'text.secondary',
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
@@ -208,7 +210,7 @@ export default function HPBlock({
         </Box>
 
         {showDeathSaves && (
-          <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
+          <Box sx={{ mt: 0.25, pt: 0.25, ...CARD_PART_RULE_SX }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
               <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>
                 Death Saves

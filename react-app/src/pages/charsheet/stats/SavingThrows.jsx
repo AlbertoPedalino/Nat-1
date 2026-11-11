@@ -21,9 +21,10 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { ROW_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { ROLL_FIGURE_MARK_STYLE, ROLL_FIGURE_SX, ROLL_ROW_SX } from '../../../shared/ui/pressable.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -92,7 +93,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ ...ROW_SX, display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+              sx={{ ...ROLL_ROW_SX, px: 0.75, mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5 }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: UI_COLORS.edge, bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
@@ -100,14 +101,17 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
                 {ABILITY_NAMES[st]}
               </Typography>
-              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', ml: 'auto' }}>
+              {/* The advantage mark sits on the figure's corner, taking no room,
+                  so the figures line up; the save-context chevron is on every
+                  row or none. */}
+              <Box component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', ...ROLL_FIGURE_SX, ml: 'auto' }}>
                 {signed(shownBonus)}
-              </Typography>
-              {visual && (
-                <Tooltip title={tooltipText}>
-                  <visual.Icon size={ICON_SIZES.xs} style={{ color: visual.color, flexShrink: 0 }} />
-                </Tooltip>
-              )}
+                {visual && (
+                  <Tooltip title={tooltipText}>
+                    <visual.Icon size={ICON_SIZES.xs} style={{ ...ROLL_FIGURE_MARK_STYLE, color: visual.color }} />
+                  </Tooltip>
+                )}
+              </Box>
               {hasContextMenu ? (
                 <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
                   <ChevronDown size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentText, flexShrink: 0, opacity: OPACITY.strong }} />

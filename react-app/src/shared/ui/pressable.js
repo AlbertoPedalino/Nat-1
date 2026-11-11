@@ -1,20 +1,35 @@
 import { getContrastRatio, lighten } from '@mui/material';
-import { UI_COLORS } from './colors.js';
+import { UI_COLORS, OPACITY } from './colors.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 import { DURATIONS } from './motion.js';
+import { LINE_HEIGHTS } from './fonts.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
 // while pressed. The one recipe for every filled button: the theme's
 // contained buttons take the edge (PRESSABLE_EDGE_SX) over their own colour,
 // and a button of any colour (a roll on a card) takes pressableSx(fill).
 // It hops up a little under the cursor and squashes when pressed.
+// How anything pressed moves: a hop under the cursor, a squash while
+// pressed (none for reduced motion). The raised button below takes it with
+// its shadows; a pressed panel (a stat tile) takes it alone.
+export const PRESS_MOTION_SX = Object.freeze({
+  transition: `transform ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease, border-color ${DURATIONS.fast}ms ease`,
+  '&:hover': { transform: 'translateY(-1px)' },
+  '&:active': { transform: 'translateY(1px) scale(0.97)' },
+  '@media (prefers-reduced-motion: reduce)': { '&:hover': { transform: 'none' }, '&:active': { transform: 'none' } },
+});
+
+// A bar of keys pressed one at a time (a button group as the Rest one, a
+// toggle group, the dice pill): the bar is raised as one button, its keys
+// lie in it.
+export const KEY_BAR_SX = Object.freeze({ boxShadow: UI_SHADOWS.press });
+
 export const PRESSABLE_EDGE_SX = Object.freeze({
+  ...PRESS_MOTION_SX,
   border: INK_EDGE,
   boxShadow: UI_SHADOWS.press,
-  transition: `transform ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
-  '&:hover': { boxShadow: UI_SHADOWS.lifted, transform: 'translateY(-1px)' },
-  '&:active': { transform: 'translateY(1px) scale(0.97)', boxShadow: UI_SHADOWS.pressed },
-  '@media (prefers-reduced-motion: reduce)': { '&:hover': { transform: 'none' }, '&:active': { transform: 'none' } },
+  '&:hover': { ...PRESS_MOTION_SX['&:hover'], boxShadow: UI_SHADOWS.lifted },
+  '&:active': { ...PRESS_MOTION_SX['&:active'], boxShadow: UI_SHADOWS.pressed },
 });
 
 // The ink that reads best on `fill`: the edge colour on a light fill, the
@@ -35,4 +50,58 @@ export function pressableSx(fill) {
     backgroundColor: fill,
     '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], backgroundColor: lighten(fill, 0.12) },
   };
+}
+
+// The small square button of a −/+ stepper (hit points, XP, a quantity): the
+// raised, drawn button on the raised surface, its icon in `tone`, red under
+// the cursor when `danger`. Every stepper in the app takes it.
+export function stepButtonSx(size = 20, { tone = null, danger = false } = {}) {
+  return {
+    ...PRESSABLE_EDGE_SX,
+    width: size,
+    height: size,
+    minWidth: 0,
+    p: 0,
+    flex: '0 0 auto',
+    borderRadius: 1,
+    backgroundColor: UI_COLORS.surfaceRaised,
+    color: tone || 'text.secondary',
+    '&:hover': {
+      ...PRESSABLE_EDGE_SX['&:hover'],
+      backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.08),
+      color: danger ? UI_COLORS.danger : (tone || UI_COLORS.accent),
+    },
+    '&.Mui-disabled': { opacity: OPACITY.edge, boxShadow: 'none' },
+  };
+}
+
+// A row you roll by clicking it (a saving throw, a skill): a button, raised
+// like every button — the ink edge on the raised surface, the solid shadow
+// under it — that hops under the cursor and squashes when pressed.
+export const ROLL_ROW_SX = Object.freeze({
+  ...pressableSx(UI_COLORS.surfaceRaised),
+  color: 'inherit',
+  borderRadius: 1,
+  cursor: 'pointer',
+});
+
+// The modifier on such a row: plain figures in a fixed-width cell, so a column
+// of them lines up; a mark on its corner (advantage) is laid over it.
+export const ROLL_FIGURE_SX = Object.freeze({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 30,
+  flexShrink: 0,
+  lineHeight: LINE_HEIGHTS.normal,
+});
+
+export const ROLL_FIGURE_MARK_STYLE = Object.freeze({ position: 'absolute', top: -5, right: -6 });
+
+// A toggle (an item's Equip, Stash, Attune or hand, a notes page): the
+// raised, drawn button, filled in its tone while on, on the raised surface
+// while off — as a clickable chip is in the theme.
+export function toggleSx(active, tone = UI_COLORS.accent) {
+  return pressableSx(active ? tone : UI_COLORS.surfaceRaised);
 }

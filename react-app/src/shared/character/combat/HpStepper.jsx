@@ -3,6 +3,7 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { Plus, Minus } from 'lucide-react';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { stepButtonSx } from '../../ui/pressable.js';
 
 // Visual presets for the call sites (sheet HP block vs encounter combatant card).
 // Add a key here for a new look instead of leaking inner `sx` through props —
@@ -55,15 +56,7 @@ export default function HpStepper({
 }) {
   const { btnSize, iconSize, amountWidth, gap, amountInputSx } = VARIANTS[variant] ?? VARIANTS.combat;
   const amt = stepAmount(amount);
-  const btnSx = (color) => ({
-    width: btnSize,
-    height: btnSize,
-    border: 2,
-    borderColor: color || 'divider',
-    color: color || 'text.secondary',
-    borderRadius: 1,
-    flex: '0 0 auto',
-  });
+  const btnSx = (color) => stepButtonSx(btnSize, { tone: color });
 
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap, flex: '0 0 auto' }}>

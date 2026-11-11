@@ -219,8 +219,8 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
         <Box sx={{ mt: cannons.length ? 0.75 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
             <ToggleButtonGroup size="small" exclusive value={size} onChange={(e, v) => { e.stopPropagation(); if (v) setSize(v); }}>
-              <ToggleButton value="S" sx={toggleSx}>Small</ToggleButton>
-              <ToggleButton value="T" sx={toggleSx}>Tiny</ToggleButton>
+              <ToggleButton value="S" sx={toggleSizeSx}>Small</ToggleButton>
+              <ToggleButton value="T" sx={toggleSizeSx}>Tiny</ToggleButton>
             </ToggleButtonGroup>
             <ToggleButtonGroup
               size="small"
@@ -228,10 +228,10 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
               value={canCreate ? effectiveCost : null}
               onChange={(e, v) => { e.stopPropagation(); if (v) setCostMode(v); }}
             >
-              <ToggleButton value="use" disabled={!canUse} sx={toggleSx}>
+              <ToggleButton value="use" disabled={!canUse} sx={toggleSizeSx}>
                 {canUse ? `Use (${usesLeft})` : 'Use'}
               </ToggleButton>
-              <ToggleButton value="slot" disabled={!canSlot} sx={toggleSx}>
+              <ToggleButton value="slot" disabled={!canSlot} sx={toggleSizeSx}>
                 {canSlot ? `Slot (Lv ${slotLevel})` : 'Slot'}
               </ToggleButton>
             </ToggleButtonGroup>
@@ -269,13 +269,12 @@ const cannonBoardSx = {
   borderRadius: 1,
 };
 
-const toggleSx = {
+// The size of this panel's toggle keys; their look is the theme's.
+const toggleSizeSx = {
   fontSize: FONT_SIZES.xs,
   py: 0.5,
   px: 1.25,
   textTransform: 'none',
-  color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
 };
 
 // AC shield beside the Defenses box, as in the character's header.

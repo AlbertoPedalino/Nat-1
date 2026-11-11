@@ -4,7 +4,7 @@ import { AlertTriangle, Archive, Check, Minus, Plus, Trash2 } from 'lucide-react
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { ENTITY_COLORS, ITEM_ATTUNEMENT, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import {
   attunementRequirementText,
@@ -25,17 +25,19 @@ import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
-import CountStepper, { stepButtonSx } from '../../../shared/ui/CountStepper.jsx';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
 
+// The size and lettering of the row's small controls and tags; a control's
+// look is toggleSx (raised, filled while on), a tag's the flat tint.
 const itemStateChipBaseSx = {
   minWidth: 0,
   px: 1,
   py: 0.25,
-  border: 2,
   borderRadius: 0.375,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
@@ -125,7 +127,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}
-              sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: item.equipped ? UI_COLORS.secondaryStrong : UI_COLORS.edge, borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ ...itemStateChipBaseSx, ...toggleSx(item.equipped, UI_COLORS.secondaryStrong) }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -140,6 +142,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               aria-label={`${item.name} charges`}
               sx={{
                 ...itemStateChipBaseSx,
+                border: 2,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
@@ -165,7 +168,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={ICON_SIZES.xxs} /> : null}
-              sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: carried ? UI_COLORS.edge : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ ...itemStateChipBaseSx, ...toggleSx(!carried, UI_COLORS.outline) }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -186,10 +189,7 @@ function ItemFlagButton({ def, active, onClick }) {
   const tone = def.tone || ENTITY_COLORS.class;
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={ICON_SIZES.xxs} /> : null}
-      sx={{
-        minWidth: 0, px: 1, py: 0.25, border: 2, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
-        ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: UI_COLORS.edge, color: 'text.secondary', bgcolor: 'transparent' }),
-      }}>
+      sx={{ ...itemStateChipBaseSx, ...toggleSx(active, tone) }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
   );
@@ -221,15 +221,11 @@ function SlotBtn({ active, onClick, label }) {
   return (
     <IconButton size="small" onClick={onClick}
       sx={{
+        ...toggleSx(active),
         minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
-        border: 2,
-        borderColor: active ? UI_COLORS.accent : UI_COLORS.edge,
         borderRadius: 0.375,
-        color: active ? UI_COLORS.accentText : 'text.secondary',
-        bgcolor: active ? uiAlpha(UI_COLORS.accent, OPACITY.fill) : 'transparent',
         ...TEXT_STYLES.title,
         fontSize: FONT_SIZES.xxxs,
-        '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent },
       }}
     >
       {label}
@@ -260,7 +256,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={ICON_SIZES.xxs} /> : (item.attuned ? <Check size={ICON_SIZES.xxs} /> : (hasRequirementWarning ? <AlertTriangle size={ICON_SIZES.xxs} /> : null))}
-            sx={{ ...itemStateChipBaseSx, borderColor: accent || UI_COLORS.edge, color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, OPACITY.fill) : 'transparent', '&.Mui-disabled': { opacity: OPACITY.edge } }}>
+            sx={{ ...itemStateChipBaseSx, ...toggleSx(item.attuned, ITEM_ATTUNEMENT), ...(hasRequirementWarning && !item.attuned ? { color: UI_COLORS.accentText } : null), '&.Mui-disabled': { opacity: OPACITY.edge } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </Box>
@@ -268,7 +264,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+            sx={{ ...itemStateChipBaseSx, ...pressableSx(UI_COLORS.dangerDeep) }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

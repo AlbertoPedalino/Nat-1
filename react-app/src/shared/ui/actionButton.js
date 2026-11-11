@@ -1,6 +1,7 @@
 import { FONT_SIZES } from './fonts.js';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { toggleSx } from './pressable.js';
 
 // The label of a compact action button in a button group (the sheet's Rest
 // group, the dice control): small uppercase display face, one line, the buttons of
@@ -25,25 +26,17 @@ export function actionButtonToneSx(color) {
   };
 }
 
-// A small toggle that lights up in gold while on (a filter, an open panel):
-// uppercase display face, quiet when off.
+// A small toggle (a filter, an open panel): the raised toggle (toggleSx,
+// filled in gold while on) in the uppercase display face.
 export function goldToggleSx(active) {
   return {
+    ...toggleSx(active),
     minHeight: 0,
     px: 1.25,
     py: 0.5,
-    border: 2,
-    borderColor: active ? UI_COLORS.accent : UI_COLORS.edge,
     borderRadius: 1,
-    bgcolor: active ? uiAlpha(UI_COLORS.accent, OPACITY.tint) : 'transparent',
-    color: active ? UI_COLORS.accentText : 'text.secondary',
     ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.xxs,
     whiteSpace: 'nowrap',
-    '&:hover': {
-      borderColor: UI_COLORS.accent,
-      color: UI_COLORS.accentText,
-      bgcolor: uiAlpha(UI_COLORS.accent, active ? OPACITY.fill : OPACITY.soft),
-    },
   };
 }

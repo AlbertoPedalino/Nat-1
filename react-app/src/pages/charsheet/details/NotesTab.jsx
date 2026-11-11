@@ -2,12 +2,12 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { Plus, Minus, PencilLine, Check } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { makeId } from '../../../shared/ids.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { toggleSx } from '../../../shared/ui/pressable.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -24,9 +24,9 @@ function PageTab({ page, active, onClick }) {
     <Box
       onClick={onClick}
       sx={{
-        px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure, bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft), color: active ? 'primary.contrastText' : 'text.secondary',
-        border: 2, borderColor: active ? 'primary.main' : UI_COLORS.edge, whiteSpace: 'nowrap', minWidth: 0,
-        '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.fill) },
+        ...toggleSx(active),
+        px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure,
+        whiteSpace: 'nowrap', minWidth: 0,
       }}
     >
       {page.name}

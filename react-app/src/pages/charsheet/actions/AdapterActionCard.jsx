@@ -25,7 +25,7 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
@@ -278,7 +278,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
   };
 
   return (
-    <Box sx={{ mt: 0.75, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+    <Box sx={{ mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>

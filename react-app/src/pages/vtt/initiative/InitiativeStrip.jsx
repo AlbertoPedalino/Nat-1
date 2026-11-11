@@ -60,7 +60,7 @@ export default function InitiativeStrip({
         {controls ? (
           <Tooltip title="Previous turn">
             <span>
-              <IconButton size="small" aria-label="Previous turn" disabled={busy} onClick={() => onStep?.(-1)} sx={stepButtonSx}>
+              <IconButton size="small" aria-label="Previous turn" disabled={busy} onClick={() => onStep?.(-1)} sx={turnArrowSx}>
                 <ChevronLeft size={ICON_SIZES.md} />
               </IconButton>
             </span>
@@ -118,7 +118,7 @@ export default function InitiativeStrip({
           <>
             <Tooltip title="Next turn">
               <span>
-                <IconButton size="small" aria-label="Next turn" disabled={busy} onClick={() => onStep?.(1)} sx={stepButtonSx}>
+                <IconButton size="small" aria-label="Next turn" disabled={busy} onClick={() => onStep?.(1)} sx={turnArrowSx}>
                   {busy ? <CircularProgress size={14} /> : <ChevronRight size={ICON_SIZES.md} />}
                 </IconButton>
               </span>
@@ -128,7 +128,7 @@ export default function InitiativeStrip({
                 size="small"
                 aria-label="Choose the fight shown"
                 onClick={(event) => setMenuAnchor(event.currentTarget)}
-                sx={stepButtonSx}
+                sx={turnArrowSx}
               >
                 <Swords size={ICON_SIZES.sm} />
               </IconButton>
@@ -357,7 +357,8 @@ const hiddenBadgeSx = {
   flexShrink: 0,
 };
 
-const stepButtonSx = {
+// The strip's turn arrows.
+const turnArrowSx = {
   flexShrink: 0,
   color: 'gmboard.vtt.accent',
 };

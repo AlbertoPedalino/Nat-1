@@ -351,8 +351,7 @@ export default function SpellEntry({
                   sx={{
                     pt: 0.75,
                     mt: 0.25,
-                    borderTop: '1px dashed',
-                    borderColor: 'divider',
+                    ...CARD_PART_RULE_SX,
                   }}
                 >
                   <Typography

@@ -8,14 +8,9 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
-import { PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
+import { KEY_BAR_SX, PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES } from '../shared/ui/surfaces.js';
 
-const SELECTED_OPTION_SX = {
-  color: UI_COLORS.accentText,
-  backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.fill),
-  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong),
-};
 const SELECTED_ROW_SX = {
   color: UI_COLORS.textPrimary,
   backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
@@ -185,7 +180,7 @@ export const theme = createTheme({
     // and the press, its halves stay flat inside it (Roll | Log, the rests).
     MuiButtonGroup: {
       styleOverrides: {
-        root: ({ ownerState }) => (ownerState.variant === 'text' ? {} : { boxShadow: UI_SHADOWS.press }),
+        root: ({ ownerState }) => (ownerState.variant === 'text' ? {} : KEY_BAR_SX),
         grouped: {
           boxShadow: 'none',
           '&:hover': { boxShadow: 'none', transform: 'none' },
@@ -195,15 +190,29 @@ export const theme = createTheme({
     },
     // A chosen option (toggle buttons, segmented choices): an accent wash
     // with accent text and edge.
+    // A group of toggle buttons is one raised bar of keys (as the Rest
+    // group): the bar casts the solid shadow, each key is on the raised
+    // surface, the chosen one filled in its colour (as toggleSx).
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        root: KEY_BAR_SX,
+      },
+    },
     MuiToggleButton: {
       styleOverrides: {
         root: {
           color: UI_COLORS.textSecondary,
           border: `2px solid ${UI_COLORS.edge}`,
-          '&.Mui-selected': SELECTED_OPTION_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
+          backgroundColor: UI_COLORS.surfaceRaised,
+          '&:hover': { backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.08) },
+          '&.Mui-selected': { backgroundColor: UI_COLORS.accent, color: UI_COLORS.onAccent },
+          '&.Mui-selected:hover': { backgroundColor: lighten(UI_COLORS.accent, 0.12) },
         },
       },
+      variants: [
+        { props: { color: 'error' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.danger, color: UI_COLORS.edge } } },
+        { props: { color: 'success' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.success, color: UI_COLORS.edge } } },
+      ],
     },
     // A chosen row (lists, menus): an accent wash with a bar on its left edge.
     MuiListItemButton: {

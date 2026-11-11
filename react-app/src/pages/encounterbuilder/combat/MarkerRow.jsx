@@ -5,6 +5,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -29,12 +30,12 @@ export default function MarkerRow({ label, count = 0, pills, onClear, belowRow, 
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
           startIcon={open ? <ChevronUp size={ICON_SIZES.sm} /> : <ChevronDown size={ICON_SIZES.sm} />}
-          sx={toggleSx}
+          sx={{ ...goldToggleSx(open), '& .MuiButton-startIcon': { mr: 0.5 } }}
         >
           {label}{count ? ` (${count})` : ''}
         </Button>
         {onClear && count > 0 ? (
-          <Button size="small" onClick={onClear} sx={clearSx}>Clear</Button>
+          <Button size="small" variant="outlined" color="error" onClick={onClear} sx={clearSx}>Clear</Button>
         ) : null}
       </Box>
 
@@ -59,27 +60,14 @@ const rowSx = {
 
 // Labelled disclosure: a bare chevron on a combatant with no markers at all
 // would say nothing about what it opens.
-const toggleSx = {
-  flex: '0 0 auto',
-  minWidth: 0,
-  px: 0.5,
-  py: 0,
-  color: 'text.secondary',
-  fontSize: FONT_SIZES.xs,
-  ...TEXT_STYLES.label,
-  '& .MuiButton-startIcon': { mr: 0.5 },
-  '&:hover': { color: 'text.primary' },
-};
 
 const clearSx = {
   flex: '0 0 auto',
   minWidth: 0,
-  px: 0.5,
-  py: 0,
-  color: 'text.secondary',
-  fontSize: FONT_SIZES.xs,
+  px: 1,
+  py: 0.25,
+  fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.label,
-  '&:hover': { color: 'error.main' },
 };
 
 // A fully collapsed Collapse still renders a zero-height box, which keeps

@@ -209,7 +209,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
               </Typography>
             </Box>
-            <Box sx={{ ...SURFACES.panel, width: '100%', height: 8, overflow: 'hidden' }}>
+            <Box sx={{ ...SURFACES.inset, width: '100%', height: 8, overflow: 'hidden' }}>
               <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
             </Box>
             {!readOnly && (

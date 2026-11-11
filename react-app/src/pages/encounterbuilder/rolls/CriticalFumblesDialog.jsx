@@ -19,6 +19,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { stepButtonSx } from '../../../shared/ui/pressable.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -150,7 +151,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
                     variant="outlined"
                     onClick={() => adjustDie(faces, -1)}
                     disabled={!count || totalDice <= 1}
-                    sx={stepButtonSx}
+                    sx={{ ...stepButtonSx(25), fontWeight: FONT_WEIGHTS.heavy }}
                     aria-label={`Remove d${faces}`}
                   >
                     −
@@ -160,7 +161,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
                     size="small"
                     variant="outlined"
                     onClick={() => adjustDie(faces, 1)}
-                    sx={stepButtonSx}
+                    sx={{ ...stepButtonSx(25), fontWeight: FONT_WEIGHTS.heavy }}
                     aria-label={`Add d${faces}`}
                   >
                     +
@@ -274,13 +275,6 @@ const countSx = {
   color: UI_COLORS.accentText,
 };
 
-const stepButtonSx = {
-  minWidth: 25,
-  width: 25,
-  height: 25,
-  p: 0,
-  fontWeight: FONT_WEIGHTS.heavy,
-};
 
 const formulaSx = {
   fontFamily: UI_FONTS.mono,

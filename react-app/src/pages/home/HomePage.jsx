@@ -9,7 +9,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import { coverRaysSx, SURFACES } from '../../shared/ui/surfaces.js';
-import { INK_EDGE, inkShadow, UI_SHADOWS } from '../../shared/ui/shadows.js';
+import { INK_EDGE, inkShadow } from '../../shared/ui/shadows.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
 import { bubbleCheerSx } from '../../shared/ui/bubble.js';
@@ -79,7 +79,7 @@ export default function HomePage() {
       <Box sx={gridSx}>
         {TOOLS.map((tool) => (
           <Box key={tool.path} component={Link} to={tool.path} sx={getCardSx(tool.color)}>
-            <Box sx={{ ...panelBadgeSx(tool.color), p: 0.75, borderRadius: 1.5, boxShadow: UI_SHADOWS.press }}>
+            <Box sx={{ ...panelBadgeSx(tool.color), p: 0.75, borderRadius: 1.5 }}>
               <tool.icon size={ICON_SIZES.hero} strokeWidth={1.75} />
             </Box>
             <Typography className="card-label" sx={cardLabelSx}>{tool.label}</Typography>

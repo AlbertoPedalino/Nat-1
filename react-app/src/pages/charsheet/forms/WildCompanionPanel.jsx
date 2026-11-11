@@ -29,7 +29,7 @@ import {
   summonWildCompanionPatch,
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -142,10 +142,10 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         onChange={(e, v) => { e.stopPropagation(); if (v) setCostMode(v); }}
         sx={{ mb: 0.5 }}
       >
-        <ToggleButton value="ws" disabled={!canWildShape} sx={toggleSx}>
+        <ToggleButton value="ws" disabled={!canWildShape} sx={toggleSizeSx}>
           {canWildShape ? `Wild Shape (${usesLeft})` : 'Wild Shape'}
         </ToggleButton>
-        <ToggleButton value="slot" disabled={!canSlot} sx={toggleSx}>
+        <ToggleButton value="slot" disabled={!canSlot} sx={toggleSizeSx}>
           {canSlot ? `Spell Slot (Lv ${slotLevel})` : 'Spell Slot'}
         </ToggleButton>
       </ToggleButtonGroup>
@@ -185,11 +185,10 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   );
 }
 
-const toggleSx = {
+// The size of this panel's toggle keys; their look is the theme's.
+const toggleSizeSx = {
   fontSize: FONT_SIZES.sm,
   py: 0.5,
   px: 1.25,
   textTransform: 'none',
-  color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
 };

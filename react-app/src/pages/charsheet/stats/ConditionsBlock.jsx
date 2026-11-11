@@ -65,7 +65,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
     <Panel icon={GAME_ICONS.conditions} title="Conditions" tone={PANEL_TONES.conditions} sx={{ flex: 1, minWidth: 140 }} bodySx={{ p: '0.4rem 0.62rem' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
-          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs, borderStyle: 'dashed' }} />}
+          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs }} />}
           {active.map((c) => (
             c.key === EXHAUSTION_KEY ? (
               <ExhaustionPill
@@ -98,16 +98,19 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
           </Box>
         )}
 
-        <Box sx={{ border: '1px dashed', borderColor: 'divider', borderRadius: 1, p: '3px 6px' }}>
-          <Box
-            component="button"
-            type="button"
+        <Box>
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            aria-expanded={open}
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: 0.375, cursor: 'pointer', ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, OPACITY.wash), color: 'text.primary' } }}
+            startIcon={<ListChecks size={ICON_SIZES.xs} />}
+            endIcon={<ChevronDown size={ICON_SIZES.xs} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />}
+            sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, justifyContent: 'flex-start', '& .MuiButton-endIcon': { ml: 'auto' } }}
           >
-            <ListChecks size={ICON_SIZES.xs} /> Manage ({active.length})
-            <ChevronDown size={ICON_SIZES.xs} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
-          </Box>
+            Manage ({active.length})
+          </Button>
           {open && (
             <Box>
               <ConditionToggleGrid

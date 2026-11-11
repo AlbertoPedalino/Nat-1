@@ -5,6 +5,7 @@ import { Plus, Minus } from 'lucide-react';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { stepButtonSx } from '../../ui/pressable.js';
 
 // Styling for the two known call sites. Add a key here to introduce a new look
 // instead of leaking `sx` for the inner input/fieldset through props.
@@ -32,6 +33,9 @@ const VARIANTS = {
  * @param {'default'|'compact'} [variant]  visual preset
  * @param {object}   [sx]       outer Box overrides (width, gap, …)
  */
+// The − and + beside the field, by the field's size.
+const STEP_SIZE = { small: 26, medium: 32 };
+
 export default function XpDeltaControl({ currentXp, onApply, variant = 'default', sx }) {
   const [delta, setDelta] = useState('');
   const { size, iconSize, inputSx, fieldSx } = VARIANTS[variant] ?? VARIANTS.default;
@@ -46,7 +50,7 @@ export default function XpDeltaControl({ currentXp, onApply, variant = 'default'
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
       <IconButton size={size} onClick={() => apply(-1)} aria-label="Subtract XP"
-        sx={{ border: '2px solid', borderColor: UI_COLORS.edge, color: 'error.main', p: 0.5, '&:hover': { borderColor: 'error.main' } }}>
+        sx={stepButtonSx(STEP_SIZE[size] ?? STEP_SIZE.small, { tone: UI_COLORS.danger })}>
         <Minus size={iconSize} />
       </IconButton>
       <TextField
@@ -61,7 +65,7 @@ export default function XpDeltaControl({ currentXp, onApply, variant = 'default'
         slotProps={{ input: { inputMode: 'numeric', sx: fieldSx } }}
       />
       <IconButton size={size} onClick={() => apply(1)} aria-label="Add XP"
-        sx={{ border: '2px solid', borderColor: UI_COLORS.edge, color: 'success.main', p: 0.5, '&:hover': { borderColor: 'success.main' } }}>
+        sx={stepButtonSx(STEP_SIZE[size] ?? STEP_SIZE.small, { tone: UI_COLORS.success })}>
         <Plus size={iconSize} />
       </IconButton>
     </Box>

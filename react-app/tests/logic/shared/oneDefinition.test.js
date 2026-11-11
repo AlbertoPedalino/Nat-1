@@ -627,6 +627,34 @@ test('no glow or ring shadows outside the battle map', () => {
   assert.deepEqual(hits, []);
 });
 
+// A dashed line means something is not there yet: an empty state, a drop
+// zone, a slot made rather than earned. A rule between a card's parts or a
+// box round a control is solid (CARD_PART_RULE_SX, the theme's button). The
+// battle map keeps its own (a piece hidden from players).
+test('a dashed line only marks an empty place', () => {
+  const dashed = /\bborder(Top|Bottom|Left|Right)?: '[\d.]+px dashed'|borderStyle: 'dashed'|`[\d.]+px dashed /;
+  const placeholders = [
+    'pages/campaigns/CampaignsPage.jsx', 'shared/ui/StatePanel.jsx', 'pages/library/styles.js',
+    'pages/gmboard/dungeon/DungeonView.jsx', 'pages/dmscreen/notes/NoteBoard.jsx',
+    'shared/character/inventory/CurrencyRow.jsx', 'pages/charsheet/spells/SpellsUiParts.jsx',
+  ];
+  const hits = sourceLinesMatching(dashed, { allow: placeholders }).filter((hit) => !hit.startsWith('pages/vtt/'));
+  assert.deepEqual(hits, []);
+});
+
+// Raised means pressed, and the press is drawn in one place: the button and
+// its motion (PRESSABLE_EDGE_SX, PRESS_MOTION_SX, pressableSx), a toggle
+// (toggleSx, goldToggleSx), a stepper's key (stepButtonSx), a bar of keys
+// (KEY_BAR_SX), a row you roll (ROLL_ROW_SX) — all in shared/ui/pressable.js.
+// A page that writes the press shadow itself, or keeps a local copy under a
+// recipe's name, is one a restyle never reaches.
+test('the press is drawn only by the pressable recipes', () => {
+  const recipes = ['shared/ui/pressable.js', 'shared/ui/shadows.js', 'shared/ui/surfaces.js'];
+  assert.deepEqual(sourceLinesMatching(/UI_SHADOWS\.(press|pressed|lifted)\b/, { allow: recipes }), []);
+  const names = /^\s*(const|function|export const|export function)\s+(toggleSx|goldToggleSx|stepButtonSx|pressableSx|readoutSx|tileSx|KEY_BAR_SX|PRESSABLE_EDGE_SX|PRESS_MOTION_SX|ROLL_ROW_SX|CARD_SX)\b/;
+  assert.deepEqual(sourceLinesMatching(names).filter((hit) => !hit.startsWith('shared/ui/')), []);
+});
+
 test('the screentone and the halftone are drawn in one place each', () => {
   assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);

@@ -1,7 +1,7 @@
 import { alpha } from '@mui/material';
 import { UI_COLORS, OPACITY } from './colors.js';
 import { inkOn, pressableSx } from './pressable.js';
-import { INK_EDGE, UI_SHADOWS } from './shadows.js';
+import { INK_EDGE } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { FONT_SIZES } from './fonts.js';
 import { CONTROL_HEIGHTS } from './controlHeights.js';
@@ -198,7 +198,7 @@ export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPAC
 }
 
 // The comic sticker chip: a fact worth reading at a glance (a resistance, an
-// immunity), drawn with the ink edge and a small solid shadow. `filled` paints
+// immunity), drawn with the ink edge; flat, as everything only read. `filled` paints
 // it solid in its tone (the stronger fact: an immunity), otherwise the tone
 // tints it and writes its label; no tone leaves it a neutral sticker.
 export function stickerChipSx(tone, { filled = false } = {}) {
@@ -213,7 +213,6 @@ export function stickerChipSx(tone, { filled = false } = {}) {
     fontSize: FONT_SIZES.sm,
     border: INK_EDGE,
     borderColor: UI_COLORS.edge,
-    boxShadow: UI_SHADOWS.pressed,
     ...look,
   };
 }

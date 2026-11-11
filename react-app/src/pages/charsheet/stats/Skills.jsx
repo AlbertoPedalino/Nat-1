@@ -15,9 +15,9 @@ import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVoca
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES, TRAINING_TONES } from '../../../shared/ui/entityColors.js';
-import { ROW_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import { ROLL_FIGURE_MARK_STYLE, ROLL_FIGURE_SX, ROLL_ROW_SX } from '../../../shared/ui/pressable.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = TRAINING_TONES[training] || 'divider';
@@ -62,7 +62,7 @@ export default function Skills({ C, sheet, onRoll }) {
 
   return (
     <Panel icon={GAME_ICONS.skills} title="Skills" tone={PANEL_TONES.skills} bodySx={{}}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '6px 30px minmax(0, 1fr) auto', gap: 0.5, px: '0.9rem', pt: '0.3rem', pb: '0.3rem', ...sectionLabelSx, color: 'text.secondary' }}>
         <span></span>
         <span>Prof.</span>
         <span>Skill</span>
@@ -103,24 +103,26 @@ export default function Skills({ C, sheet, onRoll }) {
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
             onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
-            sx={{ ...ROW_SX, display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: 0.5, mx: 0.5, py: 0.5, alignItems: 'center' }}>
+            sx={{ ...ROLL_ROW_SX, px: 0.75, mb: 0.5, display: 'grid', gridTemplateColumns: '6px 30px minmax(0, 1fr) auto', gap: 0.5, mx: 0.5, py: 0.5, alignItems: 'center' }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
               {sk.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'text.secondary' }}>
+              <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', width: 20, textAlign: 'right' }}>
                 {ABILITY_ABBREVIATIONS[sk.ability]}
               </Typography>
-              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', textAlign: 'right' }}>
+              {/* The advantage mark sits on the figure's corner, taking no room,
+                  so the figures line up. */}
+              <Box component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lg, color: 'text.primary', ...ROLL_FIGURE_SX }}>
                 {signed(shownBonus)}
-              </Typography>
-              {visual && (
-                <Tooltip title={skillTooltip}>
-                  <visual.Icon size={ICON_SIZES.xxs} style={{ color: visual.color, marginLeft: '2px' }} />
-                </Tooltip>
-              )}
+                {visual && (
+                  <Tooltip title={skillTooltip}>
+                    <visual.Icon size={ICON_SIZES.xxs} style={{ ...ROLL_FIGURE_MARK_STYLE, color: visual.color }} />
+                  </Tooltip>
+                )}
+              </Box>
             </Box>
           </RollModeArea>
         );

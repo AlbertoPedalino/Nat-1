@@ -1,24 +1,9 @@
 import { Box, IconButton } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
-import { UI_COLORS, OPACITY } from './colors.js';
+import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
-
-// The small square button of a −/+ stepper (and its neighbours, such as an
-// item's remove button): bordered, quiet, gold on hover — red when `danger`.
-export function stepButtonSx(size = 20, { danger = false } = {}) {
-  return {
-    width: size,
-    height: size,
-    p: 0,
-    border: 2,
-    borderColor: UI_COLORS.edge,
-    borderRadius: 0.375,
-    color: 'text.secondary',
-    '&:hover': { borderColor: danger ? UI_COLORS.danger : UI_COLORS.accent, color: danger ? UI_COLORS.danger : UI_COLORS.accent },
-    '&.Mui-disabled': { opacity: OPACITY.edge },
-  };
-}
+import { stepButtonSx } from './pressable.js';
 
 // A count with − and + beside it (an item's quantity, a party's size): every
 // stepper in the app. `onStep(delta)` gets −1 or +1; `label` names what is

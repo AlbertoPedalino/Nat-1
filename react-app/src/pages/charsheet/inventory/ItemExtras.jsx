@@ -10,6 +10,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
@@ -28,7 +29,7 @@ function TomeConsumePanel({ item, onConsume }) {
   const bonus = extractTomeBonus(item);
   if (!bonus) return null;
   return (
-    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX, display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ flex: 1, fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.accentText }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
@@ -46,7 +47,7 @@ function AbilityChoicePanel({ item, onPick }) {
   const stored = (item.abilityChoice && typeof item.abilityChoice === 'object') ? item.abilityChoice : {};
 
   return (
-    <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
+    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX }}>
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
         Ability Choice
       </Typography>

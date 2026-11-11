@@ -9,6 +9,7 @@ import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { spellsForBooks } from '../../../shared/content/booksView.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // A catalog with files missing is not kept: the next scroll opened asks again
 // for what failed.
@@ -96,7 +97,7 @@ function StatField({ label, value, placeholder, onCommit }) {
   );
 }
 
-const panelSx = { mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' };
+const panelSx = { mt: 1, pt: 1, ...CARD_PART_RULE_SX };
 const titleSx = {
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,

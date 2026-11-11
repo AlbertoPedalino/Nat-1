@@ -10,9 +10,10 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { tileSx } from '../../../shared/ui/interactive.js';
+import { COLUMN_RULE_SX } from '../../../shared/ui/interactive.js';
+import { ROLL_FIGURE_MARK_STYLE } from '../../../shared/ui/pressable.js';
+import StatTile from './StatTile.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
@@ -52,29 +53,32 @@ export default function AbilityScores({ C, sheet, onRoll }) {
             <RollModeArea key={s} onClick={() => onRoll(mod, ABILITY_NAMES[s] + ' Check', advArg, { kind: 'abilityCheck' })}
               sources={{ adv: false, disadv: hasDisadv }}
               onPick={(picked) => onRoll(mod, ABILITY_NAMES[s] + ' Check', picked, { kind: 'abilityCheck' })}
-              sx={{
-                ...tileSx({ clickable: true, tone: advArg === false ? 'warning.main' : null }),
-                display: 'flex', flexDirection: 'column', alignItems: 'center', p: '0.4rem 0.25rem',
-              }}>
-              <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mb: 0.25 }}>
-                {ABILITY_ABBREVIATIONS[s]}
-              </Typography>
-              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: UI_COLORS.accentText, lineHeight: LINE_HEIGHTS.none }}>
-                {signed(shownMod)}
-              </Typography>
-              <Box sx={{
-                ...SURFACES.panel,
-                ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs, color: 'text.secondary',
-                borderRadius: '50%',
-                width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 0.25,
-              }}>
-                {val}
-              </Box>
-              {visual ? (
-                <Tooltip title={tooltipText}>
-                  <visual.Icon size={ICON_SIZES.xs} style={{ color: visual.color, marginTop: '2px' }} />
-                </Tooltip>
-              ) : null}
+              sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              {/* A stat tile: its name in the bar, then two thirds for the
+                  score and one for the modifier the check rolls. */}
+              <StatTile
+                tone={advArg === false ? UI_COLORS.warning : PANEL_TONES.abilityScores}
+                label={ABILITY_ABBREVIATIONS[s]}
+                clickable
+                bodySx={{ alignItems: 'stretch' }}
+                value={(
+                  <Box sx={splitSx}>
+                    <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: 'text.primary', lineHeight: LINE_HEIGHTS.none }}>
+                      {val}
+                    </Typography>
+                    <Box sx={modifierCellSx}>
+                      <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: UI_COLORS.accentText, lineHeight: LINE_HEIGHTS.none }}>
+                        {signed(shownMod)}
+                      </Typography>
+                      {visual ? (
+                        <Tooltip title={tooltipText}>
+                          <visual.Icon size={ICON_SIZES.xs} style={{ ...ROLL_FIGURE_MARK_STYLE, top: 2, right: 2, color: visual.color }} />
+                        </Tooltip>
+                      ) : null}
+                    </Box>
+                  </Box>
+                )}
+              />
             </RollModeArea>
           );
         })}
@@ -82,3 +86,23 @@ export default function AbilityScores({ C, sheet, onRoll }) {
     </Panel>
   );
 }
+
+// Score | modifier, two thirds and one, filling the tile's body.
+const splitSx = {
+  display: 'grid',
+  gridTemplateColumns: '2fr 1fr',
+  alignItems: 'center',
+  justifyItems: 'center',
+  width: '100%',
+  py: 0.5,
+};
+
+const modifierCellSx = {
+  ...COLUMN_RULE_SX,
+  position: 'relative',
+  alignSelf: 'stretch',
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};

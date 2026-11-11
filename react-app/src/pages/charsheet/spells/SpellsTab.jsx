@@ -14,7 +14,7 @@ import { getSpellAbility } from './spellAbility.js';
 import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
 import { addButtonSx, compactInputSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
-import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
+import { Empty, SlotPanel, SpellSection } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -29,6 +29,8 @@ import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
+import StatTile from '../stats/StatTile.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -91,10 +93,12 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   return (
     <Box sx={panelRootSx}>
-      <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
-        <StatBox value={dc} label="Spell DC" />
-        <StatBox value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
-        <StatBox value={ABILITY_ABBREVIATIONS[ability] || ability.toUpperCase()} label="Spell Ability" />
+      {/* Read, as AC and Proficiency Bonus are: the same stat tiles, in the
+          spells' colour. */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, mb: 0.75, maxWidth: 420 }}>
+        <StatTile tone={UI_COLORS.spell} label="Spell DC" value={dc} />
+        <StatTile tone={UI_COLORS.spell} label="Spell Attack" value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} />
+        <StatTile tone={UI_COLORS.spell} label="Spell Ability" value={ABILITY_ABBREVIATIONS[ability] || ability.toUpperCase()} />
       </Box>
 
       <Box sx={panelToolbarSx}>
@@ -141,7 +145,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>
-          <Button onClick={() => setPickerOpen(true)} startIcon={<Plus size={ICON_SIZES.sm} />} sx={addButtonSx}>
+          <Button variant="contained" onClick={() => setPickerOpen(true)} startIcon={<Plus size={ICON_SIZES.sm} />} sx={addButtonSx}>
             Add / Remove Spell
           </Button>
         </Box>

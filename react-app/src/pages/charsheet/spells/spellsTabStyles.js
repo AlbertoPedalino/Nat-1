@@ -55,17 +55,13 @@ export const spellBodySx = {
   py: 1,
 };
 
+// The tab's own action (Add / Remove Spell): the theme's filled button,
+// raised like every button, in the tab's lettering.
 export const addButtonSx = {
-  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
-  border: 2,
-  borderColor: UI_COLORS.accent,
-  borderRadius: 1,
-  color: UI_COLORS.accent,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
   px: 1.75,
   py: 0.75,
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade), borderColor: UI_COLORS.accentText },
 };
 
 export const inlineButtonSx = {
@@ -95,10 +91,3 @@ export const levelToggleSx = {
   },
 };
 
-export const statBoxSx = {
-  ...SURFACES.inset,
-  minWidth: 92,
-  px: 1,
-  py: 0.75,
-  textAlign: 'center',
-};
