@@ -8,7 +8,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
-import { PRESSABLE_EDGE_SX } from '../shared/ui/pressable.js';
+import { PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES } from '../shared/ui/surfaces.js';
 
 const SELECTED_OPTION_SX = {
@@ -285,20 +285,13 @@ export const theme = createTheme({
           flexShrink: 1,
           fontWeight: FONT_WEIGHTS.bold,
           border: '1px solid transparent',
-          // Clickable colored chips act as toggles: selected state gets a
-          // solid fill so it stands apart from the tinted resting style.
-          '&.MuiChip-clickable.MuiChip-colorPrimary': {
-            backgroundColor: UI_COLORS.accent,
-            borderColor: UI_COLORS.accent,
-            color: UI_COLORS.onAccent,
-            '&:hover': { backgroundColor: lighten(UI_COLORS.accent, 0.18) },
-          },
-          '&.MuiChip-clickable.MuiChip-colorSecondary': {
-            backgroundColor: UI_COLORS.secondary,
-            borderColor: UI_COLORS.secondary,
-            color: UI_COLORS.onSecondary,
-            '&:hover': { backgroundColor: lighten(UI_COLORS.secondary, 0.18) },
-          },
+          // A chip that can be clicked (a level, a filter, a toggle) is the
+          // raised, drawn button: at rest on the raised surface, picked
+          // filled in its colour (shared/ui/pressable.js). A chip that is
+          // only a tag stays the flat tint below.
+          '&.MuiChip-clickable': pressableSx(UI_COLORS.surfaceRaised),
+          '&.MuiChip-clickable.MuiChip-colorPrimary': pressableSx(UI_COLORS.accent),
+          '&.MuiChip-clickable.MuiChip-colorSecondary': pressableSx(UI_COLORS.secondary),
         },
         label: {
           overflow: 'hidden',

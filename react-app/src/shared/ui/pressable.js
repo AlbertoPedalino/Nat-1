@@ -30,7 +30,9 @@ export function pressableSx(fill) {
   return {
     ...PRESSABLE_EDGE_SX,
     color: inkOn(fill),
-    bgcolor: fill,
-    '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], bgcolor: lighten(fill, 0.12) },
+    // Plain CSS names, so the recipe also works in the theme's overrides
+    // (where the sx shorthand `bgcolor` is not read).
+    backgroundColor: fill,
+    '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], backgroundColor: lighten(fill, 0.12) },
   };
 }

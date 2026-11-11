@@ -6,7 +6,7 @@ import { PRESSABLE_EDGE_SX, inkOn } from '../../../../src/shared/ui/pressable.js
 
 test('a roll button is the raised button filled with its tone, its label in the ink that reads on it', () => {
   const sx = rollerToneSx(ROLL_TONES.damage);
-  assert.equal(sx.bgcolor, ROLL_TONES.damage);
+  assert.equal(sx.backgroundColor, ROLL_TONES.damage);
   assert.equal(sx.color, inkOn(ROLL_TONES.damage));
   assert.equal(sx.boxShadow, PRESSABLE_EDGE_SX.boxShadow);
 });
