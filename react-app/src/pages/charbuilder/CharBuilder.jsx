@@ -106,20 +106,6 @@ export default function CharBuilder() {
       />
 
       <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1 }, py: 1 }}>
-        <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden' }}>
-          <Tabs
-            value={state.tab}
-            onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="Character builder steps"
-          >
-            {STEPS.map((step, index) => (
-              <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
-            ))}
-          </Tabs>
-        </Paper>
-
         <Box
           sx={{
             display: 'grid',
@@ -128,7 +114,21 @@ export default function CharBuilder() {
             gap: 1,
           }}
         >
+          {/* The steps head the left column, level with the preview's top. */}
           <Box sx={{ minWidth: 0 }}>
+            <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.surfaceHeader, overflow: 'hidden' }}>
+              <Tabs
+                value={state.tab}
+                onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="Character builder steps"
+              >
+                {STEPS.map((step, index) => (
+                  <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
+                ))}
+              </Tabs>
+            </Paper>
             <BuilderDataAlert errors={state.errors} onRetry={reloadData} />
             {cloudConflict ? (
               <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
