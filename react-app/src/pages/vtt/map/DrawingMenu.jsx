@@ -134,7 +134,7 @@ export default function DrawingMenu({
     ? `×${trimNumber(size / NOTE_WIDTH)}`
     : `${Math.round(size * feetPerCell)} ft`;
   const sizeRange = isNote
-    ? { min: Math.min(opened.width || NOTE_WIDTH, NOTE_WIDTH * 0.25), max: Math.max(opened.width || NOTE_WIDTH, NOTE_WIDTH * 4), step: NOTE_WIDTH * 0.05 }
+    ? { min: Math.min(opened.width || NOTE_WIDTH, NOTE_WIDTH * 0.25), max: Math.max(opened.width || NOTE_WIDTH, NOTE_WIDTH * MAX_NOTE_SCALE), step: NOTE_WIDTH * 0.05 }
     : { min: Math.min(openedExtent, 0.5), max: Math.max(openedExtent, MAX_STROKE_CELLS), step: 0.25 };
   // A dot has no size but its thickness; a note's width is its lettering.
   const canSize = isNote || (!area && openedExtent > 0);
@@ -367,10 +367,12 @@ function trimNumber(value) {
 const MENU_WIDTH = 280;
 // A note's default lettering, shown as ×1.
 const NOTE_WIDTH = 3;
-// The slider tops: a stroke reaches 40 cells, a line 12 (both further when the
-// mark already is, so a big mark opens where it stands).
-const MAX_STROKE_CELLS = 40;
-const MAX_THICKNESS = 12;
+// The slider tops, high enough to be out of the way at a table: a stroke
+// reaches 100 cells, a note ×10, a line 30 (each further when the mark already
+// is, so a big mark opens where it stands).
+const MAX_STROKE_CELLS = 100;
+const MAX_NOTE_SCALE = 10;
+const MAX_THICKNESS = 30;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {
