@@ -14,8 +14,10 @@ export const VTT_COLORS = Object.freeze({
   // reads better over a map than the base one.
   black: UI_COLORS.black,
   white: UI_COLORS.white,
-  surface: UI_COLORS.surfaceDarkest,
-  surfaceRaised: UI_COLORS.surfaceDeep,
+  // The map's panels are the sheet's panels: the same opaque paper and raised
+  // tone, so a panel over the board reads as solidly as one on the sheet.
+  surface: UI_COLORS.surface,
+  surfaceRaised: UI_COLORS.surfaceRaised,
   accent: UI_COLORS.accentText,
   accentHighlight: UI_COLORS.accentHighlight,
   text: UI_COLORS.textPrimary,

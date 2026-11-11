@@ -2,7 +2,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
-import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
+import { normalizeHexColor, OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
@@ -16,6 +16,7 @@ export const PLAYER_FOG_OPACITY = 1;
 // diagonal screentone over the map surface, the solid ink shadow.
 export const sceneTopbarSx = {
   ...SURFACES.map,
+  bgcolor: UI_COLORS.surfaceHeader,
   backgroundImage: panelScreentone(VTT_COLORS.accent),
   display: 'flex',
   alignItems: 'center',

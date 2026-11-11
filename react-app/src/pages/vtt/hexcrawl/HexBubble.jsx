@@ -99,7 +99,7 @@ const bubbleSx = {
   maxWidth: 340,
   textAlign: 'left',
   borderRadius: 2,
-  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid),
+  bgcolor: VTT_COLORS.surfaceRaised,
   border: '2px solid',
   borderColor: 'divider',
   boxShadow: UI_SHADOWS.popup,
@@ -153,5 +153,5 @@ const tailSx = {
   height: 0,
   borderLeft: '7px solid transparent',
   borderRight: '7px solid transparent',
-  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid)}`,
+  borderTop: `8px solid ${VTT_COLORS.surfaceRaised}`,
 };

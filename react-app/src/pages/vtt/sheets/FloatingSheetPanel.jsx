@@ -319,7 +319,7 @@ const panelSx = {
   display: 'grid',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  bgcolor: VTT_COLORS.surface,
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   boxShadow: UI_SHADOWS.overlay,

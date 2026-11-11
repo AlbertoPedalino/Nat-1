@@ -111,7 +111,7 @@ export const theme = createTheme({
         accentBorderStrong: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
         accentTint: vttAlpha(VTT_COLORS.accent, OPACITY.fill),
         accentWash: vttAlpha(VTT_COLORS.accent, OPACITY.soft),
-        surface: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+        surface: VTT_COLORS.surface,
         surfaceSolid: VTT_COLORS.surface,
         backdrop: vttAlpha(VTT_COLORS.black, OPACITY.strong),
         inset: vttAlpha(VTT_COLORS.black, OPACITY.line),

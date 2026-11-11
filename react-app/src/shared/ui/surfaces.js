@@ -1,5 +1,5 @@
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
-import { VTT_COLORS, vttAlpha } from '../vtt/colors.js';
+import { VTT_COLORS } from '../vtt/colors.js';
 import { UI_SHADOWS } from './shadows.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
@@ -64,7 +64,7 @@ export const SURFACES = Object.freeze({
   // A small control on the map (round icon buttons, corner toggles): the
   // raised button's edge and press.
   mapControl: Object.freeze({
-    bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+    bgcolor: VTT_COLORS.surface,
     border: `2px solid ${UI_COLORS.edge}`,
     boxShadow: UI_SHADOWS.press,
   }),

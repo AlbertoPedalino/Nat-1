@@ -81,7 +81,7 @@ export const placementTargetHintSx = {
   px: 1.25,
   py: 0.5,
   borderRadius: 10,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  bgcolor: VTT_COLORS.surface,
   color: VTT_COLORS.accent,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
   boxShadow: UI_SHADOWS.float,
@@ -111,7 +111,7 @@ export const selectionToolbarSx = {
   px: 1,
   py: 0.5,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  bgcolor: VTT_COLORS.surface,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.edge)}`,
   boxShadow: 4,
 };
@@ -142,10 +142,10 @@ export const fullscreenSheetButtonSx = {
   height: CONTROL_HEIGHTS.xl,
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
+  bgcolor: VTT_COLORS.surface,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
+  '&:hover': { bgcolor: VTT_COLORS.surfaceRaised },
 };
 
 // Above the rail (top 48), which hangs just below the tools toggle.
@@ -224,7 +224,7 @@ export const distanceSx = {
   top: 0,
   px: 0.75,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid),
+  bgcolor: VTT_COLORS.surface,
   color: VTT_COLORS.accent,
   ...TEXT_STYLES.figure,
   fontSize: FONT_SIZES.sm,
