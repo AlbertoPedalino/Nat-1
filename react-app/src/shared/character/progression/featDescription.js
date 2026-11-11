@@ -39,24 +39,6 @@ function describeAbilityOption(ability) {
   return parts.join(' ');
 }
 
-// Entries of the first `{ name, entries }` block called `entryName` inside a
-// feat's official entries (depth-first), e.g. Great Weapon Master → "Hew".
-// Lets a card or reminder show one benefit instead of the whole feat.
-export function featNamedEntries(feat, entryName) {
-  const wanted = matchKey(entryName);
-  if (!wanted) return null;
-  let found = null;
-  const walk = (node) => {
-    if (found || !node || typeof node !== 'object') return;
-    if (Array.isArray(node)) { node.forEach(walk); return; }
-    if (node.name && matchKey(node.name) === wanted && Array.isArray(node.entries)) { found = node.entries; return; }
-    walk(node.entries);
-    walk(node.items);
-  };
-  walk(feat?.entries);
-  return found;
-}
-
 // Feat records store ASIs separately from entries. Render them wherever the
 // feat's full description appears, without modifying the stored source record.
 export function featDescriptionEntries(feat) {

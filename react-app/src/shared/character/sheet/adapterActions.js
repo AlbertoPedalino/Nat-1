@@ -5,13 +5,13 @@ import { primaryClassLevel } from '../progression/classLevel.js';
 import { collectOwnerEntries, entryApplies } from './adapterOwners.js';
 import {
   featDescriptionEntries,
-  featNamedEntries,
 } from '../progression/featDescription.js';
 import {
   getActionRollers,
   resolveActionRollers,
 } from '../dice/rollers.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { withOnlyNamedEntry } from '../../content/entryStructure.js';
 
 // Development warnings already given, so each is logged once.
 const _featureKeyConflicts = typeof Set === 'function' ? new Set() : null;
@@ -184,29 +184,11 @@ function buildFeatureMapFromRecords(records, scope) {
   return map;
 }
 
-// A card named "Feature: Option" (Runic Power: Blood, Blessed Strikes: Divine
-// Strike) shows the feature's text with that option alone: the other named
-// options beside it are left out. Null when the feature has no such option.
-function onlyNamedOption(entries, optionKey) {
-  if (!Array.isArray(entries)) return null;
-  const isOption = (node) => node && typeof node === 'object' && node.name && Array.isArray(node.entries);
-  if (entries.some((node) => isOption(node) && nameKey(node.name) === optionKey)) {
-    return entries.filter((node) => !isOption(node) || nameKey(node.name) === optionKey);
-  }
-  for (let index = 0; index < entries.length; index += 1) {
-    const node = entries[index];
-    const inner = node && typeof node === 'object' ? onlyNamedOption(node.entries, optionKey) : null;
-    if (inner) return [...entries.slice(0, index), { ...node, entries: inner }, ...entries.slice(index + 1)];
-  }
-  return null;
-}
-
-function optionEntries(name, lookup) {
+// The option a card is about: "Runic Power: Frost" -> "Frost" inside Runic
+// Power; a card named after one benefit of its feat (Hew) is that benefit.
+function cardOption(name) {
   const parts = String(name || '').split(':').map((part) => part.trim()).filter(Boolean);
-  if (parts.length !== 2) return null;
-  const feature = lookup(nameKey(parts[0]));
-  const option = feature ? onlyNamedOption(feature, nameKey(parts[1])) : null;
-  return option ? Object.assign(option, { _upgrades: feature._upgrades }) : null;
+  return parts.length === 2 ? { feature: parts[0], option: parts[1] } : { feature: '', option: parts[0] || '' };
 }
 
 // The text with the upgrades the owner's level has reached, each under the
@@ -227,7 +209,7 @@ function warnMissingDescription(action, source) {
   if (_missingDescWarned.has(key)) return;
   _missingDescWarned.add(key);
   // eslint-disable-next-line no-console
-  console.warn(`[actions] No description for "${action?.name}" (source: ${source || 'unknown'}). Add a matching 5etools feature entry or set entryName.`);
+  console.warn(`[actions] No description for "${action?.name}" (source: ${source || 'unknown'}). Add a matching 5etools feature entry.`);
 }
 
 /**
@@ -235,8 +217,9 @@ function warnMissingDescription(action, source) {
  * from character snapshots (XPHB / XDMG / EFA / FRAiF / FRHoF) via the
  * feature-name maps built below.
  *
- * A feat action may set `entryName` to show only that named benefit of the feat
- * (Great Weapon Master → "Hew") instead of the whole feat description.
+ * A card about one option shows that option alone among the named blocks
+ * beside it (`withOnlyNamedEntry`): "Feature: Option" inside the feature
+ * (Runic Power: Frost), a feat's card named after one of its benefits.
  *
  * Adapters carry no description text. Characters saved before that may still
  * hold `desc` / `descOverride` in adapterRuntime; they are dropped below and
@@ -285,16 +268,20 @@ export function collectAdapterActions(C, sheet) {
     for (const candidate of ownerCandidates) {
       const feat = featSnapshotByName.get(candidate);
       if (feat) {
-        const entries = (action.entryName && featNamedEntries(feat, action.entryName)) || featDescriptionEntries(feat);
-        if (entries.length) return entries;
+        const entries = featDescriptionEntries(feat);
+        const { option } = cardOption(action.name);
+        const only = matchKey(option) !== matchKey(feat.name) ? withOnlyNamedEntry(entries, option) : null;
+        if (only || entries.length) return only || entries;
       }
     }
     // A feature of that exact name, else the option inside its feature, else
     // either half of the name.
     const exact = lookupByName(nameKey(action.name));
     if (exact) return withReachedUpgrades(exact, level);
-    const option = optionEntries(action.name, lookupByName);
-    if (option) return withReachedUpgrades(option, level);
+    const { feature, option } = cardOption(action.name);
+    const parent = feature ? lookupByName(nameKey(feature)) : null;
+    const only = parent ? withOnlyNamedEntry(parent, option) : null;
+    if (only) return withReachedUpgrades(Object.assign(only, { _upgrades: parent._upgrades }), level);
     const actionCandidates = nameKeyCandidates(action.name);
     for (const candidate of actionCandidates) {
       const entries = lookupByName(candidate);

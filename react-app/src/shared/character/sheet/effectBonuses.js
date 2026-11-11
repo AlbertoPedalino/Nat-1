@@ -1,5 +1,5 @@
 import { weaponFilterMatches } from '../inventory/weaponFilters.js';
-import { featNamedEntries } from '../progression/featDescription.js';
+import { findNamedEntry } from '../../content/entryStructure.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { cleanText, effectKey } from './sheetEffectText.js';
@@ -50,7 +50,7 @@ export function getWeaponEffectBonuses(character = {}, info = {}) {
 
 function ownerFeatNamedEntries(character, ownerName, entryName) {
   const feat = asArray(character?.allFeatSnapshots).find((f) => effectKey(f?.name) === effectKey(ownerName));
-  return feat ? featNamedEntries(feat, entryName) : null;
+  return feat ? findNamedEntry(feat.entries, entryName)?.entries || null : null;
 }
 
 // Weapon-scoped reminders from active effects (e.g. Great Weapon Master: Heavy
