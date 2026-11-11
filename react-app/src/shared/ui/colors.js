@@ -81,6 +81,8 @@ export const UI_COLORS = Object.freeze({
   dieFace: '#1d4a24',
   dieFaceLit: '#4f8a4b',
   onDie: '#eef0d4',
+  // The inked edge of every die, drawn like the interface's outlines.
+  dieEdge: '#0d090f',
 });
 
 // The colour of a hit point readout by its tone (vitals.hpTone).

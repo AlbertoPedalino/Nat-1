@@ -159,7 +159,13 @@ export const theme = createTheme({
         sizeSmall: { fontSize: FONT_SIZES.xl },
         sizeMedium: { fontSize: FONT_SIZES.xxl },
         sizeLarge: { fontSize: FONT_SIZES.body },
-        outlined: { borderWidth: 2, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), '&:hover': { borderWidth: 2 } },
+        // An outlined button is the raised button too, on the raised surface:
+        // the ink edge and the press, its text in its colour.
+        outlined: {
+          ...PRESSABLE_EDGE_SX,
+          backgroundColor: UI_COLORS.surfaceRaised,
+          '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], borderColor: UI_COLORS.edge, backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.06) },
+        },
         // A filled button is drawn and raised (shared/ui/pressable.js).
         contained: PRESSABLE_EDGE_SX,
       },
@@ -170,6 +176,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           color: UI_COLORS.textSecondary,
+          border: `2px solid ${UI_COLORS.edge}`,
           '&.Mui-selected': SELECTED_OPTION_SX,
           '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
         },
@@ -194,7 +201,7 @@ export const theme = createTheme({
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        notchedOutline: { borderColor: uiAlpha(UI_COLORS.textPrimary, OPACITY.shade) },
+        notchedOutline: { borderColor: UI_COLORS.edge, borderWidth: 2 },
         root: {
           backgroundColor: UI_COLORS.surfaceHeader,
           '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {

@@ -41,7 +41,7 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
 
 // Painted like the 3D die and the app's icon, coin included: deep green with a
 // cream edge. The number alone carries the result's colour.
-const DIE_PAINT = { fill: UI_COLORS.dieFace, stroke: UI_COLORS.onDie, strokeWidth: 2 };
+const DIE_PAINT = { fill: UI_COLORS.dieFace, stroke: UI_COLORS.dieEdge, strokeWidth: 2.5 };
 
 // One outline per die, each told apart by its silhouette alone: a d10 is the
 // kite its faces are, with the long point up as on the 3D die, so it no longer

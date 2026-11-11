@@ -56,7 +56,7 @@ const orbSx = {
   flex: '0 0 auto',
   borderRadius: '50%',
   // Green with a cream rim, like every other die and the app's icon.
-  border: `2px solid ${UI_COLORS.onDie}`,
+  border: `2px solid ${UI_COLORS.dieEdge}`,
   bgcolor: UI_COLORS.dieFace,
   boxShadow: [
     'inset -12px -14px 18px rgba(0, 0, 0, 0.62)',

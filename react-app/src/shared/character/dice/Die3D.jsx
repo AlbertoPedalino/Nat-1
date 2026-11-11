@@ -170,8 +170,10 @@ const DIGIT_HEIGHT = 0.72;
 // back and the number stays centred.
 const DIGIT_TIGHTEN = 0.12;
 
-const numberSx = { position: 'relative' };
-const narrowNumberSx = { position: 'relative', letterSpacing: `${-DIGIT_TIGHTEN}em`, paddingRight: `${DIGIT_TIGHTEN}em` };
+// The numbers are inked too: a hard shadow under the cream, as a comic letters.
+const NUMBER_INK = `1px 1px 0 ${UI_COLORS.dieEdge}`;
+const numberSx = { position: 'relative', textShadow: NUMBER_INK };
+const narrowNumberSx = { position: 'relative', textShadow: NUMBER_INK, letterSpacing: `${-DIGIT_TIGHTEN}em`, paddingRight: `${DIGIT_TIGHTEN}em` };
 
 // Past this many faces a die is too busy to draw in full anywhere it is not the
 // thing being watched, and its numbers are smaller than a legible glyph.
@@ -208,11 +210,15 @@ const solidSx = {
 // A die the mode threw away keeps its shape but loses its colour: it is still
 // shown, because seeing what advantage saved you from is half of why advantage
 // is fun. The coin is painted like the dice.
+//
+// Drawn like a cartoon: flat bands instead of a smooth gradient — the face
+// towards you, the lit ring round it, and the faces turning away in shadow.
 function faceTint(face, dimmed) {
   const lit = Math.max(0, face.towardsViewer);
   if (dimmed) return uiMix(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
-  const glow = clamp(1 - Math.abs(lit - 0.7) / 0.4, 0, 1);
-  return uiMix(UI_COLORS.dieFace, UI_COLORS.dieFaceLit, glow);
+  if (lit >= 0.9) return UI_COLORS.dieFace;
+  if (lit >= 0.4) return UI_COLORS.dieFaceLit;
+  return uiMix(UI_COLORS.dieFace, UI_COLORS.dieEdge, 0.4);
 }
 
 // The numbers on the faces that did not land: cream like the result, but
@@ -226,10 +232,11 @@ const faceSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // The rim: cream showing around a darker face, so every edge on the solid is
-  // drawn without a border the clip would have eaten. Opaque, or the board
-  // shows through the die and it reads as glass rather than as a solid thing.
-  bgcolor: UI_COLORS.onDie,
+  // The rim: ink showing around the face, so every edge on the solid is drawn
+  // without a border the clip would have eaten — the die's comic outline.
+  // Opaque, or the board shows through the die and it reads as glass rather
+  // than as a solid thing.
+  bgcolor: UI_COLORS.dieEdge,
   ...TEXT_STYLES.figure,
   backfaceVisibility: 'hidden',
 };
@@ -248,5 +255,5 @@ const rimSx = {
 
 const faceFillSx = {
   position: 'absolute',
-  inset: '7%',
+  inset: '9%',
 };

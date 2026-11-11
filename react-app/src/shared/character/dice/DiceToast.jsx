@@ -4,12 +4,12 @@ import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { UI_SHADOWS } from '../../ui/shadows.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
+import { bubbleSx, bubbleTailSx, comicShadow } from '../../ui/bubble.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -17,9 +17,9 @@ import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 
 const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: LAYERS.diceToast,
-  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), border: 2, borderColor: 'divider', borderRadius: 2,
+  // A speech bubble, its tail pointing down at the corner the roll came from.
+  ...bubbleSx(), ...bubbleTailSx({ side: 'bottom', at: '82%' }),
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
-  boxShadow: UI_SHADOWS.popup,
   // No backdrop blur: behind a 95%-opaque surface it could not be seen, and
   // over the battle map, where something always moves underneath, it was
   // recomputed every frame — the roller's map fell to about ten frames a
@@ -51,8 +51,9 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      ...(layout.isCrit ? { borderColor: UI_COLORS.accentText, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.accentText, OPACITY.shade)}` } : {}),
-      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `${UI_SHADOWS.popup}, 0 0 20px ${uiAlpha(UI_COLORS.danger, OPACITY.shade)}` } : {}),
+      // A natural 20 or 1 throws its shadow in its own colour.
+      ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent) } : {}),
+      ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger) } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={ICON_SIZES.sm} />

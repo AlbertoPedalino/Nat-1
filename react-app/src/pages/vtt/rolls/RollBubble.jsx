@@ -5,12 +5,12 @@ import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { bubbleSx, bubbleTailSx, comicShadow } from '../../../shared/ui/bubble.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -52,7 +52,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           },
         } : null)}
         sx={{
-          ...bubbleSx,
+          ...rollBubbleSx,
           ...(layout.isCrit ? critSx : {}),
           ...(layout.isFail ? failSx : {}),
           ...(onDismiss ? dismissableSx : {}),
@@ -99,7 +99,6 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           <Typography sx={detailSx}>{layout.detail}</Typography>
         )}
 
-        <Box sx={tailSx} />
       </Box>
     </Box>
   );
@@ -115,18 +114,16 @@ const rootSx = {
 
 const underFogSx = { zIndex: 3 };
 
-const bubbleSx = {
+const rollBubbleSx = {
   position: 'relative',
   px: 1.25,
   py: 1,
   minWidth: 150,
   maxWidth: 260,
   textAlign: 'center',
-  borderRadius: 2,
-  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid),
-  border: '2px solid',
-  borderColor: 'divider',
-  boxShadow: UI_SHADOWS.popup,
+  // The comic speech bubble, its tail on the token that speaks.
+  ...bubbleSx({ fill: VTT_COLORS.surfaceRaised }),
+  ...bubbleTailSx({ fill: VTT_COLORS.surfaceRaised, side: 'bottom', at: '50%' }),
   // Grows out of the tail, which sits on the token — so the roll looks spoken by
   // the piece rather than dropped onto the map from somewhere off screen.
   transformOrigin: 'bottom center',
@@ -159,15 +156,10 @@ const closeSx = {
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.line),
 };
 
-const critSx = {
-  borderColor: VTT_COLORS.accent,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.accent, OPACITY.line)}`,
-};
+// A natural 20 or 1 throws the bubble's shadow in its own colour.
+const critSx = { boxShadow: comicShadow(VTT_COLORS.accent) };
 
-const failSx = {
-  borderColor: VTT_COLORS.danger,
-  boxShadow: `${UI_SHADOWS.popup}, 0 0 18px ${vttAlpha(VTT_COLORS.danger, OPACITY.line)}`,
-};
+const failSx = { boxShadow: comicShadow(VTT_COLORS.danger) };
 
 const actorSx = {
   ...TEXT_STYLES.figure,
@@ -215,16 +207,3 @@ const detailSx = {
   lineHeight: LINE_HEIGHTS.normal,
 };
 
-// The little point that makes it a speech bubble rather than a box, and the
-// anchor the whole thing grows out of.
-const tailSx = {
-  position: 'absolute',
-  left: '50%',
-  bottom: -8,
-  ml: -1,
-  width: 0,
-  height: 0,
-  borderLeft: '7px solid transparent',
-  borderRight: '7px solid transparent',
-  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, OPACITY.solid)}`,
-};

@@ -1,10 +1,10 @@
 import { Snackbar, Alert, Portal } from '@mui/material';
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { UI_COLORS } from './colors.js';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
-import { UI_SHADOWS } from './shadows.js';
+import { bubbleSx, bubbleTailSx } from './bubble.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -58,12 +58,13 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               alignItems: 'center',
               minWidth: 240,
               maxWidth: 360,
-              bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
+              // A speech bubble, its shadow in the notice's colour, its tail
+              // pointing up at the bar it drops from.
+              ...bubbleSx({ tone: color }),
+              ...bubbleTailSx({ side: 'top', at: '82%' }),
+              position: 'relative',
+              overflow: 'visible',
               color: UI_COLORS.textPrimary,
-              border: '1px solid',
-              borderColor: color,
-              borderRadius: 1,
-              boxShadow: UI_SHADOWS.float,
               '& .MuiAlert-icon': { color },
               '& .MuiAlert-action': { color: UI_COLORS.textSecondary },
             }}
