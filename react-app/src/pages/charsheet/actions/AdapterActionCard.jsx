@@ -8,7 +8,8 @@ import { CAT_COLORS } from './actionTags.js';
 import { getActionRollers } from '../../../shared/character/dice/rollers.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { WeaponNoteBlock } from '../../../shared/character/combat/WeaponNoteBlock.jsx';
-import { inlineButtonSx, spellBodySx, spellRowSx } from '../spells/spellsTabStyles.js';
+import { inlineButtonSx, spellBodySx, spellCardSx, spellRowSx } from '../spells/spellsTabStyles.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { ACTION_DETAIL_RENDERERS } from './actionDetailRenderers.js';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -65,10 +66,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
     gap: 0.5,
     px: 1.25,
     py: 0.75,
-    border: 1,
-    borderTop: 'none',
-    borderColor: 'divider',
-    borderRadius: isLast && !open ? '0 0 8px 8px' : 0,
+    ...CARD_PART_RULE_SX,
     bgcolor,
   });
 
@@ -84,10 +82,10 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
 
   return (
     <ExpandableCard
-      containerSx={{ overflow: 'hidden' }}
+      containerSx={spellCardSx}
       disabled={!hasActionDetails}
       summary={({ toggle, disabled, open }) => (
-          <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: 1, borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
+          <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, cursor: disabled ? 'default' : 'pointer' }}>
             {barCat && CAT_COLORS[barCat] && (
               <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: OPACITY.solid }} />
             )}
@@ -215,7 +213,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       ) : null}
         </>
       )}
-      detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
+      detailsSx={spellBodySx}
       details={hasActionDetails ? (
         <>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: 0.75 }} /> : null}

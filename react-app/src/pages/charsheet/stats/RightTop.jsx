@@ -32,7 +32,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { tileSx } from '../../../shared/ui/interactive.js';
+import { TILE_ACTIVE_INK, tileSx } from '../../../shared/ui/interactive.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -156,7 +156,7 @@ function SquareStat({ value, label, clickable, active, onClick }) {
       {typeof value === 'string' || typeof value === 'number'
         ? <Typography sx={statValueSx}>{value}</Typography>
         : value}
-      <Typography sx={{ ...statLabelSx, mt: 0.25, ...(active ? { color: 'primary.main' } : null) }}>{label}</Typography>
+      <Typography sx={{ ...statLabelSx, mt: 0.25, ...(active ? { color: TILE_ACTIVE_INK } : null) }}>{label}</Typography>
     </Box>
   );
 }
@@ -169,7 +169,7 @@ function InspirationBlock({ sheet, onToggle }) {
       active={insp}
       onClick={onToggle}
       label={insp ? 'Insp.' : 'No Insp.'}
-      value={<Sparkles size={ICON_SIZES.lg} style={{ color: insp ? UI_COLORS.accentText : UI_COLORS.textSecondary }} />}
+      value={<Sparkles size={ICON_SIZES.lg} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
     />
   );
 }

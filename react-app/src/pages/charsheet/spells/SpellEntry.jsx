@@ -28,7 +28,8 @@ import {
   extractDamageDice,
   getUpcastStep,
 } from './spellDice.js';
-import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
+import { inlineButtonSx, spellBodySx, spellCardSx, spellRowSx } from './spellsTabStyles.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';
 import {
@@ -241,11 +242,11 @@ export default function SpellEntry({
 
   return (
     <ExpandableCard
-      containerSx={{ mb: 0.5, overflow: 'hidden' }}
-      detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
+      containerSx={{ ...spellCardSx, mb: 0.5 }}
+      detailsSx={spellBodySx}
       summary={({ toggle, open }) => (
         <Box onClick={toggle}
-          sx={{ ...spellRowSx, mb: 0, borderRadius: open || hasFreeCasts ? '8px 8px 0 0' : 1, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
+          sx={{ ...spellRowSx, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
@@ -317,12 +318,7 @@ export default function SpellEntry({
           freeCasts={entry.freeCasts}
           freeCastUses={freeCastUses}
           onToggleFreeCast={onToggleFreeCast}
-          sx={{
-            mt: 0,
-            borderTop: 'none',
-            borderColor: 'divider',
-            borderRadius: open ? 0 : '0 0 8px 8px',
-          }}
+          sx={{ mt: 0, border: 0, borderRadius: 0, ...CARD_PART_RULE_SX }}
         />
       )}
       details={(

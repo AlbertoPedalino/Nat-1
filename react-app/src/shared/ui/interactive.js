@@ -1,6 +1,7 @@
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { SURFACES } from './surfaces.js';
 import { DURATIONS } from './motion.js';
+import { inkOn } from './pressable.js';
 
 // The two shapes a thing you can open or click takes inside a panel, each
 // with one look and one hover, so the same kind of thing answers the cursor
@@ -14,20 +15,28 @@ export const CARD_SX = Object.freeze({
   '&:hover': { borderColor: UI_COLORS.accent },
 });
 
+// An expandable card (an action, a spell, an item): the whole card wears
+// CARD_SX — so its edge and lift wrap the title, the rows under it and the
+// opened description together — and its parts are only split by this rule.
+export const CARD_PART_RULE_SX = Object.freeze({ borderTop: 1, borderColor: 'divider' });
+
 // A stat tile (an ability score, Initiative, Proficiency Bonus, Inspiration, a
 // speed): a box drawn on the page, on the header tint. `tone` colours its edge
 // for a state (a penalty), `active` fills it with the accent (Inspiration
-// held), `clickable` lights its edge under the cursor.
+// held: filled solid, its text in the ink that reads on it — TILE_ACTIVE_INK),
+// `clickable` lights its edge under the cursor.
+export const TILE_ACTIVE_INK = inkOn(UI_COLORS.accent);
+
 export function tileSx({ clickable = false, tone = null, active = false } = {}) {
-  const edge = active ? UI_COLORS.accent : tone;
   return {
     ...SURFACES.panel,
-    bgcolor: active ? uiAlpha(UI_COLORS.accent, OPACITY.fill) : UI_COLORS.surfaceHeader,
-    ...(edge ? { borderColor: edge } : null),
+    bgcolor: active ? UI_COLORS.accent : UI_COLORS.surfaceHeader,
+    ...(active ? { color: TILE_ACTIVE_INK } : null),
+    ...(tone ? { borderColor: tone } : null),
     ...(clickable ? {
       cursor: 'pointer',
-      transition: `border-color ${DURATIONS.fast}ms ease`,
-      '&:hover': { borderColor: edge || UI_COLORS.accent },
+      transition: `border-color ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
+      '&:hover': active ? { bgcolor: UI_COLORS.accentText } : { borderColor: tone || UI_COLORS.accent },
     } : null),
   };
 }
