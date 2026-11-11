@@ -19,23 +19,23 @@ export const UI_COLORS = Object.freeze({
 
   // Text, brightest to faintest, and the strongest neutral outline.
   textPrimary: '#fbf4ec',
-  textSecondary: '#c4b8cc',
-  textMuted: '#928499',
-  textFaint: '#6f6278',
-  outline: '#5e4f6a',
+  textSecondary: '#c2b9ad',
+  textMuted: '#938a7f',
+  textFaint: '#6f675e',
+  outline: '#5e5750',
 
   // Surfaces, lightest to darkest. `surface` is the paper of cards and
   // dialogs, `page` the page behind them.
-  surfaceRaised: '#30253a',
-  surfaceHeader: '#2c2234',
-  surface: '#251c2c',
-  surfaceDeep: '#201826',
-  page: '#1a1420',
-  surfaceSunken: '#140f18',
-  surfaceDarkest: '#0f0b12',
+  surfaceRaised: '#2e2a26',
+  surfaceHeader: '#2a2623',
+  surface: '#24211e',
+  surfaceDeep: '#1f1c19',
+  page: '#1a1816',
+  surfaceSunken: '#141210',
+  surfaceDarkest: '#0f0e0c',
   // The drawn outline round panels, cards and buttons, and the solid shadow
   // under what can be pressed: the interface's drawn, cartoon edge.
-  edge: '#0d090f',
+  edge: '#0d0b09',
   black: '#000000',
   white: '#ffffff',
 
@@ -82,7 +82,7 @@ export const UI_COLORS = Object.freeze({
   dieFaceLit: '#4f8a4b',
   onDie: '#eef0d4',
   // The inked edge of every die, drawn like the interface's outlines.
-  dieEdge: '#0d090f',
+  dieEdge: '#0d0b09',
 });
 
 // The colour of a hit point readout by its tone (vitals.hpTone).
