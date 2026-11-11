@@ -84,9 +84,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
   const xpProgress = xpProgressPct(currentXp, level);
 
   return (
-    <Box sx={{
-      bgcolor: 'background.paper', borderBottom: 2, borderColor: UI_COLORS.edge,
-    }}>
+    <Box sx={SURFACES.pageHeader}>
       {!embedded ? (
         <>
           <AppTopBar

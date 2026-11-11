@@ -45,6 +45,13 @@ export const SURFACES = Object.freeze({
     borderRadius: 1,
     boxShadow: UI_SHADOWS.box,
   }),
+  // A page's own header under the app's top bar (the sheet's character
+  // header, the builder's title bar): the paper, closed by the ink edge.
+  pageHeader: Object.freeze({
+    bgcolor: 'background.paper',
+    backgroundImage: 'none',
+    borderBottom: INK_EDGE,
+  }),
   // The page behind everything: the background with a comic print's faint
   // halftone dots.
   page: Object.freeze({
