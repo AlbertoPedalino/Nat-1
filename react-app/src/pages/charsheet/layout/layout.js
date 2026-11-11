@@ -13,9 +13,11 @@ export const SHEET_AREAS = {
   leftCol: 'leftCol',
 };
 
+// A cell of the sheet's grid: allowed to shrink below its content. Not
+// clipped: a panel filling its cell draws its ink shadow past the cell's edge
+// (each panel clips its own content).
 export const SHEET_GRID_ITEM_SX = {
   minWidth: 0,
-  overflow: 'hidden',
 };
 
 export const SHEET_GRID = {

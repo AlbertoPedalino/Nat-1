@@ -125,7 +125,8 @@ export default function CharacterSheet({
     {/* No bottom padding: the dice dock is the sheet's last row and holds it. */}
     <Box sx={{ ...SURFACES.page, minHeight: embedded ? 'auto' : '100vh', width: '100%' }}>
       <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
-      <Box sx={{ ...sheetColumnSx(embedded), overflow: 'hidden' }}>
+      {/* Clipped sideways only, so the panels' ink shadows show at the bottom. */}
+      <Box sx={{ ...sheetColumnSx(embedded), overflowX: 'clip' }}>
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
