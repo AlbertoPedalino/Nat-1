@@ -3,6 +3,7 @@ import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { CARD_SX } from '../../shared/ui/interactive.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
@@ -59,14 +60,11 @@ export const listSx = {
 };
 
 export const rowSx = {
+  ...CARD_SX,
   display: 'flex',
   alignItems: 'center',
   gap: '0.5rem',
   p: '0.6rem 0.75rem',
-  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.fill)}`,
-  borderRadius: 1.25,
-  bgcolor: UI_COLORS.surfaceDeep,
-  '&:hover': { borderColor: UI_COLORS.accent },
 };
 
 export const rowInnerSx = {

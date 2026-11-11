@@ -1,16 +1,15 @@
 import {
   Box,
   Chip,
-  Paper,
   Stack,
   Typography,
 } from '@mui/material';
-import PanelHeader, { panelBodySx, panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
+import Panel from '../../../shared/ui/Panel.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
@@ -31,18 +30,19 @@ function EmptyCaption({ children }) {
 
 // A preview section: the sheet's panel (PanelHeader over the body), its
 // `subtitle` the first line of the body.
+// A preview section: the shared Panel at the builder's text size, its
+// `subtitle` the first line of the body.
 export function PreviewSection({ icon, title, subtitle, tone = UI_COLORS.accentText, children, emptyText }) {
   const hasContent = Boolean(children);
   return (
-    <Paper variant="outlined" sx={{ ...panelFrameSx, minWidth: 0 }}>
-      <PanelHeader icon={icon} title={title} tone={tone} titleSx={BUILDER_TEXT.panelTitle} />
-      <Stack spacing={0.75} sx={{ ...panelBodySx, minWidth: 0 }}>
+    <Panel icon={icon} title={title} tone={tone} titleSx={BUILDER_TEXT.panelTitle} sx={{ minWidth: 0 }}>
+      <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {subtitle ? (
           <Typography sx={BUILDER_TEXT.note} noWrap>{subtitle}</Typography>
         ) : null}
         {hasContent ? children : emptyText ? <EmptyCaption>{emptyText}</EmptyCaption> : null}
       </Stack>
-    </Paper>
+    </Panel>
   );
 }
 

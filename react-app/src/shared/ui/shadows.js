@@ -9,6 +9,18 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
   return `${offset}px ${offset}px 0 ${color}`;
 }
 
+// Inked lettering: a hard shadow under a title, a big number, a die's numeral.
+export function inkTextShadow(color = UI_COLORS.edge) {
+  return `1px 1px 0 ${color}`;
+}
+
+// An ink outline drawn round a silhouette (an icon drawn large, as the AC
+// shield) as a CSS filter, with the solid shadow under it in `shadow`.
+export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {
+  const edge = (x, y) => `drop-shadow(${x}px ${y}px 0 ${color})`;
+  return `${edge(1.5, 0)} ${edge(-1.5, 0)} ${edge(0, 1.5)} ${edge(0, -1.5)} drop-shadow(2px 2px 0 ${shadow})`;
+}
+
 export const UI_SHADOWS = Object.freeze({
   // A bar resting on the page (the battle map's scene bar).
   raised: `0 8px 24px ${uiAlpha(UI_COLORS.black, OPACITY.shade)}`,
@@ -27,7 +39,7 @@ export const UI_SHADOWS = Object.freeze({
   panel: inkShadow(),
   box: inkShadow(UI_COLORS.edge, 2),
   // Inked lettering: a hard shadow under titles and big numbers.
-  inkText: `1px 1px 0 ${UI_COLORS.edge}`,
+  inkText: inkTextShadow(),
   // Dialogs and floating panels.
   overlay: `0 18px 52px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
 });

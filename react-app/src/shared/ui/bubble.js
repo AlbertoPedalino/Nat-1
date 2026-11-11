@@ -7,9 +7,6 @@ import { DURATIONS } from './motion.js';
 // on a natural 20, danger on a natural 1, a notice's severity) — and a tail
 // pointing where it speaks from.
 
-// The bubble's solid shadow, as a comic panel's.
-export const comicShadow = inkShadow;
-
 // The bubble's slight tilt, and the larger one of a moment that shouts.
 const TILT = '-0.8deg';
 export const SHOUT_TILT = 'rotate(-1.6deg) scale(1.06)';
@@ -21,7 +18,7 @@ export function bubbleSx({ fill = UI_COLORS.surfaceRaised, tone = UI_COLORS.edge
     bgcolor: fill,
     border: `3px solid ${UI_COLORS.edge}`,
     borderRadius: 2,
-    boxShadow: comicShadow(tone),
+    boxShadow: inkShadow(tone),
     transform: `rotate(${TILT})`,
     ...(pop ? {
       animation: `gbBubblePop ${DURATIONS.slow}ms cubic-bezier(0.34, 1.56, 0.64, 1)`,

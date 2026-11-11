@@ -580,3 +580,21 @@ test('a choice key is read for its kind only in choiceNormalization.js', () => {
     { allow: ['shared/character/progression/choiceNormalization.js'] },
   ), []);
 });
+
+// The comic look has one home per piece: game drawings in gameIcons.js, the
+// ink edge and solid shadows in the shared ui recipes, the screentone in
+// PanelHeader.jsx, the halftone in surfaces.js. A page that writes its own
+// copy drifts the first time the look is tuned.
+test('game icons come only from gameIcons.js', () => {
+  assert.deepEqual(sourceFilesMatching(/from 'react-icons/, { allow: ['shared/ui/gameIcons.js'] }), []);
+});
+
+test('ink edges and solid shadows are written only in the shared ui recipes', () => {
+  const recipes = ['shared/ui/shadows.js', 'shared/ui/surfaces.js', 'shared/ui/pressable.js', 'shared/ui/bubble.js', 'shared/ui/PanelHeader.jsx', 'shared/ui/interactive.js', 'shared/ui/BubbleDizzy.jsx', 'app/theme.js'];
+  assert.deepEqual(sourceLinesMatching(/solid \$\{UI_COLORS\.edge\}|\dpx \dpx 0 \$\{UI_COLORS\.edge|0 \dpx 0 \$\{UI_COLORS\.edge/, { allow: recipes }), []);
+});
+
+test('the screentone and the halftone are drawn in one place each', () => {
+  assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
+  assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);
+});

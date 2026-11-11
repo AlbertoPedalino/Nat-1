@@ -11,10 +11,11 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
-import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
+import { inkShadow } from '../../../shared/ui/shadows.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -69,7 +70,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         } : null)}
         sx={{
           ...rollBubbleSx,
-          ...(layout.tone ? { boxShadow: comicShadow(layout.tone) } : {}),
+          ...(layout.tone ? { boxShadow: inkShadow(layout.tone) } : {}),
           ...(layout.isCrit ? critSx : {}),
           ...(layout.isFail ? failSx : {}),
           ...(onDismiss ? dismissableSx : {}),
@@ -180,9 +181,9 @@ const closeSx = {
 
 // A natural 20 or 1 throws the bubble's shadow in its own colour.
 // A natural 20 cheers: the bubble leaps and springs, then rests on the token.
-const critSx = { boxShadow: comicShadow(VTT_COLORS.accent, 4), ...bubbleCheerSx(BUBBLE_REST) };
+const critSx = { boxShadow: inkShadow(VTT_COLORS.accent, 4), ...bubbleCheerSx(BUBBLE_REST) };
 
-const failSx = { boxShadow: comicShadow(VTT_COLORS.danger), ...BUBBLE_SHAKE_SX };
+const failSx = { boxShadow: inkShadow(VTT_COLORS.danger), ...BUBBLE_SHAKE_SX };
 
 const actorSx = {
   ...TEXT_STYLES.figure,

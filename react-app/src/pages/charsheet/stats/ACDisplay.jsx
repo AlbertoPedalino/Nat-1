@@ -5,6 +5,7 @@ import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { inkOutlineFilter } from '../../../shared/ui/shadows.js';
 
 // The shield-shaped Armor Class readout: the character's header uses it, and so
 // do creature panels (the Eldritch Cannon), so an AC reads the same everywhere.
@@ -29,7 +30,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
               color: shieldUnproficient ? UI_COLORS.dangerSurface : UI_COLORS.surfaceRaised,
               // An ink outline round the drawing and its solid shadow, as the
               // tiles beside it.
-              filter: `drop-shadow(1.5px 0 0 ${UI_COLORS.edge}) drop-shadow(-1.5px 0 0 ${UI_COLORS.edge}) drop-shadow(0 1.5px 0 ${UI_COLORS.edge}) drop-shadow(0 -1.5px 0 ${UI_COLORS.edge}) drop-shadow(2px 2px 0 ${shieldUnproficient ? UI_COLORS.penalty : UI_COLORS.edge})`,
+              filter: inkOutlineFilter(UI_COLORS.edge, shieldUnproficient ? UI_COLORS.penalty : UI_COLORS.edge),
             }}
           />
           <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>

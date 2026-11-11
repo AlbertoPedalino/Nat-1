@@ -29,6 +29,7 @@ import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -49,7 +50,7 @@ function parseDecimalInput(value) {
 function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
-      containerSx={{ ...SURFACES.panel, flexShrink: 0, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.accent } }}
+      containerSx={{ ...CARD_SX, flexShrink: 0, overflow: 'hidden' }}
       detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (

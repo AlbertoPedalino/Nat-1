@@ -25,6 +25,7 @@ import { pillLabelSx } from './panelStyles.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -258,14 +259,10 @@ const cardSx = {
   gap: 0.25,
   p: 1,
   textAlign: 'left',
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1.5,
-  bgcolor: 'transparent',
+  ...CARD_SX,
   color: 'inherit',
   font: 'inherit',
   cursor: 'pointer',
-  '&:hover': { borderColor: 'primary.main' },
 };
 
 const freshSx = { ...cardSx, borderColor: 'primary.main' };

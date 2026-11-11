@@ -6,6 +6,7 @@ import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, uiAlpha, uiMix } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
+import { inkTextShadow } from '../../ui/shadows.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -171,7 +172,7 @@ const DIGIT_HEIGHT = 0.72;
 const DIGIT_TIGHTEN = 0.12;
 
 // The numbers are inked too: a hard shadow under the cream, as a comic letters.
-const NUMBER_INK = `1px 1px 0 ${UI_COLORS.dieEdge}`;
+const NUMBER_INK = inkTextShadow(UI_COLORS.dieEdge);
 const numberSx = { position: 'relative', textShadow: NUMBER_INK };
 const narrowNumberSx = { position: 'relative', textShadow: NUMBER_INK, letterSpacing: `${-DIGIT_TIGHTEN}em`, paddingRight: `${DIGIT_TIGHTEN}em` };
 

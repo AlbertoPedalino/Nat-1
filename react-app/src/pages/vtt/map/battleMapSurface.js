@@ -2,12 +2,12 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
+import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
-import { panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
+import { panelBarSx, panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
@@ -34,9 +34,8 @@ export const battleMapDialogPlacingPaperSx = {
 // A map dialog's title is a panel bar: the header tint over an ink line, with
 // the screentone.
 export const battleMapDialogTitleSx = {
-  bgcolor: 'transparent',
+  ...panelBarSx,
   backgroundImage: panelScreentone(VTT_COLORS.accent),
-  borderBottom: `2px solid ${UI_COLORS.edge}`,
   color: 'primary.main',
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xl,

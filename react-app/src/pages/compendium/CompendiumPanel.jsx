@@ -3,7 +3,7 @@ import { LAYERS } from '../../shared/ui/layers.js';
 import {
   Box, IconButton, Paper, Portal,
 } from '@mui/material';
-import { BookOpen, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 import PanelHeader from '../../shared/ui/PanelHeader.jsx';
 import { activePortalContainer } from '../../shared/ui/portalContainer.js';
@@ -11,6 +11,7 @@ import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -28,7 +29,7 @@ function OpenPanel({ onClose }) {
   return (
     <Portal container={activePortalContainer}>
       <Paper role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
-        <PanelHeader icon={BookOpen} title="Compendium">
+        <PanelHeader icon={GAME_ICONS.compendium} title="Compendium">
           <IconButton size="small" aria-label="Close the compendium" onClick={onClose} sx={{ ml: 'auto' }}>
             <X size={ICON_SIZES.md} />
           </IconButton>

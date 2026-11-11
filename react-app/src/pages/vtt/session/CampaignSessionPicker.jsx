@@ -8,6 +8,7 @@ import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -76,12 +77,9 @@ const emptySx = {
 };
 
 const rowSx = {
+  ...CARD_SX,
   display: 'flex',
   alignItems: 'center',
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  '&:hover': { borderColor: 'primary.main' },
 };
 
 const rowButtonSx = {
