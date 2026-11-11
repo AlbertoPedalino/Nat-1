@@ -1,6 +1,10 @@
 import { alpha } from '@mui/material';
 import { UI_COLORS, OPACITY } from './colors.js';
-import { pressableSx } from './pressable.js';
+import { inkOn, pressableSx } from './pressable.js';
+import { INK_EDGE, UI_SHADOWS } from './shadows.js';
+import { TEXT_STYLES } from './textStyles.js';
+import { FONT_SIZES } from './fonts.js';
+import { CONTROL_HEIGHTS } from './controlHeights.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
@@ -183,6 +187,27 @@ export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPAC
     backgroundColor: alpha(tone, bgAlpha),
     borderColor: alpha(tone, borderAlpha),
     color: text,
+  };
+}
+
+// The comic sticker chip: a fact worth reading at a glance (a resistance, an
+// immunity), drawn with the ink edge and a small solid shadow. `filled` paints
+// it solid in its tone (the stronger fact: an immunity), otherwise the tone
+// tints it and writes its label; no tone leaves it a neutral sticker.
+export function stickerChipSx(tone, { filled = false } = {}) {
+  const look = !tone
+    ? { bgcolor: UI_COLORS.surfaceRaised, color: UI_COLORS.textPrimary }
+    : filled
+      ? { bgcolor: tone, color: inkOn(tone) }
+      : { bgcolor: alpha(tone, OPACITY.line), color: tone };
+  return {
+    ...TEXT_STYLES.title,
+    height: CONTROL_HEIGHTS.md,
+    fontSize: FONT_SIZES.sm,
+    border: INK_EDGE,
+    borderColor: UI_COLORS.edge,
+    boxShadow: UI_SHADOWS.pressed,
+    ...look,
   };
 }
 
