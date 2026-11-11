@@ -8,6 +8,7 @@ export const SHEET_AREAS = {
   senses: 'senses',
   movement: 'movement',
   profs: 'profs',
+  defenses: 'defenses',
   skills: 'skills',
   right: 'right',
   leftCol: 'leftCol',
@@ -27,6 +28,7 @@ export const SHEET_GRID = {
       "${SHEET_AREAS.senses}"
       "${SHEET_AREAS.movement}"
       "${SHEET_AREAS.profs}"
+      "${SHEET_AREAS.defenses}"
       "${SHEET_AREAS.right}"
     `,
     md: `"${SHEET_AREAS.leftCol} ${SHEET_AREAS.skills} ${SHEET_AREAS.right}"`,

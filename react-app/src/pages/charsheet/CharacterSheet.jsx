@@ -10,6 +10,7 @@ import Proficiencies from './proficiency/Proficiencies.jsx';
 import Skills from './stats/Skills.jsx';
 import Movement from './stats/Movement.jsx';
 import RightTop from './stats/RightTop.jsx';
+import CharacterDefenses from './stats/CharacterDefenses.jsx';
 import TabsPanel from './layout/TabsPanel.jsx';
 import RestDialogs from './resources/RestDialogs.jsx';
 import { useRests } from './resources/useRests.js';
@@ -35,6 +36,7 @@ const EMBEDDED_SHEET_GRID = {
     "${SHEET_AREAS.senses}"
     "${SHEET_AREAS.movement}"
     "${SHEET_AREAS.profs}"
+    "${SHEET_AREAS.defenses}"
     "${SHEET_AREAS.right}"
   `,
   gap: '0.55rem',
@@ -161,6 +163,9 @@ export default function CharacterSheet({
             <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
               <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
             </Box>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.defenses } }}>
+              <CharacterDefenses C={C} activeConditions={sheet?.activeConditions || []} />
+            </Box>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.senses } }}>
               <Senses C={C} />
             </Box>
@@ -175,7 +180,7 @@ export default function CharacterSheet({
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
           <Stack spacing={0.5} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
-            <RightTop C={C} sheet={sheet} onRoll={rollD20}
+            <RightTop C={C} sheet={sheet} embedded={embedded} onRoll={rollD20}
               onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
               effectActions={readOnly ? readOnlyEffectActions : effectActions}
               onSetExhaustion={readOnly ? noop : setExhaustion}

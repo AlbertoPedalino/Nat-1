@@ -1,20 +1,9 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getInitiative, getPB } from '../../../shared/character/sheet/sheetStats.js';
-import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
-import {
-  collectResolvedResistanceItems,
-  collectResolvedImmunityItems,
-} from '../../../shared/character/sheet/sheetDefenses.js';
 import { getInitiativeAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
 import { advantageVisual } from './advantageMark.jsx';
-import {
-  collectItemResistanceItems,
-  collectItemImmunityItems,
-  collectItemConditionImmunityItems,
-  characterItemEffects,
-} from '../../../shared/character/inventory/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
 import {
   resolveInitiativeTriggeredResourceRecoveries,
@@ -25,7 +14,6 @@ import ConditionsBlock from './ConditionsBlock.jsx';
 import RemindersBlock from './RemindersBlock.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
-import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -34,7 +22,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { TILE_ACTIVE_INK, tileSx } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
-export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
+export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
   // initiative-triggered recoveries), so the exhaustion −2/level penalty is applied
   // to the modifier directly rather than via rollD20. Adapter-granted bonuses
@@ -97,9 +85,16 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   const acSource = acResult?.source;
   const showAcBadge = acResult?.sourceType === 'formula';
 
+  // Conditions and reminders first, side by side on a wide sheet (stacked when
+  // embedded, its panel being narrow); the stat tiles (AC, Initiative,
+  // Proficiency Bonus, Inspiration) close the block, right above the tabs.
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', gap: '0.45rem', mb: '0.4rem', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', flexDirection: embedded ? 'column' : { xs: 'column', md: 'row' }, alignItems: 'stretch', gap: '0.4rem' }}>
+        <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
+        {effectActions ? <RemindersBlock sheet={sheet} actions={effectActions} /> : null}
+      </Box>
+      <Box sx={{ display: 'flex', gap: '0.45rem', mt: '0.4rem', flexWrap: 'wrap' }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
           <Tooltip title={initTooltip}>
@@ -134,10 +129,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         </Box>
         <SquareStat value={signed(getPB(C))} label="Prof. Bonus" />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
-        <DefensesBlock C={C} activeConditions={sheet?.activeConditions || []} />
       </Box>
-      <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
-      {effectActions ? <RemindersBlock sheet={sheet} actions={effectActions} /> : null}
     </Box>
   );
 }
@@ -172,33 +164,4 @@ function InspirationBlock({ sheet, onToggle }) {
       value={<GAME_ICONS.inspiration size={ICON_SIZES.xxl} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
     />
   );
-}
-
-function DefensesBlock({ C, activeConditions = [] }) {
-  const itemEffects = characterItemEffects(C);
-  // Conditions granting resistance to all damage (e.g. Petrified).
-  const conditionResistAll = getConditionsWithEffect(activeConditions, 'resistAllDmg')
-    .map((source) => ({ type: 'All damage', kind: 'Resist', source }));
-  const advSaves = [...itemEffects.advantageOnSaveAgainst.entries()].flatMap(([target, sources]) =>
-    sources.map((src) => ({ type: `Save vs ${target}`, kind: 'Adv', source: src })),
-  );
-  const attackerDisadv = (itemEffects.disadvantageOnAttackersAgainstYou || []).map((entry) => ({
-    type: 'Attackers DIS', kind: '', source: entry.source, note: entry.note,
-  }));
-  const passiveTraits = (itemEffects.passiveTraits || []).map((entry) => ({
-    type: entry.text, kind: 'Trait', source: entry.source,
-  }));
-  const all = [
-    ...conditionResistAll,
-    ...collectResolvedResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
-    ...collectItemResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
-    ...collectResolvedImmunityItems(C).map((item) => ({ type: item.label, kind: 'Immune', source: item.source })),
-    ...collectItemImmunityItems(C).map((item) => ({ type: item.label, kind: 'Immune', source: item.source })),
-    ...collectItemConditionImmunityItems(C).map((item) => ({ type: item.label, kind: 'Cond. Immune', source: item.source })),
-    ...advSaves,
-    ...attackerDisadv,
-    ...passiveTraits,
-  ];
-
-  return <DefensesPanel items={all} sx={{ flex: 1, minWidth: 140 }} />;
 }

@@ -10,7 +10,7 @@ import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 // combatant. A reminder changes no roll and stays until someone removes it.
 export default function RemindersBlock({ sheet, actions }) {
   return (
-    <Panel icon={GAME_ICONS.reminders} title="Reminders" tone={PANEL_TONES.reminders} sx={{ flex: 1, minWidth: 140, mt: '0.4rem' }} bodySx={{ p: '0.4rem 0.62rem' }}>
+    <Panel icon={GAME_ICONS.reminders} title="Reminders" tone={PANEL_TONES.reminders} sx={{ flex: 1, minWidth: 140 }} bodySx={{ p: '0.4rem 0.62rem' }}>
       <ReminderEditor
         effects={sheet.activeEffects}
         disabled={Boolean(actions.readOnly)}
