@@ -31,6 +31,9 @@ export function panelScreentone(tone = UI_COLORS.accent) {
 // The icon's badge in a panel bar: the tone filled, edged in ink, its game
 // drawing large enough to read (PANEL_BADGE_ICON).
 export const PANEL_BADGE_ICON = ICON_SIZES.xxl;
+// The badge's outer size: its icon, 2px of padding and 2px of edge a side. A
+// bar without a badge (a stat tile's) holds this height to line up with one.
+export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 8;
 
 // The room round a panel bar's badge, the same for every bar (a PanelHeader,
 // the sheet's tab bar).
@@ -128,12 +131,6 @@ export const statValueSx = {
   fontSize: FONT_SIZES.display,
   color: UI_COLORS.accentText,
   lineHeight: LINE_HEIGHTS.none,
-};
-
-export const statLabelSx = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.xxs,
-  color: 'text.secondary',
 };
 
 // The name at the start of a row of values on a card (Status, Uses, Free

@@ -120,6 +120,13 @@ export const PANEL_TONES = Object.freeze({
   defenses: ENTITY_COLORS.background,
   conditions: UI_COLORS.danger,
   reminders: UI_COLORS.spell,
+  // The stat tiles beside Defenses, each its own: AC steel, Initiative the
+  // accent its roll wears, Proficiency Bonus the skills' green, Inspiration
+  // the violet.
+  armorClass: '#a9b8c9',
+  initiative: UI_COLORS.accent,
+  proficiencyBonus: ENTITY_COLORS.skill,
+  inspiration: UI_COLORS.spell,
 });
 
 // A skill's training dot: half and full proficiency in the accent, expertise
@@ -133,13 +140,13 @@ export const TRAINING_TONES = Object.freeze({
 // The colour a roll's toast and log line wear, by the kind of roll (the
 // toast's `meta.kind`): a check or save the colour of the panel it was rolled
 // from, an attack, damage, healing or temporary hit points the colour of its
-// roll button, Initiative the accent of its tile. A roll of no known kind (a
+// roll button, Initiative the colour of its tile. A roll of no known kind (a
 // free roll, an old saved one) has none and stays neutral.
 export const ROLL_KIND_TONES = Object.freeze({
   abilityCheck: PANEL_TONES.abilityScores,
   save: PANEL_TONES.savingThrows,
   skill: PANEL_TONES.skills,
-  initiative: UI_COLORS.accent,
+  initiative: PANEL_TONES.initiative,
   attack: ROLL_TONES.attack,
   damage: ROLL_TONES.damage,
   heal: ROLL_TONES.heal,

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getInitiative, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
@@ -17,10 +17,13 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { STAT_TILE_SIZE, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { TILE_ACTIVE_INK, tileSx } from '../../../shared/ui/interactive.js';
+import { inkOn } from '../../../shared/ui/pressable.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import StatTile from './StatTile.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
@@ -33,8 +36,8 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
   const initHasAdv = !!initAdv;
   const initAdvArg = initHasAdv ? true : undefined;
   const initTooltip = initAdv ? `Advantage on Initiative — ${initAdv.source}` : '';
-  const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
-  const [initiativeMessage, setInitiativeMessage] = useState('');
+  // The last result stays on the tile: the roll log scrolls on.
+  const [lastInitiative, setLastInitiative] = useState(null);
 
   // `advArg` as rollD20 takes it: true / false / undefined. The ordinary click
   // uses the sheet's own sources; the right-click menu adds one.
@@ -44,7 +47,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
     const roll = rollD20(initMod, { advantage: advArg });
     const d20 = roll.kept;
     const total = roll.total;
-    setLastInitiativeRoll({ d20, mod: initMod, total });
+    setLastInitiative(total);
 
     const bonusText = signed(initMod);
     const advText = initMode === 'adv' ? ' (Adv)' : initMode === 'disadv' ? ' (Dis)' : '';
@@ -56,13 +59,6 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
         setResources(result.resources);
       }
       recoveryParts.push(...(result.applied || []));
-    }
-
-    if (recoveryParts.length) {
-      const msg = recoveryParts.map(a => `${a.label}: ${a.resourceLabel || a.resourceKey} ${a.from} → ${a.to}`).join(' • ');
-      setInitiativeMessage(msg);
-    } else {
-      setInitiativeMessage('');
     }
 
     const dice = roll.rolls;
@@ -102,40 +98,19 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
           <RemindersBlock sheet={sheet} actions={effectActions} />
         </Box>
       ) : null}
-      <Box sx={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'flex-start', minWidth: 0, order: embedded ? 1 : { xs: 1, md: 0 } }}>
+      <Box sx={{ ...statRowSx, order: embedded ? 1 : { xs: 1, md: 0 } }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
-          <Tooltip title={initTooltip}>
-            <RollModeArea
-              sources={{ adv: initHasAdv, disadv: false }}
-              onPick={rollInitiative}
-              onClick={() => rollInitiative(initAdvArg)}
-            >
-              <SquareStat value={signed(initMod)} label="Initiative" clickable />
-            </RollModeArea>
-          </Tooltip>
-          {initHasAdv && (() => {
-            const v = advantageVisual(true, false);
-            const Icon = v.Icon;
-            return (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                <Icon size={ICON_SIZES.xxs} color={v.color} />
-                <Typography sx={{ fontSize: FONT_SIZES.xxxs, color: v.color, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md }}>{v.label}</Typography>
-              </Box>
-            );
-          })()}
-          {lastInitiativeRoll && (
-            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', textAlign: 'center', lineHeight: LINE_HEIGHTS.snug }}>
-              Last: <Box component="span" sx={{ fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentText }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
-            </Typography>
-          )}
-          {initiativeMessage && (
-            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.xxxs, color: UI_COLORS.success, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: STAT_TILE_SIZE + 10, wordBreak: 'break-word' }}>
-              {initiativeMessage}
-            </Typography>
-          )}
-        </Box>
-        <SquareStat value={signed(getPB(C))} label="Prof. Bonus" />
+        <Tooltip title={initTooltip}>
+          <RollModeArea
+            sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}
+            sources={{ adv: initHasAdv, disadv: false }}
+            onPick={rollInitiative}
+            onClick={() => rollInitiative(initAdvArg)}
+          >
+            <StatTile tone={PANEL_TONES.initiative} label="Initiative" value={<InitiativeFigure value={signed(initMod)} advantage={initHasAdv} last={lastInitiative} />} clickable />
+          </RollModeArea>
+        </Tooltip>
+        <StatTile tone={PANEL_TONES.proficiencyBonus} label="Prof. Bonus" value={signed(getPB(C))} />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
       </Box>
       <Box sx={{ display: 'flex', minWidth: 0 }}>
@@ -152,34 +127,55 @@ const rightTopGridSx = {
   alignItems: 'stretch',
 };
 
-// Initiative, Proficiency Bonus and Inspiration: the same square tile, a figure
-// (or Inspiration's spark) over its name.
-function SquareStat({ value, label, clickable, active, onClick }) {
+// AC, Initiative, Proficiency Bonus and Inspiration: four even tiles filling
+// their cell as tall as Defenses beside them.
+const statRowSx = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+  gap: '0.45rem',
+  alignItems: 'stretch',
+  minWidth: 0,
+};
+
+// Initiative's figure, with the advantage mark in its corner when the sheet
+// grants it (the tooltip says from what) and the last result along its foot,
+// laid over the tile so it never makes it taller.
+function InitiativeFigure({ value, advantage, last }) {
+  const mark = advantage ? advantageVisual(true, false) : null;
   return (
-    <Box
-      onClick={onClick}
-      sx={{
-        ...tileSx({ clickable, active }),
-        width: STAT_TILE_SIZE, height: STAT_TILE_SIZE,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-      }}>
-      {typeof value === 'string' || typeof value === 'number'
-        ? <Typography sx={statValueSx}>{value}</Typography>
-        : value}
-      <Typography sx={{ ...statLabelSx, mt: 0.25, ...(active ? { color: TILE_ACTIVE_INK } : null) }}>{label}</Typography>
-    </Box>
+    <>
+      <Typography sx={statValueSx}>{value}</Typography>
+      {mark ? <mark.Icon size={ICON_SIZES.sm} color={mark.color} style={{ position: 'absolute', top: 4, right: 4 }} /> : null}
+      {last != null ? (
+        <Typography sx={lastInitiativeSx}>
+          Last <Box component="span" sx={{ color: PANEL_TONES.initiative }}>{last}</Box>
+        </Typography>
+      ) : null}
+    </>
   );
 }
+
+const lastInitiativeSx = {
+  ...TEXT_STYLES.label,
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 3,
+  textAlign: 'center',
+  fontSize: FONT_SIZES.xxs,
+  color: 'text.secondary',
+};
 
 function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
-    <SquareStat
+    <StatTile
+      tone={PANEL_TONES.inspiration}
       clickable
       active={insp}
       onClick={onToggle}
-      label={insp ? 'Insp.' : 'No Insp.'}
-      value={<GAME_ICONS.inspiration size={ICON_SIZES.hero} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
+      label="Inspiration"
+      value={<GAME_ICONS.inspiration size={ICON_SIZES.hero} style={{ color: insp ? inkOn(PANEL_TONES.inspiration) : UI_COLORS.textMuted }} />}
     />
   );
 }
