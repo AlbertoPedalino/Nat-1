@@ -204,6 +204,16 @@ export function movedPoints(drawing, dx, dy) {
   })));
 }
 
+// How big a stroke is: the longer side of its bounding box, in cells (0 for a
+// dot). The menu's size is this, so it reads the same at every opening.
+export function strokeExtent(points) {
+  const list = normalizePoints(points);
+  if (list.length < 2) return 0;
+  const xs = list.map((point) => point.x);
+  const ys = list.map((point) => point.y);
+  return Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+}
+
 // A stroke made bigger or smaller about the middle of its bounding box, so it
 // grows in place rather than away from its first point.
 export function scaledPoints(points, factor) {

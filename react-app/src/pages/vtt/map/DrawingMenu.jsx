@@ -16,7 +16,7 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
   areaEffect, areaSizeFeet, feetToCells, resizedAreaPoints,
 } from '../../../shared/vtt/map/areas.js';
-import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
+import { isNote as isNoteDrawing, scaledPoints, strokeExtent } from '../../../shared/vtt/map/drawing.js';
 import { useMenuPlacement } from './menuPlacement.js';
 import {
   battleMapCheckboxRowSx,
@@ -34,7 +34,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
-// Its label, who sees it, its colour, its size, and taking it away. Every
+// Its label, who sees it, its colour, its size, its thickness, and taking it
+// away. Every
 // control writes as it is used; typing waits until the hand stops.
 //
 // `onPreview` shows a change on this screen only (a slider being dragged),
@@ -46,8 +47,11 @@ export default function DrawingMenu({
   const [text, setText] = useState('');
   const [sizeFeet, setSizeFeet] = useState('');
   const [breadthFeet, setBreadthFeet] = useState('');
-  const [scale, setScale] = useState(1);
-  // The mark as it was when the menu opened: the slider scales from it rather
+  // Both are what the mark is now, not a factor from this opening: reopened,
+  // the sliders stand where they were left and stay within the same bounds.
+  const [size, setSize] = useState(0);
+  const [thickness, setThickness] = useState(3);
+  // The mark as it was when the menu opened: a stroke is scaled from it rather
   // than compounding on every step, and a refused write goes back to it.
   const openedRef = useRef(null);
   const typed = useDebouncedPatch((patch) => onSave(drawing, patch));
@@ -70,7 +74,8 @@ export default function DrawingMenu({
     setBreadthFeet(drawing.area?.shape === 'line'
       ? String(Math.round((drawing.area.breadth || 1) * feetPerCell * 100) / 100)
       : '');
-    setScale(1);
+    setSize(isNoteDrawing(drawing) ? drawing.width || 3 : strokeExtent(drawing.points));
+    setThickness(drawing.width || 3);
   }, [drawing, feetPerCell]);
 
   // At the press; on a touch screen left there while typing, lifted only to
@@ -119,9 +124,21 @@ export default function DrawingMenu({
   };
 
   // Strokes grow about their middle; a note's size is its lettering.
-  const scalePatch = (factor) => (isNote
-    ? { width: Math.max(0.5, (openedRef.current?.width || 3) * factor) }
-    : { points: scaledPoints(openedRef.current?.points || drawing.points, factor) });
+  const opened = openedRef.current || drawing;
+  const openedExtent = strokeExtent(opened.points);
+  const sizePatchOf = (value) => (isNote
+    ? { width: value }
+    : { points: scaledPoints(opened.points, value / openedExtent) });
+  // A note's lettering is shown against the default size; a stroke in feet.
+  const sizeText = isNote
+    ? `×${trimNumber(size / NOTE_WIDTH)}`
+    : `${Math.round(size * feetPerCell)} ft`;
+  const sizeRange = isNote
+    ? { min: Math.min(opened.width || NOTE_WIDTH, NOTE_WIDTH * 0.25), max: Math.max(opened.width || NOTE_WIDTH, NOTE_WIDTH * 4), step: NOTE_WIDTH * 0.05 }
+    : { min: Math.min(openedExtent, 0.5), max: Math.max(openedExtent, MAX_STROKE_CELLS), step: 0.25 };
+  // A dot has no size but its thickness; a note's width is its lettering.
+  const canSize = isNote || (!area && openedExtent > 0);
+  const canThicken = !isNote;
 
   const kind = area
     ? `${capitalize(area.shape)}${area.effect ? ` · ${areaEffect(area.effect)?.label}` : ''}`
@@ -268,24 +285,37 @@ export default function DrawingMenu({
               />
             ) : null}
           </Stack>
-        ) : (
-          <Box>
-            <Typography sx={battleMapControlLabelSx}>{`Size ×${scale.toFixed(2).replace(/\.?0+$/, '')}`}</Typography>
-            <Slider
-              size="small"
-              aria-label="Size"
-              min={0.25}
-              max={4}
-              step={0.05}
-              value={scale}
-              onChange={(_, value) => {
-                setScale(value);
-                preview(scalePatch(value));
-              }}
-              onChangeCommitted={(_, value) => onSave(drawing, scalePatch(value))}
-            />
-          </Box>
-        )}
+        ) : null}
+
+        {canSize ? (
+          <MenuSlider
+            label="Size"
+            valueText={sizeText}
+            value={size}
+            {...sizeRange}
+            onChange={(value) => {
+              setSize(value);
+              preview(sizePatchOf(value));
+            }}
+            onCommit={(value) => onSave(drawing, sizePatchOf(value))}
+          />
+        ) : null}
+
+        {canThicken ? (
+          <MenuSlider
+            label="Thickness"
+            valueText={trimNumber(thickness)}
+            value={thickness}
+            min={0.5}
+            max={Math.max(opened.width || 3, MAX_THICKNESS)}
+            step={0.5}
+            onChange={(value) => {
+              setThickness(value);
+              preview({ width: value });
+            }}
+            onCommit={(value) => onSave(drawing, { width: value })}
+          />
+        ) : null}
 
         {area ? (
           <Typography sx={helperSx}>{`${feetPerCell} ft per ${cellWord}, as set on the ruler.`}</Typography>
@@ -311,7 +341,36 @@ export default function DrawingMenu({
   );
 }
 
+// A labelled slider of the menu, its value beside the name.
+function MenuSlider({ label, valueText, value, min, max, step, onChange, onCommit }) {
+  return (
+    <Box>
+      <Typography sx={battleMapControlLabelSx}>{`${label} ${valueText}`}</Typography>
+      <Slider
+        size="small"
+        aria-label={label}
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(_, next) => onChange(next)}
+        onChangeCommitted={(_, next) => onCommit(next)}
+      />
+    </Box>
+  );
+}
+
+function trimNumber(value) {
+  return value.toFixed(2).replace(/\.?0+$/, '');
+}
+
 const MENU_WIDTH = 280;
+// A note's default lettering, shown as ×1.
+const NOTE_WIDTH = 3;
+// The slider tops: a stroke reaches 40 cells, a line 12 (both further when the
+// mark already is, so a big mark opens where it stands).
+const MAX_STROKE_CELLS = 40;
+const MAX_THICKNESS = 12;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {

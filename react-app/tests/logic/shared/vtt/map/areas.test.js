@@ -16,7 +16,7 @@ import {
   snapAreaOrigin,
 } from '../../../../../src/shared/vtt/map/areas.js';
 import {
-  drawingAtPoint, isNote, scaledPoints, strokeLabelAnchor, toDrawing,
+  drawingAtPoint, isNote, scaledPoints, strokeExtent, strokeLabelAnchor, toDrawing,
 } from '../../../../../src/shared/vtt/map/drawing.js';
 
 const area = (shape, points, extra = {}) => ({
@@ -168,6 +168,11 @@ test('a stroke is scaled about the middle of its bounding box', () => {
   assert.deepEqual(scaledPoints([{ x: 0, y: 0 }, { x: 2, y: 4 }], 0.5), [{ x: 0.5, y: 1 }, { x: 1.5, y: 3 }]);
   // A dot has no size to change.
   assert.deepEqual(scaledPoints([{ x: 3, y: 3 }], 2), [{ x: 3, y: 3 }]);
+});
+
+test('a stroke measures the longer side of its bounding box, a dot nothing', () => {
+  assert.equal(strokeExtent([{ x: 0, y: 0 }, { x: 2, y: 4 }, { x: -1, y: 1 }]), 4);
+  assert.equal(strokeExtent([{ x: 3, y: 3 }]), 0);
 });
 
 test('a hidden mark says so', () => {

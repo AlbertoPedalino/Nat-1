@@ -80,11 +80,43 @@ test('a player gets no hide control, and a stroke is labelled and scaled rather 
   fireEvent.blur(label);
   expect(props.onSave).toHaveBeenLastCalledWith(stroke, { text: 'To the vault' });
 
-  // The slider's top is four times the size, about the middle of the stroke.
+  // Its size is its longer side in feet; the slider's top is 40 cells, about
+  // the middle of the stroke.
+  expect(screen.getByText('Size 20 ft')).toBeInTheDocument();
   fireEvent.keyDown(screen.getByRole('slider', { name: 'Size' }), { key: 'End' });
   await waitFor(() => expect(props.onPreview).toHaveBeenLastCalledWith(stroke, {
-    points: [{ x: -6, y: -3 }, { x: 10, y: 5 }],
+    points: [{ x: -18, y: -9 }, { x: 22, y: 11 }],
   }));
+});
+
+// It used to open at ×1 every time and scale from there, so each opening
+// allowed another ×4: the size is now what the stroke is, with fixed bounds.
+test('a stroke reopened shows the size it was left at, within the same bounds', () => {
+  const stroke = {
+    id: 'stroke-2', points: [{ x: 0, y: 0 }, { x: 40, y: 10 }], color: '#e8c96a', width: 3, text: null, area: null,
+  };
+  render(<DrawingMenu drawing={stroke} {...menuProps()} />);
+  const size = screen.getByRole('slider', { name: 'Size' });
+  expect(screen.getByText('Size 200 ft')).toBeInTheDocument();
+  expect(size).toHaveAttribute('aria-valuenow', '40');
+  expect(size).toHaveAttribute('aria-valuemax', '40');
+});
+
+test('an area and a stroke change their thickness; a note has none', async () => {
+  const props = menuProps();
+  const { unmount } = render(<DrawingMenu drawing={fireArea} {...props} />);
+  const thickness = screen.getByRole('slider', { name: 'Thickness' });
+  expect(thickness).toHaveAttribute('aria-valuenow', '3');
+  // An area is sized in feet, never by the stroke slider.
+  expect(screen.queryByRole('slider', { name: 'Size' })).not.toBeInTheDocument();
+  fireEvent.keyDown(thickness, { key: 'End' });
+  await waitFor(() => expect(props.onPreview).toHaveBeenLastCalledWith(fireArea, { width: 12 }));
+  unmount();
+
+  const note = { id: 'note-2', points: [{ x: 1, y: 1 }], color: '#e8c96a', width: 6, text: 'Trap', area: null };
+  render(<DrawingMenu drawing={note} {...menuProps()} />);
+  expect(screen.queryByRole('slider', { name: 'Thickness' })).not.toBeInTheDocument();
+  expect(screen.getByText('Size ×2')).toBeInTheDocument();
 });
 
 test('an area changes its effect from the menu, taking the effect colour', () => {
