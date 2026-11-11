@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { LOGO_COLORS, OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
@@ -53,18 +53,29 @@ const numeralSx = {
   textAnchor: 'middle',
 };
 
+// Rolled once per visit: arriving on the site rolls the die, coming back to
+// the home page from elsewhere in the app finds it already down on its 1.
+// Lives as long as the page does, so a reload is a new arrival.
+let rolledThisVisit = false;
+
 export default function NatOneDie({ sx }) {
   // A new key replays the animation from the start.
   const [roll, setRoll] = useState(0);
+  const [still, setStill] = useState(() => rolledThisVisit);
+  useEffect(() => { rolledThisVisit = true; }, []);
+  const rollAgain = () => {
+    setStill(false);
+    setRoll((value) => value + 1);
+  };
   return (
     <Box
       component="button"
       type="button"
       aria-label="Roll the die"
-      onClick={() => setRoll((value) => value + 1)}
+      onClick={rollAgain}
       sx={{ ...buttonSx, ...sx }}
     >
-      <Box key={roll} component="svg" viewBox="20 20 472 480" sx={svgSx} aria-hidden="true">
+      <Box key={roll} component="svg" viewBox="20 20 472 480" sx={still ? { ...svgSx, ...STILL_SX } : svgSx} aria-hidden="true">
         <g className="die">
           <polygon points={points(HEX)} fill={INK} stroke={INK} strokeWidth={24} strokeLinejoin="round" transform="translate(16 16)" />
           {FACES.map(([face, shade]) => (
@@ -79,7 +90,7 @@ export default function NatOneDie({ sx }) {
       </Box>
       {/* Dazed by its own roll: stars circle the die once it lands on the 1. */}
       <Box sx={starsAnchorSx}>
-        <BubbleDizzy key={`stars-${roll}`} delay={ROLL_MS * LANDED} reachX={70} reachY={14} starSize={30} />
+        {still ? null : <BubbleDizzy key={`stars-${roll}`} delay={ROLL_MS * LANDED} reachX={70} reachY={14} starSize={30} />}
       </Box>
     </Box>
   );
@@ -93,6 +104,13 @@ const buttonSx = {
   bgcolor: 'transparent',
   cursor: 'pointer',
   '&:focus-visible': { outline: `2px solid ${UI_COLORS.accent}`, outlineOffset: 4, borderRadius: 2 },
+};
+
+// The die at rest on its 1, with no roll: after the first roll of the visit,
+// and always for reduced motion.
+const STILL_SX = {
+  '& .die, & .twenty, & .one': { animation: 'none' },
+  '& .twenty': { opacity: 0 },
 };
 
 // Where the stars circle: just over the die's top point.
@@ -135,8 +153,5 @@ const svgSx = {
     [AFTER_FLIP]: { opacity: 1 },
     '100%': { opacity: 1 },
   },
-  '@media (prefers-reduced-motion: reduce)': {
-    '& .die, & .twenty, & .one': { animation: 'none' },
-    '& .twenty': { opacity: 0 },
-  },
+  '@media (prefers-reduced-motion: reduce)': STILL_SX,
 };
