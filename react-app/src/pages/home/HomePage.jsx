@@ -1,13 +1,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { alpha, Box, Button, Typography, Card, CardContent } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
+import { UI_COLORS } from '../../shared/ui/colors.js';
+import { coverRaysSx, SURFACES } from '../../shared/ui/surfaces.js';
+import { INK_EDGE, inkOutlineFilter, inkShadow, UI_SHADOWS } from '../../shared/ui/shadows.js';
+import { CARD_SX } from '../../shared/ui/interactive.js';
+import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
+import { bubbleCheerSx } from '../../shared/ui/bubble.js';
+import { DURATIONS } from '../../shared/ui/motion.js';
 import { UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -58,27 +64,19 @@ export default function HomePage() {
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
         <Box component="img" src={`${import.meta.env.BASE_URL}favicon.png`} alt="" sx={heroLogoSx} />
-        <Typography sx={heroTitleSx}>Nat-1 D&D 5.5e</Typography>
-        <Box sx={dividerSx} />
+        <Typography component="h1" sx={heroTitleSx}>Nat-1</Typography>
+        <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
 
       <Box sx={gridSx}>
         {TOOLS.map((tool) => (
-          <Card
-            key={tool.path}
-            component={Link}
-            to={tool.path}
-            variant="outlined"
-            sx={getCardSx(tool.color)}
-          >
-            <CardContent sx={cardContentSx}>
-              <Box sx={{ color: tool.color, display: 'flex' }}>
-                <tool.icon size={38} strokeWidth={1.5} />
-              </Box>
-              <Typography sx={cardLabelSx}>{tool.label}</Typography>
-              <Typography sx={cardDescSx}>{tool.desc}</Typography>
-            </CardContent>
-          </Card>
+          <Box key={tool.path} component={Link} to={tool.path} sx={getCardSx(tool.color)}>
+            <Box sx={{ ...panelBadgeSx(tool.color), p: 0.75, borderRadius: 1.5, boxShadow: UI_SHADOWS.press }}>
+              <tool.icon size={ICON_SIZES.hero} strokeWidth={1.75} />
+            </Box>
+            <Typography className="card-label" sx={cardLabelSx}>{tool.label}</Typography>
+            <Typography sx={cardDescSx}>{tool.desc}</Typography>
+          </Box>
         ))}
       </Box>
 
@@ -101,39 +99,55 @@ export default function HomePage() {
 }
 
 const homeRootSx = {
+  ...SURFACES.page,
   minHeight: '100vh',
-  bgcolor: UI_COLORS.surfaceDarkest,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   p: '2rem 1rem',
   pt: `calc(2rem + ${APP_TOP_BAR_HEIGHT})`,
+  overflowX: 'hidden',
 };
 
-const heroSx = { textAlign: 'center', mb: '3rem' };
-
-const heroTitleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: 'clamp(2rem, 6vw, 3.5rem)',
-  color: UI_COLORS.accentText,
-  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.accent, OPACITY.line)}`,
-  lineHeight: LINE_HEIGHTS.tight,
+// The cover: the logo, the app's name lettered like a comic's title over a
+// sunburst, and the edition on a sticker under it. The name cheers in once.
+const heroSx = {
+  ...coverRaysSx(UI_COLORS.accent),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  mb: '2.5rem',
 };
 
 const heroLogoSx = {
   display: 'block',
-  width: 'clamp(76px, 15vw, 112px)',
+  width: 'clamp(72px, 14vw, 104px)',
   height: 'auto',
-  margin: '0 auto 1rem',
-  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.success, OPACITY.line)})`,
+  mb: '0.5rem',
+  filter: inkOutlineFilter(),
 };
 
-const dividerSx = {
-  width: '120px',
-  height: '1px',
-  background: `linear-gradient(90deg, transparent, ${UI_COLORS.accent}, transparent)`,
-  margin: '1.4rem auto 0',
+const heroTitleSx = {
+  ...TEXT_STYLES.cover,
+  ...bubbleCheerSx('rotate(-4deg)'),
+  fontSize: 'clamp(3.5rem, 12vw, 6.5rem)',
+  lineHeight: LINE_HEIGHTS.tight,
+  color: UI_COLORS.accent,
+};
+
+const heroEditionSx = {
+  ...TEXT_STYLES.label,
+  fontSize: FONT_SIZES.xxl,
+  mt: '0.75rem',
+  px: 1.5,
+  py: 0.25,
+  color: UI_COLORS.textPrimary,
+  bgcolor: UI_COLORS.surfaceRaised,
+  border: INK_EDGE,
+  borderRadius: 1,
+  boxShadow: inkShadow(),
+  transform: 'rotate(2deg)',
 };
 
 const gridSx = {
@@ -149,62 +163,49 @@ const gridSx = {
   },
 };
 
-function paletteValue(theme, token) {
-  return token.split('.').reduce((value, part) => value?.[part], theme.palette) || theme.palette.primary.main;
-}
-
+// A tool's card: the drawn card, its badge in the tool's colour, lifted and
+// edged in that colour under the cursor.
 function getCardSx(color) {
   return {
+    ...CARD_SX,
     textDecoration: 'none',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: (theme) => alpha(paletteValue(theme, color), OPACITY.line),
-    borderRadius: 1.5,
-    bgcolor: UI_COLORS.surfaceDeep,
-    backgroundImage: 'none',
-    transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.75rem',
+    p: '1.75rem 1.5rem 1.5rem',
+    transition: `border-color ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, transform ${DURATIONS.fast}ms ease`,
     '&:hover': {
       borderColor: color,
-      boxShadow: (theme) => `0 0 24px ${alpha(paletteValue(theme, color), OPACITY.fill)}`,
-      transform: 'translateY(-2px)',
+      boxShadow: inkShadow(UI_COLORS.edge, 5),
+      transform: 'translate(-2px, -2px)',
     },
     '&:hover .card-label': { color },
+    '@media (max-width: 600px)': {
+      gap: '0.6rem',
+      p: '1.25rem 0.75rem 1rem',
+    },
   };
 }
-
-const cardContentSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '0.75rem',
-  p: '2rem 1.5rem 1.75rem',
-  '&:last-child': { pb: '1.75rem' },
-  '@media (max-width: 600px)': {
-    gap: '0.6rem',
-    p: '1.4rem 0.75rem 1.25rem',
-    '&:last-child': { pb: '1.25rem' },
-  },
-};
 
 const cardLabelSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxl,
   textAlign: 'center',
-  color: UI_COLORS.textSecondary,
-  transition: 'color 0.15s',
+  color: UI_COLORS.textPrimary,
+  transition: `color ${DURATIONS.fast}ms ease`,
 };
 
 const cardDescSx = {
+  ...TEXT_STYLES.note,
   fontSize: FONT_SIZES.xl,
-  color: UI_COLORS.textFaint,
   textAlign: 'center',
   lineHeight: LINE_HEIGHTS.normal,
-  fontStyle: 'italic',
   fontFamily: UI_FONTS.prose,
 };
 
 const clearDataWrapSx = {
-  mt: '1rem',
+  mt: '1.5rem',
   minHeight: '42px',
   display: 'flex',
   flexDirection: 'column',
@@ -213,13 +214,6 @@ const clearDataWrapSx = {
 };
 
 const clearDataButtonSx = {
-  borderColor: uiAlpha(UI_COLORS.danger, OPACITY.edge),
-  color: UI_COLORS.danger,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
-  '&:hover': {
-    borderColor: UI_COLORS.danger,
-    bgcolor: uiAlpha(UI_COLORS.danger, OPACITY.soft),
-  },
 };
-

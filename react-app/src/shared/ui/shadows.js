@@ -18,6 +18,12 @@ export function inkTextShadow(color = UI_COLORS.edge) {
   return `1px 1px 0 ${color}`;
 }
 
+// An ink outline drawn round big lettering (a cover title), under the fill so
+// the letters keep their full weight.
+export function inkStroke(width = 3, color = UI_COLORS.edge) {
+  return { WebkitTextStroke: `${width}px ${color}`, paintOrder: 'stroke fill' };
+}
+
 // An ink outline drawn round a silhouette (an icon drawn large, as the AC
 // shield) as a CSS filter, with the solid shadow under it in `shadow`.
 export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {

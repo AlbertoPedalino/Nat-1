@@ -9,6 +9,24 @@ import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 const HALFTONE = `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} 1px, transparent 1.4px)`;
 const HALFTONE_SIZE = '7px 7px';
 
+// A comic cover's sunburst: rays in `color` fanning out from behind a title,
+// fading out towards the edge. Spread on the box the title sits in.
+export function coverRaysSx(color = UI_COLORS.accent) {
+  return {
+    position: 'relative',
+    isolation: 'isolate',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      inset: '-60% -40%',
+      zIndex: -1,
+      pointerEvents: 'none',
+      backgroundImage: `repeating-conic-gradient(from 0deg at 50% 50%, ${uiAlpha(color, OPACITY.soft)} 0deg 7deg, transparent 7deg 15deg)`,
+      maskImage: 'radial-gradient(closest-side, black 25%, transparent 100%)',
+    },
+  };
+}
+
 export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({

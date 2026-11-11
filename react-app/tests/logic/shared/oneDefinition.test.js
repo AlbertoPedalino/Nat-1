@@ -257,7 +257,7 @@ test('text treatments come from TEXT_STYLES', () => {
   // Italic outside `note` is emphasis inside text (rich text, a stat block
   // entry name) or the prose face's own flourish.
   assert.deepEqual(sourceLinesMatching(/fontStyle:\s*'italic'/, { allow: [...allow,
-    'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx', 'pages/home/HomePage.jsx', 'pages/library/styles.js'] }), []);
+    'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx', 'pages/library/styles.js'] }), []);
 });
 
 // The look of a chosen option or row is the theme's (MuiToggleButton,
