@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { clampInt } from '../../../shared/numbers.js';
@@ -7,6 +7,7 @@ import LoadStatus from '../../../shared/ui/LoadStatus.jsx';
 import { runBusy } from '../../../shared/ui/busyAction.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -34,12 +35,8 @@ export default function CampaignImport() {
   if (!campaignPlayers.cloudEnabled) return null;
 
   return (
-    <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+    <Panel icon={Users} title="Campaign Players">
       <Stack spacing={1.5}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Users size={ICON_SIZES.md} />
-          <Typography variant="h2">Campaign Players</Typography>
-        </Stack>
         <LoadStatus
           status={campaignPlayers.loading ? 'loading' : campaignPlayers.error ? 'error' : 'ready'}
           loadingLabel="Loading campaign players…"
@@ -98,7 +95,7 @@ export default function CampaignImport() {
           </>
         ) : null}
       </Stack>
-    </Paper>
+    </Panel>
   );
 }
 

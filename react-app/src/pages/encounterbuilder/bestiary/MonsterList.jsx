@@ -1,4 +1,5 @@
-import { Paper } from '@mui/material';
+import { Skull } from 'lucide-react';
+import Panel from '../../../shared/ui/Panel.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
@@ -8,7 +9,7 @@ export default function MonsterList() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
 
   return (
-    <Paper sx={panelSx}>
+    <Panel icon={Skull} title="Monsters">
       <MonsterBrowser
         monsterDb={monsterDb}
         filters={state.filters}
@@ -18,11 +19,6 @@ export default function MonsterList() {
         onPick={(monster) => dispatch({ type: 'addMonster', monster })}
         pickLabel="Add to encounter"
       />
-    </Paper>
+    </Panel>
   );
 }
-
-const panelSx = {
-  p: 2,
-  bgcolor: 'background.paper',
-};

@@ -1,7 +1,5 @@
-import {
-  Autocomplete, Box, Button, Chip, IconButton, Paper, Stack, TextField, Tooltip, Typography,
-} from '@mui/material';
-import { Play, RotateCcw, ScrollText, SlidersHorizontal, Trash2, Upload } from 'lucide-react';
+import { Autocomplete, Box, Button, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Library as LibraryIcon, Play, RotateCcw, ScrollText, SlidersHorizontal, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -16,6 +14,9 @@ import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import Panel from '../../../shared/ui/Panel.jsx';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -33,17 +34,17 @@ export default function LibraryView() {
 
   return (
     <Stack spacing={2}>
-      <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h2">Library</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>
-          </Box>
-          <Button color="error" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={clearAll} disabled={!items.length}>
+      <Panel
+        icon={LibraryIcon}
+        title="Library"
+        action={(
+          <Button size="small" color="error" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={clearAll} disabled={!items.length}>
             Clear All
           </Button>
-        </Stack>
-      </Paper>
+        )}
+      >
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>
+      </Panel>
       {items.length ? (
         groups.map((group) => (
           <Stack key={group.quest ? `quest:${group.quest}` : 'unassigned'} spacing={1}>
@@ -56,7 +57,7 @@ export default function LibraryView() {
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,minmax(0,1fr))', xl: 'repeat(3,minmax(0,1fr))' }, gap: 2 }}>
               {group.items.map((item) => (
-                <Paper key={item.enc.id} sx={{ p: 2, bgcolor: 'background.paper' }}>
+                <Box key={item.enc.id} sx={{ ...SURFACES.card, p: 2 }}>
                   <LibraryCard
                     item={item}
                     monsters={monsterDb.monsters}
@@ -65,15 +66,15 @@ export default function LibraryView() {
                     dispatch={dispatch}
                     notify={notify}
                   />
-                </Paper>
+                </Box>
               ))}
             </Box>
           </Stack>
         ))
       ) : (
-        <Paper sx={{ p: 4, bgcolor: 'background.paper', textAlign: 'center' }}>
-          <Typography sx={{ color: 'text.secondary' }}>No encounters saved.</Typography>
-        </Paper>
+        <Box sx={{ ...SURFACES.panel, p: 4, textAlign: 'center' }}>
+          <Typography sx={TEXT_STYLES.note}>No encounters saved.</Typography>
+        </Box>
       )}
     </Stack>
   );

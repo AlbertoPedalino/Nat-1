@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { ArrowLeft, ArrowRight, RotateCcw, Swords, X } from 'lucide-react';
 import { isFightResumable } from '../../../shared/encounter/library.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -9,6 +9,8 @@ import { StatBlockPanel } from '../bestiary/StatBlockDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Panel from '../../../shared/ui/Panel.jsx';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
@@ -33,14 +35,14 @@ export default function CombatView() {
 
   if (!combat?.combatants?.length) {
     return (
-      <Paper sx={{ p: 4, bgcolor: 'background.paper', textAlign: 'center' }}>
+      <Box sx={{ ...SURFACES.panel, p: 4, textAlign: 'center' }}>
         <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
           <Swords size={ICON_SIZES.display} />
           <Typography variant="h2">No active encounter</Typography>
           <Typography sx={{ color: 'text.secondary' }}>Launch an encounter from Builder or resume a saved fight from Library.</Typography>
           <Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>
         </Stack>
-      </Paper>
+      </Box>
     );
   }
 
@@ -61,14 +63,11 @@ export default function CombatView() {
     <>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1fr) minmax(340px,0.8fr)' }, gap: 2 }}>
         <Stack spacing={2}>
-          <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+          <Panel icon={Swords} title={`Round ${combat.round}`}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
-              <Box>
-                <Typography variant="h2">Round {combat.round}</Typography>
-                <Typography sx={{ color: 'text.secondary' }}>
-                  Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>
-                </Typography>
-              </Box>
+              <Typography sx={{ color: 'text.secondary' }}>
+                Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>
+              </Typography>
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
                 <Button variant="outlined" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'prevTurn' })}>
                   Previous
@@ -84,7 +83,7 @@ export default function CombatView() {
                 </Button>
               </Stack>
             </Stack>
-          </Paper>
+          </Panel>
           <Reinforcements />
           {/* Cap the roster height so it scrolls internally instead of pushing the
               turn controls (Previous/Next/Reroll) off-screen on big encounters. */}

@@ -1,6 +1,4 @@
-import {
-  Autocomplete, Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography,
-} from '@mui/material';
+import { Autocomplete, Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
@@ -15,6 +13,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -37,19 +36,21 @@ export default function EncounterList() {
   };
 
   return (
-    <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+    <Panel
+      icon={Swords}
+      title="Encounter"
+      action={(
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Plus size={ICON_SIZES.sm} />}
+          onClick={() => dispatch({ type: 'newEncounter' })}
+        >
+          New Encounter
+        </Button>
+      )}
+    >
       <Stack spacing={2}>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-          <Typography variant="h2">Encounter</Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<Plus size={ICON_SIZES.sm} />}
-            onClick={() => dispatch({ type: 'newEncounter' })}
-          >
-            New Encounter
-          </Button>
-        </Stack>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>{formatNumber(difficulty.totalXp)} XP</Typography>
         <TextField
           size="small"
@@ -156,7 +157,7 @@ export default function EncounterList() {
           }}
         />
       </Stack>
-    </Paper>
+    </Panel>
   );
 }
 

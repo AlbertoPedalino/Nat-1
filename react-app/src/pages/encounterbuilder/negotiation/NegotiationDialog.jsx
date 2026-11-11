@@ -182,7 +182,6 @@ function MeterCard({ label, value, max, color, prominent = false }) {
               height: prominent ? 9 : 7,
               borderRadius: 99,
               bgcolor: index < value ? color : uiAlpha(UI_COLORS.white, OPACITY.soft),
-              boxShadow: index < value ? `0 0 8px ${uiAlpha(color, OPACITY.line)}` : 'none',
             }}
           />
         ))}

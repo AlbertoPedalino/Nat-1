@@ -6,6 +6,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { inkShadow } from '../../../shared/ui/shadows.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -147,12 +148,12 @@ export const hpBarSx = {
   bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft),
 };
 
+// A combatant: the drawn card (SURFACES.card); the one whose turn it is is
+// edged in the accent and casts its solid shadow in it, as a toast does.
 export const cardSx = {
+  ...SURFACES.card,
   position: 'relative',
   p: 1,
-  bgcolor: 'background.paper',
-  border: '2px solid transparent',
-  borderRadius: 1.5,
   transition: `border-color ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
 };
 
@@ -179,7 +180,7 @@ export function buildActiveSx(theme) {
   return {
     borderColor: accent,
     bgcolor: alpha(accent, OPACITY.tint),
-    boxShadow: `0 0 0 1px ${alpha(accent, OPACITY.strong)}, 0 0 16px ${alpha(accent, OPACITY.line)}`,
+    boxShadow: inkShadow(accent),
     '&::before': {
       content: '""',
       position: 'absolute',

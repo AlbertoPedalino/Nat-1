@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { ExternalLink, Trash2 } from 'lucide-react';
+import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { ExternalLink, Trash2, Users } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
@@ -9,14 +9,14 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
 
   return (
-    <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+    <Panel icon={Users} title="Party">
       <Stack spacing={2}>
-        <Typography variant="h2">Party</Typography>
         <Stack direction="row" spacing={1}>
           <Stepper
             label="PCs"
@@ -104,7 +104,7 @@ export default function PartyConfig() {
           ))}
         </Stack>
       </Stack>
-    </Paper>
+    </Panel>
   );
 }
 
