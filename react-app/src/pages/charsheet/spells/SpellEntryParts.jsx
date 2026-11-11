@@ -30,7 +30,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 1, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.line), borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>
@@ -108,7 +108,7 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
             fontSize: FONT_SIZES.sm,
             px: 1,
             py: 0.5,
-            border: 1,
+            border: 2,
             borderRadius: '999px !important',
             '&:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' },
           },

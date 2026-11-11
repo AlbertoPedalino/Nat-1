@@ -64,8 +64,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 key={level}
                 onClick={() => setCreateSlotSelection(level)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: createSlotSelection === level ? UI_COLORS.accentText : 'divider',
+                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
+                  borderColor: createSlotSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
                   borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
@@ -106,8 +106,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 key={level}
                 onClick={() => setConvertSlotSelection(level)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: convertSlotSelection === level ? UI_COLORS.accentText : 'divider',
+                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
+                  borderColor: convertSlotSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
                   borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
@@ -141,8 +141,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 key={opt.key}
                 onClick={() => { confirmWildResurgence(opt.key); }}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: 'divider', borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
+                  borderColor: UI_COLORS.edge, borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
                 }}
               >
@@ -177,8 +177,8 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 key={level}
                 onClick={() => setSpendSlotRecoverSelection(level)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : 'divider',
+                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
+                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
                   borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
                   bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
                   '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
@@ -236,7 +236,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
             {slotRecovery.levels.map((entry) => {
               const value = Number(slotRecoverySelection[String(entry.level)] || 0);
               return (
-                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.75, py: 0.5 }}>
+                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 1, px: 0.75, py: 0.5 }}>
                   <Typography sx={{ flex: 1, fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>

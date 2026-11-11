@@ -105,7 +105,7 @@ const weatherSx = {
   flexWrap: 'wrap',
   gap: 1.5,
   p: 1,
-  border: '1px solid',
+  border: '2px solid',
   borderRadius: 1.5,
   minWidth: { sm: 280 },
 };

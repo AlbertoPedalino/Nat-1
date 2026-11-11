@@ -35,7 +35,7 @@ const itemStateChipBaseSx = {
   minWidth: 0,
   px: 1,
   py: 0.25,
-  border: 1,
+  border: 2,
   borderRadius: 0.375,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
@@ -125,7 +125,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}
-              sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: item.equipped ? UI_COLORS.secondaryStrong : 'divider', borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: item.equipped ? UI_COLORS.secondaryStrong : UI_COLORS.edge, borderRadius: 0.375, color: item.equipped ? UI_COLORS.secondaryStrong : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.tint) : 'transparent', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -165,7 +165,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={ICON_SIZES.xxs} /> : null}
-              sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: carried ? 'divider' : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+              sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: carried ? UI_COLORS.edge : UI_COLORS.outline, borderRadius: 0.375, color: carried ? 'text.secondary' : UI_COLORS.textSecondary, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.outline, OPACITY.fill), ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -187,8 +187,8 @@ function ItemFlagButton({ def, active, onClick }) {
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={ICON_SIZES.xxs} /> : null}
       sx={{
-        minWidth: 0, px: 1, py: 0.25, border: 1, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
-        ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
+        minWidth: 0, px: 1, py: 0.25, border: 2, borderRadius: 0.375, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs,
+        ...(active ? chipTintStyle(tone, { bgAlpha: OPACITY.tint, borderAlpha: 1 }) : { borderColor: UI_COLORS.edge, color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
@@ -222,8 +222,8 @@ function SlotBtn({ active, onClick, label }) {
     <IconButton size="small" onClick={onClick}
       sx={{
         minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
-        border: 1,
-        borderColor: active ? UI_COLORS.accent : 'divider',
+        border: 2,
+        borderColor: active ? UI_COLORS.accent : UI_COLORS.edge,
         borderRadius: 0.375,
         color: active ? UI_COLORS.accentText : 'text.secondary',
         bgcolor: active ? uiAlpha(UI_COLORS.accent, OPACITY.fill) : 'transparent',
@@ -260,7 +260,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={ICON_SIZES.xxs} /> : (item.attuned ? <Check size={ICON_SIZES.xxs} /> : (hasRequirementWarning ? <AlertTriangle size={ICON_SIZES.xxs} /> : null))}
-            sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, OPACITY.fill) : 'transparent', '&.Mui-disabled': { opacity: OPACITY.edge } }}>
+            sx={{ ...itemStateChipBaseSx, borderColor: accent || UI_COLORS.edge, color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, OPACITY.fill) : 'transparent', '&.Mui-disabled': { opacity: OPACITY.edge } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </Box>
@@ -268,7 +268,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: 1, py: 0.25, border: 1, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
+            sx={{ minWidth: 0, px: 1, py: 0.25, border: 2, borderColor: UI_COLORS.dangerDeep, borderRadius: 0.375, color: UI_COLORS.dangerMuted, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxs }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

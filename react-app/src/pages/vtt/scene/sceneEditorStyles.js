@@ -194,7 +194,7 @@ export const sheetViewSx = {
     overscrollBehavior: 'contain',
     contain: 'layout paint',
   },
-  border: '1px solid',
+  border: '2px solid',
   borderColor: 'gmboard.vtt.accentBorderStrong',
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.veil),

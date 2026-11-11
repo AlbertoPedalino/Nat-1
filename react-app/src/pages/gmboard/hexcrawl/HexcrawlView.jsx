@@ -126,7 +126,7 @@ const moveBarSx = {
   justifyContent: 'space-between',
   gap: 1.5,
   p: 1.5,
-  border: '1px solid',
+  border: '2px solid',
   borderColor: 'primary.main',
   borderRadius: 2,
   bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash),

@@ -164,7 +164,7 @@ const columnsSx = {
 const sectionCardSx = {
   p: 1.5,
   borderRadius: 1,
-  border: '1px solid',
+  border: '2px solid',
   borderColor: 'gmboard.vtt.accentBorder',
   bgcolor: 'gmboard.vtt.inset',
 };

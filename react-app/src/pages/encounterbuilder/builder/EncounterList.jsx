@@ -14,6 +14,7 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -124,7 +125,7 @@ export default function EncounterList() {
                   aria-label="Launch with initiative options"
                   onClick={() => setInitiativeOpen(true)}
                   disabled={cannotLaunch}
-                  sx={{ border: 1, borderColor: 'divider', borderRadius: 1, px: 1.25 }}
+                  sx={{ border: 2, borderColor: UI_COLORS.edge, borderRadius: 1, px: 1.25 }}
                 >
                   <SlidersHorizontal size={ICON_SIZES.md} />
                 </IconButton>

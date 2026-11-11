@@ -8,6 +8,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -67,7 +68,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
 
 const sectionSx = {
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.fill)}`,
+  border: INK_EDGE,
   bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.faint),
   overflow: 'hidden',
 };

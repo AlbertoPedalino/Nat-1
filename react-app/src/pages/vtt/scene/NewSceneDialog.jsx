@@ -26,6 +26,7 @@ import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -286,8 +287,8 @@ const openSx = { fontSize: FONT_SIZES.md };
 const frameSx = {
   width: '100%',
   height: { xs: '52vh', md: '60vh' },
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
   bgcolor: VTT_COLORS.white,
 };

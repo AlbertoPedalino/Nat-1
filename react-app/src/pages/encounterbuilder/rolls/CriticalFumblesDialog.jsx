@@ -296,7 +296,7 @@ const outcomeSx = {
   gridTemplateColumns: { xs: '48px minmax(0,1fr)', sm: '58px minmax(0,1fr)' },
   gap: 1.25,
   alignItems: 'center',
-  border: 1,
+  border: 2,
   borderColor: 'error.main',
   bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.soft),
 };

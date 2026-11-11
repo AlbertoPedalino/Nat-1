@@ -22,7 +22,7 @@ import {
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
@@ -281,7 +281,7 @@ const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: LIN
 
 const cardSx = {
   p: 1,
-  border: '1px solid',
+  border: '2px solid',
   borderRadius: 1.5,
 };
 
@@ -292,8 +292,8 @@ const nextHexSx = {
   alignItems: 'flex-start',
   gap: 1,
   p: 1,
-  border: '1px solid',
-  borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
 };
@@ -310,8 +310,8 @@ const chipSx = {
   fontSize: FONT_SIZES.sm,
   lineHeight: LINE_HEIGHTS.normal,
   color: VTT_COLORS.text,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
 };
 
@@ -330,8 +330,8 @@ const linkButtonSx = {
 
 const lastCardSx = {
   p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1.5,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
 };

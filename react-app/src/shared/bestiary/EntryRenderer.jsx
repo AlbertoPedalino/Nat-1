@@ -41,7 +41,7 @@ export default function EntryRenderer({ entries, onRoll }) {
   }
   if (entries.type === 'table') {
     return (
-      <Table size="small" sx={{ my: 1, border: '1px solid', borderColor: 'divider' }}>
+      <Table size="small" sx={{ my: 1, border: '1px solid', borderColor: UI_COLORS.edge }}>
         {entries.caption ? <caption><InlineText value={entries.caption} onRoll={onRoll} /></caption> : null}
         {entries.colLabels ? (
           <TableHead>

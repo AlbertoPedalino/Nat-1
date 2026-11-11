@@ -9,6 +9,10 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
   return `${offset}px ${offset}px 0 ${color}`;
 }
 
+// The ink edge: the 2px black line round every drawn box and control. A frame
+// that is not a whole surface (a pill, a stepper, a tile) takes this.
+export const INK_EDGE = `2px solid ${UI_COLORS.edge}`;
+
 // Inked lettering: a hard shadow under a title, a big number, a die's numeral.
 export function inkTextShadow(color = UI_COLORS.edge) {
   return `1px 1px 0 ${color}`;

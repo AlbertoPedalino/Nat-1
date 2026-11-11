@@ -46,7 +46,7 @@ export default function XpDeltaControl({ currentXp, onApply, variant = 'default'
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
       <IconButton size={size} onClick={() => apply(-1)} aria-label="Subtract XP"
-        sx={{ border: '1px solid', borderColor: 'divider', color: 'error.main', p: 0.5, '&:hover': { borderColor: 'error.main' } }}>
+        sx={{ border: '2px solid', borderColor: UI_COLORS.edge, color: 'error.main', p: 0.5, '&:hover': { borderColor: 'error.main' } }}>
         <Minus size={iconSize} />
       </IconButton>
       <TextField
@@ -61,7 +61,7 @@ export default function XpDeltaControl({ currentXp, onApply, variant = 'default'
         slotProps={{ input: { inputMode: 'numeric', sx: fieldSx } }}
       />
       <IconButton size={size} onClick={() => apply(1)} aria-label="Add XP"
-        sx={{ border: '1px solid', borderColor: 'divider', color: 'success.main', p: 0.5, '&:hover': { borderColor: 'success.main' } }}>
+        sx={{ border: '2px solid', borderColor: UI_COLORS.edge, color: 'success.main', p: 0.5, '&:hover': { borderColor: 'success.main' } }}>
         <Plus size={iconSize} />
       </IconButton>
     </Box>

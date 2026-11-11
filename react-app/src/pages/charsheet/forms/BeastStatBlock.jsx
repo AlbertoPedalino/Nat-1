@@ -12,6 +12,7 @@ import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.j
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 
@@ -289,7 +290,7 @@ const rollChipSx = {
   appearance: 'none',
   display: 'inline-flex',
   alignItems: 'baseline',
-  border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.edge)}`,
+  border: INK_EDGE,
   bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
   color: UI_COLORS.accentText,
   borderRadius: 0.5,
@@ -334,7 +335,7 @@ export const dismissButtonSx = {
   fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.title,
   color: UI_COLORS.dangerMuted,
-  border: 1,
+  border: 2,
   borderColor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.edge),
   borderRadius: 1,
   '&:hover': { borderColor: UI_COLORS.dangerMuted, bgcolor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.tint) },

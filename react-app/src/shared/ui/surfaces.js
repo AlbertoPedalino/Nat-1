@@ -1,6 +1,6 @@
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
-import { UI_SHADOWS } from './shadows.js';
+import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
@@ -37,15 +37,15 @@ export const SURFACES = Object.freeze({
   // A sunken well inside a panel: the details under a row, a field group.
   inset: Object.freeze({
     bgcolor: UI_COLORS.surfaceSunken,
-    border: 1,
-    borderColor: 'divider',
+    border: 2,
+    borderColor: UI_COLORS.edge,
     borderRadius: 1,
   }),
   // A light row or tile laid on the page: list entries, stat tiles.
   wash: Object.freeze({
     bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
-    border: 1,
-    borderColor: 'divider',
+    border: 2,
+    borderColor: UI_COLORS.edge,
     borderRadius: 1,
   }),
   // The battle map's glass: every panel and dialog floating over the board.
@@ -58,14 +58,14 @@ export const SURFACES = Object.freeze({
   map: Object.freeze({
     bgcolor: 'gmboard.vtt.surface',
     backgroundImage: 'none',
-    border: `2px solid ${UI_COLORS.edge}`,
+    border: INK_EDGE,
     boxShadow: UI_SHADOWS.box,
   }),
   // A small control on the map (round icon buttons, corner toggles): the
   // raised button's edge and press.
   mapControl: Object.freeze({
     bgcolor: VTT_COLORS.surface,
-    border: `2px solid ${UI_COLORS.edge}`,
+    border: INK_EDGE,
     boxShadow: UI_SHADOWS.press,
   }),
 });

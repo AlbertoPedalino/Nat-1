@@ -92,8 +92,8 @@ export default function ScoresStep({ state, dispatch }) {
                         py: 0.75,
                         borderRadius: 1,
                         bgcolor: 'action.selected',
-                        border: '1px solid',
-                        borderColor: 'divider',
+                        border: '2px solid',
+                        borderColor: UI_COLORS.edge,
                         textAlign: 'center',
                       }}
                     >

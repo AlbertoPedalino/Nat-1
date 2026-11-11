@@ -9,7 +9,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
@@ -92,8 +92,8 @@ const weatherBadgeSx = {
   px: 1,
   py: 0.25,
   borderRadius: 1,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
   color: 'text.secondary',
 };

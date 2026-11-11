@@ -4,6 +4,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
+import { INK_EDGE } from '../../shared/ui/shadows.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
@@ -116,7 +117,7 @@ export const iconBtnSx = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: `1px solid ${uiAlpha(UI_COLORS.accentMuted, OPACITY.fill)}`,
+  border: INK_EDGE,
   borderRadius: 0.75,
   background: uiAlpha(UI_COLORS.black, OPACITY.fill),
   color: UI_COLORS.textFaint,
@@ -139,7 +140,7 @@ export function badgeSx(kind, theme) {
     borderRadius: 0.5,
     color,
     bgcolor: alpha(color, OPACITY.tint),
-    border: '1px solid',
+    border: '2px solid',
     borderColor: alpha(color, OPACITY.line),
   };
 }

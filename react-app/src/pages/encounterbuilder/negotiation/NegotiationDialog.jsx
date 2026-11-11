@@ -280,7 +280,7 @@ const currentResultSx = {
 
 const finalResultSx = {
   p: { xs: 1.25, sm: 1.5 },
-  border: 1,
+  border: 2,
   borderColor: 'primary.main',
   bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
 };

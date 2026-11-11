@@ -10,6 +10,7 @@ import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -97,7 +98,7 @@ const buttonSx = {
   height: 30,
   flexShrink: 0,
   color: vttAlpha(VTT_COLORS.white, OPACITY.heavy),
-  border: `1px solid ${vttAlpha(VTT_COLORS.white, OPACITY.fill)}`,
+  border: INK_EDGE,
   borderRadius: 1,
   '&:hover': {
     color: VTT_COLORS.accent,

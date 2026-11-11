@@ -111,7 +111,7 @@ function SelectedChips({ values }) {
           component="span"
           sx={{
             px: 0.75,
-            border: 1,
+            border: 2,
             borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
             borderRadius: 0.375,
             bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),

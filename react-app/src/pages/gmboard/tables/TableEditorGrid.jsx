@@ -3,6 +3,7 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
 import { resolveCellCommit } from './tableEdit.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function TableEditorGrid({ rows, columns, matchField, onEdit, tableLabel }) {
   const theme = useTheme();
@@ -25,7 +26,7 @@ export default function TableEditorGrid({ rows, columns, matchField, onEdit, tab
 
   const containerSx = {
     border: '1px solid',
-    borderColor: 'divider',
+    borderColor: UI_COLORS.edge,
     borderRadius: 2,
     '&:focus-visible': {
       outline: `2px solid ${theme.palette.primary.main}`,

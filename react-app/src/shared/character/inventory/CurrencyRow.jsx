@@ -8,6 +8,7 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../u
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { DURATIONS } from '../../ui/motion.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -26,8 +27,8 @@ export function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder
         display: 'flex',
         justifyContent: 'space-between',
         mt: v.stepper.mt,
-        border: 1,
-        borderColor: 'divider',
+        border: 2,
+        borderColor: UI_COLORS.edge,
         borderRadius: 1,
         bgcolor: v.stepper.bgcolor,
       }}

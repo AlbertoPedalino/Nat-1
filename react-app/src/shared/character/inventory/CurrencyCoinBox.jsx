@@ -89,8 +89,8 @@ export function CurrencyCoinBox({
     <Box
       sx={{
         position: 'relative',
-        border: 1,
-        borderColor: 'divider',
+        border: 2,
+        borderColor: UI_COLORS.edge,
         borderRadius: 1,
         bgcolor: v.box.bgcolor,
         p: v.box.p,
@@ -112,7 +112,7 @@ export function CurrencyCoinBox({
                 height: 14,
                 borderRadius: '50%',
                 bgcolor: coin.tone,
-                border: '1px solid',
+                border: '2px solid',
                 borderColor: uiAlpha(UI_COLORS.white, OPACITY.strong),
                 cursor: 'pointer',
                 zIndex: 1,
@@ -223,8 +223,8 @@ export function CurrencyCoinBox({
           gridTemplateColumns: v.stepper.columns,
           overflow: 'hidden',
           mt: v.stepper.mt,
-          border: 1,
-          borderColor: 'divider',
+          border: 2,
+          borderColor: UI_COLORS.edge,
           borderRadius: 1,
           bgcolor: v.stepper.bgcolor,
         }}

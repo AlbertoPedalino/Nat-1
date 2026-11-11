@@ -4,6 +4,7 @@ import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../share
 import { boardPanelSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -141,7 +142,7 @@ const stepMarkerSx = {
   flexShrink: 0,
   mt: 0.25,
   borderRadius: '50%',
-  border: '1px solid',
+  border: '2px solid',
   borderColor: 'primary.main',
   color: 'primary.main',
   fontSize: FONT_SIZES.xs,
@@ -154,8 +155,8 @@ const kwSx = {
   py: 0.25,
   mx: 0.25,
   borderRadius: 0.75,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   fontFamily: UI_FONTS.mono,
   fontSize: '0.78em',
   color: 'text.primary',

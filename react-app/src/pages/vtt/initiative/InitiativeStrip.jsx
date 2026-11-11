@@ -7,7 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -321,7 +321,7 @@ const avatarSx = {
   overflow: 'hidden',
   display: 'grid',
   placeItems: 'center',
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
+  border: INK_EDGE,
   color: VTT_COLORS.text,
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.bold,

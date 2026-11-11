@@ -224,12 +224,12 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
             />
           );
-          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.edge) : 'divider';
+          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.edge) : UI_COLORS.edge;
           const rowBg = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.wash) : UI_COLORS.surfaceHeader;
 
           if (!dbItem) {
             return (
-              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
+              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 2, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
                 <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                 {unavailable ? (
                   <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
@@ -242,7 +242,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           return (
             <ExpandableCard
               key={value}
-              containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
+              containerSx={{ border: 2, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
               detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (

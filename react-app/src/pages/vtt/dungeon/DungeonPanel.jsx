@@ -17,6 +17,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // The dungeon this map is being played as.
 //
@@ -276,8 +277,8 @@ const lineSx = { fontSize: FONT_SIZES.md, color: 'text.primary' };
 const roomSx = {
   p: 1,
   borderRadius: 1.5,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   display: 'flex',
   flexDirection: 'column',
   gap: 0.25,

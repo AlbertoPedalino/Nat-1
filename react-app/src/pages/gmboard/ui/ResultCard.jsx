@@ -2,7 +2,7 @@ import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
@@ -60,8 +60,8 @@ export const resultDetailSx = {
 };
 
 const cardSx = {
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 2,
   overflow: 'hidden',
 };
@@ -84,8 +84,8 @@ const cardTitleSx = {
 const slotSx = {
   p: 0.75,
   borderRadius: 1,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderLeftWidth: 3,
 };
 

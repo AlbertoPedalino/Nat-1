@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeMarkMatches from '../search/rehypeMarkMatches.js';
 import { MARK_SX } from '../search/HighlightedText.jsx';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // GFM without any raw-HTML plugin: note bodies are user text, so markup stays
 // markdown-only and anything HTML-like renders as inert characters.
@@ -122,8 +123,8 @@ const tableSx = {
 };
 
 const cellSx = {
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   px: 0.75,
   py: 0.5,
   textAlign: 'left',

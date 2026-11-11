@@ -19,6 +19,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -176,7 +177,7 @@ const objectButtonSx = {
   minWidth: 0,
   p: 0.5,
   borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
+  border: INK_EDGE,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),
   cursor: 'grab',
   touchAction: 'pan-y',

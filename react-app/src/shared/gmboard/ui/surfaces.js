@@ -1,4 +1,5 @@
 import { SURFACES } from '../../ui/surfaces.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 // The GM Board's two surfaces, here so the board, the battle map's hexcrawl
 // and the guide draw them alike.
 
@@ -12,8 +13,8 @@ export const boardPanelSx = {
 // result, the table being edited.
 export const boardInsetSx = {
   p: 1.25,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 2,
 };
 

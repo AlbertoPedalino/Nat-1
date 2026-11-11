@@ -22,6 +22,7 @@ import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
+import { INK_EDGE } from '../../shared/ui/shadows.js';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -231,7 +232,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               const dungeonSelection = row.dungeonEncounterId || (dungeonBuilders.length === 1 ? dungeonBuilders[0].id : '');
               const singleDungeonBuilder = dungeonBuilders.length === 1 && dungeonSelection === dungeonBuilders[0].id;
               return <Stack key={rowKey(row)} direction="row" spacing={1}
-                sx={{ alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
+                sx={{ alignItems: 'center', border: INK_EDGE, borderRadius: 1, p: 1.25 }}>
                 <Icon size={ICON_SIZES.lg} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>

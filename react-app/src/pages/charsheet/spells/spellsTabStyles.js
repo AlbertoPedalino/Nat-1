@@ -57,7 +57,7 @@ export const spellBodySx = {
 
 export const addButtonSx = {
   bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
-  border: 1,
+  border: 2,
   borderColor: UI_COLORS.accent,
   borderRadius: 1,
   color: UI_COLORS.accent,

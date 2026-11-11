@@ -264,8 +264,8 @@ const cannonBoardSx = {
   flexDirection: 'column',
   gap: 0.5,
   p: 0.75,
-  border: 1,
-  borderColor: 'divider',
+  border: 2,
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
 };
 

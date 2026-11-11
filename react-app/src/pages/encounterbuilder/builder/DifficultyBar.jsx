@@ -31,7 +31,7 @@ export default function DifficultyBar({ encounter, party }) {
           <Box
             key={label}
             sx={{
-              border: '1px solid',
+              border: '2px solid',
               borderColor: difficulty.difficultyIndex === index ? difficulty.color : 'divider',
               borderRadius: 1,
               p: 1,

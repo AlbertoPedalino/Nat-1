@@ -2,9 +2,9 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { LAYERS } from '../../../shared/ui/layers.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
@@ -41,8 +41,8 @@ export const hostSx = {
   // the short height of a phone in landscape, so the viewport was clipped before
   // its bottom-left and bottom-right controls.
   minHeight: 0,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
   // Match the fully covered player fog exactly. When a map ends, the empty
   // viewport is therefore indistinguishable from unexplored territory and
@@ -83,7 +83,7 @@ export const placementTargetHintSx = {
   borderRadius: 10,
   bgcolor: VTT_COLORS.surface,
   color: VTT_COLORS.accent,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
+  border: INK_EDGE,
   boxShadow: UI_SHADOWS.float,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
@@ -112,7 +112,7 @@ export const selectionToolbarSx = {
   py: 0.5,
   borderRadius: 1,
   bgcolor: VTT_COLORS.surface,
-  border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.edge)}`,
+  border: INK_EDGE,
   boxShadow: 4,
 };
 
@@ -242,7 +242,7 @@ export const placementCountSx = {
   borderRadius: 12,
   bgcolor: VTT_COLORS.accent,
   color: VTT_COLORS.surface,
-  border: `1px solid ${VTT_COLORS.surface}`,
+  border: `2px solid ${VTT_COLORS.surface}`,
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.heavy,
   lineHeight: '22px',

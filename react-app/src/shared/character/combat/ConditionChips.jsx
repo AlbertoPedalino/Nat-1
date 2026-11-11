@@ -81,7 +81,7 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
 }
 
 const cardSx = {
-  border: 1,
+  border: 2,
   borderColor: alpha(CONDITION_ACCENT, OPACITY.edge),
   borderRadius: 1,
   p: '6px 8px',

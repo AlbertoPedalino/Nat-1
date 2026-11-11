@@ -14,7 +14,7 @@ const btnSx = {
 const trackSx = {
   position: 'relative', flex: 1, height: 10,
   bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1,
-  border: '1px solid', borderColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
+  border: '2px solid', borderColor: UI_COLORS.edge,
   overflow: 'hidden', minWidth: 60, cursor: 'pointer', touchAction: 'none',
 };
 

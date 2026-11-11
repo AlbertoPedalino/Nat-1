@@ -20,7 +20,7 @@ export default function ResultBadge({ children, tone, icon: Icon }) {
         fontWeight: FONT_WEIGHTS.bold,
         letterSpacing: LETTER_SPACINGS.sm,
         color: resolvedTone,
-        border: `1px solid ${resolvedTone}`,
+        border: `2px solid ${resolvedTone}`,
         bgcolor: theme.palette.gmboard.panelOverlay,
       }}
     >

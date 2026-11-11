@@ -58,7 +58,7 @@ export default function HpStepper({
   const btnSx = (color) => ({
     width: btnSize,
     height: btnSize,
-    border: 1,
+    border: 2,
     borderColor: color || 'divider',
     color: color || 'text.secondary',
     borderRadius: 1,

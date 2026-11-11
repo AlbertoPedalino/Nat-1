@@ -13,7 +13,7 @@ import { columnUnitWidth, columnsForWidth, rowSpanForHeight } from './layout.js'
 import { DRAG_TRANSFORM, DRAG_TRANSITION } from '../drag/dragMotion.js';
 import NoteMarkdown from './NoteMarkdown.jsx';
 import HighlightedText from '../search/HighlightedText.jsx';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
@@ -336,8 +336,8 @@ const titlePreviewSx = {
   minWidth: 0,
   px: 1.75,
   py: 0.5,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
   cursor: 'text',
 };
@@ -351,8 +351,8 @@ const previewSx = {
   flex: 1,
   minHeight: 0,
   p: 1.25,
-  border: '1px solid',
-  borderColor: 'divider',
+  border: '2px solid',
+  borderColor: UI_COLORS.edge,
   borderRadius: 1,
   cursor: 'text',
   overflowY: 'auto',

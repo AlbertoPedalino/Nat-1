@@ -41,7 +41,7 @@ function RollButton(props) {
 
 const rollableSx = {
   appearance: 'none',
-  border: `1px solid ${uiAlpha(UI_COLORS.secondary, OPACITY.edge)}`,
+  border: `2px solid ${uiAlpha(UI_COLORS.secondary, OPACITY.edge)}`,
   bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.tint),
   color: UI_COLORS.secondaryText,
   borderRadius: 0.5,

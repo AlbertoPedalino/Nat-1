@@ -594,6 +594,24 @@ test('ink edges and solid shadows are written only in the shared ui recipes', ()
   assert.deepEqual(sourceLinesMatching(/solid \$\{UI_COLORS\.edge\}|\dpx \dpx 0 \$\{UI_COLORS\.edge|0 \dpx 0 \$\{UI_COLORS\.edge/, { allow: recipes }), []);
 });
 
+// A drawn box or control is framed by the 2px ink edge (INK_EDGE, a SURFACES
+// recipe, CARD_SX). A thin 1px frame is left only to board pieces on the map
+// (tokens, markers, the selection marquee) and to marks too small for a thick
+// line (training dots, pips, a mini badge, a stat-block table).
+test('a thin frame is drawn only by board pieces and tiny marks', () => {
+  const thin = /\bborder: 1,|\bborder: '1px solid'|\bborder: `1px solid /;
+  const boardPieces = sourceFilesMatching(thin).filter((file) => file.startsWith('pages/vtt/tokens/'));
+  const allow = [
+    ...boardPieces,
+    'pages/vtt/map/ViewportOverlays.jsx', 'pages/vtt/map/sceneViewportStyles.js',
+    'shared/bestiary/MonsterToken.jsx', 'shared/character/dice/D100Orb.jsx',
+    'pages/charsheet/stats/SavingThrows.jsx', 'pages/charsheet/stats/Skills.jsx',
+    'shared/character/combat/DeathSaveDots.jsx', 'shared/ui/PipButton.jsx', 'shared/ui/MiniBadge.jsx',
+    'shared/bestiary/EntryRenderer.jsx', 'pages/gmboard/tables/TableEditorGrid.jsx',
+  ];
+  assert.deepEqual(sourceLinesMatching(thin, { allow }), []);
+});
+
 test('the screentone and the halftone are drawn in one place each', () => {
   assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);

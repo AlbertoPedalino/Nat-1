@@ -67,7 +67,7 @@ export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
           fontSize,
           maxWidth: '100%',
           color: accent,
-          border: 1,
+          border: 2,
           borderColor: accent,
           bgcolor: alpha(accent, OPACITY.fill),
           '& .MuiChip-deleteIcon': { color: accent, '&:hover': { color: accent } },

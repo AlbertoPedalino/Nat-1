@@ -1,6 +1,6 @@
 import { getContrastRatio, lighten } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { UI_SHADOWS } from './shadows.js';
+import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 import { DURATIONS } from './motion.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
@@ -9,7 +9,7 @@ import { DURATIONS } from './motion.js';
 // and a button of any colour (a roll on a card) takes pressableSx(fill).
 // It hops up a little under the cursor and squashes when pressed.
 export const PRESSABLE_EDGE_SX = Object.freeze({
-  border: `2px solid ${UI_COLORS.edge}`,
+  border: INK_EDGE,
   boxShadow: UI_SHADOWS.press,
   transition: `transform ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
   '&:hover': { boxShadow: UI_SHADOWS.lifted, transform: 'translateY(-1px)' },

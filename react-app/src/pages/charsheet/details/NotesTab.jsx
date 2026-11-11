@@ -25,7 +25,7 @@ function PageTab({ page, active, onClick }) {
       onClick={onClick}
       sx={{
         px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure, bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft), color: active ? 'primary.contrastText' : 'text.secondary',
-        border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
+        border: 2, borderColor: active ? 'primary.main' : UI_COLORS.edge, whiteSpace: 'nowrap', minWidth: 0,
         '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.accentHighlight, OPACITY.fill) },
       }}
     >
