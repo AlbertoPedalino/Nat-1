@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveToastLayout, rollDieColor } from '../../../../../src/shared/character/dice/rollToastLayout.js';
+import { UI_COLORS } from '../../../../../src/shared/ui/colors.js';
 
 test('the kept d20 decides the crit, not the one advantage threw away', () => {
   const layout = resolveToastLayout({
@@ -58,8 +59,8 @@ test('an entry with no total keeps its words', () => {
 });
 
 test('a die is coloured by its own faces, not by twenty', () => {
-  assert.equal(rollDieColor(6, 6), '#edd48a', 'a maxed d6 reads as a good roll');
-  assert.equal(rollDieColor(1, 6), '#de675f');
+  assert.equal(rollDieColor(6, 6), UI_COLORS.accentText, 'a maxed d6 reads as a good roll');
+  assert.equal(rollDieColor(1, 6), UI_COLORS.danger);
   assert.equal(rollDieColor(6, 20), 'text.primary');
 });
 

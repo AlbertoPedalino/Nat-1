@@ -50,7 +50,7 @@ export const theme = createTheme({
       primary: UI_COLORS.textPrimary,
       secondary: UI_COLORS.textSecondary,
     },
-    divider: uiAlpha(UI_COLORS.accent, OPACITY.shade),
+    divider: uiAlpha(UI_COLORS.textSecondary, OPACITY.shade),
     // Default token color for player-character combatants without a custom color.
     pcToken: UI_COLORS.pcToken,
     // GM Board semantic tokens, read in sx as 'gmboard.<group>.<key>'. Status
@@ -119,7 +119,7 @@ export const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 10,
   },
   typography: {
     fontFamily: UI_FONTS.body,
@@ -158,7 +158,15 @@ export const theme = createTheme({
         sizeSmall: { fontSize: FONT_SIZES.xl },
         sizeMedium: { fontSize: FONT_SIZES.xxl },
         sizeLarge: { fontSize: FONT_SIZES.body },
-        outlined: { borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong) },
+        outlined: { borderWidth: 2, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), '&:hover': { borderWidth: 2 } },
+        // A filled button is drawn: an ink edge and a solid shadow under it,
+        // pushed down while pressed.
+        contained: {
+          border: `2px solid ${UI_COLORS.edge}`,
+          boxShadow: UI_SHADOWS.press,
+          '&:hover': { boxShadow: UI_SHADOWS.press },
+          '&:active': { transform: 'translateY(2px)', boxShadow: UI_SHADOWS.pressed },
+        },
       },
     },
     // A chosen option (toggle buttons, segmented choices): an accent wash
@@ -205,7 +213,7 @@ export const theme = createTheme({
         tooltip: {
           backgroundColor: UI_COLORS.surfaceRaised,
           color: UI_COLORS.textPrimary,
-          border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.shade)}`,
+          border: `2px solid ${UI_COLORS.edge}`,
           boxShadow: UI_SHADOWS.float,
           fontSize: FONT_SIZES.sm,
         },
@@ -239,7 +247,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
+          border: `2px solid ${UI_COLORS.edge}`,
         },
       },
     },
@@ -292,6 +300,10 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           minWidth: 0,
+        },
+        // An outlined surface is drawn with the ink edge, as SURFACES.panel.
+        outlined: {
+          border: `2px solid ${UI_COLORS.edge}`,
         },
       },
     },

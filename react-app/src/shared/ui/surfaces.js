@@ -8,8 +8,8 @@ export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({
     bgcolor: 'background.paper',
-    border: 1,
-    borderColor: 'divider',
+    border: 2,
+    borderColor: UI_COLORS.edge,
     borderRadius: 1,
   }),
   // A sunken well inside a panel: the details under a row, a field group.

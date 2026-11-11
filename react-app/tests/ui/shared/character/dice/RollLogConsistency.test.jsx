@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import DiceControl from '../../../../../src/shared/character/dice/DiceControl.jsx';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
 import SheetDiceDock from '../../../../../src/pages/charsheet/layout/SheetDiceDock.jsx';
+import { UI_COLORS } from '../../../../../src/shared/ui/colors.js';
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
 const theme = createTheme({ palette: { mode: 'dark', text: { primary: '#eeeeee' } } });
@@ -34,8 +35,8 @@ function renderSurface(surface, log) {
 
 test.each(['encounter', 'map', 'player'])('%s: roll first, then the log with the shared result and actor colours', (surface) => {
   const log = renderSurface(surface, rolls);
-  expect(log.getByText('24')).toHaveStyle({ color: '#edd48a' });
-  expect(log.getByText('5')).toHaveStyle({ color: '#de675f' });
+  expect(log.getByText('24')).toHaveStyle({ color: UI_COLORS.accentText });
+  expect(log.getByText('5')).toHaveStyle({ color: UI_COLORS.danger });
   expect(log.getByText('26')).toHaveStyle({ color: '#eeeeee' });
   expect(log.getByText('Goblin').parentElement).toHaveStyle({ color: '#3498db' });
   expect(log.getByText('■B').parentElement).toHaveStyle({ color: '#3498db' });

@@ -9,14 +9,13 @@ export const TEXT_STYLES = Object.freeze({
   label: Object.freeze({
     fontFamily: UI_FONTS.display,
     fontWeight: FONT_WEIGHTS.bold,
-    letterSpacing: LETTER_SPACINGS.lg,
+    letterSpacing: LETTER_SPACINGS.sm,
     textTransform: 'uppercase',
   }),
   // A name or heading set in the display face: a card title, a panel name.
   title: Object.freeze({
     fontFamily: UI_FONTS.display,
     fontWeight: FONT_WEIGHTS.bold,
-    letterSpacing: LETTER_SPACINGS.md,
   }),
   // A number or short value in the display face: HP, AC, a count, a die.
   figure: Object.freeze({

@@ -10,6 +10,10 @@ export const UI_SHADOWS = Object.freeze({
   float: `0 6px 20px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
   // Pop-ups over the content: roll bubbles, the dice toast.
   popup: `0 8px 28px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
+  // Under what can be pressed (a filled button): a solid ink edge, the drawn
+  // look's depth; `pressed` is the same button pushed down.
+  press: `0 3px 0 ${UI_COLORS.edge}`,
+  pressed: `0 1px 0 ${UI_COLORS.edge}`,
   // Dialogs and floating panels.
   overlay: `0 18px 52px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
 });

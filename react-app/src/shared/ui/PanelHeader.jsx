@@ -5,21 +5,36 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 
-// The title bar of a sheet panel (Saving Throws, Skills, Senses, Movement,
-// Proficiencies) and of SheetDialog: a dark bar with a gold left accent, an
-// icon and an uppercase Cinzel title. `tone` recolours the accent and the
-// title (Movement turns orange under a penalty); `children` go at the end.
+// The title bar of a panel (Saving Throws, Skills, Senses, Movement,
+// Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
+// ink line, its icon on a small badge of the panel's colour, an uppercase
+// title. `tone` colours the badge and the title (Movement turns orange under a
+// penalty); `children` go at the end.
 
 export const panelBarSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 1,
   bgcolor: UI_COLORS.surfaceHeader,
-  borderBottom: 1,
-  borderColor: 'divider',
-  borderLeft: 3,
-  borderLeftColor: 'primary.main',
+  borderBottom: 2,
+  borderColor: UI_COLORS.edge,
 };
+
+// The icon's badge in a panel bar: the tone filled, edged in ink.
+export function panelBadgeSx(tone = 'primary.main') {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    p: 0.375,
+    borderRadius: 1,
+    bgcolor: tone,
+    color: UI_COLORS.edge,
+    border: 2,
+    borderColor: UI_COLORS.edge,
+    flexShrink: 0,
+  };
+}
 
 export const panelTitleSx = {
   ...TEXT_STYLES.label,
@@ -110,8 +125,8 @@ export const sectionLabelSx = {
 // builder); the sheet keeps panelTitleSx as it is.
 export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', titleSx, children }) {
   return (
-    <Box sx={{ ...panelBarSx, px: '0.8rem', py: '0.48rem', borderLeftColor: tone }}>
-      {Icon ? <Icon size={ICON_SIZES.sm} /> : null}
+    <Box sx={{ ...panelBarSx, px: '0.8rem', py: '0.48rem' }}>
+      {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={ICON_SIZES.sm} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}
     </Box>

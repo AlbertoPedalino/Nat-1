@@ -9,66 +9,69 @@
 // every name still says what the colour is for. `<role>Text` is the readable
 // tone of a role on a dark surface; `on<Role>` is the ink on a filled one.
 export const UI_COLORS = Object.freeze({
-  // Accent: the interface's one highlight colour (gold), its text and line
+  // Accent: the interface's one highlight colour (turquoise), its text and line
   // tones, and the ink written on a filled accent.
-  accent: '#d7ad52',
-  accentText: '#edd48a',
-  accentHighlight: '#ffe8b0',
-  accentMuted: '#b9935a',
-  onAccent: '#17120d',
+  accent: '#34d1bf',
+  accentText: '#7fe8da',
+  accentHighlight: '#b9f5ec',
+  accentMuted: '#2a9e91',
+  onAccent: '#06201c',
 
   // Text, brightest to faintest, and the strongest neutral outline.
-  textPrimary: '#f0e6d4',
-  textSecondary: '#bda98a',
-  textMuted: '#9a8f7a',
-  textFaint: '#7a6a4a',
-  outline: '#8a7d66',
+  textPrimary: '#fbf6ec',
+  textSecondary: '#bfb6d9',
+  textMuted: '#8c84a8',
+  textFaint: '#6b6489',
+  outline: '#5b5385',
 
   // Surfaces, lightest to darkest. `surface` is the paper of cards and
   // dialogs, `page` the page behind them.
-  surfaceRaised: '#2e2a22',
-  surfaceHeader: '#23201a',
-  surface: '#211d18',
-  surfaceDeep: '#1a1713',
-  page: '#151411',
-  surfaceSunken: '#12100e',
-  surfaceDarkest: '#0f0e0d',
+  surfaceRaised: '#2d2747',
+  surfaceHeader: '#2a2342',
+  surface: '#221d36',
+  surfaceDeep: '#1c182e',
+  page: '#171425',
+  surfaceSunken: '#130f1f',
+  surfaceDarkest: '#0e0b18',
+  // The drawn outline round panels, cards and buttons, and the solid shadow
+  // under what can be pressed: the interface's drawn, cartoon edge.
+  edge: '#0c0a14',
   black: '#000000',
   white: '#ffffff',
 
   // Danger: failures, damage, removal.
-  dangerStrong: '#e5484d',
-  danger: '#de675f',
-  dangerText: '#f0958d',
-  dangerMuted: '#c98a8a',
-  dangerDeep: '#a04848',
-  dangerSurface: '#220d0b',
+  dangerStrong: '#ff3b5c',
+  danger: '#ff4d6d',
+  dangerText: '#ff94a6',
+  dangerMuted: '#d48a9a',
+  dangerDeep: '#b02d48',
+  dangerSurface: '#2a0d16',
 
   // Warning, and the stronger step before danger (a High encounter).
-  warning: '#d69245',
-  warningStrong: '#e27b3e',
-  warningText: '#e9b275',
+  warning: '#ffc94a',
+  warningStrong: '#ffa53a',
+  warningText: '#ffe08f',
 
   // Penalty: disadvantage and reduced values.
-  penalty: '#ff9800',
-  penaltyText: '#ffb74d',
+  penalty: '#ff9a3c',
+  penaltyText: '#ffc27f',
 
   // Success and healing.
-  success: '#58b879',
-  successText: '#a9d6ae',
+  success: '#5fd48a',
+  successText: '#a8eec2',
 
   // Secondary accent (the theme's secondary): advantage, bonuses.
-  secondary: '#70b7a6',
-  secondaryStrong: '#2ca797',
-  secondaryText: '#96d8c6',
-  onSecondary: '#11201c',
+  secondary: '#a3e36b',
+  secondaryStrong: '#7cc443',
+  secondaryText: '#cdf3a8',
+  onSecondary: '#142409',
 
   // Information and links.
-  info: '#4d95d6',
-  infoText: '#9ec5e6',
+  info: '#5aa9ff',
+  infoText: '#a9d0ff',
 
   // Spellcasting.
-  spell: '#9d7fb8',
+  spell: '#c38cff',
 
   // The default token colour of a player character.
   pcToken: '#5c8fe0',

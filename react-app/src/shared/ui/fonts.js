@@ -1,11 +1,11 @@
-// The interface's font stacks, from one place (Cinzel and EB Garamond are
-// loaded in index.html). The theme's body text uses `body`; titles, labels and
-// numbers on the sheet use `display`; longer flavour text uses `prose`;
-// formulas and code use `mono`.
+// The interface's font stacks, from one place (Fredoka and Nunito are loaded
+// in index.html). The theme's body text uses `body`; titles, labels and
+// numbers use `display`, a round face that gives the interface its playful
+// voice; longer flavour text uses `prose`; formulas and code use `mono`.
 export const UI_FONTS = Object.freeze({
-  display: '"Cinzel", Georgia, serif',
-  prose: '"EB Garamond", Georgia, serif',
-  body: 'Georgia, "Times New Roman", serif',
+  display: '"Fredoka", "Nunito", system-ui, sans-serif',
+  prose: '"Nunito", system-ui, sans-serif',
+  body: '"Nunito", system-ui, sans-serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
@@ -32,7 +32,7 @@ export const FONT_SIZES = Object.freeze({
   hero: '2rem',
 });
 
-// Letter spacing of spaced-out text (Cinzel labels, uppercase captions), in
+// Letter spacing of spaced-out text (uppercase labels and captions), in
 // steps like the type scale. Ordinary text keeps the font's own spacing.
 export const LETTER_SPACINGS = Object.freeze({
   sm: '0.04em',
@@ -42,8 +42,8 @@ export const LETTER_SPACINGS = Object.freeze({
   xxl: '0.12em',
 });
 
-// Font weights. Georgia has two (regular, bold); Cinzel also draws `heavy`
-// for the loudest numbers and titles.
+// Font weights. Nunito draws all three; Fredoka stops at bold, which `heavy`
+// falls back to.
 export const FONT_WEIGHTS = Object.freeze({
   regular: 400,
   bold: 700,

@@ -8,10 +8,9 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 
-// Dialog chrome that matches the character-sheet panels (dark surface, gold
-// left-accent header bar, uppercase Cinzel title) so dialogs feel native to
-// the sheet rather than like plain MUI popups. Buttons use the sheet's small
-// Cinzel scale. Single source for every sheet dialog; pass `headerRight` for
+// Dialog chrome that matches the panels (the header-tint bar over an ink line,
+// uppercase display title) so dialogs feel native to the sheet rather than
+// like plain MUI popups. Buttons use the sheet's small display scale. Single source for every sheet dialog; pass `headerRight` for
 // title-bar extras (counts, a Clear button) and `actions` for the button bar.
 // Without a `title` there is no bar, for content that carries its own (a
 // statblock, a compendium entry); `showClose` then puts the close button in
