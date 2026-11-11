@@ -105,11 +105,14 @@ export function splatSx(color = UI_COLORS.danger) {
 // A bubble that groans (a natural 1): it shakes once instead of popping in.
 // A bubble that cheers (a natural 20): it leaps up stretched, lands squashed
 // like a spring, rocks twice and settles at `end` — the larger shouting tilt
-// on the dice toast, the bubble's own tilt over a token.
-export function bubbleCheerSx(end = SHOUT_TILT) {
+// on the dice toast, the bubble's own tilt over a token. With `delay` (ms) it
+// is not there until it leaps in (the home cover's name, after the die lands).
+export function bubbleCheerSx(end = SHOUT_TILT, { delay = 0 } = {}) {
+  const cheer = `gbBubbleCheer ${DURATIONS.slow * 4}ms cubic-bezier(0.3, 0.9, 0.4, 1)`;
   return {
     transform: end,
-    animation: `gbBubbleCheer ${DURATIONS.slow * 4}ms cubic-bezier(0.3, 0.9, 0.4, 1)`,
+    animation: delay ? `${cheer} ${delay}ms both, gbBubbleWait 1ms linear ${delay}ms both` : cheer,
+    '@keyframes gbBubbleWait': { from: { opacity: 0 }, to: { opacity: 1 } },
     '@keyframes gbBubbleCheer': {
       // No fade: the bubble is there from the first frame, only small.
       '0%': { transform: 'translateY(12px) scale(0.6) rotate(-6deg)' },

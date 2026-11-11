@@ -16,7 +16,7 @@ import { bubbleCheerSx } from '../../shared/ui/bubble.js';
 import { DURATIONS } from '../../shared/ui/motion.js';
 import { UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
-import NatOneDie from './NatOneDie.jsx';
+import NatOneDie, { NAT_ONE_LANDED_MS } from './NatOneDie.jsx';
 import { useFirstArrival } from './useFirstArrival.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
@@ -67,7 +67,7 @@ export default function HomePage() {
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
         <NatOneDie sx={heroLogoSx} />
-        <Typography component="h1" sx={arriving ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT) } : heroTitleSx}>Nat-1</Typography>
+        <Typography component="h1" sx={arriving ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT, { delay: NAT_ONE_LANDED_MS }) } : heroTitleSx}>Nat-1</Typography>
         <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
 
@@ -130,7 +130,8 @@ const heroLogoSx = {
   mb: '0.25rem',
 };
 
-// The name's tilt; it cheers into it on arriving on the site (useFirstArrival).
+// The name's tilt; on arriving on the site (useFirstArrival) the name waits
+// for the die to land on its 1, then cheers into it.
 const HERO_TITLE_TILT = 'rotate(-4deg)';
 
 const heroTitleSx = {

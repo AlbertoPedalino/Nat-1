@@ -41,8 +41,10 @@ const points = (names) => names.map((name) => P[name].join(',')).join(' ');
 const ROLL_MS = 2400;
 const FLIP = '75%';
 const AFTER_FLIP = '75.1%';
-// When it is down on the 1, as a fraction of the roll.
+// When it is down on the 1, as a fraction of the roll; NAT_ONE_LANDED_MS in
+// ms, for what waits for the landing (the cover's name).
 const LANDED = 0.85;
+export const NAT_ONE_LANDED_MS = ROLL_MS * LANDED;
 
 const numeralSx = {
   fontFamily: UI_FONTS.shout,
@@ -87,7 +89,7 @@ export default function NatOneDie({ sx }) {
       </Box>
       {/* Dazed by its own roll: stars circle the die once it lands on the 1. */}
       <Box sx={starsAnchorSx}>
-        {still ? null : <BubbleDizzy key={`stars-${roll}`} delay={ROLL_MS * LANDED} reachX={70} reachY={14} starSize={30} />}
+        {still ? null : <BubbleDizzy key={`stars-${roll}`} delay={NAT_ONE_LANDED_MS} reachX={70} reachY={14} starSize={30} />}
       </Box>
     </Box>
   );
