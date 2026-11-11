@@ -39,5 +39,5 @@ export default function CharacterDefenses({ C, activeConditions = [] }) {
     ...passiveTraits,
   ];
 
-  return <DefensesPanel items={all} />;
+  return <DefensesPanel items={all} sx={{ flex: 1, minWidth: 0 }} />;
 }

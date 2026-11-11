@@ -10,7 +10,6 @@ import Proficiencies from './proficiency/Proficiencies.jsx';
 import Skills from './stats/Skills.jsx';
 import Movement from './stats/Movement.jsx';
 import RightTop from './stats/RightTop.jsx';
-import CharacterDefenses from './stats/CharacterDefenses.jsx';
 import TabsPanel from './layout/TabsPanel.jsx';
 import RestDialogs from './resources/RestDialogs.jsx';
 import { useRests } from './resources/useRests.js';
@@ -36,7 +35,6 @@ const EMBEDDED_SHEET_GRID = {
     "${SHEET_AREAS.senses}"
     "${SHEET_AREAS.movement}"
     "${SHEET_AREAS.profs}"
-    "${SHEET_AREAS.defenses}"
     "${SHEET_AREAS.right}"
   `,
   gap: '0.55rem',
@@ -162,9 +160,6 @@ export default function CharacterSheet({
           }}>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
               <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
-            </Box>
-            <Box sx={{ gridArea: { xs: SHEET_AREAS.defenses } }}>
-              <CharacterDefenses C={C} activeConditions={sheet?.activeConditions || []} />
             </Box>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.senses } }}>
               <Senses C={C} />

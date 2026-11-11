@@ -12,6 +12,7 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import ACDisplay from './ACDisplay.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
 import RemindersBlock from './RemindersBlock.jsx';
+import CharacterDefenses from './CharacterDefenses.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
@@ -85,16 +86,22 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
   const acSource = acResult?.source;
   const showAcBadge = acResult?.sourceType === 'formula';
 
-  // Conditions and reminders first, side by side on a wide sheet (stacked when
-  // embedded, its panel being narrow); the stat tiles (AC, Initiative,
-  // Proficiency Bonus, Inspiration) close the block, right above the tabs.
+  // Two even columns on a wide sheet (one when embedded, its panel being
+  // narrow): Conditions beside Reminders, then the stat tiles (AC, Initiative,
+  // Proficiency Bonus, Inspiration) under Conditions and Defenses under
+  // Reminders, right above the tabs. A sheet without reminders gives
+  // Conditions the whole row.
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', flexDirection: embedded ? 'column' : { xs: 'column', md: 'row' }, alignItems: 'stretch', gap: '0.4rem' }}>
+    <Box sx={{ ...rightTopGridSx, gridTemplateColumns: embedded ? '1fr' : { xs: '1fr', md: '1fr 1fr' } }}>
+      <Box sx={{ display: 'flex', minWidth: 0, ...(effectActions ? null : { gridColumn: '1 / -1' }) }}>
         <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
-        {effectActions ? <RemindersBlock sheet={sheet} actions={effectActions} /> : null}
       </Box>
-      <Box sx={{ display: 'flex', gap: '0.45rem', mt: '0.4rem', flexWrap: 'wrap' }}>
+      {effectActions ? (
+        <Box sx={{ display: 'flex', minWidth: 0 }}>
+          <RemindersBlock sheet={sheet} actions={effectActions} />
+        </Box>
+      ) : null}
+      <Box sx={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'flex-start', minWidth: 0 }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
           <Tooltip title={initTooltip}>
@@ -130,9 +137,19 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
         <SquareStat value={signed(getPB(C))} label="Prof. Bonus" />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
       </Box>
+      <Box sx={{ display: 'flex', minWidth: 0 }}>
+        <CharacterDefenses C={C} activeConditions={sheet?.activeConditions || []} />
+      </Box>
     </Box>
   );
 }
+
+const rightTopGridSx = {
+  display: 'grid',
+  gap: '0.4rem',
+  width: '100%',
+  alignItems: 'stretch',
+};
 
 // Initiative, Proficiency Bonus and Inspiration: the same square tile, a figure
 // (or Inspiration's spark) over its name.
