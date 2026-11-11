@@ -12,6 +12,7 @@ import {
   nextRollExpiry,
   rollAuthor,
   normalizeRoll,
+  rollToast,
 } from '../../../../../src/shared/vtt/rolls/rollFeed.js';
 
 const roll = (patch = {}) => ({
@@ -41,6 +42,16 @@ test('a normalized roll can pass through the feed again without losing its metad
   assert.equal(again.at, 1000);
   assert.equal(again.mode, 'disadvantage');
   assert.equal(again.bonus, -2);
+});
+
+// The kind is what colours a roll's toast, bubble and log line: a roll made on
+// an embedded sheet reaches the map's toast only through the feed.
+test('what was rolled travels through the feed into the toast', () => {
+  const entry = normalizeRoll(roll({ meta: { kind: 'save', bonus: 4 } }));
+  assert.equal(entry.kind, 'save');
+  assert.equal(normalizeRoll(entry).kind, 'save');
+  assert.equal(rollToast(entry).meta.kind, 'save');
+  assert.equal(normalizeRoll(roll()).kind, null);
 });
 
 // A rest or a death-save guard has no total; it is still worth showing.

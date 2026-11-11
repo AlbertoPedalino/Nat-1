@@ -88,6 +88,7 @@ export function rollToast(roll) {
     meta: {
       ...(roll.mode ? { mode: roll.mode } : {}),
       ...(roll.bonus != null ? { bonus: roll.bonus } : {}),
+      ...(roll.kind ? { kind: roll.kind } : {}),
     },
   };
 }
@@ -129,6 +130,10 @@ export function normalizeRoll(entry) {
     // Carried so the bubble can lay the roll out exactly as the sheet's toast
     // did — dice, then the flat modifier, then the total.
     bonus: rollTotal(requestedBonus, DICE_LIMITS.modifierAbs),
+    // What was rolled (a save, a skill, an attack, damage…: buildD20Meta's
+    // `kind`), so the toast, the bubble and the log wear its colour on every
+    // screen it reaches. An unknown kind is simply shown neutral.
+    kind: boundedText(entry.meta?.kind ?? entry.kind, 24) || null,
     // Requests physical playback on an open map. Both the map roller and a
     // synced sheet roll set it; notices without dice never do.
     thrown: Boolean(entry.thrown && rolls.length),

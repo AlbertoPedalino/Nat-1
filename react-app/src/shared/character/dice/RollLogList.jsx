@@ -40,7 +40,7 @@ export default function RollLogList({
 function RollLogRow({ entry }) {
   const { title, rest } = splitTitle(entry.label, entry.detail);
   const outcome = rollOutcome(entry);
-  const tone = ROLL_KIND_TONES[entry?.meta?.kind];
+  const tone = ROLL_KIND_TONES[entry?.kind];
   return (
     <Box sx={{ ...rowSx, ...(tone ? { borderLeft: `3px solid ${tone}` } : null) }}>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', minWidth: 0 }}>
