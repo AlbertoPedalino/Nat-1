@@ -9,7 +9,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import { coverRaysSx, SURFACES } from '../../shared/ui/surfaces.js';
-import { INK_EDGE, inkOutlineFilter, inkShadow, UI_SHADOWS } from '../../shared/ui/shadows.js';
+import { INK_EDGE, inkShadow, UI_SHADOWS } from '../../shared/ui/shadows.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
 import { bubbleCheerSx } from '../../shared/ui/bubble.js';
@@ -63,7 +63,7 @@ export default function HomePage() {
       {/* Home already has the Compendium card. */}
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
-        <Box component="img" src={`${import.meta.env.BASE_URL}favicon.png`} alt="" sx={heroLogoSx} />
+        <Box component="img" src={`${import.meta.env.BASE_URL}logo.svg`} alt="" sx={heroLogoSx} />
         <Typography component="h1" sx={heroTitleSx}>Nat-1</Typography>
         <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
@@ -122,10 +122,10 @@ const heroSx = {
 
 const heroLogoSx = {
   display: 'block',
-  width: 'clamp(72px, 14vw, 104px)',
+  // The logo is drawn inked (outline, shadow, tilt), so it takes no filter.
+  width: 'clamp(96px, 18vw, 140px)',
   height: 'auto',
-  mb: '0.5rem',
-  filter: inkOutlineFilter(),
+  mb: '0.25rem',
 };
 
 const heroTitleSx = {
