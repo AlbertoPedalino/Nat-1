@@ -10,6 +10,9 @@ import { collectOwnerEntries } from '../../../src/shared/character/sheet/adapter
 import { normalizeResourceMax } from '../../../src/shared/character/resources/restResources.js';
 import { enumerateSubclassDataGrants } from '../../../src/shared/character/spells/autoGrantedSpells.js';
 import { meetsFeatPrerequisites } from '../../../src/pages/charbuilder/choices/featPrerequisiteRules.js';
+import { collectAdapterActions } from '../../../src/shared/character/sheet/adapterActions.js';
+import { collectChoiceSpells } from '../../../src/pages/charsheet/spells/grantedSpells.js';
+import { normalizeCharacterChoices } from '../../../src/shared/character/progression/choiceNormalization.js';
 
 [installPaladin, installDeathKnight, installEbonBlade, installRangerHunter, installDemonHunter].forEach((install) => install(adapterRegistry));
 adapterRegistry.registerClassSkin('Death Knight', { base: 'Paladin', removedFeatures: ['Lay on Hands', "Paladin's Smite", 'Restoring Touch'] });
@@ -83,4 +86,24 @@ test('the World of Warcraft invocations bring their cards, spells and uses', asy
   const names = collectOwnerEntries(C, 'SheetActions').map(({ entry }) => entry.name);
   assert.ok(['Pact of the Legion', 'Health Funnel'].every((name) => names.includes(name)));
   assert.ok(!names.includes('Call of the Void'));
+});
+
+const runeLists = [
+  { name: 'Blood', prepared: { 3: ['vampiric blood|wow'] } },
+  { name: 'Frost', prepared: { 3: ['chains of ice|wow'] } },
+  { name: 'Unholy', prepared: { 3: ['scourge strike|wow'] } },
+];
+
+test('the rune is switched on the sheet from the Runeforging card, its options from the data', () => {
+  const dk = { ...deathKnight(3, { subclass_spell_list: ['Frost'] }), subclassAdditionalSpells: runeLists };
+  const card = collectAdapterActions(dk).find((action) => action.name === 'Runeforging');
+  assert.equal(card.choiceKey, 'subclass_spell_list');
+  assert.equal(card.choicePrefix, '');
+  assert.deepEqual(card.choiceOptions({ character: dk, action: card }).map((option) => option.value), ['Blood', 'Frost', 'Unholy']);
+});
+
+test('the rune is a list name, not a spell the character picked', () => {
+  const dk = deathKnight(3, { subclass_spell_list: ['Blood'] });
+  assert.deepEqual(collectChoiceSpells(dk, new Map()), []);
+  assert.deepEqual(normalizeCharacterChoices(dk).spells.spells, []);
 });

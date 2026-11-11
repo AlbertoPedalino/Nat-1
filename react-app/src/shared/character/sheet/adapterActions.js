@@ -273,7 +273,8 @@ export function collectAdapterActions(C, sheet) {
   };
 
   // `checked`: already gated by collectOwnerEntries.
-  const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1, { checked = false } = {}) => {
+  // `choicePrefix`: where the owner's builder choices are saved ('' or `mc<i>_`).
+  const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1, { checked = false, choicePrefix = '' } = {}) => {
     (arr || []).forEach(a => {
       if (!a || !a.name) return;
       const lv = Number(a.ownerLevel ?? ownerLevel ?? C?.level ?? 1);
@@ -288,6 +289,7 @@ export function collectAdapterActions(C, sheet) {
         ...rest,
         ownerLevel: lv,
         ownerName: a.ownerName || source,
+        choicePrefix,
         _source: a.ownerName || source,
         entries: officialEntries || null,
       });
@@ -297,7 +299,7 @@ export function collectAdapterActions(C, sheet) {
   // Prefer live registry data so function properties such as condition/max/formula survive
   // after the character has been serialized to localStorage.
   collectOwnerEntries(C, 'SheetActions', { sheet }).forEach(({ entry, owner }) => {
-    pushFiltered([entry], owner.label, owner.level, { checked: true });
+    pushFiltered([entry], owner.label, owner.level, { checked: true, choicePrefix: owner.choicePrefix || '' });
   });
 
   // Fallback for older exported characters that already contain adapterRuntime.

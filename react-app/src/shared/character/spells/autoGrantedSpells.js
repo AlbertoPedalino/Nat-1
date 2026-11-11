@@ -5,7 +5,7 @@ import { enumerateFixedAdditionalSpells } from './additionalSpellGrants.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { classEntities } from '../progression/classLevel.js';
 import { choiceKey, matchKey, stripSource } from '../../content/nameKeys.js';
-import { choiceValueNames, readChoiceValue } from '../progression/choiceUtils.js';
+import { SUBCLASS_SPELL_LIST_KEY, choiceValueNames, readChoiceValue } from '../progression/choiceUtils.js';
 import { asArray } from '../../lists.js';
 
 /**
@@ -270,9 +270,11 @@ export function subclassDataSpells(entity) {
   return Array.isArray(record?.additionalSpells) ? record.additionalSpells : [];
 }
 
-// The builder choice naming which of a subclass's spell lists applies
-// (choiceSpecs.js subclassSpellListSpec), saved under the class's prefix.
-export const SUBCLASS_SPELL_LIST_KEY = 'subclass_spell_list';
+// The names of a subclass's spell lists in its data (Blood, Frost, Unholy):
+// the options of SUBCLASS_SPELL_LIST_KEY, saved under the class's prefix.
+export function subclassSpellListNames(entity) {
+  return subclassDataSpells(entity).map((entry) => entry?.name).filter(Boolean);
+}
 
 /**
  * Grants from the subclass data: its always-prepared spells as 5etools lists

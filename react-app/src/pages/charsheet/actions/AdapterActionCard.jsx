@@ -1,7 +1,8 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
+import { readChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
+import { asArray } from '../../../shared/lists.js';
 import { toggleActiveField } from '../state/toggleState.js';
 import { CAT_COLORS } from './actionTags.js';
 import { getActionRollers } from '../../../shared/character/dice/rollers.js';
@@ -243,20 +244,16 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
   );
 }
 
-const _CHOICE_PICKER_OPTIONS = {
-  armorer_model: [
-    { value: 'Guardian', label: 'Guardian (Defensive Tank)' },
-    { value: 'Infiltrator', label: 'Infiltrator (Fast Striker)' },
-    { value: 'Dreadnaught', label: 'Dreadnought (Force + Reach)' },
-  ],
-};
-
+// A card's builder choice, switched from the sheet: `choiceOptions` (a list,
+// or a function of the character and the card) under `choiceKey`, saved as
+// the builder saves it — a one-item list under its class's prefix.
 function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
-  const choiceKey = action.choiceKey;
-  const options = action.choiceOptions || _CHOICE_PICKER_OPTIONS[choiceKey];
+  const choiceKey = `${action.choicePrefix || ''}${action.choiceKey}`;
+  const options = typeof action.choiceOptions === 'function'
+    ? action.choiceOptions({ character: C, action })
+    : action.choiceOptions;
   if (!options || !options.length) return null;
-  const current = getChoiceValue(C, choiceKey);
-  const q = String(current || '').toLowerCase();
+  const q = String(asArray(readChoiceValue(C, choiceKey))[0] || '').toLowerCase();
   const match = options.find((o) => String(o.value).toLowerCase() === q);
   const activeValue = match ? match.value : '';
 
@@ -276,7 +273,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
     }
     onUpdateCharacter((prev) => {
       const choices = { ...(prev.choices || {}) };
-      choices[choiceKey] = next;
+      choices[choiceKey] = [next];
       return { ...prev, choices };
     });
     if (!action.choiceNoToast) onNotice?.('Choice Updated', `${action.choiceLabel || 'Choice'}: ${next}`);
@@ -294,9 +291,11 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.25 }}>
-        <RichInline text={action.choiceRestNote || "Change when you finish a Short or Long Rest (Smith's Tools required)."} keyPrefix={`choice-${action.choiceKey || 'note'}`} />
-      </Typography>
+      {action.choiceRestNote ? (
+        <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.25 }}>
+          <RichInline text={action.choiceRestNote} keyPrefix={`choice-${action.choiceKey}`} />
+        </Typography>
+      ) : null}
     </Box>
   );
 }

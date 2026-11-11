@@ -66,7 +66,13 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "cat": "action",
     "minLevel": 3,
     "choiceKey": "armorer_model",
-    "choiceLabel": "Arcane Armor Model"
+    "choiceLabel": "Arcane Armor Model",
+    "choiceOptions": [
+      { "value": "Guardian", "label": "Guardian (Defensive Tank)" },
+      { "value": "Infiltrator", "label": "Infiltrator (Fast Striker)" },
+      { "value": "Dreadnaught", "label": "Dreadnought (Force + Reach)" }
+    ],
+    "choiceRestNote": "Change when you finish a Short or Long Rest (Smith's Tools required)."
   },
   {
     "name": "Thunder Pulse",

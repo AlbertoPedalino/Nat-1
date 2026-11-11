@@ -1,5 +1,6 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
 import { flattenList } from '../../lists.js';
+import { isSubclassSpellListKey } from './choiceUtils.js';
 import { choiceKey, choiceText } from '../../content/nameKeys.js';
 import { ABILITIES, ALL_LANGUAGES, SKILL_NAMES } from '../../content/rulesVocabulary.js';
 
@@ -110,6 +111,7 @@ function isLanguageKey(key) {
 }
 
 function isSpellChoiceKey(key) {
+  if (isSubclassSpellListKey(key)) return false;
   const k = choiceKey(key);
   return k.includes('spell') || k.includes('cantrip') || k.includes('arcanum');
 }

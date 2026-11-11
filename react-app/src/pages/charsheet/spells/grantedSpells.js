@@ -23,7 +23,7 @@ import {
 import { getChoiceSpellAbility } from './spellAbility.js';
 import { buildFeatMetaMap } from './featSpellMeta.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
-import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { baseChoiceKey, isSubclassSpellListKey } from '../../../shared/character/progression/choiceUtils.js';
 import { asArray } from '../../../shared/lists.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 
@@ -129,6 +129,8 @@ export function collectChoiceSpells(C, spellIndex) {
   Object.entries(C?.choices || {}).forEach(([key, value]) => {
     const cleanKey = baseChoiceKey(key);
     if (isWarlockModifierCantripChoiceKey(cleanKey)) return;
+    // A subclass's spell list pick (a rune) names a list, not a spell.
+    if (isSubclassSpellListKey(cleanKey)) return;
     if (!speciesChoiceKeyMatchesActiveLineage(C, cleanKey)) return;
     const values = asArray(value);
     values.forEach((entry) => {

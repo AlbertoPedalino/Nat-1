@@ -1,6 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { ownerEntries, speciesOwner } from '../../../shared/character/sheet/adapterOwners.js';
-import { SUBCLASS_SPELL_LIST_KEY } from '../../../shared/character/spells/autoGrantedSpells.js';
+import { SUBCLASS_SPELL_LIST_KEY } from '../../../shared/character/progression/choiceUtils.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
 import {
@@ -212,7 +212,7 @@ function dedupSpecs(specs) {
 // A subclass whose data has several spell lists the player picks from
 // (Ebon Blade: a rune; Demon Hunter: a specialization) asks for it when its
 // runtime config says so (`spellListChoice: { label }`); the list's spells
-// then come from the data (autoGrantedSpells.js, SUBCLASS_SPELL_LIST_KEY).
+// then come from the data (autoGrantedSpells.js enumerateSubclassDataGrants).
 function subclassSpellListSpec(options, cls) {
   const choice = adapterRegistry.getSubclassRuntimeConfig(options.className, options.subclassShortName)?.spellListChoice;
   const lists = (options.subclass?.additionalSpells || []).map((entry) => entry?.name).filter(Boolean);

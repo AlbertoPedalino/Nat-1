@@ -9,6 +9,15 @@ export function baseChoiceKey(key) {
 
 const isChoiceKey = (stored, key) => stored === key || baseChoiceKey(stored) === key;
 
+// The pick naming which of a subclass's spell lists applies (Ebon Blade: the
+// rune; Demon Hunter: the specialization). Its value is a list name, never a
+// spell, though the key says "spell".
+export const SUBCLASS_SPELL_LIST_KEY = 'subclass_spell_list';
+
+export function isSubclassSpellListKey(key) {
+  return baseChoiceKey(key) === SUBCLASS_SPELL_LIST_KEY;
+}
+
 // A character's stored value for a choice key, wherever it was saved: the
 // choice itself, the normalized choices (raw, then by bucket), or a
 // multiclass-prefixed copy. null when there is none.
