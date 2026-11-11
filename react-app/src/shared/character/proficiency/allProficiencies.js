@@ -1,8 +1,5 @@
 import { getMulticlassProficiencies } from '../progression/multiclassProficiencies.js';
-import {
-  parseTypedProficiencyValue as parseTypedProficiencyValueShared,
-  isChoicePlaceholderValue,
-} from '../progression/typedProficiencies.js';
+import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 import {
   addFixedLabels,
   collectFixedFeatureProfs,
@@ -10,11 +7,6 @@ import {
 } from './proficiencyHelpers.js';
 import { asArray } from '../../lists.js';
 
-function parseTypedProficiencyValue(value) {
-  const parsed = parseTypedProficiencyValueShared(value);
-  if (!parsed.kind || !parsed.label) return null;
-  return { kind: parsed.kind, label: parsed.label };
-}
 
 export function collectAllProficiencies(character, equipmentSets) {
   if (!equipmentSets) {
@@ -25,14 +17,10 @@ export function collectAllProficiencies(character, equipmentSets) {
   const toolSet = new Set();
   const langSet = new Set();
 
-  (character?.normalizedChoices?.tools || [])
-    .map(normalizeLabel)
-    .filter(Boolean)
-    .forEach((v) => toolSet.add(v));
-  (character?.normalizedChoices?.languages || [])
-    .map(normalizeLabel)
-    .filter(Boolean)
-    .forEach((v) => langSet.add(v));
+  // Picked tools and languages: the one reading of the builder's choices.
+  const normalized = getNormalizedChoices(character);
+  (normalized.tools || []).map(normalizeLabel).filter(Boolean).forEach((v) => toolSet.add(v));
+  (normalized.languages || []).map(normalizeLabel).filter(Boolean).forEach((v) => langSet.add(v));
 
   addFixedLabels(sp.tools, toolSet);
 
@@ -54,31 +42,6 @@ export function collectAllProficiencies(character, equipmentSets) {
   collectFixedFeatureProfs(character, 'toolProficiencies').forEach((v) => toolSet.add(v));
   collectFixedFeatureProfs(character, 'languageProficiencies').forEach((v) => langSet.add(v));
   collectFixedFeatureProfs(character, 'skillToolLanguageProficiencies').forEach((v) => toolSet.add(v));
-
-  if (character?.choices) {
-    for (const [key, val] of Object.entries(character.choices)) {
-      if (!val) continue;
-      const lk = key.toLowerCase();
-      const vals = asArray(val);
-      vals.forEach((v) => {
-        const typed = parseTypedProficiencyValue(v);
-        if (typed) {
-          if (typed.kind === 'tool') toolSet.add(typed.label);
-          else if (typed.kind === 'language') langSet.add(typed.label);
-          return;
-        }
-        if (isChoicePlaceholderValue(v)) return;
-        if (lk.includes('tool') || lk.includes('instrument')) {
-          const n = normalizeLabel(v);
-          if (n) toolSet.add(n);
-        }
-        if (lk.includes('language')) {
-          const n = normalizeLabel(v);
-          if (n) langSet.add(n);
-        }
-      });
-    }
-  }
 
   adapterGrants.forEach((grant) => {
     if (grant.display === false) return;

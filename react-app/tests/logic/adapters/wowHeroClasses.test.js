@@ -12,7 +12,6 @@ import { enumerateSubclassDataGrants } from '../../../src/shared/character/spell
 import { meetsFeatPrerequisites } from '../../../src/pages/charbuilder/choices/featPrerequisiteRules.js';
 import { collectAdapterActions } from '../../../src/shared/character/sheet/adapterActions.js';
 import { collectChoiceSpells } from '../../../src/pages/charsheet/spells/grantedSpells.js';
-import { normalizeCharacterChoices } from '../../../src/shared/character/progression/choiceNormalization.js';
 
 [installPaladin, installDeathKnight, installEbonBlade, installRangerHunter, installDemonHunter].forEach((install) => install(adapterRegistry));
 adapterRegistry.registerClassSkin('Death Knight', { base: 'Paladin', removedFeatures: ['Lay on Hands', "Paladin's Smite", 'Restoring Touch'] });
@@ -90,8 +89,8 @@ test('the World of Warcraft invocations bring their cards, spells and uses', asy
 
 test('the rune is a list name, not a spell the character picked', () => {
   const dk = deathKnight(3, { subclass_spell_list: ['Blood'] });
+  // Not in the spell index, and its key is no spell slot: no spell.
   assert.deepEqual(collectChoiceSpells(dk, new Map()), []);
-  assert.deepEqual(normalizeCharacterChoices(dk).spells.spells, []);
 });
 
 const runeOption = (name) => ({ type: 'entries', name, entries: [`${name} text.`] });

@@ -37,20 +37,6 @@ function mergeSelectedList(current, additions) {
   return uniqueProficiencyLabels([...(Array.isArray(current) ? current : []), ...added]);
 }
 
-function mergeNormalizedChoices(normalizedChoices, typedProfs) {
-  const hasTyped = typedProfs.skills.length || typedProfs.tools.length || typedProfs.languages.length;
-  if (!normalizedChoices && !hasTyped) return null;
-
-  const normalized = normalizedChoices && typeof normalizedChoices === 'object'
-    ? { ...normalizedChoices }
-    : {};
-
-  normalized.skills = uniqueProficiencyLabels([...(normalized.skills || []), ...typedProfs.skills]);
-  normalized.tools = uniqueProficiencyLabels([...(normalized.tools || []), ...typedProfs.tools]);
-  normalized.languages = uniqueProficiencyLabels([...(normalized.languages || []), ...typedProfs.languages]);
-
-  return normalized;
-}
 
 export function normalizeProficiencyChoicesForPersistence(character = {}) {
   const typedProfs = collectTypedProficiencyChoices(character.choices || {});
@@ -60,6 +46,5 @@ export function normalizeProficiencyChoicesForPersistence(character = {}) {
     selectedSkills: mergeSelectedSkills(character.selectedSkills, typedProfs.skills),
     selectedTools: mergeSelectedList(character.selectedTools, typedProfs.tools),
     selectedLanguages: mergeSelectedList(character.selectedLanguages, typedProfs.languages),
-    normalizedChoices: mergeNormalizedChoices(character.normalizedChoices, typedProfs),
   };
 }

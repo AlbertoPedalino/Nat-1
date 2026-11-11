@@ -9,17 +9,12 @@ import { stripMarkup } from '../../../shared/content/markupText.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
-// for derived proficiencies/expertise/spells (consumed by the sheet and previews).
+// for derived proficiencies/expertise (consumed by the sheet and previews).
 const NORMALIZE_SOURCE_FIELDS = [
   'choices',
   'selectedSkills',
   'selectedTools',
   'selectedLanguages',
-  'selectedCantrips',
-  'selectedSpells',
-  'wizardSpellbook',
-  'wizardSpellMastery',
-  'wizardSignatureSpells',
 ];
 
 export function patchTouchesNormalizeSource(patch) {

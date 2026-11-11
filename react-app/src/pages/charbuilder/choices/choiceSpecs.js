@@ -115,13 +115,31 @@ function optionEntryLabel(entry) {
   return '';
 }
 
-function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
+// Where a class or subclass feature's own picks are saved, under the class's
+// prefix: `<prefix>auto_feat_<Name>_<kind>_<n>`, expertise
+// `<prefix>auto_feat_exp_<Name>_<n>`. Built here, and read back to drop a
+// subclass's picks when the subclass changes (classHandlers.js).
+const FEATURE_PICK_KINDS = ['skill', 'lang', 'tool', 'opt'];
+
+function featureKeyName(feature, index = 0) {
+  return specSan(feature?.name || `Feature_${index}`).replace(/[^a-zA-Z0-9]/g, '_') || `f_${index}`;
+}
+
+export function featurePickKeyStems(feature, classPrefix = '') {
+  const name = featureKeyName(feature);
+  return [
+    ...FEATURE_PICK_KINDS.map((kind) => `${classPrefix}auto_feat_${name}_${kind}_`),
+    `${classPrefix}auto_feat_exp_${name}_`,
+  ];
+}
+
+function deriveFeatureChoiceSpecs(features, maxLv, classPrefix) {
   const out = [];
   const list = (features || []).filter((feature) => !feature?.isReprinted && (Number(feature?.level) || 0) <= maxLv);
   list.forEach((feature, fi) => {
     const fname = specSan(feature.name || `Feature_${fi}`);
-    const fkey = fname.replace(/[^a-zA-Z0-9]/g, '_') || `f_${fi}`;
-    const baseKey = `${keyPrefix}_feat_${fkey}`;
+    const fkey = featureKeyName(feature, fi);
+    const baseKey = `${classPrefix}auto_feat_${fkey}`;
 
     (feature.skillProficiencies || []).forEach((block, bi) => {
       const choose = block?.choose || {};
@@ -171,7 +189,7 @@ function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
       asArray(feature.expertise).forEach((ex, idx) => {
         if (ex?.choose) {
           specPush(out, {
-            key: `${keyPrefix}_feat_exp_${fkey}_${idx}`,
+            key: `${classPrefix}auto_feat_exp_${fkey}_${idx}`,
             label: `${fname} — Expertise`,
             type: 'expertise',
             from: ex.choose.from || [],
@@ -265,7 +283,7 @@ function buildClassSpecs(cls, classLevel, options) {
       ? (options.subclassFeatures || []).filter((feature) => Number(feature?.level || 0) <= classLevel && !feature?.isReprinted && feature.subclassShortName === options.subclassShortName)
       : []),
   ];
-  specs.push(...deriveFeatureChoiceSpecs(allFeatures, classLevel, `${options.keyPrefix}auto`));
+  specs.push(...deriveFeatureChoiceSpecs(allFeatures, classLevel, options.keyPrefix || ''));
 
   if (options.keyPrefix) {
     return specs.map((spec) => ({ ...spec, key: `${options.keyPrefix}${spec.key.startsWith(options.keyPrefix) ? spec.key.slice(options.keyPrefix.length) : spec.key}` }));

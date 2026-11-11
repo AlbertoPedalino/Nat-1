@@ -2,6 +2,7 @@ import { asArray } from '../../../shared/lists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
 import { stripMarkup } from '../../../shared/content/markupText.js';
+import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 
 export function normalizeArtificerTool(value) {
   if (!value) return '';
@@ -55,11 +56,6 @@ function addFixedToolBlocks(out, blocks) {
   });
 }
 
-function choiceLooksLikeTool(key) {
-  const raw = String(key || '').toLowerCase();
-  return raw.includes('tool') || raw.includes('instrument') || raw.startsWith('start_tools');
-}
-
 /**
  * Collects tool proficiencies that the character already has before the
  * current Artificer subclass grant is applied.
@@ -80,10 +76,8 @@ export function collectKnownArtificerToolKeys(ctx = {}, cls = null) {
   addFixedToolBlocks(out, character.backgroundObj?.toolProficiencies);
   addFixedToolBlocks(out, character.speciesObj?.toolProficiencies);
 
-  Object.entries(choices).forEach(([key, value]) => {
-    if (!choiceLooksLikeTool(key)) return;
-    asArray(value).forEach((item) => addTool(out, item));
-  });
+  // Picked tools: the one reading of the builder's choices.
+  normalizeCharacterChoices({ choices }).tools.forEach((item) => addTool(out, item));
 
   return out;
 }

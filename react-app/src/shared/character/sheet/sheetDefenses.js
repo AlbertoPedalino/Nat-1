@@ -1,7 +1,7 @@
 import { asArray, compareText } from '../../lists.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { cleanText, effectKey, displayLabel, inferDamageTypeFromText, resolveChoiceValue, effectTitle, effectSummary } from './sheetEffectText.js';
-import { baseChoiceKey } from '../progression/choiceUtils.js';
+import { isSpeciesResistKey } from '../progression/choiceUtils.js';
 
 // Damage resistances and immunities as the sheet and the builder preview show
 // them: the species' and other static defense blocks, the choices that pick a
@@ -67,28 +67,9 @@ function collectSelectedSpeciesResistanceChoices(character = {}, source = 'Speci
     if (damageType) out.push({ label: damageType, kind: 'Resistance', source });
   };
 
-  const speciesChoiceCanGrantResistance = (key) => {
-    const k = effectKey(baseChoiceKey(key));
-    if (!k.startsWith('species')) return false;
-    return k.includes('resist') || k.includes('resistance');
-  };
-
   Object.entries(character.choices || {}).forEach(([key, value]) => {
-    if (!speciesChoiceCanGrantResistance(key)) return;
+    if (!isSpeciesResistKey(key)) return;
     asArray(value).forEach((entry) => pushMaybeDamageType(entry, key));
-  });
-
-  const normalized = character.normalizedChoices || {};
-  [
-    normalized.species?.options,
-    normalized.speciesOptions,
-    normalized.rawByKey,
-  ].forEach((bucket) => {
-    if (!bucket || typeof bucket !== 'object') return;
-    Object.entries(bucket).forEach(([key, value]) => {
-      if (!speciesChoiceCanGrantResistance(key)) return;
-      asArray(value).forEach((entry) => pushMaybeDamageType(entry, key));
-    });
   });
 
   return dedupeDefenseItems(out);

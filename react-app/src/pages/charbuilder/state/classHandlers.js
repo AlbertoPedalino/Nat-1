@@ -1,6 +1,7 @@
 import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { hasLevelAbove, totalCharacterLevel } from './choiceCleanup.js';
 import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
+import { featurePickKeyStems } from '../choices/choiceSpecs.js';
 
 // The builder reducer's class actions beyond the primary class pick
 // (stateHandlers.js handleClassSelect): subclasses and the multiclass tabs.
@@ -58,13 +59,23 @@ export function handleMulticlassRemove(state, action, { findByNameSource, update
   return updateCharacter(state, { extraClasses, activeClassTab: 0, choices: remappedChoices, level: total });
 }
 
+// The picks a class's previous subclass owns, dropped when it changes: its
+// adapter's (`<prefix>subclass_…`) and those its features ask for
+// (featurePickKeyStems). Every other pick (background, species, class) stays.
+function withoutSubclassChoices(choices, prefix, subFeatures, subclassShortName) {
+  const stems = (subFeatures || [])
+    .filter((feature) => subclassShortName && feature?.subclassShortName === subclassShortName)
+    .flatMap((feature) => featurePickKeyStems(feature, prefix));
+  return Object.fromEntries(Object.entries(choices || {}).filter(([key]) => (
+    !key.startsWith(`${prefix}subclass_`) && !stems.some((stem) => key.startsWith(stem))
+  )));
+}
+
 // The primary class's subclass: its features, and a clean slate for the
-// subclass, skill and expertise choices.
+// previous subclass's choices.
 export function handleSubclassSelect(state, action, { findByNameSource, updateCharacter }) {
-  const choices = { ...state.character.choices };
-  Object.keys(choices).forEach((key) => {
-    if (key.startsWith('subclass_') || key.includes('_skill_') || key.includes('_exp_')) delete choices[key];
-  });
+  const { character } = state;
+  const choices = withoutSubclassChoices(character.choices, '', character.allSubFeatures, character.subclassShortName);
   const selectedSubclass = (state.character.subclasses || []).find(
     (s) => s.shortName === action.subclassShortName
   );
@@ -113,16 +124,12 @@ export function handleExtraClassSelect(state, action, { findByNameSource, update
   return updateCharacter(state, { extraClasses, choices, activeClassTab: idx + 1, level: total });
 }
 
-// An extra class's subclass, clearing that tab's subclass, skill and
-// expertise choices.
+// An extra class's subclass, clearing that tab's previous subclass choices.
 export function handleExtraSubclassSelect(state, action, { findByNameSource, updateCharacter }) {
   const idx = Number(action.index);
   if (!Number.isInteger(idx) || idx < 0) return state;
-  const prefix = `mc${idx}_`;
-  const choices = { ...state.character.choices };
-  Object.keys(choices).forEach((key) => {
-    if (key.startsWith(`${prefix}subclass_`) || (key.startsWith(prefix) && (key.includes('_skill_') || key.includes('_exp_')))) delete choices[key];
-  });
+  const previous = state.character.extraClasses?.[idx] || {};
+  const choices = withoutSubclassChoices(state.character.choices, `mc${idx}_`, previous.allSubFeatures, previous.subclassShortName);
   const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => {
     if (itemIndex !== idx) return extraClass;
     const selectedSubclass = (extraClass.subclasses || []).find(

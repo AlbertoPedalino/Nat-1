@@ -569,3 +569,14 @@ test('spell slot changes are saved only through spellSlots.js', () => {
 test('death saves are written as { success, fail } only', () => {
   assert.deepEqual(sourceLinesMatching(/\{ s: \d, f: \d \}|deathSaves\??\.(s|f)\b|saveType: ['"](s|f)['"]/), []);
 });
+
+// A choice's kind is read in one place: choiceKeyKind and the value checks of
+// choiceNormalization.js. A key that merely contains "spell" or "_skill_" is
+// no spell or skill pick (a rune list, a background's skill wiped with a
+// subclass change); every reader goes through the normalized choices.
+test('a choice key is read for its kind only in choiceNormalization.js', () => {
+  assert.deepEqual(sourceLinesMatching(
+    /\b(key|k|lk|ck|cleanKey|baseKey|raw|stored)\.(includes|startsWith|endsWith)\(['"](skill|tool|language|lang|instrument|expertise|expert|_skill_|_exp_|spell|cantrip|resist|resistance|weapon|mastery)['"]\)/,
+    { allow: ['shared/character/progression/choiceNormalization.js'] },
+  ), []);
+});

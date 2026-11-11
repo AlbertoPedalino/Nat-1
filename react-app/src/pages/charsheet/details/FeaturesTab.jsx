@@ -5,6 +5,7 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { asArray } from '../../../shared/lists.js';
+import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { collectWarlockInvocationFeatures, collectClassBuckets } from './featuresTabData.js';
 import { FeatureSection } from './FeatureSection.jsx';
 import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
@@ -32,16 +33,10 @@ export default function FeaturesTab({ C }) {
       });
     }
 
-    const backgroundChoices = {};
-    if (C?.choices) {
-      Object.entries(C.choices).forEach(([k, v]) => {
-        if (!k.startsWith('bg_')) return;
-        const vals = asArray(v);
-        if (k.includes('skill')) backgroundChoices.skills = [...(backgroundChoices.skills || []), ...vals];
-        else if (k.includes('tool') || k.includes('instrument')) backgroundChoices.tools = [...(backgroundChoices.tools || []), ...vals];
-        else if (k.includes('language')) backgroundChoices.languages = [...(backgroundChoices.languages || []), ...vals];
-      });
-    }
+    // The background's own picks, read the one way choices are read.
+    const backgroundChoices = normalizeCharacterChoices({
+      choices: Object.fromEntries(Object.entries(C?.choices || {}).filter(([key]) => key.startsWith('bg_'))),
+    });
 
     const fixedSkills = extractFixedProficiencyLabels(backgroundSnapshot.skillProficiencies);
     const allSkills = [...new Set([...fixedSkills, ...(backgroundChoices.skills || [])])];

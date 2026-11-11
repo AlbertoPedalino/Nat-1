@@ -1,6 +1,6 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
 import { flattenList } from '../../lists.js';
-import { isSubclassSpellListKey } from './choiceUtils.js';
+import { isChoicePlaceholderValue, parseTypedProficiencyValue } from './typedProficiencies.js';
 import { choiceKey, choiceText } from '../../content/nameKeys.js';
 import { ABILITIES, ALL_LANGUAGES, SKILL_NAMES } from '../../content/rulesVocabulary.js';
 
@@ -110,61 +110,47 @@ function isLanguageKey(key) {
   return k.includes('language') || k.endsWith('lang') || k.includes('polyglot');
 }
 
-function isSpellChoiceKey(key) {
-  if (isSubclassSpellListKey(key)) return false;
-  const k = choiceKey(key);
-  return k.includes('spell') || k.includes('cantrip') || k.includes('arcanum');
+// What a choice grants, read off its key: the one place a builder choice key
+// is read for its kind, for the saved choices here and the builder's specs
+// (ChoiceBlock). Only what the value alone cannot say: a weapon's mastery or
+// its proficiency, expertise, and the fallback for a value outside the known
+// lists (an instrument, a setting's language). Null for any other choice.
+export function choiceKeyKind(key) {
+  if (isWeaponMasteryKey(key)) return 'weaponMastery';
+  if (isWeaponProficiencyKey(key)) return 'weapon';
+  if (isExpertiseKey(key)) return 'expertise';
+  if (isSkillKey(key)) return 'skill';
+  if (isLanguageKey(key)) return 'language';
+  if (isToolKey(key)) return 'tool';
+  return null;
 }
 
-function isSubclassKey(key) {
-  return choiceKey(key).startsWith('subclass');
+// What a picked value names: a skill, a language or a tool, else null.
+function valueKind(text) {
+  if (isSkill(text)) return 'skill';
+  if (isLanguage(text)) return 'language';
+  if (isToolLike(text)) return 'tool';
+  return null;
 }
 
-function isBackgroundKey(key) {
-  const k = choiceKey(key);
-  return k.startsWith('bg') || k === 'featorigin';
-}
-
-function classifyProficiencyValue(out, key, value, options = {}) {
-  const text = choiceText(value);
-  if (!text) return;
-
-  const forceExpertise = Boolean(options.expertise);
-  if (forceExpertise) {
+// One picked value: its typed kind ("tool:Brewer's Supplies"), else what it
+// names, else what its key says.
+function classifyProficiencyValue(out, key, value, { expertise = false } = {}) {
+  const typed = parseTypedProficiencyValue(value);
+  const text = typed.label;
+  if (!text || isChoicePlaceholderValue(text)) return;
+  const keyKind = choiceKeyKind(key);
+  const kind = typed.kind || valueKind(text) || (keyKind === 'expertise' ? null : keyKind);
+  if (expertise) {
     uniquePush(out.expertise, text);
-    if (isSkill(text)) uniquePush(out.skills, text);
-    else if (isToolLike(text)) uniquePush(out.tools, text);
+    if (kind === 'skill') uniquePush(out.skills, text);
+    else if (kind === 'tool') uniquePush(out.tools, text);
     return;
   }
-
-  if (isSkill(text)) {
-    uniquePush(out.skills, text);
-    return;
-  }
-
-  if (isLanguage(text)) {
-    uniquePush(out.languages, text);
-    return;
-  }
-
-  if (isToolLike(text)) {
-    uniquePush(out.tools, text);
-    return;
-  }
-
-  if (isSkillKey(key)) {
-    uniquePush(out.skills, text);
-    return;
-  }
-
-  if (isLanguageKey(key)) {
-    uniquePush(out.languages, text);
-    return;
-  }
-
-  if (isToolKey(key)) {
-    uniquePush(out.tools, text);
-  }
+  if (kind === 'skill') uniquePush(out.skills, text);
+  else if (kind === 'language') uniquePush(out.languages, text);
+  else if (kind === 'tool') uniquePush(out.tools, text);
+  else if (kind === 'weapon') uniquePush(out.weapons, text);
 }
 
 function normalizeChoiceEntry(out, key, value) {
@@ -175,56 +161,39 @@ function normalizeChoiceEntry(out, key, value) {
 
   if (VERSION_KEYS.has(key)) {
     out.species.version = values[0] || null;
-    out.species.options[key] = out.rawByKey[key];
     return;
   }
 
   if (SPELL_ABILITY_KEYS.has(key)) {
     const ability = values.find(isAbility) || values[0];
     out.species.spellAbility = choiceKey(ability) || null;
-    out.spells.spellAbilityChoices[key] = out.species.spellAbility;
-    out.species.options[key] = out.species.spellAbility;
     return;
   }
 
   if (SIZE_KEYS.has(key)) {
     out.species.size = values[0] || null;
-    out.species.options[key] = out.rawByKey[key];
     return;
   }
 
-  if (isWeaponMasteryKey(key)) {
+  const kind = choiceKeyKind(key);
+  if (kind === 'weaponMastery') {
     uniquePushMany(out.weaponMasteries, values);
-    out.choiceKeysByCategory.weaponMasteries.push(key);
     return;
   }
-
-  if (isWeaponProficiencyKey(key)) {
+  if (kind === 'weapon') {
     uniquePushMany(out.weapons, values);
-    out.choiceKeysByCategory.weapons.push(key);
     return;
   }
-
-  if (isExpertiseKey(key)) {
+  if (kind === 'expertise') {
     values.forEach((item) => classifyProficiencyValue(out, key, item, { expertise: true }));
-    out.choiceKeysByCategory.expertise.push(key);
     return;
   }
-
-  if (isSkillKey(key) || isToolKey(key) || isLanguageKey(key)) {
+  if (kind) {
     values.forEach((item) => classifyProficiencyValue(out, key, item));
-    if (isSkillKey(key)) out.choiceKeysByCategory.skills.push(key);
-    if (isToolKey(key)) out.choiceKeysByCategory.tools.push(key);
-    if (isLanguageKey(key)) out.choiceKeysByCategory.languages.push(key);
     if (isFeatKey(key)) return;
-  }
-
-  if (isSpellChoiceKey(key)) {
-    out.spells.byKey[key] = out.rawByKey[key];
-    if (choiceKey(key).includes('cantrip')) uniquePushMany(out.spells.cantrips, values);
-    else uniquePushMany(out.spells.spells, values);
-    out.choiceKeysByCategory.spells.push(key);
-    return;
+  } else {
+    // A typed value says what it is under any key.
+    values.filter((item) => parseTypedProficiencyValue(item).kind).forEach((item) => classifyProficiencyValue(out, key, item));
   }
 
   if (isFeatDetailKey(key)) return;
@@ -235,26 +204,7 @@ function normalizeChoiceEntry(out, key, value) {
     if (key === 'feat_origin' || key === 'species_origin_feat') {
       uniquePushMany(out.feats.origin, values);
     }
-    out.choiceKeysByCategory.feats.push(key);
-    return;
   }
-
-  if (key.startsWith('species_')) {
-    out.species.options[key] = out.rawByKey[key];
-    return;
-  }
-
-  if (isBackgroundKey(key)) {
-    out.background.options[key] = out.rawByKey[key];
-    return;
-  }
-
-  if (isSubclassKey(key)) {
-    out.subclassOptions[key] = out.rawByKey[key];
-    return;
-  }
-
-  out.classOptions[key] = out.rawByKey[key];
 }
 
 function emptyNormalizedChoices() {
@@ -271,34 +221,12 @@ function emptyNormalizedChoices() {
       origin: [],
       byKey: {},
     },
-    spells: {
-      cantrips: [],
-      spells: [],
-      byKey: {},
-      spellAbilityChoices: {},
-    },
     species: {
       version: null,
       size: null,
       spellAbility: null,
-      options: {},
     },
-    background: {
-      options: {},
-    },
-    classOptions: {},
-    subclassOptions: {},
     rawByKey: {},
-    choiceKeysByCategory: {
-      skills: [],
-      expertise: [],
-      tools: [],
-      languages: [],
-      weapons: [],
-      weaponMasteries: [],
-      feats: [],
-      spells: [],
-    },
   };
 }
 
@@ -331,12 +259,6 @@ export function normalizeCharacterChoices(character = {}) {
   }
   uniquePushMany(out.languages, character.selectedLanguages);
   uniquePushMany(out.tools, character.selectedTools);
-  uniquePushMany(out.spells.cantrips, character.selectedCantrips);
-  uniquePushMany(out.spells.spells, character.selectedSpells);
-
-  uniquePushMany(out.spells.spells, character.wizardSpellbook);
-  uniquePushMany(out.spells.spells, character.wizardSpellMastery);
-  uniquePushMany(out.spells.spells, character.wizardSignatureSpells);
 
   return out;
 }

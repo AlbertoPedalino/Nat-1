@@ -22,7 +22,7 @@ import {
   parseTypedProficiencyValue,
 } from '../../../shared/character/progression/typedProficiencies.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { choiceKeyKind } from '../../../shared/character/progression/choiceNormalization.js';
 import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
@@ -49,16 +49,14 @@ function isChoicePlaceholder(value) {
   return isChoicePlaceholderValue(value);
 }
 
+// The proficiency kind a spec offers: its type, else what its key says
+// (choiceKeyKind, the same reading the saved choices get).
+const SPEC_TYPE_KINDS = { skill_tool_choice: 'mixed', skill_choice: 'skill', language_choice: 'language', tool_choice: 'tool' };
+const KEY_KIND_PROFICIENCY = { skill: 'skill', language: 'language', tool: 'tool', weapon: 'weapon', weaponMastery: 'weapon' };
+
 function specProficiencyKind(spec) {
-  const key = String(spec?.key || '').toLowerCase();
-  const label = String(spec?.label || '').toLowerCase();
-  if (spec?.type === 'skill_tool_choice') return 'mixed';
   if (spec?.type === 'expertise') return null;
-  if (spec?.type === 'skill_choice' || key.includes('skill')) return 'skill';
-  if (spec?.type === 'language_choice' || key.includes('language') || key.includes('lang')) return 'language';
-  if (key.includes('tool') || label.includes('tool') || label.includes('instrument')) return 'tool';
-  if (key.includes('weapon') || label.includes('weapon proficiency')) return 'weapon';
-  return null;
+  return SPEC_TYPE_KINDS[spec?.type] || KEY_KIND_PROFICIENCY[choiceKeyKind(spec?.key)] || null;
 }
 
 function addChoiceValueToKindSet(out, value, kind) {
@@ -102,8 +100,7 @@ function collectAlreadyExpertiseSkills({ character }) {
 }
 
 function isWeaponMasterySpec(spec) {
-  const key = baseChoiceKey(spec?.key || '').toLowerCase();
-  return key.includes('weapon_mastery') || (key.includes('weapon') && key.includes('mastery'));
+  return choiceKeyKind(spec?.key) === 'weaponMastery';
 }
 
 export default function ChoiceBlock({ spec, choices, dispatch, character, getOptionDescription, items = [] }) {

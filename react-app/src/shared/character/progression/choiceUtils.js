@@ -10,38 +10,27 @@ export function baseChoiceKey(key) {
 const isChoiceKey = (stored, key) => stored === key || baseChoiceKey(stored) === key;
 
 // The pick naming which of a subclass's spell lists applies (Ebon Blade: the
-// rune; Demon Hunter: the specialization). Its value is a list name, never a
-// spell, though the key says "spell".
+// rune; Demon Hunter: the specialization). Its value is a list name.
 export const SUBCLASS_SPELL_LIST_KEY = 'subclass_spell_list';
 
-export function isSubclassSpellListKey(key) {
-  return baseChoiceKey(key) === SUBCLASS_SPELL_LIST_KEY;
+// A species' damage resistance pick (its `resist` block number `index`).
+export const speciesResistKey = (index) => `species_resist_${index}`;
+
+export function isSpeciesResistKey(key) {
+  return /^species_resist_\d+$/.test(baseChoiceKey(key));
 }
 
 // A character's stored value for a choice key, wherever it was saved: the
-// choice itself, the normalized choices (raw, then by bucket), or a
-// multiclass-prefixed copy. null when there is none.
+// choice itself, the normalized choices' raw copy, or a multiclass-prefixed
+// copy. null when there is none.
 export function readChoiceValue(character, key) {
   if (!character || !key) return null;
 
   const direct = character?.choices?.[key];
   if (direct != null) return direct;
 
-  const normalized = character?.normalizedChoices || {};
-  const byKey = normalized.rawByKey || {};
+  const byKey = character?.normalizedChoices?.rawByKey || {};
   if (byKey[key] != null) return byKey[key];
-
-  const buckets = [
-    normalized.classOptions,
-    normalized.subclassOptions,
-    normalized.species?.options,
-    normalized.background?.options,
-    normalized.feats?.byKey,
-    normalized.spells?.byKey,
-  ];
-  for (const bucket of buckets) {
-    if (bucket && bucket[key] != null) return bucket[key];
-  }
 
   const found = Object.entries(character?.choices || {}).find(([stored]) => baseChoiceKey(stored) === key);
   return found ? found[1] : null;

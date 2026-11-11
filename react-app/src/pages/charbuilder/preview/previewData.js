@@ -10,19 +10,14 @@ import { parseTypedProficiencyValue } from '../../../shared/character/progressio
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { buildPreviewSheetCharacter } from './previewSheet.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { asArray } from '../../../shared/lists.js';
 import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
+import { getNormalizedChoices } from '../../../shared/character/progression/choiceNormalization.js';
 
 // What the builder preview lists: skill and other proficiencies merged from
 // every source, and the feats the character holds.
 
 function uniqueClean(values) {
   return uniqueDisplayLabels(values);
-}
-
-function choiceKeyCanGrantSkill(key) {
-  const lk = String(key || '').toLowerCase();
-  return lk.includes('skill') || lk.includes('exp_') || lk.includes('expertise');
 }
 
 function collectSkillProficiencies(character) {
@@ -43,13 +38,8 @@ function collectSkillProficiencies(character) {
     ];
   fromSelected.forEach(pushSkill);
   out.push(...heldProficiencyLabels(character, 'skill'));
-  (character.normalizedChoices?.expertise || []).forEach(pushSkill);
-
-  Object.entries(character.choices || {})
-    .filter(([key]) => choiceKeyCanGrantSkill(key))
-    .forEach(([, value]) => {
-      asArray(value).forEach(pushSkill);
-    });
+  const normalized = getNormalizedChoices(character);
+  [...(normalized.skills || []), ...(normalized.expertise || [])].forEach(pushSkill);
 
   return uniqueClean(out);
 }

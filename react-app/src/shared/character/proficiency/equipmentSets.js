@@ -13,10 +13,8 @@ import {
   normalizeLabel,
 } from './proficiencyHelpers.js';
 import { asArray } from '../../lists.js';
+import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 
-function isProficiencyChoiceKey(lowerKey) {
-  return lowerKey.includes('proficiency');
-}
 
 export function resolveWeaponProficiencyRules(character, adapterGrants) {
   const rules = [];
@@ -52,10 +50,10 @@ export function collectEquipmentProficiencySets(character) {
   const masteryHidden = new Set();
   const rawWeaponLabels = new Set();
 
-  (character?.normalizedChoices?.weaponMasteries || [])
-    .map(normalizeLabel)
-    .filter(Boolean)
-    .forEach((v) => weaponMasterySet.add(v));
+  // Picked masteries and weapons: the one reading of the builder's choices.
+  const normalized = getNormalizedChoices(character);
+  (normalized.weaponMasteries || []).map(normalizeLabel).filter(Boolean).forEach((v) => weaponMasterySet.add(v));
+  (normalized.weapons || []).map(normalizeLabel).filter(Boolean).forEach((v) => rawWeaponLabels.add(v));
 
   addFixedLabels(sp.armor, armorSet);
 
@@ -79,21 +77,6 @@ export function collectEquipmentProficiencySets(character) {
 
   collectFixedFeatureProfs(character, 'armorProficiencies').forEach((v) => armorSet.add(v));
   collectFixedFeatureProfs(character, 'weaponProficiencies').forEach((v) => rawWeaponLabels.add(v));
-
-  if (character?.choices) {
-    for (const [key, val] of Object.entries(character.choices)) {
-      if (!val) continue;
-      const lk = key.toLowerCase();
-      if (!isProficiencyChoiceKey(lk)) continue;
-      const vals = asArray(val);
-      if (lk.includes('mastery') && lk.includes('weapon')) {
-        vals.forEach((v) => { const n = normalizeLabel(v); if (n) weaponMasterySet.add(n); });
-        continue;
-      }
-      if (lk.includes('armor')) vals.forEach((v) => { const n = normalizeLabel(v); if (n) armorSet.add(n); });
-      if (lk.includes('weapon')) vals.forEach((v) => { const n = normalizeLabel(v); if (n) rawWeaponLabels.add(n); });
-    }
-  }
 
   adapterGrants.forEach((grant) => {
     if (!['armor', 'weapon', 'weaponMastery'].includes(grant.type)) return;

@@ -15,6 +15,7 @@ import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { SRC_COLOR, featSlotTone, unionSpellSources } from './spellSourceDisplay.js';
 import {
   choiceKeyIsCantripChoice,
+  choiceSpellSlotKey,
   featSpellSlotKey,
   ownerClassFromChoiceKey,
   sourceFromChoiceKey,
@@ -23,7 +24,7 @@ import {
 import { getChoiceSpellAbility } from './spellAbility.js';
 import { buildFeatMetaMap } from './featSpellMeta.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
-import { baseChoiceKey, isSubclassSpellListKey } from '../../../shared/character/progression/choiceUtils.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { asArray } from '../../../shared/lists.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 
@@ -129,15 +130,15 @@ export function collectChoiceSpells(C, spellIndex) {
   Object.entries(C?.choices || {}).forEach(([key, value]) => {
     const cleanKey = baseChoiceKey(key);
     if (isWarlockModifierCantripChoiceKey(cleanKey)) return;
-    // A subclass's spell list pick (a rune) names a list, not a spell.
-    if (isSubclassSpellListKey(cleanKey)) return;
     if (!speciesChoiceKeyMatchesActiveLineage(C, cleanKey)) return;
     const values = asArray(value);
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
       const name = stripSource(entry);
       if (!name) return;
-      if (!spellIndex.has(matchKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
+      // A picked spell is a value that names one, or one under a spell slot
+      // key of the builder's own form; a key that merely says "spell" is not.
+      if (!spellIndex.has(matchKey(name)) && !choiceSpellSlotKey(key)) return;
       if (ABILITIES.includes(matchKey(name))) return;
       const slotKey = featSpellSlotKey(C, key);
       const meta = slotKey ? featMetaMap.get(slotKey) : null;

@@ -16,6 +16,7 @@ import {
   choiceGroupWhat,
 } from '../spells/additionalSpellChoices.js';
 import { versionChoiceLabel } from './speciesVersion.js';
+import { speciesResistKey } from './choiceUtils.js';
 
 // 5etools proficiency "choose" blocks turned into builder choice specs — the
 // one parser for species, backgrounds, feats and multiclassing.
@@ -107,7 +108,7 @@ export function genericSpeciesChoiceSpecs(species) {
   // only sums the versions up.
   if (!asArray(species?._versions).length) {
     asArray(species?.resist).forEach((block, index) => {
-      add(choiceFromBlock(`species_resist_${index}`, 'Resistance', block, []));
+      add(choiceFromBlock(speciesResistKey(index), 'Resistance', block, []));
     });
   }
   return specs;

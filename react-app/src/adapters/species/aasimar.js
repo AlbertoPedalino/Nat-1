@@ -9,13 +9,7 @@ export default function install(registry, context = {}) {
     registerSpeciesSheetCommonChoiceMeta,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Aasimar_XPHB", function (s) {
-  let specs = [];
-  // Aasimar XPHB has fixed Celestial Resistance; avoid showing it as a build choice.
-  // Also remove a generic size spec, if parsed from the raw JSON, so we do not show it twice.
-  specs = specs.filter(function (x) {
-    return !String(x.key || '').startsWith('species_resist') && x.key !== 'species_size';
-  });
-
+  const specs = [];
   specs.push({ key: 'species_size', label: 'Choose Size', type: 'generic_choice', from: ['Medium', 'Small'], count: 1, level: 1 });
   return specs;
 });
