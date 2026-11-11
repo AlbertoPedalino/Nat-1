@@ -16,6 +16,8 @@ import {
   YES_NO_OPTIONS, anyValue, catalogDefaults, catalogEntries, fieldOptions, runCatalog, sourceOptions,
 } from './catalogFilter.js';
 import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -189,7 +191,7 @@ function CatalogRow({
   );
 }
 
-const filterBarSx = { p: 1.5, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 };
+const filterBarSx = { p: 1.5, borderBottom: INK_EDGE, flexShrink: 0 };
 
 const controlsSx = { display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' };
 
@@ -202,8 +204,7 @@ const headerRowSx = {
   gap: 1.5,
   px: 2,
   py: 0.75,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
+  borderBottom: INK_EDGE,
   flexShrink: 0,
 };
 
@@ -214,8 +215,7 @@ const listBoxSx = { flex: 1, minHeight: 0 };
 const rowSx = {
   appearance: 'none',
   border: 0,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
+  ...LIST_ROW_RULE_SX,
   bgcolor: 'transparent',
   color: 'inherit',
   font: 'inherit',

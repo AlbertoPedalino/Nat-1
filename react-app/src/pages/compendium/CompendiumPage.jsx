@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import CompendiumHome from './CompendiumHome.jsx';
+import { CompendiumFrame } from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 
@@ -12,7 +12,7 @@ export default function CompendiumPage() {
     <Box sx={rootSx}>
       <AppTopBar home compendium={false} />
       <Box sx={bodySx}>
-        <CompendiumHome compendium={compendium} layout="page" autoFocus />
+        <CompendiumFrame compendium={compendium} layout="page" autoFocus sx={{ height: '100%' }} />
       </Box>
     </Box>
   );
@@ -28,5 +28,7 @@ const rootSx = {
 const bodySx = {
   flex: 1,
   minHeight: 0,
-  pt: APP_TOP_BAR_HEIGHT,
+  pt: `calc(${APP_TOP_BAR_HEIGHT} + 8px)`,
+  px: { xs: 1, sm: 2 },
+  pb: { xs: 1, sm: 2 },
 };

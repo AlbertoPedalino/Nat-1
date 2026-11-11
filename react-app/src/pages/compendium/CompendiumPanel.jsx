@@ -1,17 +1,12 @@
 import { useCallback } from 'react';
 import { LAYERS } from '../../shared/ui/layers.js';
-import {
-  Box, IconButton, Paper, Portal,
-} from '@mui/material';
+import { Box, IconButton, Portal } from '@mui/material';
 import { X } from 'lucide-react';
 import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
-import PanelHeader from '../../shared/ui/PanelHeader.jsx';
 import { activePortalContainer } from '../../shared/ui/portalContainer.js';
-import CompendiumHome from './CompendiumHome.jsx';
+import { CompendiumFrame } from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
-import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
-import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -28,32 +23,29 @@ function OpenPanel({ onClose }) {
   }, [onClose]);
   return (
     <Portal container={activePortalContainer}>
-      <Paper role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
-        <PanelHeader icon={GAME_ICONS.compendium} title="Compendium">
-          <IconButton size="small" aria-label="Close the compendium" onClick={onClose} sx={{ ml: 'auto' }}>
-            <X size={ICON_SIZES.md} />
-          </IconButton>
-        </PanelHeader>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <CompendiumHome compendium={compendium} layout="panel" autoFocus />
-        </Box>
-      </Paper>
+      <Box role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
+        <CompendiumFrame
+          compendium={compendium}
+          layout="panel"
+          autoFocus
+          sx={{ height: '100%' }}
+          action={(
+            <IconButton size="small" aria-label="Close the compendium" onClick={onClose}>
+              <X size={ICON_SIZES.md} />
+            </IconButton>
+          )}
+        />
+      </Box>
     </Portal>
   );
 }
 
 // Below the app's top bar and under menus, like the stat block panel.
 const panelSx = {
-  ...SURFACES.panel,
   position: 'fixed',
   zIndex: LAYERS.compendium,
   top: `calc(${APP_TOP_BAR_HEIGHT} + 8px)`,
   left: { xs: 8, sm: 16 },
   bottom: { xs: 8, sm: 16 },
   width: { xs: 'calc(100% - 16px)', sm: 420 },
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  backgroundImage: 'none',
-  boxShadow: 12,
 };

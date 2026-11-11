@@ -6,6 +6,9 @@ import { CATALOG_TABS } from './catalogs/catalogColumns.jsx';
 import BookLinks from './books/BookLinks.jsx';
 import { fillColumnSx } from './compendiumStyles.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
+import { INK_EDGE } from '../../shared/ui/shadows.js';
+import Panel from '../../shared/ui/Panel.jsx';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 const TABS = [
   { key: 'search', label: 'Search' },
@@ -51,8 +54,7 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
 const tabsSx = {
   minHeight: CONTROL_HEIGHTS.huge,
   flexShrink: 0,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
+  borderBottom: INK_EDGE,
   '& .MuiTab-root': { minHeight: CONTROL_HEIGHTS.huge },
 };
 
@@ -64,3 +66,20 @@ const paneSx = {
 };
 
 const hiddenSx = { display: 'none' };
+
+// The compendium as a panel, the same on its own page and beside a session:
+// the app's Panel (its badge, title and screentone), the tabs filling it.
+// `action` goes at the end of the bar (the side panel's close button).
+export function CompendiumFrame({ compendium, layout, autoFocus = false, action = null, sx }) {
+  return (
+    <Panel
+      icon={GAME_ICONS.compendium}
+      title="Compendium"
+      action={action}
+      sx={{ display: 'flex', flexDirection: 'column', ...sx }}
+      bodySx={{ flex: 1, minHeight: 0 }}
+    >
+      <CompendiumHome compendium={compendium} layout={layout} autoFocus={autoFocus} />
+    </Panel>
+  );
+}

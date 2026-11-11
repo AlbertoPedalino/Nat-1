@@ -21,6 +21,8 @@ import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { entryNameSx, fillColumnSx, rowChipSx } from '../compendiumStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The kind filter: everything, or one kind.
 const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
@@ -163,8 +165,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
 
 const searchBarSx = {
   p: 1.5,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
+  borderBottom: INK_EDGE,
   flexShrink: 0,
 };
 
@@ -179,10 +180,9 @@ const kindRowSx = {
 const statusSx = { ...emptyTextSx, p: 2 };
 
 const resultSx = {
+  ...LIST_ROW_RULE_SX,
   gap: 1,
   alignItems: 'center',
-  borderBottom: '1px solid',
-  borderColor: 'divider',
 };
 
 const scrollSx = {
@@ -202,8 +202,7 @@ const pageBodySx = {
 };
 
 const pageListSx = {
-  borderRight: { md: '1px solid' },
-  borderColor: { md: 'divider' },
+  borderRight: { md: INK_EDGE },
 };
 
 const pageDetailSx = {

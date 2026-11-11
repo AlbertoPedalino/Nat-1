@@ -19,6 +19,10 @@ export const CARD_SX = Object.freeze({
 // opened description together — and its parts are only split by this rule.
 export const CARD_PART_RULE_SX = Object.freeze({ borderTop: 1, borderColor: 'divider' });
 
+// The hairline between the rows of a long list (compendium results, a
+// catalog): thin on purpose, a frame would be noise at that density.
+export const LIST_ROW_RULE_SX = Object.freeze({ borderBottom: 1, borderColor: 'divider' });
+
 // A tile (an ability score, a speed): a box drawn on the page, on the header
 // tint. `tone` colours its edge for a state (a penalty), `clickable` lights
 // its edge under the cursor. The sheet's AC, Initiative, Proficiency Bonus
