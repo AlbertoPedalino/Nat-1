@@ -34,6 +34,7 @@ import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
+import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -68,6 +69,7 @@ function ActiveStep({ state, dispatch, sheetProps }) {
 
 export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
+  const isPhone = useIsPhone();
   const { notify } = useToast();
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
@@ -120,7 +122,8 @@ export default function CharBuilder() {
               <Tabs
                 value={state.tab}
                 onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
-                variant="scrollable"
+                // The steps fill the bar; on a phone, too narrow for six, they scroll.
+                variant={isPhone ? 'scrollable' : 'fullWidth'}
                 scrollButtons="auto"
                 aria-label="Character builder steps"
               >
