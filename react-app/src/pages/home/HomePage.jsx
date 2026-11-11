@@ -16,6 +16,7 @@ import { bubbleCheerSx } from '../../shared/ui/bubble.js';
 import { DURATIONS } from '../../shared/ui/motion.js';
 import { UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
+import NatOneDie from './NatOneDie.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
@@ -63,7 +64,7 @@ export default function HomePage() {
       {/* Home already has the Compendium card. */}
       <AppTopBar compendium={false} />
       <Box sx={heroSx}>
-        <Box component="img" src={`${import.meta.env.BASE_URL}logo.svg`} alt="" sx={heroLogoSx} />
+        <NatOneDie sx={heroLogoSx} />
         <Typography component="h1" sx={heroTitleSx}>Nat-1</Typography>
         <Typography sx={heroEditionSx}>D&D 5.5e</Typography>
       </Box>
@@ -124,7 +125,6 @@ const heroLogoSx = {
   display: 'block',
   // The logo is drawn inked (outline, shadow, tilt), so it takes no filter.
   width: 'clamp(96px, 18vw, 140px)',
-  height: 'auto',
   mb: '0.25rem',
 };
 

@@ -90,6 +90,19 @@ export const HP_TONE_COLORS = Object.freeze({
   healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerStrong,
 });
 
+// The app's logo (the d20 on the home cover and in public/favicon.svg): its
+// greens from lit to shaded faces and its numeral's cream. Brand art, kept
+// apart from the interface roles so a restyle never recolours the logo.
+export const LOGO_COLORS = Object.freeze({
+  light: '#7ddc8a',
+  midLight: '#55c06c',
+  mid: '#3a9f55',
+  midDark: '#2a8044',
+  dark: '#1d6534',
+  darkest: '#144a26',
+  numeral: '#fff3d6',
+});
+
 // How strongly a colour is laid over the surface, in steps: the faint washes
 // behind rows, tints of a chosen chip, the lines of borders and dividers, the
 // veils of overlays. A colour at some opacity is always
