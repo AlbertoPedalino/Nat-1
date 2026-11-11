@@ -277,6 +277,16 @@ export const theme = createTheme({
       },
     },
     MuiChip: {
+      // A chip that can be clicked (a level, a filter, a toggle) is the
+      // raised, drawn button: at rest on the raised surface, picked filled in
+      // its colour (shared/ui/pressable.js). A chip that is only a tag stays
+      // the flat tint below. As variants these weigh what the chip's base
+      // style does, so a chip's own sx (a toggled condition's colour) wins.
+      variants: [
+        { props: ({ ownerState }) => ownerState.clickable, style: pressableSx(UI_COLORS.surfaceRaised) },
+        { props: ({ ownerState }) => ownerState.clickable && ownerState.color === 'primary', style: pressableSx(UI_COLORS.accent) },
+        { props: ({ ownerState }) => ownerState.clickable && ownerState.color === 'secondary', style: pressableSx(UI_COLORS.secondary) },
+      ],
       styleOverrides: {
         sizeSmall: { height: CONTROL_HEIGHTS.sm },
         root: {
@@ -285,13 +295,6 @@ export const theme = createTheme({
           flexShrink: 1,
           fontWeight: FONT_WEIGHTS.bold,
           border: '1px solid transparent',
-          // A chip that can be clicked (a level, a filter, a toggle) is the
-          // raised, drawn button: at rest on the raised surface, picked
-          // filled in its colour (shared/ui/pressable.js). A chip that is
-          // only a tag stays the flat tint below.
-          '&.MuiChip-clickable': pressableSx(UI_COLORS.surfaceRaised),
-          '&.MuiChip-clickable.MuiChip-colorPrimary': pressableSx(UI_COLORS.accent),
-          '&.MuiChip-clickable.MuiChip-colorSecondary': pressableSx(UI_COLORS.secondary),
         },
         label: {
           overflow: 'hidden',
