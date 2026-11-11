@@ -11,7 +11,7 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 
@@ -23,7 +23,7 @@ export const PROFICIENCY_TONE = UI_COLORS.accentText;
 
 function EmptyCaption({ children }) {
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal }}>
+    <Typography sx={BUILDER_TEXT.hint}>
       {children}
     </Typography>
   );
@@ -51,7 +51,7 @@ export function InlineMetadata({ items }) {
   if (!visibleItems.length) return null;
 
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.tight }}>
+    <Typography sx={{ ...BUILDER_TEXT.itemMeta, lineHeight: LINE_HEIGHTS.tight }}>
       {visibleItems.map((item, index) => (
         <Box component="span" key={item.key}>
           {index > 0 ? (
@@ -84,12 +84,11 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
             height: CONTROL_HEIGHTS.sm,
             maxWidth: '100%',
             '& .MuiChip-label': {
+              ...BUILDER_TEXT.chip,
               color: tone,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontSize: FONT_SIZES.xs,
-              fontWeight: FONT_WEIGHTS.bold,
             },
           }}
         />
@@ -101,7 +100,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
 // Shared 5etools entry renderer at the preview's compact type scale.
 export function PreviewEntryText({ entries }) {
   return (
-    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: FONT_SIZES.lg, lineHeight: LINE_HEIGHTS.normal } }}>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { ...BUILDER_TEXT.body, lineHeight: LINE_HEIGHTS.normal } }}>
       <EntryBlocks entries={entries} emptyText="" />
     </Box>
   );
@@ -130,7 +129,7 @@ export function FeatureAccordion({ feature, source, children }) {
     <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {children != null ? children : hasDefaultBody ? <PreviewEntryText entries={body} /> : (
-          <Typography variant="caption" component="div" sx={{ color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, wordBreak: 'break-word' }}>
+          <Typography component="div" sx={{ ...BUILDER_TEXT.hint, wordBreak: 'break-word' }}>
             No description.
           </Typography>
         )}

@@ -11,3 +11,11 @@ test('builder headings take a shared role, not a heading variant', () => {
   }).filter((hit) => hit.startsWith('pages/charbuilder/'));
   assert.deepEqual(hits, []);
 });
+
+// Every builder text takes its size from BUILDER_TEXT (layout/builderText.js):
+// no size written in a component, no text variant bringing the theme's own.
+test('builder text sizes come only from builderText.js', () => {
+  const inBuilder = (hit) => hit.startsWith('pages/charbuilder/');
+  assert.deepEqual(sourceLinesMatching(/fontSize\s*:/, { allow: ['pages/charbuilder/layout/builderText.js'] }).filter(inBuilder), []);
+  assert.deepEqual(sourceLinesMatching(/variant="(body1|body2|caption|subtitle1|subtitle2|overline)"/).filter(inBuilder), []);
+});

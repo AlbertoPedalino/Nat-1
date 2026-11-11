@@ -8,7 +8,6 @@ import { abilityModifier } from '../../../shared/character/progression/abilityMo
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -97,7 +96,7 @@ export default function ScoresStep({ state, dispatch }) {
                         textAlign: 'center',
                       }}
                     >
-                      <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: FONT_WEIGHTS.heavy, lineHeight: LINE_HEIGHTS.none }}>{finalScore ?? '-'}</Typography>
+                      <Typography sx={BUILDER_TEXT.figure}>{finalScore ?? '-'}</Typography>
                       <Typography sx={{ ...BUILDER_TEXT.hint, mt: 0.25 }}>
                         {scoreMod(finalScore)}
                       </Typography>
@@ -134,10 +133,7 @@ export default function ScoresStep({ state, dispatch }) {
                         ]}
                         onChange={(_, value) => dispatch({ type: 'score/set', bucket, stat, value })}
                         sx={{
-                          '& .MuiSlider-markLabel': {
-                            fontSize: FONT_SIZES.sm,
-                            color: 'text.secondary',
-                          },
+                          '& .MuiSlider-markLabel': BUILDER_TEXT.caption,
                         }}
                       />
                     </Box>

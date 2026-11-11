@@ -1,4 +1,4 @@
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LETTER_SPACINGS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import {
   captionLabelSx, cardTitleSx, panelTitleSx, sheetBoxTitleSx, sheetSectionHeaderSx,
@@ -9,6 +9,10 @@ import {
 // rather than a block of a dense sheet. Every builder heading, note and value
 // takes its size from here.
 export const BUILDER_TEXT = Object.freeze({
+  // The builder's name in its app bar, and the character's in the preview.
+  displayTitle: Object.freeze({ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, lineHeight: LINE_HEIGHTS.tight }),
+  // The open step's name over its panels.
+  stepTitle: Object.freeze({ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxl }),
   // A panel's name in its PanelHeader bar.
   panelTitle: Object.freeze({ ...panelTitleSx, fontSize: FONT_SIZES.xl }),
   // A framed box inside a panel (a feat's choices, a starting equipment set,
@@ -33,4 +37,13 @@ export const BUILDER_TEXT = Object.freeze({
   // the line under it.
   itemName: Object.freeze({ fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.regular, color: 'text.primary' }),
   itemMeta: Object.freeze({ fontSize: FONT_SIZES.md, color: 'text.secondary' }),
+  // The smallest secondary line: a subtitle, a modifier under a score, a
+  // slider's end marks, the footer.
+  caption: Object.freeze({ fontSize: FONT_SIZES.sm, color: 'text.secondary' }),
+  // A score or total in the display face (an ability score).
+  figure: Object.freeze({ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.none }),
+  // The text of a chip: a count, a step number, a proficiency.
+  chip: Object.freeze({ fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold }),
+  // An uppercase chip (Level 3).
+  chipLabel: Object.freeze({ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs }),
 });

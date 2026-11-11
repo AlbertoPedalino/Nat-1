@@ -29,17 +29,16 @@ import SpeciesStep from './steps/SpeciesStep.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
+import { BUILDER_TEXT } from './layout/builderText.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
     <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-      <Chip size="small" label={index + 1} sx={{ height: CONTROL_HEIGHTS.xs, fontSize: FONT_SIZES.xxs }} />
+      <Chip size="small" label={index + 1} sx={{ height: CONTROL_HEIGHTS.xs, '& .MuiChip-label': BUILDER_TEXT.chip }} />
       <Icon size={ICON_SIZES.sm} />
       <span>{step.label}</span>
     </Stack>
@@ -135,8 +134,8 @@ export default function CharBuilder() {
             ) : null}
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={ICON_SIZES.md} />
-              <Typography variant="h2" sx={{ fontSize: FONT_SIZES.xxl, ...TEXT_STYLES.label, color: 'primary.main' }}>{activeStep.label}</Typography>
-              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: CONTROL_HEIGHTS.xs, fontSize: FONT_SIZES.xxs }} />
+              <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: 'primary.main' }}>{activeStep.label}</Typography>
+              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: CONTROL_HEIGHTS.xs, '& .MuiChip-label': BUILDER_TEXT.chip }} />
             </Stack>
 
             <ActiveStep
@@ -180,7 +179,7 @@ export default function CharBuilder() {
           </Box>
         </Box>
 
-        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.5, textAlign: 'center', fontSize: FONT_SIZES.xxs }}>
+        <Typography component="footer" sx={{ ...BUILDER_TEXT.caption, mt: 1.5, textAlign: 'center' }}>
           Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
         </Typography>
       </Box>

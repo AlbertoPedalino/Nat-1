@@ -1,5 +1,5 @@
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // Compact controlled search field shared by the builder selection panels
 // (feats, fighting styles, weapon mastery, skills, ...).
@@ -10,7 +10,7 @@ export default function SelectionSearch({ value, onChange, placeholder = 'Search
       onChange={onChange}
       placeholder={placeholder}
       iconSize={15}
-      sx={{ '& .MuiInputBase-input': { fontSize: FONT_SIZES.xl, py: 0.5 } }}
+      sx={{ '& .MuiInputBase-input': { ...BUILDER_TEXT.body, py: 0.5 } }}
     />
   );
 }

@@ -4,8 +4,8 @@ import ImportSheetFab from './ImportSheetFab.jsx';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
 import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { BUILDER_TEXT } from './builderText.js';
 
 // The builder's header: the app's top bar (with sheet import and the cloud
 // menu's draft upload) and, under it, the sticky page title.
@@ -21,10 +21,10 @@ export default function BuilderAppBar({ canUploadDraft, onUploadDraft, onNotify,
           <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
             <Wand2 size={ICON_SIZES.lg} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="h1" noWrap sx={{ fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, color: UI_COLORS.accentText }}>
+              <Typography variant="h1" noWrap sx={{ ...BUILDER_TEXT.displayTitle, color: UI_COLORS.accentText }}>
                 Character Builder
               </Typography>
-              <Typography variant="body2" noWrap sx={{ color: 'text.secondary', fontSize: FONT_SIZES.xs }}>
+              <Typography noWrap sx={BUILDER_TEXT.caption}>
                 D&D 5e 2024
               </Typography>
             </Box>

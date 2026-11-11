@@ -31,10 +31,10 @@ import { collectPreviewProficiencies, collectPreviewFeats } from './previewData.
 import {
   PROFICIENCY_TONE, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { captionLabelSx, sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -65,7 +65,7 @@ function PreviewHeader({ character, hp }) {
           <Typography sx={{ ...captionLabelSx, color: 'primary.main' }}>Preview</Typography>
           <Typography
             noWrap
-            sx={{ ...TEXT_STYLES.title, color: UI_COLORS.accentText, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.tight }}
+            sx={{ ...BUILDER_TEXT.displayTitle, color: UI_COLORS.accentText }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -83,13 +83,13 @@ function AbilityScoreGrid({ scores }) {
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ ...sheetBoxSx, textAlign: 'center', minWidth: 0 }}>
             <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 } }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.sm }}>
+              <Typography sx={{ ...BUILDER_TEXT.boxTitle, color: 'text.secondary', mb: 0 }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
-              <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHTS.tight, color: 'text.primary' }}>
+              <Typography sx={{ ...BUILDER_TEXT.figure, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: FONT_SIZES.sm }}>
+              <Typography sx={BUILDER_TEXT.caption}>
                 {signed(abilityModifier(scores[stat]))}
               </Typography>
             </CardContent>
@@ -111,9 +111,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           sx={{
             ...chipTintStyle(UI_COLORS.accentText),
             height: CONTROL_HEIGHTS.sm,
-            fontSize: FONT_SIZES.xxs,
-            ...TEXT_STYLES.label,
-            
+            '& .MuiChip-label': BUILDER_TEXT.chipLabel,
           }}
         />
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
@@ -143,10 +141,10 @@ function AcFormulasSection({ character }) {
           const blocked = (f.requiresNoArmor && hasArmor) ? 'Blocked: wearing armor' : '';
           return (
             <Box key={f.key} sx={{ minWidth: 0 }}>
-              <Typography variant="body2" sx={{ color: 'text.primary', fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.snug }}>
+              <Typography sx={{ ...BUILDER_TEXT.value, color: 'text.primary', lineHeight: LINE_HEIGHTS.snug }}>
                 {f.label}: {val}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal }}>
+              <Typography sx={BUILDER_TEXT.itemMeta}>
                 {f.base} + {abils.join(' + ')}{blocked ? ` — ${blocked}` : ''}
               </Typography>
             </Box>
@@ -164,16 +162,7 @@ function ProficiencySection({ sections }) {
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                display: 'block',
-                color: PROFICIENCY_TONE,
-                fontSize: FONT_SIZES.xs,
-                ...TEXT_STYLES.label,
-                
-              }}
-            >
+            <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: PROFICIENCY_TONE }}>
               {section.title}
             </Typography>
             <PreviewChipList
@@ -239,7 +228,7 @@ function FeatNameCard({ name }) {
   return (
     <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${SOURCE_COLOR.feat}` }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Typography variant="body2" sx={{ color: SOURCE_COLOR.feat, fontWeight: FONT_WEIGHTS.bold }}>
+        <Typography sx={{ ...BUILDER_TEXT.value, color: SOURCE_COLOR.feat }}>
           {name}
         </Typography>
       </CardContent>
