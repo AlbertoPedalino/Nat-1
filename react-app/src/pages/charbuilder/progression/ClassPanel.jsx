@@ -18,6 +18,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -150,7 +151,7 @@ export default function ClassPanel({ state, character, dispatch }) {
   return (
     <BuilderPanel tone={ENTITY_COLORS.class}
       title="Class"
-      icon={PanelIcon}
+      icon={GAME_ICONS.classes}
       note={activeExtra ? 'Selecting multiclass class' : 'Selecting primary class'}
       action={
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.5 }}>

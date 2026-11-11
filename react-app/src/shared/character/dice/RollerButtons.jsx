@@ -1,33 +1,33 @@
 import { Button } from '@mui/material';
-import { Cross, Dices, Shield, Sword } from 'lucide-react';
 import { formatRollTitle, rollFormula } from './dice.js';
 import { normalizeRollerKind, resolveRollers } from './rollers.js';
 import { ROLL_TONES, rollerToneSx } from '../../ui/entityColors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 const ROLLER_PRESENTATION = {
   damage: {
     verb: 'Dmg',
     title: 'Damage',
-    Icon: Sword,
+    Icon: GAME_ICONS.damage,
     tone: rollerToneSx(ROLL_TONES.damage),
   },
   heal: {
     verb: 'Heal',
     title: 'Heal',
-    Icon: Cross,
+    Icon: GAME_ICONS.heal,
     tone: rollerToneSx(ROLL_TONES.heal),
   },
   utility: {
     verb: 'Roll',
     title: 'Roll',
-    Icon: Dices,
+    Icon: GAME_ICONS.roll,
     tone: rollerToneSx(ROLL_TONES.utility),
   },
   tempHp: {
     verb: 'Temp HP',
     title: 'Temp HP',
-    Icon: Shield,
+    Icon: GAME_ICONS.tempHp,
     tone: rollerToneSx(ROLL_TONES.tempHp),
   },
 };

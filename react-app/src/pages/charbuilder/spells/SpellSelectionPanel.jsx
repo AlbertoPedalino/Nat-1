@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { BookOpen } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
@@ -16,6 +15,7 @@ import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js'
 import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -75,7 +75,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   }, [activeTab]);
 
   return (
-    <BuilderPanel id="panel-spells" tone={UI_COLORS.spell} title="Spells" icon={BookOpen} note={profile.preparedMode ? `${profile.preparedMode} casting` : 'Known/prepared spell selection'}>
+    <BuilderPanel id="panel-spells" tone={UI_COLORS.spell} title="Spells" icon={GAME_ICONS.spells} note={profile.preparedMode ? `${profile.preparedMode} casting` : 'Known/prepared spell selection'}>
       <Stack spacing={1.5}>
         {!isCaster ? (
           <Typography sx={{ color: 'text.secondary' }}>No spellcasting for current class/subclass.</Typography>

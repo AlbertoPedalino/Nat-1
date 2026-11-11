@@ -1,5 +1,5 @@
-import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
-import { Footprints, AlertCircle } from 'lucide-react';
+import { Box, Chip, Tooltip, Typography } from '@mui/material';
+import { AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getFinal, exhaustionSpeedPenalty } from '../../../shared/character/sheet/sheetStats.js';
 import { getSpeedZeroConditions } from '../../../shared/character/combat/conditions.js';
@@ -17,12 +17,13 @@ import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wi
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -100,14 +101,11 @@ export default function Movement({ C, sheet }) {
   const reason = reasons.join(' • ');
 
   return (
-    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
-      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? UI_COLORS.warning : UI_COLORS.secondary}>
-        {hasPenalty ? (
-          <Tooltip title={reason}>
-            <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty, marginLeft: 'auto' }} />
-          </Tooltip>
-        ) : null}
-      </PanelHeader>
+    <Panel icon={GAME_ICONS.movement} title="Movement" tone={hasPenalty ? UI_COLORS.warning : UI_COLORS.secondary} sx={{ mb: '0.6rem' }} bodySx={{}} action={hasPenalty ? (
+      <Tooltip title={reason}>
+        <AlertCircle size={ICON_SIZES.xs} style={{ color: UI_COLORS.penalty }} />
+      </Tooltip>
+    ) : null}>
       <Box sx={{ p: '0.55rem 0.8rem', display: 'grid', gap: 0.25 }}>
         {entries.map((entry) => (
           <Box key={entry.key} sx={{ ...tileSx({ tone: hasPenalty ? 'warning.main' : null }), display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.25 }}>
@@ -137,6 +135,6 @@ export default function Movement({ C, sheet }) {
           <Chip size="small" label={reason} variant="outlined" sx={{ ...chipTintStyle(UI_COLORS.penaltyText), fontSize: FONT_SIZES.xxxs, justifyContent: 'flex-start' }} />
         ) : null}
       </Box>
-    </Paper>
+    </Panel>
   );
 }

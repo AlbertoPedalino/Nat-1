@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { Dice5, Dumbbell } from 'lucide-react';
+import { Dice5 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
@@ -12,6 +12,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -25,7 +26,7 @@ export default function ScoresStep({ state, dispatch }) {
   const spent = pointBuySpent(character.pbScores);
 
   return (
-    <BuilderPanel id="panel-scores" tone={UI_COLORS.secondary} title="Ability Scores" icon={Dumbbell} note="Point buy, standard array, dice, or manual scores.">
+    <BuilderPanel id="panel-scores" tone={UI_COLORS.secondary} title="Ability Scores" icon={GAME_ICONS.abilityScores} note="Point buy, standard array, dice, or manual scores.">
       <Stack spacing={2}>
         <Tabs value={character.scoreMethod} onChange={(_, method) => dispatch({ type: 'score/method', method })} variant="scrollable">
           <Tab value="pointbuy" label="Point Buy" />

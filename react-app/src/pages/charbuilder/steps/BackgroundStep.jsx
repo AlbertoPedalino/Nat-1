@@ -1,5 +1,4 @@
 import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material';
-import { Feather, GraduationCap, ScrollText, SlidersHorizontal } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import SearchList from '../choices/SearchList.jsx';
@@ -19,6 +18,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -127,7 +127,7 @@ export default function BackgroundStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-bg" tone={ENTITY_COLORS.background} title="Background" icon={Feather} note="Pick a background; the card below shows its full details.">
+      <BuilderPanel id="panel-bg" tone={ENTITY_COLORS.background} title="Background" icon={GAME_ICONS.background} note="Pick a background; the card below shows its full details.">
         <SearchList
           value={search.background}
           placeholder="Search background"
@@ -152,7 +152,7 @@ export default function BackgroundStep({ state, dispatch }) {
         />
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-detail" tone={ENTITY_COLORS.background} title="Background Detail" icon={ScrollText} note="Granted proficiencies, origin feat, description.">
+      <BuilderPanel id="panel-bg-detail" tone={ENTITY_COLORS.background} title="Background Detail" icon={GAME_ICONS.background} note="Granted proficiencies, origin feat, description.">
         {selectedBackground ? (
           <BackgroundDetailCard background={selectedBackground} />
         ) : (
@@ -160,7 +160,7 @@ export default function BackgroundStep({ state, dispatch }) {
         )}
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-ability" tone={ENTITY_COLORS.background} title="Background Ability Bonus" icon={SlidersHorizontal}>
+      <BuilderPanel id="panel-bg-ability" tone={ENTITY_COLORS.background} title="Background Ability Bonus" icon={GAME_ICONS.abilityScores}>
         <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
           Choose +2/+1 or +1/+1/+1 from selected background ability pool.
         </Typography>
@@ -194,7 +194,7 @@ export default function BackgroundStep({ state, dispatch }) {
         </Stack>
       </BuilderPanel>
 
-      <BuilderPanel id="panel-bg-choices" tone={ENTITY_COLORS.background} title="Background Choices" icon={GraduationCap} note="Origin feat + skill/tool/language picks.">
+      <BuilderPanel id="panel-bg-choices" tone={ENTITY_COLORS.background} title="Background Choices" icon={GAME_ICONS.background} note="Origin feat + skill/tool/language picks.">
         <Stack spacing={1.5}>
           {backgroundChoiceSpecs(character).map((spec) => (
             <ChoiceSpec key={spec.key} spec={spec} state={state} dispatch={dispatch} />

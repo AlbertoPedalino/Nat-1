@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Box, Button, ButtonGroup, IconButton, Popover, Tooltip,
 } from '@mui/material';
-import { Dices, History } from 'lucide-react';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
@@ -10,6 +9,7 @@ import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -42,21 +42,21 @@ export default function DiceControl({
         <Box role="group" aria-label="Dice" sx={[iconGroupSx, surface.groupSx, sx]}>
           <Tooltip title="Roll dice">
             <IconButton size="small" aria-label="Roll dice" onClick={() => setRollerOpen(true)} sx={[iconSegmentSx, surface.segmentSx]}>
-              <Dices size={ICON_SIZES.md} />
+              <GAME_ICONS.roll size={ICON_SIZES.md} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Roll log">
             <IconButton size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
-              <History size={ICON_SIZES.md} />
+              <GAME_ICONS.rollLog size={ICON_SIZES.md} />
             </IconButton>
           </Tooltip>
         </Box>
       ) : (
         <ButtonGroup size="small" variant="outlined" aria-label="Dice" sx={sx}>
-          <Button startIcon={<Dices size={ICON_SIZES.sm} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.accentText)]}>
+          <Button startIcon={<GAME_ICONS.roll size={ICON_SIZES.sm} />} onClick={() => setRollerOpen(true)} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.accentText)]}>
             Roll
           </Button>
-          <Button startIcon={<History size={ICON_SIZES.sm} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
+          <Button startIcon={<GAME_ICONS.rollLog size={ICON_SIZES.sm} />} {...logProps} sx={[actionButtonTextSx, actionButtonToneSx(UI_COLORS.success), anchor ? openSx : null]}>
             Log{count ? ` · ${count}` : ''}
           </Button>
         </ButtonGroup>

@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
-import { Sparkles } from 'lucide-react';
 import { getInitiative, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
@@ -33,6 +32,7 @@ import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { TILE_ACTIVE_INK, tileSx } from '../../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -169,7 +169,7 @@ function InspirationBlock({ sheet, onToggle }) {
       active={insp}
       onClick={onToggle}
       label={insp ? 'Insp.' : 'No Insp.'}
-      value={<Sparkles size={ICON_SIZES.lg} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
+      value={<GAME_ICONS.inspiration size={ICON_SIZES.lg} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
     />
   );
 }

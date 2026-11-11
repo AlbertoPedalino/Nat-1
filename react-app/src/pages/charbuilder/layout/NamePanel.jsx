@@ -1,10 +1,10 @@
 import { TextField } from '@mui/material';
-import { Sparkles } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function NamePanel({ character, dispatch }) {
   return (
-    <BuilderPanel title="Character Name" icon={Sparkles}>
+    <BuilderPanel title="Character Name" icon={GAME_ICONS.characterName}>
       <TextField
         fullWidth
         value={character.name}

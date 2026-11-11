@@ -1,8 +1,11 @@
-import { Box, Chip, Typography } from '@mui/material';
+import { Chip, Typography } from '@mui/material';
 import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
-import { emptyTextSx, sheetBoxSx, sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
+import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -11,8 +14,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 // (the Eldritch Cannon), so both read the same.
 export default function DefensesPanel({ items = [], emptyText = 'No resistances detected.', sx }) {
   return (
-    <Box sx={{ ...sheetBoxSx, p: '0.4rem 0.62rem', ...sx }}>
-      <Typography sx={sheetBoxTitleSx}>Defenses</Typography>
+    <Panel icon={GAME_ICONS.defenses} title="Defenses" tone={ENTITY_COLORS.background} sx={sx} bodySx={{ p: '0.4rem 0.62rem' }}>
       {items.length === 0 && <Typography sx={emptyTextSx}>{emptyText}</Typography>}
       {items.map((d, i) => {
         const tone = d.kind === 'Resist' || d.kind === 'Immune' ? damageTypeTone(d.type) : null;
@@ -27,7 +29,7 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
           />
         );
       })}
-    </Box>
+    </Panel>
   );
 }
 

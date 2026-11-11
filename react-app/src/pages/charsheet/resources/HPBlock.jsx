@@ -9,11 +9,12 @@ import { EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { HP_TONE_COLORS, UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -107,11 +108,8 @@ export default function HPBlock({
   const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.25 };
 
   return (
-    <Box sx={{ ...sheetBoxSx, width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }}>
+    <Panel icon={GAME_ICONS.hitPoints} title="Hit Points" tone={UI_COLORS.success} sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0 }} bodySx={{}}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
-        <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary' }}>
-          HP
-        </Typography>
 
         {dead && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.25, py: 0.25, border: 1, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.tint) }}>
@@ -233,6 +231,6 @@ export default function HPBlock({
           </Box>
         )}
       </Box>
-    </Box>
+    </Panel>
   );
 }

@@ -3,7 +3,7 @@ import {
   Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip,
   Typography,
 } from '@mui/material';
-import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
@@ -27,6 +27,7 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -193,7 +194,7 @@ export default function EquipmentStep({ state, dispatch }) {
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-equip" tone={ENTITY_COLORS.tool} title="Starting Equipment" icon={PackagePlus} note="Class/background packs add items and coins to inventory.">
+      <BuilderPanel id="panel-equip" tone={ENTITY_COLORS.tool} title="Starting Equipment" icon={GAME_ICONS.equipment} note="Class/background packs add items and coins to inventory.">
         <Stack spacing={1.5}>
           <StartingEquipmentBlock title={character.className} eq={character.cls?.startingEquipment} prefix="cls" character={character} items={state.data.items} dispatch={dispatch} />
           <StartingEquipmentBlock title={character.backgroundName} eq={character.backgroundObj?.startingEquipment} prefix="bg" character={character} items={state.data.items} dispatch={dispatch} />
@@ -203,7 +204,7 @@ export default function EquipmentStep({ state, dispatch }) {
         </Stack>
       </BuilderPanel>
 
-      <BuilderPanel id="panel-currency" tone={ENTITY_COLORS.tool} title="Currency" icon={Coins}>
+      <BuilderPanel id="panel-currency" tone={ENTITY_COLORS.tool} title="Currency" icon={GAME_ICONS.currency}>
         <CurrencyRow
           currency={character.currency}
           onCoinChange={(coin, value) => dispatch({ type: 'currency/set', coin, value })}
@@ -215,7 +216,7 @@ export default function EquipmentStep({ state, dispatch }) {
         />
       </BuilderPanel>
 
-      <BuilderPanel id="panel-inventory" tone={ENTITY_COLORS.tool} title="Inventory" icon={Backpack} note={`${formatWeight(totalWeight)} lb carried`}>
+      <BuilderPanel id="panel-inventory" tone={ENTITY_COLORS.tool} title="Inventory" icon={GAME_ICONS.inventory} note={`${formatWeight(totalWeight)} lb carried`}>
         <Stack spacing={1.5}>
           <SearchField
             value={localQuery}

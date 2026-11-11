@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { ClipboardList, CloudUpload, Download, FileText, Save } from 'lucide-react';
+import { CloudUpload, Download, FileText, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { makeSheetPayload, saveCharacter } from '../state/persistence.js';
@@ -10,6 +10,7 @@ import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../..
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -34,7 +35,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
   const ready = missing.length === 0;
 
   return (
-    <BuilderPanel id="panel-sheet" title="Sheet" icon={ClipboardList}>
+    <BuilderPanel id="panel-sheet" title="Sheet" icon={GAME_ICONS.sheet}>
       <Stack spacing={1.5} sx={{ py: 1.5 }}>
         {!ready ? (
           <Alert severity="warning">Complete first: {missing.join(', ')}.</Alert>

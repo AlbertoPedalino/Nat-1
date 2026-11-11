@@ -1,10 +1,10 @@
 import { Box, LinearProgress, Stack, Typography } from '@mui/material';
-import { Layers } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -17,7 +17,7 @@ export default function XpPanel({ character, dispatch }) {
   const note = isMaxLevel ? 'Max level (20)' : `${progress}% to player level ${trackerLevel + 1}`;
 
   return (
-    <BuilderPanel id="panel-xp" title="Experience (XP)" icon={Layers} note={note}>
+    <BuilderPanel id="panel-xp" title="Experience (XP)" icon={GAME_ICONS.experience} note={note}>
       <Stack spacing={1.25}>
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
           <Typography sx={{ ...BUILDER_TEXT.value, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>

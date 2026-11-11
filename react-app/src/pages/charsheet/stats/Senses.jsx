@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
-import { ChevronDown, Eye } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
+import { ChevronDown } from 'lucide-react';
 import { passiveScore } from '../../../shared/character/sheet/sheetStats.js';
 import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
@@ -8,12 +8,13 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function Senses({ C }) {
   const passPerc = passiveScore(C, 'Perception');
@@ -45,8 +46,7 @@ export default function Senses({ C }) {
   };
 
   return (
-    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
-      <PanelHeader icon={Eye} title="Senses" tone={UI_COLORS.info} />
+    <Panel icon={GAME_ICONS.senses} title="Senses" tone={UI_COLORS.info} sx={{ mb: '0.6rem' }} bodySx={{}}>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         <SenseRow value={passPerc} label="Passive Perception" />
         <SenseRow value={passInv} label="Passive Investigation" />
@@ -54,7 +54,7 @@ export default function Senses({ C }) {
         {visionRows.map((row) => renderRow(`vision-${row.type}`, `${row.range} ft`, row))}
         {otherRows.map((row) => renderRow(row.key, row.value, row))}
       </Box>
-    </Paper>
+    </Panel>
   );
 }
 

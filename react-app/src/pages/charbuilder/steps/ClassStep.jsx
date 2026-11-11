@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Stack, Typography } from '@mui/material';
-import { Layers } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import { classChoiceSpecs } from '../choices/choiceSpecs.js';
@@ -15,6 +14,7 @@ import SpellSlotsPanel from '../spells/SpellSlotsPanel.jsx';
 import SpellSelectionPanel from '../spells/SpellSelectionPanel.jsx';
 import { activeExtraClass } from '../state/activeClass.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function ClassStep({ state, dispatch }) {
   const { character } = state;
@@ -62,7 +62,7 @@ export default function ClassStep({ state, dispatch }) {
       <ClassPanel state={state} character={character} dispatch={dispatch} />
       <LevelPanel character={character} dispatch={dispatch} />
       <SubclassPanel character={character} dispatch={dispatch} />
-      <BuilderPanel id="panel-class-choices" tone={ENTITY_COLORS.class} title="Class Choices" icon={Layers} note="Class, subclass, ASI, expertise, optional, plus feat slots (Fighting Style, Epic Boon, ASI feat).">
+      <BuilderPanel id="panel-class-choices" tone={ENTITY_COLORS.class} title="Class Choices" icon={GAME_ICONS.classes} note="Class, subclass, ASI, expertise, optional, plus feat slots (Fighting Style, Epic Boon, ASI feat).">
         <Stack spacing={1.5}>
           {choiceSpecs.map(renderSpec)}
           {!choiceSpecs.length ? (

@@ -1,9 +1,10 @@
 import { Box, Tooltip, Typography } from '@mui/material';
-import { AlertCircle, Shield } from 'lucide-react';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { AlertCircle } from 'lucide-react';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The shield-shaped Armor Class readout: the character's header uses it, and so
 // do creature panels (the Eldritch Cannon), so an AC reads the same everywhere.
@@ -21,14 +22,14 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
         <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0 }}>
           {/* A drawn shield: filled, inked, set on its own solid shadow like the
               tiles beside it; an untrained Shield turns it to the penalty colour. */}
-          <Shield
+          <GAME_ICONS.armorClass
             size={ICON_SIZES.giant}
-            strokeWidth={2.4}
-            fill={shieldUnproficient ? uiAlpha(UI_COLORS.penalty, OPACITY.shade) : UI_COLORS.surfaceHeader}
             style={{
               position: 'absolute', inset: 0, width: '100%', height: '100%',
-              color: shieldUnproficient ? UI_COLORS.penalty : UI_COLORS.edge,
-              filter: `drop-shadow(2px 2px 0 ${UI_COLORS.edge})`,
+              color: shieldUnproficient ? UI_COLORS.dangerSurface : UI_COLORS.surfaceRaised,
+              // An ink outline round the drawing and its solid shadow, as the
+              // tiles beside it.
+              filter: `drop-shadow(1.5px 0 0 ${UI_COLORS.edge}) drop-shadow(-1.5px 0 0 ${UI_COLORS.edge}) drop-shadow(0 1.5px 0 ${UI_COLORS.edge}) drop-shadow(0 -1.5px 0 ${UI_COLORS.edge}) drop-shadow(2px 2px 0 ${shieldUnproficient ? UI_COLORS.penalty : UI_COLORS.edge})`,
             }}
           />
           <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>

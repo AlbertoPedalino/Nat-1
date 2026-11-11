@@ -10,7 +10,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
@@ -35,6 +34,7 @@ import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { captionLabelSx, sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 const PANEL_SX = {
   p: 1.25,
@@ -132,7 +132,7 @@ function AcFormulasSection({ character }) {
   const formulas = collectAcFormulas(character);
   if (!formulas.length) return null;
   return (
-    <PreviewSection icon={Shield} title="Defense" subtitle="Armor Class formulas">
+    <PreviewSection icon={GAME_ICONS.armorClass} title="Defense" subtitle="Armor Class formulas">
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {formulas.map((f) => {
           const val = computeAcFormulaValue(character, f);
@@ -158,7 +158,7 @@ function AcFormulasSection({ character }) {
 function ProficiencySection({ sections }) {
   if (!sections.length) return null;
   return (
-    <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages" tone={PROFICIENCY_TONE}>
+    <PreviewSection icon={GAME_ICONS.proficiencies} title="Proficiencies" subtitle="Skills, equipment, languages" tone={PROFICIENCY_TONE}>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
@@ -179,7 +179,7 @@ function ProficiencySection({ sections }) {
 function WeaponMasterySection({ items }) {
   if (!items.length) return null;
   return (
-    <PreviewSection icon={Sword} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
+    <PreviewSection icon={GAME_ICONS.attack} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
       <PreviewChipList
         items={items}
         getKey={(item) => `${item.weaponName}-${item.mastery || 'none'}`}
@@ -281,7 +281,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
 
         {character.cls ? (
           <ClassSection
-            icon={Sword}
+            icon={GAME_ICONS.classes}
             title={character.className || 'Class'}
             subtitle={`Level ${primaryLv}${character.subclassShortName ? ` • ${character.subclassShortName}` : ''}`}
             classFeatures={character.allFeatures || []}
@@ -296,7 +296,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
           return (
             <Box key={`${extra.name}-${index}`} sx={{ minWidth: 0 }}>
               <ClassSection
-                icon={Shield}
+                icon={GAME_ICONS.classes}
                 title={`Multiclass ${index + 1}: ${extra.name}`}
                 subtitle={`Level ${ecLv}${extra.subclassShortName ? ` • ${extra.subclassShortName}` : ''}`}
                 classFeatures={extra.allFeatures || []}
@@ -309,7 +309,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
         })}
 
         <PreviewSection
-          icon={Sparkles}
+          icon={GAME_ICONS.species}
           title="Species"
           subtitle={character.speciesName || 'Not selected'}
           tone={SOURCE_COLOR.species}
@@ -323,7 +323,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
         </PreviewSection>
 
         <PreviewSection
-          icon={Feather}
+          icon={GAME_ICONS.background}
           title="Background"
           subtitle={character.backgroundName || 'Not selected'}
           tone={SOURCE_COLOR.background}
@@ -337,7 +337,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
         </PreviewSection>
 
         {previewFeats.length ? (
-          <PreviewSection icon={Layers} title="Feats" tone={SOURCE_COLOR.feat}>
+          <PreviewSection icon={GAME_ICONS.subclass} title="Feats" tone={SOURCE_COLOR.feat}>
             <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               {previewFeats.map((feat, index) => (
                 <PreviewFeat key={`${matchKey(feat.name)}-${index}`} feat={feat} />

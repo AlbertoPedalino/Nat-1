@@ -1,11 +1,11 @@
 import { Chip, Grid, MenuItem, Select, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { HeartPulse } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { multiclassLevels, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -35,7 +35,7 @@ export default function LevelPanel({ character, dispatch }) {
     <BuilderPanel tone={ENTITY_COLORS.class}
       id="panel-level"
       title={`Level - ${isExtra ? extraClass.name : (character.className || 'Primary')}`}
-      icon={HeartPulse}
+      icon={GAME_ICONS.level}
       note={isExtra
         ? `Class Lv ${currentLevel} (max ${maxLv}) - Total Lv ${character.level} - Hit Die ${faces}`
         : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character)} - Hit Die ${faces}`}

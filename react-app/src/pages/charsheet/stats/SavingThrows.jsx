@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
+import { Box, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
 import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
 import { hasSaveProficiency, getSaveBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { getConcentrationBonus, getD20FloorReminders } from '../../../shared/character/sheet/effectBonuses.js';
@@ -16,13 +16,14 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import PanelHeader, { panelFrameSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { ROW_SX } from '../../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -74,8 +75,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   };
 
   return (
-    <Paper variant="outlined" sx={{ ...panelFrameSx, mb: '0.6rem' }}>
-      <PanelHeader icon={Dice5} title="Saving Throws" tone={ENTITY_COLORS.skill} />
+    <Panel icon={GAME_ICONS.savingThrows} title="Saving Throws" tone={ENTITY_COLORS.skill} sx={{ mb: '0.6rem' }} bodySx={{}}>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {ABILITIES.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;
@@ -198,6 +198,6 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           </MenuItem>
         ))}
       </Menu>
-    </Paper>
+    </Panel>
   );
 }

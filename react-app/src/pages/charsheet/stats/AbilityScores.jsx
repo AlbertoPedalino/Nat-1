@@ -9,11 +9,12 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
-import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import Panel from '../../../shared/ui/Panel.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -21,9 +22,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
   const activeConditions = sheet?.activeConditions || [];
 
   return (
-    <Box sx={{
-      ...sheetBoxSx, height: '100%', p: '0.45rem',
-    }}>
+    <Panel icon={GAME_ICONS.abilityScores} title="Ability Scores" tone={UI_COLORS.secondary} sx={{ height: '100%' }} bodySx={{ p: '0.45rem' }}>
       <Box sx={{
         display: 'grid', gridTemplateColumns: { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' },
         gap: '0.6rem', minWidth: 0,
@@ -79,6 +78,6 @@ export default function AbilityScores({ C, sheet, onRoll }) {
           );
         })}
       </Box>
-    </Box>
+    </Panel>
   );
 }

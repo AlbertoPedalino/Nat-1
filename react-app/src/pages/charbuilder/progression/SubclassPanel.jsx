@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
 import { isBookAllowed } from '../../../shared/content/sourcePriority.js';
-import { Sparkles } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
@@ -10,6 +9,7 @@ import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js'
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -54,7 +54,7 @@ export default function SubclassPanel({ character, dispatch }) {
     else dispatch({ type: 'subclass/select', subclassShortName: value });
   };
   return (
-    <BuilderPanel id="panel-subclass" tone={ENTITY_COLORS.subclass} title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={Sparkles} note={`Unlock level ${unlockLevel}`}>
+    <BuilderPanel id="panel-subclass" tone={ENTITY_COLORS.subclass} title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={GAME_ICONS.subclass} note={`Unlock level ${unlockLevel}`}>
       <Stack spacing={1.5}>
         <FormControl fullWidth size="small">
           <InputLabel>{title}</InputLabel>
