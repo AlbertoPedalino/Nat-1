@@ -1,4 +1,5 @@
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor, OPACITY } from '../../../shared/ui/colors.js';
@@ -11,8 +12,11 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 export const GM_FOG_OPACITY = 0.55;
 export const PLAYER_FOG_OPACITY = 1;
 
+// The scene's bar (its name and the presenter's buttons) is a panel bar: the
+// diagonal screentone over the map surface, the solid ink shadow.
 export const sceneTopbarSx = {
   ...SURFACES.map,
+  backgroundImage: panelScreentone(VTT_COLORS.accent),
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',
@@ -20,7 +24,6 @@ export const sceneTopbarSx = {
   px: { xs: 1, md: 1.25 },
   py: 0.75,
   borderRadius: 1,
-  boxShadow: UI_SHADOWS.raised,
 };
 
 // Shrinks rather than grows: the presenter controls belong next to the name the

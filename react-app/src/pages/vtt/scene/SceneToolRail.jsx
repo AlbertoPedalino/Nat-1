@@ -147,7 +147,6 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  boxShadow: 6,
   cursor: 'default',
   transition: `opacity ${DURATIONS.fast}ms ease`,
 };

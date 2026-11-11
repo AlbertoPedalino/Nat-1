@@ -52,11 +52,12 @@ export const SURFACES = Object.freeze({
   // No backdrop blur: the surface is 95% opaque, so a blur behind it cannot be
   // seen, and over a map where something always moves it is redone every
   // frame — measured at ~100ms a frame on desktop under the roll toast.
-  // Drawn like every panel: the ink edge, a solid shadow, the halftone dots.
+  // Drawn like every panel: the ink edge and a solid shadow. No halftone: over
+  // a see-through panel on a busy map the dots are noise that hides the
+  // buttons; a map bar that wants a texture takes the screentone instead.
   map: Object.freeze({
     bgcolor: 'gmboard.vtt.surface',
-    backgroundImage: HALFTONE,
-    backgroundSize: HALFTONE_SIZE,
+    backgroundImage: 'none',
     border: `2px solid ${UI_COLORS.edge}`,
     boxShadow: UI_SHADOWS.box,
   }),
