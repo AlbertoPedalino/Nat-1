@@ -4,7 +4,6 @@ import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
 // bottom of the sheet, so a roll never needs a scroll back to the top.
@@ -96,27 +95,23 @@ const pageDockSx = {
   [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0 },
 };
 
-// Floating over the sheet.
-// The phone's pill: solid gold with dark icons and a faint gold halo, the one
+// Floating over the sheet, raised like every button.
+// The phone's pill: filled with the accent, dark icons, inked edge — the one
 // bright thing at the bottom of a dark sheet; a touch larger to tap.
 const phoneSurface = {
-  groupSx: { bgcolor: 'primary.main', borderColor: 'primary.main' },
+  groupSx: { bgcolor: 'primary.main' },
   segmentSx: {
     color: 'primary.contrastText',
     px: 1.5,
     py: 0.75,
     '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint) },
   },
-  dividerColor: uiAlpha(UI_COLORS.black, OPACITY.line),
 };
 
-const phonePillSx = {
-  boxShadow: `${UI_SHADOWS.float}, 0 0 0 4px ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
-};
+const phonePillSx = {};
 
 // The labelled control made into the same pill.
 const labelledPillSx = {
-  boxShadow: UI_SHADOWS.float,
   bgcolor: 'background.paper',
   borderRadius: 999,
   '& .MuiButton-root': { px: 2, py: 0.5 },

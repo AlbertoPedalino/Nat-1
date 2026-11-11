@@ -170,6 +170,18 @@ export const theme = createTheme({
         contained: PRESSABLE_EDGE_SX,
       },
     },
+    // A group of buttons is one raised button: the group carries the shadow
+    // and the press, its halves stay flat inside it (Roll | Log, the rests).
+    MuiButtonGroup: {
+      styleOverrides: {
+        root: ({ ownerState }) => (ownerState.variant === 'text' ? {} : { boxShadow: UI_SHADOWS.press }),
+        grouped: {
+          boxShadow: 'none',
+          '&:hover': { boxShadow: 'none' },
+          '&:active': { transform: 'none', boxShadow: 'none' },
+        },
+      },
+    },
     // A chosen option (toggle buttons, segmented choices): an accent wash
     // with accent text and edge.
     MuiToggleButton: {

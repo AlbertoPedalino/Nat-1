@@ -9,6 +9,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { UI_SHADOWS } from '../../ui/shadows.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -82,8 +83,10 @@ export default function DiceControl({
   );
 }
 
+// The icon pill is one raised button, as a button group is.
 const iconGroupSx = {
   ...SURFACES.panel,
+  boxShadow: UI_SHADOWS.press,
   display: 'inline-flex',
   alignItems: 'stretch',
   borderRadius: 999,
@@ -94,8 +97,8 @@ const iconSegmentSx = { borderRadius: 0, px: 1 };
 
 // The rule between the two halves, on the log half itself: a rule set from the
 // group would lose to the buttons' own `border: 0`.
-function dividerSx(color = 'divider') {
-  return { borderLeft: '1px solid', borderLeftColor: color };
+function dividerSx(color = UI_COLORS.edge) {
+  return { borderLeft: '2px solid', borderLeftColor: color };
 }
 
 // The half whose popover is open is lit.
