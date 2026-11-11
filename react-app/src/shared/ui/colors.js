@@ -9,33 +9,33 @@
 // every name still says what the colour is for. `<role>Text` is the readable
 // tone of a role on a dark surface; `on<Role>` is the ink on a filled one.
 export const UI_COLORS = Object.freeze({
-  // Accent: the interface's one highlight colour (turquoise), its text and line
+  // Accent: the interface's one highlight colour (sunflower), its text and line
   // tones, and the ink written on a filled accent.
-  accent: '#34d1bf',
-  accentText: '#7fe8da',
-  accentHighlight: '#b9f5ec',
-  accentMuted: '#2a9e91',
-  onAccent: '#06201c',
+  accent: '#ffc83d',
+  accentText: '#ffdb7a',
+  accentHighlight: '#ffeab0',
+  accentMuted: '#c99a2e',
+  onAccent: '#2a1c00',
 
   // Text, brightest to faintest, and the strongest neutral outline.
-  textPrimary: '#fbf6ec',
-  textSecondary: '#bfb6d9',
-  textMuted: '#8c84a8',
-  textFaint: '#6b6489',
-  outline: '#5b5385',
+  textPrimary: '#fbf4ec',
+  textSecondary: '#c4b8cc',
+  textMuted: '#928499',
+  textFaint: '#6f6278',
+  outline: '#5e4f6a',
 
   // Surfaces, lightest to darkest. `surface` is the paper of cards and
   // dialogs, `page` the page behind them.
-  surfaceRaised: '#2d2747',
-  surfaceHeader: '#2a2342',
-  surface: '#221d36',
-  surfaceDeep: '#1c182e',
-  page: '#171425',
-  surfaceSunken: '#130f1f',
-  surfaceDarkest: '#0e0b18',
+  surfaceRaised: '#30253a',
+  surfaceHeader: '#2c2234',
+  surface: '#251c2c',
+  surfaceDeep: '#201826',
+  page: '#1a1420',
+  surfaceSunken: '#140f18',
+  surfaceDarkest: '#0f0b12',
   // The drawn outline round panels, cards and buttons, and the solid shadow
   // under what can be pressed: the interface's drawn, cartoon edge.
-  edge: '#0c0a14',
+  edge: '#0d090f',
   black: '#000000',
   white: '#ffffff',
 
@@ -48,9 +48,9 @@ export const UI_COLORS = Object.freeze({
   dangerSurface: '#2a0d16',
 
   // Warning, and the stronger step before danger (a High encounter).
-  warning: '#ffc94a',
-  warningStrong: '#ffa53a',
-  warningText: '#ffe08f',
+  warning: '#ff9a3c',
+  warningStrong: '#ff7a2e',
+  warningText: '#ffc27f',
 
   // Penalty: disadvantage and reduced values.
   penalty: '#ff9a3c',

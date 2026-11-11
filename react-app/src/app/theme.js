@@ -8,6 +8,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
+import { PRESSABLE_EDGE_SX } from '../shared/ui/pressable.js';
 
 const SELECTED_OPTION_SX = {
   color: UI_COLORS.accentText,
@@ -159,14 +160,8 @@ export const theme = createTheme({
         sizeMedium: { fontSize: FONT_SIZES.xxl },
         sizeLarge: { fontSize: FONT_SIZES.body },
         outlined: { borderWidth: 2, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), '&:hover': { borderWidth: 2 } },
-        // A filled button is drawn: an ink edge and a solid shadow under it,
-        // pushed down while pressed.
-        contained: {
-          border: `2px solid ${UI_COLORS.edge}`,
-          boxShadow: UI_SHADOWS.press,
-          '&:hover': { boxShadow: UI_SHADOWS.press },
-          '&:active': { transform: 'translateY(2px)', boxShadow: UI_SHADOWS.pressed },
-        },
+        // A filled button is drawn and raised (shared/ui/pressable.js).
+        contained: PRESSABLE_EDGE_SX,
       },
     },
     // A chosen option (toggle buttons, segmented choices): an accent wash

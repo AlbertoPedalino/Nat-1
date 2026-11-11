@@ -2,14 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DAMAGE_TYPE_COLORS, ROLL_TONES, attackRollerToneSx, damageTypeTone, rollerToneSx } from '../../../../src/shared/ui/entityColors.js';
 import { UI_COLORS } from '../../../../src/shared/ui/colors.js';
+import { PRESSABLE_EDGE_SX, inkOn } from '../../../../src/shared/ui/pressable.js';
 
-test('a roll-button tint is its tone plus a translucent border of the same hue', () => {
+test('a roll button is the raised button filled with its tone, its label in the ink that reads on it', () => {
   const sx = rollerToneSx(ROLL_TONES.damage);
-  assert.equal(sx.color, ROLL_TONES.damage);
-  assert.equal(sx.borderColor, 'rgba(255, 107, 53, 0.4)');
+  assert.equal(sx.bgcolor, ROLL_TONES.damage);
+  assert.equal(sx.color, inkOn(ROLL_TONES.damage));
+  assert.equal(sx.boxShadow, PRESSABLE_EDGE_SX.boxShadow);
 });
 
-test('an ordinary attack roll is tinted with the default blue', () => {
+test('an ordinary attack roll is tinted with the attack tone', () => {
   assert.deepEqual(attackRollerToneSx(), rollerToneSx(ROLL_TONES.attack));
   assert.deepEqual(attackRollerToneSx({}), rollerToneSx(ROLL_TONES.attack));
 });

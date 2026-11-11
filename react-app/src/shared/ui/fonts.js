@@ -1,11 +1,12 @@
-// The interface's font stacks, from one place (Fredoka and Nunito are loaded
-// in index.html). The theme's body text uses `body`; titles, labels and
-// numbers use `display`, a round face that gives the interface its playful
-// voice; longer flavour text uses `prose`; formulas and code use `mono`.
+// The interface's font stacks, from one place (Rubik and Nunito Sans are
+// loaded in index.html). The theme's body text uses `body`; titles, labels and
+// numbers use `display`, a sturdy, lightly softened face that gives the
+// interface its voice; longer flavour text uses `prose`; formulas and code use
+// `mono`.
 export const UI_FONTS = Object.freeze({
-  display: '"Fredoka", "Nunito", system-ui, sans-serif',
-  prose: '"Nunito", system-ui, sans-serif',
-  body: '"Nunito", system-ui, sans-serif',
+  display: '"Rubik", "Nunito Sans", system-ui, sans-serif',
+  prose: '"Nunito Sans", system-ui, sans-serif',
+  body: '"Nunito Sans", system-ui, sans-serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
@@ -42,8 +43,7 @@ export const LETTER_SPACINGS = Object.freeze({
   xxl: '0.12em',
 });
 
-// Font weights. Nunito draws all three; Fredoka stops at bold, which `heavy`
-// falls back to.
+// Font weights. Rubik and Nunito Sans draw all three.
 export const FONT_WEIGHTS = Object.freeze({
   regular: 400,
   bold: 700,

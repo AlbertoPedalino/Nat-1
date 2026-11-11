@@ -1,5 +1,6 @@
 import { alpha } from '@mui/material';
 import { UI_COLORS, OPACITY } from './colors.js';
+import { pressableSx } from './pressable.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
@@ -93,7 +94,7 @@ export const CHIP_TONES = {
 // baked into the bonus; `attackDisadvantage` reuses CHIP_TONES.negative so a
 // penalized roll reads like a negative status chip.
 export const ROLL_TONES = {
-  attack: '#4d95d6',
+  attack: UI_COLORS.accent,
   attackNotProficient: '#de675f',
   attackDisadvantage: CHIP_TONES.negative,
   damage: '#ff6b35',
@@ -120,11 +121,12 @@ export const COMPENDIUM_KIND_COLORS = {
   skill: ENTITY_COLORS.skill,
 };
 
-// The one roll-button recipe: solid text color over a translucent border of the
-// same hue, so every roll button on the sheet reads as one family. Pass a
-// ROLL_TONES value.
+// The one roll-button recipe: the raised, drawn button filled with the roll's
+// tone (shared/ui/pressable.js), so every roll button reads as one family and
+// as the same kind of thing as the app's filled buttons. Pass a ROLL_TONES
+// value.
 export function rollerToneSx(tone) {
-  return { color: tone, borderColor: alpha(tone, OPACITY.edge) };
+  return pressableSx(tone);
 }
 
 // Tint for an attack-roll button. Disadvantage outranks not-proficient: it
