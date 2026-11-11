@@ -55,8 +55,8 @@ export default function NotFoundPage() {
 }
 
 const pageSx = {
+  ...SURFACES.page,
   minHeight: '100vh',
-  bgcolor: 'background.default',
   pt: APP_TOP_BAR_HEIGHT,
 };
 

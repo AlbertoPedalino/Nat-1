@@ -3,6 +3,7 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from './AppTopBar.jsx';
 import LinkedToolsMenu from './LinkedToolsMenu.jsx';
 import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import { asArray } from '../../shared/lists.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 // The frame of a saved tool's page (GM Board, Encounter Builder, DM Screen):
 // the top bar with Home, Back to the tool's list and the Links menu, the
@@ -42,9 +43,9 @@ export default function ToolPageShell({
 }
 
 const pageSx = {
+  ...SURFACES.page,
   minHeight: '100vh',
   minWidth: 0,
-  bgcolor: 'background.default',
   pt: APP_TOP_BAR_HEIGHT,
 };
 

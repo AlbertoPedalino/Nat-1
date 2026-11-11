@@ -5,13 +5,14 @@ import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
 
 export const rootSx = {
+  ...SURFACES.page,
   minHeight: '100vh',
-  bgcolor: UI_COLORS.surfaceDarkest,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

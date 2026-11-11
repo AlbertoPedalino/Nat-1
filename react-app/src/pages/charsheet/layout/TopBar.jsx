@@ -85,7 +85,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
 
   return (
     <Box sx={{
-      bgcolor: 'background.paper', borderBottom: 2, borderColor: 'divider',
+      bgcolor: 'background.paper', borderBottom: 2, borderColor: UI_COLORS.edge,
     }}>
       {!embedded ? (
         <>
