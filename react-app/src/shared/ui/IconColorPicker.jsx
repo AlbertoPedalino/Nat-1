@@ -38,9 +38,10 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             onClick={() => pick(color)}
             sx={{
               width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-              bgcolor: color, border: 2,
-              borderColor: (localColor || currentColor) === color ? UI_COLORS.white : 'transparent',
-              boxShadow: (localColor || currentColor) === color ? `0 0 6px ${uiAlpha(UI_COLORS.white, OPACITY.edge)}` : 'none',
+              // Inked like every swatch; the chosen one ringed in the accent.
+              bgcolor: color, border: 2, borderColor: UI_COLORS.edge,
+              outline: (localColor || currentColor) === color ? `2px solid ${UI_COLORS.accent}` : 'none',
+              outlineOffset: 1,
               '&:hover': { transform: 'scale(1.2)', transition: 'transform 0.12s' },
             }}
           />
