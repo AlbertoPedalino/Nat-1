@@ -12,8 +12,8 @@ import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
@@ -35,10 +35,10 @@ export function PreviewSection({ icon, title, subtitle, tone = UI_COLORS.accentT
   const hasContent = Boolean(children);
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden', minWidth: 0 }}>
-      <PanelHeader icon={icon} title={title} tone={tone} />
+      <PanelHeader icon={icon} title={title} tone={tone} titleSx={BUILDER_TEXT.panelTitle} />
       <Stack spacing={0.75} sx={{ ...panelBodySx, minWidth: 0 }}>
         {subtitle ? (
-          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm }} noWrap>{subtitle}</Typography>
+          <Typography sx={BUILDER_TEXT.note} noWrap>{subtitle}</Typography>
         ) : null}
         {hasContent ? children : emptyText ? <EmptyCaption>{emptyText}</EmptyCaption> : null}
       </Stack>

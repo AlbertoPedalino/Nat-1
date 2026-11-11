@@ -25,8 +25,8 @@ import { matchKey } from '../../../shared/content/nameKeys.js';
 import { choiceKeyKind } from '../../../shared/character/progression/choiceNormalization.js';
 import { heldProficiencyLabels } from '../../../shared/character/proficiency/heldProficiencies.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -214,11 +214,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                       primary={
                         <Typography
                           noWrap
-                          sx={{
-                            color: 'text.primary',
-                            fontSize: FONT_SIZES.xl,
-                            fontWeight: FONT_WEIGHTS.regular,
-                          }}
+                          sx={BUILDER_TEXT.itemName}
                         >
                           {label}
                         </Typography>
@@ -250,7 +246,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
         </List>
         ) : (
           <Box sx={{ px: 1, py: 0.75 }}>
-            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.lg }}>No matches.</Typography>
+            <Typography sx={BUILDER_TEXT.hint}>No matches.</Typography>
           </Box>
         )}
       </Paper>

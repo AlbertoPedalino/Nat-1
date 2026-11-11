@@ -8,6 +8,7 @@ import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searc
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -120,7 +121,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
           })}
         </List>
       </Paper>
-      {!pool.length ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>No spells found for this filter.</Typography> : null}
+      {!pool.length ? <Typography sx={BUILDER_TEXT.hint}>No spells found for this filter.</Typography> : null}
     </ChoiceFrame>
   );
 }

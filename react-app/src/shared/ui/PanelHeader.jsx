@@ -106,11 +106,13 @@ export const sectionLabelSx = {
   fontSize: FONT_SIZES.xxxs,
 };
 
-export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', children }) {
+// `titleSx` resizes the title for a page whose panels are its main content (the
+// builder); the sheet keeps panelTitleSx as it is.
+export default function PanelHeader({ icon: Icon, title, tone = 'primary.main', titleSx, children }) {
   return (
     <Box sx={{ ...panelBarSx, px: '0.8rem', py: '0.48rem', borderLeftColor: tone }}>
       {Icon ? <Icon size={ICON_SIZES.sm} /> : null}
-      <Typography sx={{ ...panelTitleSx, color: tone }}>{title}</Typography>
+      <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}
     </Box>
   );

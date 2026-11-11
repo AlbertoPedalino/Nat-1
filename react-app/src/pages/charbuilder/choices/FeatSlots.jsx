@@ -13,9 +13,8 @@ import { meetsFeatPrerequisites } from './featPrerequisiteRules.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { asArray } from '../../../shared/lists.js';
-import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -71,7 +70,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
   const listLabel = feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`;
   return (
     <Stack spacing={0.5}>
-      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: FONT_WEIGHTS.bold }}>
+      <Typography sx={{ ...BUILDER_TEXT.value, color: 'text.secondary' }}>
         {listLabel}
       </Typography>
       {locked ? (
@@ -143,7 +142,7 @@ function FeatChoicesPanel({ feat, slotKey, character, state, dispatch, lockedLis
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Typography sx={sheetBoxTitleSx}>{feat.name} Choices</Typography>
+        <Typography sx={BUILDER_TEXT.boxTitle}>{feat.name} Choices</Typography>
         <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} locked={locked} />
         {grants.map((grant) => <ChoiceSpec key={grant.key} spec={grant} state={state} dispatch={dispatch} />)}
       </Stack>
@@ -159,7 +158,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
     <Stack spacing={1.5} sx={{ minWidth: 0 }}>
       <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
         <Stack spacing={1} sx={{ minWidth: 0 }}>
-          <Typography sx={sheetBoxTitleSx}>{feat ? feat.name : spec.fixed}</Typography>
+          <Typography sx={BUILDER_TEXT.boxTitle}>{feat ? feat.name : spec.fixed}</Typography>
           <FeatDescriptionRows feat={feat} />
         </Stack>
       </Paper>

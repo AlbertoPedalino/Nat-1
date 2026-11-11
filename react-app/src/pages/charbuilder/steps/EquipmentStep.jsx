@@ -23,9 +23,9 @@ import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -94,7 +94,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1 }}>
             <ItemNameIcon item={item} />
-            <Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.xxl, minWidth: 0 }} noWrap>{item.name}</Typography>
+            <Typography sx={{ ...BUILDER_TEXT.itemName, minWidth: 0 }} noWrap>{item.name}</Typography>
           </Box>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
@@ -231,7 +231,7 @@ export default function EquipmentStep({ state, dispatch }) {
 
           <ItemFilterPanel {...addList.panelProps} />
 
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography sx={BUILDER_TEXT.hint}>
             {sortedItems.length} of {state.data.items.length} items
           </Typography>
 
@@ -245,7 +245,7 @@ export default function EquipmentStep({ state, dispatch }) {
           </Paper>
 
           <Divider />
-          <Typography sx={sheetSectionHeaderSx()}>Current Inventory</Typography>
+          <Typography sx={BUILDER_TEXT.sectionHeader}>Current Inventory</Typography>
           {character.inventory.length ? (
             <>
               <SearchField
@@ -269,7 +269,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
               ))}
               {character.inventory.length && !currentInventory.length ? (
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', px: 2, py: 1 }}>
+                <Typography sx={{ ...BUILDER_TEXT.hint, px: 2, py: 1 }}>
                   No matches.
                 </Typography>
               ) : null}

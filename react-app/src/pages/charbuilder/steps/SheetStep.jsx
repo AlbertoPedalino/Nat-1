@@ -7,10 +7,9 @@ import { downloadCharacterExport } from '../../../shared/character/profile/chara
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { campaignSheetPath, characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function charIdFromUrl() {
   const id = characterIdFromUrl();
@@ -53,10 +52,10 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
           }}
         >
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ ...cardTitleSx, color: ready ? 'primary.main' : 'text.secondary' }}>
+            <Typography sx={{ ...BUILDER_TEXT.cardTitle, color: ready ? 'primary.main' : 'text.secondary' }}>
               {ready ? 'Character sheet ready' : 'Character sheet not ready'}
             </Typography>
-            <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
+            <Typography sx={{ ...BUILDER_TEXT.hint, mt: 0.25 }}>
               {ready
                 ? 'Download JSON without local storage, save a local copy, or open the local sheet.'
                 : 'The character is missing minimum data.'}

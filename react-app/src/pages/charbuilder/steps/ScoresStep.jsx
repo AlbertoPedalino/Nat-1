@@ -12,7 +12,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -73,7 +73,7 @@ export default function ScoresStep({ state, dispatch }) {
                 <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
                   <Stack direction="row" spacing={1.25} sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography sx={sheetBoxTitleSx}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
+                      <Typography sx={BUILDER_TEXT.boxTitle}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
                       <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1 }}>
                         <MiniBadge label={`Base ${baseScore}`} color={UI_COLORS.textSecondary} />
                         {bonusBreakdown.map((bonus, index) => (
@@ -98,7 +98,7 @@ export default function ScoresStep({ state, dispatch }) {
                       }}
                     >
                       <Typography sx={{ fontSize: FONT_SIZES.lead, fontWeight: FONT_WEIGHTS.heavy, lineHeight: LINE_HEIGHTS.none }}>{finalScore ?? '-'}</Typography>
-                      <Typography sx={{ color: 'text.secondary', fontSize: FONT_SIZES.md, mt: 0.25 }}>
+                      <Typography sx={{ ...BUILDER_TEXT.hint, mt: 0.25 }}>
                         {scoreMod(finalScore)}
                       </Typography>
                     </Box>

@@ -12,11 +12,12 @@ import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { activeExtraClass } from '../state/activeClass.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -25,18 +26,18 @@ function MulticlassProfDetails({ className, profs }) {
   const rows = describeMulticlassProficiencies(className, profs);
   if (!rows.length) {
     return (
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Typography sx={BUILDER_TEXT.hint}>
         This class grants no multiclass proficiencies.
       </Typography>
     );
   }
   return (
     <Stack spacing={0.5}>
-      <Typography variant="caption" sx={{ fontWeight: FONT_WEIGHTS.bold, color: 'text.secondary' }}>
+      <Typography sx={{ ...BUILDER_TEXT.hint, fontWeight: FONT_WEIGHTS.bold }}>
         Multiclass proficiencies gained
       </Typography>
       {rows.map(({ label, values }) => (
-        <Typography key={label} variant="caption" sx={{ color: 'text.secondary' }}>
+        <Typography key={label} sx={BUILDER_TEXT.hint}>
           <Box component="span" sx={{ fontWeight: FONT_WEIGHTS.bold }}>{label}:</Box> {values.join(', ')}
         </Typography>
       ))}
@@ -66,7 +67,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                 <Icon size={ICON_SIZES.sm} />
               </Box>
               <ListItemText
-                primary={<Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.lg }}>{cls.name}</Typography>}
+                primary={<Typography sx={BUILDER_TEXT.itemName}>{cls.name}</Typography>}
                 secondary={(
                   <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.25 }}>
                     <MiniBadge label={`Hit Die ${hitDie}`} color={ENTITY_COLORS.class} />
@@ -80,7 +81,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
               <MiniBadge label={cls.source} color={UI_COLORS.textSecondary} />
             </Box>
             {prereqReason && (
-              <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, mb: 0.5 }}>
+              <Typography sx={{ ...BUILDER_TEXT.hint, color: 'warning.main', ml: 3, mb: 0.5 }}>
                 {prereqReason}
               </Typography>
             )}
@@ -179,7 +180,7 @@ export default function ClassPanel({ state, character, dispatch }) {
           ))}
         </ToggleButtonGroup>
         {activeClass?.isHero && activeLevel < 3 ? (
-          <Typography variant="caption" sx={{ color: 'warning.main' }}>
+          <Typography sx={{ ...BUILDER_TEXT.hint, color: 'warning.main' }}>
             {activeClass.name} is a hero class: it normally starts at level 3. Below that it needs your DM&apos;s permission.
           </Typography>
         ) : null}
@@ -269,7 +270,7 @@ export default function ClassPanel({ state, character, dispatch }) {
         >
           <Stack spacing={1.5}>
             <Typography>{pendingConfirm.message}</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{pendingConfirm.note}</Typography>
+            <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary' }}>{pendingConfirm.note}</Typography>
           </Stack>
         </SheetDialog>
       )}

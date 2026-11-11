@@ -4,8 +4,7 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -21,13 +20,13 @@ export default function XpPanel({ character, dispatch }) {
     <BuilderPanel id="panel-xp" title="Experience (XP)" icon={Layers} note={note}>
       <Stack spacing={1.25}>
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
-          <Typography variant="body2" sx={{ fontWeight: FONT_WEIGHTS.bold, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+          <Typography sx={{ ...BUILDER_TEXT.value, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
+          <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', whiteSpace: 'nowrap' }}>
             {isMaxLevel ? `${formatNumber(xp)} XP` : `${formatNumber(xp)} / ${formatNumber(nextXp)} XP`}
           </Typography>
         </Box>
         <LinearProgress variant="determinate" value={progress} />
-        <Typography variant="caption" sx={{ ...TEXT_STYLES.note }}>
+        <Typography sx={BUILDER_TEXT.note}>
           Tracker only — stats use class levels (total {statsLevel}).
         </Typography>
         <XpDeltaControl

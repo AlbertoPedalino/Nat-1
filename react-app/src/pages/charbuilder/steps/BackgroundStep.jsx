@@ -14,20 +14,19 @@ import { backgroundAbilityBonus, DEFAULT_BACKGROUND_PATTERN } from '../../../sha
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { asArray } from '../../../shared/lists.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
-import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
   if (!values?.length) return null;
   return (
     <>
-      <Typography variant="body2" sx={{ color: UI_COLORS.accentText, ...TEXT_STYLES.label, fontSize: FONT_SIZES.md, whiteSpace: 'nowrap' }}>{label}</Typography>
-      <Typography variant="body2" sx={{ color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
+      <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: UI_COLORS.accentText, whiteSpace: 'nowrap' }}>{label}</Typography>
+      <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
     </>
   );
 }
@@ -93,11 +92,11 @@ function BackgroundDetailCard({ background }) {
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography sx={{ ...cardTitleSx, flex: 1, minWidth: 0 }}>{background.name}</Typography>
+          <Typography sx={{ ...BUILDER_TEXT.cardTitle, flex: 1, minWidth: 0 }}>{background.name}</Typography>
           <MiniBadge label={background.source || ''} color={UI_COLORS.textSecondary} />
         </Stack>
         {lore ? (
-          <Typography variant="body2" sx={{ ...TEXT_STYLES.note, lineHeight: LINE_HEIGHTS.relaxed }}>
+          <Typography sx={{ ...BUILDER_TEXT.note, lineHeight: LINE_HEIGHTS.relaxed }}>
             {lore}
           </Typography>
         ) : null}

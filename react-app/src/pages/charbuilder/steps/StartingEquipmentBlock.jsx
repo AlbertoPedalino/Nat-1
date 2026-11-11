@@ -14,7 +14,7 @@ import {
   resolveEquipmentItems,
   collectEquipmentTypeSlots,
 } from './startingEquipment.js';
-import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // One source's starting-equipment choices (class or background) in the
 // builder's equipment step.
@@ -41,11 +41,11 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
   if (!eq) return null;
   return (
     <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Typography sx={{ ...sheetBoxTitleSx, mb: 1 }}>{title}</Typography>
+      <Typography sx={{ ...BUILDER_TEXT.boxTitle, mb: 1 }}>{title}</Typography>
       <Stack spacing={1}>
         {blocks.map((block) => (
           <Paper key={block.key} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>{block.label}</Typography>
+            <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>{block.label}</Typography>
             <Stack spacing={0.75}>
               {block.options.map((option) => {
                 const selected = character.equipChoices[block.key] === option.value;
@@ -80,7 +80,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
           const selectedRef = character.equipChoices[slot.slotKey] || null;
           return (
             <Paper key={slot.slotKey} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+              <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>
                 Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
               </Typography>
               <Stack spacing={0.75}>

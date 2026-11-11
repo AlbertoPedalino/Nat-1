@@ -3,9 +3,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { sheetBoxTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -28,11 +27,11 @@ export default function ExpandableSelectionList({
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
-          <Typography sx={{ ...sheetBoxTitleSx, flex: 1, minWidth: 0 }}>
+          <Typography sx={{ ...BUILDER_TEXT.boxTitle, flex: 1, minWidth: 0 }}>
             {title}
           </Typography>
           {status ? (
-            <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>
+            <Typography sx={{ ...BUILDER_TEXT.hint, flexShrink: 0 }}>
               {status}
             </Typography>
           ) : null}
@@ -70,7 +69,7 @@ export default function ExpandableSelectionList({
                           primary={(
                             <Typography
                               noWrap
-                              sx={{ color: 'text.primary', fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.regular }}
+                              sx={BUILDER_TEXT.itemName}
                             >
                               {option.label}
                             </Typography>
@@ -78,7 +77,7 @@ export default function ExpandableSelectionList({
                           secondary={option.secondary || null}
                           slotProps={{ secondary: {
                             noWrap: true,
-                            sx: { mt: 0.25, fontSize: FONT_SIZES.md },
+                            sx: { ...BUILDER_TEXT.itemMeta, mt: 0.25 },
                           } }}
                         />
                       </ListItemButton>

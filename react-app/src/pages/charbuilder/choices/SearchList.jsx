@@ -1,8 +1,8 @@
 import { List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 export default function SearchList({ value, onSearch, placeholder, items, selectedName, onSelect, meta }) {
   return (
@@ -27,7 +27,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
                 sx={{ alignItems: 'flex-start', gap: 1, py: 0.5 }}
               >
                 <ListItemText
-                  primary={<Typography sx={{ fontWeight: FONT_WEIGHTS.regular, fontSize: FONT_SIZES.lg }}>{item.name}</Typography>}
+                  primary={<Typography sx={BUILDER_TEXT.itemName}>{item.name}</Typography>}
                   secondary={meta?.(item)}
                   slotProps={{ secondary: { component: 'div' } }}
                 />

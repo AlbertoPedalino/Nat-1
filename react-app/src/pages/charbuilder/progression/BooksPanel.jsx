@@ -2,8 +2,6 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material';
 import { BookOpen } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { goldToggleSx } from '../../../shared/ui/actionButton.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import {
   ALWAYS_ON_BOOKS,
   SELECTABLE_BOOKS,
@@ -12,6 +10,7 @@ import {
   sourceLabel,
 } from '../../../shared/content/sourcePriority.js';
 import { picksFromUnusedBooks } from './bookPicks.js';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // The books the character is built from: the core ones always, the others as
 // the player chooses. The steps and the sheet then offer only their content.
@@ -58,7 +57,7 @@ export default function BooksPanel({ character, dispatch }) {
         {UNIVERSES_BEYOND_BOOKS.map(bookButton)}
       </BookGroup>
       {leftovers.length ? (
-        <Typography variant="caption" sx={{ display: 'block', mt: 0.75, color: 'warning.main' }}>
+        <Typography sx={{ ...BUILDER_TEXT.hint, mt: 0.75, color: 'warning.main' }}>
           From books not in use: {leftovers.join(', ')}. They stay on the character until you change them.
         </Typography>
       ) : null}
@@ -69,9 +68,9 @@ export default function BooksPanel({ character, dispatch }) {
 function BookGroup({ title, note, children }) {
   return (
     <Box>
-      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: 'text.secondary', mb: 0.5 }}>{title}</Typography>
+      <Typography sx={{ ...BUILDER_TEXT.groupLabel, mb: 0.5 }}>{title}</Typography>
       {note ? (
-        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', mb: 0.5 }}>{note}</Typography>
+        <Typography sx={{ ...BUILDER_TEXT.hint, mb: 0.5 }}>{note}</Typography>
       ) : null}
       <Stack direction="row" useFlexGap spacing={0.5} sx={{ flexWrap: 'wrap' }}>
         {children}
