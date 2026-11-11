@@ -88,22 +88,22 @@ test('the World of Warcraft invocations bring their cards, spells and uses', asy
   assert.ok(!names.includes('Call of the Void'));
 });
 
-const runeLists = [
-  { name: 'Blood', prepared: { 3: ['vampiric blood|wow'] } },
-  { name: 'Frost', prepared: { 3: ['chains of ice|wow'] } },
-  { name: 'Unholy', prepared: { 3: ['scourge strike|wow'] } },
-];
-
-test('the rune is switched on the sheet from the Runeforging card, its options from the data', () => {
-  const dk = { ...deathKnight(3, { subclass_spell_list: ['Frost'] }), subclassAdditionalSpells: runeLists };
-  const card = collectAdapterActions(dk).find((action) => action.name === 'Runeforging');
-  assert.equal(card.choiceKey, 'subclass_spell_list');
-  assert.equal(card.choicePrefix, '');
-  assert.deepEqual(card.choiceOptions({ character: dk, action: card }).map((option) => option.value), ['Blood', 'Frost', 'Unholy']);
-});
-
 test('the rune is a list name, not a spell the character picked', () => {
   const dk = deathKnight(3, { subclass_spell_list: ['Blood'] });
   assert.deepEqual(collectChoiceSpells(dk, new Map()), []);
   assert.deepEqual(normalizeCharacterChoices(dk).spells.spells, []);
+});
+
+const runeOption = (name) => ({ type: 'entries', name, entries: [`${name} text.`] });
+const runicPower = {
+  name: 'Runic Power', className: 'Death Knight', subclassShortName: 'Ebon Blade', level: 3,
+  entries: ['Immediately after you cast Rune Strike…', runeOption('Blood'), runeOption('Frost'), runeOption('Unholy')],
+};
+
+test('Runic Power shows only the option of the rune, Frost with its damage', () => {
+  const dk = { ...deathKnight(3, { subclass_spell_list: ['Frost'] }), allSubFeatures: [runicPower] };
+  const cards = collectAdapterActions(dk).filter((action) => action.name.startsWith('Runic Power'));
+  assert.deepEqual(cards.map((card) => card.name), ['Runic Power: Frost']);
+  assert.deepEqual([...cards[0].entries], ['Immediately after you cast Rune Strike…', runeOption('Frost')]);
+  assert.deepEqual(cards[0].rollers.map((roller) => roller.formula), ['2d6']);
 });

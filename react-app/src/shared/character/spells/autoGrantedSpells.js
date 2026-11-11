@@ -270,12 +270,6 @@ export function subclassDataSpells(entity) {
   return Array.isArray(record?.additionalSpells) ? record.additionalSpells : [];
 }
 
-// The names of a subclass's spell lists in its data (Blood, Frost, Unholy):
-// the options of SUBCLASS_SPELL_LIST_KEY, saved under the class's prefix.
-export function subclassSpellListNames(entity) {
-  return subclassDataSpells(entity).map((entry) => entry?.name).filter(Boolean);
-}
-
 /**
  * Grants from the subclass data: its always-prepared spells as 5etools lists
  * them, the way feats and species read theirs. With several lists, the one

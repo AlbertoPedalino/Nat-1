@@ -184,6 +184,31 @@ function buildFeatureMapFromRecords(records, scope) {
   return map;
 }
 
+// A card named "Feature: Option" (Runic Power: Blood, Blessed Strikes: Divine
+// Strike) shows the feature's text with that option alone: the other named
+// options beside it are left out. Null when the feature has no such option.
+function onlyNamedOption(entries, optionKey) {
+  if (!Array.isArray(entries)) return null;
+  const isOption = (node) => node && typeof node === 'object' && node.name && Array.isArray(node.entries);
+  if (entries.some((node) => isOption(node) && nameKey(node.name) === optionKey)) {
+    return entries.filter((node) => !isOption(node) || nameKey(node.name) === optionKey);
+  }
+  for (let index = 0; index < entries.length; index += 1) {
+    const node = entries[index];
+    const inner = node && typeof node === 'object' ? onlyNamedOption(node.entries, optionKey) : null;
+    if (inner) return [...entries.slice(0, index), { ...node, entries: inner }, ...entries.slice(index + 1)];
+  }
+  return null;
+}
+
+function optionEntries(name, lookup) {
+  const parts = String(name || '').split(':').map((part) => part.trim()).filter(Boolean);
+  if (parts.length !== 2) return null;
+  const feature = lookup(nameKey(parts[0]));
+  const option = feature ? onlyNamedOption(feature, nameKey(parts[1])) : null;
+  return option ? Object.assign(option, { _upgrades: feature._upgrades }) : null;
+}
+
 // The text with the upgrades the owner's level has reached, each under the
 // name and level of the feature that adds it.
 function withReachedUpgrades(entries, level) {
@@ -264,6 +289,12 @@ export function collectAdapterActions(C, sheet) {
         if (entries.length) return entries;
       }
     }
+    // A feature of that exact name, else the option inside its feature, else
+    // either half of the name.
+    const exact = lookupByName(nameKey(action.name));
+    if (exact) return withReachedUpgrades(exact, level);
+    const option = optionEntries(action.name, lookupByName);
+    if (option) return withReachedUpgrades(option, level);
     const actionCandidates = nameKeyCandidates(action.name);
     for (const candidate of actionCandidates) {
       const entries = lookupByName(candidate);
