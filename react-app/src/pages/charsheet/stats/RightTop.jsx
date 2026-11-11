@@ -17,7 +17,7 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { STAT_TILE_SIZE, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { TILE_ACTIVE_INK, tileSx } from '../../../shared/ui/interactive.js';
@@ -130,7 +130,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
             </Typography>
           )}
           {initiativeMessage && (
-            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.xxxs, color: UI_COLORS.success, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: 90, wordBreak: 'break-word' }}>
+            <Typography variant="caption" sx={{ fontSize: FONT_SIZES.xxxs, color: UI_COLORS.success, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: STAT_TILE_SIZE + 10, wordBreak: 'break-word' }}>
               {initiativeMessage}
             </Typography>
           )}
@@ -160,7 +160,7 @@ function SquareStat({ value, label, clickable, active, onClick }) {
       onClick={onClick}
       sx={{
         ...tileSx({ clickable, active }),
-        width: 62, height: 62,
+        width: STAT_TILE_SIZE, height: STAT_TILE_SIZE,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>
       {typeof value === 'string' || typeof value === 'number'
@@ -179,7 +179,7 @@ function InspirationBlock({ sheet, onToggle }) {
       active={insp}
       onClick={onToggle}
       label={insp ? 'Insp.' : 'No Insp.'}
-      value={<GAME_ICONS.inspiration size={ICON_SIZES.xxl} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
+      value={<GAME_ICONS.inspiration size={ICON_SIZES.hero} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
     />
   );
 }

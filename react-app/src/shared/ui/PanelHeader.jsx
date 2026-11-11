@@ -119,16 +119,20 @@ export const emptyTextSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xl };
 
 // A sheet readout: a big gold number over its tiny uppercase name (AC,
 // Initiative, Speed).
+// The side of a stat tile (Initiative, Proficiency Bonus, Inspiration) and the
+// width of the AC shield beside them: big enough to find at a glance.
+export const STAT_TILE_SIZE = 80;
+
 export const statValueSx = {
   ...TEXT_STYLES.figure,
-  fontSize: FONT_SIZES.title,
+  fontSize: FONT_SIZES.display,
   color: UI_COLORS.accentText,
   lineHeight: LINE_HEIGHTS.none,
 };
 
 export const statLabelSx = {
   ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.micro,
+  fontSize: FONT_SIZES.xxs,
   color: 'text.secondary',
 };
 

@@ -1,7 +1,7 @@
 import { Box, Tooltip, Typography } from '@mui/material';
 import { AlertCircle } from 'lucide-react';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { STAT_TILE_SIZE, statLabelSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
@@ -20,7 +20,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, flexShrink: 0 }}>
       <Tooltip title={tooltipText}>
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0 }}>
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: STAT_TILE_SIZE, height: STAT_TILE_SIZE * 1.1, flexShrink: 0 }}>
           {/* A drawn shield: filled, inked, set on its own solid shadow like the
               tiles beside it; an untrained Shield turns it to the penalty colour. */}
           <GAME_ICONS.armorClass
@@ -41,7 +41,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
         </Box>
       </Tooltip>
       {showBadge && badgeLabel ? (
-        <Typography sx={{ fontSize: FONT_SIZES.micro, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
+        <Typography sx={{ fontSize: FONT_SIZES.micro, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, textAlign: 'center', lineHeight: LINE_HEIGHTS.tight, maxWidth: STAT_TILE_SIZE + 10, whiteSpace: 'normal', wordBreak: 'break-word' }}>
           {badgeLabel}
         </Typography>
       ) : null}
