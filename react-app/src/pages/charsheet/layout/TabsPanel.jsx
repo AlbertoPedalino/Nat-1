@@ -5,9 +5,8 @@ import InventoryTab from '../inventory/InventoryTab.jsx';
 import FeaturesTab from '../details/FeaturesTab.jsx';
 import NotesTab from '../details/NotesTab.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { panelBadgeSx, panelBarSx, panelFrameSx, panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
+import { PANEL_BADGE_ICON, panelBadgeSx, panelBarPadSx, panelBarSx, panelFrameSx, panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 const TABS = ['Actions', 'Spells', 'Inventory', 'Features', 'Notes'];
 
@@ -17,8 +16,8 @@ export default function TabsPanel({ C, sheet, tab, setTab, resources, freeCastUs
   return (
     <Paper variant="outlined" sx={panelFrameSx}>
       {/* The tab bar is the panel's bar: its badge, its screentone. */}
-      <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(), pl: '0.8rem' }}>
-        <Box sx={panelBadgeSx()}><GAME_ICONS.actions size={ICON_SIZES.sm} /></Box>
+      <Box sx={{ ...panelBarSx, ...panelBarPadSx, backgroundImage: panelScreentone() }}>
+        <Box sx={panelBadgeSx()}><GAME_ICONS.actions size={PANEL_BADGE_ICON} /></Box>
         <Tabs value={tab} onChange={handleChange} variant="scrollable" scrollButtons="auto"
           sx={{ minHeight: 0, '& .MuiTab-root': { minHeight: 0, py: 1, px: 1.5, fontSize: FONT_SIZES.sm } }}>
           {TABS.map(t => <Tab key={t} label={t} />)}

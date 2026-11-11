@@ -10,7 +10,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
-import { bubbleSx, bubbleTailSx, comicShadow, starburstSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_SHAKE_SX, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
@@ -88,8 +88,9 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           <Typography sx={{
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.title,
-            color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.totalColor,
+            color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.isFail ? VTT_COLORS.text : layout.totalColor,
             ...(layout.isCrit ? { ...starburstSx(VTT_COLORS.accent), textShadow: 'none' } : null),
+            ...(layout.isFail ? splatSx(VTT_COLORS.danger) : null),
           }}>
             {layout.total}
           </Typography>
@@ -161,7 +162,7 @@ const closeSx = {
 // A natural 20 or 1 throws the bubble's shadow in its own colour.
 const critSx = { boxShadow: comicShadow(VTT_COLORS.accent, 4) };
 
-const failSx = { boxShadow: comicShadow(VTT_COLORS.danger) };
+const failSx = { boxShadow: comicShadow(VTT_COLORS.danger), ...BUBBLE_SHAKE_SX };
 
 const actorSx = {
   ...TEXT_STYLES.figure,

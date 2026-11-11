@@ -169,7 +169,7 @@ function InspirationBlock({ sheet, onToggle }) {
       active={insp}
       onClick={onToggle}
       label={insp ? 'Insp.' : 'No Insp.'}
-      value={<GAME_ICONS.inspiration size={ICON_SIZES.lg} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
+      value={<GAME_ICONS.inspiration size={ICON_SIZES.xxl} style={{ color: insp ? TILE_ACTIVE_INK : UI_COLORS.textSecondary }} />}
     />
   );
 }

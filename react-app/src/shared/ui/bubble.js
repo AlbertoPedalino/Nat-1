@@ -58,20 +58,25 @@ export function bubbleTailSx({ fill = UI_COLORS.surfaceRaised, side = 'bottom', 
   };
 }
 
-// The comic starburst behind a total that shouts (a natural 20): a spiky
-// star of `color` drawn behind the number, its points cut by clip-path.
-const BURST_POINTS = (() => {
-  const points = [];
-  const spikes = 12;
-  for (let index = 0; index < spikes * 2; index += 1) {
-    const radius = index % 2 === 0 ? 50 : 34;
-    const angle = (Math.PI * index) / spikes - Math.PI / 2;
-    points.push(`${(50 + radius * Math.cos(angle)).toFixed(1)}% ${(50 + radius * Math.sin(angle)).toFixed(1)}%`);
-  }
-  return `polygon(${points.join(', ')})`;
-})();
+// The comic shapes behind a total that shouts: the spiky starburst of a
+// natural 20 and the ragged splat of a natural 1, drawn behind the number
+// and cut by clip-path.
+const polygon = (points) => `polygon(${points.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(', ')})`;
 
-export function starburstSx(color = UI_COLORS.accent) {
+const BURST_POINTS = polygon(Array.from({ length: 24 }, (_, index) => {
+  const radius = index % 2 === 0 ? 50 : 34;
+  const angle = (Math.PI * index) / 12 - Math.PI / 2;
+  return [50 + radius * Math.cos(angle), 50 + radius * Math.sin(angle)];
+}));
+
+// A splat is uneven on purpose: blunt lobes of different reach, no two alike.
+const SPLAT_REACH = [46, 30, 40, 27, 49, 33, 37, 25, 44, 31, 42, 28, 47, 34];
+const SPLAT_POINTS = polygon(SPLAT_REACH.map((radius, index) => {
+  const angle = (2 * Math.PI * index) / SPLAT_REACH.length - Math.PI / 2;
+  return [50 + radius * Math.cos(angle), 50 + radius * Math.sin(angle)];
+}));
+
+function shapeBehindSx(color, clipPath, turn) {
   return {
     position: 'relative',
     isolation: 'isolate',
@@ -84,10 +89,31 @@ export function starburstSx(color = UI_COLORS.accent) {
       top: '50%',
       width: '2.2em',
       height: '2.2em',
-      transform: 'translate(-50%, -50%) rotate(-8deg)',
-      clipPath: BURST_POINTS,
+      transform: `translate(-50%, -50%) rotate(${turn})`,
+      clipPath,
       bgcolor: color,
       zIndex: -1,
     },
   };
 }
+
+export function starburstSx(color = UI_COLORS.accent) {
+  return shapeBehindSx(color, BURST_POINTS, '-8deg');
+}
+
+export function splatSx(color = UI_COLORS.danger) {
+  return shapeBehindSx(color, SPLAT_POINTS, '14deg');
+}
+
+// A bubble that groans (a natural 1): it shakes once instead of popping in.
+export const BUBBLE_SHAKE_SX = Object.freeze({
+  animation: `gbBubbleShake ${DURATIONS.slow * 2}ms ease-in-out`,
+  '@keyframes gbBubbleShake': {
+    '0%, 100%': { transform: `rotate(${TILT}) translateX(0)` },
+    '20%': { transform: 'rotate(-3deg) translateX(-6px)' },
+    '40%': { transform: 'rotate(2deg) translateX(5px)' },
+    '60%': { transform: 'rotate(-2deg) translateX(-4px)' },
+    '80%': { transform: 'rotate(1deg) translateX(2px)' },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+});

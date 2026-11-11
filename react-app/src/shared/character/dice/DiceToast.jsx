@@ -9,9 +9,9 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../u
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
-import { SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow, starburstSx } from '../../ui/bubble.js';
+import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleSx, bubbleTailSx, comicShadow, splatSx, starburstSx } from '../../ui/bubble.js';
 import { inkOn } from '../../ui/pressable.js';
-import { celebrateNatural20 } from '../../ui/celebrate.js';
+import { celebrateNatural20, lamentNatural1 } from '../../ui/celebrate.js';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -41,11 +41,14 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
-  // A natural 20 throws confetti from the toast's corner, once a throw.
-  const crit = Boolean(toast && !hidden && resolveToastLayout(toast).isCrit);
+  // A natural 20 throws confetti from the toast's corner, a natural 1 sheds
+  // debris, once a throw.
+  const shown = toast && !hidden ? resolveToastLayout(toast) : null;
+  const moment = shown?.isCrit ? 'crit' : shown?.isFail ? 'fail' : null;
   useEffect(() => {
-    if (crit) celebrateNatural20();
-  }, [crit, toast?.timestamp]);
+    if (moment === 'crit') celebrateNatural20();
+    if (moment === 'fail') lamentNatural1();
+  }, [moment, toast?.timestamp]);
 
   // Keep the expiry running while hidden so returning to the map cannot revive
   // an old result that arrived during the background view.
@@ -61,7 +64,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       ...toastRootSx,
       // A natural 20 or 1 throws its shadow in its own colour.
       ...(layout.isCrit ? { boxShadow: comicShadow(UI_COLORS.accent, 4), transform: SHOUT_TILT } : {}),
-      ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger) } : {}),
+      ...(layout.isFail ? { boxShadow: comicShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={ICON_SIZES.sm} />
@@ -107,8 +110,10 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
           <Typography component="span" sx={{
             ...TEXT_STYLES.figure, lineHeight: LINE_HEIGHTS.none,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
-            color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.totalColor,
-            ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), textShadow: 'none' } : { display: 'inline-block' }),
+            color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
+            ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), textShadow: 'none' } : null),
+            ...(layout.isFail ? splatSx(UI_COLORS.dangerDeep) : null),
+            ...(!layout.isCrit && !layout.isFail ? { display: 'inline-block' } : null),
           }}>
             {layout.total}
           </Typography>

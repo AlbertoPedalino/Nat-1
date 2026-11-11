@@ -28,13 +28,20 @@ export function panelScreentone(tone = UI_COLORS.accent) {
   return `repeating-linear-gradient(-45deg, ${uiAlpha(ink, OPACITY.soft)} 0 2px, transparent 2px 7px)`;
 }
 
-// The icon's badge in a panel bar: the tone filled, edged in ink.
+// The icon's badge in a panel bar: the tone filled, edged in ink, its game
+// drawing large enough to read (PANEL_BADGE_ICON).
+export const PANEL_BADGE_ICON = ICON_SIZES.xxl;
+
+// The room round a panel bar's badge, the same for every bar (a PanelHeader,
+// the sheet's tab bar).
+export const panelBarPadSx = { px: '0.8rem', py: '0.36rem' };
+
 export function panelBadgeSx(tone = 'primary.main') {
   return {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    p: 0.375,
+    p: 0.25,
     borderRadius: 1,
     bgcolor: tone,
     color: UI_COLORS.edge,
@@ -143,8 +150,8 @@ export const sectionLabelSx = {
 // builder); the sheet keeps panelTitleSx as it is.
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
   return (
-    <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(tone), px: '0.8rem', py: '0.48rem' }}>
-      {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={ICON_SIZES.sm} /></Box> : null}
+    <Box sx={{ ...panelBarSx, ...panelBarPadSx, backgroundImage: panelScreentone(tone) }}>
+      {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}
     </Box>
