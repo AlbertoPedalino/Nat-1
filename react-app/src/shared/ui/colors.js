@@ -27,6 +27,9 @@ export const UI_COLORS = Object.freeze({
   // Surfaces, lightest to darkest. `surface` is the paper of cards and
   // dialogs, `page` the page behind them.
   surfaceRaised: '#2e2a26',
+  // A speech bubble (toasts, roll bubbles over pieces): lighter than any
+  // surface, so it stands off the page and the map.
+  bubble: '#4a433b',
   surfaceHeader: '#2a2623',
   surface: '#24211e',
   surfaceDeep: '#1f1c19',

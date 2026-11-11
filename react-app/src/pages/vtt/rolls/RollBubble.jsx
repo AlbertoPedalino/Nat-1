@@ -144,8 +144,8 @@ const rollBubbleSx = {
   maxWidth: 260,
   textAlign: 'center',
   // The comic speech bubble, its tail on the token that speaks.
-  ...bubbleSx({ fill: VTT_COLORS.surfaceRaised }),
-  ...bubbleTailSx({ fill: VTT_COLORS.surfaceRaised, side: 'bottom', at: '50%' }),
+  ...bubbleSx(),
+  ...bubbleTailSx({ side: 'bottom', at: '50%' }),
   // Grows out of the tail, which sits on the token — so the roll looks spoken by
   // the piece rather than dropped onto the map from somewhere off screen.
   transformOrigin: 'bottom center',

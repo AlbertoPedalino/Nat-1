@@ -13,7 +13,7 @@ export const SHOUT_TILT = 'rotate(-1.6deg) scale(1.06)';
 
 // The bubble itself, filled with `fill`; `tone` colours its shadow. It sits a
 // little askew and, with `pop`, snaps in like a speech balloon drawn in.
-export function bubbleSx({ fill = UI_COLORS.surfaceRaised, tone = UI_COLORS.edge, pop = true } = {}) {
+export function bubbleSx({ fill = UI_COLORS.bubble, tone = UI_COLORS.edge, pop = true } = {}) {
   return {
     bgcolor: fill,
     border: `3px solid ${UI_COLORS.edge}`,
@@ -34,7 +34,7 @@ export function bubbleSx({ fill = UI_COLORS.surfaceRaised, tone = UI_COLORS.edge
 // The tail, drawn by the bubble's own ::before (the ink) and ::after (the
 // fill over it), on its `side` ('top' or 'bottom') at `at` along it. The
 // bubble must be positioned (relative, fixed or absolute).
-export function bubbleTailSx({ fill = UI_COLORS.surfaceRaised, side = 'bottom', at = '50%' } = {}) {
+export function bubbleTailSx({ fill = UI_COLORS.bubble, side = 'bottom', at = '50%' } = {}) {
   const point = side === 'top' ? 'borderBottom' : 'borderTop';
   const piece = (width, height, offset, color) => ({
     content: '""',
