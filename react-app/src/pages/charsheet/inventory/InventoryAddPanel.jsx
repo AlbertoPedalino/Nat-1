@@ -29,7 +29,7 @@ import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { CARD_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -151,7 +151,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
       </Box>
 
       {addPanelOpen ? (
-        <Box sx={{ pt: 0.75, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ pt: 0.75, ...CARD_PART_RULE_SX }}>
           <SearchField
             placeholder="Search 2024 items by name, source, type, property..."
             value={search}

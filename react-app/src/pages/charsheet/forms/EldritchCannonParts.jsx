@@ -12,6 +12,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -159,7 +160,7 @@ const rulesRowSx = {
   gap: 0.75,
   alignItems: 'baseline',
   py: 0.5,
-  borderTop: `1px solid ${uiAlpha(UI_COLORS.white, OPACITY.wash)}`,
+  ...CARD_PART_RULE_SX,
   '&:first-of-type': { borderTop: 0 },
 };
 

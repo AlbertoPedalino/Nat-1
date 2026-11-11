@@ -15,6 +15,7 @@ import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarF
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -177,8 +178,7 @@ const sectionTitleSx = {
   fontSize: FONT_SIZES.md,
   color: 'gmboard.vtt.accent',
   pb: 0.5,
-  borderBottom: '1px solid',
-  borderColor: 'gmboard.vtt.accentTint',
+  ...LIST_ROW_RULE_SX,
 };
 
 

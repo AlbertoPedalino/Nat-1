@@ -9,12 +9,12 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import { detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -114,7 +114,7 @@ export function BeastStatBlock({
       )}
       {tempHP > 0 ? <StatLine label="Temp HP" value={signed(tempHP)} accent /> : null}
       {speed ? <StatLine label="Speed" value={speed} /> : null}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', my: 0.5, py: 0.5, borderTop: 1, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', my: 0.5, py: 0.5, ...CARD_PART_RULE_SX, ...LIST_ROW_RULE_SX }}>
         {ABILITIES.map((k) => {
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (

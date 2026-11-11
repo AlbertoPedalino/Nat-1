@@ -18,6 +18,7 @@ import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -227,8 +228,7 @@ const dialogContentSx = {
 const tabsSx = {
   mx: { xs: -1.25, sm: -2.25 },
   px: { xs: 0.5, sm: 1.5 },
-  borderBottom: 1,
-  borderColor: 'divider',
+  ...LIST_ROW_RULE_SX,
   minHeight: 42,
   '& .MuiTab-root': {
     minHeight: 42,

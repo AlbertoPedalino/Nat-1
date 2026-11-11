@@ -23,6 +23,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -334,7 +335,7 @@ const headerSx = {
   minHeight: SHEET_VISIBLE_HEADER,
   px: 1,
   alignItems: 'center',
-  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
+  ...LIST_ROW_RULE_SX,
   color: VTT_COLORS.textSecondary,
   cursor: 'move',
   touchAction: 'none',

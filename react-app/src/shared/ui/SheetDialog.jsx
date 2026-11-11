@@ -7,6 +7,7 @@ import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
+import { CARD_PART_RULE_SX } from './interactive.js';
 
 // Dialog chrome that matches the panels (the header-tint bar over an ink line,
 // uppercase display title) so dialogs feel native to the sheet rather than
@@ -57,8 +58,7 @@ const actionsSx = {
   py: 1.25,
   gap: 0.75,
   bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid),
-  borderTop: 1,
-  borderColor: 'divider',
+  ...CARD_PART_RULE_SX,
   // Compact buttons, at the sheet's button scale.
   '& .MuiButton-root': {
     fontSize: FONT_SIZES.xs,

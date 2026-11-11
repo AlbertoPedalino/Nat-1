@@ -35,6 +35,7 @@ import { useMasteryEntries } from '../../../shared/character/combat/WeaponMaster
 import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -165,7 +166,7 @@ export default function ActionsTab({ C, sheet, resources }) {
           <Typography sx={levelHeaderSx}>Attacks</Typography>
           <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: FONT_SIZES.lg }}>
             <Box component="thead">
-              <Box component="tr" sx={{ '& th': { ...sectionLabelSx, color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
+              <Box component="tr" sx={{ '& th': { ...sectionLabelSx, color: 'text.secondary', ...LIST_ROW_RULE_SX, p: '4px 6px', textAlign: 'left' } }}>
                 <Box component="th">Name</Box>
                 <Box component="th">Hit</Box>
                 <Box component="th">Damage</Box>
@@ -176,7 +177,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 const prof = getMod(getFinal(C, 'str')) > getMod(getFinal(C, 'dex')) ? getMod(getFinal(C, 'str')) : getMod(getFinal(C, 'dex'));
                 const hitBonus = signed(prof);
                 return (
-                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.surfaceHeader } }}>
+                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', ...LIST_ROW_RULE_SX, color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.surfaceHeader } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: FONT_WEIGHTS.bold }}>{item.name}</Typography></Box>
                     <Box component="td"><Typography sx={{ ...TEXT_STYLES.figure, color: UI_COLORS.accentText, fontSize: FONT_SIZES.xxl }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>

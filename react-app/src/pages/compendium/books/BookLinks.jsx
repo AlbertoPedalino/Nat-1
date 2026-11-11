@@ -14,6 +14,7 @@ import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 const NO_BOOKS = [];
 
@@ -62,4 +63,4 @@ const subheaderSx = {
   lineHeight: '36px',
 };
 
-const rowSx = { gap: 1, borderBottom: '1px solid', borderColor: 'divider' };
+const rowSx = { gap: 1, ...LIST_ROW_RULE_SX };

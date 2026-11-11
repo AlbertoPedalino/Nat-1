@@ -28,6 +28,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -70,7 +71,7 @@ function FilterChips({ filters, value, onChange }) {
 function AddItemRow({ item, onAdd }) {
   return (
     <ExpandableCard
-      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      containerSx={{ ...LIST_ROW_RULE_SX }}
       bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
       body={<ItemReferenceBody item={item} />}
       header={({ open, toggle }) => (
@@ -89,7 +90,7 @@ function AddItemRow({ item, onAdd }) {
 function CurrentInventoryRow({ item, index, dispatch }) {
   return (
     <ExpandableCard
-      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      containerSx={{ ...LIST_ROW_RULE_SX }}
       bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
       body={<ItemReferenceBody item={item} />}
       header={({ toggle }) => (

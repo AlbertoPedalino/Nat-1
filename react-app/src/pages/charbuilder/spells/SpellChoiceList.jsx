@@ -9,6 +9,7 @@ import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -106,7 +107,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             return (
               <ExpandableCard
                 key={`${spec.key}-${spell.name}-${spell.source}`}
-                containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+                containerSx={{ ...LIST_ROW_RULE_SX }}
                 bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
                 body={<SpellReferenceBody spell={spell} />}
                 header={({ open, toggle: toggleOpen }) => (

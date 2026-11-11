@@ -10,6 +10,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -139,7 +140,7 @@ const footerSx = {
   alignItems: 'center',
   mt: 0.75,
   pt: 0.5,
-  borderTop: '1px solid',
+  ...CARD_PART_RULE_SX,
 };
 
 const footerTextSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', whiteSpace: 'nowrap' };

@@ -10,6 +10,7 @@ import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { UI_SHADOWS } from '../../ui/shadows.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -104,7 +105,7 @@ function dividerSx(color = UI_COLORS.edge) {
 // The half whose popover is open is lit.
 const openSx = { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.fill) };
 
-const settingsSx = { pb: 1, mb: 1, borderBottom: 1, borderColor: 'divider' };
+const settingsSx = { pb: 1, mb: 1, ...LIST_ROW_RULE_SX };
 
 const paperSx = {
   mt: 0.75,

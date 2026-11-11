@@ -6,6 +6,7 @@ import { SWATCH_COLORS } from './swatches.js';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { SURFACES } from './surfaces.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { CARD_PART_RULE_SX } from './interactive.js';
 
 export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
@@ -61,7 +62,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           ✕
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, pt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
         <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', ...TEXT_STYLES.title }}>
           Custom
         </Typography>

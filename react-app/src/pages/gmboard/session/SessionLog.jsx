@@ -6,6 +6,7 @@ import BoardPanel from '../ui/BoardPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -33,7 +34,7 @@ export default function SessionLog() {
     >
       <Box sx={logBoxSx}>
         {entries.length ? entries.map((entry, index) => (
-          <Typography key={index} sx={{ ...entrySx, borderBottom: `1px solid ${theme.palette.gmboard.rowDivider}` }}>{entry}</Typography>
+          <Typography key={index} sx={{ ...entrySx, ...LIST_ROW_RULE_SX }}>{entry}</Typography>
         )) : (
           <Typography sx={emptySx}>No log entries yet.</Typography>
         )}

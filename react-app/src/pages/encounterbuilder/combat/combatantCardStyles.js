@@ -7,6 +7,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
@@ -70,8 +71,7 @@ export const conditionsRowSx = {
   flex: '1 1 100%',
   minWidth: 0,
   pt: 0.5,
-  borderTop: 1,
-  borderColor: 'divider',
+  ...CARD_PART_RULE_SX,
 };
 
 // No divider of its own: conditions and reminders read as one block of markers,

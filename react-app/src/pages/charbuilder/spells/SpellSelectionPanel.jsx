@@ -16,6 +16,7 @@ import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -169,7 +170,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
 function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind, onToggle }) {
   return (
     <ExpandableCard
-      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      containerSx={{ ...LIST_ROW_RULE_SX }}
       bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
       body={<SpellReferenceBody spell={spell} />}
       header={({ open, toggle }) => (

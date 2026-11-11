@@ -19,6 +19,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -53,7 +54,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
   return (
     <ExpandableCard
       details={details}
-      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      containerSx={{ ...LIST_ROW_RULE_SX }}
       detailsSx={{ px: 2, pt: 0.25, pb: 1.25, bgcolor: 'background.paper' }}
       summary={({ open, toggle, disabled: caretDisabled }) => (
         <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>

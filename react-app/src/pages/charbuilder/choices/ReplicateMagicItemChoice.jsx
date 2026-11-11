@@ -19,6 +19,7 @@ import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -41,7 +42,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
   return (
     <ExpandableCard
       disabled={!item}
-      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      containerSx={{ ...LIST_ROW_RULE_SX }}
       detailsSx={itemDetailsSx}
       details={item ? <ItemReferenceBody item={item} /> : null}
       summary={({ open, toggle, disabled: expandDisabled }) => (

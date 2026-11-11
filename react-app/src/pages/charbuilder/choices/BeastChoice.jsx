@@ -11,6 +11,7 @@ import { asArray } from '../../../shared/lists.js';
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -76,7 +77,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
             {visibleOptions.map(({ value, beast }) => {
               const active = selected.includes(value);
               return (
-                <Box key={value} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Box key={value} sx={{ ...LIST_ROW_RULE_SX }}>
                   <ListItemButton selected={active} disabled={!active && atLimit} onClick={() => toggle(value)} sx={{ py: 0.75, px: 1, gap: 0.75 }}>
                     <ListItemText
                       primary={(

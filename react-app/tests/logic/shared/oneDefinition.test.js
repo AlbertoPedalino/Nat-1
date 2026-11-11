@@ -595,11 +595,15 @@ test('ink edges and solid shadows are written only in the shared ui recipes', ()
 });
 
 // A drawn box or control is framed by the 2px ink edge (INK_EDGE, a SURFACES
-// recipe, CARD_SX). A thin 1px frame is left only to board pieces on the map
-// (tokens, markers, the selection marquee) and to marks too small for a thick
-// line (training dots, pips, a mini badge, a stat-block table).
-test('a thin frame is drawn only by board pieces and tiny marks', () => {
-  const thin = /\bborder: 1,|\bborder: '1px solid'|\bborder: `1px solid /;
+// recipe, CARD_SX). A hairline is one of two recipes in interactive.js: the
+// rule between a card's parts (CARD_PART_RULE_SX) and the one between a
+// list's rows (LIST_ROW_RULE_SX); a section heading's rule is
+// sheetSectionHeaderSx. A thin line written by hand is left only to board
+// pieces on the map (tokens, markers, the selection marquee), to marks too
+// small for a thick line (training dots, pips, a mini badge, a stat-block
+// table), to the coins' own splits and to the XP field's underline.
+test('a thin frame or rule is drawn only by its recipe, board pieces and tiny marks', () => {
+  const thin = /\bborder(Top|Bottom|Left|Right)?: (1\b|'1px solid'|`1px solid )/;
   const boardPieces = sourceFilesMatching(thin).filter((file) => file.startsWith('pages/vtt/tokens/'));
   const allow = [
     ...boardPieces,
@@ -608,6 +612,8 @@ test('a thin frame is drawn only by board pieces and tiny marks', () => {
     'pages/charsheet/stats/SavingThrows.jsx', 'pages/charsheet/stats/Skills.jsx',
     'shared/character/combat/DeathSaveDots.jsx', 'shared/ui/PipButton.jsx', 'shared/ui/MiniBadge.jsx',
     'shared/bestiary/EntryRenderer.jsx', 'pages/gmboard/tables/TableEditorGrid.jsx',
+    'shared/ui/interactive.js', 'shared/ui/PanelHeader.jsx',
+    'shared/character/inventory/CurrencyCoinBox.jsx', 'shared/character/progression/XpDeltaControl.jsx',
   ];
   assert.deepEqual(sourceLinesMatching(thin, { allow }), []);
 });

@@ -9,7 +9,7 @@ import { featureKey } from './featuresTabData.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { CARD_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // A titled group of features on the Features tab, each expandable.
 
@@ -30,7 +30,7 @@ export function FeatureSection({ title, color, features }) {
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.accentText, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade), pb: 0.25, mb: 0.25 }}>
+          <Typography sx={{ ...sheetSectionHeaderSx({ color: UI_COLORS.accentText, rule: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }), fontSize: FONT_SIZES.xxs, pb: 0.25, mb: 0.25 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (
@@ -76,7 +76,7 @@ function FeatureItem({ feature, tone }) {
       </Box>
       <CollapsibleBody open={open}>
         {feature.entries ? (
-          <Box sx={{ px: 1.5, py: 1, borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{ px: 1.5, py: 1, ...CARD_PART_RULE_SX }}>
             <EntryBlocks entries={feature.entries} emptyText="" />
           </Box>
         ) : null}

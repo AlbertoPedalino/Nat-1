@@ -5,6 +5,7 @@ import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -54,7 +55,7 @@ export default function ExpandableSelectionList({
                 <ExpandableCard
                   key={option.key ?? option.value}
                   details={option.details}
-                  containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+                  containerSx={{ ...LIST_ROW_RULE_SX }}
                   detailsSx={{ px: 1, py: 1, bgcolor: 'background.paper' }}
                   summary={({ open, toggle, disabled }) => (
                     <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>

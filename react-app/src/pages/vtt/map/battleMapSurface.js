@@ -8,6 +8,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
 import { panelBarSx, panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
 export const mapIconButtonSx = {
@@ -48,8 +49,7 @@ export const battleMapDialogContentSx = {
 
 export const battleMapDialogActionsSx = {
   bgcolor: 'transparent',
-  borderTop: '1px solid',
-  borderTopColor: 'gmboard.vtt.accentTint',
+  ...CARD_PART_RULE_SX,
 };
 
 // Placement dialogs stay open while a piece is dragged, but only their paper

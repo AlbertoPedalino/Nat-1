@@ -15,6 +15,7 @@ import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfac
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -268,8 +269,7 @@ const statNoteSx = {
 const diceSx = {
   mt: 0.75,
   pt: 0.5,
-  borderTop: '1px solid',
-  borderColor: 'divider',
+  ...CARD_PART_RULE_SX,
   fontSize: FONT_SIZES.sm,
   color: 'text.secondary',
 };

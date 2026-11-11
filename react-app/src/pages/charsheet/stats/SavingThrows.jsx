@@ -21,7 +21,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { ROW_SX } from '../../../shared/ui/interactive.js';
+import { ROW_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 
@@ -119,7 +119,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       </Box>
 
       {(modifierRows.length > 0 || concentrationBonus > 0 || d20FloorReminders.length > 0) && (
-        <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        <Box sx={{ ...CARD_PART_RULE_SX, px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: 0.75 }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
               <Dice5 size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />

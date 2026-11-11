@@ -3,6 +3,7 @@ import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
+import { LIST_ROW_RULE_SX } from '../../shared/ui/interactive.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -78,7 +79,7 @@ export function EntryBlocks({
                   <Box component="thead">
                     <Box component="tr">
                       {block.headers.map((cell, cellIndex) => (
-                        <Box key={`th-${cellIndex}`} component="th" sx={{ textAlign: 'left', p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: headingColor }}>
+                        <Box key={`th-${cellIndex}`} component="th" sx={{ textAlign: 'left', p: '3px 6px', ...LIST_ROW_RULE_SX, color: headingColor }}>
                           {cell}
                         </Box>
                       ))}
@@ -89,7 +90,7 @@ export function EntryBlocks({
                   {(block.rows || []).map((row, rowIndex) => (
                     <Box key={`tr-${rowIndex}`} component="tr">
                       {row.map((cell, cellIndex) => (
-                        <Box key={`td-${rowIndex}-${cellIndex}`} component="td" sx={{ p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: bodyColor, verticalAlign: 'top' }}>
+                        <Box key={`td-${rowIndex}-${cellIndex}`} component="td" sx={{ p: '3px 6px', ...LIST_ROW_RULE_SX, color: bodyColor, verticalAlign: 'top' }}>
                           {cell}
                         </Box>
                       ))}

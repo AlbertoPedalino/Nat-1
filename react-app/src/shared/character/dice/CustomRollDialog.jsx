@@ -8,6 +8,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -121,7 +122,7 @@ export default function CustomRollDialog({
 }
 
 const CUSTOM_ROLL_SX = {
-  diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.5, borderBottom: 1, borderColor: 'divider' },
+  diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.5, ...LIST_ROW_RULE_SX },
   diceLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary', minWidth: 42 },
   countLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, minWidth: 24, textAlign: 'center' },
   stepBtn: { minWidth: 28, px: 0.5, py: 0.25, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } },

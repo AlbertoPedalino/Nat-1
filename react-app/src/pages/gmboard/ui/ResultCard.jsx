@@ -4,6 +4,7 @@ import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
 // Roll tab): a header band with an icon, a title and whatever `header` adds
@@ -71,8 +72,7 @@ const headerBandSx = {
   flexWrap: 'wrap',
   px: 1.25,
   py: 0.75,
-  borderBottom: '1px solid',
-  borderColor: 'divider',
+  ...LIST_ROW_RULE_SX,
 };
 
 const cardTitleSx = {
