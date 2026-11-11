@@ -7,6 +7,7 @@ import {
   classIconSx,
   mapObjectSx,
   turnActiveSx,
+  characterPieceSx,
 } from './tokenSpriteStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 
@@ -60,8 +61,10 @@ export default function TokenArt({
           ? `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.solid)}`
           : 'none',
         outlineOffset: '-4px',
-        // Whose turn it is, readable from across the table and on the
-        // projector: a gold halo outside the piece's own ring.
+        // A character is a cut-out laid on the map (ink outline, solid
+        // shadow). Whose turn it is, readable from across the table and on
+        // the projector: a gold halo outside the piece's own ring.
+        ...(isCharacter ? characterPieceSx : null),
         ...(token.turnActive && !isScenery && !isMapObject ? turnActiveSx : null),
         // A turned piece must not be cut off at the corners of its own box; a
         // creature still needs the clip that crops its art into the circle.

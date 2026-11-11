@@ -7,6 +7,7 @@ import { initials } from '../../../shared/ui/textCase.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import { characterPieceSx } from './tokenSpriteStyles.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -161,6 +162,8 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         borderColor: isCharacter || hasUploadedArtworkRing
           ? (token?.color || vttAlpha(VTT_COLORS.black, OPACITY.strong))
           : vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
+        // A character looks as it will on the map: inked, its solid shadow.
+        ...(isCharacter ? characterPieceSx : null),
       }}
     >
       {imageUrl ? <Box component="img" src={imageUrl} alt="" draggable={false} sx={imageSx} /> : null}

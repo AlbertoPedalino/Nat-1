@@ -3,6 +3,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { inkPieceShadow } from '../../../shared/ui/shadows.js';
 
 // Styles of a piece on the battle map: the cell layout (art, name plate, HP or
 // death-save bars, reminders), handles, badges, condition pills and tooltips.
@@ -259,8 +260,16 @@ export const badgeSx = {
   transition: `all ${DURATIONS.fast}ms ease`,
 };
 
-// A thin white ring keeps the colour apart from the art and from the map.
-const turnRing = `0 0 0 2px ${VTT_COLORS.white}, 0 0 0 5px ${VTT_COLORS.turnActive}`;
+// A character's piece is a cut-out laid on the map: inked round its own ring,
+// its solid shadow under it, both in fractions of the piece so a zoomed-out
+// board keeps them in proportion.
+const PIECE_INK = { outline: 'clamp(1px, 2cqmin, 2px)', drop: 'clamp(1px, 3cqmin, 3px)' };
+export const characterPieceSx = { boxShadow: inkPieceShadow(PIECE_INK) };
+
+// A thin white ring keeps the colour apart from the art and from the map; the
+// ink sits outside it, and the halo outside everything.
+const TURN_RING_WIDTH = '5px';
+const turnRing = `0 0 0 2px ${VTT_COLORS.white}, 0 0 0 ${TURN_RING_WIDTH} ${VTT_COLORS.turnActive}, ${inkPieceShadow({ ...PIECE_INK, around: TURN_RING_WIDTH })}`;
 
 export const turnActiveSx = {
   boxShadow: `${turnRing}, 0 0 18px 6px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.heavy)}`,

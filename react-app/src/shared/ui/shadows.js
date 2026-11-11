@@ -13,6 +13,17 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
 // that is not a whole surface (a pill, a stepper, a tile) takes this.
 export const INK_EDGE = `2px solid ${UI_COLORS.edge}`;
 
+// A piece laid on the board (a character's token): an ink outline round it
+// and its solid shadow under it, so it reads as a cut-out set down on the
+// map. Lengths are CSS (they can follow the piece's size: cqmin); `around` is
+// what already rings the piece (a turn ring) for the ink to sit outside. The
+// shadow is the ink at half strength, so it reads as a shadow on the map and
+// never hides the name under the piece.
+export function inkPieceShadow({ outline = '2px', drop = '3px', around = '0px' } = {}) {
+  const spread = `calc(${around} + ${outline})`;
+  return `0 0 0 ${spread} ${UI_COLORS.edge}, ${drop} ${drop} 0 ${around} ${uiAlpha(UI_COLORS.edge, OPACITY.strong)}`;
+}
+
 // Inked lettering: a hard shadow under a title, a big number, a die's numeral.
 export function inkTextShadow(color = UI_COLORS.edge) {
   return `1px 1px 0 ${color}`;
