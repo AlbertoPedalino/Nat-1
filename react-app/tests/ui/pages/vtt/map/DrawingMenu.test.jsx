@@ -80,12 +80,12 @@ test('a player gets no hide control, and a stroke is labelled and scaled rather 
   fireEvent.blur(label);
   expect(props.onSave).toHaveBeenLastCalledWith(stroke, { text: 'To the vault' });
 
-  // Its size is its longer side in feet; the slider's top is 100 cells, about
+  // Its size is its longer side in feet; the slider's top is 300 cells, about
   // the middle of the stroke.
   expect(screen.getByText('Size 20 ft')).toBeInTheDocument();
   fireEvent.keyDown(screen.getByRole('slider', { name: 'Size' }), { key: 'End' });
   await waitFor(() => expect(props.onPreview).toHaveBeenLastCalledWith(stroke, {
-    points: [{ x: -48, y: -24 }, { x: 52, y: 26 }],
+    points: [{ x: -148, y: -74 }, { x: 152, y: 76 }],
   }));
 });
 
@@ -99,7 +99,7 @@ test('a stroke reopened shows the size it was left at, within the same bounds', 
   const size = screen.getByRole('slider', { name: 'Size' });
   expect(screen.getByText('Size 200 ft')).toBeInTheDocument();
   expect(size).toHaveAttribute('aria-valuenow', '40');
-  expect(size).toHaveAttribute('aria-valuemax', '100');
+  expect(size).toHaveAttribute('aria-valuemax', '300');
 });
 
 test('an area and a stroke change their thickness; a note has none', async () => {
@@ -110,7 +110,7 @@ test('an area and a stroke change their thickness; a note has none', async () =>
   // An area is sized in feet, never by the stroke slider.
   expect(screen.queryByRole('slider', { name: 'Size' })).not.toBeInTheDocument();
   fireEvent.keyDown(thickness, { key: 'End' });
-  await waitFor(() => expect(props.onPreview).toHaveBeenLastCalledWith(fireArea, { width: 30 }));
+  await waitFor(() => expect(props.onPreview).toHaveBeenLastCalledWith(fireArea, { width: 100 }));
   unmount();
 
   const note = { id: 'note-2', points: [{ x: 1, y: 1 }], color: '#e8c96a', width: 6, text: 'Trap', area: null };

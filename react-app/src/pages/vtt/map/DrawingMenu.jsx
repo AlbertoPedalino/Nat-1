@@ -368,11 +368,11 @@ const MENU_WIDTH = 280;
 // A note's default lettering, shown as ×1.
 const NOTE_WIDTH = 3;
 // The slider tops, high enough to be out of the way at a table: a stroke
-// reaches 100 cells, a note ×10, a line 30 (each further when the mark already
+// reaches 300 cells, a note ×30, a line 100 (each further when the mark already
 // is, so a big mark opens where it stands).
-const MAX_STROKE_CELLS = 100;
-const MAX_NOTE_SCALE = 10;
-const MAX_THICKNESS = 30;
+const MAX_STROKE_CELLS = 300;
+const MAX_NOTE_SCALE = 30;
+const MAX_THICKNESS = 100;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {
