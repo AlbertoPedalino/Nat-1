@@ -89,8 +89,9 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
   // Two even columns on a wide sheet (one when embedded, its panel being
   // narrow): Conditions beside Reminders, then the stat tiles (AC, Initiative,
   // Proficiency Bonus, Inspiration) under Conditions and Defenses under
-  // Reminders, right above the tabs. A sheet without reminders gives
-  // Conditions the whole row.
+  // Reminders, right above the tabs. In one column (a phone, an embedded
+  // sheet) Defenses comes straight under Reminders and the tiles close the
+  // block. A sheet without reminders gives Conditions the whole row.
   return (
     <Box sx={{ ...rightTopGridSx, gridTemplateColumns: embedded ? '1fr' : { xs: '1fr', md: '1fr 1fr' } }}>
       <Box sx={{ display: 'flex', minWidth: 0, ...(effectActions ? null : { gridColumn: '1 / -1' }) }}>
@@ -101,7 +102,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
           <RemindersBlock sheet={sheet} actions={effectActions} />
         </Box>
       ) : null}
-      <Box sx={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'flex-start', minWidth: 0 }}>
+      <Box sx={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'flex-start', minWidth: 0, order: embedded ? 1 : { xs: 1, md: 0 } }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
           <Tooltip title={initTooltip}>
