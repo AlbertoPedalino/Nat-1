@@ -10,7 +10,7 @@ const HALFTONE = `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)
 const HALFTONE_SIZE = '7px 7px';
 
 // A comic cover's sunburst: rays in `color` fanning out from behind a title,
-// fading out towards the edge. Spread on the box the title sits in.
+// fading out before the edge of the box the title sits in (spread on it).
 export function coverRaysSx(color = UI_COLORS.accent) {
   return {
     position: 'relative',
@@ -18,11 +18,13 @@ export function coverRaysSx(color = UI_COLORS.accent) {
     '&::before': {
       content: '""',
       position: 'absolute',
-      inset: '-60% -40%',
+      // Within the cover's height, wider than it: the rays never reach
+      // what sits under the title.
+      inset: '0 -30%',
       zIndex: -1,
       pointerEvents: 'none',
       backgroundImage: `repeating-conic-gradient(from 0deg at 50% 50%, ${uiAlpha(color, OPACITY.soft)} 0deg 7deg, transparent 7deg 15deg)`,
-      maskImage: 'radial-gradient(closest-side, black 25%, transparent 100%)',
+      maskImage: 'radial-gradient(ellipse closest-side, black 30%, transparent 100%)',
     },
   };
 }
