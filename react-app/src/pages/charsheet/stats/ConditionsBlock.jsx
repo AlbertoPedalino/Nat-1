@@ -18,6 +18,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { inkShadow } from '../../../shared/ui/shadows.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -39,7 +40,7 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
     </Box>
   );
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: CONTROL_HEIGHTS.sm, px: 0.5, border: 2, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: CONTROL_HEIGHTS.sm, px: 0.5, border: 2, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? inkShadow(accent, 2) : 'none' }}>
       <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={ICON_SIZES.xxs} /></StepButton>
       <Typography component="span" onClick={hasDesc ? onToggle : undefined}
         sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>

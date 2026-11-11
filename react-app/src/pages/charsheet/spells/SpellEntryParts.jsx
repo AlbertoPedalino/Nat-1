@@ -57,7 +57,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
                         border: '1.5px solid',
                         borderColor: isUsed ? UI_COLORS.accentText : uiAlpha(UI_COLORS.accent, OPACITY.line),
                         bgcolor: isUsed ? UI_COLORS.accent : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.accent, OPACITY.shade)}` } : undefined,
+                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText } : undefined,
                       }}
                     />
                   );

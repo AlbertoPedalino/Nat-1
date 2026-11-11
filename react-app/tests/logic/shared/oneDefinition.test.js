@@ -618,6 +618,15 @@ test('a thin frame or rule is drawn only by its recipe, board pieces and tiny ma
   assert.deepEqual(sourceLinesMatching(thin, { allow }), []);
 });
 
+// No glows and no thin rings: a picked or open thing casts its solid shadow
+// in its colour (inkShadow(tone)), a hovered one changes its edge colour. The
+// battle map keeps its own glows (selection, light, focus over the board).
+test('no glow or ring shadows outside the battle map', () => {
+  const glow = /[`'"]0 0 (0 )?\d+px/;
+  const hits = sourceLinesMatching(glow).filter((hit) => !hit.startsWith('pages/vtt/'));
+  assert.deepEqual(hits, []);
+});
+
 test('the screentone and the halftone are drawn in one place each', () => {
   assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);

@@ -1,12 +1,13 @@
 import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { asArray } from '../../lists.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { inkShadow } from '../../ui/shadows.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -46,7 +47,8 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
         color: CONDITION_ACCENT,
         borderColor: CONDITION_ACCENT,
         bgcolor: alpha(CONDITION_ACCENT, isOpen ? OPACITY.line : OPACITY.fill),
-        boxShadow: isOpen ? `0 0 0 1px ${CONDITION_ACCENT}` : 'none',
+        // Open: its solid shadow in its colour, as a selected thing anywhere.
+        boxShadow: isOpen ? inkShadow(CONDITION_ACCENT, 2) : 'none',
         '&:hover': hasDesc ? { bgcolor: alpha(CONDITION_ACCENT, OPACITY.shade) } : undefined,
         ...(readOnlyReason ? { opacity: OPACITY.heavy } : null),
         ...sx,
@@ -129,7 +131,7 @@ export function ConditionToggleGrid({
             sx={[
               toggleChipSx,
               isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, OPACITY.fill) } : null,
-              { '&:hover': { boxShadow: `0 0 0 1px ${isOn ? CONDITION_ACCENT : uiAlpha(UI_COLORS.white, OPACITY.shade)}` } },
+              { '&:hover': { borderColor: CONDITION_ACCENT } },
               ...asArray(chipSx),
             ]}
           />
