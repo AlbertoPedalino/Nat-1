@@ -20,6 +20,10 @@ import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import Panel from '../../../shared/ui/Panel.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -156,14 +160,12 @@ export default function ScenePicker({
       {campaigns.map((campaign) => {
         const scenes = scenesByCampaign[campaign.id] || [];
         return (
-          <Paper key={campaign.id} sx={{ p: 2, bgcolor: 'background.paper' }}>
-            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5, gap: 1 }}>
-              <Box>
-                <Typography variant="h2">{campaign.name}</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {campaign.members.length} character{campaign.members.length === 1 ? '' : 's'} in the campaign
-                </Typography>
-              </Box>
+          <Panel
+            key={campaign.id}
+            icon={GAME_ICONS.scenes}
+            title={campaign.name}
+            bodySx={{ p: 1.5 }}
+            action={(
               <Button
                 variant="contained"
                 size="small"
@@ -173,7 +175,11 @@ export default function ScenePicker({
               >
                 New scene
               </Button>
-            </Stack>
+            )}
+          >
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.25 }}>
+              {campaign.members.length} character{campaign.members.length === 1 ? '' : 's'} in the campaign
+            </Typography>
 
             {scenes.length ? (
               <Stack spacing={0.75}>
@@ -212,7 +218,7 @@ export default function ScenePicker({
             ) : (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>No scenes yet.</Typography>
             )}
-          </Paper>
+          </Panel>
         );
       })}
 
@@ -228,8 +234,8 @@ export default function ScenePicker({
 }
 
 const emptySx = {
+  ...SURFACES.panel,
   p: 4,
-  bgcolor: 'background.paper',
   textAlign: 'center',
 };
 
@@ -240,15 +246,13 @@ const liveChipSx = {
   flexShrink: 0,
 };
 
+// A scene: the drawn card, lit under the cursor.
 const rowSx = {
+  ...CARD_SX,
   display: 'flex',
   alignItems: 'center',
   gap: 0.5,
   p: 0.75,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  '&:hover': { borderColor: 'primary.main' },
 };
 
 const rowButtonSx = {

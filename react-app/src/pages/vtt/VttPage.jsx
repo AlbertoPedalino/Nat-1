@@ -23,6 +23,7 @@ import { UI_FONTS, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import { OPACITY } from '../../shared/ui/colors.js';
+import { SURFACES } from '../../shared/ui/surfaces.js';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -257,8 +258,8 @@ export default function VttPage() {
 }
 
 const pageSx = {
+  ...SURFACES.page,
   minHeight: '100vh',
-  bgcolor: 'background.default',
   pt: APP_TOP_BAR_HEIGHT,
 };
 

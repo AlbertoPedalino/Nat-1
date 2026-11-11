@@ -3,7 +3,7 @@ import {
   GiHearts, GiKnapsack, GiMagicSwirl, GiMuscleUp, GiQuill, 
   GiScrollQuill, GiShieldReflect, GiSkills, GiSpellBook, GiStarFormation,
   GiStarsStack, GiStarSwirl, GiSwordClash, GiSwordsEmblem, GiTwoCoins, GiUpgrade, GiShield,
-  GiWalkingBoot, GiBleedingWound, GiCandleLight, GiTiedScroll, GiCrystalBall,
+  GiWalkingBoot, GiBleedingWound, GiCandleLight, GiTiedScroll, GiCrystalBall, GiTreasureMap,
 } from 'react-icons/gi';
 import { Dices, HeartPulse, History, ShieldPlus, Sword, Swords } from 'lucide-react';
 
@@ -57,4 +57,7 @@ export const GAME_ICONS = Object.freeze({
   inventory: GiBackpack,
   sheet: GiScrollQuill,
   preview: GiCrystalBall,
+
+  // The battle map.
+  scenes: GiTreasureMap,
 });
