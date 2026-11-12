@@ -250,7 +250,7 @@ export default function SpellEntry({
           sx={{ ...spellRowSx, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
-          <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
+          <Typography noWrap sx={{ minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (

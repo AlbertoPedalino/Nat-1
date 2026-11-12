@@ -1,6 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 export const placementCardSx = {
   display: 'flex',
@@ -21,7 +22,7 @@ export const placementCardSx = {
 
 export const noticeSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: LINE_HEIGHTS.normal };
 export const instanceRowSx = { display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, width: '100%' };
-export const instanceNameSx = { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' };
+export const instanceNameSx = ONE_LINE_SX;
 
 // A save that is not in this browser yet: picking it downloads it.
 export const cloudBadgeSx = {

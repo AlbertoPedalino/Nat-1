@@ -8,11 +8,12 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -280,15 +281,8 @@ const entryBodySx = {
 };
 
 const entryButtonSx = {
-  appearance: 'none',
-  border: 0,
-  p: 0,
-  m: 0,
+  ...BARE_BUTTON_SX,
   bgcolor: 'transparent',
-  color: 'inherit',
-  font: 'inherit',
-  textAlign: 'left',
-  cursor: 'pointer',
   borderRadius: 999,
   '&:focus-visible': { outline: '2px solid', outlineColor: 'gmboard.vtt.accent', outlineOffset: 2 },
 };
@@ -338,10 +332,8 @@ const avatarImageSx = {
 };
 
 const nameSx = {
+  ...ONE_LINE_SX,
   minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
   fontSize: FONT_SIZES.md,
   lineHeight: LINE_HEIGHTS.tight,
 };

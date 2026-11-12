@@ -21,7 +21,7 @@ import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
@@ -182,7 +182,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 <TagChip icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
               )}
             </Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography variant="body2" sx={{ ...ONE_LINE_SX, color: 'text.secondary' }}>
               {[race, clsDisplay, bg].filter(Boolean).join(' · ')}
             </Typography>
           </Box>

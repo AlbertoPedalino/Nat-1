@@ -17,7 +17,7 @@ import {
 } from './catalogFilter.js';
 import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 
@@ -215,14 +215,9 @@ const headerCellSx = { ...captionLabelSx, color: 'primary.main' };
 const listBoxSx = { flex: 1, minHeight: 0 };
 
 const rowSx = {
-  appearance: 'none',
-  border: 0,
+  ...BARE_BUTTON_SX,
   ...LIST_ROW_RULE_SX,
   bgcolor: 'transparent',
-  color: 'inherit',
-  font: 'inherit',
-  textAlign: 'left',
-  cursor: 'pointer',
   display: 'grid',
   gap: 1.5,
   alignItems: 'center',

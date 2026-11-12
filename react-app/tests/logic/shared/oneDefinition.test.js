@@ -736,3 +736,13 @@ test('what went wrong is said through ErrorLine', () => {
 test('a quiet line beside something is a Caption', () => {
   assert.deepEqual(sourceFilesMatching(/variant="caption"\s+(?:[\w-]+(?:="[^"]*")?\s+)*sx=\{\{ color: 'text\.secondary'/, { allow: ['shared/ui/Caption.jsx'] }), []);
 });
+
+test("a bare <button>'s chrome is taken off by BARE_BUTTON_SX", () => {
+  assert.deepEqual(sourceFilesMatching(/appearance: 'none'|background: 'none'/, {
+    allow: ['shared/ui/interactive.js', 'shared/ui/ColorField.jsx'],
+  }), []);
+});
+
+test('text is cut to one line by ONE_LINE_SX', () => {
+  assert.deepEqual(sourceFilesMatching(/textOverflow: 'ellipsis'/, { allow: ['shared/ui/textStyles.js', 'app/theme.js'] }), []);
+});

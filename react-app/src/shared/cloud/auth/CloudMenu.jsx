@@ -12,7 +12,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 import { failureMessage } from '../../ui/busyAction.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
@@ -33,10 +33,8 @@ const loginBtnSx = {
 // The account name is shown on every screen size; a long one is cut short
 // (the menu it opens shows it in full).
 const usernameLabelSx = {
+  ...ONE_LINE_SX,
   maxWidth: { xs: 110, sm: 180 },
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 };
 
 export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {

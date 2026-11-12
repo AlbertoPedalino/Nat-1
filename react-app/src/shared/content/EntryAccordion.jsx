@@ -41,7 +41,7 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
           {leading}
-          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, color: titleColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, color: titleColor }}>
             {title}
           </Typography>
         </Stack>

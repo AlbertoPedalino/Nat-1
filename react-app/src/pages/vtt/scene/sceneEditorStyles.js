@@ -6,7 +6,7 @@ import { normalizeHexColor, OPACITY, UI_COLORS } from '../../../shared/ui/colors
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -41,13 +41,11 @@ export const sceneIdentitySx = {
 // The scene's name (the campaign's, for a player): lettered like a character's
 // name and a panel's title, the comic's shout face.
 export const sceneTitleSx = {
+  ...ONE_LINE_SX,
   ...TEXT_STYLES.shout,
   color: 'primary.main',
   fontSize: { xs: FONT_SIZES.body, md: FONT_SIZES.lead },
   lineHeight: LINE_HEIGHTS.tight,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 };
 
 export const scenePresenterActionsSx = {

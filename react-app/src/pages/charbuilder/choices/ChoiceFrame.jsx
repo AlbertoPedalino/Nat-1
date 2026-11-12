@@ -4,6 +4,7 @@ import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 // The frame every builder choice sits in: its label and how many of the
 // allowed picks are taken ("2/3", or `countLabel` for a count that says more),
@@ -27,9 +28,7 @@ export default function ChoiceFrame({
 
 const labelSx = {
   flex: 1,
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  ...ONE_LINE_SX,
   color: 'text.secondary',
   ...BUILDER_TEXT.value,
   fontWeight: FONT_WEIGHTS.heavy,

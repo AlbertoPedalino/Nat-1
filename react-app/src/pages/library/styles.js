@@ -1,8 +1,8 @@
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
-import { CARD_SX } from '../../shared/ui/interactive.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../shared/ui/textStyles.js';
+import { CARD_SX, BARE_BUTTON_SX } from '../../shared/ui/interactive.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 
@@ -69,26 +69,18 @@ export const rowSx = {
 };
 
 export const rowInnerSx = {
+  ...BARE_BUTTON_SX,
   flex: 1,
   minWidth: 0,
   display: 'flex',
   alignItems: 'center',
   gap: '0.75rem',
   textDecoration: 'none',
-  color: 'inherit',
-  cursor: 'pointer',
-  background: 'none',
-  border: 0,
-  textAlign: 'left',
-  font: 'inherit',
-  p: 0,
 };
 
 export const nameSx = {
+  ...ONE_LINE_SX,
   minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
   fontSize: FONT_SIZES.xxl,
 };
 

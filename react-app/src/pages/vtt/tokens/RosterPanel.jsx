@@ -8,6 +8,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -153,10 +154,8 @@ const rowSx = {
 const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };
 
 const nameSx = {
+  ...ONE_LINE_SX,
   flex: 1,
   minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
   fontSize: FONT_SIZES.xxl,
 };

@@ -8,6 +8,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { inkShadow } from '../../ui/shadows.js';
+import { BARE_BUTTON_SX } from '../../ui/interactive.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -99,11 +100,10 @@ const cardTitleSx = {
 };
 
 const cardCloseSx = {
+  ...BARE_BUTTON_SX,
   display: 'inline-flex',
   p: 0.25,
-  border: 0,
   bgcolor: 'transparent',
-  cursor: 'pointer',
   color: 'text.secondary',
   borderRadius: 0.375,
   '&:hover': { color: CONDITION_ACCENT },

@@ -54,3 +54,18 @@ export function readoutSx({ clickable = false, tone = null } = {}) {
 export function tileSx({ tone = null } = {}) {
   return { ...readoutSx({ tone }), bgcolor: UI_COLORS.surfaceHeader };
 }
+
+// A <button> that wears no button look of its own: a card, a row, a chip or a
+// strip entry that is clicked, its own sx drawing it. The browser's button
+// chrome taken off, the text and the cursor of what it stands in.
+export const BARE_BUTTON_SX = Object.freeze({
+  appearance: 'none',
+  background: 'none',
+  border: 0,
+  p: 0,
+  m: 0,
+  color: 'inherit',
+  font: 'inherit',
+  textAlign: 'left',
+  cursor: 'pointer',
+});

@@ -5,7 +5,7 @@ import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { CARD_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
@@ -77,17 +77,12 @@ const rowSx = {
 };
 
 const rowButtonSx = {
+  ...BARE_BUTTON_SX,
   flex: 1,
   minWidth: 0,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  background: 'none',
-  border: 0,
-  color: 'inherit',
-  font: 'inherit',
-  textAlign: 'left',
-  cursor: 'pointer',
   p: 1,
 };
 

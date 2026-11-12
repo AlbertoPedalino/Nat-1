@@ -1,6 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkPieceShadow } from '../../../shared/ui/shadows.js';
@@ -218,6 +218,7 @@ export const tempFillSx = {
 export const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)' };
 
 export const plateSx = {
+  ...ONE_LINE_SX,
   flex: 'none',
   px: 'clamp(2px, 4cqmin, 5px)',
   borderRadius: 1,
@@ -227,9 +228,6 @@ export const plateSx = {
   // projector; zoomed far out it gets small rather than spilling over.
   fontSize: 'clamp(5px, 12cqmin, 11px)',
   lineHeight: LINE_HEIGHTS.snug,
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
   boxSizing: 'border-box',
 };
 
@@ -344,6 +342,7 @@ export const remindersSx = {
 // the same thing is the same colour everywhere. On a dark plate rather than a
 // tint, because it has to stay legible over any map.
 export const reminderSx = {
+  ...ONE_LINE_SX,
   maxWidth: 170,
   px: 0.5,
   py: 0.25,
@@ -355,9 +354,6 @@ export const reminderSx = {
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.bold,
   lineHeight: LINE_HEIGHTS.normal,
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
 };
 
 export const reminderInlineSx = {

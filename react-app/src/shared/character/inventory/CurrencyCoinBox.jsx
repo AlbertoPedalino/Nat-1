@@ -12,6 +12,7 @@ import IconColorPicker from '../../ui/IconColorPicker.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { currencyVariant, HOVER_SUBTRACT, HOVER_ADD, buttonBaseSx } from './currencyVariants.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
+import { ONE_LINE_SX } from '../../ui/textStyles.js';
 
 export function CurrencyCoinBox({
   coin,
@@ -37,13 +38,11 @@ export function CurrencyCoinBox({
   const addStep = normalizeCoinAmount(stepDraft) || 1;
 
   const labelBaseSx = {
+    ...ONE_LINE_SX,
     fontFamily: v.fontFamily,
     fontWeight: FONT_WEIGHTS.bold,
     lineHeight: LINE_HEIGHTS.tight,
     textTransform: 'uppercase',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
   };
 
   const stepButtonSx = {

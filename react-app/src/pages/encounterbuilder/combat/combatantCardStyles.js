@@ -2,14 +2,14 @@ import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
-export const nameSpanSx = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+export const nameSpanSx = { ...ONE_LINE_SX };
 
 export const rowSx = {
   display: 'flex',

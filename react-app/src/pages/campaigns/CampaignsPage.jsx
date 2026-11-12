@@ -39,6 +39,7 @@ import TagChip from '../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { BARE_BUTTON_SX } from '../../shared/ui/interactive.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -348,18 +349,14 @@ const characterRowSx = {
 };
 
 const characterOpenButtonSx = {
+  ...BARE_BUTTON_SX,
   flex: 1,
   minWidth: 0,
   display: 'flex',
   alignItems: 'flex-start',
   gap: 1,
   p: 1,
-  color: 'inherit',
   bgcolor: 'transparent',
-  border: 0,
-  textAlign: 'left',
-  font: 'inherit',
-  cursor: 'pointer',
   '&:hover': { bgcolor: 'action.hover' },
   '&:focus-visible': focusVisibleSx,
 };

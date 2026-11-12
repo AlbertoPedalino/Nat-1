@@ -10,11 +10,11 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../.
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailTitleSx } from '../layout/layout.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -44,7 +44,7 @@ export function BeastNameLink({ name, source, sx }) {
       onClick={(e) => e.stopPropagation()}
       sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, minWidth: 0, color: UI_COLORS.accentText, cursor: 'pointer', ...sx }}
     >
-      <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
+      <Box component="span" sx={ONE_LINE_SX}>{name}</Box>
       <ExternalLink size={ICON_SIZES.xxs} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
     </Link>
   );
@@ -287,7 +287,7 @@ const statBlockSx = {
 const metaSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm };
 
 const rollChipSx = {
-  appearance: 'none',
+  ...BARE_BUTTON_SX,
   display: 'inline-flex',
   alignItems: 'baseline',
   border: INK_EDGE,
@@ -296,9 +296,7 @@ const rollChipSx = {
   borderRadius: 0.5,
   px: '0.28em',
   py: 0,
-  font: 'inherit',
   lineHeight: LINE_HEIGHTS.normal,
-  cursor: 'pointer',
   '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
 };
 

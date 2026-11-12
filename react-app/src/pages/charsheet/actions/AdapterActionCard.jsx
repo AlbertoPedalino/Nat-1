@@ -27,7 +27,7 @@ import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
@@ -92,7 +92,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
 
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-                <Typography sx={{ ...cardTitleSx, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <Typography sx={{ ...ONE_LINE_SX, ...cardTitleSx, flex: 1, minWidth: 0 }}>
                   {displayName || action.name}
                 </Typography>
                 {hasRollers ? (

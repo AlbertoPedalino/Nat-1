@@ -19,13 +19,14 @@ import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
+import { CARD_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -187,7 +188,7 @@ export default function ScenePicker({
                   <Box key={scene.id} sx={rowSx}>
                     <Box component="button" type="button" onClick={() => onOpen(scene.id)} sx={rowButtonSx}>
                       <Map size={ICON_SIZES.md} />
-                      <Typography sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography sx={ONE_LINE_SX}>
                         {scene.name}
                       </Typography>
                       {scene.isLive ? <TagChip tone={UI_COLORS.accent} label="Live" /> : null}
@@ -245,16 +246,11 @@ const rowSx = {
 };
 
 const rowButtonSx = {
+  ...BARE_BUTTON_SX,
   flex: 1,
   minWidth: 0,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  background: 'none',
-  border: 0,
-  color: 'inherit',
-  font: 'inherit',
-  textAlign: 'left',
-  cursor: 'pointer',
   p: 0.5,
 };

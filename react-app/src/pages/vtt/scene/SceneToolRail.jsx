@@ -8,6 +8,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -106,18 +107,17 @@ const railSx = {
 };
 
 const railButtonSx = {
+  ...BARE_BUTTON_SX,
   width: 62,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  textAlign: 'center',
   gap: 0.25,
   px: 0.5,
   py: 0.75,
-  border: 0,
   borderRadius: 1,
-  background: 'none',
   color: VTT_COLORS.textSecondary,
-  cursor: 'pointer',
   '&:hover': { color: VTT_COLORS.accent, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
 };
 

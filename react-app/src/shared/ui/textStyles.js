@@ -50,3 +50,12 @@ export const TEXT_STYLES = Object.freeze({
     color: 'text.secondary',
   }),
 });
+
+// Text kept to one line, cut with an ellipsis where it runs out of room (a
+// name in a row, a title in a strip). Its box may shrink below the text.
+export const ONE_LINE_SX = Object.freeze({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});

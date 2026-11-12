@@ -21,6 +21,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -200,10 +201,8 @@ const previewSx = {
 };
 
 const labelSx = {
+  ...ONE_LINE_SX,
   display: 'block',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
   color: VTT_COLORS.text,
   fontSize: FONT_SIZES.xxs,
   lineHeight: LINE_HEIGHTS.tight,

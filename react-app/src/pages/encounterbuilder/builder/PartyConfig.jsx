@@ -6,7 +6,7 @@ import { campaignSheetUrl } from '../../../shared/character/profile/characterRou
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
@@ -60,7 +60,7 @@ export default function PartyConfig() {
                   endIcon={<ExternalLink size={ICON_SIZES.xs} />}
                   sx={{ justifyContent: 'flex-start', minWidth: 0, flex: 1 }}
                 >
-                  <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</Box>
+                  <Box component="span" sx={ONE_LINE_SX}>{player.name}</Box>
                 </Button>
               ) : (
                 <TextField
