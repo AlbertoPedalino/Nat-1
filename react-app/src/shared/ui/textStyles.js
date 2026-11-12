@@ -1,6 +1,6 @@
 import { UI_FONTS, LETTER_SPACINGS, FONT_WEIGHTS } from './fonts.js';
 import { UI_COLORS } from './colors.js';
-import { inkShadow, inkStroke } from './shadows.js';
+import { inkDropShadow, inkShadow, inkStroke } from './shadows.js';
 
 // The interface's text treatments, by role. Each fixes the typeface, weight,
 // spacing and case; size and colour stay with the place that uses it
@@ -45,7 +45,7 @@ export const TEXT_STYLES = Object.freeze({
     fontWeight: FONT_WEIGHTS.regular,
     letterSpacing: LETTER_SPACINGS.md,
     ...inkStroke(3),
-    textShadow: inkShadow(UI_COLORS.edge, 6),
+    filter: inkDropShadow(UI_COLORS.edge, 6),
   }),
   // A quiet aside in the body face: a hint, an empty state, a rules note.
   note: Object.freeze({

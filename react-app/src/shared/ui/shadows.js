@@ -31,6 +31,13 @@ export function inkTextShadow(color = UI_COLORS.edge) {
   return `1px 1px 0 ${color}`;
 }
 
+// A solid shadow drawn under whatever an element painted, outline and all, as
+// a filter: for outlined lettering, where Safari on iOS drops the text-shadow
+// of text drawn with a stroke (only the outline showed).
+export function inkDropShadow(color = UI_COLORS.edge, offset = 3) {
+  return `drop-shadow(${offset}px ${offset}px 0 ${color})`;
+}
+
 // An ink outline drawn round big lettering (a cover title), under the fill so
 // the letters keep their full weight.
 export function inkStroke(width = 3, color = UI_COLORS.edge) {
