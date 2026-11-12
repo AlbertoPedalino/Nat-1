@@ -53,7 +53,7 @@ test('equipment lists value, weight and attributes, and filters by typed ranges'
   expect(screen.getByText('2 items')).toBeInTheDocument();
   const sword = screen.getByRole('button', { name: /Longsword/ });
   expect(sword).toHaveTextContent('15 gp');
-  expect(sword).toHaveTextContent('3 lb.');
+  expect(sword).toHaveTextContent('3 lb');
   expect(sword).toHaveTextContent('1d8 slashing');
   expect(sword).toHaveTextContent('Weapons');
 

@@ -10,6 +10,7 @@ import { characterItemEffects } from '../../../shared/character/inventory/itemEf
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {
   carryCapacity,
+  formatPounds,
   formatWeight,
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
@@ -93,7 +94,7 @@ export default function Movement({ C, sheet }) {
   const hasPenalty = speedPenalty < 0 || overloaded || speedZero || exhaustionPenalty > 0;
   const reasons = [
     speedZero ? `${speedZeroConditions.join(', ')}: speed 0` : null,
-    overloaded ? `Over carry: speed 5 ft (${formatWeight(carriedWeight)} / ${formatWeight(maxCarry)} lb)` : null,
+    overloaded ? `Over carry: speed 5 ft (${formatWeight(carriedWeight)} / ${formatPounds(maxCarry)})` : null,
     exhaustionPenalty > 0 ? `Exhaustion ${exhaustionLevel}: −${exhaustionPenalty} ft` : null,
     speedPenalty < 0 ? `Armor STR requirement: ${speedPenalty} ft` : null,
   ].filter(Boolean);

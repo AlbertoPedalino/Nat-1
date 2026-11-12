@@ -4,8 +4,7 @@ import CollapsibleBody from './CollapsibleBody.jsx';
 
 // Expandable card shell. Owns the open/closed state and renders three slots:
 // `summary` (click target), optional `persistent` controls/status, and
-// collapsible `details`. The legacy `header`/`body` names remain supported for
-// callers that only need a simple expandable row. Render-prop slots receive
+// collapsible `details`. Render-prop slots receive
 // `{ open, toggle, disabled }`, so each context keeps its native row styling.
 //
 // Centralizing the expand mechanic here means a future change — animation,
@@ -17,20 +16,15 @@ function renderSlot(slot, slotProps) {
 }
 
 export function ExpandableCard({
-  header,
-  body,
   summary,
   persistent,
   details,
   containerSx,
-  bodySx,
   detailsSx,
   disabled = false,
 }) {
   const [open, setOpen] = useState(false);
-  const detailContent = details !== undefined ? details : body;
-  const summaryContent = summary !== undefined ? summary : header;
-  const canExpand = !disabled && detailContent != null;
+  const canExpand = !disabled && details != null;
   const visibleOpen = canExpand && open;
   const toggle = () => {
     if (canExpand) setOpen((value) => !value);
@@ -38,10 +32,10 @@ export function ExpandableCard({
   const slotProps = { open: visibleOpen, toggle, disabled: !canExpand };
   return (
     <Box sx={containerSx}>
-      {renderSlot(summaryContent, slotProps)}
+      {renderSlot(summary, slotProps)}
       {renderSlot(persistent, slotProps)}
       <CollapsibleBody open={visibleOpen}>
-        <Box sx={detailsSx ?? bodySx}>{detailContent}</Box>
+        <Box sx={detailsSx}>{details}</Box>
       </CollapsibleBody>
     </Box>
   );

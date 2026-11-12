@@ -4,6 +4,9 @@ import { isItemCarried, itemQty } from './weight.js';
 import { matchKey, splitNameSource } from '../../content/nameKeys.js';
 import { stripMarkup } from '../../content/markupText.js';
 
+// The equipped slot of a stack readied to throw (Thrown weapons).
+export const THROWN_SLOT = 'thrown';
+
 export function parseInventoryItemRef(ref) {
   const { name, source } = splitNameSource(ref);
   return {
@@ -122,6 +125,33 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
     else next[idx] = { ...next[idx], qty: itemQty(next[idx]) + qty };
   });
   return next;
+}
+
+// One more or one fewer of an inventory row, the same on the sheet and in the
+// builder. A row at zero goes. Adding to a row that must stay a single unit —
+// something equipped (a stack readied to throw excepted) or an item with its
+// own charges — adds an unequipped copy instead, without the charges or the
+// attunement of the original.
+export function stepInventoryQty(inventory, index, delta) {
+  const current = inventory || [];
+  const target = current[index];
+  if (!target) return current;
+  const singleUnit = (target.equipped || target.equippedSlot) && target.equippedSlot !== THROWN_SLOT;
+  const charged = itemChargeMaximum(target) > 0;
+  if (delta > 0 && (singleUnit || charged)) {
+    const copy = { ...target, qty: delta, equipped: false };
+    delete copy.equippedSlot;
+    if (charged) {
+      delete copy.attuned;
+      delete copy.chargesCurrent;
+    }
+    return addInventoryEntries(current, [copy]);
+  }
+  return current.flatMap((item, idx) => {
+    if (idx !== index) return [item];
+    const qty = Math.max(0, itemQty(item) + delta);
+    return qty > 0 ? [{ ...item, qty }] : [];
+  });
 }
 
 export function setInventoryItemCarried(item, carried) {

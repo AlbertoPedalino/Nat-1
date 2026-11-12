@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { THROWN_SLOT, equipToSlot as equipToSlotHelper } from './equipmentSlots.js';
+import { equipToSlot as equipToSlotHelper } from './equipmentSlots.js';
 import { toggleItemFlag } from '../../../shared/character/inventory/itemFlags.js';
 import {
   addInventoryEntries,
   setOneInventoryUnitCarried,
+  stepInventoryQty,
 } from '../../../shared/character/inventory/itemContainers.js';
 import { toggleItemAttunement } from '../../../shared/character/inventory/itemAttunement.js';
 import { extractTomeBonus } from '../../../shared/character/inventory/itemEffects.js';
@@ -11,7 +12,6 @@ import { writeOnScroll } from '../../../shared/character/inventory/spellScrolls.
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import {
   itemChargeCurrent,
-  itemChargeMaximum,
   setInventoryItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
 import { isBodyArmor, isShield } from '../../../shared/character/inventory/itemKinds.js';
@@ -72,27 +72,7 @@ export function useInventoryActions({
   }, [itemsDb, updateInv]);
 
   const adjustQty = useCallback((index, delta) => {
-    const current = invRef.current || [];
-    const target = current[index];
-    if (!target) return;
-    // A stack readied to throw stays one stack; anything else equipped is a single unit.
-    const singleUnit = (target.equipped || target.equippedSlot) && target.equippedSlot !== THROWN_SLOT;
-    if (delta > 0 && (singleUnit || itemChargeMaximum(target) > 0)) {
-      const unequippedCopy = { ...target, qty: delta, equipped: false };
-      delete unequippedCopy.equippedSlot;
-      if (itemChargeMaximum(target) > 0) {
-        delete unequippedCopy.attuned;
-        delete unequippedCopy.chargesCurrent;
-      }
-      updateInv(addInventoryEntries(current, [unequippedCopy]));
-      return;
-    }
-    const next = current.flatMap((item, idx) => {
-      if (idx !== index) return [item];
-      const nextQty = Math.max(0, itemQty(item) + delta);
-      return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
-    });
-    updateInv(next);
+    updateInv(stepInventoryQty(invRef.current, index, delta));
   }, [updateInv]);
 
   const removeItem = useCallback((index) => {
@@ -197,12 +177,7 @@ export function useInventoryActions({
       const existing = Array.isArray(prev?.consumedItemBonuses) ? prev.consumedItemBonuses : [];
       return { ...prev, consumedItemBonuses: [...existing, bonus] };
     });
-    const nextInv = current.flatMap((item, idx) => {
-      if (idx !== index) return [item];
-      const nextQty = Math.max(0, itemQty(item) - 1);
-      return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
-    });
-    updateInv(nextInv);
+    updateInv(stepInventoryQty(current, index, -1));
     onNotice?.(`Read ${target.name}`, `Permanent +${bonus.value} to ${bonus.ability.toUpperCase()}`);
   }, [updateInv, onUpdateCharacter, onNotice]);
 

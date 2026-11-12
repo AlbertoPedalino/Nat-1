@@ -10,7 +10,7 @@ import {
   RARITY_OPTIONS, isMagicItem, rarityKey, rarityRank,
 } from '../../../shared/character/inventory/itemRarity.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
-import { formatWeight } from '../../../shared/character/inventory/weight.js';
+import { formatPounds } from '../../../shared/character/inventory/weight.js';
 import { itemBaseType } from '../../../shared/character/inventory/itemKinds.js';
 
 export const MAGIC_TYPES = Object.freeze([
@@ -70,7 +70,7 @@ export function formatCostCell(copper) {
 
 export function formatWeightCell(pounds) {
   const lb = Number(pounds) || 0;
-  return lb ? `${formatWeight(lb)} lb.` : '—';
+  return lb ? formatPounds(lb) : '—';
 }
 
 // Damage, AC, properties and mastery — the row's "Attributes" — said as the

@@ -30,6 +30,8 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useItemsDb } from './useItemsDb.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
+import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
 
 const sectionSx = {
   ...SURFACES.panel,
@@ -143,7 +145,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     if (!spent) return;
     onUpdateInventory?.(rechargeReplicatedItem(inventory, chargeSource, level));
     const sourceLabel = source === 'pact' ? 'Pact Magic slot' : 'spell slot';
-    onNotice?.('Charge Magic Item', `${selectedChargeItem.displayName || selectedChargeItem.name} regained up to ${level} charges using a level ${level} ${sourceLabel}.`);
+    onNotice?.('Charge Magic Item', `${itemDisplayName(selectedChargeItem)} regained up to ${level} charges using a level ${level} ${sourceLabel}.`);
   };
 
   const drainItem = () => {
@@ -155,7 +157,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     persistCreatedSlots(created, onUpdateSheet, onUpdateCharacter);
     onUpdateInventory?.(removeOneCrafted(inventory, 'replicated', drainSource));
     spendResource(MAGIC_ITEM_TINKER_DRAIN_RESOURCE);
-    onNotice?.('Drain Magic Item', `${selectedDrainItem.displayName || selectedDrainItem.name} vanished; created a level ${level} spell slot.`);
+    onNotice?.('Drain Magic Item', `${itemDisplayName(selectedDrainItem)} vanished; created a level ${level} spell slot.`);
     setDrainSource('');
   };
 
@@ -179,7 +181,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
 
   const sourceOptions = replicated.map((item) => ({
     value: String(item.craftedFrom || ''),
-    label: item.displayName || item.name,
+    label: itemDisplayName(item),
   }));
 
   return (
@@ -194,7 +196,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
             <MenuItem value=""><em>Select charged item…</em></MenuItem>
             {chargeable.map((item) => (
               <MenuItem key={item.craftedFrom} value={item.craftedFrom}>
-                {item.displayName || item.name} ({itemChargeCurrent(item)}/{itemChargeMaximum(item)})
+                {itemDisplayName(item)} ({itemChargeCurrent(item)}/{itemChargeMaximum(item)})
               </MenuItem>
             ))}
           </Select>
@@ -224,7 +226,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
         <Stack direction="row" spacing={0.5}>
           <Select size="small" displayEmpty value={drainSource} onChange={(event) => setDrainSource(event.target.value)} sx={selectSx}>
             <MenuItem value=""><em>Select replicated item…</em></MenuItem>
-            {drainable.map((item) => <MenuItem key={item.craftedFrom} value={item.craftedFrom}>{item.displayName || item.name} · {item.rarity}</MenuItem>)}
+            {drainable.map((item) => <MenuItem key={item.craftedFrom} value={item.craftedFrom}>{itemDisplayName(item)} · {rarityLabel(item)}</MenuItem>)}
           </Select>
           <Button variant="contained" size="small" onClick={drainItem} disabled={readOnly || !selectedDrainItem || drainUses <= 0}>Drain</Button>
         </Stack>

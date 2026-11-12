@@ -7,8 +7,7 @@ import { itemHasProperty } from '../../../shared/character/inventory/weaponPrope
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { isShield, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 import { itemQty } from '../../../shared/character/inventory/weight.js';
-
-export const THROWN_SLOT = 'thrown';
+import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 
 export function isLightWeapon(item) {
   return itemHasProperty(item, 'light');

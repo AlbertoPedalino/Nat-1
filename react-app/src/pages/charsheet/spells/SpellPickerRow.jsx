@@ -25,9 +25,9 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
   return (
     <ExpandableCard
       containerSx={{ ...CARD_SX, flexShrink: 0, overflow: 'hidden', opacity: atLimit ? OPACITY.strong : 1, ...(selected ? { borderColor: UI_COLORS.success, '&:hover': { borderColor: UI_COLORS.success } } : null) }}
-      bodySx={{ px: 1.25, pt: 0.25, pb: 1 }}
-      body={<SpellReferenceBody spell={spell} />}
-      header={({ toggle }) => (
+      detailsSx={{ px: 1.25, pt: 0.25, pb: 1 }}
+      details={<SpellReferenceBody spell={spell} />}
+      summary={({ toggle }) => (
         <Box
           onClick={toggle}
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.75, cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : 'transparent' }}

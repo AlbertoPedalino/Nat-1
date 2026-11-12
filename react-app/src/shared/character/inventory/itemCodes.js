@@ -4,6 +4,7 @@ import { capitalize } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { ABILITY_ABBREVIATIONS, DAMAGE_TYPE_NAMES } from '../../content/rulesVocabulary.js';
 import { formatCopper } from './currency.js';
+import { formatPounds } from './weight.js';
 import { rarityLabel } from './itemRarity.js';
 import { attunementRequirementText } from './itemAttunement.js';
 import { ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
@@ -301,7 +302,7 @@ registerItemPropertySegment('stealth', (item) => {
 });
 registerItemPropertySegment('weight', (item) => {
   if (!item?.weight) return [];
-  return [{ kind: 'weight', label: 'Weight', value: `${item.weight} lb` }];
+  return [{ kind: 'weight', label: 'Weight', value: formatPounds(item.weight) }];
 });
 registerItemPropertySegment('value', (item) => {
   const gp = formatCopper(item?.value);

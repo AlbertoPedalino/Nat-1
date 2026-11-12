@@ -16,11 +16,13 @@ import { ItemNameIcon } from '../../content/FiveEToolsLink.jsx';
 // inventory rows so the expanded view stays identical everywhere.
 // A weapon's mastery is always shown here as reference (unlike the Actions tab,
 // which only surfaces it when the character actually has that mastery).
-export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, sx }) {
+// `exclude` drops property rows a screen already shows elsewhere (the
+// compendium's header line).
+export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, exclude, sx }) {
   const hasEntries = Array.isArray(item?.entries) && item.entries.length > 0;
   return (
     <Box sx={sx}>
-      <ItemPropertyTable item={item} sx={{ mb: hasEntries ? 0.75 : 0 }} />
+      <ItemPropertyTable item={item} exclude={exclude} sx={{ mb: hasEntries ? 0.75 : 0 }} />
       {hasEntries ? (
         <EntryBlocks
           entries={item.entries}

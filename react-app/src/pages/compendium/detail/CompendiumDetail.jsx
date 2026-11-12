@@ -3,7 +3,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ItemNameIcon, SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { HigherLevelBlock, SpellMetaGrid } from '../../../shared/character/spells/SpellReference.jsx';
-import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPropertyTable.jsx';
+import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
@@ -58,8 +58,9 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
       {kind === 'spell' ? <SpellMetaGrid spell={record} /> : null}
       {/* As the item card shows it, but for its attunement: whether it is
           required is in the line above, and nobody here is attuned to it. */}
-      {kind === 'item' ? <ItemPropertyTable item={record} exclude={['type', 'rarity', 'attunement']} /> : null}
-      <EntryBlocks entries={record.descriptionEntries || record.entries} />
+      {kind === 'item'
+        ? <ItemReferenceBody item={record} exclude={['type', 'rarity', 'attunement']} />
+        : <EntryBlocks entries={record.descriptionEntries || record.entries} />}
       {kind === 'spell' ? <HigherLevelBlock entries={record.higherLevelEntries} /> : null}
     </Stack>
   );

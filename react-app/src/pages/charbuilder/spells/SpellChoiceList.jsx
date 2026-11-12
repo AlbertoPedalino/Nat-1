@@ -109,9 +109,9 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
               <ExpandableCard
                 key={`${spec.key}-${spell.name}-${spell.source}`}
                 containerSx={{ ...LIST_ROW_RULE_SX }}
-                bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
-                body={<SpellReferenceBody spell={spell} />}
-                header={({ open, toggle: toggleOpen }) => (
+                detailsSx={{ px: 2, pt: 0.25, pb: 1.25 }}
+                details={<SpellReferenceBody spell={spell} />}
+                summary={({ open, toggle: toggleOpen }) => (
                   <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
                     <SpellRowLabel spell={spell} selected={active} />
                     <SpellMiniTags spell={spell} sx={{ mx: 1 }} />

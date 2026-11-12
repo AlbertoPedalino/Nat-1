@@ -54,3 +54,8 @@ export function formatWeight(value) {
     maximumFractionDigits: 3,
   }).format(roundWeight(value));
 }
+
+// A weight with its unit, as every screen writes it ("2.5 lb").
+export function formatPounds(value) {
+  return `${formatWeight(value)} lb`;
+}

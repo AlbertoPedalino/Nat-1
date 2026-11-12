@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { equipToSlot, THROWN_SLOT } from '../../../../../src/pages/charsheet/inventory/equipmentSlots.js';
+import { equipToSlot } from '../../../../../src/pages/charsheet/inventory/equipmentSlots.js';
+import { THROWN_SLOT } from '../../../../../src/shared/character/inventory/itemContainers.js';
 import { isItemEquipped } from '../../../../../src/shared/character/inventory/itemGroups.js';
 
 test('equipping one of a stack splits it and leaves the rest loose', () => {

@@ -11,7 +11,7 @@ import {
   removeCustomCurrency,
   reorderCurrency,
 } from '../../../shared/character/inventory/currency.js';
-import { addInventoryEntries } from '../../../shared/character/inventory/itemContainers.js';
+import { addInventoryEntries, stepInventoryQty } from '../../../shared/character/inventory/itemContainers.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { splitNameSource } from '../../../shared/content/nameKeys.js';
@@ -58,18 +58,12 @@ function findByNameSource(list, name, source) {
   return list.find((item) => item.name === name && (!source || item.source === source)) || null;
 }
 
-// Remove a single unit of the item identified by `name|source` (decrement qty,
-// drop the row when it hits zero). Used to swap equipment-type picker selections.
+// One fewer of the item a type picker had added (`name|source`), when the
+// pick changes.
 function removeOneByRef(inventory, ref) {
   const { name, source } = splitNameSource(ref);
-  const list = inventory || [];
-  const idx = list.findIndex((item) => item.name === name && (item.source || '') === source);
-  if (idx === -1) return list;
-  const next = [...list];
-  const qty = Math.max(0, Number(next[idx].qty ?? 1) - 1);
-  if (qty > 0) next[idx] = { ...next[idx], qty };
-  else next.splice(idx, 1);
-  return next;
+  const index = (inventory || []).findIndex((item) => item.name === name && (item.source || '') === source);
+  return index === -1 ? inventory || [] : stepInventoryQty(inventory, index, -1);
 }
 
 export function builderReducer(state, action) {
@@ -289,14 +283,8 @@ export function builderReducer(state, action) {
       );
       return updateCharacter(state, { currency, inventory });
     }
-    case 'inventory/qty': {
-      const inventory = state.character.inventory.flatMap((item, idx) => {
-        if (idx !== action.index) return [item];
-        const qty = Math.max(0, Number(item.qty ?? 1) + action.delta);
-        return qty > 0 ? [{ ...item, qty }] : [];
-      });
-      return updateCharacter(state, { inventory });
-    }
+    case 'inventory/qty':
+      return updateCharacter(state, { inventory: stepInventoryQty(state.character.inventory, action.index, action.delta) });
     case 'inventory/remove':
       return updateCharacter(state, {
         inventory: state.character.inventory.filter((_, idx) => idx !== action.index),

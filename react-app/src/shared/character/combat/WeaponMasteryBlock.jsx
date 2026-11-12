@@ -9,7 +9,7 @@ import {
   loadMasteryEntries,
 } from './weaponMastery.js';
 import { stripSource } from '../../content/nameKeys.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { WeaponRuleBlock } from './WeaponNoteBlock.jsx';
 
 // First mastery code stripped of its source suffix ("Graze|XPHB" -> "Graze").
 // Accepts the raw item.mastery array, a single tagged string, or a clean name.
@@ -42,22 +42,18 @@ export function WeaponMasteryBlock({ mastery, variant = 'tag', fontSize, sx }) {
   if (!code) return null;
   const name = getWeaponMasteryName(code) || code;
   const entries = getWeaponMasteryEntries(code);
+  const missing = (
+    <Typography sx={{ fontSize, color: 'text.secondary' }}>
+      {loaded ? 'Mastery description unavailable.' : 'Loading mastery description...'}
+    </Typography>
+  );
+  if (variant === 'tag') {
+    return <WeaponRuleBlock title={`Weapon Mastery — ${name}`} entries={entries} fontSize={fontSize} sx={sx}>{missing}</WeaponRuleBlock>;
+  }
   return (
-    <Box sx={{ mt: variant === 'tag' ? 0.75 : 0, ...sx }}>
-      {variant === 'title' ? (
-        <Typography variant="h2" sx={{ color: RICH_TEXT_ACCENT }}>{name}</Typography>
-      ) : (
-        <Typography sx={{ fontSize: FONT_SIZES.sm, color: RICH_TEXT_ACCENT, fontWeight: FONT_WEIGHTS.bold }}>
-          Weapon Mastery — {name}
-        </Typography>
-      )}
-      {entries?.length ? (
-        <EntryBlocks entries={entries} fontSize={fontSize} emptyText="" />
-      ) : (
-        <Typography sx={{ fontSize, color: 'text.secondary' }}>
-          {loaded ? 'Mastery description unavailable.' : 'Loading mastery description...'}
-        </Typography>
-      )}
+    <Box sx={sx}>
+      <Typography variant="h2" sx={{ color: RICH_TEXT_ACCENT }}>{name}</Typography>
+      {entries?.length ? <EntryBlocks entries={entries} fontSize={fontSize} emptyText="" /> : missing}
     </Box>
   );
 }

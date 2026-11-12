@@ -12,7 +12,7 @@ import { useItemListQuery } from '../../../shared/character/inventory/useItemLis
 import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { stepButtonSx } from '../../../shared/ui/pressable.js';
-import { formatWeight, itemQty, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
+import { formatPounds, itemQty, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { OWNED_ITEM_CHIPS } from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
@@ -52,9 +52,9 @@ function CurrentInventoryRow({ item, index, dispatch }) {
   return (
     <ExpandableCard
       containerSx={{ ...LIST_ROW_RULE_SX }}
-      bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
-      body={<ItemReferenceBody item={item} />}
-      header={({ toggle }) => (
+      detailsSx={{ px: 2, pt: 0.25, pb: 1.5 }}
+      details={<ItemReferenceBody item={item} />}
+      summary={({ toggle }) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1 }}>
             <ItemNameIcon item={item} />
@@ -146,7 +146,7 @@ export default function EquipmentStep({ state, dispatch }) {
         />
       </BuilderPanel>
 
-      <BuilderPanel id="panel-inventory" tone={ENTITY_COLORS.tool} title="Inventory" icon={GAME_ICONS.inventory} note={`${formatWeight(totalWeight)} lb carried`}>
+      <BuilderPanel id="panel-inventory" tone={ENTITY_COLORS.tool} title="Inventory" icon={GAME_ICONS.inventory} note={`${formatPounds(totalWeight)} carried`}>
         <Stack spacing={1.5}>
           <SearchField
             value={localQuery}

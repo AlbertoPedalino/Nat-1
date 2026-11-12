@@ -172,9 +172,9 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind
   return (
     <ExpandableCard
       containerSx={{ ...LIST_ROW_RULE_SX }}
-      bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
-      body={<SpellReferenceBody spell={spell} />}
-      header={({ open, toggle }) => (
+      detailsSx={{ px: 2, pt: 0.25, pb: 1.25 }}
+      details={<SpellReferenceBody spell={spell} />}
+      summary={({ open, toggle }) => (
         <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
           <SpellRowLabel spell={spell} selected={selected} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />

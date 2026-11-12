@@ -20,7 +20,8 @@ import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/invento
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
-import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
+import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
+import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
