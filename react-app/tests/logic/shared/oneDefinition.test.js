@@ -764,3 +764,7 @@ test('one choice among a few is a ChoiceToggle', () => {
 test('a short table of facts is a LabelValueGrid', () => {
   assert.deepEqual(sourceFilesMatching(/gridTemplateColumns: 'auto 1fr'/, { allow: ['shared/ui/LabelValueGrid.jsx'] }), []);
 });
+
+test("a dialog's Cancel is the CancelButton", () => {
+  assert.deepEqual(sourceFilesMatching(/>Cancel<\/Button>/, { allow: ['shared/ui/SheetDialog.jsx'] }), []);
+});

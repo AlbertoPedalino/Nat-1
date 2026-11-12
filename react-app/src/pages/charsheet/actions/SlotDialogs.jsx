@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -47,7 +47,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         title={createSlotDialog?.label || 'Create Spell Slot'}
         actions={(
           <>
-            <Button onClick={() => setCreateSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={() => setCreateSlotDialog(null)} />
             <Button variant="contained" onClick={confirmCreateSlot} disabled={createSlotSelection == null}>
               Create
             </Button>
@@ -89,7 +89,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         title={convertSlotDialog?.label || 'Convert Spell Slot'}
         actions={(
           <>
-            <Button onClick={() => setConvertSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={() => setConvertSlotDialog(null)} />
             <Button variant="contained" onClick={confirmConvertSlot} disabled={convertSlotSelection == null}>
               Convert
             </Button>
@@ -129,7 +129,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         open={Boolean(wildResurgenceDialog)}
         onClose={() => setWildResurgenceDialog(null)}
         title={wildResurgenceDialog?.label || 'Wild Resurgence'}
-        actions={<Button onClick={() => setWildResurgenceDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>}
+        actions={<CancelButton onClick={() => setWildResurgenceDialog(null)} />}
       >
         {wildResurgenceDialog ? (
           <Box sx={{ display: 'grid', gap: 0.75 }}>
@@ -159,7 +159,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         title={spendSlotRecoverDialog?.label || 'Spell Slot Recovery'}
         actions={(
           <>
-            <Button onClick={() => setSpendSlotRecoverDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={() => setSpendSlotRecoverDialog(null)} />
             <Button variant="contained" onClick={confirmSpendSlotRecover} disabled={spendSlotRecoverSelection == null}>
               Spend Slot & Recover
             </Button>
@@ -199,7 +199,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         title={consumePactSlotDialog?.label || 'Spend Pact Slot'}
         actions={(
           <>
-            <Button onClick={() => setConsumePactSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={() => setConsumePactSlotDialog(null)} />
             <Button variant="contained" onClick={() => confirmConsumePactSlot(1)}>
               Spend Pact Slot
             </Button>
@@ -221,7 +221,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
         title={slotRecovery?.label || 'Recover Spell Slots'}
         actions={(
           <>
-            <Button onClick={() => setSlotRecovery(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={() => setSlotRecovery(null)} />
             <Button variant="contained" onClick={confirmSlotRecovery} disabled={!slotRecovery || slotRecoverySpent <= 0}>
               Recover
             </Button>

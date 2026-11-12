@@ -17,6 +17,7 @@ import { noticeSx } from './encounterImportStyles.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
@@ -86,7 +87,7 @@ export default function EncounterImportDialog({
       title="Import from an encounter"
       actions={(
         <>
-            <Button onClick={onClose} disabled={busy}>Cancel</Button>
+            <CancelButton onClick={onClose} disabled={busy} />
             <Button
               variant="contained"
               disabled={busy || !combatants.length}

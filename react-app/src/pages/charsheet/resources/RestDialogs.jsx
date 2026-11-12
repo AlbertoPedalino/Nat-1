@@ -1,6 +1,6 @@
 import { Button, Stack, Typography } from '@mui/material';
 import { Hourglass, Moon } from 'lucide-react';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import HitDiceSpendControl from './HitDiceSpendControl.jsx';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/resources/restResources.js';
@@ -25,7 +25,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         icon={<Hourglass size={ICON_SIZES.xl} />}
         actions={(
           <>
-            <Button onClick={rest.closeShortRest} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={rest.closeShortRest} />
             <Button variant="contained" onClick={rest.confirmShortRest}>
               Take Short Rest
             </Button>
@@ -64,7 +64,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         icon={<Moon size={ICON_SIZES.xl} />}
         actions={(
           <>
-            <Button onClick={rest.closeLongRest} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <CancelButton onClick={rest.closeLongRest} />
             <Button variant="contained" onClick={rest.confirmLongRest}>Confirm Long Rest</Button>
           </>
         )}

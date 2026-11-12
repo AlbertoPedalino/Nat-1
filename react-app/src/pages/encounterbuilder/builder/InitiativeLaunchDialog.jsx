@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -48,7 +48,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
       showClose
       actions={(
         <>
-          <Button onClick={onClose}>Cancel</Button>
+          <CancelButton onClick={onClose} />
           <Button variant="contained" startIcon={<Swords size={ICON_SIZES.md} />} onClick={() => onLaunch(choices)}>
             Launch
           </Button>

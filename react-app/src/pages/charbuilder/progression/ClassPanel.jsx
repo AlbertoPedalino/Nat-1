@@ -3,7 +3,7 @@ import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, Typ
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import { describeMulticlassProficiencies, getMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
 import { checkMulticlassPrerequisite, multiclassBlockReason } from './multiclassRules.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
@@ -262,7 +262,7 @@ export default function ClassPanel({ state, character, dispatch }) {
           onClose={() => setPendingConfirm(null)}
           actions={(
             <>
-              <Button autoFocus variant="outlined" onClick={() => setPendingConfirm(null)}>Cancel</Button>
+              <CancelButton autoFocus onClick={() => setPendingConfirm(null)} />
               <Button variant="contained" color={pendingConfirm.confirmColor || 'primary'} onClick={() => {
                 dispatch(pendingConfirm.action);
                 setPendingConfirm(null);

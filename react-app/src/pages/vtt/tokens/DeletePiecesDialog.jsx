@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
+import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 
 export default function DeletePiecesDialog({
   open, pieces, busy, error, container, onCancel, onConfirm,
@@ -20,7 +21,7 @@ export default function DeletePiecesDialog({
       contentProps={{ 'aria-busy': busy }}
       actions={(
         <>
-          <Button autoFocus disabled={busy} onClick={onCancel}>Cancel</Button>
+          <CancelButton autoFocus disabled={busy} onClick={onCancel} />
           <Button
             color="error"
             variant="contained"

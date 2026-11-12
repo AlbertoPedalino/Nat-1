@@ -1,4 +1,4 @@
-import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
@@ -36,6 +36,16 @@ const titleTextSx = {
   ...panelTitleSx,
   lineHeight: LINE_HEIGHTS.snug,
 };
+
+// The way out of a dialog without doing anything: a quiet text button, first
+// in the action bar, the same in every dialog.
+export function CancelButton({ onClick, disabled, autoFocus, children = 'Cancel' }) {
+  return (
+    <Button onClick={onClick} disabled={disabled} autoFocus={autoFocus} sx={{ color: 'text.secondary' }}>
+      {children}
+    </Button>
+  );
+}
 
 // The title of a section inside a dialog's content.
 export const dialogSectionTitleSx = {
