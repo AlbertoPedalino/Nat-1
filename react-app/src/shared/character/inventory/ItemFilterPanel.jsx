@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button } from '@mui/material';
-import { ChevronDown, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X } from 'lucide-react';
 import { RICH_TEXT_ACCENT } from '../../ui/entityColors.js';
 import {
   ITEM_FILTER_FIELDS,
@@ -10,12 +10,12 @@ import {
 } from './itemFilters.js';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
-import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import SelectField from '../../ui/SelectField.jsx';
+import DisclosureButton from '../../ui/DisclosureButton.jsx';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -117,16 +117,14 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
   return (
     <Box sx={sx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-        <Button
-          size="small"
-          aria-expanded={open}
-          onClick={() => setOpen((prev) => !prev)}
-          startIcon={<SlidersHorizontal size={ICON_SIZES.xs} />}
-          endIcon={open ? <ChevronDown size={ICON_SIZES.xs} /> : <ChevronRight size={ICON_SIZES.xs} />}
-          sx={goldToggleSx(open || activeCount > 0)}
-        >
-          {activeCount > 0 ? `Filters (${activeCount})` : 'Filters'}
-        </Button>
+        <DisclosureButton
+          open={open}
+          onToggle={() => setOpen((prev) => !prev)}
+          label="Filters"
+          count={activeCount}
+          lit={activeCount > 0}
+          icon={<SlidersHorizontal size={ICON_SIZES.xs} />}
+        />
         {activeCount > 0 ? (
           <Button size="small" onClick={() => onChange(emptyItemFilters())} startIcon={<X size={ICON_SIZES.xxs} />} sx={clearButtonSx}>
             Clear all

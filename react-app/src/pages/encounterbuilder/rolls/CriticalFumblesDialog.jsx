@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dices, Skull } from 'lucide-react';
-import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DialogSection, ResetButton } from '../../../shared/ui/SheetDialog.jsx';
 import {
   buildFumbleFormula,
   FUMBLE_CATEGORIES,
@@ -11,12 +11,11 @@ import {
   getFumbleRange,
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, calloutSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -24,7 +23,6 @@ import DiceCountPicker from '../../../shared/character/dice/DiceCountPicker.jsx'
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
-  const mobile = useIsPhone();
   const [categoryId, setCategoryId] = useState(FUMBLE_CATEGORIES[0].id);
   const [outcome, setOutcome] = useState(null);
   const outcomeRef = useRef(null);
@@ -102,19 +100,11 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       icon={<Skull size={ICON_SIZES.xl} />}
       showClose
       maxWidth="md"
-      fullScreen={mobile}
+      phoneFullScreen
       topPad={1.5}
-      contentSx={dialogContentSx}
       actions={(
         <>
-          <Button
-            onClick={handleReset}
-            color="inherit"
-            size="small"
-            sx={{ mr: 'auto' }}
-          >
-            Reset
-          </Button>
+          <ResetButton onClick={handleReset} />
           <Button onClick={handleRoll} variant="contained" size="small" startIcon={<Dices size={ICON_SIZES.sm} />}>
             Roll Fumble
           </Button>
@@ -133,13 +123,11 @@ export default function CriticalFumblesDialog({ open, onClose }) {
         ))}
       </Tabs>
 
-      <Box sx={sectionSx}>
-        <Stack spacing={0.5}>
-          <Typography sx={dialogSectionTitleSx}>Dice combination</Typography>
-          <Caption>
-            Choose any combination. At least one die is always kept.
-          </Caption>
-        </Stack>
+      <DialogSection
+        title="Dice combination"
+        hint="Choose any combination. At least one die is always kept."
+        sx={sectionSx}
+      >
         <DiceCountPicker
           dice={FUMBLE_DICE_TYPES}
           counts={table?.dice}
@@ -157,50 +145,45 @@ export default function CriticalFumblesDialog({ open, onClose }) {
             Results {range.min}–{range.max} · {range.count} entries
           </Caption>
         </Stack>
-      </Box>
+      </DialogSection>
 
       {outcome?.categoryId === category.id ? (
-        <Paper ref={outcomeRef} sx={outcomeSx}>
+        <Box ref={outcomeRef} sx={outcomeSx}>
           <Box sx={outcomeNumberSx}>{outcome.total}</Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={outcomeTitleSx}>{outcome.categoryLabel} Fumble</Typography>
             <Typography sx={outcomeTextSx}>{outcome.consequence}</Typography>
             <Caption>{outcome.mathStr}</Caption>
           </Box>
-        </Paper>
+        </Box>
       ) : null}
 
-      <Stack spacing={0.5} sx={{ mt: 1.75, mb: 1 }}>
-        <Typography sx={dialogSectionTitleSx}>Result table</Typography>
-        <Caption>
-          Entries outside the current range are preserved when you change dice.
-        </Caption>
-      </Stack>
-      <Stack spacing={0.75}>
-        {resultValues.map((result) => (
-          <Paper key={result} variant="outlined" sx={entryRowSx}>
-            <Typography sx={resultLabelSx}>Result {result}</Typography>
-            <TextField
-              value={table?.entries?.[String(result)] ?? ''}
-              onChange={(event) => handleEntryChange(result, event.target.value)}
-              size="small"
-              fullWidth
-              multiline
-              maxRows={4}
-              placeholder="Describe the consequence…"
-              slotProps={{ htmlInput: { 'aria-label': `${category.label} fumble result ${result}` } }}
-            />
-          </Paper>
-        ))}
-      </Stack>
+      <DialogSection
+        title="Result table"
+        hint="Entries outside the current range are preserved when you change dice."
+        sx={{ mt: 1.75 }}
+      >
+        <Stack spacing={0.75} sx={{ mt: 1 }}>
+          {resultValues.map((result) => (
+            <Box key={result} sx={entryRowSx}>
+              <Typography sx={resultLabelSx}>Result {result}</Typography>
+              <TextField
+                value={table?.entries?.[String(result)] ?? ''}
+                onChange={(event) => handleEntryChange(result, event.target.value)}
+                size="small"
+                fullWidth
+                multiline
+                maxRows={4}
+                placeholder="Describe the consequence…"
+                slotProps={{ htmlInput: { 'aria-label': `${category.label} fumble result ${result}` } }}
+              />
+            </Box>
+          ))}
+        </Stack>
+      </DialogSection>
     </SheetDialog>
   );
 }
-
-const dialogContentSx = {
-  px: { xs: 1.25, sm: 2.25 },
-  pb: { xs: 1.5, sm: 2 },
-};
 
 const tabsSx = {
   mx: { xs: -1.25, sm: -2.25 },
@@ -237,15 +220,13 @@ const formulaSx = {
 };
 
 const outcomeSx = {
+  ...calloutSx(UI_COLORS.danger),
   mt: 1.5,
   p: { xs: 1, sm: 1.5 },
   display: 'grid',
   gridTemplateColumns: { xs: '48px minmax(0,1fr)', sm: '58px minmax(0,1fr)' },
   gap: 1.25,
   alignItems: 'center',
-  border: 2,
-  borderColor: 'error.main',
-  bgcolor: uiAlpha(UI_COLORS.dangerStrong, OPACITY.soft),
 };
 
 const outcomeNumberSx = {
@@ -275,12 +256,12 @@ const outcomeTextSx = {
 };
 
 const entryRowSx = {
+  ...SURFACES.wash,
   p: { xs: 0.75, sm: 0.75 },
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', sm: '76px minmax(0,1fr)' },
   gap: { xs: 0.5, sm: 1 },
   alignItems: 'center',
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const resultLabelSx = {

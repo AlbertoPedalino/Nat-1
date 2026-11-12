@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Divider, Paper, Stack, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
+import { Box, Button, Divider } from '@mui/material';
+import { Plus, ScrollText } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
@@ -8,16 +8,22 @@ import PlayerSheetPanel from '../campaign/PlayerSheetPanel.jsx';
 
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SidePanel from '../../../shared/ui/SidePanel.jsx';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 export default function StatBlockDialog() {
   const { state, dispatch } = useEncounterBuilder();
   const monster = state.selectedStatblock?.monster;
   if (state.view === 'combat' || !monster) return null;
+  const close = () => dispatch({ type: 'closeStatblock' });
 
   return (
-    <SheetDialog open onClose={() => dispatch({ type: 'closeStatblock' })} maxWidth="md" topPad={2}>
-      <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
+    <SheetDialog open onClose={close} maxWidth="md" topPad={2} showClose closeLabel="Close statblock">
+      {/* Room for the dialog's corner X, so a long name never runs under it. */}
+      <Box sx={{ pr: 4 }}>
+        <StatBlockHeader monster={monster} />
+      </Box>
       <Divider sx={{ my: 1.5 }} />
       <StatBlockBody monster={monster} allowAdd />
     </SheetDialog>
@@ -29,29 +35,20 @@ export function StatBlockPanel() {
   const selection = state.selectedStatblock;
   const monster = selection?.monster;
   const isPlayerSelection = selection && !monster && selection.combatantId != null;
+  const close = () => dispatch({ type: 'closeStatblock' });
 
   if (!selection) return <EmptyStatBlock />;
 
   if (isPlayerSelection) {
-    return (
-      <Paper sx={statPanelSx}>
-        <PlayerSheetPanel selection={selection} onClose={() => dispatch({ type: 'closeStatblock' })} />
-      </Paper>
-    );
+    return <PlayerSheetPanel selection={selection} onClose={close} sx={sidePlacementSx} />;
   }
 
   if (!monster) return <EmptyStatBlock />;
 
   return (
-    <Paper sx={statPanelSx}>
-      <Box sx={statPanelHeaderSx}>
-        <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
-      </Box>
-      <Divider />
-      <Box sx={statPanelBodySx}>
-        <StatBlockBody monster={monster} allowAdd={false} />
-      </Box>
-    </Paper>
+    <SidePanel header={<StatBlockHeader monster={monster} />} onClose={close} closeLabel="Close statblock" sx={sidePlacementSx}>
+      <StatBlockBody monster={monster} allowAdd={false} />
+    </SidePanel>
   );
 }
 
@@ -104,31 +101,17 @@ function StatBlockBody({ monster, allowAdd = false }) {
 // The panel before anything is selected (or after a monster is gone).
 function EmptyStatBlock() {
   return (
-    <Paper sx={statPanelSx}>
-      <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-        <Typography variant="h2">Statblock</Typography>
-        <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
-      </Stack>
-    </Paper>
+    <StatePanel icon={ScrollText} title="Statblock" sx={sidePlacementSx}>
+      Click a monster or player combatant to inspect it here.
+    </StatePanel>
   );
 }
 
-const statPanelSx = {
-  bgcolor: 'background.paper',
-  overflow: 'hidden',
+// The side column beside the roster: kept in view while the roster scrolls on
+// a wide screen.
+const sidePlacementSx = {
   alignSelf: 'start',
   position: { lg: 'sticky' },
   top: { lg: 82 },
   maxHeight: { lg: 'calc(100vh - 104px)' },
-};
-
-const statPanelHeaderSx = {
-  p: 2,
-  position: 'relative',
-};
-
-const statPanelBodySx = {
-  p: 2,
-  overflow: 'auto',
-  maxHeight: { xs: 520, lg: 'calc(100vh - 218px)' },
 };

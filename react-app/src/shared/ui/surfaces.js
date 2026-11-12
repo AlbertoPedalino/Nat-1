@@ -43,6 +43,20 @@ export function scrollWellSx(maxHeight) {
   return { ...SURFACES.inset, maxHeight, overflow: 'auto' };
 }
 
+// A callout in a tone, set apart from the dialog or list it sits in: a
+// concluded negotiation, a rolled fumble, a condition's rules card. The 2px
+// edge in its tone over a soft wash of it. `tone` is a palette colour (hex).
+export function calloutSx(tone) {
+  return { border: 2, borderColor: tone, borderRadius: 1, bgcolor: uiAlpha(tone, OPACITY.soft) };
+}
+
+// The empty track of a meter (a combatant's HP bar, the encounter's XP bar, a
+// negotiation's pips), `height` tall; the filled part is drawn over it in the
+// meter's own colour.
+export function meterTrackSx(height) {
+  return { height, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft) };
+}
+
 export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({

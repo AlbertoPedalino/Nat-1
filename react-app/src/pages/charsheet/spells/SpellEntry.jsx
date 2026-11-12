@@ -42,6 +42,7 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
@@ -50,7 +51,6 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function SpellEntry({
@@ -344,43 +344,22 @@ export default function SpellEntry({
               spellSaveDc={resolvedSpellSaveDc}
             />
           ) : null}
-          {modifierDetailGroups.length ? (
-            <Stack spacing={0.75} sx={{ mt: 1 }}>
-              {modifierDetailGroups.map((group) => (
-                <Box
-                  key={group.label}
-                  sx={{
-                    pt: 0.75,
-                    mt: 0.25,
-                    ...CARD_PART_RULE_SX,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      ...TEXT_STYLES.title,
-                      fontSize: FONT_SIZES.xs,
-                      color: RICH_TEXT_ACCENT,
-                      lineHeight: LINE_HEIGHTS.tight,
-                    }}
-                  >
-                    {group.label}
-                  </Typography>
-                  <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-                    {group.items.map((modifier) => (
-                      <Box key={modifier.key || modifier.label}>
-                        <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight }}>
-                          {modifier.detailTitle || modifier.tagLabel || modifier.label}
-                        </Typography>
-                        <Caption sx={{ display: 'block', lineHeight: LINE_HEIGHTS.snug, mt: 0.25 }}>
-                          {modifier.detailText || modifier.description}
-                        </Caption>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
-          ) : null}
+          {modifierDetailGroups.map((group) => (
+            <CardSection key={group.label} title={group.label} tone={RICH_TEXT_ACCENT}>
+              <Stack spacing={0.5} sx={{ mt: 0.25 }}>
+                {group.items.map((modifier) => (
+                  <Box key={modifier.key || modifier.label}>
+                    <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight }}>
+                      {modifier.detailTitle || modifier.tagLabel || modifier.label}
+                    </Typography>
+                    <Caption sx={{ display: 'block', lineHeight: LINE_HEIGHTS.snug, mt: 0.25 }}>
+                      {modifier.detailText || modifier.description}
+                    </Caption>
+                  </Box>
+                ))}
+              </Stack>
+            </CardSection>
+          ))}
         </>
       )}
     />

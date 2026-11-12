@@ -9,6 +9,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { inkShadow } from '../../ui/shadows.js';
 import { BARE_BUTTON_SX } from '../../ui/interactive.js';
+import { calloutSx } from '../../ui/surfaces.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -84,11 +85,9 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
 }
 
 const cardSx = {
-  border: 2,
-  borderColor: alpha(CONDITION_ACCENT, OPACITY.edge),
-  borderRadius: 1,
-  p: '6px 8px',
-  bgcolor: alpha(CONDITION_ACCENT, OPACITY.wash),
+  ...calloutSx(CONDITION_ACCENT),
+  py: 0.75,
+  px: 1,
 };
 
 const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 };

@@ -3,12 +3,11 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -89,10 +88,7 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
     );
   }
   return (
-    <Box sx={{ mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.25 }}>
-        Weapon
-      </Typography>
+    <CardSection title="Weapon" tone={RICH_TEXT_ACCENT}>
       <ChoiceToggle
         size="xs"
         wrap
@@ -103,6 +99,6 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
         }))}
         options={options.map((option) => ({ value: option.key, label: option.name }))}
       />
-    </Box>
+    </CardSection>
   );
 }

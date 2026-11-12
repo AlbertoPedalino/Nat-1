@@ -25,24 +25,19 @@ import {
   replicatedNonArmorCount,
   setReplicatedItemCharges,
 } from '../../../shared/character/inventory/magicItemTinker.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useItemsDb } from './useItemsDb.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import { cardSectionTitleSx } from '../../../shared/ui/CardSection.jsx';
 
 const sectionSx = {
   ...SURFACES.panel,
   p: 0.75,
 };
-const labelSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xs,
-  color: UI_COLORS.accentText,
-};
+const labelSx = cardSectionTitleSx();
 const selectSx = { flex: 1, minWidth: 150 };
 
 function availableSlotOptions(regularSlots, pactSlots, sheet) {

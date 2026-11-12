@@ -10,7 +10,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
@@ -30,7 +30,7 @@ function TomeConsumePanel({ item, onConsume }) {
   const bonus = extractTomeBonus(item);
   if (!bonus) return null;
   return (
-    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <CardSection sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ flex: 1, fontSize: FONT_SIZES.sm, color: 'text.secondary' }}>
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.accentText }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
@@ -38,7 +38,7 @@ function TomeConsumePanel({ item, onConsume }) {
         sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, borderColor: UI_COLORS.accentText, color: UI_COLORS.accentText, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft), borderColor: UI_COLORS.accentText } }}>
         Read & Consume
       </Button>
-    </Box>
+    </CardSection>
   );
 }
 
@@ -48,10 +48,7 @@ function AbilityChoicePanel({ item, onPick }) {
   const stored = (item.abilityChoice && typeof item.abilityChoice === 'object') ? item.abilityChoice : {};
 
   return (
-    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
-        Ability Choice
-      </Typography>
+    <CardSection title="Ability Choice">
       {groups.map((group, groupIdx) => {
         const from = Array.isArray(group.from) ? group.from : [];
         const count = Math.max(1, Number(group.count || 1));
@@ -82,6 +79,6 @@ function AbilityChoicePanel({ item, onPick }) {
           </Box>
         );
       })}
-    </Box>
+    </CardSection>
   );
 }

@@ -3,6 +3,7 @@ import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { SURFACES, meterTrackSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -21,23 +22,19 @@ export default function DifficultyBar({ encounter, party }) {
       <LinearProgress
         variant="determinate"
         value={difficulty.percent}
-        sx={{
-          height: 8,
-          borderRadius: 1,
-          bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft),
-          '& .MuiLinearProgress-bar': { bgcolor: difficulty.color },
-        }}
+        sx={{ ...meterTrackSx(8), '& .MuiLinearProgress-bar': { bgcolor: difficulty.color } }}
       />
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2,1fr)', md: 'repeat(4,1fr)' }, gap: 1 }}>
         {DIFFICULTY_LABELS.map((label, index) => (
           <Box
             key={label}
             sx={{
-              border: '2px solid',
-              borderColor: difficulty.difficultyIndex === index ? difficulty.color : 'divider',
-              borderRadius: 1,
+              ...SURFACES.wash,
               p: 1,
-              bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.accent, OPACITY.tint) : uiAlpha(UI_COLORS.white, OPACITY.faint),
+              // The band the encounter falls in: edged in its colour.
+              ...(difficulty.difficultyIndex === index
+                ? { borderColor: difficulty.color, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint) }
+                : null),
             }}
           >
             <Caption>{label}</Caption>

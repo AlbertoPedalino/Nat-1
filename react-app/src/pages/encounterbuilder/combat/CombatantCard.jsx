@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Avatar, Box, Button, Collapse, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { ChevronDown, ChevronUp, ExternalLink, HeartPulse, Shield, Sparkles, X } from 'lucide-react';
+import { Avatar, Box, Button, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { ExternalLink, HeartPulse, Shield, Sparkles } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -14,15 +14,18 @@ import { hpToneColor } from '../../../shared/character/combat/vitals.js';
 import { HP_TONE_COLORS } from '../../../shared/ui/colors.js';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import {
-  nameSpanSx, rowSx, removeButtonSx, identityClusterSx, avatarBaseSx, nameButtonSx,
+  nameSpanSx, rowSx, identityClusterSx, avatarBaseSx, nameButtonSx,
   sheetLinkButtonSx, acBadgeSx, acLabelSx, acValueSx, conditionsRowSx, effectsRowSx, hpSummaryRowSx,
-  hpToggleSx, hpFlagSx, hpDetailsSx, collapseSx, hpPanelRowSx, hpValueRowSx, hpFieldSx, hpMaxSx,
+  hpFlagSx, hpDetailsSx, hpPanelRowSx, hpValueRowSx, hpFieldSx, hpMaxSx,
   hpBarSx, cardSx, hpRowSx, buildActiveSx, deadSx,
 } from './combatantCardStyles.js';
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import CornerCloseButton from '../../../shared/ui/CornerCloseButton.jsx';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -67,9 +70,8 @@ export default function CombatantCard({ combatant, active }) {
         ...(combatant.isDead ? deadSx : null),
       })}
     >
-      <TipIconButton title="Remove" color="error" onClick={remove} size="small" sx={removeButtonSx} ariaLabel="Remove combatant">
-        <X size={ICON_SIZES.sm} />
-      </TipIconButton>
+      {/* A tighter corner than a panel's: the card's own padding is small. */}
+      <CornerCloseButton onClose={remove} label="Remove combatant" tooltip="Remove" danger sx={{ top: 4, right: 4 }} />
       <Box sx={rowSx}>
         {/* Identity cluster: initiative + token + name + AC */}
         <Box sx={identityClusterSx}>
@@ -185,15 +187,14 @@ export default function CombatantCard({ combatant, active }) {
                   section reads as the flags unfolding rather than as new
                   content appearing elsewhere. */}
               <Box sx={hpSummaryRowSx}>
-                <Button
-                  size="small"
-                  onClick={() => setHpDetailsOpen((open) => !open)}
-                  aria-expanded={hpDetailsOpen}
-                  startIcon={hpDetailsOpen ? <ChevronUp size={ICON_SIZES.sm} /> : <ChevronDown size={ICON_SIZES.sm} />}
-                  sx={hpToggleSx}
-                >
-                  HP modifiers
-                </Button>
+                {/* Labelled: a bare chevron on a combatant with no temp HP and
+                    no max-HP modifier would mean nothing. */}
+                <DisclosureButton
+                  open={hpDetailsOpen}
+                  onToggle={() => setHpDetailsOpen((open) => !open)}
+                  label="HP modifiers"
+                  tone="quiet"
+                />
                 {!hpDetailsOpen && tempHp !== 0 ? (
                   <HpFlag Icon={Sparkles} title={`Temp HP: ${tempHp}`} text={tempHp} />
                 ) : null}
@@ -202,7 +203,7 @@ export default function CombatantCard({ combatant, active }) {
                 ) : null}
               </Box>
 
-              <Collapse in={hpDetailsOpen} unmountOnExit sx={collapseSx}>
+              <CollapsibleBody open={hpDetailsOpen}>
                 <Box sx={hpDetailsSx}>
                   {/* Temp HP */}
                   <Box sx={hpPanelRowSx}>
@@ -240,7 +241,7 @@ export default function CombatantCard({ combatant, active }) {
                     />
                   </Box>
                 </Box>
-              </Collapse>
+              </CollapsibleBody>
 
               <LinearProgress
                 variant="determinate"

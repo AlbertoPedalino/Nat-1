@@ -8,16 +8,8 @@ import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import CardSection from '../../ui/CardSection.jsx';
 import LabelValueGrid from '../../ui/LabelValueGrid.jsx';
-
-const SECTION_HEADING_SX = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xs,
-  color: RICH_TEXT_ACCENT,
-  mb: 0.5,
-};
 
 // Casting Time / Range / Components / Duration as a two-column grid.
 // Shared by the sheet spell card and the builder expanded body so the meta
@@ -42,14 +34,15 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
   const headingBlock = headingIdx >= 0 ? blocks[headingIdx] : null;
   const bodyBlocks = headingIdx >= 0 ? blocks.filter((_, i) => i !== headingIdx) : blocks;
   return (
-    <Box sx={{ mt: 1, pt: 1, ...CARD_PART_RULE_SX, ...sx }}>
-      <Box sx={SECTION_HEADING_SX}>
-        {headingBlock?.tokens?.length
-          ? <RichInline tokens={headingBlock.tokens} keyPrefix="hl-heading" />
-          : (headingBlock?.text || 'Using a Higher-Level Spell Slot')}
-      </Box>
+    <CardSection
+      tone={RICH_TEXT_ACCENT}
+      title={headingBlock?.tokens?.length
+        ? <RichInline tokens={headingBlock.tokens} keyPrefix="hl-heading" />
+        : (headingBlock?.text || 'Using a Higher-Level Spell Slot')}
+      sx={sx}
+    >
       <EntryBlocks blocks={bodyBlocks} fontSize={fontSize} emptyText="" />
-    </Box>
+    </CardSection>
   );
 }
 

@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Box, Button, Collapse } from '@mui/material';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, Button } from '@mui/material';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { goldToggleSx } from '../../../shared/ui/actionButton.js';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -25,15 +24,7 @@ export default function MarkerRow({ label, count = 0, pills, onClear, belowRow, 
     <Box sx={wrapperSx}>
       <Box sx={rowSx}>
         {pills}
-        <Button
-          size="small"
-          onClick={() => setOpen((prev) => !prev)}
-          aria-expanded={open}
-          startIcon={open ? <ChevronUp size={ICON_SIZES.sm} /> : <ChevronDown size={ICON_SIZES.sm} />}
-          sx={{ ...goldToggleSx(open), '& .MuiButton-startIcon': { mr: 0.5 } }}
-        >
-          {label}{count ? ` (${count})` : ''}
-        </Button>
+        <DisclosureButton open={open} onToggle={() => setOpen((prev) => !prev)} label={label} count={count} />
         {onClear && count > 0 ? (
           <Button size="small" variant="outlined" color="error" onClick={onClear} sx={clearSx}>Clear</Button>
         ) : null}
@@ -41,9 +32,9 @@ export default function MarkerRow({ label, count = 0, pills, onClear, belowRow, 
 
       {belowRow}
 
-      <Collapse in={open} unmountOnExit sx={collapseSx}>
+      <CollapsibleBody open={open}>
         {children}
-      </Collapse>
+      </CollapsibleBody>
     </Box>
   );
 }
@@ -58,9 +49,6 @@ const rowSx = {
   minHeight: CONTROL_HEIGHTS.sm,
 };
 
-// Labelled disclosure: a bare chevron on a combatant with no markers at all
-// would say nothing about what it opens.
-
 const clearSx = {
   flex: '0 0 auto',
   minWidth: 0,
@@ -69,9 +57,3 @@ const clearSx = {
   fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.label,
 };
-
-// A fully collapsed Collapse still renders a zero-height box, which keeps
-// earning a slot in the parent's flex gap. MUI tags that state with
-// .MuiCollapse-hidden once the exit transition ends, so dropping the box out of
-// layout there removes the phantom gap without costing the animation.
-const collapseSx = { '&.MuiCollapse-hidden': { display: 'none' } };

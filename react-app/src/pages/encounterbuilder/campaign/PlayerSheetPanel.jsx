@@ -1,5 +1,5 @@
-import { Avatar, Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material';
-import { ExternalLink, X } from 'lucide-react';
+import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
+import { ExternalLink } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
@@ -9,97 +9,78 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SidePanel from '../../../shared/ui/SidePanel.jsx';
 
-export default function PlayerSheetPanel({ selection, onClose }) {
+const CLOSE_LABEL = 'Close character sheet';
+
+// A player combatant's campaign sheet in the encounter's side panel, where a
+// monster's stat block shows: the same SidePanel, so the two read alike. `sx`
+// places the panel on the page.
+export default function PlayerSheetPanel({ selection, onClose, sx }) {
   const { state, characterDigests } = useEncounterBuilder();
   const combatant = state.combat?.combatants?.find((item) => item.id === selection?.combatantId);
   const sourceId = selection?.playerSourceId || combatant?.sourceId || null;
 
   if (!combatant) {
     return (
-      <>
-        <Box sx={playerHeaderSx}>
-          <Typography variant="h2">Player Character</Typography>
-          <IconButton onClick={onClose} sx={closeButtonSx} aria-label="Close character sheet">
-            <X size={ICON_SIZES.lg} />
-          </IconButton>
-        </Box>
-        <Divider />
-        <Box sx={playerBodySx}>
-          <EmptyLine>That combatant is no longer in the active encounter.</EmptyLine>
-        </Box>
-      </>
+      <SidePanel header={<Typography variant="h2">Player Character</Typography>} onClose={onClose} closeLabel={CLOSE_LABEL} sx={sx}>
+        <EmptyLine>That combatant is no longer in the active encounter.</EmptyLine>
+      </SidePanel>
     );
   }
 
+  const header = (
+    <Stack direction="row" spacing={1.5} useFlexGap sx={{ alignItems: 'center', minWidth: 0, flexWrap: 'wrap' }}>
+      <PortraitBadge path={combatant.portraitPath} color={combatant.color} size={avatarSx.width}>
+        <Avatar sx={{ ...avatarSx, bgcolor: 'transparent' }}>PC</Avatar>
+      </PortraitBadge>
+      <Box sx={{ minWidth: 0, flex: '1 1 180px' }}>
+        <Typography variant="h2" component="div" noWrap>{combatant.name}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Player character
+        </Typography>
+      </Box>
+      {sourceId ? (
+        <Button
+          component="a"
+          href={campaignSheetUrl(sourceId, { edit: true })}
+          target="_blank"
+          rel="noopener"
+          size="small"
+          variant="outlined"
+          endIcon={<ExternalLink size={ICON_SIZES.sm} />}
+          sx={{ flexShrink: 0 }}
+        >
+          Open sheet
+        </Button>
+      ) : null}
+    </Stack>
+  );
+
   return (
-    <>
-      <Box sx={playerHeaderSx}>
-        <Stack direction="row" spacing={1.5} useFlexGap sx={{ alignItems: 'center', minWidth: 0, pr: 4, flexWrap: 'wrap' }}>
-          <PortraitBadge path={combatant.portraitPath} color={combatant.color} size={avatarSx.width}>
-            <Avatar sx={{ ...avatarSx, bgcolor: 'transparent' }}>PC</Avatar>
-          </PortraitBadge>
-          <Box sx={{ minWidth: 0, flex: '1 1 180px' }}>
-            <Typography variant="h2" component="div" noWrap>{combatant.name}</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Player character
-            </Typography>
-          </Box>
-          {sourceId ? (
-            <Button
-              component="a"
-              href={campaignSheetUrl(sourceId, { edit: true })}
-              target="_blank"
-              rel="noopener"
-              size="small"
-              variant="outlined"
-              endIcon={<ExternalLink size={ICON_SIZES.sm} />}
-              sx={{ flexShrink: 0 }}
-            >
-              Open sheet
-            </Button>
-          ) : null}
-        </Stack>
-        <IconButton onClick={onClose} sx={closeButtonSx} aria-label="Close character sheet">
-          <X size={ICON_SIZES.lg} />
-        </IconButton>
-      </Box>
-      <Divider />
-      <Box sx={playerBodySx}>
-        {sourceId ? (
-          <Box sx={sheetFrameSx}>
-            {/* Linked players are already followed for the encounter: the sheet
-                takes its vitals from that digest instead of a channel of its own. */}
-            <CampaignSheetView
-              sheetId={sourceId}
-              editable
-              embedded
-              liveDigest={characterDigests?.get(String(sourceId)) ?? null}
-            />
-          </Box>
-        ) : (
-          <Box sx={fallbackSx}>
-            <Typography variant="h2">Encounter Stats</Typography>
-            <Typography sx={{ color: 'text.secondary' }}>
-              No campaign sheet is linked to this player combatant.
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </>
+    <SidePanel header={header} onClose={onClose} closeLabel={CLOSE_LABEL} sx={sx}>
+      {sourceId ? (
+        <Box sx={sheetFrameSx}>
+          {/* Linked players are already followed for the encounter: the sheet
+              takes its vitals from that digest instead of a channel of its own. */}
+          <CampaignSheetView
+            sheetId={sourceId}
+            editable
+            embedded
+            liveDigest={characterDigests?.get(String(sourceId)) ?? null}
+          />
+        </Box>
+      ) : (
+        <Box sx={fallbackSx}>
+          <Typography variant="h2">Encounter Stats</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>
+            No campaign sheet is linked to this player combatant.
+          </Typography>
+        </Box>
+      )}
+    </SidePanel>
   );
 }
-
-const playerHeaderSx = {
-  p: 2,
-  position: 'relative',
-};
-
-const playerBodySx = {
-  p: 2,
-  overflow: 'auto',
-  maxHeight: { xs: 520, lg: 'calc(100vh - 218px)' },
-};
 
 const avatarSx = {
   width: 58,
@@ -108,12 +89,6 @@ const avatarSx = {
   fontSize: FONT_SIZES.xxl,
   fontWeight: FONT_WEIGHTS.heavy,
   flex: '0 0 auto',
-};
-
-const closeButtonSx = {
-  position: 'absolute',
-  top: 8,
-  right: 8,
 };
 
 const sheetFrameSx = {

@@ -29,6 +29,7 @@ import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.j
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
@@ -277,10 +278,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
   };
 
   return (
-    <Box sx={{ mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
-      <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
-        {action.choiceLabel || 'Active Option'}
-      </Typography>
+    <CardSection title={action.choiceLabel || 'Active Option'}>
       <ChoiceToggle
         size="xs"
         wrap
@@ -294,6 +292,6 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
           <RichInline text={action.choiceRestNote} keyPrefix={`choice-${action.choiceKey}`} />
         </Typography>
       ) : null}
-    </Box>
+    </CardSection>
   );
 }

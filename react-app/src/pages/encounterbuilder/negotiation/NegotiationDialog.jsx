@@ -1,6 +1,6 @@
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { Check, Handshake, Skull, Sparkles, X } from 'lucide-react';
-import SheetDialog, { dialogSectionTitleSx } from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DialogSection, ResetButton } from '../../../shared/ui/SheetDialog.jsx';
 import {
   getNpcAttitude,
   MAX_INTEREST,
@@ -16,10 +16,10 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { SURFACES, calloutSx, meterTrackSx } from '../../../shared/ui/surfaces.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -30,7 +30,6 @@ const ACTION_UI = Object.freeze([
 
 export default function NegotiationDialog({ open, onClose }) {
   const { state, dispatch } = useEncounterBuilder();
-  const mobile = useIsPhone();
   const negotiation = state.negotiation;
   const attitude = getNpcAttitude(negotiation.attitude);
   const status = negotiationStatus(negotiation);
@@ -57,26 +56,15 @@ export default function NegotiationDialog({ open, onClose }) {
       icon={<Handshake size={ICON_SIZES.xl} />}
       showClose
       maxWidth="sm"
-      fullScreen={mobile}
+      phoneFullScreen
       topPad={1.5}
-      contentSx={contentSx}
-      actions={(
-        <Button
-          onClick={reset}
-          color="inherit"
-          size="small"
-          sx={{ mr: 'auto' }}
-        >
-          Reset negotiation
-        </Button>
-      )}
+      actions={<ResetButton onClick={reset}>Reset negotiation</ResetButton>}
     >
       <Stack spacing={1.75}>
-        <Box>
-          <Typography sx={dialogSectionTitleSx}>NPC attitude</Typography>
-          <Caption>
-            Changing attitude resets Patience and Interest. The threshold is preserved.
-          </Caption>
+        <DialogSection
+          title="NPC attitude"
+          hint="Changing attitude resets Patience and Interest. The threshold is preserved."
+        >
           <Box sx={attitudeGridSx}>
             {NPC_ATTITUDES.map((item) => {
               const selected = item.id === negotiation.attitude;
@@ -94,7 +82,7 @@ export default function NegotiationDialog({ open, onClose }) {
               );
             })}
           </Box>
-        </Box>
+        </DialogSection>
 
         <TextField
           label="Threshold / DC"
@@ -125,22 +113,21 @@ export default function NegotiationDialog({ open, onClose }) {
         </Box>
 
         {status.ended ? (
-          <Paper sx={finalResultSx}>
+          <Box sx={finalResultSx}>
             <Typography sx={finalEyebrowSx}>Negotiation concluded</Typography>
             <Typography sx={finalResultTextSx}>{status.result}</Typography>
             <Caption>{status.reason}</Caption>
-          </Paper>
+          </Box>
         ) : (
-          <Paper variant="outlined" sx={currentStateSx}>
+          <Box sx={currentStateSx}>
             <Caption>Current position</Caption>
             <Typography sx={currentResultSx}>
               Interest {negotiation.interest}: {NEGOTIATION_RESULTS[negotiation.interest]}
             </Typography>
-          </Paper>
+          </Box>
         )}
 
-        <Box>
-          <Typography sx={dialogSectionTitleSx}>Resolve the check</Typography>
+        <DialogSection title="Resolve the check">
           <Box sx={actionGridSx}>
             {ACTION_UI.map(({ id, Icon, color }) => {
               const action = NEGOTIATION_ACTIONS[id];
@@ -160,7 +147,7 @@ export default function NegotiationDialog({ open, onClose }) {
               );
             })}
           </Box>
-        </Box>
+        </DialogSection>
       </Stack>
     </SheetDialog>
   );
@@ -168,7 +155,7 @@ export default function NegotiationDialog({ open, onClose }) {
 
 function MeterCard({ label, value, max, color, prominent = false }) {
   return (
-    <Paper variant="outlined" sx={{ ...meterCardSx, ...(prominent ? prominentMeterSx : {}) }}>
+    <Box sx={{ ...meterCardSx, ...(prominent ? prominentMeterSx : {}) }}>
       <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
         <Typography sx={meterLabelSx}>{label}</Typography>
         <Typography sx={{ ...meterValueSx, color }}>
@@ -179,15 +166,11 @@ function MeterCard({ label, value, max, color, prominent = false }) {
         {Array.from({ length: max }, (_, index) => (
           <Box
             key={index}
-            sx={{
-              height: prominent ? 9 : 7,
-              borderRadius: 99,
-              bgcolor: index < value ? color : uiAlpha(UI_COLORS.white, OPACITY.soft),
-            }}
+            sx={{ ...meterTrackSx(prominent ? 9 : 7), ...(index < value ? { bgcolor: color } : null) }}
           />
         ))}
       </Box>
-    </Paper>
+    </Box>
   );
 }
 
@@ -203,11 +186,6 @@ function formatActionDelta(action) {
     action.patienceDelta ? `Patience ${signed(action.patienceDelta)}` : '',
   ].filter(Boolean).join(' · ');
 }
-
-const contentSx = {
-  px: { xs: 1.25, sm: 2.25 },
-  pb: { xs: 1.5, sm: 2 },
-};
 
 const attitudeGridSx = {
   display: 'grid',
@@ -239,8 +217,8 @@ const meterGridSx = {
 };
 
 const meterCardSx = {
+  ...SURFACES.wash,
   p: 1.25,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const prominentMeterSx = {
@@ -267,8 +245,8 @@ const meterMaxSx = {
 };
 
 const currentStateSx = {
+  ...SURFACES.wash,
   p: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
 };
 
 const currentResultSx = {
@@ -279,10 +257,8 @@ const currentResultSx = {
 };
 
 const finalResultSx = {
+  ...calloutSx(UI_COLORS.accent),
   p: { xs: 1.25, sm: 1.5 },
-  border: 2,
-  borderColor: 'primary.main',
-  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
 };
 
 const finalEyebrowSx = {

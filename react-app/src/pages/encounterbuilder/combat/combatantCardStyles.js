@@ -1,9 +1,9 @@
 import { alpha } from '@mui/material/styles';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import { SURFACES, meterTrackSx } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -18,15 +18,6 @@ export const rowSx = {
   columnGap: { xs: 1.5, sm: 3 },
   rowGap: 1.25,
   pr: 3,
-};
-
-export const removeButtonSx = {
-  position: 'absolute',
-  top: 4,
-  right: 4,
-  zIndex: 1,
-  color: 'text.secondary',
-  '&:hover': { color: 'error.main' },
 };
 
 export const identityClusterSx = {
@@ -89,20 +80,6 @@ export const hpSummaryRowSx = {
   minHeight: CONTROL_HEIGHTS.sm,
 };
 
-// Labelled disclosure: the row must say what it hides, otherwise a bare chevron
-// on a combatant with no temp HP and no max-HP modifier means nothing.
-export const hpToggleSx = {
-  flex: '0 0 auto',
-  minWidth: 0,
-  px: 0.5,
-  py: 0,
-  color: 'text.secondary',
-  fontSize: FONT_SIZES.xs,
-  ...TEXT_STYLES.label,
-  '& .MuiButton-startIcon': { mr: 0.5 },
-  '&:hover': { color: 'text.primary' },
-};
-
 export const hpFlagSx = {
   display: 'inline-flex',
   alignItems: 'center',
@@ -119,12 +96,6 @@ export const hpFlagSx = {
 };
 
 export const hpDetailsSx = { display: 'flex', flexDirection: 'column', gap: 0.75 };
-
-// A fully collapsed Collapse still renders a zero-height box, which keeps
-// earning a slot in the parent's flex gap. MUI tags that state with
-// .MuiCollapse-hidden once the exit transition ends, so dropping the box out of
-// layout there removes the phantom gap without costing the animation.
-export const collapseSx = { '&.MuiCollapse-hidden': { display: 'none' } };
 
 export const hpPanelRowSx = {
   display: 'flex',
@@ -143,9 +114,7 @@ export const hpMaxSx = { whiteSpace: 'nowrap', fontSize: FONT_SIZES.xl };
 
 export const hpBarSx = {
   width: '100%',
-  height: 5,
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft),
+  ...meterTrackSx(5),
 };
 
 // A combatant: the drawn card (SURFACES.card); the one whose turn it is is

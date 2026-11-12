@@ -6,12 +6,10 @@ import {
   Box,
   Button,
   Divider,
-  IconButton,
   Link,
   Stack,
   Typography,
 } from '@mui/material';
-import { X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
 import { armorClassEntry, formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, displayType, getTypeTags } from './monsterUtils.js';
 import EntryRenderer from './EntryRenderer.jsx';
@@ -29,10 +27,13 @@ import { ABILITIES, ABILITY_ABBREVIATIONS } from '../content/rulesVocabulary.js'
 import { crKey, crPB, crXP } from './challengeRating.js';
 import { get5eToolsBestiaryUrl } from '../content/fiveEToolsLinks.js';
 import { FONT_WEIGHTS } from '../ui/fonts.js';
-import { ICON_SIZES } from '../ui/iconSizes.js';
 import TagChip from '../ui/TagChip.jsx';
+import CornerCloseButton from '../ui/CornerCloseButton.jsx';
 import { UI_COLORS } from '../ui/colors.js';
 
+// The token, name and type line over a stat block. With `onClose` it draws
+// its own corner X (the battle map's side view); a SheetDialog or SidePanel
+// around it draws the X itself instead.
 export function StatBlockHeader({ monster, onClose }) {
   const url = get5eToolsBestiaryUrl(monster?.name, monster?.source);
   return (
@@ -52,9 +53,7 @@ export function StatBlockHeader({ monster, onClose }) {
         </Box>
       </Stack>
       {onClose ? (
-        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close statblock">
-          <X size={ICON_SIZES.lg} />
-        </IconButton>
+        <CornerCloseButton onClose={onClose} label="Close statblock" />
       ) : null}
     </>
   );

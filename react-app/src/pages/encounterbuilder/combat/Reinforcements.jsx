@@ -1,24 +1,23 @@
 import { useState } from 'react';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { ChevronDown, Plus, Search } from 'lucide-react';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Plus, Search } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Panel from '../../../shared/ui/Panel.jsx';
+import { panelBodySx } from '../../../shared/ui/PanelHeader.jsx';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
+
+// Adding to a fight under way: a monster from the bestiary or a quick
+// combatant typed by hand. A panel like the round's above it, folded away
+// until it is wanted so the roster stays in view.
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
   const [manual, setManual] = useState({ name: '', hpMax: 10, ac: 10, initMod: 0 });
+  const [open, setOpen] = useState(false);
 
   const addManual = () => {
     if (!manual.name.trim()) return;
@@ -27,15 +26,14 @@ export default function Reinforcements() {
   };
 
   return (
-    <Accordion disableGutters sx={{ ...SURFACES.panel, '&:before': { display: 'none' } }}>
-      <AccordionSummary expandIcon={<ChevronDown size={ICON_SIZES.lg} />}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Plus size={ICON_SIZES.md} />
-          <Typography variant="h2">Reinforcements</Typography>
-        </Stack>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0,1.2fr) minmax(260px,0.8fr)' }, gap: 2 }}>
+    <Panel
+      icon={Plus}
+      title="Reinforcements"
+      action={<DisclosureButton open={open} onToggle={() => setOpen((prev) => !prev)} label="Add combatants" />}
+      bodySx={collapsedBodySx}
+    >
+      <CollapsibleBody open={open}>
+        <Box sx={{ ...panelBodySx, display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0,1.2fr) minmax(260px,0.8fr)' }, gap: 2 }}>
           <Stack spacing={1.25}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Search size={ICON_SIZES.md} />
@@ -64,7 +62,10 @@ export default function Reinforcements() {
             </Button>
           </Stack>
         </Box>
-      </AccordionDetails>
-    </Accordion>
+      </CollapsibleBody>
+    </Panel>
   );
 }
+
+// The body pads itself inside the fold, so a closed panel is only its bar.
+const collapsedBodySx = { p: 0 };

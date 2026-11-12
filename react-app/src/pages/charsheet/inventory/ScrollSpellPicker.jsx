@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Stack, TextField } from '@mui/material';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { byName } from '../../../shared/lists.js';
 import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { spellsForBooks } from '../../../shared/content/booksView.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 
 // A catalog with files missing is not kept: the next scroll opened asks again
 // for what failed.
@@ -39,8 +37,7 @@ export default function ScrollSpellPicker({ item, character = null, onWrite }) {
   const fixed = scrollSpellStats(level);
 
   return (
-    <Box sx={panelSx} onClick={(event) => event.stopPropagation()}>
-      <Typography sx={titleSx}>{level === 0 ? 'Cantrip' : `Level ${level} spell`}</Typography>
+    <CardSection title={level === 0 ? 'Cantrip' : `Level ${level} spell`} onClick={(event) => event.stopPropagation()}>
       <Autocomplete
         size="small"
         options={options}
@@ -68,7 +65,7 @@ export default function ScrollSpellPicker({ item, character = null, onWrite }) {
           onCommit={(scrollAttack) => onWrite({ scrollAttack })}
         />
       </Stack>
-    </Box>
+    </CardSection>
   );
 }
 
@@ -97,13 +94,6 @@ function StatField({ label, value, placeholder, onCommit }) {
   );
 }
 
-const panelSx = { mt: 1, pt: 1, ...CARD_PART_RULE_SX };
-const titleSx = {
-  fontSize: FONT_SIZES.xs,
-  color: UI_COLORS.accentText,
-  ...TEXT_STYLES.title,
-  mb: 0.5,
-};
 const fieldSx = {
   maxWidth: 280,
   '& .MuiInputBase-root': { fontSize: FONT_SIZES.lg },
