@@ -1,7 +1,7 @@
 import { UI_COLORS } from './colors.js';
 
 // The interface's small fantasy ornaments, drawn in the same ink as
-// everything else: gilded points (the accent in an ink edge) on the ends of
+// everything else: gilded gems (the accent in an ink edge) on the ends of
 // a panel's title bar and a gem on a section's rule, as a rulebook sets its
 // headings. One recipe, so a restyle reaches every one.
 //
@@ -15,34 +15,35 @@ function picture(width, height, path) {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
-// A point 8 wide and 14 tall, its flat side on the bar's edge, pointing in.
-const POINT_WIDTH = 8;
-const POINT_HEIGHT = 14;
-const POINT_IN_FROM_LEFT = picture(POINT_WIDTH, POINT_HEIGHT, `M1 1L${POINT_WIDTH - 1} ${POINT_HEIGHT / 2}L1 ${POINT_HEIGHT - 1}`);
-const POINT_IN_FROM_RIGHT = picture(POINT_WIDTH, POINT_HEIGHT, `M${POINT_WIDTH - 1} 1L1 ${POINT_HEIGHT / 2}L${POINT_WIDTH - 1} ${POINT_HEIGHT - 1}`);
+// A whole gem, 9 wide and 13 tall, set just inside each end of the bar, in
+// the gap before the badge and after the last control.
+const STUD_WIDTH = 9;
+const STUD_HEIGHT = 13;
+const STUD_INSET = 2;
+const STUD = picture(STUD_WIDTH, STUD_HEIGHT, `M${STUD_WIDTH / 2} 1L${STUD_WIDTH - 1} ${STUD_HEIGHT / 2}L${STUD_WIDTH / 2} ${STUD_HEIGHT - 1}L1 ${STUD_HEIGHT / 2}Z`);
 
-function point(side, image) {
+function stud(side) {
   return {
     content: '""',
     position: 'absolute',
-    [side]: 0,
+    [side]: STUD_INSET,
     top: 0,
     bottom: 0,
-    width: POINT_WIDTH,
-    backgroundImage: image,
+    width: STUD_WIDTH,
+    backgroundImage: STUD,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    backgroundSize: `${POINT_WIDTH}px ${POINT_HEIGHT}px`,
+    backgroundSize: `${STUD_WIDTH}px ${STUD_HEIGHT}px`,
     pointerEvents: 'none',
   };
 }
 
-// The studs on a title bar: a gilded point on each end, set against the
-// panel's frame, so the bar reads as a cartouche across the panel.
+// The studs on a title bar: a gilded gem at each end, so the bar reads as a
+// cartouche across the panel.
 export const BAR_STUDS_SX = Object.freeze({
   position: 'relative',
-  '&::before': point('left', POINT_IN_FROM_LEFT),
-  '&::after': point('right', POINT_IN_FROM_RIGHT),
+  '&::before': stud('left'),
+  '&::after': stud('right'),
 });
 
 // A gem standing in the middle of a heading's rule (spread with the rule
