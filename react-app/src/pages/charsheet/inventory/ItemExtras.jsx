@@ -11,6 +11,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
@@ -70,19 +71,14 @@ function AbilityChoicePanel({ item, onPick }) {
             <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', mb: 0.25 }}>
               Pick {count} (+{amount} each)
             </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
-              {from.map((abil) => {
-                const isOn = current.includes(abil);
-                return (
-                  <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
-                    onClick={() => togglePick(abil)}
-                    sx={{ minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, ...TEXT_STYLES.figure,
-                      ...(isOn ? { bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.fill), color: UI_COLORS.accentText, borderColor: UI_COLORS.accentText } : { color: 'text.secondary' }) }}>
-                    {ABILITY_ABBREVIATIONS[abil] || abil.toUpperCase()}
-                  </Button>
-                );
-              })}
-            </Box>
+            <ChoiceToggle
+              multiple
+              wrap
+              size="xs"
+              value={current}
+              onChange={(_, abil) => togglePick(abil)}
+              options={from.map((abil) => ({ value: abil, label: ABILITY_ABBREVIATIONS[abil] || abil.toUpperCase() }))}
+            />
           </Box>
         );
       })}

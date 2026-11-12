@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
@@ -118,19 +118,13 @@ export function SpellPickerDialog({
       )}
     >
       {casterPickers.length > 1 ? (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.75 }}>
-          {casterPickers.map((caster, index) => (
-            <Chip
-              key={`${caster.className}-${index}`}
-              size="small"
-              label={`${caster.label} (${caster.note})`}
-              variant={pickerClassIndex === index ? 'filled' : 'outlined'}
-              color={pickerClassIndex === index ? 'primary' : 'default'}
-              onClick={() => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
-              sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs }}
-            />
-          ))}
-        </Box>
+        <ChoiceToggle
+          wrap
+          value={pickerClassIndex}
+          onChange={(index) => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
+          options={casterPickers.map((caster, index) => ({ value: index, label: `${caster.label} (${caster.note})` }))}
+          sx={{ mb: 0.75 }}
+        />
       ) : null}
 
       {activePicker ? (

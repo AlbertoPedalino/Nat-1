@@ -1,4 +1,4 @@
-import { Box, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import { Box, Tooltip, Typography } from '@mui/material';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
@@ -8,6 +8,7 @@ import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -92,34 +93,16 @@ export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCha
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: RICH_TEXT_ACCENT, ...TEXT_STYLES.title, mb: 0.25 }}>
         Weapon
       </Typography>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
+        size="xs"
+        wrap
         value={selectedKey}
-        onChange={(_, next) => {
-          if (!next || next === selectedKey) return;
-          onUpdateCharacter?.((prev) => ({
-            ...prev,
-            spellWeapons: { ...(prev?.spellWeapons || {}), [spellName]: next },
-          }));
-        }}
-        sx={{
-          flexWrap: 'wrap',
-          gap: 0.5,
-          '& .MuiToggleButton-root': {
-            fontSize: FONT_SIZES.sm,
-            px: 1,
-            py: 0.5,
-            border: 2,
-            borderRadius: '999px !important',
-            '&:not(.Mui-selected)': { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' },
-          },
-        }}
-      >
-        {options.map((option) => (
-          <ToggleButton key={option.key} value={option.key}>{option.name}</ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+        onChange={(next) => onUpdateCharacter?.((prev) => ({
+          ...prev,
+          spellWeapons: { ...(prev?.spellWeapons || {}), [spellName]: next },
+        }))}
+        options={options.map((option) => ({ value: option.key, label: option.name }))}
+      />
     </Box>
   );
 }

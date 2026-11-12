@@ -7,7 +7,10 @@ import { TEXT_STYLES } from './textStyles.js';
 // look on the sheet, in the builder and in the dialogs. `options` are
 // { value, label, disabled? }; `onChange` gets the new value only when it
 // changes. `size` follows the panel ('sm', or 'xs' on a card); `wrap` lets a
-// long list run onto more lines. A row of filters is FilterToggles instead.
+// long list run onto more lines; `allowClear` lets the lit key be pressed
+// again to choose nothing (`onChange(null)`). With `multiple` several keys
+// can be lit: `value` is their list and `onChange(list, toggled)` names the
+// one pressed. A row of filters is FilterToggles instead.
 const KEY_SX = Object.freeze({
   ...TEXT_STYLES.title,
   minHeight: 0,
@@ -20,17 +23,27 @@ const SIZES = Object.freeze({
 });
 
 export default function ChoiceToggle({
-  options, value, onChange, size = 'sm', wrap = false, stopPropagation = false, ariaLabel, sx,
+  options, value, onChange, size = 'sm', wrap = false, multiple = false, allowClear = false, stopPropagation = false, ariaLabel, sx,
 }) {
   return (
     <ToggleButtonGroup
       size="small"
-      exclusive
-      value={value ?? null}
+      exclusive={!multiple}
+      value={multiple ? (value || []) : (value ?? null)}
       aria-label={ariaLabel}
       onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}
       onChange={(_, next) => {
-        if (next != null && next !== value) onChange(next);
+        if (multiple) {
+          const before = value || [];
+          const toggled = next.find((key) => !before.includes(key)) ?? before.find((key) => !next.includes(key));
+          onChange(next, toggled);
+          return;
+        }
+        if (next == null) {
+          if (allowClear && value != null) onChange(null);
+          return;
+        }
+        if (next !== value) onChange(next);
       }}
       sx={[wrap && { flexWrap: 'wrap' }, sx]}
     >

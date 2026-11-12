@@ -1,6 +1,5 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { readChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { asArray } from '../../../shared/lists.js';
 import { toggleActiveField } from '../state/toggleState.js';
@@ -29,6 +28,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -255,12 +255,10 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
   const match = options.find((o) => String(o.value).toLowerCase() === q);
   const activeValue = match ? match.value : '';
 
-  const handleChange = (_, next) => {
-    if (next === activeValue) return;
-    // Exclusive ToggleButtonGroup yields null when the active button is clicked
-    // again: clear the choice when the action opts in, otherwise ignore.
+  // Choosing nothing (the lit option pressed again) clears the choice, when
+  // the action allows it.
+  const handleChange = (next) => {
     if (!next) {
-      if (!action.choiceAllowClear) return;
       onUpdateCharacter((prev) => {
         const choices = { ...(prev.choices || {}) };
         delete choices[choiceKey];
@@ -282,13 +280,14 @@ function ChoicePicker({ action, C, onUpdateCharacter, onNotice }) {
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText, ...TEXT_STYLES.title, mb: 0.25 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
-      <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: 0.5, '& .MuiToggleButton-root': { fontSize: FONT_SIZES.sm, px: 1, py: 0.5, border: 2, borderRadius: '999px !important' }, '& .MuiToggleButton-root:not(.Mui-selected)': { borderColor: UI_COLORS.edge, color: 'text.secondary', bgcolor: 'transparent' } }}
-      >
-        {options.map((opt) => (
-          <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+      <ChoiceToggle
+        size="xs"
+        wrap
+        allowClear={Boolean(action.choiceAllowClear)}
+        value={activeValue || null}
+        onChange={handleChange}
+        options={options.map((opt) => ({ value: opt.value, label: opt.label }))}
+      />
       {action.choiceRestNote ? (
         <Typography component="div" sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.25 }}>
           <RichInline text={action.choiceRestNote} keyPrefix={`choice-${action.choiceKey}`} />

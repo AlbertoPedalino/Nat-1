@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material';
+import { Box, Divider, Stack, Typography } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import SearchList from '../choices/SearchList.jsx';
@@ -20,6 +20,7 @@ import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -167,31 +168,23 @@ export default function BackgroundStep({ state, dispatch }) {
         </Typography>
         <Stack spacing={1.5}>
           {patterns.length > 1 ? (
-            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              {patterns.map((pattern, index) => (
-                <Chip
-                  key={pattern.join('-')}
-                  label={pattern.map((value) => `+${value}`).join('/')}
-                  color={character.backgroundPatternIdx === index ? 'primary' : 'default'}
-                  onClick={() => dispatch({ type: 'background/pattern', index })}
-                />
-              ))}
-            </Stack>
+            <ChoiceToggle
+              wrap
+              value={character.backgroundPatternIdx}
+              onChange={(index) => dispatch({ type: 'background/pattern', index })}
+              options={patterns.map((pattern, index) => ({ value: index, label: pattern.map((value) => `+${value}`).join('/') }))}
+            />
           ) : null}
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-            {abilityPool.map((stat) => {
+          <ChoiceToggle
+            multiple
+            wrap
+            value={character.backgroundAbilities}
+            onChange={(_, stat) => dispatch({ type: 'background/ability-toggle', stat })}
+            options={abilityPool.map((stat) => {
               const bonus = backgroundAbilityBonus(character, stat);
-              return (
-                <Button
-                  key={stat}
-                  variant={character.backgroundAbilities.includes(stat) ? 'contained' : 'outlined'}
-                  onClick={() => dispatch({ type: 'background/ability-toggle', stat })}
-                >
-                  {ABILITY_ABBREVIATIONS[stat]} {bonus ? `+${bonus}` : ''}
-                </Button>
-              );
+              return { value: stat, label: `${ABILITY_ABBREVIATIONS[stat]}${bonus ? ` +${bonus}` : ''}` };
             })}
-          </Stack>
+          />
         </Stack>
       </BuilderPanel>
 

@@ -15,6 +15,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import { tileSx } from '../../../shared/ui/interactive.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -50,17 +51,12 @@ export default function ScoresStep({ state, dispatch }) {
             <Button startIcon={<Dice5 size={ICON_SIZES.md} />} onClick={() => dispatch({ type: 'dice/roll' })}>
               Roll Stats
             </Button>
-            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              {character.dicePool.map((value, index) => (
-                <Button
-                  key={`${value}-${index}`}
-                  variant={character.selDiceIdx === index ? 'contained' : 'outlined'}
-                  onClick={() => dispatch({ type: 'dice/select', index })}
-                >
-                  {value}
-                </Button>
-              ))}
-            </Stack>
+            <ChoiceToggle
+              wrap
+              value={character.selDiceIdx}
+              onChange={(index) => dispatch({ type: 'dice/select', index })}
+              options={character.dicePool.map((value, index) => ({ value: index, label: value }))}
+            />
           </Stack>
         ) : null}
 

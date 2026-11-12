@@ -1,4 +1,4 @@
-import { Chip, Grid, MenuItem, Select, Stack, TextField } from '@mui/material';
+import { Grid, MenuItem, Select, Stack, TextField } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
@@ -59,16 +59,12 @@ export default function LevelPanel({ character, dispatch }) {
         {/* The level picks take the room the HP toggle leaves, so they start
             right after it and wrap under each other. */}
         <Grid size={{ xs: 12, md: 'grow' }} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-            {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
-              <Chip
-                key={level}
-                label={level}
-                color={level === currentLevel ? 'primary' : 'default'}
-                onClick={() => setLevel(level)}
-              />
-            ))}
-          </Stack>
+          <ChoiceToggle
+            wrap
+            value={currentLevel}
+            onChange={setLevel}
+            options={Array.from({ length: maxLv }, (_, index) => ({ value: index + 1, label: index + 1 }))}
+          />
         </Grid>
         {character.hpMode === 'rolled' && rollLevels.length ? (
           <Grid size={{ xs: 12 }}>

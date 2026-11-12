@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { Lock } from 'lucide-react';
 import ChoiceSpec from './ChoiceSpec.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
@@ -19,6 +19,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -85,18 +86,12 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
           sx={{ alignSelf: 'flex-start' }}
         />
       ) : (
-        <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-          {additional.map((entry, idx) => (
-            <Button
-              key={`${slotKey}-entry-${idx}`}
-              size="small"
-              variant={idx === entryIdx ? 'contained' : 'outlined'}
-              onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${slotKey}_spell_` })}
-            >
-              {grantLabel(entry)}
-            </Button>
-          ))}
-        </Stack>
+        <ChoiceToggle
+          wrap
+          value={entryIdx}
+          onChange={(idx) => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${slotKey}_spell_` })}
+          options={additional.map((entry, idx) => ({ value: idx, label: grantLabel(entry) }))}
+        />
       )}
     </Stack>
   );

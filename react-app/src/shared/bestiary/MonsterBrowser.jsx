@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
@@ -20,6 +20,7 @@ import Caption from '../ui/Caption.jsx';
 import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
 import SearchField from '../ui/SearchField.jsx';
+import FilterToggles from '../ui/FilterToggles.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -58,20 +59,11 @@ export default function MonsterBrowser({
     <Stack spacing={2}>
       {onToggleSource ? (
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-          {monsterDb.sourceOptions.map((source) => {
-            const active = allSourcesActive || filters.sources.includes(source.source);
-            return (
-              <Tooltip key={source.source} title={source.label}>
-                <Chip
-                  label={source.source}
-                  size="small"
-                  clickable
-                  color={active ? 'primary' : 'default'}
-                  onClick={() => onToggleSource(source.source)}
-                />
-              </Tooltip>
-            );
-          })}
+          <FilterToggles
+            options={monsterDb.sourceOptions.map((source) => ({ key: source.source, label: source.source, tooltip: source.label }))}
+            isOn={(source) => allSourcesActive || filters.sources.includes(source)}
+            onChange={onToggleSource}
+          />
         </Stack>
       ) : null}
 
