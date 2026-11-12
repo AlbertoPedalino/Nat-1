@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Box, TextField, Tooltip, Typography } from '@mui/material';
-import { Minus, Plus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { currencyVariant, HOVER_SUBTRACT, HOVER_ADD, buttonBaseSx } from './currencyVariants.js';
+import { currencyVariant, HOVER_SUBTRACT } from './currencyVariants.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { ONE_LINE_SX } from '../../ui/textStyles.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
+import CountStepper from '../../ui/CountStepper.jsx';
 
 export function CurrencyCoinBox({
   coin,
@@ -38,13 +39,6 @@ export function CurrencyCoinBox({
     fontWeight: FONT_WEIGHTS.bold,
     lineHeight: LINE_HEIGHTS.tight,
     textTransform: 'uppercase',
-  };
-
-  const stepButtonSx = {
-    ...buttonBaseSx,
-    width: v.stepper.button,
-    height: v.stepper.button,
-    color: 'text.secondary',
   };
 
   const commit = (nextValue) => {
@@ -204,58 +198,43 @@ export function CurrencyCoinBox({
           'aria-label': `${coin.label} amount`,
         } }}
       />
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: v.stepper.columns,
-          overflow: 'hidden',
-          mt: v.stepper.mt,
-          border: 2,
-          borderColor: UI_COLORS.edge,
-          borderRadius: 1,
-          bgcolor: v.stepper.bgcolor,
-        }}
-      >
-        <TipIconButton title={`Subtract ${addStep}`} size="small" disabled={amount <= 0 && (!focused || draft === '')} onClick={() => step(-addStep)} sx={{ ...stepButtonSx, '&:hover': { color: HOVER_SUBTRACT } }}>
-          <Minus size={v.stepper.icon} />
-        </TipIconButton>
-        <TextField
-          value={stepDraft}
-          onChange={handleStepChange}
-          placeholder="1"
-          size="small"
-          variant="standard"
-          fullWidth
-          sx={{
-            '& .MuiInputBase-root': {
-              height: v.stepper.button,
-              borderLeft: 1,
-              borderColor: 'divider',
-            },
-            '& input': {
-              textAlign: 'center',
-              fontFamily: v.fontFamily,
-              fontSize: v.stepper.stepFontSize,
-              fontWeight: FONT_WEIGHTS.bold,
-              color: v.stepper.stepColor,
-              py: 0,
-            },
-          }}
-          slotProps={{ htmlInput: {
-            inputMode: 'numeric',
-            pattern: '[0-9]*',
-            'aria-label': `Custom ${coin.label} add amount`,
-          }, input: { disableUnderline: true } }}
-        />
-        <TipIconButton title={`Add ${addStep}`} size="small" onClick={() => step(addStep)} sx={{
-              ...stepButtonSx,
-              borderLeft: 1,
-              borderColor: 'divider',
-              '&:hover': { color: HOVER_ADD },
-            }}>
-          <Plus size={v.stepper.icon} />
-        </TipIconButton>
-      </Box>
+      {/* The figure between the buttons is how much one press adds or takes
+          away (1 unless typed). */}
+      <CountStepper
+        fullWidth
+        size={v.stepper.button}
+        label={`${coin.label} by ${addStep}`}
+        canDecrease={amount > 0 || (focused && draft !== '')}
+        onStep={(delta) => step(delta * addStep)}
+        sx={{ mt: v.stepper.mt }}
+        value={(
+          <TextField
+            value={stepDraft}
+            onChange={handleStepChange}
+            placeholder="1"
+            size="small"
+            variant="standard"
+            fullWidth
+            sx={{
+              // Sunk, so the step amount reads as a field to type into.
+              '& .MuiInputBase-root': { height: v.stepper.button, bgcolor: v.stepper.bgcolor, borderRadius: 1 },
+              '& input': {
+                textAlign: 'center',
+                fontFamily: v.fontFamily,
+                fontSize: v.stepper.stepFontSize,
+                fontWeight: FONT_WEIGHTS.bold,
+                color: v.stepper.stepColor,
+                py: 0,
+              },
+            }}
+            slotProps={{ htmlInput: {
+              inputMode: 'numeric',
+              pattern: '[0-9]*',
+              'aria-label': `Custom ${coin.label} add amount`,
+            }, input: { disableUnderline: true } }}
+          />
+        )}
+      />
     </Box>
   );
 }

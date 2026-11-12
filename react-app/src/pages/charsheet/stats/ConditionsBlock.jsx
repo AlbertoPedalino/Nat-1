@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Button, alpha } from '@mui/material';
-import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
+import { ChevronDown, ListChecks, X } from 'lucide-react';
 import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
 import {
@@ -20,6 +20,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
@@ -29,26 +30,28 @@ const DEAD_ACCENT = UI_COLORS.dangerStrong;
 const pillSx = { fontSize: FONT_SIZES.xxxs };
 
 // Exhaustion is graded 1–6: a stepper pill instead of a plain toggle. − at level
-// 1 removes it (level 0); + caps at 6 (death, shown red). The label still expands
-// the description card like other pills.
+// 1 removes it (level 0), so it is never disabled; + caps at 6 (death, shown
+// red). The label between the buttons still expands the description card like
+// other pills.
 function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
   const dead = level >= EXHAUSTION_MAX;
   const accent = dead ? DEAD_ACCENT : COND_ACCENT;
-  const StepButton = ({ label, onClick, disabled, children }) => (
-    <Box component="button" type="button" aria-label={label} disabled={disabled}
-      onClick={(e) => { e.stopPropagation(); if (!disabled) onClick(); }}
-      sx={{ display: 'inline-flex', p: 0, border: 0, bgcolor: 'transparent', color: accent, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? OPACITY.line : 1 }}>
-      {children}
-    </Box>
-  );
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: CONTROL_HEIGHTS.sm, px: 0.5, border: 2, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? inkShadow(accent, 2) : 'none' }}>
-      <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={ICON_SIZES.xxs} /></StepButton>
-      <Typography component="span" onClick={hasDesc ? onToggle : undefined}
-        sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
-        {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
-      </Typography>
-      <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={ICON_SIZES.xxs} /></StepButton>
+      <CountStepper
+        size={14}
+        tone={accent}
+        label="exhaustion"
+        canIncrease={!dead}
+        onStep={(delta) => onSet(level + delta)}
+        sx={{ gap: 0.25 }}
+        value={(
+          <Typography component="span" onClick={hasDesc ? onToggle : undefined}
+            sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+            {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
+          </Typography>
+        )}
+      />
       {hasDesc ? (
         <ChevronDown size={ICON_SIZES.xxs} style={{ color: accent, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s', cursor: 'pointer' }}
           onClick={(e) => { e.stopPropagation(); onToggle(); }} />

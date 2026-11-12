@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -240,9 +241,13 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   <Typography sx={{ flex: 1, fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
-                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.75 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: FONT_SIZES.lg, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>{value}</Typography>
-                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.75 }}>+</Button>
+                  <CountStepper
+                    value={value}
+                    label={`level ${entry.level} slots`}
+                    canDecrease={value > 0}
+                    canIncrease={slotRecoveryRemaining >= entry.level && value < entry.expended}
+                    onStep={(delta) => adjustSlotRecoveryLevel(entry.level, delta)}
+                  />
                 </Box>
               );
             })}

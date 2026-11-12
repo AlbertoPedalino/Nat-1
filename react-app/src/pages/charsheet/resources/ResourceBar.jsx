@@ -1,15 +1,13 @@
 import { useCallback, useRef } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
 
-const btnSx = {
-  fontSize: FONT_SIZES.md, ...TEXT_STYLES.figure, minWidth: 24, px: 0.5, py: 0, lineHeight: LINE_HEIGHTS.normal,
-  ...actionButtonToneSx(UI_COLORS.accentText),
-};
+// The bar and its figure, side by side between the stepper's buttons.
+const barRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 
 const trackSx = {
   position: 'relative', flex: 1, height: 10,
@@ -63,18 +61,23 @@ export default function ResourceBar({ value, max, onChange }) {
 
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
 
+  // The stepper's − and + flank the bar: one control, so a resource is changed
+  // the same way as any other count.
   return (
-    <>
-      <Button size="small" variant="outlined" disabled={value <= 0}
-        onClick={(e) => { e.stopPropagation(); onChange(-1); }} sx={btnSx}
-      >−</Button>
-      <Box onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} sx={trackSx}>
-        <Box sx={fillSx(pct)} />
-      </Box>
-      <Typography sx={labelSx}>{value}/{max}</Typography>
-      <Button size="small" variant="outlined" disabled={value >= max}
-        onClick={(e) => { e.stopPropagation(); onChange(1); }} sx={btnSx}
-      >+</Button>
-    </>
+    <CountStepper
+      fullWidth
+      label="uses"
+      canDecrease={value > 0}
+      canIncrease={value < max}
+      onStep={onChange}
+      value={(
+        <Box sx={barRowSx}>
+          <Box onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} sx={trackSx}>
+            <Box sx={fillSx(pct)} />
+          </Box>
+          <Typography sx={labelSx}>{value}/{max}</Typography>
+        </Box>
+      )}
+    />
   );
 }

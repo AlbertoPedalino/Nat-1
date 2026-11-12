@@ -4,12 +4,13 @@ import { Dices } from 'lucide-react';
 import { DICE_LIMITS } from './dice.js';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { signed, withModifier } from '../../ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../ui/Caption.jsx';
+import CountStepper from '../../ui/CountStepper.jsx';
+import DiceCountPicker from './DiceCountPicker.jsx';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -18,12 +19,6 @@ import Caption from '../../ui/Caption.jsx';
 // keeps the identical picker UI in one place across the app.
 
 const DICE_TYPES = [2, 4, 6, 8, 10, 12, 20, 100];
-
-// A two-sided die is a coin, and calling it one is clearer than "d2" — it is
-// also what gets thrown on the battle map. The formula it builds is still
-// `Nd2`, which is what every roller in the app understands.
-const DIE_LABELS = { 2: 'Coin' };
-const dieLabel = (faces) => DIE_LABELS[faces] || `d${faces}`;
 
 // `footer`: a line under the dice (who will see the roll, for the GM).
 export default function CustomRollDialog({
@@ -81,29 +76,16 @@ export default function CustomRollDialog({
       )}
       {...dialogProps}
     >
-      {DICE_TYPES.map((faces) => (
-        <Box key={faces} sx={CUSTOM_ROLL_SX.diceRow}>
-          <Typography sx={CUSTOM_ROLL_SX.diceLabel}>{dieLabel(faces)}</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Button size="small" variant="outlined" onClick={() => adjustDie(faces, -1)} disabled={!counts[faces]} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
-            <Typography sx={CUSTOM_ROLL_SX.countLabel}>{counts[faces] || 0}</Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => adjustDie(faces, 1)}
-              disabled={totalDice >= DICE_LIMITS.maxDice}
-              sx={CUSTOM_ROLL_SX.stepBtn}
-            >
-              +
-            </Button>
-          </Box>
-        </Box>
-      ))}
+      <DiceCountPicker
+        dice={DICE_TYPES}
+        counts={counts}
+        onStep={adjustDie}
+        canDecrease={(_, count) => count > 0}
+        canIncrease={() => totalDice < DICE_LIMITS.maxDice}
+      />
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, py: 0.75 }}>
         <Typography sx={CUSTOM_ROLL_SX.modLabel}>Modifier</Typography>
-        <Button size="small" variant="outlined" onClick={() => setModifier((m) => m - 1)} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
-        <Typography sx={CUSTOM_ROLL_SX.countLabel}>{signed(modifier)}</Typography>
-        <Button size="small" variant="outlined" onClick={() => setModifier((m) => m + 1)} sx={CUSTOM_ROLL_SX.stepBtn}>+</Button>
+        <CountStepper value={signed(modifier)} size={24} label="modifier" onStep={(delta) => setModifier((m) => m + delta)} />
       </Box>
       {/* The formula and the dice-cap lines always take their space, hidden when
           empty: the dialog is centred, so a line appearing on the first tap would
@@ -120,10 +102,6 @@ export default function CustomRollDialog({
 }
 
 const CUSTOM_ROLL_SX = {
-  diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.5, ...LIST_ROW_RULE_SX },
-  diceLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary', minWidth: 42 },
-  countLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, minWidth: 24, textAlign: 'center' },
-  stepBtn: { minWidth: 28, px: 0.5, py: 0.25, fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } },
   modLabel: { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: 'text.secondary', mr: 0.5 },
   formula: { fontFamily: UI_FONTS.mono, fontSize: FONT_SIZES.lg, color: UI_COLORS.secondary, textAlign: 'center', py: 0.5 },
 };

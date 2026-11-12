@@ -19,8 +19,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { stepButtonSx } from '../../../shared/ui/pressable.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import DiceCountPicker from '../../../shared/character/dice/DiceCountPicker.jsx';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -140,38 +140,13 @@ export default function CriticalFumblesDialog({ open, onClose }) {
             Choose any combination. At least one die is always kept.
           </Caption>
         </Stack>
-        <Box sx={diceGridSx}>
-          {FUMBLE_DICE_TYPES.map((faces) => {
-            const count = Number(table?.dice?.[faces]) || 0;
-            return (
-              <Paper key={faces} variant="outlined" sx={dieControlSx}>
-                <Typography sx={dieLabelSx}>d{faces}</Typography>
-                <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => adjustDie(faces, -1)}
-                    disabled={!count || totalDice <= 1}
-                    sx={{ ...stepButtonSx(25), fontWeight: FONT_WEIGHTS.heavy }}
-                    aria-label={`Remove d${faces}`}
-                  >
-                    −
-                  </Button>
-                  <Typography sx={countSx}>{count}</Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => adjustDie(faces, 1)}
-                    sx={{ ...stepButtonSx(25), fontWeight: FONT_WEIGHTS.heavy }}
-                    aria-label={`Add d${faces}`}
-                  >
-                    +
-                  </Button>
-                </Stack>
-              </Paper>
-            );
-          })}
-        </Box>
+        <DiceCountPicker
+          dice={FUMBLE_DICE_TYPES}
+          counts={table?.dice}
+          onStep={adjustDie}
+          canDecrease={(_, count) => count > 0 && totalDice > 1}
+          sx={diceGridSx}
+        />
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 0.25, sm: 1 }}
@@ -246,36 +221,13 @@ const sectionSx = {
   p: { xs: 1, sm: 1.25 },
 };
 
+// The dialog is wide, so the dice rows run in columns.
 const diceGridSx = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 1fr))',
-  gap: 0.75,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+  columnGap: 2,
   my: 1,
 };
-
-const dieControlSx = {
-  px: 0.75,
-  py: 0.5,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 0.5,
-  bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint),
-};
-
-const dieLabelSx = {
-  ...TEXT_STYLES.figure,
-  fontSize: FONT_SIZES.md,
-};
-
-const countSx = {
-  minWidth: 18,
-  textAlign: 'center',
-  fontFamily: UI_FONTS.mono,
-  fontSize: FONT_SIZES.lg,
-  color: UI_COLORS.accentText,
-};
-
 
 const formulaSx = {
   fontFamily: UI_FONTS.mono,

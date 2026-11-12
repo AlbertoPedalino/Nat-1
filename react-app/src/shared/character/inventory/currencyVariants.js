@@ -1,16 +1,9 @@
-import { UI_COLORS, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES, LETTER_SPACINGS } from '../../ui/fonts.js';
 
 // Accent colors shared across every variant.
 export const HOVER_SUBTRACT = UI_COLORS.danger;
 export const HOVER_ADD = UI_COLORS.success;
-
-export const buttonBaseSx = {
-  borderRadius: 0,
-  '&.Mui-disabled': {
-    opacity: OPACITY.line,
-  },
-};
 
 // Per-mode visual config. Add a new mode by adding an entry here — the coin
 // components read it through currencyVariant() and never branch on the mode name.
@@ -23,7 +16,6 @@ const VARIANTS = {
     labelBottom: { fontSize: FONT_SIZES.xxs, letterSpacing: LETTER_SPACINGS.sm },
     field: { variant: 'outlined', fontSize: FONT_SIZES.xxl, color: 'text.primary', py: 0.75 },
     stepper: {
-      columns: '24px minmax(34px, 1fr) 24px',
       mt: 0.5,
       bgcolor: 'background.default',
       button: 24,
@@ -40,7 +32,6 @@ const VARIANTS = {
     labelBottom: { fontSize: FONT_SIZES.xxxs, letterSpacing: LETTER_SPACINGS.lg },
     field: { variant: 'standard', fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText, py: 0.25 },
     stepper: {
-      columns: '20px minmax(26px, 1fr) 20px',
       mt: 0.25,
       bgcolor: UI_COLORS.surfaceSunken,
       button: 20,

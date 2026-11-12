@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Box, Button, IconButton, Tooltip, Typography, alpha } from '@mui/material';
-import { AlertTriangle, Archive, Check, Minus, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Archive, Check, Trash2 } from 'lucide-react';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -155,15 +155,15 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               <Box component="span">
                 Charges
               </Box>
-              <ChargeStepButton ariaLabel={`Spend one ${item.name} charge`} disabled={chargeCurrent <= 0} onClick={() => actions.charges(index, -1)}>
-                <Minus size={ICON_SIZES.xxs} />
-              </ChargeStepButton>
-              <Box component="span" sx={{ minWidth: 28, textAlign: 'center' }}>
-                {chargeCurrent}/{chargeMaximum}
-              </Box>
-              <ChargeStepButton ariaLabel={`Restore one ${item.name} charge`} disabled={chargeCurrent >= chargeMaximum} onClick={() => actions.charges(index, 1)}>
-                <Plus size={ICON_SIZES.xxs} />
-              </ChargeStepButton>
+              <CountStepper
+                value={`${chargeCurrent}/${chargeMaximum}`}
+                size={16}
+                tone={ITEM_ATTUNEMENT}
+                label={`${item.name} charges`}
+                canDecrease={chargeCurrent > 0}
+                canIncrease={chargeCurrent < chargeMaximum}
+                onStep={(delta) => actions.charges(index, delta)}
+              />
             </Box>
           ) : null}
           {/* Where the item is and how many, apart from how it is being used. */}
@@ -191,28 +191,6 @@ function ItemFlagButton({ def, active, onClick }) {
       sx={{ ...itemStateChipBaseSx, ...toggleSx(active, tone) }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
-  );
-}
-
-function ChargeStepButton({ children, disabled = false, ariaLabel, onClick }) {
-  return (
-    <IconButton
-      size="small"
-      disabled={disabled}
-      aria-label={ariaLabel}
-      onClick={onClick}
-      sx={{
-        width: 16,
-        height: 16,
-        p: 0,
-        color: 'inherit',
-        borderRadius: 0.375,
-        '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, OPACITY.fill) },
-        '&.Mui-disabled': { color: 'inherit', opacity: OPACITY.line },
-      }}
-    >
-      {children}
-    </IconButton>
   );
 }
 
