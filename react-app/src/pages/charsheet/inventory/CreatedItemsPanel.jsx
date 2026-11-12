@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
+import { ITEM_DETAILS_SX, ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import { addCraftedItem, removeOneCrafted, craftedCount, craftedCountFor } from '../../../shared/character/inventory/craftedItemState.js';
 import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
@@ -243,7 +243,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             <ExpandableCard
               key={value}
               containerSx={{ border: 2, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
-              detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
+              detailsSx={ITEM_DETAILS_SX}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75 }}>

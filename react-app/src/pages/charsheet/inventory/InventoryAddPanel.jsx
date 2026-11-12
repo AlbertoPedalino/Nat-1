@@ -2,25 +2,13 @@ import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import {
-  ItemReferenceBody,
-  QuantityAdder,
-} from '../../../shared/character/inventory/ItemReference.jsx';
+import { ItemAddRow } from '../../../shared/character/inventory/ItemReference.jsx';
+import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
+import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import {
-  hasActiveItemFilters,
-  itemMatchesFilters,
-} from '../../../shared/character/inventory/itemFilters.js';
-import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { compareItemsBySearch, itemMatchesPreparedSearch } from './itemSearch.js';
-import {
-  InventoryFilterButtons,
-  compactInputSx,
-  inventorySectionSx,
-} from './inventoryControls.jsx';
+import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
+import { compactInputSx, inventorySectionSx } from './inventoryControls.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
@@ -29,7 +17,7 @@ import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -44,26 +32,6 @@ function parseDecimalInput(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-// Add-list row: tap to expand the item reference (props + live rich text),
-// pick a quantity, then Add. The quantity adder stops propagation so it never
-// toggles the expand.
-function AddResultRow({ item, onAdd }) {
-  return (
-    <ExpandableCard
-      containerSx={{ ...CARD_SX, flexShrink: 0, overflow: 'hidden' }}
-      detailsSx={{ px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary' }}
-      details={<ItemReferenceBody item={item} />}
-      summary={({ toggle }) => (
-        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.75, cursor: 'pointer' }}>
-          <ItemNameIcon item={item} />
-          <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{item.name}</Typography>
-          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
-        </Box>
-      )}
-    />
-  );
-}
-
 const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem, resetKey }) {
   const page = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
   const { visible, listProps } = page;
@@ -71,7 +39,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   return (
     <Box {...listProps} sx={{ ...SURFACES.inset, maxHeight: 320, overflowY: 'auto', mb: 0.75, p: 0.25, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
       {visible.map((item) => (
-        <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
+        <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
       <ShowMoreButton page={page} />
       {!items.length && (
@@ -96,28 +64,11 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
   const [customWeight, setCustomWeight] = useState('');
   const [customValue, setCustomValue] = useState('');
 
-  // The pool the filter panel builds its dropdowns from: narrowed by the chip
-  // and the search box, but *not* by the panel's own choices (see InventoryList).
-  const searchPool = useMemo(() => {
-    const q = deferredSearch.trim();
-    let items = itemsDb;
-    if (filter !== 'all') items = items.filter((item) => item._itemType === filter);
-    if (q) items = items.filter((item) => itemMatchesPreparedSearch(item, q));
-    return items;
-  }, [itemsDb, deferredSearch, filter]);
-
-  const addList = useItemFilters(searchPool);
-
-  // Paging resets on a changed *query*, not on a changed array.
-  const searchResetKey = `${deferredSearch.trim()}|${filter}|${addList.key}`;
-
-  const searchResults = useMemo(() => {
-    const q = deferredSearch.trim();
-    const items = hasActiveItemFilters(addList.filters)
-      ? searchPool.filter((item) => itemMatchesFilters(item, addList.filters))
-      : searchPool;
-    return q ? [...items].sort(compareItemsBySearch(q)) : items;
-  }, [searchPool, deferredSearch, addList.filters]);
+  // Database items, narrowed and ordered as on every item list
+  // (useItemListQuery); the order is relevance to the search.
+  const query = deferredSearch.trim();
+  const compare = useMemo(() => compareItemsBySearch(query), [query]);
+  const { results: searchResults, filterList: addList, resetKey: searchResetKey } = useItemListQuery(itemsDb, { chip: filter, query, compare });
 
   const addCustom = () => {
     const name = customName.trim();
@@ -160,7 +111,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             sx={{ ...compactInputSx, mb: 0.5 }}
           />
 
-          <InventoryFilterButtons value={filter} onChange={setFilter} />
+          <ItemGroupFilter value={filter} onChange={setFilter} />
 
           <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.5 }} />
 

@@ -1,26 +1,24 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Divider, IconButton, List, Stack, Tooltip, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
-import { formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
+import { ItemAddRow, ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
+import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
+import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
+import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import { stepButtonSx } from '../../../shared/ui/pressable.js';
+import { formatWeight, itemQty, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import { itemMatchesFilters } from '../../../shared/character/inventory/itemFilters.js';
-import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
-import {
-  ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip,
-} from '../../../shared/character/inventory/itemGroups.js';
+import { OWNED_ITEM_CHIPS } from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { byName } from '../../../shared/lists.js';
-import { itemSearchText } from './startingEquipment.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
-import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
@@ -48,41 +46,6 @@ function useDebouncedSearch(value, commit) {
   return [local, change];
 }
 
-function FilterChips({ filters, value, onChange }) {
-  return (
-    <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-      {filters.map((filter) => (
-        <Chip
-          key={filter.key}
-          label={filter.label}
-          color={value === filter.key ? 'primary' : 'default'}
-          onClick={() => onChange(filter.key)}
-        />
-      ))}
-    </Stack>
-  );
-}
-
-// Add-list row: tap to expand the item reference (props + live rich text),
-// pick a quantity, then Add. The quantity adder stops propagation so it never
-// toggles the expand.
-function AddItemRow({ item, onAdd }) {
-  return (
-    <ExpandableCard
-      containerSx={{ ...LIST_ROW_RULE_SX }}
-      bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
-      body={<ItemReferenceBody item={item} />}
-      header={({ open, toggle }) => (
-        <ListItemButton onClick={toggle} aria-expanded={open} sx={{ gap: 1, alignItems: 'flex-start' }}>
-          <ItemNameIcon item={item} />
-          <ListItemText primary={<Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.regular }}>{item.name}</Typography>} />
-          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} sx={{ alignSelf: 'center' }} />
-        </ListItemButton>
-      )}
-    />
-  );
-}
-
 // Current-inventory row: tap the name to expand the item reference; keep the
 // quantity controls and full-row remove action on the right.
 function CurrentInventoryRow({ item, index, dispatch }) {
@@ -98,17 +61,15 @@ function CurrentInventoryRow({ item, index, dispatch }) {
             <Typography sx={{ ...BUILDER_TEXT.itemName, minWidth: 0 }} noWrap>{item.name}</Typography>
           </Box>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
-            <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
-            <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty ?? 1}</Typography>
-            <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: 1 })}>+</Button>
+            <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => dispatch({ type: 'inventory/qty', index, delta })} />
             <Tooltip title="Remove row">
               <IconButton
                 size="small"
                 aria-label={`Remove ${item.name}`}
                 onClick={() => dispatch({ type: 'inventory/remove', index })}
-                sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+                sx={stepButtonSx(20, { danger: true })}
               >
-                <Trash2 size={ICON_SIZES.md} />
+                <Trash2 size={ICON_SIZES.xs} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -117,6 +78,9 @@ function CurrentInventoryRow({ item, index, dispatch }) {
     />
   );
 }
+
+// An owned row's item (rows keep their inventory index beside it).
+const entryItem = (entry) => entry.item;
 
 export default function EquipmentStep({ state, dispatch }) {
   const { character, search, inventoryFilter, currentInventoryFilter } = state;
@@ -127,36 +91,18 @@ export default function EquipmentStep({ state, dispatch }) {
   const deferredQuery = useDeferredValue(localQuery);
   const query = deferredQuery.toLowerCase();
 
-  // The pool each panel builds its dropdowns from: narrowed by the chip and the
-  // search box, but not by the panel's own choices. Otherwise chip "Armor" would
-  // keep offering "Martial Melee Weapon", which can only ever return nothing.
-  const addPool = useMemo(() => state.data.items.filter((item) => (
-    matchesItemGroupChip(item, inventoryFilter)
-    && (!query || itemSearchText(item).includes(query))
-  )), [state.data.items, inventoryFilter, query]);
-
-  // Two independent advanced-filter sets: narrowing the item DB above must not
-  // silently hide rows in the carried list below. Both live in the reducer, like
-  // the chips and the search boxes, so leaving the step and coming back does not
-  // silently drop half the query.
-  const addList = useItemFilters(addPool, [
-    state.inventoryFilters,
-    (filters) => dispatch({ type: 'inventory/filters', filters }),
-  ]);
-
-  const sortedItems = useMemo(() => addPool
-    .filter((item) => itemMatchesFilters(item, addList.filters))
-    .sort((a, b) => {
-      const aBase = !a.rarity || a.rarity === 'none' ? 0 : 1;
-      const bBase = !b.rarity || b.rarity === 'none' ? 0 : 1;
-      if (aBase !== bBase) return aBase - bBase;
-      return byName(a, b);
-    }), [addPool, addList.filters]);
-
-  const addPage = usePagedList(sortedItems, {
-    pageSize: ADD_LIST_PAGE,
-    resetKey: `${query}|${inventoryFilter}|${addList.key}`,
+  // The item database, narrowed and ordered as on every item list
+  // (useItemListQuery, compareItemsBySearch). Its advanced filters live in the
+  // reducer, like the chips and the search boxes, so leaving the step and
+  // coming back keeps the whole query.
+  const compare = useMemo(() => compareItemsBySearch(query), [query]);
+  const { results: sortedItems, filterList: addList, resetKey: addResetKey } = useItemListQuery(state.data.items, {
+    chip: inventoryFilter,
+    query,
+    compare,
+    filtersState: [state.inventoryFilters, (filters) => dispatch({ type: 'inventory/filters', filters })],
   });
+  const addPage = usePagedList(sortedItems, { pageSize: ADD_LIST_PAGE, resetKey: addResetKey });
 
   const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
   const totalWeight = totalCarriedWeight(character.inventory, character.currency);
@@ -167,29 +113,14 @@ export default function EquipmentStep({ state, dispatch }) {
     search.currentInventory,
     (value) => dispatch({ type: 'search/set', scope: 'currentInventory', value }),
   );
-  const currentSearch = currentQuery.trim().toLowerCase();
-  const currentPool = useMemo(() => character.inventory
-    .map((item, index) => ({ item, index }))
-    .filter(({ item }) => (
-      matchesItemGroupChip(item, currentInventoryFilter)
-      && (!currentSearch || itemSearchText(item).includes(currentSearch))
-    )), [character.inventory, currentSearch, currentInventoryFilter]);
-  const currentPoolItems = useMemo(() => currentPool.map((entry) => entry.item), [currentPool]);
-
-  const currentList = useItemFilters(currentPoolItems, [
-    state.currentInventoryFilters,
-    (filters) => dispatch({ type: 'inventory/current-filters', filters }),
-  ]);
-
-  const currentInventory = useMemo(
-    () => currentPool.filter(({ item }) => itemMatchesFilters(item, currentList.filters)),
-    [currentPool, currentList.filters],
-  );
-
-  const currentPage = usePagedList(currentInventory, {
-    pageSize: CURRENT_LIST_PAGE,
-    resetKey: `${currentSearch}|${currentInventoryFilter}|${currentList.key}`,
+  const currentEntries = useMemo(() => character.inventory.map((item, index) => ({ item, index })), [character.inventory]);
+  const { results: currentInventory, filterList: currentList, resetKey: currentResetKey } = useItemListQuery(currentEntries, {
+    chip: currentInventoryFilter,
+    query: currentQuery,
+    getItem: entryItem,
+    filtersState: [state.currentInventoryFilters, (filters) => dispatch({ type: 'inventory/current-filters', filters })],
   });
+  const currentPage = usePagedList(currentInventory, { pageSize: CURRENT_LIST_PAGE, resetKey: currentResetKey });
 
   return (
     <Stack spacing={2}>
@@ -224,8 +155,7 @@ export default function EquipmentStep({ state, dispatch }) {
             size="medium"
             iconSize={18}
           />
-          <FilterChips
-            filters={ITEM_GROUP_CHIPS}
+          <ItemGroupFilter
             value={inventoryFilter}
             onChange={(key) => dispatch({ type: 'inventory/filter', filter: key })}
           />
@@ -237,11 +167,11 @@ export default function EquipmentStep({ state, dispatch }) {
           </Typography>
 
           <Box {...addPage.listProps} sx={scrollWellSx(430)}>
-            <List dense disablePadding>
+            <Box sx={{ p: 0.5 }}>
               {addPage.visible.map((item) => (
-                <AddItemRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
+                <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
               ))}
-            </List>
+            </Box>
             <ShowMoreButton page={addPage} sx={{ py: 1 }} />
           </Box>
 
@@ -256,8 +186,8 @@ export default function EquipmentStep({ state, dispatch }) {
                 size="medium"
                 iconSize={18}
               />
-              <FilterChips
-                filters={OWNED_ITEM_CHIPS}
+              <ItemGroupFilter
+                chips={OWNED_ITEM_CHIPS}
                 value={currentInventoryFilter}
                 onChange={(filter) => dispatch({ type: 'inventory/current-filter', filter })}
               />

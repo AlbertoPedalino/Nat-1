@@ -8,39 +8,26 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import InventoryRow from './InventoryRow.jsx';
 import { itemQty } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import {
-  hasActiveItemFilters,
-  itemMatchesFilters,
-} from '../../../shared/character/inventory/itemFilters.js';
-import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
+import { hasActiveItemFilters } from '../../../shared/character/inventory/itemFilters.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import {
-  ITEM_GROUP_CHIPS,
-  ITEM_GROUP_KEYS,
-  OWNED_ITEM_CHIPS,
-  itemGroupKey as itemType,
-  matchesItemGroupChip,
-} from '../../../shared/character/inventory/itemGroups.js';
-import { itemMatchesSearch, byItemName } from './itemSearch.js';
-import {
-  CHIP_ICONS,
-  InventoryFilterButtons,
-  compactInputSx,
-  inventorySectionSx,
-  withIcons,
-} from './inventoryControls.jsx';
+import { ITEM_GROUP_CHIPS, ITEM_GROUP_KEYS, OWNED_ITEM_CHIPS, itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
+import { byItemName } from '../../../shared/character/inventory/itemSearch.js';
+import ItemGroupFilter, { ITEM_GROUP_ICONS } from '../../../shared/character/inventory/ItemGroupFilter.jsx';
+import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
+import { compactInputSx, inventorySectionSx } from './inventoryControls.jsx';
 import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
 
-const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
 
 // The inventory section headers, in shelf order. Derived from the same keys, so
 // a new group cannot end up filterable but unrenderable.
 const GROUP_LABELS = Object.fromEntries(ITEM_GROUP_CHIPS.map((chip) => [chip.key, chip.label]));
-const GROUPS = ITEM_GROUP_KEYS.map((key) => ({ key, label: GROUP_LABELS[key], icon: CHIP_ICONS[key] }));
+const GROUPS = ITEM_GROUP_KEYS.map((key) => ({ key, label: GROUP_LABELS[key], icon: ITEM_GROUP_ICONS[key] }));
+// An inventory row's item (rows keep their index beside it).
+const entryItem = (entry) => entry.item;
 
 // The owned inventory is a different scale from the item database — dozens of
 // rows, not thousands — so a small page keeps the first paint light and
@@ -96,27 +83,12 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
   const deferredInventorySearch = useDeferredValue(inventorySearch);
   const [inventoryFilter, setInventoryFilter] = useState('all');
 
-  // The pool each filter panel builds its dropdowns from: narrowed by the chip
-  // and the search box, but *not* by the panel's own choices. Otherwise the
-  // chips and the Type dropdown contradict each other — chip "Armor" would keep
-  // offering "Martial Melee Weapon", which can only ever return nothing.
-  // Excluding the panel's own choices keeps a picked value from collapsing its
-  // own dropdown to that single entry.
+  // Owned items, each beside its inventory index, narrowed as on every item
+  // list (useItemListQuery).
   const resolvedInv = useMemo(() => inv.map((item, index) => ({ item, index, type: itemType(item) })), [inv]);
-  const inventoryPool = useMemo(() => {
-    const q = deferredInventorySearch.trim();
-    return resolvedInv.filter((entry) => (
-      matchesItemGroupChip(entry.item, inventoryFilter) && itemMatchesSearch(entry.item, q)
-    ));
-  }, [deferredInventorySearch, inventoryFilter, resolvedInv]);
-  const inventoryPoolItems = useMemo(() => inventoryPool.map((entry) => entry.item), [inventoryPool]);
-
-  const inventoryList = useItemFilters(inventoryPoolItems);
-
-  const visibleInventory = useMemo(
-    () => inventoryPool.filter((entry) => itemMatchesFilters(entry.item, inventoryList.filters)),
-    [inventoryPool, inventoryList.filters],
-  );
+  const { results: visibleInventory, filterList: inventoryList, resetKey: inventoryResetKey } = useItemListQuery(resolvedInv, {
+    chip: inventoryFilter, query: deferredInventorySearch, getItem: entryItem,
+  });
   // Flattened in display order (group by group, alphabetical inside each) so a
   // page boundary falls where the reader expects, then regrouped for rendering.
   const orderedInventory = useMemo(() => {
@@ -131,10 +103,6 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
     || deferredInventorySearch.trim().length > 0
     || hasActiveItemFilters(inventoryList.filters);
 
-  // Paging resets on a changed *query*, not on a changed array: the inventory
-  // is rebuilt on every quantity tick, and resetting there would scroll the
-  // list back to the top under the user's cursor.
-  const inventoryResetKey = `${deferredInventorySearch.trim()}|${inventoryFilter}|${inventoryList.key}`;
   const inventoryPage = usePagedList(orderedInventory, { pageSize: INVENTORY_PAGE, resetKey: inventoryResetKey });
   const groupedInventory = groupEntriesByType(inventoryPage.visible);
   const profSets = useProficiencySets();
@@ -153,7 +121,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
         sx={{ ...compactInputSx, mb: 0.5 }}
       />
 
-      <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} filters={INVENTORY_FILTERS} />
+      <ItemGroupFilter value={inventoryFilter} onChange={setInventoryFilter} chips={OWNED_ITEM_CHIPS} />
 
       <ItemFilterPanel {...inventoryList.panelProps} sx={{ mb: 0.5 }} />
 

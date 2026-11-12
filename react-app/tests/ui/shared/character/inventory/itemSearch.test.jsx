@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { compareItemsBySearch, itemMatchesSearch } from '../../../../../src/pages/charsheet/inventory/itemSearch.js';
+import { compareItemsBySearch, itemMatchesSearch } from '../../../../../src/shared/character/inventory/itemSearch.js';
 
 test('every word of the query must appear in the item, punctuation and case ignored', () => {
   const item = { name: 'Longsword +1', source: 'XDMG', type: 'M', rarity: 'uncommon', property: ['V'] };

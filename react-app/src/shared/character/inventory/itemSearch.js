@@ -1,16 +1,17 @@
-import { loadItems } from '../../../shared/content/catalogs/itemData.js';
-import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/sourcePriority.js';
-import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
-import { itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
-import { byName, compareText } from '../../../shared/lists.js';
-import { cachedLoader } from '../../../shared/content/cachedLoader.js';
-import { rarityRank } from '../../../shared/character/inventory/itemRarity.js';
+import { loadItems } from '../../content/catalogs/itemData.js';
+import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
+import { itemDisplayName } from './itemIdentity.js';
+import { itemGroupKey as itemType } from './itemGroups.js';
+import { stripSource } from '../../content/nameKeys.js';
+import { byName, compareText } from '../../lists.js';
+import { cachedLoader } from '../../content/cachedLoader.js';
+import { rarityRank } from './itemRarity.js';
 
-// Searching the item database from the inventory's add panel: normalized
-// search text per item (name, type, rarity, properties), relevance order (name
-// match, then rarity and preferred source), and the items DB loaded once per tab
-// with every record prepared for search.
+// Searching items, the same way on every screen (the sheet's add panel and
+// inventory, the builder's equipment step): normalized search text per item
+// (name, type, rarity, properties), every word of the query required,
+// relevance order (name match, then preferred source and rarity), and the
+// items DB loaded once per tab with every record prepared for search.
 
 function normalizeSearch(value) {
   return String(value || '')
@@ -40,10 +41,12 @@ function itemSearchText(item) {
   ].filter(Boolean).join(' '));
 }
 
+// Every word of the query found in the item's search text (prepared once for
+// a database record, built on the spot for an owned item).
 export function itemMatchesSearch(item, query) {
   const q = normalizeSearch(query);
   if (!q) return true;
-  const haystack = itemSearchText(item);
+  const haystack = item?._searchText || itemSearchText(item);
   return q.split(' ').every((part) => haystack.includes(part));
 }
 
@@ -92,13 +95,6 @@ function prepareSearchItem(item) {
     _sourcePriority: sourcePriority(item?.source),
     _rarityPriority: rarityRank(item),
   };
-}
-
-export function itemMatchesPreparedSearch(item, query) {
-  const q = normalizeSearch(query);
-  if (!q) return true;
-  const haystack = item._searchText || itemSearchText(item);
-  return q.split(' ').every((part) => haystack.includes(part));
 }
 
 // Entries keep their original inventory index, so qty/equip/remove keep

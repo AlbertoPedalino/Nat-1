@@ -18,20 +18,6 @@ export function cpToCoins(cpValue) {
 }
 
 
-export function itemSearchText(item) {
-  return [
-    item?.name,
-    item?.source,
-    item?.sourceAlias,
-    item?.type,
-    item?.rarity,
-    item?.scfType,
-    Array.isArray(item?.focus) ? item.focus.join(' ') : '',
-    Array.isArray(item?.group) ? item.group.join(' ') : '',
-    Array.isArray(item?.items) ? item.items.map((ref) => parseInventoryItemRef(ref).name).join(' ') : '',
-  ].filter(Boolean).join(' ').toLowerCase();
-}
-
 export function flattenEquip(node, items = []) {
   if (!node) return items;
   if (typeof node === 'string') {

@@ -1,5 +1,5 @@
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
-import { loadItemsCached } from './itemSearch.js';
+import { loadItemsCached } from '../../../shared/character/inventory/itemSearch.js';
 
 const NO_ITEMS = [];
 

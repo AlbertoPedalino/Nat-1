@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { ItemPropertyTable } from './ItemPropertyTable.jsx';
 import { WeaponMasteryBlock } from '../combat/WeaponMasteryBlock.jsx';
 import { clampInt } from '../../numbers.js';
 import CountStepper from '../../ui/CountStepper.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
+import { UI_COLORS } from '../../ui/colors.js';
+import { CARD_SX } from '../../ui/interactive.js';
+import { ExpandableCard } from '../../ui/ExpandableCard.jsx';
+import { ItemNameIcon } from '../../content/FiveEToolsLink.jsx';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
@@ -43,3 +47,29 @@ export function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
     </Box>
   );
 }
+
+// An item to add from a database (the sheet's add panel, the builder's
+// equipment list): its name and icon, a quantity and Add on the right, its
+// reference text when opened. The quantity adder stops propagation, so it
+// never toggles the card.
+export function ItemAddRow({ item, onAdd }) {
+  return (
+    <ExpandableCard
+      containerSx={{ ...CARD_SX, flexShrink: 0, overflow: 'hidden', mb: 0.5 }}
+      detailsSx={ITEM_DETAILS_SX}
+      details={<ItemReferenceBody item={item} />}
+      summary={({ toggle }) => (
+        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.75, cursor: 'pointer' }}>
+          <ItemNameIcon item={item} />
+          <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{item.name}</Typography>
+          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
+        </Box>
+      )}
+    />
+  );
+}
+
+// The opened part of an item card: its reference text on the sunken tint.
+export const ITEM_DETAILS_SX = Object.freeze({
+  px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary',
+});
