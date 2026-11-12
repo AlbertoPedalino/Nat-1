@@ -9,7 +9,6 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
-import { inkOn } from '../../ui/pressable.js';
 import { celebrateNatural20 } from '../../ui/celebrate.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../ui/shadows.js';
@@ -110,7 +109,9 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
             // A roll's numbers are shouted, in the comic's lettering.
             ...TEXT_STYLES.shout, lineHeight: LINE_HEIGHTS.none,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.display,
-            color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
+            // A natural 20 or 1 is written light on its burst, the ink outline
+            // keeping it legible on the gold as on the red.
+            color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
             ...(layout.isCrit ? starburstSx(UI_COLORS.accent) : null),
             ...(layout.isFail ? splatSx(UI_COLORS.dangerDeep) : null),
             ...(!layout.isCrit && !layout.isFail ? { display: 'inline-block' } : null),

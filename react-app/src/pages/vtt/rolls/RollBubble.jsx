@@ -11,7 +11,6 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
-import { inkOn } from '../../../shared/ui/pressable.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -107,7 +106,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           <Typography sx={{
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
-            color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.isFail ? VTT_COLORS.text : layout.totalColor,
+            color: layout.isCrit || layout.isFail ? VTT_COLORS.text : layout.totalColor,
             ...(layout.isCrit ? starburstSx(VTT_COLORS.accent) : null),
             ...(layout.isFail ? splatSx(VTT_COLORS.danger) : null),
           }}>
