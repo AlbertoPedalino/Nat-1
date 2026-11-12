@@ -53,6 +53,10 @@ export default function Die3D({
   const flat = crowded && !solid;
   const drawn = flat ? [geometry.faces[landed]] : geometry.faces;
   const spinning = spin && !flat;
+  // A die the mode threw away settles in half the time, turning half as far:
+  // the eye follows the die that counts, and two whole solids tumbling side
+  // by side for the full throw made the toast stutter.
+  const spinShare = dimmed ? DROPPED_SPIN_SHARE : 1;
 
   // One size for every number on the die, taken from the longest of them and
   // from the least room any face has. Sizing each number to its own width made
@@ -75,10 +79,10 @@ export default function Die3D({
           height: size,
           ...(spinning ? {
             animationName: 'gbDieTumble',
-            animationDuration: `${spinMs}ms`,
+            animationDuration: `${spinMs * spinShare}ms`,
             animationDelay: `${tumble.delayMs}ms`,
-            '--gb-die-x': `${-tumble.x * turns}deg`,
-            '--gb-die-y': `${-tumble.y * turns}deg`,
+            '--gb-die-x': `${-tumble.x * turns * spinShare}deg`,
+            '--gb-die-y': `${-tumble.y * turns * spinShare}deg`,
           } : null),
         }}
       >
@@ -182,6 +186,9 @@ const narrowNumberSx = { position: 'relative', textShadow: NUMBER_INK, letterSpa
 // Past this many faces a die is too busy to draw in full anywhere it is not the
 // thing being watched, and its numbers are smaller than a legible glyph.
 const CROWDED_FACES = 24;
+
+// How much of the throw a die the mode threw away spends tumbling.
+const DROPPED_SPIN_SHARE = 0.5;
 
 const sceneSx = {
   perspective: '600px',
