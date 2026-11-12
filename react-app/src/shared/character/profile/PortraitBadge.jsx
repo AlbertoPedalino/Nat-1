@@ -1,9 +1,11 @@
 import { Box } from '@mui/material';
 import { usePortrait } from './usePortraits.js';
 import { UI_COLORS } from '../../ui/colors.js';
+import { inkPieceShadow } from '../../ui/shadows.js';
 
 // The round badge that stands for a character: their portrait if they have one,
-// and the class icon in their chosen colour if they do not.
+// and the class icon in their chosen colour if they do not, inked as their
+// piece on the battle map is.
 //
 // Display only. Choosing a portrait belongs to the sheet, which is the one
 // place a character is edited; everywhere else — an encounter, a battle map —
@@ -31,6 +33,9 @@ export default function PortraitBadge({ path, size, color, children, sx, ...prop
         // The colour still shows behind a portrait that has not arrived yet, so
         // the badge never flashes as a hole in the layout.
         bgcolor: color || UI_COLORS.surfaceRaised,
+        // Inked like the character's piece on the battle map (characterPieceSx):
+        // the same cut-out, wherever the character is shown.
+        boxShadow: inkPieceShadow(),
         ...sx,
       }}
     >
