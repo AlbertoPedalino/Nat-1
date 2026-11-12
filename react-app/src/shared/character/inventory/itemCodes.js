@@ -6,6 +6,7 @@ import { ABILITY_ABBREVIATIONS, DAMAGE_TYPE_NAMES } from '../../content/rulesVoc
 import { formatCopper } from './currency.js';
 import { rarityLabel } from './itemRarity.js';
 import { attunementRequirementText } from './itemAttunement.js';
+import { ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -87,15 +88,11 @@ export const WEAPON_PROPERTY_DESCRIPTIONS = {
 };
 
 const ITEM_PROPERTY_KEYS = ['property', 'properties'];
-const WEAPON_TYPE_CODES = new Set(['M', 'R', 'WEAPON']);
 
 function rawPropertyCode(value) {
   return stripSource(value).toUpperCase();
 }
 
-function rawTypeCode(item) {
-  return stripSource(item?.type).toUpperCase();
-}
 
 function collectRawProperties(item) {
   const out = [];
@@ -112,10 +109,10 @@ function weaponCategoryLabel(item) {
 }
 
 export function decodeItemTypeLabel(item) {
-  const code = rawTypeCode(item);
+  const code = itemBaseType(item);
   if (!code) return 'Gear';
   const base = ITEM_TYPE_LABELS[code] || code;
-  if (WEAPON_TYPE_CODES.has(code)) {
+  if (ANY_WEAPON_CODES.has(code)) {
     const cat = weaponCategoryLabel(item);
     return cat ? `${cat} ${base}` : base;
   }
@@ -265,7 +262,7 @@ registerItemPropertySegment('versatile', (item) => {
 });
 registerItemPropertySegment('ac', (item) => {
   if (item?.ac == null) return [];
-  const t = rawTypeCode(item);
+  const t = itemBaseType(item);
   const dexCap = item?.dexterityMax;
   const value =
     t === 'LA' ? `${item.ac} + Dex`
@@ -341,12 +338,4 @@ export function buildItemPropertySegments(item, options = {}) {
   });
 }
 
-// An item's 5etools type code without its source ('M|XPHB' -> 'M').
-export function itemBaseType(item) {
-  return stripSource(item?.type).toUpperCase();
-}
 
-// Melee or ranged weapon.
-export function isWeaponItem(item) {
-  return ['M', 'R'].includes(itemBaseType(item));
-}

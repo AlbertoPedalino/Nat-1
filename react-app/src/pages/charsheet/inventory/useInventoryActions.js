@@ -14,6 +14,7 @@ import {
   itemChargeMaximum,
   setInventoryItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
+import { isBodyArmor, isShield } from '../../../shared/character/inventory/itemKinds.js';
 
 function normalizeStoredItem(item) {
   const {
@@ -103,12 +104,11 @@ export function useInventoryActions({
     const current = invRef.current || [];
     const target = current[index];
     if (!target || !isItemCarried(target)) return;
-    const targetType = String(target.type || '').toUpperCase();
+    // One suit of armor and one shield at a time: equipping one takes off the other.
     const next = current.map((item, idx) => {
       if (idx === index) return { ...item, equipped: !item.equipped };
-      const type = String(item.type || '').toUpperCase();
-      if (['LA', 'MA', 'HA'].includes(targetType) && ['LA', 'MA', 'HA'].includes(type) && item.equipped) return { ...item, equipped: false };
-      if (targetType === 'S' && type === 'S' && item.equipped) return { ...item, equipped: false };
+      if (isBodyArmor(target) && isBodyArmor(item) && item.equipped) return { ...item, equipped: false };
+      if (isShield(target) && isShield(item) && item.equipped) return { ...item, equipped: false };
       return item;
     });
     updateInv(next);

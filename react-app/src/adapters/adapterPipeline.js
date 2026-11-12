@@ -1,11 +1,9 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
+import { isAmmo, isBodyArmor, isMeleeWeapon, isRangedWeapon, isShield, isWeaponItem } from '../shared/character/inventory/itemKinds.js';
 import { matchKey, stripSource } from '../shared/content/nameKeys.js';
 import { asArray, byName } from '../shared/lists.js';
 import { stripMarkup } from '../shared/content/markupText.js';
 
-const WEAPON_TYPES = new Set(['M', 'R']);
-const ARMOR_TYPES = new Set(['LA', 'MA', 'HA']);
-const AMMO_TYPES = new Set(['A', 'AF', 'AT']);
 
 function runAdapters(record, adapters, label, context) {
   return asArray(adapters).reduce((acc, fn) => {
@@ -274,12 +272,12 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
       itemKey: `${matchKey(name)}_${matchKey(source)}`,
-      isWeapon: WEAPON_TYPES.has(type),
-      isMeleeWeapon: type === 'M',
-      isRangedWeapon: type === 'R',
-      isArmor: ARMOR_TYPES.has(type),
-      isShield: type === 'S',
-      isAmmo: AMMO_TYPES.has(type),
+      isWeapon: isWeaponItem(raw),
+      isMeleeWeapon: isMeleeWeapon(raw),
+      isRangedWeapon: isRangedWeapon(raw),
+      isArmor: isBodyArmor(raw),
+      isShield: isShield(raw),
+      isAmmo: isAmmo(raw),
       isMagic: !!(raw.rarity && raw.rarity !== 'none'),
       isVariant: !!raw._variant,
       isAdapted: true,

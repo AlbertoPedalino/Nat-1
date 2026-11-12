@@ -1,5 +1,5 @@
 import { byName } from '../../lists.js';
-import { isWeaponItem, itemBaseType } from '../../character/inventory/itemCodes.js';
+import { isWeaponItem, itemBaseType } from '../../character/inventory/itemKinds.js';
 
 const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
 

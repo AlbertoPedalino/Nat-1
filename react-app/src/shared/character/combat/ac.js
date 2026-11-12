@@ -5,6 +5,7 @@ import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { wildShapeArmorClassWithRules } from '../forms/wildShapeRules.js';
+import { isBodyArmor, isShield, itemBaseType } from '../inventory/itemKinds.js';
 
 // The alternate AC formulas in force (Unarmored Defense, Draconic Resilience…):
 // sheet effects of type `acFormula`, gated like every other effect
@@ -33,11 +34,11 @@ export function collectAcFormulas(character) {
 }
 
 export function getEquippedArmor(character, items) {
-  return (items || []).find((i) => i.equipped && ['LA', 'MA', 'HA'].includes(i.type));
+  return (items || []).find((i) => i.equipped && isBodyArmor(i));
 }
 
 export function getEquippedShield(character, items) {
-  return (items || []).find((i) => i.equipped && i.type === 'S');
+  return (items || []).find((i) => i.equipped && isShield(i));
 }
 
 export function computeArmorItemAc(character, items) {
@@ -45,9 +46,10 @@ export function computeArmorItemAc(character, items) {
   if (!armor) return null;
   const dex = finalAbilityModifier(character, 'dex');
   const base = (Number(armor.ac) || 10) + armorEnhancement(armor);
-  if (armor.type === 'LA') return { value: base + dex, source: armor.name || 'Light Armor', label: 'Light Armor' };
-  if (armor.type === 'MA') return { value: base + Math.min(2, dex), source: armor.name || 'Medium Armor', label: 'Medium Armor' };
-  if (armor.type === 'HA') return { value: base, source: armor.name || 'Heavy Armor', label: 'Heavy Armor' };
+  const kind = itemBaseType(armor);
+  if (kind === 'LA') return { value: base + dex, source: armor.name || 'Light Armor', label: 'Light Armor' };
+  if (kind === 'MA') return { value: base + Math.min(2, dex), source: armor.name || 'Medium Armor', label: 'Medium Armor' };
+  if (kind === 'HA') return { value: base, source: armor.name || 'Heavy Armor', label: 'Heavy Armor' };
   return null;
 }
 

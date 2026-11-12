@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -32,7 +33,7 @@ const _wizardBladesingerActions = [
     "_toggleCondition": function (ctx) {
       var C = ctx && ctx.C;
       var hasArmorOrShield = (C && C.inventory || []).some(function (i) {
-        return i.equipped && ['LA','MA','HA','S'].indexOf(String(i.type || '').toUpperCase()) !== -1;
+        return i.equipped && isArmorOrShield(i);
       });
       return { canActivate: !hasArmorOrShield, isSuppressed: hasArmorOrShield };
     },

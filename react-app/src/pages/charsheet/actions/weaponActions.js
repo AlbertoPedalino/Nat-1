@@ -25,8 +25,7 @@ import {
   getWeaponNotes,
 } from '../../../shared/character/sheet/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
-import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
+import { isMeleeWeapon, isRangedWeapon, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -50,7 +49,7 @@ function weaponAbility(C, item, weaponOverride) {
 // The ability a weapon uses by the rules alone: Dexterity for a ranged
 // weapon, the better of Strength and Dexterity for a finesse one.
 function baseWeaponAbility(C, item) {
-  if (String(item?.type || '').toUpperCase() === 'R') return 'dex';
+  if (isRangedWeapon(item)) return 'dex';
   if (isFinesseWeapon(item)) return getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str')) ? 'dex' : 'str';
   return 'str';
 }
@@ -73,10 +72,9 @@ function weaponCardName(item) {
 // The weapon's own kind, for weapon-scoped effects and notes (WEAPON_FILTERS).
 // How it is held (one or two hands, alone or not) is the caller's to add.
 function weaponKindInfo(item, ctx = {}) {
-  const type = stripSource(item?.type).toUpperCase();
   return {
-    ranged: type === 'R',
-    melee: type === 'M',
+    ranged: isRangedWeapon(item),
+    melee: isMeleeWeapon(item),
     thrown: isThrownWeapon(item),
     heavy: isHeavyWeapon(item),
     finesse: isFinesseWeapon(item),
@@ -184,8 +182,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const enhancement = weaponEnhancement(item);
   const base = opts.damageBase != null ? opts.damageBase : weaponDamageBase(item);
   // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
-  const isRangedWeapon = String(item?.type || '').toUpperCase() === 'R';
-  const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon ? (ctx.strMeleeDamageBonus || 0) : 0;
+  const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon(item) ? (ctx.strMeleeDamageBonus || 0) : 0;
   // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon)
   // plus weapon-scoped rule reminders (Great Weapon Master) share one weapon profile.
   const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
@@ -309,8 +306,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohEnhancement = weaponEnhancement(offHandItem);
     const ohBase = weaponDamageBase(offHandItem);
     const ohDtype = weaponDamageType(offHandItem);
-    const ohRanged = String(offHandItem?.type || '').toUpperCase() === 'R';
-    const ohStrMeleeDamageBonus = ohAbility === 'str' && !ohRanged ? ctx.strMeleeDamageBonus : 0;
+    const ohStrMeleeDamageBonus = ohAbility === 'str' && !isRangedWeapon(offHandItem) ? ctx.strMeleeDamageBonus : 0;
     // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
     // ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
     const ohWeaponInfo = {

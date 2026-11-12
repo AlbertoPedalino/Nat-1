@@ -1,6 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { RAGE_DAMAGE_LEVELS, rageDamageBonus } from './rageDamage.js';
+import { isHeavyArmor } from '../../../shared/character/inventory/itemKinds.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -69,7 +70,7 @@ registerClassSheetActions("Barbarian", [
     "_toggleCondition": function (ctx) {
       var C = ctx && ctx.C;
       var hasHeavyArmor = (C && C.inventory || []).some(function (i) {
-        return i.equipped && String(i.type || '').toUpperCase() === 'HA';
+        return i.equipped && isHeavyArmor(i);
       });
       return { canActivate: !hasHeavyArmor, isSuppressed: hasHeavyArmor };
     }

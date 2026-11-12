@@ -5,7 +5,7 @@ import {
   getArmorKindEntry,
 } from './armorRules.js';
 import { requireEquipmentSets } from './equipmentSets.js';
-import { isWeaponItem } from '../inventory/itemCodes.js';
+import { isBodyArmor, isWeaponItem, itemBaseType } from '../inventory/itemKinds.js';
 
 export function getWeaponProficiencyInfo(character, item, weaponOverride, equipmentSets) {
   if (!item || !isWeaponItem(item)) return { proficient: true, source: '' };
@@ -29,16 +29,13 @@ export function getArmorTrainingInfo(character, item, armorOverride, equipmentSe
 export function getUntrainedArmor(character, inventory, equipmentSets) {
   const sets = requireEquipmentSets(equipmentSets, 'getUntrainedArmor');
   return (inventory || [])
-    .filter((item) => item.equipped && ARMOR_KIND_KEYS[String(item.type || '').toUpperCase()])
+    .filter((item) => item.equipped && ARMOR_KIND_KEYS[itemBaseType(item)])
     .map((item) => ({ item, info: getArmorTrainingInfo(character, item, null, sets) }))
     .filter((entry) => !entry.info.trained);
 }
 
 export function hasNonProficientArmor(character, inventory, equipmentSets) {
   return getUntrainedArmor(character, inventory, equipmentSets)
-    .some(({ item }) => {
-      const t = String(item.type || '').toUpperCase();
-      return t === 'LA' || t === 'MA' || t === 'HA';
-    });
+    .some(({ item }) => isBodyArmor(item));
 }
 

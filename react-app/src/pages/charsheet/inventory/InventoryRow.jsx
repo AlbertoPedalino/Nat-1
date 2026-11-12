@@ -24,13 +24,13 @@ import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipment
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
+import { isEquippable, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 
 // The size and lettering of the row's small controls and tags; a control's
 // look is toggleSx (raised, filled while on), a tag's the flat tint.
@@ -64,8 +64,7 @@ function ItemTagsRow({ item, character }) {
 // expanded part is the item's reference text and its extras.
 // `actions` and `attunement` are memoized by InventoryTab so the row stays memo.
 const InventoryRow = memo(function InventoryRow({ item, index, character, penaltyMsg, itemFlagDefs, attunement, actions }) {
-  const type = String(item.type || '').toUpperCase();
-  const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
+  const canEquip = isEquippable(item);
   const carried = isItemCarried(item);
   const chargeMaximum = itemChargeMaximum(item);
   const chargeCurrent = itemChargeCurrent(item);

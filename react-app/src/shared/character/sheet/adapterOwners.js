@@ -4,7 +4,7 @@ import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { matchesRequiredChoice } from '../progression/lineageMatch.js';
 import { inventoryHasFlag } from '../progression/choiceUtils.js';
 import { asArray } from '../../lists.js';
-import { stripSource } from '../../content/nameKeys.js';
+import { isBodyArmor, isHeavyArmor, isShield } from '../inventory/itemKinds.js';
 
 // The one road from a character to the adapter behaviour that applies to them.
 //
@@ -125,19 +125,18 @@ function itemFlagPasses(entry, C, sheet) {
 // `{ heavy: false }` (Fast Movement, Roving), `{ body: false, shield: false }`
 // (Unarmored Movement). Body armor is Light, Medium or Heavy.
 const ARMOR_KINDS = {
-  body: (type) => ['LA', 'MA', 'HA'].includes(type),
-  heavy: (type) => type === 'HA',
-  shield: (type) => type === 'S',
+  body: isBodyArmor,
+  heavy: isHeavyArmor,
+  shield: isShield,
 };
 
 function armorPasses(entry, C, sheet) {
   const requirement = entry.requiredArmor;
   if (!requirement || typeof requirement !== 'object') return true;
   const worn = (sheet?.sheetInventory || C?.inventory || [])
-    .filter((item) => item?.equipped)
-    .map((item) => stripSource(item.type).toUpperCase());
+    .filter((item) => item?.equipped);
   return Object.entries(requirement).every(([kind, allowed]) => (
-    allowed !== false || !worn.some((type) => ARMOR_KINDS[kind]?.(type))
+    allowed !== false || !worn.some((item) => ARMOR_KINDS[kind]?.(item))
   ));
 }
 

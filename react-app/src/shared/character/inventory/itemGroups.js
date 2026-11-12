@@ -1,12 +1,10 @@
-import { stripSource } from '../../content/nameKeys.js';
 import { isMagicItem } from './itemRarity.js';
+import { ANY_ARMOR_CODES, ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
 // The filter-chip taxonomy for item lists: which shelf an item sits on, the
 // chip set itself, and the test a chip applies. Shared so the builder and the
 // sheet cannot disagree — they used to classify independently, and a ring with
 // no rarity landed in "Magic" on one screen and "Gear" on the other.
 
-const WEAPON_TYPES = new Set(['M', 'R', 'WEAPON']);
-const ARMOR_TYPES = new Set(['LA', 'MA', 'HA', 'S', 'ARMOR']);
 const MAGIC_TYPES = new Set(['RG']);
 
 export const ITEM_GROUP_KEYS = Object.freeze(['weapon', 'armor', 'magic', 'gear']);
@@ -14,10 +12,9 @@ export const ITEM_GROUP_KEYS = Object.freeze(['weapon', 'armor', 'magic', 'gear'
 // Order matters: an item is classified by what it *is* before what it costs, so
 // a Flame Tongue is a Weapon, not Magic.
 export function itemGroupKey(item) {
-  // 5etools types can carry a source suffix ("M|XPHB").
-  const type = stripSource(item?.type).toUpperCase();
-  if (WEAPON_TYPES.has(type)) return 'weapon';
-  if (ARMOR_TYPES.has(type)) return 'armor';
+  const type = itemBaseType(item);
+  if (ANY_WEAPON_CODES.has(type)) return 'weapon';
+  if (ANY_ARMOR_CODES.has(type)) return 'armor';
   if (MAGIC_TYPES.has(type)) return 'magic';
   if (isMagicItem(item)) return 'magic';
   return 'gear';

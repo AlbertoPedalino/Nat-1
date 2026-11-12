@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -16,7 +17,7 @@ registerSubclassSheetActions("Bard_Dance", [
 // Shield: Unarmored Defense 10 + DEX + CHA, and Unarmed Strikes with DEX whose
 // damage is the Bardic Inspiration die (d6, d8 at 5, d10 at 10, d12 at 15).
 const unencumbered = (C) => !(C?.inventory || []).some((item) => (
-  item?.equipped && ['LA', 'MA', 'HA', 'S'].includes(String(item.type || '').toUpperCase())
+  item?.equipped && isArmorOrShield(item)
 ));
 
 registerSubclassSheetEffects("Bard_Dance", [

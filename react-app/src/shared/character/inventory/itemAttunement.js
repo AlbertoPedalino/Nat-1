@@ -2,12 +2,10 @@ import { itemIdentityKey } from './itemIdentity.js';
 import { isItemCarried } from './weight.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
+import { isHeldOrWorn } from './itemKinds.js';
 
 export const BASE_ATTUNEMENT_LIMIT = 3;
 
-const HELD_OR_WORN_TYPES = new Set([
-  'M', 'R', 'LA', 'MA', 'HA', 'S', 'WEAPON', 'ARMOR', 'WD', 'RD', 'ST', 'SCF',
-]);
 const SUPPORTED_REQUIREMENT_TAGS = new Set(['class', 'race', 'spellcasting']);
 
 export function requiresAttunement(item) {
@@ -15,7 +13,7 @@ export function requiresAttunement(item) {
 }
 
 export function requiresEquipmentForEffect(item) {
-  return HELD_OR_WORN_TYPES.has(String(item?.type || '').toUpperCase());
+  return isHeldOrWorn(item);
 }
 
 export function isItemEffectActive(item) {

@@ -122,13 +122,14 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
 function AcFormulasSection({ character }) {
   const formulas = collectAcFormulas(character);
   if (!formulas.length) return null;
+  // The armor the character starts wearing blocks the formulas that need none.
+  const hasArmor = !!getEquippedArmor(character, character.inventory || []);
   return (
     <PreviewSection icon={GAME_ICONS.armorClass} title="Defense" subtitle="Armor Class formulas">
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {formulas.map((f) => {
           const val = computeAcFormulaValue(character, f);
           const abils = (f.abilities || []).map((a) => a.toUpperCase());
-          const hasArmor = !!getEquippedArmor(character, []);
           const blocked = (f.requiresNoArmor && hasArmor) ? 'Blocked: wearing armor' : '';
           return (
             <Box key={f.key} sx={{ minWidth: 0 }}>

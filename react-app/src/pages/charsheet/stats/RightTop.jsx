@@ -4,7 +4,7 @@ import { getInitiative, getPB } from '../../../shared/character/sheet/sheetStats
 import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
 import { getInitiativeAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
 import { advantageVisual } from './advantageMark.jsx';
-import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
+import { computeBestArmorClass, getEquippedShield } from '../../../shared/character/combat/ac.js';
 import {
   resolveInitiativeTriggeredResourceRecoveries,
 } from '../../../shared/character/combat/initiativeEffects.js';
@@ -73,7 +73,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
   }, [C, resources, setResources, onShowToast, initMod]);
 
   const inv = sheet?.sheetInventory || [];
-  const equippedShield = inv.find(i => i.equipped && i.type === 'S');
+  const equippedShield = getEquippedShield(C, inv);
   const profSets = useProficiencySets();
   const shieldUnproficient = equippedShield ? !getArmorTrainingInfo(C, equippedShield, null, profSets).trained : false;
   const shieldTrained = !shieldUnproficient;

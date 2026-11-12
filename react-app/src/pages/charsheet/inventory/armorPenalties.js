@@ -12,9 +12,10 @@ import { getArmorTrainingInfo } from '../../../shared/character/proficiency/prof
 import { requireEquipmentSets } from '../../../shared/character/proficiency/equipmentSets.js';
 import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
 import { getFinal } from '../../../shared/character/sheet/sheetStats.js';
+import { isArmorOrShield, isBodyArmor, isHeavyArmor, isShield } from '../../../shared/character/inventory/itemKinds.js';
 
 export function getArmorPenalties(C, item, equipmentSets) {
-  if (!item || !['LA', 'MA', 'HA', 'S'].includes(item.type)) {
+  if (!item || !isArmorOrShield(item)) {
     return { hasPenalty: false, penalties: [], cannotCastSpells: false };
   }
   const sets = requireEquipmentSets(equipmentSets, 'getArmorPenalties');
@@ -23,19 +24,19 @@ export function getArmorPenalties(C, item, equipmentSets) {
   const info = getArmorTrainingInfo(C, item, null, sets);
   const { trained, kind } = info;
 
-  if (!trained && ['LA', 'MA', 'HA'].includes(item.type)) {
+  if (!trained && isBodyArmor(item)) {
     penalties.push(
       { type: 'disadvantage', applies: ['str-checks', 'str-saves', 'dex-checks', 'dex-saves'], reason: `No ${kind} Training` },
       { type: 'no-spellcasting', reason: `No ${kind} Training` },
     );
   }
 
-  if (!trained && item.type === 'S') {
+  if (!trained && isShield(item)) {
     penalties.push({ type: 'no-shield-ac', amount: -2, reason: 'No Shield Training' });
   }
 
-  if (item.type === 'HA' || item.stealth) {
-    penalties.push({ type: 'disadvantage', applies: ['dex-stealth'], reason: item.type === 'HA' ? 'Heavy Armor Stealth Disadvantage' : 'Armor Stealth Disadvantage' });
+  if (isHeavyArmor(item) || item.stealth) {
+    penalties.push({ type: 'disadvantage', applies: ['dex-stealth'], reason: isHeavyArmor(item) ? 'Heavy Armor Stealth Disadvantage' : 'Armor Stealth Disadvantage' });
   }
 
   const requiredStrength = Number(item.strength || 0);
@@ -54,7 +55,7 @@ export function getEquippedArmorPenalties(C, inventory, equipmentSets) {
   const sets = requireEquipmentSets(equipmentSets, 'getEquippedArmorPenalties');
   // Wild Shape: the armor merges into the form, so it imposes nothing.
   const equippedArmor = itemEffectInventory(C, inventory)
-    .filter(item => item.equipped && ['LA', 'MA', 'HA', 'S'].includes(item.type));
+    .filter(item => item.equipped && isArmorOrShield(item));
 
   const allPenalties = equippedArmor
     .flatMap(item => {

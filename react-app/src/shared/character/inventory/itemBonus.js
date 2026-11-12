@@ -4,6 +4,7 @@
 
 import { isItemEffectActive } from './itemAttunement.js';
 import { itemEffectInventory } from '../forms/wildShapeForm.js';
+import { isArmorOrShield } from './itemKinds.js';
 
 export function parseSignedBonus(value) {
   if (value == null) return 0;
@@ -60,7 +61,7 @@ function sumField(inventory, field) {
 // Protection, Ring of Protection, etc.
 export function aggregateMiscAcBonus(inventory) {
   return activeEquippedItems(inventory)
-    .filter((item) => !['LA', 'MA', 'HA', 'S'].includes(String(item.type || '').toUpperCase()))
+    .filter((item) => !isArmorOrShield(item))
     .reduce((sum, item) => sum + parseSignedBonus(item.bonusAc), 0);
 }
 

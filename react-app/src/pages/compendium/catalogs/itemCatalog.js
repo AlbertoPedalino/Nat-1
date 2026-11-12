@@ -2,7 +2,7 @@
 // magic and mundane, with the filters a shop or a loot table needs. Pure,
 // testable in node; their columns are in catalogColumns.jsx.
 
-import { buildItemPropertySegments, itemBaseType } from '../../../shared/character/inventory/itemCodes.js';
+import { buildItemPropertySegments } from '../../../shared/character/inventory/itemCodes.js';
 import { parseSignedBonus } from '../../../shared/character/inventory/itemBonus.js';
 import { requiresAttunement } from '../../../shared/character/inventory/itemAttunement.js';
 import { ITEM_RANGE_FIELDS } from '../../../shared/character/inventory/itemFilters.js';
@@ -11,6 +11,7 @@ import {
 } from '../../../shared/character/inventory/itemRarity.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
 import { formatWeight } from '../../../shared/character/inventory/weight.js';
+import { itemBaseType } from '../../../shared/character/inventory/itemKinds.js';
 
 export const MAGIC_TYPES = Object.freeze([
   { key: 'armor', label: 'Armor' },

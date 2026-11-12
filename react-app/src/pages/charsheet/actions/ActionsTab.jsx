@@ -25,7 +25,6 @@ import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
-import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { AdapterActionCard } from './AdapterActionCard.jsx';
 import { ensureClassAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
@@ -36,6 +35,7 @@ import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {

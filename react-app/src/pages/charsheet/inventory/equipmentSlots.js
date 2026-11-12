@@ -5,7 +5,7 @@ import {
 import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
-import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
+import { isShield, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 
 export const THROWN_SLOT = 'thrown';
 
@@ -60,14 +60,14 @@ export function isPolearmMasterWeapon(item) {
 }
 
 export function hasEquippedShield(inventory) {
-  return (inventory || []).some((i) => i.equipped && stripSource(i.type).toUpperCase() === 'S');
+  return (inventory || []).some((i) => i.equipped && isShield(i));
 }
 
 // True if a weapon or Shield is currently held in a hand. Used by Fighting Style:
 // Unarmed Fighting (d8 die only when not wielding any weapon or a Shield).
 export function isWieldingWeaponOrShield(inventory) {
   const list = inventory || [];
-  const shield = list.some((i) => i.equipped && String(i.type || '').toUpperCase() === 'S');
+  const shield = list.some((i) => i.equipped && isShield(i));
   const weapon = list.some((i) => ['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) && isWeaponItem(i));
   return shield || weapon;
 }
@@ -99,10 +99,6 @@ export function getEquippedOffHandWeapon(inventory) {
   return (inventory || []).find(i => i.equippedSlot === 'offHand');
 }
 
-export function getEquippedShield(inventory) {
-  return (inventory || []).find(i => i.equipped && i.type === 'S');
-}
-
 export function hasTwoWeaponFightingStyle(C) {
   return hasOwnedFeat(C, 'Two-Weapon Fighting');
 }
@@ -126,7 +122,7 @@ export function canUseLightExtraAttack(C, inventory) {
 export function getSlotConflictWarnings(inventory) {
   const warnings = [];
   const hasTwoHandedWeapon = (inventory || []).some(i => i.equippedSlot === 'twoHands');
-  const hasShield = (inventory || []).some(i => i.equipped && i.type === 'S');
+  const hasShield = hasEquippedShield(inventory);
   const hasOffHandWeapon = (inventory || []).some(i => i.equippedSlot === 'offHand');
 
   if (hasTwoHandedWeapon && hasShield) {

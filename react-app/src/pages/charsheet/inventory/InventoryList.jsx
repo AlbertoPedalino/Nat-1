@@ -33,6 +33,7 @@ import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeade
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
 
 const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
 
@@ -226,7 +227,7 @@ const getPenaltyMessage = (() => {
       lastC = C;
       cache = new WeakMap();
     }
-    if (!item || !item.equipped || !['LA', 'MA', 'HA', 'S'].includes(item.type) || !C) return '';
+    if (!item || !item.equipped || !isArmorOrShield(item) || !C) return '';
     if (cache.has(item)) return cache.get(item);
 
     const armorPenalty = getArmorPenalties(C, item, precomputedSets);

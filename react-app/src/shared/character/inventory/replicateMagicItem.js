@@ -28,23 +28,18 @@ import { itemHasProperty } from './weaponProperties.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
 import { byName, compareText } from '../../lists.js';
-import { isWeaponItem } from './itemCodes.js';
+import { ARMOR_OR_SHIELD_CODES, isBodyArmor, isWeaponItem, itemBaseType } from './itemKinds.js';
 
 const lc = (value) => String(value || '').toLowerCase();
-const typeOf = (item) => stripSource(item?.type).toUpperCase();
-
 // 5etools type codes excluded from the Common bucket.
 const POTION = 'P';
 const SCROLL = 'SC';
 
-// Body armor (Light / Medium / Heavy). Excludes shields (S): a shield is a
-// single base item, so "Shield +N" stays a concrete plan with no choice.
-const isBodyArmor = (item) => ['LA', 'MA', 'HA'].includes(typeOf(item));
 // The Armorer's level-9 Armor Replication benefit uses the broad magic-item
 // Armor category, which includes shields as well as worn body armor.
 export const isReplicateArmorItem = (item) => {
-  const type = typeOf(item);
-  if (['LA', 'MA', 'HA', 'S'].includes(type)) return true;
+  const type = itemBaseType(item);
+  if (ARMOR_OR_SHIELD_CODES.has(type)) return true;
   // 5etools models a handful of concrete Armor plans (notably Armor of
   // Resistance) as generic-variant group records. They still belong to the
   // rules' Armor category even though their storage type is GV.

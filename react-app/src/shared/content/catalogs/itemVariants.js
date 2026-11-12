@@ -3,6 +3,7 @@ import { canonicalItemSource, formatLeadingBonusName, withCanonicalSource } from
 import { resolveVariantTemplate } from './entryTemplates.js';
 import { asArray } from '../../lists.js';
 import { resolveCopyRecords as resolveCopies } from '../copyRecords.js';
+import { ANY_ARMOR_CODES, ANY_WEAPON_CODES } from '../../character/inventory/itemKinds.js';
 
 // 5etools item variants: `_copy` resolution, base-item requirement matching,
 // and the expansion of magic variants into concrete items.
@@ -25,13 +26,8 @@ function normalizeComparable(value) {
   return stripSource(value).toLowerCase();
 }
 
-function isWeaponType(type) {
-  return ['M', 'R', 'WEAPON'].includes(type);
-}
-
-function isArmorType(type) {
-  return ['LA', 'MA', 'HA', 'S', 'ARMOR'].includes(type);
-}
+const isWeaponType = (type) => ANY_WEAPON_CODES.has(type);
+const isArmorType = (type) => ANY_ARMOR_CODES.has(type);
 
 function matchesProperty(item, required) {
   const properties = (Array.isArray(item?.property) ? item.property : [])
