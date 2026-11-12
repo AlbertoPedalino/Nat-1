@@ -718,3 +718,9 @@ test('a chip that is only read is a TagChip', () => {
   });
   assert.deepEqual(offenders, []);
 });
+
+test('outlined lettering is inked only by inkLettering', () => {
+  assert.deepEqual(sourceFilesMatching(/WebkitTextStroke/, {
+    allow: ['shared/ui/shadows.js'],
+  }), []);
+});

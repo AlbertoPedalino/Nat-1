@@ -111,7 +111,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
             ...TEXT_STYLES.shout, lineHeight: LINE_HEIGHTS.none,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.display,
             color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
-            ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), textShadow: 'none' } : null),
+            ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), filter: 'none' } : null),
             ...(layout.isFail ? splatSx(UI_COLORS.dangerDeep) : null),
             ...(!layout.isCrit && !layout.isFail ? { display: 'inline-block' } : null),
           }}>

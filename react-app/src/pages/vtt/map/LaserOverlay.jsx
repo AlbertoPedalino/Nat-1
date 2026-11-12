@@ -226,5 +226,4 @@ const labelSx = {
   fontSize: FONT_SIZES.sm,
   lineHeight: LINE_HEIGHTS.none,
   whiteSpace: 'nowrap',
-  textShadow: `-1px -1px 0 ${VTT_COLORS.black}, 1px -1px 0 ${VTT_COLORS.black}, -1px 1px 0 ${VTT_COLORS.black}, 1px 1px 0 ${VTT_COLORS.black}`,
 };

@@ -249,6 +249,10 @@ const faceSx = {
   // than as a solid thing.
   bgcolor: UI_COLORS.dieEdge,
   ...TEXT_STYLES.figure,
+  // No lettering shadow as a filter here: it would be one more filter on
+  // every face of a tumbling solid (and would shadow the face itself). The
+  // numbers keep their own text-shadow (numberSx).
+  filter: 'none',
   backfaceVisibility: 'hidden',
 };
 

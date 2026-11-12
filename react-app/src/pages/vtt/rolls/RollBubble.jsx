@@ -108,7 +108,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
             color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.isFail ? VTT_COLORS.text : layout.totalColor,
-            ...(layout.isCrit ? { ...starburstSx(VTT_COLORS.accent), textShadow: 'none' } : null),
+            ...(layout.isCrit ? { ...starburstSx(VTT_COLORS.accent), filter: 'none' } : null),
             ...(layout.isFail ? splatSx(VTT_COLORS.danger) : null),
           }}>
             {layout.total}
