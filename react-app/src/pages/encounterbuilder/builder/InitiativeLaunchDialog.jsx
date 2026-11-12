@@ -4,9 +4,8 @@ import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
-import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import Caption from '../../../shared/ui/Caption.jsx';
+import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
@@ -66,7 +65,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
           const values = new Set(keys.map((key) => choices[key] || 'none'));
           return (
             <Stack key={side} spacing={0.75}>
-              <Box sx={rowSx}>
+              <Box sx={sideHeaderSx}>
                 <Typography variant="overline" sx={{ flex: 1, color: 'primary.main' }}>{label}</Typography>
                 <ModeToggle
                   label={`All ${label.toLowerCase()}`}
@@ -79,21 +78,21 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
                 const own = row.sources.adv || row.sources.disadv;
                 const result = advArgFor(choice ? withExtraSource(row.sources, choice) : row.sources);
                 return (
-                  <Box key={row.key} sx={rowSx}>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{row.name}</Typography>
-                      {own || choice ? (
-                        <Caption noWrap component="div">
-                          {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
-                        </Caption>
-                      ) : null}
-                    </Box>
-                    <ModeToggle
-                      label={row.name}
-                      value={choice || 'none'}
-                      onChange={(value) => choose([row.key], value)}
-                    />
-                  </Box>
+                  <EntityRow
+                    key={row.key}
+                    surface="none"
+                    title={row.name}
+                    subtitle={own || choice
+                      ? `${own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ ${rollModeLabel(result)}`
+                      : null}
+                    actions={(
+                      <ModeToggle
+                        label={row.name}
+                        value={choice || 'none'}
+                        onChange={(value) => choose([row.key], value)}
+                      />
+                    )}
+                  />
                 );
               })}
             </Stack>
@@ -120,5 +119,6 @@ function ModeToggle({ label, value, onChange }) {
   );
 }
 
-const rowSx = { display: 'flex', alignItems: 'center', gap: 1 };
+// A side's heading row: its name and the toggle for all of it.
+const sideHeaderSx = { display: 'flex', alignItems: 'center', gap: 1 };
 

@@ -23,6 +23,31 @@ export const CARD_PART_RULE_SX = Object.freeze({ borderTop: 1, borderColor: 'div
 // catalog): thin on purpose, a frame would be noise at that density.
 export const LIST_ROW_RULE_SX = Object.freeze({ borderBottom: 1, borderColor: 'divider' });
 
+// A row of a list of things (a monster, a saved session, a sheet, a player):
+// what stands for it, its name and its buttons on one line. EntityRow
+// (shared/ui/EntityRow.jsx) lays it on a surface; a row that is a form
+// rather than a name (a player's fields) spreads it on SURFACES.wash itself.
+export const LIST_ROW_SX = Object.freeze({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1,
+  p: 1,
+  minWidth: 0,
+});
+
+// The keyboard's ring round what has the focus, drawn only for the keyboard
+// (:focus-visible). `inset` draws it inside the box, for a row flush with its
+// neighbours (a catalog's virtual list), where an outer ring would be cut.
+export function focusRingSx({ inset = false } = {}) {
+  return {
+    '&:focus-visible': {
+      outline: '2px solid',
+      outlineColor: 'primary.main',
+      outlineOffset: inset ? -2 : 2,
+    },
+  };
+}
+
 // The hairline between two columns of one box (an ability's score and its
 // modifier).
 export const COLUMN_RULE_SX = Object.freeze({ borderLeft: 1, borderColor: 'divider' });

@@ -1,24 +1,22 @@
 import { useMemo } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
 import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { formatNumber } from '../ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
 import { crKey, crXP } from './challengeRating.js';
 import { usePagedList } from '../ui/usePagedList.js';
 import ShowMoreButton from '../ui/ShowMoreButton.jsx';
 import { LoadingLine } from '../ui/LoadStatus.jsx';
-import { SURFACES } from '../ui/surfaces.js';
-import { FONT_WEIGHTS } from '../ui/fonts.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
 import EmptyLine from '../ui/EmptyLine.jsx';
 import { ErrorLine } from '../ui/LoadStatus.jsx';
 import Caption from '../ui/Caption.jsx';
 import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
+import EntityRow from '../ui/EntityRow.jsx';
 import SearchField from '../ui/SearchField.jsx';
 import FilterToggles from '../ui/FilterToggles.jsx';
 import SelectField from '../ui/SelectField.jsx';
@@ -101,8 +99,11 @@ export default function MonsterBrowser({
 
       <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }} {...page.listProps}>
         {page.visible.length ? page.visible.map((monster) => (
-          <Box
+          // The open area is a div that acts as a button: it holds the
+          // creature's token, which is not phrasing content.
+          <EntityRow
             key={monsterKey(monster)}
+            component="div"
             role="button"
             tabIndex={0}
             onPointerDown={onPointerDragStart
@@ -110,25 +111,17 @@ export default function MonsterBrowser({
               : undefined}
             onClick={() => onSelect?.(monster)}
             onKeyDown={(event) => { if (event.key === 'Enter') onSelect?.(monster); }}
-            sx={[rowSx, onPointerDragStart ? DRAG_SOURCE_SX : null]}
-          >
-            <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{monster.name}</Typography>
-              <Caption noWrap>
-                {getType(monster.type)} · {monster.source}
-              </Caption>
-            </Box>
-            <Typography variant="caption" sx={{ color: 'primary.main', minWidth: 92, textAlign: 'right' }}>
-              CR {crKey(monster.cr)} · {formatNumber(crXP(monster.cr))} XP
-            </Typography>
-            <TipIconButton title={pickLabel} size="small" color="primary" onClick={(event) => {
-                  event.stopPropagation();
-                  onPick(monster);
-                }}>
-              <Plus size={ICON_SIZES.md} />
-            </TipIconButton>
-          </Box>
+            sx={onPointerDragStart ? DRAG_SOURCE_SX : null}
+            leading={<MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />}
+            title={monster.name}
+            subtitle={`${getType(monster.type)} · ${monster.source}`}
+            meta={`CR ${crKey(monster.cr)} · ${formatNumber(crXP(monster.cr))} XP`}
+            actions={(
+              <TipIconButton title={pickLabel} size="small" color="primary" onClick={() => onPick(monster)}>
+                <Plus size={ICON_SIZES.md} />
+              </TipIconButton>
+            )}
+          />
         )) : (
           <EmptyLine inList>No monsters found.</EmptyLine>
         )}
@@ -143,21 +136,5 @@ const defaultListSx = {
   maxHeight: { xs: 380, lg: 'calc(100vh - 350px)' },
   overflow: 'auto',
   pr: 0.5,
-};
-
-const rowSx = {
-  ...SURFACES.wash,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  p: 1,
-  cursor: 'pointer',
-  minWidth: 0,
-  userSelect: 'none',
-  touchAction: 'pan-y',
-  '&:hover': {
-    borderColor: 'primary.main',
-    bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
-  },
 };
 

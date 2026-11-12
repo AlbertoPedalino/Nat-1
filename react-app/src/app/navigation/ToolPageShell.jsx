@@ -1,13 +1,14 @@
-import { Box, Stack, Typography } from '@mui/material';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from './AppTopBar.jsx';
+import { Stack } from '@mui/material';
+import AppPage from './AppPage.jsx';
 import LinkedToolsMenu from './LinkedToolsMenu.jsx';
+import { TOOL_CATALOG } from './toolCatalog.js';
 import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
-import { asArray } from '../../shared/lists.js';
-import { SURFACES } from '../../shared/ui/surfaces.js';
+import PageHeader from '../../shared/ui/PageHeader.jsx';
 
 // The frame of a saved tool's page (GM Board, Encounter Builder, DM Screen):
-// the top bar with Home, Back to the tool's list and the Links menu, the
-// conflict banner, the title with the instance id, and the page's content.
+// the app page with Home, Back to the tool's list and the Links menu in its
+// bar, the conflict banner, the page header (the tool's icon, its title and
+// the instance id), and the page's content.
 //
 // `actions` sit beside the title (below it on a phone); `children` is the
 // content; `after` is what lives outside the column (dialogs, toasts).
@@ -15,44 +16,32 @@ import { SURFACES } from '../../shared/ui/surfaces.js';
 export default function ToolPageShell({
   tool, sectionKey, title, backTo, backLabel, actions = null, maxWidth = 1500, sx, children, after = null,
 }) {
+  const catalog = TOOL_CATALOG[sectionKey];
   return (
-    <Box sx={[pageSx, ...asArray(sx)]}>
-      <AppTopBar home backTo={backTo} backLabel={backLabel}>
-        <LinkedToolsMenu sectionKey={sectionKey} instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
-      </AppTopBar>
-      <Box component="main" sx={{ ...contentSx, maxWidth }}>
-        <Stack spacing={2}>
-          <InstanceConflictBanner tool={tool} />
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={1.5}
-            sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}
-          >
-            <Box>
-              <Typography variant="h1">{title}</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Instance {tool.id}</Typography>
-            </Box>
-            {actions}
-          </Stack>
-          {children}
-        </Stack>
-      </Box>
-      {after}
-    </Box>
+    <AppPage
+      dense
+      maxWidth={maxWidth}
+      sx={sx}
+      after={after}
+      topBar={{
+        home: true,
+        backTo,
+        backLabel,
+        children: <LinkedToolsMenu sectionKey={sectionKey} instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />,
+      }}
+    >
+      <Stack spacing={2}>
+        <InstanceConflictBanner tool={tool} />
+        <PageHeader
+          icon={catalog?.icon}
+          iconColor={catalog?.color}
+          title={title}
+          subtitle={`Instance ${tool.id}`}
+          actions={actions}
+          sx={{ mb: 0 }}
+        />
+        {children}
+      </Stack>
+    </AppPage>
   );
 }
-
-const pageSx = {
-  ...SURFACES.page,
-  minHeight: '100vh',
-  minWidth: 0,
-  pt: APP_TOP_BAR_HEIGHT,
-};
-
-const contentSx = {
-  width: 1,
-  mx: 'auto',
-  px: { xs: 1.25, md: 2 },
-  py: 2,
-  boxSizing: 'border-box',
-};

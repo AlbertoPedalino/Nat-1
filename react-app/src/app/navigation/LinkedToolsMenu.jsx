@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import { Network, Plus, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
@@ -13,8 +13,7 @@ import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
-import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
-import { appTopBarButtonSx } from '../../shared/ui/appBar.js';
+import TopBarButton from '../../shared/ui/TopBarButton.jsx';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
 import { TOOL_CATALOG } from './toolCatalog.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
@@ -23,11 +22,11 @@ import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
-import { INK_EDGE } from '../../shared/ui/shadows.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 import Caption from '../../shared/ui/Caption.jsx';
 import TipIconButton from '../../shared/ui/TipIconButton.jsx';
+import EntityRow from '../../shared/ui/EntityRow.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -202,14 +201,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     await linkHexcrawlBoardCampaign(target.id, campaign.id);
   }, 'Campaign settings updated.');
 
-  const button = <Button size="small" variant={groupId ? 'contained' : 'outlined'} color="primary"
-    startIcon={<Network size={ICON_SIZES.sm} />} onClick={handleOpen}
-    aria-label="Linked tools" sx={appTopBarButtonSx}>
-    <Box component="span" sx={phoneHiddenLabelSx}>LINKS</Box>
-  </Button>;
-
   return <>
-    {button}
+    <TopBarButton icon={Network} label="LINKS" ariaLabel="Linked tools" active={Boolean(groupId)} onClick={handleOpen} />
     <SheetDialog
       open={open}
       onClose={() => !working && setOpen(false)}
@@ -236,45 +229,44 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               )) : [];
               const dungeonSelection = row.dungeonEncounterId || (dungeonBuilders.length === 1 ? dungeonBuilders[0].id : '');
               const singleDungeonBuilder = dungeonBuilders.length === 1 && dungeonSelection === dungeonBuilders[0].id;
-              return <Stack key={rowKey(row)} direction="row" spacing={1}
-                sx={{ alignItems: 'center', border: INK_EDGE, borderRadius: 1, p: 1.25 }}>
-                <Icon size={ICON_SIZES.lg} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
-                  <Caption component="div">{TOOL_UI[row.sectionKey].label}</Caption>
-                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Caption component="div" sx={{ mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
-                    Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
-                  </Caption>}
-                  {row.sectionKey === 'campaign' && <SelectField
-                    label={`Time, weather & tables for ${row.name}`} sx={{ mt: 1 }}
-                    value={row.hexcrawlBoardId || ''}
-                    disabled={disabled || !campaignBoards.length || (campaignBoards.length === 1 && Boolean(row.hexcrawlBoardId))}
-                    placeholder={campaignBoards.length ? 'Choose a GM Board' : 'Link a GM Board to use time, weather and tables'}
-                    options={campaignBoards.map((board) => ({
-                      value: board.id,
-                      label: campaignBoards.length === 1 ? `Automatic: ${board.name}` : board.name,
-                    }))}
-                    onChange={(value) => handleSelectBoard(row, value)} />}
-                  {row.sectionKey === 'campaign' && <SelectField
-                    label="Dungeon fights" sx={{ mt: 1 }}
-                    value={dungeonSelection} disabled={disabled || !dungeonBuilders.length || singleDungeonBuilder}
-                    helperText="Destination for new fights. Previously sent fights stay in their original builder."
-                    placeholder={dungeonBuilders.length ? 'Choose an Encounter Builder' : 'Link an Encounter Builder to send dungeon fights'}
-                    options={[
-                      ...(row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
-                        ? [{ value: row.dungeonEncounterId, label: 'Previously selected builder is no longer linked', disabled: true }]
-                        : []),
-                      ...dungeonBuilders.map((tool) => ({
-                        value: tool.id,
-                        label: singleDungeonBuilder ? `Automatic: ${tool.name}` : tool.name,
-                      })),
-                    ]}
-                    onChange={(value) => handleSelectDungeonEncounter(row, value)} />}
-                </Box>
-                {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
-                  size="small" disabled={working} aria-label={`Open ${row.name}`} onClick={() => setOpen(false)}>Open</Button>}
-                {groupId && <TipIconButton title={`Unlink ${row.name}`} size="small" color="error" disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={ICON_SIZES.md} /></TipIconButton>}
-              </Stack>;
+              return <EntityRow key={rowKey(row)} wrap
+                leading={<Icon size={ICON_SIZES.lg} />}
+                title={`${row.name}${isCurrent ? ' · Current' : ''}`}
+                subtitle={TOOL_UI[row.sectionKey].label}
+                actions={(!isCurrent || groupId) ? <>
+                  {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
+                    size="small" disabled={working} aria-label={`Open ${row.name}`} onClick={() => setOpen(false)}>Open</Button>}
+                  {groupId && <TipIconButton danger title={`Unlink ${row.name}`} size="small" disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={ICON_SIZES.sm} /></TipIconButton>}
+                </> : null}>
+                {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Caption component="div" sx={{ mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
+                  Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
+                </Caption>}
+                {row.sectionKey === 'campaign' && <SelectField
+                  label={`Time, weather & tables for ${row.name}`} sx={{ mt: 1 }}
+                  value={row.hexcrawlBoardId || ''}
+                  disabled={disabled || !campaignBoards.length || (campaignBoards.length === 1 && Boolean(row.hexcrawlBoardId))}
+                  placeholder={campaignBoards.length ? 'Choose a GM Board' : 'Link a GM Board to use time, weather and tables'}
+                  options={campaignBoards.map((board) => ({
+                    value: board.id,
+                    label: campaignBoards.length === 1 ? `Automatic: ${board.name}` : board.name,
+                  }))}
+                  onChange={(value) => handleSelectBoard(row, value)} />}
+                {row.sectionKey === 'campaign' && <SelectField
+                  label="Dungeon fights" sx={{ mt: 1 }}
+                  value={dungeonSelection} disabled={disabled || !dungeonBuilders.length || singleDungeonBuilder}
+                  helperText="Destination for new fights. Previously sent fights stay in their original builder."
+                  placeholder={dungeonBuilders.length ? 'Choose an Encounter Builder' : 'Link an Encounter Builder to send dungeon fights'}
+                  options={[
+                    ...(row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
+                      ? [{ value: row.dungeonEncounterId, label: 'Previously selected builder is no longer linked', disabled: true }]
+                      : []),
+                    ...dungeonBuilders.map((tool) => ({
+                      value: tool.id,
+                      label: singleDungeonBuilder ? `Automatic: ${tool.name}` : tool.name,
+                    })),
+                  ]}
+                  onChange={(value) => handleSelectDungeonEncounter(row, value)} />}
+              </EntityRow>;
             })}
           </Stack>
           {!linkedRows.length && <EmptyLine>No other tools are linked yet.</EmptyLine>}

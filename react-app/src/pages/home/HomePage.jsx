@@ -4,11 +4,11 @@ import { Box, Button, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import AppPage from '../../app/navigation/AppPage.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
-import { coverRaysSx, SURFACES } from '../../shared/ui/surfaces.js';
+import { coverRaysSx } from '../../shared/ui/surfaces.js';
 import { INK_EDGE, inkShadow } from '../../shared/ui/shadows.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
@@ -67,9 +67,9 @@ export default function HomePage() {
   }, [notify]);
 
   return (
-    <Box sx={homeRootSx}>
-      {/* Home already has the Compendium card. */}
-      <AppTopBar compendium={false} />
+    // Home already has the Compendium card, so its bar leaves the button out.
+    // The cover's rays spread wider than the page: they are cut at its sides.
+    <AppPage center topBar={{ compendium: false }} maxWidth="none" sx={{ overflowX: 'hidden' }}>
       <Box sx={heroSx}>
         <NatOneDie roll={roll} animate={coverRolls} onRoll={rollCover} sx={heroLogoSx} />
         <Typography key={`name-${roll}`} component="h1" sx={coverRolls ? { ...heroTitleSx, ...bubbleCheerSx(HERO_TITLE_TILT, { delay: NAT_ONE_LANDED_MS }) } : heroTitleSx}>Nat-1</Typography>
@@ -102,21 +102,9 @@ export default function HomePage() {
           </Button>
         </Box>
       ) : null}
-    </Box>
+    </AppPage>
   );
 }
-
-const homeRootSx = {
-  ...SURFACES.page,
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  p: '2rem 1rem',
-  pt: `calc(2rem + ${APP_TOP_BAR_HEIGHT})`,
-  overflowX: 'hidden',
-};
 
 // The cover: the logo, the app's name lettered like a comic's title over a
 // sunburst, and the edition on a sticker under it. The name cheers in once.

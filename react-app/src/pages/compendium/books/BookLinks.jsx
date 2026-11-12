@@ -15,6 +15,7 @@ import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { scrollPaneSx } from '../compendiumStyles.js';
 
 const NO_BOOKS = [];
 
@@ -38,7 +39,7 @@ export default function BookLinks() {
     ['Adventures', state.books.filter((book) => book.kind === 'adventure')],
   ].filter(([, books]) => books.length);
   return (
-    <Box sx={scrollSx}>
+    <Box sx={{ ...scrollPaneSx, flex: 1 }}>
       {groups.map(([title, books]) => (
         <List key={title} dense subheader={<ListSubheader sx={subheaderSx}>{title}</ListSubheader>} aria-label={title}>
           {books.map((book) => (
@@ -53,8 +54,6 @@ export default function BookLinks() {
     </Box>
   );
 }
-
-const scrollSx = { minHeight: 0, overflowY: 'auto', flex: 1 };
 
 const subheaderSx = {
   ...captionLabelSx,

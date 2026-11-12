@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { Library as LibraryIcon, Play, RotateCcw, ScrollText, SlidersHorizontal, Trash2, Upload } from 'lucide-react';
+import { Library as LibraryIcon, Play, RotateCcw, ScrollText, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -8,7 +8,7 @@ import {
 import { normalizeEncounterQuest } from '../state/storage.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import InitiativeLaunchDialog from '../builder/InitiativeLaunchDialog.jsx';
+import InitiativeLaunchButton from '../builder/InitiativeLaunchButton.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
@@ -20,7 +20,6 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
-import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -84,7 +83,6 @@ export default function LibraryView() {
 
 function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }) {
   const enc = item.enc;
-  const [initiativeOpen, setInitiativeOpen] = useState(false);
   const fight = item.fight;
   const date = Math.max(toTime(fight?.savedAt), toTime(enc.updatedAt || enc.createdAt));
   const monsterText = (enc.encounter || [])
@@ -148,9 +146,13 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         >
           Launch
         </Button>
-        <TipIconButton title="Launch with initiative advantage / disadvantage" size="small" ariaLabel="Launch with initiative options" onClick={() => setInitiativeOpen(true)} disabled={missingMonster}>
-          <SlidersHorizontal size={ICON_SIZES.sm} />
-        </TipIconButton>
+        <InitiativeLaunchButton
+          size="small"
+          encounter={enc.encounter}
+          players={players}
+          disabled={missingMonster}
+          onLaunch={(initiative) => dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters, initiative })}
+        />
         {fight ? (
           <Button
             size="small"
@@ -176,16 +178,6 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         </Button>
       </Stack>
       <Caption>{formatDateTime(toTime(date))}</Caption>
-      <InitiativeLaunchDialog
-        open={initiativeOpen}
-        onClose={() => setInitiativeOpen(false)}
-        encounter={enc.encounter}
-        players={players}
-        onLaunch={(initiative) => {
-          setInitiativeOpen(false);
-          dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters, initiative });
-        }}
-      />
     </Stack>
   );
 }

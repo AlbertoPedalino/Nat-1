@@ -1,10 +1,11 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Box, Button, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import { Plus } from 'lucide-react';
-import AppTopBar from '../../app/navigation/AppTopBar.jsx';
+import AppPage from '../../app/navigation/AppPage.jsx';
 import NotFoundPage from '../notfound/NotFoundPage.jsx';
 import { createInstance } from '../../shared/instances/instanceStore.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
+import PageHeader from '../../shared/ui/PageHeader.jsx';
 import { resolveTool } from './logic/tools.js';
 import CharacterPicker from './CharacterPicker.jsx';
 import SectionPicker from './SectionPicker.jsx';
@@ -35,19 +36,19 @@ export default function InstancePickerPage() {
     : { component: Link, to: meta.newRoute };
 
   return (
-    <Box sx={s.rootSx}>
-      <AppTopBar home />
-      <Box sx={s.headerSx}>
-        <Box sx={{ color: meta.color, display: 'flex' }}>
-          <meta.icon size={30} strokeWidth={1.5} />
-        </Box>
-        <Typography sx={s.titleSx}>{meta.label}</Typography>
-        <Button {...newButtonProps} variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} sx={s.newBtnSx}>
-          New {meta.label}
-        </Button>
-      </Box>
+    <AppPage topBar={{ home: true }} maxWidth={640}>
+      <PageHeader
+        icon={meta.icon}
+        iconColor={meta.color}
+        title={meta.label}
+        actions={(
+          <Button {...newButtonProps} variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} sx={s.newBtnSx}>
+            New {meta.label}
+          </Button>
+        )}
+      />
 
       {meta.slug === 'characters' ? <CharacterPicker /> : <SectionPicker meta={meta} />}
-    </Box>
+    </AppPage>
   );
 }

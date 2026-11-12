@@ -6,7 +6,6 @@ import {
   List,
   ListItemButton,
   Stack,
-  Typography,
 } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -18,12 +17,11 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendiumIndex.js';
 import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
-import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
+import { fillColumnSx, filterBarSx, scrollPaneSx } from '../compendiumStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import Caption from '../../../shared/ui/Caption.jsx';
+import EntityRow from '../../../shared/ui/EntityRow.jsx';
 
 // The kind filter: everything, or one kind.
 const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
@@ -54,7 +52,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
   const showList = !panel || !selected;
 
   const search = (
-    <Stack spacing={1} sx={searchBarSx}>
+    <Stack spacing={1} sx={filterBarSx}>
       <SearchField
         value={query}
         onChange={(value) => { setQuery(value); if (panel) setSelectedKey(null); }}
@@ -88,20 +86,16 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
         {results.length ? (
           <List dense disablePadding aria-label="Results">
             {page.visible.map((entry) => (
-              <ListItemButton
+              <EntityRow
                 key={entry.key}
+                component={ListItemButton}
+                surface="rule"
                 selected={entry.key === selectedKey}
                 onClick={() => setSelectedKey(entry.key)}
-                sx={resultSx}
-              >
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography variant="body2" sx={entryNameSx}>{entry.name}</Typography>
-                  <Caption noWrap component="div">
-                    {[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
-                  </Caption>
-                </Box>
-                <MiniBadge label={compendiumKind(entry.kind)?.single || entry.kind} color={COMPENDIUM_KIND_COLORS[entry.kind]} />
-              </ListItemButton>
+                title={entry.name}
+                subtitle={[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
+                meta={<MiniBadge label={compendiumKind(entry.kind)?.single || entry.kind} color={COMPENDIUM_KIND_COLORS[entry.kind]} />}
+              />
             ))}
           </List>
         ) : (
@@ -112,13 +106,18 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
     );
   }
 
+  // The way back to the list: always in the panel, where the entry replaces
+  // the results; on the page only on a phone, where it does too.
   const detail = selected ? (
     <Box sx={detailSx}>
-      {panel ? (
-        <Button size="small" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => setSelectedKey(null)} sx={{ mb: 1 }}>
-          Back to results
-        </Button>
-      ) : null}
+      <Button
+        size="small"
+        startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
+        onClick={() => setSelectedKey(null)}
+        sx={{ mb: 1, display: panel ? undefined : { md: 'none' } }}
+      >
+        Back to results
+      </Button>
       <CompendiumDetail key={selected.key} entry={selected} legendaryGroups={compendium.legendaryGroups} />
     </Box>
   ) : null;
@@ -127,7 +126,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
     return (
       <Box sx={fillColumnSx}>
         {showList ? search : null}
-        <Box {...(showList ? page.listProps : {})} sx={scrollSx}>{showList ? list : detail}</Box>
+        <Box {...(showList ? page.listProps : {})} sx={scrollPaneSx}>{showList ? list : detail}</Box>
       </Box>
     );
   }
@@ -136,34 +135,14 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
     <Box sx={fillColumnSx}>
       {search}
       <Box sx={pageBodySx}>
-        <Box {...page.listProps} sx={[scrollSx, pageListSx, selected && { display: { xs: 'none', md: 'block' } }]}>{list}</Box>
-        <Box sx={[scrollSx, pageDetailSx, !selected && { display: { xs: 'none', md: 'block' } }]}>
-          {selected ? (
-            <>
-              <Button
-                size="small"
-                startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
-                onClick={() => setSelectedKey(null)}
-                sx={{ mb: 1, display: { md: 'none' } }}
-              >
-                Back to results
-              </Button>
-              {detail}
-            </>
-          ) : (
-            <EmptyLine inList>Pick an entry to read it.</EmptyLine>
-          )}
+        <Box {...page.listProps} sx={[scrollPaneSx, pageListSx, selected && { display: { xs: 'none', md: 'block' } }]}>{list}</Box>
+        <Box sx={[scrollPaneSx, pageDetailSx, !selected && { display: { xs: 'none', md: 'block' } }]}>
+          {detail || <EmptyLine inList>Pick an entry to read it.</EmptyLine>}
         </Box>
       </Box>
     </Box>
   );
 }
-
-const searchBarSx = {
-  p: 1.5,
-  borderBottom: INK_EDGE,
-  flexShrink: 0,
-};
 
 // Wrapped, not scrolled: in one scrolling row the toggles shrank to their
 // first letter on a phone or in the panel.
@@ -171,18 +150,6 @@ const kindRowSx = {
   display: 'flex',
   flexWrap: 'wrap',
   gap: 0.75,
-};
-
-
-const resultSx = {
-  ...LIST_ROW_RULE_SX,
-  gap: 1,
-  alignItems: 'center',
-};
-
-const scrollSx = {
-  minHeight: 0,
-  overflowY: 'auto',
 };
 
 const detailSx = {

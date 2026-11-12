@@ -15,9 +15,9 @@ import { rangeFilterKeys } from '../../../shared/character/inventory/itemFilters
 import {
   YES_NO_OPTIONS, anyValue, catalogDefaults, catalogEntries, fieldOptions, runCatalog, sourceOptions,
 } from './catalogFilter.js';
-import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
+import { entryNameSx, fillColumnSx, filterBarSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
-import { LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import { LIST_ROW_RULE_SX, BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
@@ -191,8 +191,6 @@ function CatalogRow({
   );
 }
 
-const filterBarSx = { p: 1.5, borderBottom: INK_EDGE, flexShrink: 0 };
-
 const controlsSx = { display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' };
 
 const controlSx = { minWidth: 130, flex: { xs: '1 1 130px', md: '0 0 auto' } };
@@ -222,7 +220,7 @@ const rowSx = {
   px: 2,
   width: '100%',
   '&:hover': { bgcolor: 'action.hover' },
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: -2 },
+  ...focusRingSx({ inset: true }),
 };
 
 const narrowRowSx = { display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center', gap: 0 };

@@ -1,30 +1,23 @@
 import { lazy, Suspense, useState } from 'react';
-import { Box, Button } from '@mui/material';
 import { BookOpen } from 'lucide-react';
-import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
-import { asArray } from '../../shared/lists.js';
-import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import TopBarButton from '../../shared/ui/TopBarButton.jsx';
 
 // Loaded on first opening: the button is in every top bar, and most pages
 // never open the compendium.
 const CompendiumPanel = lazy(() => import('./CompendiumPanel.jsx'));
 
 // The compendium from any top bar: opens and closes the side panel.
-export default function CompendiumButton({ sx }) {
+export default function CompendiumButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button
-        size="small"
-        variant={open ? 'contained' : 'outlined'}
-        startIcon={<BookOpen size={ICON_SIZES.sm} />}
-        aria-label="Compendium"
+      <TopBarButton
+        icon={BookOpen}
+        label="Compendium"
+        active={open}
         aria-pressed={open}
         onClick={() => setOpen((value) => !value)}
-        sx={[iconOnlyOnPhoneButtonSx, ...asArray(sx)]}
-      >
-        <Box component="span" sx={phoneHiddenLabelSx}>Compendium</Box>
-      </Button>
+      />
       {open ? (
         <Suspense fallback={null}>
           <CompendiumPanel open onClose={() => setOpen(false)} />

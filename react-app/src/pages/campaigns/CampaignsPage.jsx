@@ -7,14 +7,16 @@ import {
   Stack,
   TextField,
   Chip,
-  IconButton,
   Divider,
 } from '@mui/material';
 import { Cloud, Flag, Users, Plus, ScrollText, Copy, LogIn, LogOut, X, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import AppPage from '../../app/navigation/AppPage.jsx';
+import PageHeader from '../../shared/ui/PageHeader.jsx';
+import EntityRow from '../../shared/ui/EntityRow.jsx';
+import TipIconButton from '../../shared/ui/TipIconButton.jsx';
 import {
   createCampaign, joinCampaign, listMyCampaigns,
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
@@ -39,7 +41,7 @@ import { UI_COLORS } from '../../shared/ui/colors.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
-import { BARE_BUTTON_SX } from '../../shared/ui/interactive.js';
+import { focusRingSx } from '../../shared/ui/interactive.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -138,184 +140,160 @@ export default function CampaignsPage() {
   };
 
   return (
-    <Box sx={rootSx}>
-      <AppTopBar home />
-      <Box component="main" sx={pageSx}>
-        <Box sx={headerSx}>
-          <Box component={Flag} size={30} strokeWidth={1.5} aria-hidden sx={headerIconSx} />
-          <Typography component="h1" sx={titleSx}>Campaigns</Typography>
-        </Box>
+    <AppPage
+      topBar={{ home: true }}
+      maxWidth={860}
+      sx={{ overflowX: 'hidden' }}
+      after={<AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />}
+    >
+      <PageHeader icon={Flag} title="Campaigns" />
 
-        {pageState === 'unconfigured' ? (
-          <StatePanel icon={Cloud} title="Online features not configured.">
-            Campaigns require the cloud connection to be configured for this app.
-          </StatePanel>
-        ) : pageState === 'loading' ? (
-          <StatePanel loading>Restoring your session…</StatePanel>
-        ) : pageState === 'signedOut' ? (
-          <StatePanel
-            icon={Users}
-            title="Campaigns live online"
-            action={(
-              <Button variant="contained" startIcon={<LogIn size={ICON_SIZES.md} />} onClick={() => setAuthOpen(true)}>
-                Log in / Sign up
-              </Button>
-            )}
-          >
-            Log in or create an account to create, join, and manage campaigns.
-          </StatePanel>
-        ) : (
-          <>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={setupStackSx}>
-              <Box component="section" sx={setupPanelSx}>
-                <Typography component="h2" sx={sectionTitleSx}>Create a campaign</Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                  <TextField size="small" label="Campaign name" value={newName} onChange={(e) => setNewName(e.target.value)} fullWidth />
-                  <Button variant="contained" size="small" startIcon={<Plus size={ICON_SIZES.sm} />} onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</Button>
-                </Stack>
-              </Box>
-              <Box component="section" sx={setupPanelSx}>
-                <Typography component="h2" sx={sectionTitleSx}>Join with a code</Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                  <TextField size="small" label="Invite code" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} fullWidth />
-                  <Button variant="contained" size="small" startIcon={<Users size={ICON_SIZES.sm} />} onClick={handleJoin} disabled={busy} sx={setupActionSx}>Join</Button>
-                </Stack>
-              </Box>
-            </Stack>
+      {pageState === 'unconfigured' ? (
+        <StatePanel icon={Cloud} title="Online features not configured.">
+          Campaigns require the cloud connection to be configured for this app.
+        </StatePanel>
+      ) : pageState === 'loading' ? (
+        <StatePanel loading>Restoring your session…</StatePanel>
+      ) : pageState === 'signedOut' ? (
+        <StatePanel
+          icon={Users}
+          title="Campaigns live online"
+          action={(
+            <Button variant="contained" startIcon={<LogIn size={ICON_SIZES.md} />} onClick={() => setAuthOpen(true)}>
+              Log in / Sign up
+            </Button>
+          )}
+        >
+          Log in or create an account to create, join, and manage campaigns.
+        </StatePanel>
+      ) : (
+        <>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={setupStackSx}>
+            <Box component="section" sx={setupPanelSx}>
+              <Typography component="h2" sx={sectionTitleSx}>Create a campaign</Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <TextField size="small" label="Campaign name" value={newName} onChange={(e) => setNewName(e.target.value)} fullWidth />
+                <Button variant="contained" size="small" startIcon={<Plus size={ICON_SIZES.sm} />} onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</Button>
+              </Stack>
+            </Box>
+            <Box component="section" sx={setupPanelSx}>
+              <Typography component="h2" sx={sectionTitleSx}>Join with a code</Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <TextField size="small" label="Invite code" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} fullWidth />
+                <Button variant="contained" size="small" startIcon={<Users size={ICON_SIZES.sm} />} onClick={handleJoin} disabled={busy} sx={setupActionSx}>Join</Button>
+              </Stack>
+            </Box>
+          </Stack>
 
-            {loading ? <LoadingLine centered label="Loading campaigns…" sx={{ py: 2 }} /> : null}
-            {!loading && campaigns.length === 0 ? (
-              <StatePanel title="No campaigns yet">Create one or join with a code.</StatePanel>
-            ) : null}
+          {loading ? <LoadingLine centered label="Loading campaigns…" sx={{ py: 2 }} /> : null}
+          {!loading && campaigns.length === 0 ? (
+            <StatePanel title="No campaigns yet">Create one or join with a code.</StatePanel>
+          ) : null}
 
-            <Stack spacing={2}>
-              {campaigns.map((c) => {
-                const isCampaignGm = c.gm === myId;
-                const chars = charsByCampaign[c.id] || [];
-                const members = membersByCampaign[c.id] || [];
-                // Only MY own characters can be added (a global GM's listMyCharacters
-                // returns everyone's sheets via RLS — never offer those).
-                const assignable = myChars.filter((mc) => mc.owner === myId && mc.campaign_id !== c.id);
-                return (
-                  <Box component="article" key={c.id} sx={campaignCardSx}>
-                    <Box sx={campaignHeaderSx}>
-                      <Box sx={campaignTitleRowSx}>
-                        <Typography component="h2" sx={campaignNameSx}>{c.name}</Typography>
-                        {isCampaignGm ? <TagChip label="GM" tone={UI_COLORS.accent} /> : null}
-                        {isCampaignGm ? (
-                          <Chip
-                            size="small"
-                            label={`Code: ${c.join_code}`}
-                            onClick={() => copyCode(c.join_code)}
-                            icon={<Copy size={ICON_SIZES.xs} />}
-                            color="primary"
-                            variant="outlined"
-                            aria-label={`Copy invite code ${c.join_code}`}
-                            sx={inviteChipSx}
-                          />
-                        ) : null}
-                      </Box>
-                      <Box sx={campaignActionsSx}>
-                        <Typography sx={metaSx}>{members.length} member{members.length === 1 ? '' : 's'}</Typography>
-                        {isCampaignGm ? (
-                          <IconButton size="small" onClick={() => handleDeleteCampaign(c)} title="Delete campaign" aria-label={`Delete campaign ${c.name}`} sx={dangerActionSx}>
-                            <Trash2 size={ICON_SIZES.sm} />
-                          </IconButton>
-                        ) : (
-                          <IconButton size="small" onClick={() => handleLeave(c.id)} title="Leave" aria-label={`Leave campaign ${c.name}`} sx={dangerActionSx}>
-                            <LogOut size={ICON_SIZES.sm} />
-                          </IconButton>
-                        )}
-                      </Box>
+          <Stack spacing={2}>
+            {campaigns.map((c) => {
+              const isCampaignGm = c.gm === myId;
+              const chars = charsByCampaign[c.id] || [];
+              const members = membersByCampaign[c.id] || [];
+              // Only MY own characters can be added (a global GM's listMyCharacters
+              // returns everyone's sheets via RLS — never offer those).
+              const assignable = myChars.filter((mc) => mc.owner === myId && mc.campaign_id !== c.id);
+              return (
+                <Box component="article" key={c.id} sx={campaignCardSx}>
+                  <Box sx={campaignHeaderSx}>
+                    <Box sx={campaignTitleRowSx}>
+                      <Typography component="h2" sx={campaignNameSx}>{c.name}</Typography>
+                      {isCampaignGm ? <TagChip label="GM" tone={UI_COLORS.accent} /> : null}
+                      {isCampaignGm ? (
+                        <Chip
+                          size="small"
+                          label={`Code: ${c.join_code}`}
+                          onClick={() => copyCode(c.join_code)}
+                          icon={<Copy size={ICON_SIZES.xs} />}
+                          color="primary"
+                          variant="outlined"
+                          aria-label={`Copy invite code ${c.join_code}`}
+                          sx={inviteChipSx}
+                        />
+                      ) : null}
                     </Box>
-
-                    <Divider sx={campaignDividerSx} />
-
-                    {chars.length === 0 ? (
-                      <EmptyLine>No sheets in this campaign yet.</EmptyLine>
-                    ) : (
-                      <Stack spacing={0.75}>
-                        {chars.map((ch) => {
-                          const mine = ch.owner === myId;
-                          // Mirror openCampaignChar: editable by owner, a global GM
-                          // (useAuth isGm), or the GM of this campaign.
-                          const canEditChar = mine || isGm || isCampaignGm;
-                          const s = summarizeCharacter(ch.data);
-                          return (
-                            <Box key={ch.id} sx={characterRowSx}>
-                              <Box component="button" type="button" onClick={() => openCampaignChar(ch, c)} sx={characterOpenButtonSx}>
-                                <Box component={ScrollText} size={16} aria-hidden sx={characterIconSx(canEditChar)} />
-                                <Box component="span" sx={characterInfoSx}>
-                                  <Box component="span" sx={characterNameRowSx}>
-                                    <Typography component="span" sx={characterNameSx}>{ch.name || ch.id}</Typography>
-                                    {!canEditChar ? (
-                                      <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
-                                    ) : null}
-                                  </Box>
-                                  <Typography component="span" sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
-                                  {s ? (
-                                    <Box component="span" sx={statsRowSx}>
-                                      <Box component="span" sx={statSx}>HP <Box component="b" sx={hpStatSx}>{s.currentHP}</Box>/{s.maxHP}</Box>
-                                      <Box component="span" sx={statSx}>AC <Box component="b" sx={acStatSx}>{s.ac}</Box></Box>
-                                      <Box component="span" sx={statSx}>PP <Box component="b" sx={ppStatSx}>{s.passivePerception}</Box></Box>
-                                      <Box component="span" sx={statSx}>Init <Box component="b" sx={initStatSx}>{signed(s.initiative)}</Box></Box>
-                                    </Box>
-                                  ) : null}
-                                </Box>
-                              </Box>
-                              {mine ? (
-                                <IconButton size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" aria-label={`Remove ${ch.name || ch.id} from campaign`} sx={dangerActionSx}>
-                                  <X size={ICON_SIZES.sm} />
-                                </IconButton>
-                              ) : null}
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    )}
-
-                    {assignable.length > 0 ? (
-                      <SelectField
-                        value=""
-                        sx={characterSelectSx}
-                        label="Add one of my characters"
-                        options={assignable.map((mc) => ({ value: mc.id, label: mc.name || mc.id }))}
-                        onChange={(value) => assignChar(value, c.id)}
-                        disabled={busy}
-                      />
-                    ) : null}
+                    <Box sx={campaignActionsSx}>
+                      <Typography sx={metaSx}>{members.length} member{members.length === 1 ? '' : 's'}</Typography>
+                      {isCampaignGm ? (
+                        <TipIconButton danger size="small" onClick={() => handleDeleteCampaign(c)} title="Delete campaign" ariaLabel={`Delete campaign ${c.name}`}>
+                          <Trash2 size={ICON_SIZES.sm} />
+                        </TipIconButton>
+                      ) : (
+                        <TipIconButton danger size="small" onClick={() => handleLeave(c.id)} title="Leave" ariaLabel={`Leave campaign ${c.name}`}>
+                          <LogOut size={ICON_SIZES.sm} />
+                        </TipIconButton>
+                      )}
+                    </Box>
                   </Box>
-                );
-              })}
-            </Stack>
-          </>
-        )}
-      </Box>
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-    </Box>
+
+                  <Divider sx={campaignDividerSx} />
+
+                  {chars.length === 0 ? (
+                    <EmptyLine>No sheets in this campaign yet.</EmptyLine>
+                  ) : (
+                    <Stack spacing={0.75}>
+                      {chars.map((ch) => {
+                        const mine = ch.owner === myId;
+                        // Mirror openCampaignChar: editable by owner, a global GM
+                        // (useAuth isGm), or the GM of this campaign.
+                        const canEditChar = mine || isGm || isCampaignGm;
+                        const s = summarizeCharacter(ch.data);
+                        return (
+                          <EntityRow
+                            key={ch.id}
+                            surface="card"
+                            wrap
+                            onClick={() => openCampaignChar(ch, c)}
+                            leading={<Box component={ScrollText} size={16} aria-hidden sx={characterIconSx(canEditChar)} />}
+                            title={ch.name || ch.id}
+                            badge={!canEditChar ? (
+                              <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
+                            ) : null}
+                            subtitle={`${ch.owner_username || '—'}${mine ? ' · you' : ''}`}
+                            actions={mine ? (
+                              <TipIconButton danger size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" ariaLabel={`Remove ${ch.name || ch.id} from campaign`}>
+                                <X size={ICON_SIZES.sm} />
+                              </TipIconButton>
+                            ) : null}
+                          >
+                            {s ? (
+                              <Box component="span" sx={statsRowSx}>
+                                <Box component="span" sx={statSx}>HP <Box component="b" sx={hpStatSx}>{s.currentHP}</Box>/{s.maxHP}</Box>
+                                <Box component="span" sx={statSx}>AC <Box component="b" sx={acStatSx}>{s.ac}</Box></Box>
+                                <Box component="span" sx={statSx}>PP <Box component="b" sx={ppStatSx}>{s.passivePerception}</Box></Box>
+                                <Box component="span" sx={statSx}>Init <Box component="b" sx={initStatSx}>{signed(s.initiative)}</Box></Box>
+                              </Box>
+                            ) : null}
+                          </EntityRow>
+                        );
+                      })}
+                    </Stack>
+                  )}
+
+                  {assignable.length > 0 ? (
+                    <SelectField
+                      value=""
+                      sx={characterSelectSx}
+                      label="Add one of my characters"
+                      options={assignable.map((mc) => ({ value: mc.id, label: mc.name || mc.id }))}
+                      onChange={(value) => assignChar(value, c.id)}
+                      disabled={busy}
+                    />
+                  ) : null}
+                </Box>
+              );
+            })}
+          </Stack>
+        </>
+      )}
+    </AppPage>
   );
 }
-
-const focusVisibleSx = { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: '2px' };
-
-const rootSx = {
-  minHeight: '100vh',
-  ...SURFACES.page,
-  overflowX: 'hidden',
-  pt: APP_TOP_BAR_HEIGHT,
-};
-
-const pageSx = {
-  width: '100%',
-  maxWidth: 860,
-  mx: 'auto',
-  p: { xs: 2, sm: 3, md: 4 },
-};
-
-const headerSx = { display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.5 };
-const headerIconSx = { color: 'primary.main', flexShrink: 0 };
-const titleSx = { ...TEXT_STYLES.title, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: 'primary.main' };
-
 
 const setupStackSx = { mb: 2.5 };
 const setupPanelSx = { ...SURFACES.panel, flex: 1, minWidth: 0, p: 1.5 };
@@ -329,36 +307,9 @@ const campaignNameSx = { minWidth: 0, ...TEXT_STYLES.figure, fontSize: FONT_SIZE
 const campaignActionsSx = { ml: { xs: 0, sm: 'auto' }, display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 };
 const campaignDividerSx = { my: 1.25 };
 const smallChipSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs, flexShrink: 0 };
-const inviteChipSx = { ...smallChipSx, cursor: 'pointer', '&:focus-visible': focusVisibleSx };
-const dangerActionSx = { color: 'error.main', flexShrink: 0, '&:focus-visible': focusVisibleSx };
+const inviteChipSx = { ...smallChipSx, cursor: 'pointer', ...focusRingSx() };
 
-const characterRowSx = {
-  ...SURFACES.inset,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0.5,
-  minWidth: 0,
-  transition: 'border-color 0.15s, background-color 0.15s',
-  '&:hover, &:focus-within': { borderColor: 'primary.main' },
-};
-
-const characterOpenButtonSx = {
-  ...BARE_BUTTON_SX,
-  flex: 1,
-  minWidth: 0,
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: 1,
-  p: 1,
-  bgcolor: 'transparent',
-  '&:hover': { bgcolor: 'action.hover' },
-  '&:focus-visible': focusVisibleSx,
-};
-
-const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboard.badge.cloud', flexShrink: 0, mt: 0.25 });
-const characterInfoSx = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' };
-const characterNameRowSx = { display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flexWrap: 'wrap' };
-const characterNameSx = { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
+const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboard.badge.cloud', flexShrink: 0 });
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.5 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };

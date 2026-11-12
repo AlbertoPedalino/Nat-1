@@ -1,15 +1,14 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { LAYERS } from '../../shared/ui/layers.js';
 import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
-import { phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
+import TopBarButton from '../../shared/ui/TopBarButton.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import { panelBarSx, panelScreentone } from '../../shared/ui/PanelHeader.jsx';
 import { UI_SHADOWS } from '../../shared/ui/shadows.js';
-import { APP_TOP_BAR_HEIGHT, appTopBarButtonSx, appTopBarFontSx } from '../../shared/ui/appBar.js';
-import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 
 export { APP_TOP_BAR_HEIGHT };
 
@@ -24,38 +23,22 @@ export default function AppTopBar({
       {home || backTo || start ? (
         <Box sx={leftActionsSx}>
           {home ? (
-            <Button
-              component={RouterLink}
-              to="/"
-              size="small"
-              variant="outlined"
-              color="primary"
-              aria-label="Home"
-              startIcon={<Home size={ICON_SIZES.sm} />}
-              sx={appTopBarButtonSx}
-            >
-              <Box component="span" sx={phoneHiddenLabelSx}>HOME</Box>
-            </Button>
+            <TopBarButton component={RouterLink} to="/" icon={Home} label="HOME" ariaLabel="Home" />
           ) : null}
           {backTo ? (
-            <Button
+            <TopBarButton
               component={RouterLink}
               to={backTo}
-              size="small"
-              variant="outlined"
-              color="primary"
-              aria-label={`Back to ${backLabel}`}
-              startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
-              sx={appTopBarButtonSx}
-            >
-              <Box component="span" sx={phoneHiddenLabelSx}>{backLabel}</Box>
-            </Button>
+              icon={ArrowLeft}
+              label={backLabel}
+              ariaLabel={`Back to ${backLabel}`}
+            />
           ) : null}
           {start}
         </Box>
       ) : null}
       {children}
-      {compendium ? <CompendiumButton sx={appTopBarFontSx} /> : null}
+      {compendium ? <CompendiumButton /> : null}
       <CloudMenu {...cloudMenuProps} />
     </Box>
   );

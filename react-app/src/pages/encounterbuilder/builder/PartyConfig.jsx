@@ -11,6 +11,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { LIST_ROW_SX } from '../../../shared/ui/interactive.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -96,7 +97,7 @@ export default function PartyConfig() {
                 onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { initMod: event.target.value } })}
                 sx={{ width: 78 }}
               />
-              <TipIconButton title="Remove from encounter" size="small" color="error" onClick={() => dispatch({ type: 'removePlayer', index })}>
+              <TipIconButton danger title="Remove from encounter" size="small" onClick={() => dispatch({ type: 'removePlayer', index })}>
                 <Trash2 size={ICON_SIZES.sm} />
               </TipIconButton>
             </Box>
@@ -125,14 +126,12 @@ function Stepper(props) {
   );
 }
 
-// Circular swatch wrapping the native color input (MUI ships no color picker).
+// A player's row is a form (name, HP, AC, Init), not a name over a caption,
+// so it takes the list row's layout on the wash itself, wrapping its fields.
 const playerRowSx = {
   ...SURFACES.wash,
-  display: 'flex',
-  alignItems: 'center',
+  ...LIST_ROW_SX,
   flexWrap: 'wrap',
-  gap: 1,
-  p: 1,
 };
 
 const stepperGroupSx = {
