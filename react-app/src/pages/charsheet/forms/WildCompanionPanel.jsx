@@ -32,9 +32,10 @@ import {
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { filterByBooks } from '../../../shared/content/booksView.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -173,7 +174,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
               typeLabel="Fey"
             />
           ))}
-          {!visible.length ? <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>No matches.</Typography> : null}
+          {!visible.length ? <EmptyLine>No matches.</EmptyLine> : null}
         </Stack>
       )}
       <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>

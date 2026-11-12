@@ -13,11 +13,12 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { goldToggleSx } from '../../../shared/ui/actionButton.js';
-import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -43,9 +44,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
       ))}
       <ShowMoreButton page={page} />
       {!items.length && (
-        <Typography sx={{ ...emptyTextSx, py: 0.75, px: 1 }}>
-          {itemsDbCount ? 'No items found.' : 'Loading items.'}
-        </Typography>
+        itemsDbCount ? <EmptyLine inList>No items found.</EmptyLine> : <LoadingLine label="Loading items…" sx={{ px: 1, py: 1.25 }} />
       )}
     </Box>
   );

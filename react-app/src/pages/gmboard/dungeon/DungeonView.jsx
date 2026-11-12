@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { Box, Stack, TextField, useTheme } from '@mui/material';
 import { Castle } from 'lucide-react';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
@@ -10,8 +10,7 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { boardCardGridSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -80,31 +79,11 @@ export default function DungeonView() {
           {dungeon.rooms.map((room) => <RoomCard key={room.id} room={room} />)}
         </Box>
       ) : (
-        <Box sx={{ ...emptyStateSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
-          <Castle size={ICON_SIZES.xl} color={theme.palette.text.secondary} />
-          <Typography sx={emptyTextSx}>
-            No dungeon generated yet. Set a room count, population mode and tier, then press Generate.
-          </Typography>
-        </Box>
+        <StatePanel icon={Castle} title="No dungeon yet">
+          Set a room count, population mode and tier, then press Generate.
+        </StatePanel>
       )}
     </Stack>
   );
 }
 
-const emptyStateSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 1,
-  p: 3,
-  border: '1px dashed',
-  borderColor: 'divider',
-  borderRadius: 2,
-  textAlign: 'center',
-};
-
-const emptyTextSx = {
-  fontSize: FONT_SIZES.lg,
-  color: 'text.secondary',
-  maxWidth: 360,
-};

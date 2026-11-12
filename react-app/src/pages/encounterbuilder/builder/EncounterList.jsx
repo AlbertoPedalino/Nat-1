@@ -14,6 +14,7 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -103,7 +104,7 @@ export default function EncounterList() {
               </Stack>
             </Box>
           )) : (
-            <Typography sx={{ color: 'text.secondary', py: 2 }}>Add monsters from the bestiary list.</Typography>
+            <EmptyLine inList>Add monsters from the bestiary list.</EmptyLine>
           )}
         </Stack>
         <DifficultyBar encounter={state.encounter} party={state.party} />

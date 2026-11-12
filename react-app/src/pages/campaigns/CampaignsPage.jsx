@@ -32,12 +32,13 @@ import { failureMessage } from '../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
-import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import TagChip from '../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
+import EmptyLine from '../../shared/ui/EmptyLine.jsx';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -232,7 +233,7 @@ export default function CampaignsPage() {
                     <Divider sx={campaignDividerSx} />
 
                     {chars.length === 0 ? (
-                      <Typography sx={metaSx}>No sheets in this campaign yet.</Typography>
+                      <EmptyLine>No sheets in this campaign yet.</EmptyLine>
                     ) : (
                       <Stack spacing={0.75}>
                         {chars.map((ch) => {

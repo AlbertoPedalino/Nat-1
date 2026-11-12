@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
 import { isBookAllowed } from '../../../shared/content/sourcePriority.js';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -10,6 +10,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -75,7 +76,7 @@ export default function SubclassPanel({ character, dispatch }) {
                 <SubclassFeatureRow key={`${feature.name}-${feature.level}`} feature={feature} />
               ))}
               {!subclassFeatures.length ? (
-                <Typography sx={{ color: 'text.secondary' }}>No subclass features loaded for this subclass.</Typography>
+                <EmptyLine>No subclass features loaded for this subclass.</EmptyLine>
               ) : null}
             </Stack>
           </Box>

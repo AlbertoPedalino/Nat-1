@@ -8,6 +8,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -35,13 +36,9 @@ export default function ExpandableSelectionList({
         {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
 
         {!options.length ? (
-          <Box sx={{ px: 0.25 }}>
-            <Typography sx={{ color: 'text.secondary' }}>{emptyText}</Typography>
-          </Box>
+          <EmptyLine>{emptyText}</EmptyLine>
         ) : !visibleOptions.length ? (
-          <Box sx={{ px: 0.25 }}>
-            <Typography sx={{ color: 'text.secondary' }}>No matches.</Typography>
-          </Box>
+          <EmptyLine>No matches.</EmptyLine>
         ) : (
           <Box sx={scrollWellSx(maxHeight)}>
             <List dense disablePadding>

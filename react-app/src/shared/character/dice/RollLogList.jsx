@@ -4,12 +4,12 @@ import RollActorLabel from './RollActorLabel.jsx';
 import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
 import { formatClockTime } from '../../ui/dateFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
+import EmptyLine from '../../ui/EmptyLine.jsx';
+import { TEXT_STYLES } from '../../ui/textStyles.js';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -26,7 +26,7 @@ export default function RollLogList({
         </Button>
       ) : null}
       {log?.length ? log.map((entry) => <RollLogRow key={entry.id} entry={entry} />) : (
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{emptyText}</Typography>
+        <EmptyLine>{emptyText}</EmptyLine>
       )}
       {log?.length ? (
         <Typography variant="caption" sx={{ color: 'text.disabled' }}>

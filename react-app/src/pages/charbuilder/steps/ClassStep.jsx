@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceSpec from '../choices/ChoiceSpec.jsx';
 import { classChoiceSpecs } from '../choices/choiceSpecs.js';
@@ -15,6 +15,7 @@ import SpellSelectionPanel from '../spells/SpellSelectionPanel.jsx';
 import { activeExtraClass } from '../state/activeClass.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function ClassStep({ state, dispatch }) {
   const { character } = state;
@@ -66,7 +67,7 @@ export default function ClassStep({ state, dispatch }) {
         <Stack spacing={1.5}>
           {choiceSpecs.map(renderSpec)}
           {!choiceSpecs.length ? (
-            <Typography sx={{ color: 'text.secondary' }}>No class choices at current level.</Typography>
+            <EmptyLine>No class choices at current level.</EmptyLine>
           ) : null}
         </Stack>
       </BuilderPanel>

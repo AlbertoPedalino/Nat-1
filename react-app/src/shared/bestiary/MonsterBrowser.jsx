@@ -26,6 +26,7 @@ import { LoadingLine } from '../ui/LoadStatus.jsx';
 import { SURFACES } from '../ui/surfaces.js';
 import { FONT_WEIGHTS } from '../ui/fonts.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
+import EmptyLine from '../ui/EmptyLine.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -146,7 +147,7 @@ export default function MonsterBrowser({
             </Tooltip>
           </Box>
         )) : (
-          <Typography sx={{ color: 'text.secondary', py: 4, textAlign: 'center' }}>No monsters found.</Typography>
+          <EmptyLine inList>No monsters found.</EmptyLine>
         )}
       </Stack>
 

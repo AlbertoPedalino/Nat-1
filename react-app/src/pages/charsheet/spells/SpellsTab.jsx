@@ -14,7 +14,7 @@ import { getSpellAbility } from './spellAbility.js';
 import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
 import { addButtonSx, compactInputSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
-import { Empty, SlotPanel, SpellSection } from './SpellsUiParts.jsx';
+import { SlotPanel, SpellSection } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -31,6 +31,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
 import StatTile from '../stats/StatTile.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -125,7 +126,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
           {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} adapterRegistry={adapterRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
-          {!visibleCantrips.length ? <Empty text="None" /> : null}
+          {!visibleCantrips.length ? <EmptyLine framed>None</EmptyLine> : null}
         </SpellSection>
       ) : null}
 
@@ -141,7 +142,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         </SpellSection>
       ))}
 
-      {!hasVisibleSpells && catalogStatus === 'ready' ? <Empty text={emptySpellText} /> : null}
+      {!hasVisibleSpells && catalogStatus === 'ready' ? <EmptyLine framed>{emptySpellText}</EmptyLine> : null}
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>

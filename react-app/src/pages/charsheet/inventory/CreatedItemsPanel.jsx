@@ -20,8 +20,8 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
-import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
@@ -257,9 +257,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             />
           );
         }) : (
-          <Typography sx={{ ...emptyTextSx, py: 0.5 }}>
-            No items match “{query.trim()}”.
-          </Typography>
+          <EmptyLine inList>No items match “{query.trim()}”.</EmptyLine>
         )}
       </Box>
 

@@ -4,9 +4,9 @@ import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -36,7 +36,7 @@ export default function SessionLog() {
         {entries.length ? entries.map((entry, index) => (
           <Typography key={index} sx={{ ...entrySx, ...LIST_ROW_RULE_SX }}>{entry}</Typography>
         )) : (
-          <Typography sx={emptySx}>No log entries yet.</Typography>
+          <EmptyLine>No log entries yet.</EmptyLine>
         )}
       </Box>
     </BoardPanel>
@@ -62,7 +62,3 @@ const entrySx = {
   pb: 0.5,
 };
 
-const emptySx = {
-  ...TEXT_STYLES.note, fontSize: FONT_SIZES.lg,
-  
-};

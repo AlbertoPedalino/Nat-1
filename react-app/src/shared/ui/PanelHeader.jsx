@@ -116,9 +116,6 @@ export const sheetBoxSx = {
 
 export const sheetBoxTitleSx = { ...panelTitleSx, mb: 0.5 };
 
-// The line a list or panel shows when it has nothing in it.
-export const emptyTextSx = { ...TEXT_STYLES.note, fontSize: FONT_SIZES.xl };
-
 // A sheet readout: a big gold number over its tiny uppercase name (AC,
 // Initiative, Speed).
 // The side of a stat tile (Initiative, Proficiency Bonus, Inspiration) and the

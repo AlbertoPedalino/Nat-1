@@ -1,9 +1,8 @@
-import { Typography } from '@mui/material';
 import { damageTypeTone, PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -13,7 +12,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 export default function DefensesPanel({ items = [], emptyText = 'No resistances detected.', sx }) {
   return (
     <Panel icon={GAME_ICONS.defenses} title="Defenses" tone={PANEL_TONES.defenses} sx={sx} bodySx={{ p: '0.4rem 0.62rem' }}>
-      {items.length === 0 && <Typography sx={emptyTextSx}>{emptyText}</Typography>}
+      {items.length === 0 && <EmptyLine>{emptyText}</EmptyLine>}
       {items.map((d, i) => {
         const tone = d.kind === 'Resist' || d.kind === 'Immune' ? damageTypeTone(d.type) : null;
         return (

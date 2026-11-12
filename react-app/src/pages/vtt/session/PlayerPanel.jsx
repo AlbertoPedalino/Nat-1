@@ -6,6 +6,7 @@ import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx'
 import TokenComposer from '../tokens/TokenComposer.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
 // character, add a token piece of their own (name, colour, picture), and move
@@ -88,9 +89,7 @@ export default function PlayerPanel({
             })}
           </Stack>
         ) : (
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            None of your characters is attached to this campaign yet.
-          </Typography>
+          <EmptyLine>None of your characters is attached to this campaign yet.</EmptyLine>
         )}
 
         <TokenComposer

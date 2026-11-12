@@ -8,6 +8,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
   const { state, characterDigests } = useEncounterBuilder();
@@ -25,7 +26,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
         </Box>
         <Divider />
         <Box sx={playerBodySx}>
-          <Typography sx={{ color: 'text.secondary' }}>That combatant is no longer in the active encounter.</Typography>
+          <EmptyLine>That combatant is no longer in the active encounter.</EmptyLine>
         </Box>
       </>
     );

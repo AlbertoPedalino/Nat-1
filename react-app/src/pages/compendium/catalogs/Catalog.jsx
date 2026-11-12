@@ -10,7 +10,7 @@ import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { captionLabelSx, emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
+import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { rangeFilterKeys } from '../../../shared/character/inventory/itemFilters.js';
 import {
   YES_NO_OPTIONS, anyValue, catalogDefaults, catalogEntries, fieldOptions, runCatalog, sourceOptions,
@@ -18,6 +18,7 @@ import {
 import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -149,7 +150,7 @@ export default function Catalog({
             sx={{ height: '100%' }}
           />
         ) : (
-          <Typography sx={{ ...emptyTextSx, p: 2 }}>Nothing matches these filters.</Typography>
+          <EmptyLine inList>Nothing matches these filters.</EmptyLine>
         )}
       </Box>
       <SheetDialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" showClose>

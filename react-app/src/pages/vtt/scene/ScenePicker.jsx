@@ -23,6 +23,7 @@ import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -215,7 +216,7 @@ export default function ScenePicker({
                 ))}
               </Stack>
             ) : (
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>No scenes yet.</Typography>
+              <EmptyLine>No scenes yet.</EmptyLine>
             )}
           </Panel>
         );

@@ -25,6 +25,7 @@ import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -129,7 +130,7 @@ export default function EquipmentStep({ state, dispatch }) {
           <StartingEquipmentBlock title={character.className} eq={character.cls?.startingEquipment} prefix="cls" character={character} items={state.data.items} dispatch={dispatch} />
           <StartingEquipmentBlock title={character.backgroundName} eq={character.backgroundObj?.startingEquipment} prefix="bg" character={character} items={state.data.items} dispatch={dispatch} />
           {!character.cls?.startingEquipment && !character.backgroundObj?.startingEquipment ? (
-            <Typography sx={{ color: 'text.secondary' }}>Select class and background to see starting equipment.</Typography>
+            <EmptyLine>Select class and background to see starting equipment.</EmptyLine>
           ) : null}
         </Stack>
       </BuilderPanel>
@@ -200,9 +201,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
               ))}
               {character.inventory.length && !currentInventory.length ? (
-                <Typography sx={{ ...BUILDER_TEXT.hint, px: 2, py: 1 }}>
-                  No matches.
-                </Typography>
+                <EmptyLine inList>No matches.</EmptyLine>
               ) : null}
             </List>
             <ShowMoreButton page={currentPage} sx={{ py: 1 }} />

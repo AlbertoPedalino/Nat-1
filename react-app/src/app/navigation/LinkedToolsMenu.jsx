@@ -23,6 +23,7 @@ import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
+import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -277,7 +278,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               </Stack>;
             })}
           </Stack>
-          {!linkedRows.length && <Typography variant="body2" sx={{ color: 'text.secondary' }}>No other tools are linked yet.</Typography>}
+          {!linkedRows.length && <EmptyLine>No other tools are linked yet.</EmptyLine>}
           {adding ? <TextField select fullWidth size="small" label="Add a tool or campaign" value="" disabled={disabled}
             onChange={(event) => {
               const value = event.target.value;

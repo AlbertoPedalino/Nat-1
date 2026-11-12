@@ -3,16 +3,7 @@ import { levelHeaderSx, panelSurfaceSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-
-export function Empty({ text }) {
-  return (
-    <Box sx={{ ...panelSurfaceSx, py: 1 }}>
-      <Typography sx={emptyTextSx}>{text}</Typography>
-    </Box>
-  );
-}
 
 export function SpellSection({ title, children }) {
   return (

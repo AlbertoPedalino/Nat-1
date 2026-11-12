@@ -9,6 +9,7 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -44,10 +45,10 @@ export default function CampaignImport() {
           errorMessage={campaignPlayers.error}
         />
         {!campaignPlayers.loading && !campaignPlayers.signedIn ? (
-          <Typography sx={{ color: 'text.secondary' }}>Log in to import players from your GM campaigns.</Typography>
+          <EmptyLine>Log in to import players from your GM campaigns.</EmptyLine>
         ) : null}
         {!campaignPlayers.loading && campaignPlayers.signedIn && !campaignPlayers.campaigns.length ? (
-          <Typography sx={{ color: 'text.secondary' }}>No campaigns where you are GM.</Typography>
+          <EmptyLine>No campaigns where you are GM.</EmptyLine>
         ) : null}
         {selected ? (
           <>

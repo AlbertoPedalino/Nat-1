@@ -20,6 +20,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -136,7 +137,7 @@ export default function MapObjectsPanel({
             );
           })}
         </Box>
-      ) : <Typography sx={emptySx}>No Lucide icon matches this search.</Typography>}
+      ) : <EmptyLine>No Lucide icon matches this search.</EmptyLine>}
 
       {pageCount > 1 ? (
         <Pagination
@@ -208,7 +209,6 @@ const labelSx = {
   lineHeight: LINE_HEIGHTS.tight,
 };
 
-const emptySx = { py: 3, textAlign: 'center', color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.md };
 const paginationSx = {
   mt: 1,
   display: 'flex',

@@ -17,8 +17,9 @@ import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
-import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -156,7 +157,7 @@ export default function BackgroundStep({ state, dispatch }) {
         {selectedBackground ? (
           <BackgroundDetailCard background={selectedBackground} />
         ) : (
-          <Typography sx={{ color: 'text.secondary' }}>Select a background.</Typography>
+          <EmptyLine>Select a background.</EmptyLine>
         )}
       </BuilderPanel>
 

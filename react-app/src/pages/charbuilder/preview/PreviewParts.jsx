@@ -12,20 +12,13 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
 
 
 export const PROFICIENCY_TONE = UI_COLORS.accentText;
-
-function EmptyCaption({ children }) {
-  return (
-    <Typography sx={BUILDER_TEXT.hint}>
-      {children}
-    </Typography>
-  );
-}
 
 // A preview section: the sheet's panel (PanelHeader over the body), its
 // `subtitle` the first line of the body.
@@ -39,7 +32,7 @@ export function PreviewSection({ icon, title, subtitle, tone = UI_COLORS.accentT
         {subtitle ? (
           <Typography sx={BUILDER_TEXT.note} noWrap>{subtitle}</Typography>
         ) : null}
-        {hasContent ? children : emptyText ? <EmptyCaption>{emptyText}</EmptyCaption> : null}
+        {hasContent ? children : emptyText ? <EmptyLine>{emptyText}</EmptyLine> : null}
       </Stack>
     </Panel>
   );

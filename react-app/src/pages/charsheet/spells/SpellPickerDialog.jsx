@@ -12,7 +12,6 @@ import {
   hasSpellcastingProfile,
 } from '../../../shared/character/spells/spellcasting.js';
 import { compactInputSx, levelToggleSx } from './spellsTabStyles.js';
-import { Empty } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
@@ -31,6 +30,7 @@ import { spellPickerPool } from '../../../shared/character/spells/spellPickerPoo
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The sheet's Add / Remove Spell dialog: one caster class at a time, a spell
 // level, and the spells it may pick (spellPickerPool) — or, for a Wizard,
@@ -212,7 +212,7 @@ export function SpellPickerDialog({
           );
         })}
         {!pickerList.length ? (
-          <Empty text={activeIsWizard && pickerWizardMode === 'prepare' ? 'No spells in this Wizard spellbook level.' : 'No spells found for this class/level.'} />
+          <EmptyLine framed>{activeIsWizard && pickerWizardMode === 'prepare' ? 'No spells in this Wizard spellbook level.' : 'No spells found for this class/level.'}</EmptyLine>
         ) : null}
       </Box>
     </SheetDialog>

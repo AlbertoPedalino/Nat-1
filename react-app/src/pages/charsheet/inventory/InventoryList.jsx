@@ -15,11 +15,12 @@ import { byItemName } from '../../../shared/character/inventory/itemSearch.js';
 import ItemGroupFilter, { ITEM_GROUP_ICONS } from '../../../shared/character/inventory/ItemGroupFilter.jsx';
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
 import { compactInputSx, inventorySectionSx } from './inventoryControls.jsx';
-import { emptyTextSx, sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
+import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 
 // The inventory section headers, in shelf order. Derived from the same keys, so
@@ -157,11 +158,9 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
             <ShowMoreButton page={inventoryPage} />
           </Box>
         ) : null}
-        {!inv.length && <Typography sx={{ ...emptyTextSx, py: 0.5 }}>Inventory empty.</Typography>}
+        {!inv.length && <EmptyLine inList>Inventory empty.</EmptyLine>}
         {inv.length > 0 && !visibleInventory.length && (
-          <Typography sx={{ ...emptyTextSx, py: 0.5 }}>
-            No inventory items match this search or filter.
-          </Typography>
+          <EmptyLine inList>No inventory items match this search or filter.</EmptyLine>
         )}
       </Box>
     </Box>

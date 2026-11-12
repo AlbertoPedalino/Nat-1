@@ -724,3 +724,7 @@ test('outlined lettering is inked only by inkLettering', () => {
     allow: ['shared/ui/shadows.js'],
   }), []);
 });
+
+test('a list with nothing in it says so through EmptyLine', () => {
+  assert.deepEqual(sourceFilesMatching(/\bemptyTextSx\b/, { allow: ['shared/ui/EmptyLine.jsx'] }), []);
+});

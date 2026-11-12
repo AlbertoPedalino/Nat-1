@@ -13,7 +13,6 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
 import { COMPENDIUM_KIND_COLORS } from '../../../shared/ui/entityColors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendiumIndex.js';
@@ -23,6 +22,7 @@ import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The kind filter: everything, or one kind.
 const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
@@ -104,7 +104,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
             ))}
           </List>
         ) : (
-          <Typography sx={statusSx}>Nothing found.</Typography>
+          <EmptyLine inList>Nothing found.</EmptyLine>
         )}
         <ShowMoreButton page={page} />
       </>
@@ -150,7 +150,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
               {detail}
             </>
           ) : (
-            <Typography sx={statusSx}>Pick an entry to read it.</Typography>
+            <EmptyLine inList>Pick an entry to read it.</EmptyLine>
           )}
         </Box>
       </Box>
@@ -172,7 +172,6 @@ const kindRowSx = {
   gap: 0.75,
 };
 
-const statusSx = { ...emptyTextSx, p: 2 };
 
 const resultSx = {
   ...LIST_ROW_RULE_SX,

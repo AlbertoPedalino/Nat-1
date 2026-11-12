@@ -28,6 +28,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -123,9 +124,7 @@ export function AtmospherePicker({ value, onSelect }) {
         ))}
       </Box>
       {visiblePresets.length === 0 ? (
-        <Typography variant="caption" sx={{ color: 'text.secondary', py: 1, textAlign: 'center' }}>
-          No atmospheres found
-        </Typography>
+        <EmptyLine inList>No atmospheres found.</EmptyLine>
       ) : null}
     </Stack>
   );

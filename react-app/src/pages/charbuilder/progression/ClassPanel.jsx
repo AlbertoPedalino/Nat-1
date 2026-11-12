@@ -21,6 +21,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -248,9 +249,7 @@ export default function ClassPanel({ state, character, dispatch }) {
               );
             })}
             {!visibleClasses.length ? (
-              <Typography sx={{ color: 'text.secondary', px: 1, py: 1.25 }}>
-                No classes found.
-              </Typography>
+              <EmptyLine inList>No classes found.</EmptyLine>
             ) : null}
           </List>
         </Box>

@@ -15,6 +15,7 @@ import EncounterSaveSelect from './EncounterSaveSelect.jsx';
 import EncounterGroupCard from './EncounterGroupCard.jsx';
 import { noticeSx } from './encounterImportStyles.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
@@ -106,10 +107,10 @@ export default function EncounterImportDialog({
           <LoadingLine label="Loading your encounter saves…" />
         ) : null}
         {!instances.length && !listing ? (
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          <EmptyLine>
             No Encounter Builder saves yet. Prepare one in the Encounter Builder, and sign in to
             see the ones made on another device.
-          </Typography>
+          </EmptyLine>
         ) : null}
         {instances.length ? (
           <>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, List, ListItemButton, Typography } from '@mui/material';
+import { Box, List, ListItemButton } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -8,9 +8,9 @@ import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searc
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
-import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -123,7 +123,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
           })}
         </List>
       </Box>
-      {!pool.length ? <Typography sx={BUILDER_TEXT.hint}>No spells found for this filter.</Typography> : null}
+      {!pool.length ? <EmptyLine>No spells found for this filter.</EmptyLine> : null}
     </ChoiceFrame>
   );
 }

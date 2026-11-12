@@ -14,7 +14,6 @@ import {
   panelRootSx,
   panelToolbarSx,
 } from '../spells/spellsTabStyles.js';
-import { Empty } from '../spells/SpellsUiParts.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import SlotDialogs from './SlotDialogs.jsx';
 import { useResourceSideEffects } from './useResourceSideEffects.js';
@@ -36,6 +35,7 @@ import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -219,7 +219,7 @@ export default function ActionsTab({ C, sheet, resources }) {
         </Box>
       ))}
 
-      {!actionSections.length ? <Empty text="No actions for this filter." /> : null}
+      {!actionSections.length ? <EmptyLine framed>No actions for this filter.</EmptyLine> : null}
 
       <SlotDialogs dialogs={slotDialogs} resNameMap={resNameMap} />
     </Box>

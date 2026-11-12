@@ -14,10 +14,11 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { asArray } from '../../../shared/lists.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { BUILDER_TEXT } from '../layout/builderText.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -107,7 +108,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
 function FeatDescriptionRows({ feat }) {
   const { introEntries, namedEntries } = partitionNamedEntries(featDescriptionEntries(feat));
   if (!introEntries.length && !namedEntries.length) {
-    return <Typography sx={{ color: 'text.secondary' }}>No description available.</Typography>;
+    return <EmptyLine>No description available.</EmptyLine>;
   }
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>

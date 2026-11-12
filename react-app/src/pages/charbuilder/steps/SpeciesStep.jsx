@@ -8,9 +8,10 @@ import { speciesChoiceSpecs } from '../choices/choiceSpecs.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { BUILDER_TEXT } from '../layout/builderText.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { BUILDER_TEXT } from '../layout/builderText.js';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
@@ -32,7 +33,7 @@ function SpeciesDetailCard({ species }) {
             ))}
           </Stack>
         ) : (
-          <Typography sx={{ color: 'text.secondary' }}>No description available.</Typography>
+          <EmptyLine>No description available.</EmptyLine>
         )}
       </Stack>
     </Box>
@@ -61,7 +62,7 @@ export default function SpeciesStep({ state, dispatch }) {
         {selectedSpecies ? (
           <SpeciesDetailCard species={selectedSpecies} />
         ) : (
-          <Typography sx={{ color: 'text.secondary' }}>Select a species.</Typography>
+          <EmptyLine>Select a species.</EmptyLine>
         )}
       </BuilderPanel>
 

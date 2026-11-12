@@ -12,10 +12,11 @@ import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -84,7 +85,7 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
             </Typography>
           </ResultSlot>
         ) : (
-          <Typography sx={emptySx}>Not rolled yet.</Typography>
+          <EmptyLine>Not rolled yet.</EmptyLine>
         )}
       </Box>
       <Stack direction="row" spacing={0.75} sx={wrapRowSx}>
@@ -187,7 +188,7 @@ export default function RollView() {
             {rolls.map((roll, index) => <HistoryRow key={roll.id} roll={roll} last={index === rolls.length - 1} />)}
           </Box>
         ) : (
-          <Typography sx={{ ...emptySx, mt: 1 }}>No rolls yet.</Typography>
+          <EmptyLine sx={{ mt: 1 }}>No rolls yet.</EmptyLine>
         )}
       </Box>
     </Stack>
@@ -274,10 +275,6 @@ const diceSx = {
   color: 'text.secondary',
 };
 
-const emptySx = {
-  ...TEXT_STYLES.note, fontSize: FONT_SIZES.md,
-  
-};
 
 const followUpSx = {
   textTransform: 'none',

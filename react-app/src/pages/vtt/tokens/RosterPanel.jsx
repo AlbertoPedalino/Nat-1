@@ -6,6 +6,7 @@ import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import TokenComposer from './TokenComposer.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -33,9 +34,7 @@ export default function RosterPanel({
     <Box sx={panelInnerSx}>
       <Stack spacing={1.25}>
         {!roster.length ? (
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            No characters in this campaign yet.
-          </Typography>
+          <EmptyLine>No characters in this campaign yet.</EmptyLine>
         ) : placementDisabled ? (
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Switch to the battlemap to place or move pieces.
