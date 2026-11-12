@@ -3,14 +3,13 @@ import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js'
 import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../shared/gmboard/weather.js';
 import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { BARE_BUTTON_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -40,7 +39,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
         // the viewport too and picks the hex behind the bubble.
         data-viewport-control=""
         aria-label={onClose ? `${bubble.headline} — close` : undefined}
-        sx={{ ...bubbleSx, ...(onClose ? clickableSx : null) }}
+        sx={{ ...(onClose ? clickableSx : null), ...hexBubbleSx }}
       >
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25 }}>
           {TerrainIcon ? <TerrainIcon size={ICON_SIZES.xs} color={theme.palette.text.secondary} /> : null}
@@ -75,7 +74,6 @@ export default function HexBubble({ bubble, x, y, onClose }) {
           </Stack>
         ) : null}
 
-        <Box sx={tailSx} />
       </Box>
     </Box>
   );
@@ -91,7 +89,9 @@ const rootSx = {
   pointerEvents: 'none',
 };
 
-const bubbleSx = {
+// The comic speech bubble a piece gets when it rolls, spoken here by the hex
+// the party stands on: its tail on the hex.
+const hexBubbleSx = {
   position: 'relative',
   display: 'block',
   px: 1.5,
@@ -99,26 +99,16 @@ const bubbleSx = {
   minWidth: 210,
   maxWidth: 340,
   textAlign: 'left',
-  borderRadius: 2,
-  bgcolor: VTT_COLORS.surfaceRaised,
-  border: '2px solid',
-  borderColor: 'divider',
-  boxShadow: UI_SHADOWS.popup,
-  // Grows out of the tail, which sits on the hex, so the answer looks spoken by
-  // the ground the party is standing on.
-  transformOrigin: 'bottom center',
-  animation: `gbHexBubbleIn ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
-  '@keyframes gbHexBubbleIn': {
-    from: { opacity: 0, transform: 'scale(0.25)' },
-    to: { opacity: 1, transform: 'scale(1)' },
-  },
+  ...bubbleSx({ pop: false }),
+  ...bubbleTailSx({ side: 'bottom', at: '50%' }),
+  ...BUBBLE_FROM_TAIL_SX,
 };
 
+// Dismissed by a click: a bare button, the bubble its whole look.
 const clickableSx = {
+  ...BARE_BUTTON_SX,
   pointerEvents: 'auto',
-  cursor: 'pointer',
-  font: 'inherit',
-  '&:hover': { borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy) },
+  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.accent}`, outlineOffset: 2 },
 };
 
 const coordSx = {
@@ -145,14 +135,3 @@ const footerSx = {
 
 const footerTextSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', whiteSpace: 'nowrap' };
 
-const tailSx = {
-  position: 'absolute',
-  left: '50%',
-  bottom: -8,
-  ml: -1,
-  width: 0,
-  height: 0,
-  borderLeft: '7px solid transparent',
-  borderRight: '7px solid transparent',
-  borderTop: `8px solid ${VTT_COLORS.surfaceRaised}`,
-};

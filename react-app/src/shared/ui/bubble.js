@@ -147,6 +147,19 @@ export function splatSx(color = UI_COLORS.danger) {
   return shapeBehindSx(color, CRASH_PATH, 100, '14deg');
 }
 
+// A bubble spoken by something on the map (a piece's roll, the hex the party
+// stands on): it grows out of its tail, which sits on the speaker, so it reads
+// as said by it rather than dropped onto the map from off screen.
+export const BUBBLE_FROM_TAIL_SX = Object.freeze({
+  transformOrigin: 'bottom center',
+  animation: `gbBubbleFromTail ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
+  '@keyframes gbBubbleFromTail': {
+    from: { opacity: 0, transform: 'scale(0.25)' },
+    to: { opacity: 1, transform: 'scale(1)' },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+});
+
 // A bubble that groans (a natural 1): it shakes once instead of popping in.
 // A bubble that cheers (a natural 20): it leaps up stretched, lands squashed
 // like a spring, rocks twice and settles at `end` — the larger shouting tilt

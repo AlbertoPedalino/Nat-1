@@ -9,8 +9,7 @@ import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
-import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -143,16 +142,9 @@ const rollBubbleSx = {
   maxWidth: 260,
   textAlign: 'center',
   // The comic speech bubble, its tail on the token that speaks.
-  ...bubbleSx(),
+  ...bubbleSx({ pop: false }),
   ...bubbleTailSx({ side: 'bottom', at: '50%' }),
-  // Grows out of the tail, which sits on the token — so the roll looks spoken by
-  // the piece rather than dropped onto the map from somewhere off screen.
-  transformOrigin: 'bottom center',
-  animation: `gbRollBubbleIn ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
-  '@keyframes gbRollBubbleIn': {
-    from: { opacity: 0, transform: 'scale(0.25)' },
-    to: { opacity: 1, transform: 'scale(1)' },
-  },
+  ...BUBBLE_FROM_TAIL_SX,
 };
 
 const dismissableSx = {
