@@ -35,7 +35,7 @@ export default function PortraitBadge({ path, size, color, children, sx, ...prop
         bgcolor: color || UI_COLORS.surfaceRaised,
         // Inked like the character's piece on the battle map (characterPieceSx):
         // the same cut-out, wherever the character is shown.
-        boxShadow: inkPieceShadow(),
+        boxShadow: inkPieceShadow({ solid: true }),
         ...sx,
       }}
     >

@@ -18,7 +18,6 @@ import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -188,8 +187,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         </Box>
       )}
 
-      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
-        slotProps={{ paper: { sx: { ...SURFACES.panel } } }}>
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
         <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: FONT_SIZES.lg }}>
           Normal save
         </MenuItem>

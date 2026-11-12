@@ -5,7 +5,6 @@ import { activePortalContainer } from '../shared/ui/portalContainer.js';
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
-import { UI_SHADOWS } from '../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
@@ -149,8 +148,15 @@ export const theme = createTheme({
     MuiModal: {
       defaultProps: { container: activePortalContainer },
     },
+    // Everything that floats for a moment — a menu (the roll-with menu of a
+    // held roller among them), a select's list, a popover, an autocomplete
+    // list, a tooltip — is the one floating surface (SURFACES.floating).
     MuiPopover: {
       defaultProps: { container: activePortalContainer },
+      styleOverrides: { paper: SURFACES.floating },
+    },
+    MuiAutocomplete: {
+      styleOverrides: { paper: SURFACES.floating },
     },
     MuiPopper: {
       defaultProps: { container: activePortalContainer },
@@ -245,10 +251,8 @@ export const theme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: UI_COLORS.surfaceRaised,
+          ...SURFACES.floating,
           color: UI_COLORS.textPrimary,
-          border: `2px solid ${UI_COLORS.edge}`,
-          boxShadow: UI_SHADOWS.float,
           fontSize: FONT_SIZES.sm,
         },
         arrow: { color: UI_COLORS.surfaceRaised },

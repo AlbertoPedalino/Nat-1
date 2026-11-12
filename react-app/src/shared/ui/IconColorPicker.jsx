@@ -3,8 +3,7 @@ import { Box, Popover, Typography } from '@mui/material';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import ColorField from './ColorField.jsx';
 import { SWATCH_COLORS } from './swatches.js';
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
-import { SURFACES } from './surfaces.js';
+import { UI_COLORS } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { CARD_PART_RULE_SX } from './interactive.js';
 
@@ -27,7 +26,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       onClose={() => { if (localColor !== currentColor) onSelect(localColor); onClose(); }}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      slotProps={{ paper: { sx: { ...SURFACES.panel, bgcolor: uiAlpha(UI_COLORS.surfaceDeep, OPACITY.solid), p: 1 } } }}
+      slotProps={{ paper: { sx: { p: 1 } } }}
     >
       <Typography sx={{ fontSize: FONT_SIZES.xs, color: 'text.secondary', mb: 0.5, ...TEXT_STYLES.label }}>
         {title}

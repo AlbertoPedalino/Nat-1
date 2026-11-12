@@ -683,3 +683,11 @@ test('markup is stripped only by stripMarkup', () => {
   assert.deepEqual(sourceLinesMatching(anyTag, { allow: ['shared/content/inlineMarkup.js'] }), []);
   assert.deepEqual(sourceLinesMatching(/^\s*(export )?function (strip5eMarkup|stripMarkup)\b/).filter((hit) => !hit.startsWith('shared/content/markupText.js')), []);
 });
+
+// A menu, a select list, a popover, an autocomplete list and a tooltip are the
+// one floating surface the theme gives them (SURFACES.floating); a screen only
+// sizes or pads one. The battle map's menus keep its glass.
+test('floating surfaces are drawn by the theme', () => {
+  const localPaper = /paper: \{[^}]*sx: \{[^}]*\.\.\.SURFACES\./;
+  assert.deepEqual(sourceLinesMatching(localPaper).filter((hit) => !hit.startsWith('pages/vtt/')), []);
+});

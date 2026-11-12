@@ -94,6 +94,16 @@ export const SURFACES = Object.freeze({
     border: INK_EDGE,
     boxShadow: UI_SHADOWS.box,
   }),
+  // What floats over the page for a moment: every menu, select list,
+  // popover, autocomplete list and tooltip (set in the theme). The raised
+  // paper in the ink edge, with the panel's solid shadow. Written in CSS
+  // keys, so the theme's overrides can take it as it is.
+  floating: Object.freeze({
+    backgroundColor: UI_COLORS.surfaceRaised,
+    backgroundImage: 'none',
+    border: INK_EDGE,
+    boxShadow: UI_SHADOWS.box,
+  }),
   // A small control on the map (round icon buttons, corner toggles): the
   // raised button's edge and press.
   mapControl: Object.freeze({
