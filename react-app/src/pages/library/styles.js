@@ -146,20 +146,12 @@ export function badgeSx(kind, theme) {
   };
 }
 
-export const emptyBoxSx = {
+// An empty list: the shared state panel (it has its own paper, so it reads
+// over the page's drawings), sized to the list.
+export const emptyStateSx = {
   width: '100%',
   maxWidth: '640px',
-  textAlign: 'center',
-  p: '2rem 1rem',
-  border: `1px dashed ${uiAlpha(UI_COLORS.accentMuted, OPACITY.shade)}`,
-  borderRadius: 1.5,
-};
-
-export const emptyTextSx = {
-  color: UI_COLORS.textMuted,
-  fontSize: FONT_SIZES.xxl,
-  fontStyle: 'italic',
-  fontFamily: UI_FONTS.prose,
+  minHeight: 0,
 };
 
 export const errorTextSx = {

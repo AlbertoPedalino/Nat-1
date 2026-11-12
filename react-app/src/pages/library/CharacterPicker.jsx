@@ -17,6 +17,7 @@ import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import InstanceRow from './components/InstanceRow.jsx';
 import * as s from './styles.js';
+import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
@@ -136,13 +137,11 @@ export default function CharacterPicker() {
       {loading && !rows.length ? <LoadingLine label="Loading sheets…" /> : null}
 
       {!loading && rows.length === 0 ? (
-        <Box sx={s.emptyBoxSx}>
-          <Typography sx={s.emptyTextSx}>
-            {isGm
-              ? "No sheets yet. Players' sheets show up here once they log in and edit."
-              : 'No sheets yet. Create a character while logged in and it shows up here.'}
-          </Typography>
-        </Box>
+        <StatePanel sx={s.emptyStateSx}>
+          {isGm
+            ? "No sheets yet. Players' sheets show up here once they log in and edit."
+            : 'No sheets yet. Create a character while logged in and it shows up here.'}
+        </StatePanel>
       ) : (
         <Box sx={s.listSx}>
           {rows.map((row) => {

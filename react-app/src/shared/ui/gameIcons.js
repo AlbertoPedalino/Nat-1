@@ -1,9 +1,16 @@
 import {
-  GiAllSeeingEye, GiAnvil, GiBackpack, GiBookshelf, GiCheckedShield, GiDualityMask,
-  GiHearts, GiKnapsack, GiMagicSwirl, GiMuscleUp, GiQuill, 
-  GiScrollQuill, GiShieldReflect, GiSkills, GiSpellBook, GiStarFormation,
-  GiStarsStack, GiStarSwirl, GiSwordClash, GiSwordsEmblem, GiTwoCoins, GiUpgrade, GiShield,
-  GiWalkingBoot, GiBleedingWound, GiCandleLight, GiTiedScroll, GiCrystalBall, GiTreasureMap, GiBookCover,
+  GiAllSeeingEye, GiAnvil, GiBackpack, GiBleedingWound, GiBookCover, GiBookshelf, GiCandleLight,
+  GiCheckedShield, GiCrystalBall, GiDualityMask, GiHearts, GiKnapsack, GiMagicSwirl, GiMuscleUp, GiQuill,
+  GiScrollQuill, GiShield, GiShieldReflect, GiSkills, GiSpellBook, GiStarFormation, GiStarSwirl,
+  GiStarsStack, GiSwordClash, GiSwordsEmblem, GiTiedScroll, GiTreasureMap, GiTwoCoins, GiUpgrade,
+  GiWalkingBoot, GiAcorn, GiAnchor, GiBarracksTent, GiBattleAxe, GiBowArrow, GiBroadsword, GiCandlebright,
+  GiChest, GiCloverSpiked, GiCrenelCrown, GiCrenulatedShield, GiCrossedSwords, GiCutDiamond, GiDeathSkull,
+  GiDiamondRing, GiDiceSixFacesFive, GiFallingStar, GiFeather, GiFeatheredWing, GiFire, GiFireAxe, GiFist,
+  GiFlame, GiFloatingCrystal, GiGhost, GiGhostAlly, GiGinkgoLeaf, GiHatchet, GiHeartBottle, GiHelmet, GiHood,
+  GiHourglass, GiKey, GiLantern, GiMoon, GiMoonBats, GiOpenBook, GiPineTree, GiPlainDagger, GiPocketBow,
+  GiPotionBall, GiRing, GiSevenPointedStar, GiShardSword, GiShinyApple, GiSnake, GiStoneTower, GiSwordsPower,
+  GiThrownSpear, GiTorch, GiTowerFlag, GiTrident, GiVisoredHelm, GiWarhammer, GiWarlockEye, GiWaterDrop,
+  GiWhiteTower, GiWolfHead, GiMushroomGills,
 } from 'react-icons/gi';
 import { Dices, HeartPulse, History, ShieldPlus, Sword, Swords } from 'lucide-react';
 
@@ -64,3 +71,18 @@ export const GAME_ICONS = Object.freeze({
   // The compendium.
   compendium: GiBookCover,
 });
+
+// The game's things drawn small all over the app's paper (stickerPaper.js):
+// only drawings with a plain silhouette, which still read at 20px — a d20 or
+// an owl at that size is a smudge.
+export const STICKER_DRAWINGS = Object.freeze([
+  GiShield, GiWaterDrop, GiDiceSixFacesFive, GiSevenPointedStar, GiBarracksTent, GiHearts, GiFallingStar,
+  GiHelmet, GiGinkgoLeaf, GiFire, GiThrownSpear, GiWhiteTower, GiCloverSpiked, GiTowerFlag,
+  GiCrenulatedShield, GiTrident, GiCrenelCrown, GiHatchet, GiShardSword, GiMoon, GiFeatheredWing,
+  GiCandlebright, GiFireAxe, GiFloatingCrystal, GiStoneTower, GiWarlockEye, GiGhostAlly, GiDeathSkull,
+  GiChest, GiCutDiamond, GiFist, GiHourglass, GiWarhammer, GiRing, GiDiamondRing, GiCandleLight, GiFlame,
+  GiFeather, GiBowArrow, GiSwordsPower, GiHood, GiTorch, GiQuill, GiMoonBats, GiAnchor, GiPlainDagger,
+  GiTwoCoins, GiSnake, GiPocketBow, GiWolfHead, GiOpenBook, GiCrossedSwords, GiBattleAxe, GiPineTree,
+  GiBroadsword, GiShinyApple, GiVisoredHelm, GiCrystalBall, GiPotionBall, GiHeartBottle, GiGhost, GiLantern,
+  GiAcorn, GiKey, GiMushroomGills,
+]);

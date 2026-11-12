@@ -13,6 +13,7 @@ import InstanceRow from './components/InstanceRow.jsx';
 import { sectionDeletePlan } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import * as s from './styles.js';
+import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -76,9 +77,7 @@ export default function SectionPicker({ meta }) {
       {error ? <Typography sx={s.errorTextSx}>{error}</Typography> : null}
       {loading && !rows.length ? <LoadingLine label="Loading saves…" /> : null}
       {!loading && !rows.length ? (
-        <Box sx={s.emptyBoxSx}>
-          <Typography sx={s.emptyTextSx}>No saved {meta.label.toLowerCase()} sessions yet.</Typography>
-        </Box>
+        <StatePanel sx={s.emptyStateSx}>No saved {meta.label.toLowerCase()} sessions yet.</StatePanel>
       ) : (
         <Box sx={s.listSx}>
           {rows.map((row) => (

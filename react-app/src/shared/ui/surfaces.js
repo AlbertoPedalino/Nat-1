@@ -1,6 +1,7 @@
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
+import { STICKER_PAPER } from './stickerPaper.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
@@ -23,7 +24,14 @@ export function coverRaysSx(color = UI_COLORS.accent) {
       inset: '0 -30%',
       zIndex: -1,
       pointerEvents: 'none',
-      backgroundImage: `repeating-conic-gradient(from 0deg at 50% 50%, ${uiAlpha(color, OPACITY.soft)} 0deg 7deg, transparent 7deg 15deg)`,
+      // The rays, over a pool of the page's own colour that quiets the
+      // paper's drawings behind the title.
+      backgroundImage: [
+        // Each ray's edges fade over a degree and a half: hard stops in a conic
+        // gradient are drawn jagged.
+        `repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg, ${uiAlpha(color, OPACITY.shade)} 1.5deg 6deg, transparent 7.5deg 15deg)`,
+        `radial-gradient(ellipse closest-side, ${UI_COLORS.page} 35%, transparent 100%)`,
+      ].join(', '),
       maskImage: 'radial-gradient(ellipse closest-side, black 30%, transparent 100%)',
     },
   };
@@ -60,12 +68,13 @@ export const SURFACES = Object.freeze({
     backgroundImage: 'none',
     borderBottom: INK_EDGE,
   }),
-  // The page behind everything: the background with a comic print's faint
-  // halftone dots.
+  // The page behind everything: the background with the game's things drawn
+  // small all over it (stickerPaper.js) over a comic print's faint halftone
+  // dots.
   page: Object.freeze({
     bgcolor: 'background.default',
-    backgroundImage: HALFTONE,
-    backgroundSize: HALFTONE_SIZE,
+    backgroundImage: `${STICKER_PAPER.image}, ${HALFTONE}`,
+    backgroundSize: `${STICKER_PAPER.size}, ${HALFTONE_SIZE}`,
   }),
   // A sunken well inside a panel: the details under a row, a field group.
   inset: Object.freeze({
