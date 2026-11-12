@@ -674,3 +674,12 @@ test('an item kind is asked of itemKinds.js', () => {
   const homes = ['shared/character/inventory/itemKinds.js', 'shared/character/inventory/weight.js', 'shared/character/inventory/itemContainers.js'];
   assert.deepEqual(sourceLinesMatching(kinds).filter((hit) => !homes.some((home) => hit.startsWith(home))), []);
 });
+
+// 5etools markup is read by one parser (inlineMarkup.js) and reduced to plain
+// words by one function (stripMarkup, markupText.js). A hand regex that drops
+// any tag (`replace(/\{@\w+ …/)`) misses nested tags and the stat-block labels.
+test('markup is stripped only by stripMarkup', () => {
+  const anyTag = /replace\(\/\\\{@\\w/;
+  assert.deepEqual(sourceLinesMatching(anyTag, { allow: ['shared/content/inlineMarkup.js'] }), []);
+  assert.deepEqual(sourceLinesMatching(/^\s*(export )?function (strip5eMarkup|stripMarkup)\b/).filter((hit) => !hit.startsWith('shared/content/markupText.js')), []);
+});

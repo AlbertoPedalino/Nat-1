@@ -1,5 +1,5 @@
 import { findInventoryItem, parseInventoryItemRef } from '../../../shared/character/inventory/itemContainers.js';
-import { strip5eMarkup } from '../../../shared/content/entryText.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
 
@@ -21,7 +21,7 @@ export function cpToCoins(cpValue) {
 export function flattenEquip(node, items = []) {
   if (!node) return items;
   if (typeof node === 'string') {
-    items.push(strip5eMarkup(node).replace(/\|[a-zA-Z0-9-]+/g, ''));
+    items.push(stripMarkup(node).replace(/\|[a-zA-Z0-9-]+/g, ''));
     return items;
   }
   if (typeof node === 'number') return items;
@@ -40,9 +40,9 @@ export function flattenEquip(node, items = []) {
       const name = stripSource(node.item);
       const qty = node.quantity && node.quantity > 1 ? ` x${node.quantity}` : '';
       const value = node.containsValue || node.value || 0;
-      items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${formatCopper(value)})` : ''}`);
-    } else if (node.special) items.push(strip5eMarkup(node.special));
-    else if (node.equipmentType) items.push(strip5eMarkup(node.equipmentType));
+      items.push(`${stripMarkup(name)}${qty}${value ? ` (${formatCopper(value)})` : ''}`);
+    } else if (node.special) items.push(stripMarkup(node.special));
+    else if (node.equipmentType) items.push(stripMarkup(node.equipmentType));
     else if (node.containsValue || node.value) items.push(formatCopper(node.containsValue || node.value));
     else if (node.entries) flattenEquip(node.entries, items);
     else Object.entries(node).forEach(([key, value]) => {

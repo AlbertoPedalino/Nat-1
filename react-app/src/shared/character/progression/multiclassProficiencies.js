@@ -1,4 +1,4 @@
-import { strip5eMarkup } from '../../content/entryText.js';
+import { stripMarkup } from '../../content/markupText.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { choiceFromBlock } from './choiceBlocks.js';
 
@@ -18,8 +18,8 @@ function toList(value) {
 // One proficiency entry → display string, stripping 5etools inline markup
 // (e.g. "{@item thieves' tools|PHB}" → "thieves' tools").
 function toText(value) {
-  if (value && typeof value === 'object') return strip5eMarkup(String(value.name || value.tool || '')).trim();
-  return strip5eMarkup(String(value)).trim();
+  if (value && typeof value === 'object') return stripMarkup(String(value.name || value.tool || '')).trim();
+  return stripMarkup(String(value)).trim();
 }
 
 // Maps a `proficienciesGained` object to ordered, human-readable rows for display:

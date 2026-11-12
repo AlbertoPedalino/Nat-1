@@ -7,7 +7,7 @@ import { backgroundChoiceSpecs } from '../choices/choiceSpecs.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
-import { strip5eMarkup } from '../../../shared/content/entryText.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { backgroundAbilityBonus, DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
@@ -38,7 +38,7 @@ function GrantRow({ label, values }) {
 function factValue(node) {
   const raw = node?.entry != null ? node.entry : node?.entries;
   const parts = asArray(raw);
-  return strip5eMarkup(parts.filter((part) => typeof part === 'string').join(' ')).trim();
+  return stripMarkup(parts.filter((part) => typeof part === 'string').join(' ')).trim();
 }
 
 function extractBackgroundFacts(background) {
@@ -48,7 +48,7 @@ function extractBackgroundFacts(background) {
     if (Array.isArray(node)) { node.forEach(visit); return; }
     if (typeof node === 'object') {
       if (node.type === 'item' && node.name) {
-        const label = strip5eMarkup(node.name).replace(/:\s*$/, '').trim();
+        const label = stripMarkup(node.name).replace(/:\s*$/, '').trim();
         const value = factValue(node);
         if (label && value) out.push({ label, value });
         return;
@@ -59,7 +59,7 @@ function extractBackgroundFacts(background) {
     }
     if (typeof node === 'string') {
       const match = node.match(/^\{@b\s+(.+?):?\}\s*:?\s*(.*)$/s);
-      if (match) out.push({ label: match[1].trim(), value: strip5eMarkup(match[2]).trim() });
+      if (match) out.push({ label: match[1].trim(), value: stripMarkup(match[2]).trim() });
     }
   };
   visit(Array.isArray(background?.entries) ? background.entries : []);
@@ -67,14 +67,14 @@ function extractBackgroundFacts(background) {
 }
 
 function extractBackgroundLore(background) {
-  if (background?._lore) return strip5eMarkup(background._lore);
+  if (background?._lore) return stripMarkup(background._lore);
   const entries = background?.entries;
   if (!Array.isArray(entries)) return '';
   const first = entries[0];
-  if (typeof first === 'string') return strip5eMarkup(first);
+  if (typeof first === 'string') return stripMarkup(first);
   if (first?.type === 'entries' && Array.isArray(first.entries)) {
     const inner = first.entries[0];
-    if (typeof inner === 'string') return strip5eMarkup(inner);
+    if (typeof inner === 'string') return stripMarkup(inner);
   }
   return '';
 }

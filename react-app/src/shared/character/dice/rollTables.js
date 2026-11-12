@@ -1,5 +1,5 @@
 import { loadGameData } from '../../content/gameData.js';
-import { strip5eMarkup } from '../../content/entryText.js';
+import { stripMarkup } from '../../content/markupText.js';
 import { rollDie } from './dice.js';
 
 // Tables a feature rolls on (Wild Magic Surge), read from the 5etools data
@@ -40,7 +40,7 @@ export function parseRollTable(name, table) {
   const sides = Number(String(table?.colLabels?.[0] || '').match(/d(\d+)/)?.[1]) || null;
   const rows = (table?.rows || []).map(([range, effect]) => {
     const bounds = rangeBounds(range);
-    return bounds && { low: bounds[0], high: bounds[1], range: String(range), effect: strip5eMarkup(effect) };
+    return bounds && { low: bounds[0], high: bounds[1], range: String(range), effect: stripMarkup(effect) };
   }).filter(Boolean);
   return sides && rows.length ? { name: `${table.caption || name} Table`, sides, rows } : null;
 }

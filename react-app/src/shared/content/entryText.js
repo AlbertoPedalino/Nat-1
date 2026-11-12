@@ -1,5 +1,6 @@
 import { asArray } from '../lists.js';
 import { REF_TAGS, scanMarkup, tagDisplayText, tagParts } from './inlineMarkup.js';
+import { stripMarkup } from './markupText.js';
 
 // Entry prose as tokens: text, em/strong runs and record references; every
 // other tag shows its display text (inlineMarkup.js), plain {braces} their
@@ -37,10 +38,6 @@ function tokensToPlainText(tokens) {
   return tokens.map((token) => token.text).join('').trim();
 }
 
-export function strip5eMarkup(value) {
-  return tokensToPlainText(tokenizeInlineMarkup(value));
-}
-
 export { tokenizeInlineMarkup };
 
 function pushText(out, kind, raw, depth = 0) {
@@ -59,13 +56,13 @@ function pushText(out, kind, raw, depth = 0) {
 
 function nodeToText(node) {
   if (node == null) return '';
-  if (typeof node === 'string' || typeof node === 'number') return strip5eMarkup(node);
+  if (typeof node === 'string' || typeof node === 'number') return stripMarkup(node);
   if (Array.isArray(node)) return node.map(nodeToText).filter(Boolean).join(' ');
   if (typeof node !== 'object') return '';
 
   if (node.type === 'item') {
     const body = nodeToText(node.entries ?? node.entry ?? node.items);
-    const name = strip5eMarkup(node.name || '');
+    const name = stripMarkup(node.name || '');
     return [name ? `${name}.` : '', body].filter(Boolean).join(' ').trim();
   }
 
@@ -80,7 +77,7 @@ function nodeToText(node) {
   }
 
   const body = nodeToText(node.entries ?? node.entry ?? node.items ?? node.rows);
-  const name = strip5eMarkup(node.name || '');
+  const name = stripMarkup(node.name || '');
   return [name ? `${name}.` : '', body].filter(Boolean).join(' ').trim();
 }
 
@@ -98,7 +95,7 @@ function nodeToTokens(node) {
   if (typeof node !== 'object') return [];
 
   if (node.type === 'item') {
-    const name = node.name ? tokenizeInlineMarkup(`${strip5eMarkup(node.name)}.`) : [];
+    const name = node.name ? tokenizeInlineMarkup(`${stripMarkup(node.name)}.`) : [];
     const body = nodeToTokens(node.entries ?? node.entry ?? node.items);
     const sep = name.length && body.length ? [{ type: 'text', text: ' ' }] : [];
     return [...name, ...sep, ...body];
@@ -117,7 +114,7 @@ function nodeToTokens(node) {
 
   const body = nodeToTokens(node.entries ?? node.entry ?? node.items ?? node.rows);
   if (node.name) {
-    const name = tokenizeInlineMarkup(`${strip5eMarkup(node.name)}.`);
+    const name = tokenizeInlineMarkup(`${stripMarkup(node.name)}.`);
     if (!body.length) return name;
     return [...name, { type: 'text', text: ' ' }, ...body];
   }
@@ -148,7 +145,7 @@ function walkEntries(node, out, depth = 0, listDepth = 0) {
   if (node.type === 'table') {
     out.push({
       kind: 'table',
-      caption: strip5eMarkup(node.caption || node.name || ''),
+      caption: stripMarkup(node.caption || node.name || ''),
       headers: asArray(node.colLabels).map(nodeToText),
       rows: asArray(node.rows).map((row) => asArray(row?.row || row).map(nodeToText)),
     });

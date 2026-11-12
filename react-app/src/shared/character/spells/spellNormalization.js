@@ -1,4 +1,4 @@
-import { strip5eMarkup } from '../../content/entryText.js';
+import { stripMarkup } from '../../content/markupText.js';
 import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';
@@ -32,7 +32,7 @@ function formatDistance(distance) {
 
 export function formatSpellRange(range) {
   if (!range) return '';
-  if (typeof range === 'string') return strip5eMarkup(range);
+  if (typeof range === 'string') return stripMarkup(range);
   if (typeof range !== 'object') return '';
   const type = String(range.type || '').toLowerCase();
   if (type === 'point') return formatDistance(range.distance) || 'Point';
@@ -47,16 +47,16 @@ export function formatCastingTime(time) {
     const number = entry.number ?? 1;
     const unit = String(entry.unit || '').toLowerCase();
     const base = `${number} ${title(unit)}`.trim();
-    const condition = entry.condition ? ` (${strip5eMarkup(entry.condition)})` : '';
+    const condition = entry.condition ? ` (${stripMarkup(entry.condition)})` : '';
     return `${base}${condition}`;
   }).filter(Boolean).join(', ');
 }
 
 export function formatMaterialComponent(material) {
   if (!material) return '';
-  if (typeof material === 'string') return strip5eMarkup(material);
+  if (typeof material === 'string') return stripMarkup(material);
   if (typeof material !== 'object') return '';
-  return strip5eMarkup(material.text || material.name || '');
+  return stripMarkup(material.text || material.name || '');
 }
 
 export function formatSpellComponents(components) {
