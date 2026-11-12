@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
-  Box, Button, Collapse, IconButton, Stack, TextField, Typography,
+  Box, Button, IconButton, Stack, TextField, Typography,
 } from '@mui/material';
 import { ImagePlus, Plus, X } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
@@ -57,17 +59,14 @@ export default function TokenComposer({
 
   return (
     <>
-      <Button
-        size="small"
-        variant="outlined"
-        startIcon={open ? <X size={ICON_SIZES.sm} /> : <Plus size={ICON_SIZES.sm} />}
+      <DisclosureButton
+        open={open}
+        onToggle={() => setOpen((current) => !current)}
+        icon={open ? null : <Plus size={ICON_SIZES.sm} />}
+        label={open ? 'Close token editor' : openLabel}
         disabled={blocked}
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-      >
-        {open ? 'Close token editor' : openLabel}
-      </Button>
-      <Collapse in={open} unmountOnExit>
+      />
+      <CollapsibleBody open={open}>
         <Stack spacing={1} sx={composerSx}>
           <Box
             role="button"
@@ -130,7 +129,7 @@ export default function TokenComposer({
             </Button>
           </Stack>
         </Stack>
-      </Collapse>
+      </CollapsibleBody>
     </>
   );
 }

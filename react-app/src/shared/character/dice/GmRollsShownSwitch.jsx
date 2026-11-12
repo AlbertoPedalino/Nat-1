@@ -1,7 +1,6 @@
-import { FormControlLabel, Switch } from '@mui/material';
 import { useGmRollsShown } from '../../cloud/sync/rollVisibility.js';
-import { FONT_SIZES } from '../../ui/fonts.js';
 import Caption from '../../ui/Caption.jsx';
+import ToggleRow from '../../ui/ToggleRow.jsx';
 
 // Whether the players see the creatures' rolls — and the GM's own custom
 // rolls with them — for a campaign (rollVisibility.js): the same switch
@@ -14,16 +13,11 @@ export default function GmRollsShownSwitch({ campaignId, sx }) {
     return <Caption sx={{ ...sx }}>No campaign: rolls stay on this screen.</Caption>;
   }
   return (
-    <FormControlLabel
-      control={<Switch size="small" checked={shown} onChange={(_, checked) => setShown(checked)} />}
+    <ToggleRow
       label={shown ? 'Players see creature rolls' : 'Only the GM sees creature rolls'}
-      sx={[labelSx, sx]}
+      checked={shown}
+      onChange={setShown}
+      sx={sx}
     />
   );
 }
-
-const labelSx = {
-  m: 0,
-  gap: 0.5,
-  '& .MuiFormControlLabel-label': { fontSize: FONT_SIZES.lg, color: 'text.secondary' },
-};

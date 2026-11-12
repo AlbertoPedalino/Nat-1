@@ -4,6 +4,7 @@ import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { focusRingSx } from '../../ui/interactive.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -77,7 +78,7 @@ function optionSx(tone, selected, dense) {
     color: selected ? tone.color : (tone.dim || 'text.secondary'),
     bgcolor: selected ? alpha(tone.color, OPACITY.fill) : 'transparent',
     '&:hover': { borderColor: tone.color, bgcolor: alpha(tone.color, OPACITY.tint) },
-    '&:focus-visible': { outline: `2px solid ${tone.color}`, outlineOffset: '1px' },
+    ...focusRingSx({ tone: tone.color }),
   };
 }
 

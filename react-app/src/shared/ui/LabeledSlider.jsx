@@ -12,11 +12,17 @@ import { CONTROL_LABEL_SX } from './controlLabel.js';
 // stroke width" under "Stroke"), or when there is no label because a section
 // title above already says what it is. `onChange` gets the value while it
 // moves; `onCommit`, when given, gets it once the hand lets go (for a write
-// that should not happen on every step). `sx` places it (a margin).
+// that should not happen on every step). `marks` writes the given values
+// under the track ([{ value, label }]: the builder's score sliders mark their
+// floor and ceiling), lettered like the label. `sx` places it (a margin).
 //
 // The track is inset by the thumb's half on each side, so the thumb is not cut
 // off at the ends inside a scrolling panel.
-const SLIDER_SX = Object.freeze({ mx: 0.5, width: 'calc(100% - 8px)' });
+const SLIDER_SX = Object.freeze({
+  mx: 0.5,
+  width: 'calc(100% - 8px)',
+  '& .MuiSlider-markLabel': { ...CONTROL_LABEL_SX, color: 'text.secondary' },
+});
 
 export default function LabeledSlider({
   label,
@@ -26,6 +32,7 @@ export default function LabeledSlider({
   min,
   max,
   step,
+  marks,
   onChange,
   onCommit,
   disabled = false,
@@ -42,6 +49,7 @@ export default function LabeledSlider({
         min={min}
         max={max}
         step={step}
+        marks={marks}
         value={value}
         disabled={disabled}
         valueLabelDisplay={valueText == null ? 'auto' : 'off'}

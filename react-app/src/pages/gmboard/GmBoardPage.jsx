@@ -11,6 +11,7 @@ import RollView from './tables/RollView.jsx';
 import TablesView from './tables/TablesView.jsx';
 import GuideView from './ui/GuideView.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { focusRingSx } from '../../shared/ui/interactive.js';
 
 const TABS = [
   { value: 'hex', label: 'Hexcrawl', Icon: Map },
@@ -80,9 +81,4 @@ function GmBoardShell({ tool }) {
   );
 }
 
-const tabPanelSx = {
-  '&:focus-visible': {
-    outline: (theme) => `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: '2px',
-  },
-};
+const tabPanelSx = focusRingSx();

@@ -12,7 +12,6 @@ import {
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
@@ -21,6 +20,8 @@ import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
@@ -104,19 +105,14 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
         )}
 
         <Box>
-          <Button
-            size="small"
-            variant="outlined"
-            fullWidth
-            aria-expanded={open}
-            onClick={() => setOpen(!open)}
-            startIcon={<ListChecks size={ICON_SIZES.xs} />}
-            endIcon={<ChevronDown size={ICON_SIZES.xs} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />}
-            sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, justifyContent: 'flex-start', '& .MuiButton-endIcon': { ml: 'auto' } }}
-          >
-            Manage ({active.length})
-          </Button>
-          {open && (
+          {/* The count stays in the name even at nought: "Manage (0)". */}
+          <DisclosureButton
+            open={open}
+            onToggle={() => setOpen(!open)}
+            icon={<ListChecks size={ICON_SIZES.xs} />}
+            label={`Manage (${active.length})`}
+          />
+          <CollapsibleBody open={open}>
             <Box>
               <ConditionToggleGrid
                 conditions={CONDITIONS}
@@ -137,7 +133,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 </Button>
               )}
             </Box>
-          )}
+          </CollapsibleBody>
         </Box>
       </Box>
     </Panel>

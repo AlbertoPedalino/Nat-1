@@ -38,7 +38,7 @@ export function PicturesControls({
           {scene.imagePath ? 'Replace map' : 'Upload map'}
         </Button>
         {scene.imagePath ? (
-          <TipIconButton title="Remove battlemap" size="small" color="error" disabled={busy} onClick={onRemoveMap}>
+          <TipIconButton title="Remove battlemap" size="small" danger disabled={busy} onClick={onRemoveMap}>
             <Trash2 size={ICON_SIZES.sm} />
           </TipIconButton>
         ) : null}
@@ -56,7 +56,7 @@ export function PicturesControls({
           {scene.backgroundPath ? 'Add another background' : 'Upload background'}
         </Button>
         {scene.backgroundPath ? (
-          <TipIconButton title="Remove the background on show" size="small" color="error" disabled={busy} ariaLabel="Remove background" onClick={() => onRemoveBackground()}>
+          <TipIconButton title="Remove the background on show" size="small" danger disabled={busy} ariaLabel="Remove background" onClick={() => onRemoveBackground()}>
             <Trash2 size={ICON_SIZES.sm} />
           </TipIconButton>
         ) : null}

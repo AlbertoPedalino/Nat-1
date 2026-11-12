@@ -3,7 +3,8 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
 import { resolveCellCommit } from './tableEdit.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { focusRingSx } from '../../../shared/ui/interactive.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 export default function TableEditorGrid({ rows, columns, matchField, onEdit, tableLabel }) {
   const theme = useTheme();
@@ -25,13 +26,9 @@ export default function TableEditorGrid({ rows, columns, matchField, onEdit, tab
   };
 
   const containerSx = {
-    border: '1px solid',
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     borderRadius: 2,
-    '&:focus-visible': {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: '-2px',
-    },
+    ...focusRingSx({ inset: true }),
   };
 
   return (

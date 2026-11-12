@@ -8,6 +8,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import { focusRingSx } from '../../../shared/ui/interactive.js';
 
 // The building block of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary. The labels inside it are MapSectionTitle.
@@ -64,7 +65,8 @@ const sectionHeaderSx = {
   py: 0.75,
   color: VTT_COLORS.text,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
-  '&.Mui-focusVisible': { outline: `1px solid ${VTT_COLORS.accent}`, outlineOffset: -1 },
+  // Inside the section's clipped frame, so the ring is drawn within the header.
+  ...focusRingSx({ inset: true, tone: VTT_COLORS.accent }),
 };
 
 const sectionIconSx = { display: 'flex', color: VTT_COLORS.accent, flexShrink: 0 };

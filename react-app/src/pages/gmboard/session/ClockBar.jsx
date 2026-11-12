@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import {
-  Box, Button, Stack, Typography, useTheme,
+  Box, Button, Stack, Typography,
 } from '@mui/material';
 import { CalendarDays, Pencil } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM } from '../../../shared/gmboard/campaignTime.js';
-import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.js';
-import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
+import { WeatherCard } from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import CampaignCalendarFields, { QUICK_HOURS, quickButtonSx } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -22,9 +21,7 @@ export default function ClockBar() {
   const {
     state, setStart, setSeason, setWeatherOverride, advanceManual,
   } = useGmBoard();
-  const theme = useTheme();
   const [editing, setEditing] = useState(false);
-  const tone = weatherTone(theme.palette, state.weather);
 
   return (
     <BoardPanel
@@ -48,12 +45,7 @@ export default function ClockBar() {
           <Typography sx={dateSx}>{formatDate(state)}</Typography>
           <Typography sx={timeSx}>{formatHM(state.min)}</Typography>
         </Box>
-        <Box sx={{ ...weatherSx, borderColor: tone }}>
-          <WeatherSummary weather={state.weather} intensity={state.intensity} dense />
-          <Typography sx={{ ...timerSx, color: state.season ? 'text.secondary' : 'text.disabled' }}>
-            {weatherTimerLabel(state.season, state.nextWeatherIn, state.hoursSinceWeather)}
-          </Typography>
-        </Box>
+        <WeatherCard clock={state} sx={WEATHER_CARD_SX} />
       </Box>
 
       <SheetDialog
@@ -98,16 +90,5 @@ const timeSx = {
   lineHeight: LINE_HEIGHTS.tight,
 };
 
-const weatherSx = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexWrap: 'wrap',
-  gap: 1.5,
-  p: 1,
-  border: '2px solid',
-  borderRadius: 1.5,
-  minWidth: { sm: 280 },
-};
-
-const timerSx = { fontSize: FONT_SIZES.md };
+// Beside the date on a wide screen, the card keeps a readable width.
+const WEATHER_CARD_SX = { minWidth: { sm: 280 } };

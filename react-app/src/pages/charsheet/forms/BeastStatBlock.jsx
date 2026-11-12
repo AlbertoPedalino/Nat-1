@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Box, Button, Collapse, Link, Typography } from '@mui/material';
+import { Box, Button, Link, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
@@ -16,6 +15,7 @@ import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
+import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -177,43 +177,42 @@ export function BeastPickerRow({
   actionLabel, onAction, actionDisabled,
   typeLabel = 'Beast', hpLabel = 'HP',
 }) {
-  const [open, setOpen] = useState(false);
-  const expandable = !!beast;
-  const Chevron = open ? ChevronDown : ChevronRight;
   return (
-    <Box sx={{ ...rowSx, display: 'block', p: 0, overflow: 'hidden', flexShrink: 0 }}>
-      <Box
-        onClick={expandable ? () => setOpen((o) => !o) : undefined}
-        sx={{
-          display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75,
-          cursor: expandable ? 'pointer' : 'default',
-        }}
-      >
-        {expandable
-          ? <Chevron size={14} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />
-          : <Box sx={{ width: 14, flexShrink: 0 }} />}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <BeastNameLink name={name} source={source} sx={{ fontSize: FONT_SIZES.xl }} />
-          <Typography noWrap sx={summaryColor ? { ...subSx, color: summaryColor } : subSx}>{summary}</Typography>
-        </Box>
-        <Button
-          size="small"
-          variant="outlined"
-          disabled={actionDisabled}
-          onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, ...actionButtonToneSx(UI_COLORS.accentText) }}
-        >
-          {actionLabel}
-        </Button>
-      </Box>
-      {expandable ? (
-        <Collapse in={open} unmountOnExit>
-          <Box sx={{ px: 1, pb: 1, pt: 0.25 }}>
-            <BeastStatBlock b={beast} typeLabel={typeLabel} hpLabel={hpLabel} />
+    <ExpandableCard
+      containerSx={BEAST_ROW_SX}
+      disabled={!beast}
+      summary={({ open, toggle, disabled }) => {
+        const Chevron = open ? ChevronDown : ChevronRight;
+        return (
+          <Box
+            onClick={disabled ? undefined : toggle}
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75,
+              cursor: disabled ? 'default' : 'pointer',
+            }}
+          >
+            {disabled
+              ? <Box sx={{ width: 14, flexShrink: 0 }} />
+              : <Chevron size={14} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <BeastNameLink name={name} source={source} sx={{ fontSize: FONT_SIZES.xl }} />
+              <Typography noWrap sx={summaryColor ? { ...subSx, color: summaryColor } : subSx}>{summary}</Typography>
+            </Box>
+            <Button
+              size="small"
+              variant="outlined"
+              disabled={actionDisabled}
+              onClick={(e) => { e.stopPropagation(); onAction(); }}
+              sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, ...actionButtonToneSx(UI_COLORS.accentText) }}
+            >
+              {actionLabel}
+            </Button>
           </Box>
-        </Collapse>
-      ) : null}
-    </Box>
+        );
+      }}
+      details={beast ? <BeastStatBlock b={beast} typeLabel={typeLabel} hpLabel={hpLabel} /> : null}
+      detailsSx={BEAST_DETAILS_SX}
+    />
   );
 }
 
@@ -356,3 +355,7 @@ export const rowSx = {
   px: 1,
   py: 0.75,
 };
+
+// A picker row is the card around its header line and the stat block it opens.
+const BEAST_ROW_SX = { ...rowSx, display: 'block', p: 0, overflow: 'hidden', flexShrink: 0 };
+const BEAST_DETAILS_SX = { px: 1, pb: 1, pt: 0.25 };

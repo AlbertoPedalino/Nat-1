@@ -12,7 +12,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
-import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import { BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The turn order over the battle map. What it lists is decided by the caller:
@@ -269,7 +269,7 @@ const entryButtonSx = {
   ...BARE_BUTTON_SX,
   bgcolor: 'transparent',
   borderRadius: 999,
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'gmboard.vtt.accent', outlineOffset: 2 },
+  ...focusRingSx({ tone: VTT_COLORS.accent }),
 };
 
 // Dragged onto the board like a piece from the Pieces panel; on touch, after

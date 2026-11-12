@@ -14,6 +14,7 @@ import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import { focusRingSx } from '../../../shared/ui/interactive.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -152,7 +153,7 @@ const dismissableSx = {
   cursor: 'pointer',
   // Room for the cross, so it never sits on the actor's name.
   px: 2.25,
-  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.accent}`, outlineOffset: 2 },
+  ...focusRingSx({ tone: VTT_COLORS.accent }),
 };
 
 const closeSx = {

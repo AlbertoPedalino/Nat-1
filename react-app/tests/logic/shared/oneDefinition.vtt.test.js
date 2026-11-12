@@ -46,7 +46,7 @@ test("a map menu's footer and visibility tick are written once", () => {
 test('an on/off row on the map is a ToggleRow', () => {
   assert.deepEqual(onMap(sourceFilesMatching(/<FormControlLabel\b/)), []);
   assert.deepEqual(onMap(sourceFilesMatching(/GM layer"|The party sees/, {
-    allow: ['pages/vtt/tokens/GmLayerSwitch.jsx', 'pages/vtt/scene/ScenePanels.jsx'],
+    allow: ['pages/vtt/tokens/GmLayerSwitch.jsx'],
   })), []);
 });
 

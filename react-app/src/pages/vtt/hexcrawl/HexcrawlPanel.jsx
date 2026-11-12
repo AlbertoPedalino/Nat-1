@@ -1,5 +1,5 @@
 import {
-  Box, Button, Stack, Typography, alpha, useTheme,
+  Box, Button, Stack, Typography, useTheme,
 } from '@mui/material';
 import {
   CalendarDays, Compass, Dices, Footprints, Rabbit, Swords,
@@ -10,7 +10,7 @@ import {
   advanceMinutes, formatDate, formatCampaignDateTime, formatDuration, formatHM,
 } from '../../../shared/gmboard/campaignTime.js';
 import {
-  travelLine, travelTime, weatherTimerLabel, weatherTone,
+  travelLine, travelTime,
 } from '../../../shared/gmboard/weather.js';
 import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import {
@@ -20,7 +20,7 @@ import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
+import { WeatherCard } from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -56,7 +56,8 @@ export default function HexcrawlPanel({
 
   return (
     <Stack spacing={1}>
-      {sky ? <WeatherCard clock={sky} /> : null}
+      {/* The weather the next click will be rolled under. */}
+      {sky ? <WeatherCard clock={sky} showDate /> : null}
 
       <NextHexLine terrain={defaults?.terrain} clock={sky} mountSpeed={mountSpeed} />
 
@@ -97,32 +98,6 @@ export default function HexcrawlPanel({
         />
       ) : null}
     </Stack>
-  );
-}
-
-// The weather the next click will be rolled under, said the way the GM Board
-// says it: the condition first, what it costs second.
-function WeatherCard({ clock }) {
-  const theme = useTheme();
-  const tone = weatherTone(theme.palette, clock.weather);
-  // A clock row that predates the weather counters has neither, and a countdown
-  // to nowhere is worse than no countdown.
-  const timed = clock.season
-    && Number.isFinite(clock.nextWeatherIn)
-    && Number.isFinite(clock.hoursSinceWeather);
-
-  return (
-    <Box sx={{ ...cardSx, borderColor: alpha(tone, OPACITY.strong), bgcolor: alpha(tone, OPACITY.soft) }}>
-      <WeatherSummary weather={clock.weather} intensity={clock.intensity} dense />
-      <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.5 }}>
-        <Typography sx={clockSx}>{formatCampaignDateTime(clock)}</Typography>
-        {timed ? (
-          <Typography sx={effectSx}>
-            {weatherTimerLabel(clock.season, clock.nextWeatherIn, clock.hoursSinceWeather)}
-          </Typography>
-        ) : null}
-      </Stack>
-    </Box>
   );
 }
 
@@ -245,14 +220,6 @@ function LastHexCard({ last, onOpenResult }) {
     </Box>
   );
 }
-
-const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
-
-const cardSx = {
-  p: 1,
-  border: '2px solid',
-  borderRadius: 1.5,
-};
 
 const effectSx = { color: 'text.secondary', fontSize: FONT_SIZES.sm };
 

@@ -45,19 +45,11 @@ test('a lowercase-alphanumeric key is made only by matchKey, never inline or und
   ), []);
 });
 
-// A 5etools reference loses its source through stripSource. The {@tag text|…}
-// parsers split a tag's arguments (their first part is the text to show), and
-// multi-step text cleaners split as one step of their chain, on its own line.
+// A 5etools reference loses its source through stripSource.
 test('a name without its source comes from stripSource', () => {
   assert.deepEqual(sourceFilesMatching(
     /String\([^\n]*\)\s*(\.toUpperCase\(\))?\.split\(['"]\|['"]\)\[0\]|[\w$\]]\.split\(['"]\|['"]\)\[0\]/,
-    { allow: [
-      'shared/content/nameKeys.js',
-      'shared/bestiary/markup.js',
-      'shared/character/forms/beasts.js',
-      'shared/content/entryText.js',
-      'pages/charbuilder/choices/choiceSpecs.js',
-    ] },
+    { allow: ['shared/content/nameKeys.js'] },
   ), []);
 });
 
@@ -179,7 +171,7 @@ test('no literal colours outside the palettes and colour data', () => {
     'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js',
     'shared/ui/swatches.js', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
     'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
-    'shared/character/dice/D100Orb.jsx', 'shared/character/dice/Die3D.jsx',
+    'shared/character/dice/D100Orb.jsx',
   ];
   assert.deepEqual(sourceLinesMatching(/['"`]#[0-9a-fA-F]{3,8}['"`]|rgba?\(\s*\d/, { allow: DATA })
     .filter((hit) => !hit.startsWith('adapters/') && !hit.startsWith('data/')), []);
@@ -253,9 +245,9 @@ test('text treatments come from TEXT_STYLES', () => {
     'shared/character/inventory/CurrencyCoinBox.jsx', 'shared/character/inventory/CurrencyRow.jsx'] }), []);
   assert.deepEqual(sourceLinesMatching(/fontFamily:\s*UI_FONTS\.display.*fontWeight|fontWeight.*fontFamily:\s*UI_FONTS\.display/, { allow }), []);
   // Italic outside `note` is emphasis inside text (rich text, a stat block
-  // entry name) or the prose face's own flourish.
+  // entry name).
   assert.deepEqual(sourceLinesMatching(/fontStyle:\s*'italic'/, { allow: [...allow,
-    'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx', 'pages/library/styles.js'] }), []);
+    'shared/content/RichText.jsx', 'pages/charsheet/forms/BeastStatBlock.jsx'] }), []);
 });
 
 // The look of a chosen option or row is the theme's (MuiToggleButton,
@@ -289,7 +281,7 @@ test('font weights, line heights and layers come from their scales', () => {
 // Transition times are DURATIONS steps (shared/ui/motion.js); dice keep
 // their own rhythm.
 test('transition times come from DURATIONS', () => {
-  assert.deepEqual(sourceLinesMatching(/(?<![\w.$])[1-9]\d{1,2}ms/, { allow: ['shared/ui/motion.js', 'shared/character/dice/D100Orb.jsx'] }), []);
+  assert.deepEqual(sourceLinesMatching(/(?<![\w.$])[1-9]\d{1,2}ms\b/, { allow: ['shared/ui/motion.js', 'shared/character/dice/D100Orb.jsx'] }), []);
 });
 
 // The app has one theme; a page keeps only its own sizes (the builder's
@@ -358,7 +350,8 @@ test('a wizard spellbook is normalized only by shared/character/spells/wizardBoo
 
 // Ability scores are computed from the character's choices every time, never
 // stored: a saved copy went stale (no items, Tomes or Wild Shape) and the
-// sheet's own background bonus ignored the +1/+1/+1 pattern.
+// sheet's own background bonus ignored the +1/+1/+1 pattern. itemEffects.js
+// holds the item and Tome layer that abilityScores.js lays over the built score.
 test('ability scores are computed only by shared/character/progression/abilityScores.js', () => {
   assert.deepEqual(sourceFilesMatching(/\bfinalScores\b|getFinalAbilityScore\(|backgroundAbilities\.indexOf\(/, {
     allow: ['shared/character/progression/abilityScores.js', 'shared/character/inventory/itemEffects.js'],
@@ -424,6 +417,8 @@ test('choice keys and values are read through shared/character/progression/choic
 });
 
 // Levels and Hit Dice: classLevel.js and hp.js answer them once.
+// adapterPipeline.js writes a raw class record's Hit Die as text, empty when
+// the record has none, where hitDieFaces would answer d8.
 test('total and multiclass levels and Hit Die faces have one definition', () => {
   assert.deepEqual(sourceFilesMatching(/extraClasses[\s\S]{0,80}\.reduce\(\(sum,|hd\??\.faces/, {
     allow: ['shared/character/progression/classLevel.js', 'shared/character/combat/hp.js', 'adapters/adapterPipeline.js'],
@@ -588,7 +583,7 @@ test('game icons come only from gameIcons.js', () => {
 });
 
 test('ink edges and solid shadows are written only in the shared ui recipes', () => {
-  const recipes = ['shared/ui/shadows.js', 'shared/ui/surfaces.js', 'shared/ui/pressable.js', 'shared/ui/bubble.js', 'shared/ui/PanelHeader.jsx', 'shared/ui/interactive.js', 'shared/ui/BubbleDizzy.jsx', 'app/theme.js'];
+  const recipes = ['shared/ui/shadows.js', 'shared/ui/surfaces.js', 'shared/ui/pressable.js', 'shared/ui/bubble.js', 'shared/ui/PanelHeader.jsx', 'shared/ui/interactive.js', 'app/theme.js'];
   assert.deepEqual(sourceLinesMatching(/solid \$\{UI_COLORS\.edge\}|\dpx \dpx 0 \$\{UI_COLORS\.edge|0 \dpx 0 \$\{UI_COLORS\.edge/, { allow: recipes }), []);
 });
 
@@ -609,7 +604,7 @@ test('a thin frame or rule is drawn only by its recipe, board pieces and tiny ma
     'shared/bestiary/MonsterToken.jsx', 'shared/character/dice/D100Orb.jsx',
     'pages/charsheet/stats/SavingThrows.jsx', 'pages/charsheet/stats/Skills.jsx',
     'shared/character/combat/DeathSaveDots.jsx', 'shared/ui/PipButton.jsx', 'shared/ui/MiniBadge.jsx',
-    'shared/bestiary/EntryRenderer.jsx', 'pages/gmboard/tables/TableEditorGrid.jsx',
+    'shared/bestiary/EntryRenderer.jsx',
     'shared/ui/interactive.js', 'shared/ui/PanelHeader.jsx',
     'shared/character/progression/XpDeltaControl.jsx',
   ];
@@ -632,9 +627,7 @@ test('no glow or ring shadows outside the battle map', () => {
 test('a dashed line only marks an empty place', () => {
   const dashed = /\bborder(Top|Bottom|Left|Right)?: '[\d.]+px dashed'|borderStyle: 'dashed'|`[\d.]+px dashed /;
   const placeholders = [
-    'pages/campaigns/CampaignsPage.jsx', 'shared/ui/StatePanel.jsx', 'pages/library/styles.js',
-    'pages/gmboard/dungeon/DungeonView.jsx', 'pages/dmscreen/notes/NoteBoard.jsx',
-    'shared/character/inventory/CurrencyRow.jsx', 'pages/charsheet/spells/SpellsUiParts.jsx',
+    'shared/ui/StatePanel.jsx', 'shared/character/inventory/CurrencyRow.jsx', 'pages/charsheet/spells/SpellsUiParts.jsx',
   ];
   const hits = sourceLinesMatching(dashed, { allow: placeholders }).filter((hit) => !hit.startsWith('pages/vtt/'));
   assert.deepEqual(hits, []);
@@ -709,10 +702,11 @@ function openingTag(text, start) {
   return text.slice(start);
 }
 
+// A chip that is clicked or removed (a reminder's X) is the theme's Chip.
 test('a chip that is only read is a TagChip', () => {
-  const offenders = sourceFilesMatching(/<Chip/, { allow: ['shared/ui/TagChip.jsx'] }).filter((file) => {
+  const offenders = sourceFilesMatching(/<Chip\b/, { allow: ['shared/ui/TagChip.jsx'] }).filter((file) => {
     const text = readSource(file);
-    return [...text.matchAll(/<Chip/g)].some(({ index }) => !/onClick|clickable/.test(openingTag(text, index)));
+    return [...text.matchAll(/<Chip\b/g)].some(({ index }) => !/\bonClick\b|\bclickable\b|\bonDelete\b/.test(openingTag(text, index)));
   });
   assert.deepEqual(offenders, []);
 });
@@ -735,6 +729,8 @@ test('a quiet line beside something is a Caption', () => {
   assert.deepEqual(sourceFilesMatching(/variant="caption"\s+(?:[\w-]+(?:="[^"]*")?\s+)*sx=\{\{ color: 'text\.secondary'/, { allow: ['shared/ui/Caption.jsx'] }), []);
 });
 
+// ColorField takes the native colour input's own chrome off, which is not a
+// button's.
 test("a bare <button>'s chrome is taken off by BARE_BUTTON_SX", () => {
   assert.deepEqual(sourceFilesMatching(/appearance: 'none'|background: 'none'/, {
     allow: ['shared/ui/interactive.js', 'shared/ui/ColorField.jsx'],
@@ -745,6 +741,8 @@ test('text is cut to one line by ONE_LINE_SX', () => {
   assert.deepEqual(sourceFilesMatching(/textOverflow: 'ellipsis'/, { allow: ['shared/ui/textStyles.js', 'app/theme.js'] }), []);
 });
 
+// RollModeArea stops the iOS callout for a long press on a roller, not for a
+// drag, and keeps no grab cursor.
 test('a drag source onto the map takes DRAG_SOURCE_SX', () => {
   assert.deepEqual(sourceFilesMatching(/WebkitTouchCallout: 'none'/, {
     allow: ['shared/ui/interactive.js', 'shared/character/dice/RollModeArea.jsx'],

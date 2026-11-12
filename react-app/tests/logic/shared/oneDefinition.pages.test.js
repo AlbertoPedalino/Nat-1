@@ -65,14 +65,8 @@ test('a list row is an EntityRow, or takes LIST_ROW_SX', () => {
   assert.deepEqual(sourceFilesMatching(/\.\.\.SURFACES\.wash,\s*display: 'flex',\s*alignItems: 'center'/), []);
 });
 
-// The four files allowed are pages not moved onto `danger` yet.
 test('a button that removes something is a TipIconButton marked danger', () => {
-  assert.deepEqual(filesWithTag('TipIconButton', /color="error"/, {
-    allow: [
-      'pages/dmscreen/notes/NoteCard.jsx', 'pages/encounterbuilder/combat/CombatantCard.jsx',
-      'pages/vtt/scene/PicturesControls.jsx', 'pages/vtt/scene/ScenePicker.jsx',
-    ],
-  }), []);
+  assert.deepEqual(filesWithTag('TipIconButton', /color="error"/), []);
   assert.deepEqual(filesWithTag('IconButton', /color="error"|sx=\{dangerActionSx\}/, {
     allow: ['shared/ui/TipIconButton.jsx'],
   }), []);
@@ -84,11 +78,9 @@ test('the launch with initiative options is the InitiativeLaunchButton', () => {
   }), []);
 });
 
-// The GM Board's tab ring and its table editor's cell ring are the two not
-// moved onto the recipe yet.
 test('the focus ring is focusRingSx', () => {
   assert.deepEqual(sourceFilesMatching(/outlineColor: 'primary\.main'|2px solid \$\{theme\.palette\.primary\.main\}/, {
-    allow: ['shared/ui/interactive.js', 'pages/gmboard/GmBoardPage.jsx', 'pages/gmboard/tables/TableEditorGrid.jsx'],
+    allow: ['shared/ui/interactive.js'],
   }), []);
 });
 

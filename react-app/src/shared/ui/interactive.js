@@ -36,13 +36,16 @@ export const LIST_ROW_SX = Object.freeze({
 });
 
 // The keyboard's ring round what has the focus, drawn only for the keyboard
-// (:focus-visible). `inset` draws it inside the box, for a row flush with its
-// neighbours (a catalog's virtual list), where an outer ring would be cut.
-export function focusRingSx({ inset = false } = {}) {
+// (:focus-visible): the one ring in the app, so every focused thing reads the
+// same. `inset` draws it inside the box, for a row flush with its neighbours
+// (a catalog's virtual list, a scrolling table), where an outer ring would be
+// cut. `tone` colours it for a thing that wears a tone of its own (a selector
+// option in its tone, the battle map's brighter accent); the accent otherwise.
+export function focusRingSx({ inset = false, tone = 'primary.main' } = {}) {
   return {
     '&:focus-visible': {
       outline: '2px solid',
-      outlineColor: 'primary.main',
+      outlineColor: tone,
       outlineOffset: inset ? -2 : 2,
     },
   };

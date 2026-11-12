@@ -14,6 +14,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
+import { focusRingSx } from '../../../shared/ui/interactive.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -219,7 +220,8 @@ const thumbSx = (selected) => ({
   opacity: selected ? 1 : OPACITY.heavy,
   transition: `opacity ${DURATIONS.fast}ms`,
   '&:hover': { opacity: 1 },
-  '&.Mui-focusVisible': { outline: `2px solid ${VTT_COLORS.accentHighlight}` },
+  // Brighter than the selected thumb's outline, so focus reads apart from it.
+  ...focusRingSx({ tone: VTT_COLORS.accentHighlight }),
 });
 
 const imageSx = {

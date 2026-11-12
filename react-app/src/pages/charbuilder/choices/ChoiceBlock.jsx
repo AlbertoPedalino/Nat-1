@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Box, Collapse, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { Box, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/combat/weaponMastery.js';
@@ -19,6 +18,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -96,14 +96,8 @@ function isWeaponMasterySpec(spec) {
 }
 
 export default function ChoiceBlock({ spec, choices, dispatch, character, getOptionDescription, items = [] }) {
-  const [expanded, setExpanded] = useState(() => new Set());
   const weaponMasterySpec = isWeaponMasterySpec(spec);
 
-  const toggleExpanded = (value) => setExpanded((prev) => {
-    const next = new Set(prev);
-    if (next.has(value)) next.delete(value); else next.add(value);
-    return next;
-  });
   const selected = Array.isArray(choices[spec.key]) ? choices[spec.key] : (choices[spec.key] ? [choices[spec.key]] : []);
   const proficiencyKind = specProficiencyKind(spec);
   const blockedValues = proficiencyKind
@@ -187,52 +181,50 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
             const optionKind = parsed.kind || (proficiencyKind === 'mixed' ? null : proficiencyKind);
             const duplicate = !active && optionKind && blockedValues.has(proficiencyBlockKey(optionKind, parsed.label));
             const desc = getOptionDescription ? getOptionDescription(value) : null;
-            const isOpen = expanded.has(value);
             return (
-              <Box key={`${spec.key}-${value}`} sx={isOpen ? null : LIST_ROW_RULE_SX}>
-                <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
-                  <ListItemButton
-                    selected={active}
-                    disabled={full || duplicate}
-                    onClick={() => toggleOption(value)}
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                      py: 0.75,
-                      px: 1,
-                    }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography
-                          noWrap
-                          sx={BUILDER_TEXT.itemName}
-                        >
-                          {label}
-                        </Typography>
-                      }
-                    />
-                    {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
-                  </ListItemButton>
-                  {desc ? (
-                    <IconButton
-                      size="small"
-                      aria-label={isOpen ? 'Collapse description' : 'Expand description'}
-                      onClick={() => toggleExpanded(value)}
-                      sx={{ borderRadius: 0, color: 'text.secondary' }}
+              <ExpandableCard
+                key={`${spec.key}-${value}`}
+                containerSx={LIST_ROW_RULE_SX}
+                summary={({ open, toggle }) => (
+                  <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
+                    <ListItemButton
+                      selected={active}
+                      disabled={full || duplicate}
+                      onClick={() => toggleOption(value)}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        py: 0.75,
+                        px: 1,
+                      }}
                     >
-                      {isOpen ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
-                    </IconButton>
-                  ) : null}
-                </Stack>
-                {desc ? (
-                  <Collapse in={isOpen} unmountOnExit>
-                    <Box sx={{ px: 1, py: 0.75, bgcolor: 'background.paper' }}>
-                      <EntryBlocks entries={desc} emptyText="" />
-                    </Box>
-                  </Collapse>
-                ) : null}
-              </Box>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            noWrap
+                            sx={BUILDER_TEXT.itemName}
+                          >
+                            {label}
+                          </Typography>
+                        }
+                      />
+                      {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
+                    </ListItemButton>
+                    {desc ? (
+                      <IconButton
+                        size="small"
+                        aria-label={open ? 'Collapse description' : 'Expand description'}
+                        onClick={toggle}
+                        sx={{ borderRadius: 0, color: 'text.secondary' }}
+                      >
+                        {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
+                      </IconButton>
+                    ) : null}
+                  </Stack>
+                )}
+                details={desc ? <EntryBlocks entries={desc} emptyText="" /> : null}
+                detailsSx={DESCRIPTION_SX}
+              />
             );
           })}
         </List>
@@ -245,3 +237,6 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
     </ChoiceFrame>
   );
 }
+
+// An option's opened description, on the paper under its row.
+const DESCRIPTION_SX = { px: 1, py: 0.75, bgcolor: 'background.paper' };

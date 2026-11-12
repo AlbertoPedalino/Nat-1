@@ -15,7 +15,16 @@ in one folder.
 | `adapters/` | D&D rule adapters, grouped by class, species, feat, spell, or item |
 
 `app/navigation/` contains the app top bar and linked-tool menu. Generic inputs
-such as `ColorField` and `InfoHint` belong to `shared/ui/`.
+such as `ColorField` and `InfoHint` belong to `shared/ui/`, with the one piece for
+each recurring job (guarded by `tests/logic/shared/oneDefinition*.test.js`):
+`ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
+labelled stops), `TipIconButton` (an icon button, `danger` for one that removes),
+`DisclosureButton` + `CollapsibleBody` / `ExpandableCard` (what opens and closes),
+`CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
+`Panel` / `SidePanel` / `PageHeader`, `CornerCloseButton`, and the recipes in
+`interactive.js` (`focusRingSx` with an optional `tone`, `LIST_ROW_SX`,
+`CARD_PART_RULE_SX`, `readoutSx`). The weather card is `WeatherCard` in
+`shared/gmboard/ui/WeatherSummary.jsx`.
 
 ## Page features
 

@@ -201,7 +201,7 @@ export default function ScenePicker({
                       {scene.isLive ? <Radio size={ICON_SIZES.sm} /> : <RadioTower size={ICON_SIZES.sm} />}
                     </TipIconButton>
                     <TipIconButton title="Rename" size="small" onClick={() => handleRename(scene)}><Pencil size={ICON_SIZES.sm} /></TipIconButton>
-                    <TipIconButton title="Delete" size="small" color="error" onClick={() => handleDelete(scene)}>
+                    <TipIconButton title="Delete" size="small" danger onClick={() => handleDelete(scene)}>
                       <Trash2 size={ICON_SIZES.sm} />
                     </TipIconButton>
                   </Box>

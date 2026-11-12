@@ -187,7 +187,7 @@ export default function NoteCard({
             {showEditor ? <Eye size={ICON_SIZES.md} /> : <Pencil size={ICON_SIZES.md} />}
           </TipIconButton>
         ) : null}
-        <TipIconButton title="Delete note" size="small" color="error" onClick={handleRemove}>
+        <TipIconButton title="Delete note" size="small" danger onClick={handleRemove}>
           <Trash2 size={ICON_SIZES.md} />
         </TipIconButton>
       </Box>

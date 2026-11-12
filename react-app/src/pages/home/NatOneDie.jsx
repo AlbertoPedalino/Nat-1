@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { LOGO_COLORS, OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
+import { focusRingSx } from '../../shared/ui/interactive.js';
 
 // The app's logo on the home cover: the inked, cel-shaded d20 (the same
 // drawing as public/favicon.svg). It spins in, all but settled on a 20… and
@@ -95,7 +96,9 @@ const buttonSx = {
   border: 0,
   bgcolor: 'transparent',
   cursor: 'pointer',
-  '&:focus-visible': { outline: `2px solid ${UI_COLORS.accent}`, outlineOffset: 4, borderRadius: 2 },
+  // Rounds the focus ring's corners (the button itself draws nothing).
+  borderRadius: 2,
+  ...focusRingSx(),
 };
 
 // The die at rest on its 1, with no roll: after the first roll of the visit,

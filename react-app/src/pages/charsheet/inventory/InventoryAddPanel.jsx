@@ -1,6 +1,6 @@
 import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ItemAddRow } from '../../../shared/character/inventory/ItemReference.jsx';
 import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
@@ -13,7 +13,8 @@ import { COMPACT_INPUT_SX } from '../../../shared/ui/controlHeights.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
-import { goldToggleSx } from '../../../shared/ui/actionButton.js';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -89,19 +90,15 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
   return (
     <Box sx={inventorySectionSx}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: addPanelOpen ? 0.75 : 0 }}>
-        <Button
-          size="small"
-          aria-expanded={addPanelOpen}
-          onClick={() => setAddPanelOpen((prev) => !prev)}
-          startIcon={addPanelOpen ? null : <Plus size={ICON_SIZES.xs} />}
-          endIcon={addPanelOpen ? <ChevronDown size={ICON_SIZES.xs} /> : <ChevronRight size={ICON_SIZES.xs} />}
-          sx={goldToggleSx(addPanelOpen)}
-        >
-          {addPanelOpen ? 'Close' : 'Add Item'}
-        </Button>
+        <DisclosureButton
+          open={addPanelOpen}
+          onToggle={() => setAddPanelOpen((prev) => !prev)}
+          icon={addPanelOpen ? null : <Plus size={ICON_SIZES.xs} />}
+          label={addPanelOpen ? 'Close' : 'Add Item'}
+        />
       </Box>
 
-      {addPanelOpen ? (
+      <CollapsibleBody open={addPanelOpen}>
         <Box sx={{ pt: 0.75, ...CARD_PART_RULE_SX }}>
           <SearchField
             placeholder="Search 2024 items by name, source, type, property..."
@@ -136,7 +133,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             </Button>
           </Box>
         </Box>
-      ) : null}
+      </CollapsibleBody>
     </Box>
   );
 }

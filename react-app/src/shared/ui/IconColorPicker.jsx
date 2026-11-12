@@ -5,7 +5,7 @@ import ColorField from './ColorField.jsx';
 import { SWATCH_COLORS } from './swatches.js';
 import { UI_COLORS } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
-import { CARD_PART_RULE_SX } from './interactive.js';
+import CardSection from './CardSection.jsx';
 
 export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
@@ -61,7 +61,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           ✕
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, pt: 0.5, ...CARD_PART_RULE_SX }}>
+      <CardSection dense sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary', ...TEXT_STYLES.title }}>
           Custom
         </Typography>
@@ -89,7 +89,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             {currentColor}
           </Typography>
         ) : null}
-      </Box>
+      </CardSection>
     </Popover>
   );
 }

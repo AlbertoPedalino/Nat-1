@@ -8,7 +8,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { BARE_BUTTON_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { BARE_BUTTON_SX, CARD_PART_RULE_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
 import { hexLabel } from './hexLabel.js';
 import WeatherTag from './WeatherTag.jsx';
@@ -101,7 +101,7 @@ const hexBubbleSx = {
 const clickableSx = {
   ...BARE_BUTTON_SX,
   pointerEvents: 'auto',
-  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.accent}`, outlineOffset: 2 },
+  ...focusRingSx({ tone: VTT_COLORS.accent }),
 };
 
 const coordSx = {

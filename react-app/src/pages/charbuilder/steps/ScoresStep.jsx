@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dice5 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
@@ -16,6 +16,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import { tileSx } from '../../../shared/ui/interactive.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -118,21 +119,17 @@ export default function ScoresStep({ state, dispatch }) {
                       slotProps={{ htmlInput: { min: 1, max: 30 } }}
                     />
                   ) : (
-                    <Box sx={{ px: 0.75, pt: 2.25, pb: 0.25 }}>
-                      <Slider
-                        value={scores[stat] ?? 8}
-                        min={character.scoreMethod === 'manual' ? 1 : 8}
-                        max={character.scoreMethod === 'pointbuy' ? 15 : 20}
-                        marks={[
-                          { value: 8, label: '8' },
-                          { value: character.scoreMethod === 'pointbuy' ? 15 : 20, label: character.scoreMethod === 'pointbuy' ? '15' : '20' },
-                        ]}
-                        onChange={(_, value) => dispatch({ type: 'score/set', bucket, stat, value })}
-                        sx={{
-                          '& .MuiSlider-markLabel': BUILDER_TEXT.caption,
-                        }}
-                      />
-                    </Box>
+                    <LabeledSlider
+                      value={scores[stat] ?? 8}
+                      min={character.scoreMethod === 'manual' ? 1 : 8}
+                      max={character.scoreMethod === 'pointbuy' ? 15 : 20}
+                      marks={[
+                        { value: 8, label: '8' },
+                        { value: character.scoreMethod === 'pointbuy' ? 15 : 20, label: character.scoreMethod === 'pointbuy' ? '15' : '20' },
+                      ]}
+                      onChange={(value) => dispatch({ type: 'score/set', bucket, stat, value })}
+                      sx={{ mt: 2.25 }}
+                    />
                   )}
                 </BuilderBox>
               </Grid>

@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { UI_COLORS } from './colors.js';
+import { focusRingSx } from './interactive.js';
 
 // Accessible pip/dot used across the sheet (hit dice, resource dots,
 // free-cast dots). When given an `onClick` it renders a native <button>
@@ -30,7 +31,7 @@ export default function PipButton({ size = 20, round = false, onClick, sx, ...pr
         transition: 'background-color 0.12s, border-color 0.12s',
         ...(interactive ? {
           '&:disabled': { cursor: 'default' },
-          '&:focus-visible': { outline: `2px solid ${UI_COLORS.accentText}`, outlineOffset: '1px' },
+          ...focusRingSx({ tone: UI_COLORS.accentText }),
           '&:hover:not(:disabled)': { borderColor: UI_COLORS.accentText },
         } : {}),
         ...sx,

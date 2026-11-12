@@ -15,7 +15,8 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { readoutSx, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { readoutSx } from '../../../shared/ui/interactive.js';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -210,28 +211,26 @@ export default function HPBlock({
         </Box>
 
         {showDeathSaves && (
-          <Box sx={{ mt: 0.25, pt: 0.25, ...CARD_PART_RULE_SX }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>
-                Death Saves
-              </Typography>
-              <DeathSaveDots
-                deathSaves={deathSaves}
-                colors={{ success: UI_COLORS.success, fail: UI_COLORS.danger }}
-                onChange={(type, value) => onDeathSaveSet?.(type, clickedDeathSaveCount(deathSaves[type], value))}
-              />
-              {!dead && (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={onDeathSave}
-                sx={{ ml: 'auto', minWidth: 36, height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, ...TEXT_STYLES.title, color: 'text.secondary', borderColor: 'divider' }}
-              >
-                Roll
-              </Button>
-              )}
-            </Box>
-          </Box>
+          <CardSection dense sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+            <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>
+              Death Saves
+            </Typography>
+            <DeathSaveDots
+              deathSaves={deathSaves}
+              colors={{ success: UI_COLORS.success, fail: UI_COLORS.danger }}
+              onChange={(type, value) => onDeathSaveSet?.(type, clickedDeathSaveCount(deathSaves[type], value))}
+            />
+            {!dead && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={onDeathSave}
+              sx={{ ml: 'auto', minWidth: 36, height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, ...TEXT_STYLES.title, color: 'text.secondary', borderColor: 'divider' }}
+            >
+              Roll
+            </Button>
+            )}
+          </CardSection>
         )}
       </Box>
     </Panel>

@@ -8,25 +8,16 @@ import { sourceFilesMatching } from '../sourceScan.js';
 
 // What opens and closes goes through CollapsibleBody, which also drops a
 // fully collapsed box out of the layout (MUI leaves a zero-height one behind).
-// The files left use a raw Collapse for their own reasons and are not yet
-// converted.
 test('a collapsing body is a CollapsibleBody', () => {
   assert.deepEqual(sourceFilesMatching(/MuiCollapse-hidden/, { allow: ['shared/ui/CollapsibleBody.jsx'] }), []);
-  assert.deepEqual(sourceFilesMatching(/<Collapse\b/, {
-    allow: [
-      'shared/ui/CollapsibleBody.jsx',
-      'pages/charbuilder/choices/ChoiceBlock.jsx',
-      'pages/charsheet/forms/BeastStatBlock.jsx',
-      'pages/vtt/tokens/TokenComposer.jsx',
-    ],
-  }), []);
+  assert.deepEqual(sourceFilesMatching(/<Collapse\b/, { allow: ['shared/ui/CollapsibleBody.jsx'] }), []);
 });
 
 // A button that opens what sits under it is a DisclosureButton: one chevron
-// convention, aria-expanded, a label. InventoryAddPanel is not yet converted.
+// convention, aria-expanded, a label.
 test('a disclosure toggle is a DisclosureButton', () => {
-  assert.deepEqual(sourceFilesMatching(/(start|end)Icon=\{\w+ \? <Chevron(Up|Down)\b/, {
-    allow: ['shared/ui/DisclosureButton.jsx', 'pages/charsheet/inventory/InventoryAddPanel.jsx'],
+  assert.deepEqual(sourceFilesMatching(/(start|end)Icon=\{\w+ \? <(Chevron(Up|Down|Right)|X|Plus)\b|<Button\b[^>]*aria-expanded/, {
+    allow: ['shared/ui/DisclosureButton.jsx'],
   }), []);
 });
 
@@ -37,11 +28,11 @@ test('a folding panel is a Panel with a DisclosureButton, not an Accordion', () 
 });
 
 // A ruled part of an opened card under a small accent title is a CardSection
-// (its title alone, cardSectionTitleSx). HPBlock and IconColorPicker keep a
-// ruled row of controls without a title and are not yet converted.
+// (its title alone, cardSectionTitleSx); a ruled row of controls without a
+// title is one too, `dense` inside a packed block.
 test('a ruled card part is a CardSection', () => {
   assert.deepEqual(sourceFilesMatching(/mt: [\d.]+, pt: [\d.]+, \.\.\.CARD_PART_RULE_SX/, {
-    allow: ['shared/ui/CardSection.jsx', 'pages/charsheet/resources/HPBlock.jsx', 'shared/ui/IconColorPicker.jsx'],
+    allow: ['shared/ui/CardSection.jsx'],
   }), []);
   assert.deepEqual(sourceFilesMatching(/const SECTION_HEADING_SX\b/), []);
 });
@@ -72,4 +63,27 @@ test('the wash and the meter track are drawn only by surfaces.js', () => {
 test('dialog sections and the phone full screen go through SheetDialog', () => {
   assert.deepEqual(sourceFilesMatching(/\bdialogSectionTitleSx\b/, { allow: ['shared/ui/SheetDialog.jsx'] }), []);
   assert.deepEqual(sourceFilesMatching(/fullScreen=\{/, { allow: ['shared/ui/SheetDialog.jsx'] }), []);
+});
+
+// An on/off setting with its name beside it is a ToggleRow, and a value picked
+// by dragging a LabeledSlider, on every page: one row and one slider look.
+test('an on/off row is a ToggleRow and a slider a LabeledSlider', () => {
+  assert.deepEqual(sourceFilesMatching(/<FormControlLabel\b|<Switch\b/, { allow: ['shared/ui/ToggleRow.jsx'] }), []);
+  assert.deepEqual(sourceFilesMatching(/<Slider\b|from '@mui\/material\/Slider'/, { allow: ['shared/ui/LabeledSlider.jsx'] }), []);
+});
+
+// The keyboard's focus ring is focusRingSx (shared/ui/interactive.js), in a
+// tone when the thing wears one: no ring is drawn by hand.
+test('a focus ring is focusRingSx', () => {
+  assert.deepEqual(sourceFilesMatching(/['"]&(:focus-visible|\.Mui-focusVisible)['"]: \{ outline|outline: ['`]2px solid/, {
+    allow: ['shared/ui/interactive.js'],
+  }), []);
+});
+
+// The weather card (the WeatherSummary in a callout of its tone, the date and
+// the next weather check under it) is WeatherCard, on the GM Board and the map.
+test('the weather card is WeatherCard', () => {
+  assert.deepEqual(sourceFilesMatching(/weatherTimerLabel\(/, {
+    allow: ['shared/gmboard/weather.js', 'shared/gmboard/ui/WeatherSummary.jsx'],
+  }), []);
 });

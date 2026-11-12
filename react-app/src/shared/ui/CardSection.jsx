@@ -12,8 +12,10 @@ import { asArray } from '../lists.js';
 // display face, small, in `tone` (the accent text by default; the rich-text
 // accent for a spell's rules). Every such part is one, so they keep one
 // spacing and one title. `title` may be left out for a ruled part that only
-// holds a control (a tome's Read button); `sx` lays out the part's body or
-// places it.
+// holds a control (a tome's Read button). `dense` halves the spacing round
+// the rule, for a ruled row of controls inside a packed block (the HP block's
+// death saves, a colour popover's custom well). `sx` lays out the part's body
+// or places it.
 //
 // cardSectionTitleSx is the same title for a block that keeps its own frame
 // (an artificer's tinker panels).
@@ -22,10 +24,11 @@ export function cardSectionTitleSx(tone = UI_COLORS.accentText) {
 }
 
 const SECTION_SX = Object.freeze({ mt: 1, pt: 1, ...CARD_PART_RULE_SX });
+const DENSE_SECTION_SX = Object.freeze({ mt: 0.5, pt: 0.5, ...CARD_PART_RULE_SX });
 
-export default function CardSection({ title, tone, children, sx, ...rest }) {
+export default function CardSection({ title, tone, dense = false, children, sx, ...rest }) {
   return (
-    <Box sx={[SECTION_SX, ...asArray(sx)]} {...rest}>
+    <Box sx={[dense ? DENSE_SECTION_SX : SECTION_SX, ...asArray(sx)]} {...rest}>
       {title != null ? <Typography component="div" sx={cardSectionTitleSx(tone)}>{title}</Typography> : null}
       {children}
     </Box>
