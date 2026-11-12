@@ -1,42 +1,67 @@
 import { UI_COLORS } from './colors.js';
 
 // The interface's small fantasy ornaments, drawn in the same ink as
-// everything else: a gilded gem (a lozenge of the accent in an ink edge) set
-// on the ends of a panel's title bar and in the middle of a section's rule,
-// as a rulebook sets its headings. One recipe, so a restyle reaches every gem.
+// everything else: gilded points (the accent in an ink edge) on the ends of
+// a panel's title bar and a gem on a section's rule, as a rulebook sets its
+// headings. One recipe, so a restyle reaches every one.
+//
+// Each is a small picture drawn wholly inside the box that carries it: an
+// ornament that pokes out of its box is cut by a frame that hides overflow,
+// and inside one that scrolls it grows a scrollbar.
 
-// A gem `size` px across before it is turned on its point, centred on the
-// point (`left`, `top`) of the box it is drawn in. Spread as a pseudo-element.
-function gem(size, { left, top, right }) {
+function picture(width, height, path) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`
+    + `<path d="${path}" fill="${UI_COLORS.accent}" stroke="${UI_COLORS.edge}" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+// A point 8 wide and 14 tall, its flat side on the bar's edge, pointing in.
+const POINT_WIDTH = 8;
+const POINT_HEIGHT = 14;
+const POINT_IN_FROM_LEFT = picture(POINT_WIDTH, POINT_HEIGHT, `M1 1L${POINT_WIDTH - 1} ${POINT_HEIGHT / 2}L1 ${POINT_HEIGHT - 1}`);
+const POINT_IN_FROM_RIGHT = picture(POINT_WIDTH, POINT_HEIGHT, `M${POINT_WIDTH - 1} 1L1 ${POINT_HEIGHT / 2}L${POINT_WIDTH - 1} ${POINT_HEIGHT - 1}`);
+
+function point(side, image) {
   return {
     content: '""',
     position: 'absolute',
-    width: size,
-    height: size,
-    ...(right != null ? { right } : { left }),
-    top,
-    marginTop: `${-size / 2 - 2}px`,
-    ...(right != null ? { marginRight: `${-size / 2 - 2}px` } : { marginLeft: `${-size / 2 - 2}px` }),
-    transform: 'rotate(45deg)',
-    bgcolor: UI_COLORS.accent,
-    border: 2,
-    borderColor: UI_COLORS.edge,
-    boxSizing: 'content-box',
+    [side]: 0,
+    top: 0,
+    bottom: 0,
+    width: POINT_WIDTH,
+    backgroundImage: image,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    backgroundSize: `${POINT_WIDTH}px ${POINT_HEIGHT}px`,
     pointerEvents: 'none',
   };
 }
 
-// The studs on a title bar: a gem on each end, half sunk into the panel's
-// frame, so the bar reads as a cartouche across the panel.
+// The studs on a title bar: a gilded point on each end, set against the
+// panel's frame, so the bar reads as a cartouche across the panel.
 export const BAR_STUDS_SX = Object.freeze({
   position: 'relative',
-  '&::before': gem(7, { left: 0, top: '50%' }),
-  '&::after': gem(7, { right: 0, top: '50%' }),
+  '&::before': point('left', POINT_IN_FROM_LEFT),
+  '&::after': point('right', POINT_IN_FROM_RIGHT),
 });
 
-// A gem in the middle of a heading's rule (spread with the rule itself):
-// the box's own bottom border carries it.
+// A gem standing in the middle of a heading's rule (spread with the rule
+// itself): drawn above the rule, its lower point on the line.
+const GEM_SIZE = 10;
+const GEM = picture(GEM_SIZE, GEM_SIZE, `M${GEM_SIZE / 2} 1L${GEM_SIZE - 1} ${GEM_SIZE / 2}L${GEM_SIZE / 2} ${GEM_SIZE - 1}L1 ${GEM_SIZE / 2}Z`);
+
 export const RULE_GEM_SX = Object.freeze({
   position: 'relative',
-  '&::after': gem(5, { left: '50%', top: '100%' }),
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    left: '50%',
+    bottom: 0,
+    width: GEM_SIZE,
+    height: GEM_SIZE,
+    marginLeft: `${-GEM_SIZE / 2}px`,
+    backgroundImage: GEM,
+    backgroundSize: '100% 100%',
+    pointerEvents: 'none',
+  },
 });
