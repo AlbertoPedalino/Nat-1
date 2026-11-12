@@ -760,3 +760,7 @@ test('an icon button with a tooltip is a TipIconButton', () => {
 test('one choice among a few is a ChoiceToggle', () => {
   assert.deepEqual(sourceFilesMatching(/<ToggleButtonGroup\b/, { allow: ['shared/ui/ChoiceToggle.jsx'] }), []);
 });
+
+test('a short table of facts is a LabelValueGrid', () => {
+  assert.deepEqual(sourceFilesMatching(/gridTemplateColumns: 'auto 1fr'/, { allow: ['shared/ui/LabelValueGrid.jsx'] }), []);
+});

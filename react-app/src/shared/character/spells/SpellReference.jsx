@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { RichInline } from '../../content/RichText.jsx';
@@ -11,13 +10,7 @@ import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
-
-const META_LABEL_SX = {
-  ...TEXT_STYLES.label,
-  color: RICH_TEXT_ACCENT,
-  fontSize: FONT_SIZES.xxs,
-  alignSelf: 'center',
-};
+import LabelValueGrid from '../../ui/LabelValueGrid.jsx';
 
 const SECTION_HEADING_SX = {
   ...TEXT_STYLES.title,
@@ -30,18 +23,7 @@ const SECTION_HEADING_SX = {
 // Shared by the sheet spell card and the builder expanded body so the meta
 // presentation stays identical. Renders nothing when the spell has no meta.
 export function SpellMetaGrid({ spell, fontSize = FONT_SIZES.sm, sx }) {
-  const segments = getSpellMetaSegments(spell);
-  if (!segments.length) return null;
-  return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 1, rowGap: 0.25, fontSize, ...sx }}>
-      {segments.map((segment) => (
-        <Fragment key={segment.label}>
-          <Box sx={META_LABEL_SX}>{segment.label}</Box>
-          <Box sx={{ color: 'text.primary' }}>{segment.value}</Box>
-        </Fragment>
-      ))}
-    </Box>
-  );
+  return <LabelValueGrid rows={getSpellMetaSegments(spell)} fontSize={fontSize} sx={sx} />;
 }
 
 // "Using a Higher-Level Spell Slot" upcast block. Accepts raw higher-level

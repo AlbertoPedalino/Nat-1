@@ -21,17 +21,8 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import LabelValueGrid from '../../../shared/ui/LabelValueGrid.jsx';
 
-// One label/value row inside the grants grid (label column + wrapped values).
-function GrantRow({ label, values }) {
-  if (!values?.length) return null;
-  return (
-    <>
-      <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: UI_COLORS.accentText, whiteSpace: 'nowrap' }}>{label}</Typography>
-      <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
-    </>
-  );
-}
 
 // Backgrounds encode their summary inside `entries` (Ability Scores, Feat,
 // Skill/Tool Proficiencies, Equipment). Newer sources use list `{type:'item'}`
@@ -103,18 +94,15 @@ function BackgroundDetailCard({ background }) {
           </Typography>
         ) : null}
         <Divider />
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 1.5, rowGap: 0.75, alignItems: 'baseline', minWidth: 0 }}>
-          {facts.length ? (
-            facts.map((fact) => <GrantRow key={fact.label} label={fact.label} values={[fact.value]} />)
-          ) : (
-            <>
-              <GrantRow label="Origin Feat" values={originFeat ? [originFeat] : []} />
-              <GrantRow label="Skills" values={fixedSkills.map(titleCase)} />
-              <GrantRow label="Tools" values={fixedTools.map(titleCase)} />
-              <GrantRow label="Languages" values={fixedLangs.map(titleCase)} />
-            </>
-          )}
-        </Box>
+        <LabelValueGrid
+          fontSize={BUILDER_TEXT.body.fontSize}
+          rows={facts.length ? facts : [
+            { label: 'Origin Feat', value: originFeat },
+            { label: 'Skills', value: fixedSkills.map(titleCase).join(', ') },
+            { label: 'Tools', value: fixedTools.map(titleCase).join(', ') },
+            { label: 'Languages', value: fixedLangs.map(titleCase).join(', ') },
+          ].filter((row) => row.value)}
+        />
       </Stack>
     </Box>
   );
