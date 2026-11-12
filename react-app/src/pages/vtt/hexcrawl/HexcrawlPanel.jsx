@@ -25,6 +25,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -82,22 +84,11 @@ export default function HexcrawlPanel({
         />
       </Stack>
 
-      {!board ? (
-        <Typography sx={warnSx}>
-          No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
-          campaign under Links.
-        </Typography>
-      ) : null}
-      {board && !clockLinked ? (
-        <Typography sx={warnSx}>
-          The campaign clock is not readable from here, so time will not be saved.
-        </Typography>
-      ) : null}
-      {error ? <Typography sx={warnSx}>{error}</Typography> : null}
+      <HexcrawlLinkWarnings board={board} clockLinked={clockLinked} error={error} />
 
       {missing?.length && board ? (
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography sx={hintSx}>Set {missing.join(', ')} before walking into a hex.</Typography>
+          <Caption component="p" tone="warning">Set {missing.join(', ')} before walking into a hex.</Caption>
           {onOpenSettings ? (
             <Button size="small" sx={linkButtonSx} onClick={onOpenSettings}>Open settings</Button>
           ) : null}
@@ -147,7 +138,7 @@ function WeatherCard({ clock }) {
 function NextHexLine({ terrain, clock, mountSpeed }) {
   const option = terrainOption(terrain);
   if (!option) {
-    return <Typography sx={hintSx}>Next hex: pick a terrain to see how long it takes.</Typography>;
+    return <Caption component="p">Next hex: pick a terrain to see how long it takes.</Caption>;
   }
   const travel = travelTime(option.hours, clock?.weather, clock?.intensity, mountSpeed);
   const Icon = TERRAIN_ICONS[option.id] || Footprints;
@@ -265,10 +256,8 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal };
 const sectionSx = { color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
 const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
-const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.normal };
 
 const cardSx = {
   p: 1,

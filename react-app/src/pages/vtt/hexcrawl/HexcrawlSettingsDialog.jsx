@@ -6,9 +6,8 @@ import MountSelector from '../../../shared/hexcrawl/ui/MountSelector.jsx';
 import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
-import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
@@ -16,6 +15,8 @@ import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -51,18 +52,7 @@ export default function HexcrawlSettingsDialog({
       contentProps={{ dividers: true }}
       actions={<Button onClick={onClose}>Done</Button>}
     >
-      {!board ? (
-        <Typography sx={warnSx}>
-          No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
-          campaign under Links.
-        </Typography>
-      ) : null}
-      {board && !clockLinked ? (
-        <Typography sx={warnSx}>
-          The campaign clock is not readable from here, so changes will not be saved.
-        </Typography>
-      ) : null}
-      {error ? <Typography sx={warnSx}>{error}</Typography> : null}
+      <HexcrawlLinkWarnings board={board} clockLinked={clockLinked} error={error} />
 
       <Box sx={columnsSx}>
         <Stack spacing={2} sx={sectionCardSx}>
@@ -141,7 +131,7 @@ export default function HexcrawlSettingsDialog({
               deferMs={180}
               label="Explored hex colour"
             />
-            <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
+            <Caption>{hexColor || DEFAULT_HEX_COLOR}</Caption>
             {(hexColor || DEFAULT_HEX_COLOR) !== DEFAULT_HEX_COLOR ? (
               <Button size="small" onClick={() => onHexColorChange(DEFAULT_HEX_COLOR)}>Reset</Button>
             ) : null}
@@ -184,6 +174,4 @@ const sectionTitleSx = {
 
 
 const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
-const hintSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md };
-const warnSx = { color: 'warning.main', fontSize: FONT_SIZES.lg, lineHeight: LINE_HEIGHTS.normal, mb: 1.5 };
 

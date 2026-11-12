@@ -17,6 +17,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -84,7 +85,7 @@ export default function HexcrawlView() {
             ].filter(Boolean).join(' · ')}
           </Typography>
           {missing.length ? (
-            <Typography sx={hintSx}>Select {missing.join(', ')} to continue.</Typography>
+            <Caption component="p" tone="warning">Select {missing.join(', ')} to continue.</Caption>
           ) : null}
         </Box>
         <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
@@ -136,7 +137,3 @@ const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };
 
 const moveSummarySx = { fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 };
 
-const hintSx = {
-  fontSize: FONT_SIZES.md,
-  color: 'warning.main',
-};

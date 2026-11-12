@@ -17,6 +17,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -149,9 +150,9 @@ export default function RollView() {
           value={rollTier}
           onChange={(tier) => dispatch({ type: 'setRollTier', tier })}
         />
-        <Typography sx={hintSx}>
+        <Caption component="p">
           One roll on one table. Nothing here moves the clock, the weather or the session log.
-        </Typography>
+        </Caption>
       </BoardPanel>
 
       <Box sx={boardCardGridSx}>
@@ -195,10 +196,6 @@ export default function RollView() {
   );
 }
 
-const hintSx = {
-  fontSize: FONT_SIZES.md,
-  color: 'text.secondary',
-};
 
 // A fixed height, so the cards with a tier badge line up with the ones without.
 const headerBandSx = {

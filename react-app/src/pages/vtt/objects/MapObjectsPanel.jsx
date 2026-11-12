@@ -21,6 +21,7 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import SearchField from '../../../shared/ui/SearchField.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -65,10 +66,10 @@ export default function MapObjectsPanel({
 
   return (
     <Box>
-      <Typography sx={hintSx}>
+      <Caption component="p" sx={{ mb: 1 }}>
         Click to quick-place, or drag with mouse, touch or pen onto the {layer} layer.
         {' '}Placed objects can be moved, resized and rotated.
-      </Typography>
+      </Caption>
       <Box sx={filtersSx}>
         <SearchField
           value={query}
@@ -148,7 +149,6 @@ export default function MapObjectsPanel({
   );
 }
 
-const hintSx = { mb: 1, color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.md, lineHeight: LINE_HEIGHTS.normal };
 const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 };
 const countSx = { mb: 0.75, color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs };
 const strokeControlSx = {
