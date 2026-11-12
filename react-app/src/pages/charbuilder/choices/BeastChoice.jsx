@@ -3,7 +3,7 @@ import { Box, List, ListItemButton, ListItemText, Typography } from '@mui/materi
 import { Check } from 'lucide-react';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import { eligibleBeasts, beastRefValue, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
+import { eligibleBeasts, beastRefValue, beastSummary, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { wildShapeCrCap } from '../../../shared/character/forms/wildShapeRules.js';
 import { formatCr } from '../../../shared/bestiary/challengeRating.js';
@@ -86,7 +86,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
                           {beast.name}
                         </Typography>
                       )}
-                      secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
+                      secondary={`${beastSummary(beast)} · ${beast.source}`}
                       slotProps={{ secondary: { noWrap: true, sx: BUILDER_TEXT.itemMeta } }}
                     />
                     {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}

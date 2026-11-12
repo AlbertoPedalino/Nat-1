@@ -6,7 +6,7 @@ import { classLevel } from '../../../shared/character/progression/classLevel.js'
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
-import { detailPanelSx } from '../layout/layout.js';
+import DetailPanel from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 
@@ -114,10 +114,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
   };
 
   return (
-    <Box
-      onClick={(e) => e.stopPropagation()}
-      sx={detailPanelSx}
-    >
+    <DetailPanel>
       <Stack spacing={1.25}>
         {sections.map((s, i) => (
           <FeatureBox key={`sec-${i}`} title={s.title} accent={s.accent}>
@@ -186,6 +183,6 @@ export default function ActionDetailPanel({ action, character, sheet }) {
           </FeatureBox>
         ) : null}
       </Stack>
-    </Box>
+    </DetailPanel>
   );
 }

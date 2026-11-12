@@ -1,23 +1,17 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { filterOptions } from '../../../shared/content/searchText.js';
-import { findFamiliarBeasts } from '../../../shared/character/forms/beasts.js';
+import { beastSummary, findFamiliarBeasts } from '../../../shared/character/forms/beasts.js';
 import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/forms/wildShapeForm.js';
-import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import {
-  consumeSlot,
-  lowestAvailableSlotLevel,
-} from '../../../shared/character/spells/spellSlots.js';
-import {
-  BeastNameLink,
+  BeastTitle,
   BeastStatBlock,
   BeastPickerRow,
   creatureHpBoxSx,
-  subSx,
   dismissButtonSx,
 } from './BeastStatBlock.jsx';
 import { useBeastsDb } from './useBeastsDb.js';
@@ -29,13 +23,11 @@ import {
   summonWildCompanionPatch,
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import { filterByBooks } from '../../../shared/content/booksView.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { useCostMode } from './useCostMode.js';
+import CostModeToggle from './CostModeToggle.jsx';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -44,26 +36,23 @@ import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 // C.wildCompanion for the stat block.
 
 export default function WildCompanionPanel({ character, sheet, resources, onResChange }) {
-  const { onUpdateCharacter, onUpdateSheet } = useSheetActions();
+  const { onUpdateCharacter } = useSheetActions();
   // The familiar is its own creature: its rolls never take the druid's
   // exhaustion penalty.
   const { rollCheck, rollFormulaToast } = useCreatureRolls();
   const beastsDb = useBeastsDb();
   const [query, setQuery] = useState('');
-  const [costMode, setCostMode] = useState('ws'); // 'ws' | 'slot'
   const [hpStep, setHpStep] = useState('1'); // persistent heal/damage step for the familiar HP tracker
 
-  const usesLeft = Number(resources?.[WILD_SHAPE_RESOURCE_KEY] ?? 0);
-  const regularSlots = useMemo(() => getSpellSlots(character)?.regular || [], [character]);
-  const slotLevel = useMemo(() => lowestAvailableSlotLevel(regularSlots, sheet), [regularSlots, sheet]);
-  const canWildShape = usesLeft > 0;
-  const canSlot = slotLevel > 0;
-  const canSummon = canWildShape || canSlot;
-  // Honor the picked cost method, but fall back to whichever is actually
-  // available so the Summon button always spends something valid.
-  const effectiveCost = costMode === 'slot'
-    ? (canSlot ? 'slot' : 'ws')
-    : (canWildShape ? 'ws' : 'slot');
+  // Find Familiar is cast with a Wild Shape use or a spell slot.
+  const costMode = useCostMode({
+    character,
+    sheet,
+    usesLeft: Number(resources?.[WILD_SHAPE_RESOURCE_KEY] ?? 0),
+    resKey: WILD_SHAPE_RESOURCE_KEY,
+    onResChange,
+  });
+  const { canPay: canSummon, cost, slotLevel } = costMode;
 
   const active = getActiveWildCompanion(character);
   const familiars = useMemo(() => findFamiliarBeasts(filterByBooks(beastsDb, character)), [beastsDb, character]);
@@ -75,12 +64,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   );
 
   const summon = (beast) => {
-    if (!beast || !onUpdateCharacter || !canSummon) return;
-    if (effectiveCost === 'slot') {
-      if (!consumeSlot(regularSlots, sheet, slotLevel, onUpdateSheet, onUpdateCharacter)) return;
-    } else if (typeof onResChange === 'function') {
-      onResChange(WILD_SHAPE_RESOURCE_KEY, -1);
-    }
+    if (!beast || !onUpdateCharacter || !costMode.spend()) return;
     onUpdateCharacter((prev) => ({ ...prev, ...summonWildCompanionPatch(beast) }));
   };
   const dismiss = () => {
@@ -99,15 +83,16 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     const b = active.beast;
     const hp = getWildCompanionHp(character);
     return (
-      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Sparkles size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-          <Typography sx={detailTitleSx} component="span">Familiar —</Typography>
-          <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
-          <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
+      <DetailPanel
+        icon={Sparkles}
+        title="Familiar —"
+        titleNode={<BeastTitle name={b.name} source={b.source} />}
+        aside={(
+          <Button size="small" onClick={dismiss} sx={dismissButtonSx}>
             Dismiss familiar
           </Button>
-        </Box>
+        )}
+      >
         {hp ? (
           <Box sx={creatureHpBoxSx}>
             <HpPoolBar
@@ -123,29 +108,16 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           </Box>
         ) : null}
         <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" onRoll={rollCheck} onRollFormula={rollFormulaToast} />
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
+        <DetailNote>
           A Fey spirit; rolls its own Initiative and acts on its own turn. It can't attack, but takes other actions normally. Vanishes when you finish a Long Rest.
-        </Typography>
-      </Box>
+        </DetailNote>
+      </DetailPanel>
     );
   }
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <Sparkles size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-        <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
-      </Box>
-      <ChoiceToggle
-        stopPropagation
-        value={canSummon ? effectiveCost : null}
-        onChange={setCostMode}
-        options={[
-          { value: 'ws', disabled: !canWildShape, label: canWildShape ? `Wild Shape (${usesLeft})` : 'Wild Shape' },
-          { value: 'slot', disabled: !canSlot, label: canSlot ? `Spell Slot (Lv ${slotLevel})` : 'Spell Slot' },
-        ]}
-        sx={{ mb: 0.5 }}
-      />
+    <DetailPanel icon={Sparkles} title="Summon Familiar — CR 0 Beast">
+      <CostModeToggle costMode={costMode} useLabel="Wild Shape" sx={{ mb: 0.5 }} />
       <SearchField
         value={query}
         onChange={setQuery}
@@ -155,7 +127,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         sx={{ mb: 0.5 }}
       />
       {!familiars.length ? (
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>Loading beasts…</Typography>
+        <DetailNote sx={{ mt: 0 }}>Loading beasts…</DetailNote>
       ) : (
         <Stack spacing={0.5} sx={{ maxHeight: 260, overflow: 'auto' }}>
           {visible.map((beast) => (
@@ -164,7 +136,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
               beast={beast}
               name={beast.name}
               source={beast.source}
-              summary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`}
+              summary={beastSummary(beast)}
               actionLabel="Summon"
               onAction={() => summon(beast)}
               actionDisabled={!canSummon}
@@ -174,13 +146,12 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           {!visible.length ? <EmptyLine>No matches.</EmptyLine> : null}
         </Stack>
       )}
-      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+      <DetailNote warn={!canSummon}>
         {!canSummon
           ? 'No Wild Shape uses or spell slots left — finish a rest.'
-          : `Summoning spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'one Wild Shape use'}; the familiar is Fey and lasts until a Long Rest.`}
-      </Typography>
-    </Box>
+          : `Summoning spends ${cost === 'slot' ? `a level ${slotLevel} spell slot` : 'one Wild Shape use'}; the familiar is Fey and lasts until a Long Rest.`}
+      </DetailNote>
+    </DetailPanel>
   );
 }
 
-// The size of this panel's toggle keys; their look is the theme's.

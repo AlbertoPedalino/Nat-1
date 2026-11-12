@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { findBeast, parseBeastRef } from '../../../shared/character/forms/beasts.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { beastSummary, findBeast, parseBeastRef } from '../../../shared/character/forms/beasts.js';
+import { BeastTitle, BeastStatBlock, BeastPickerRow, dismissButtonSx } from './BeastStatBlock.jsx';
 import { useBeastsDb, useFeatureForms } from './useBeastsDb.js';
 import {
   getActiveWildShape,
@@ -14,9 +14,7 @@ import { featureFormSnapshot, wildShapeTempHp } from '../../../shared/character/
 import { classLevel, hasClassFeature } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import { tempHpAfter } from '../../../shared/character/combat/vitals.js';
 import { filterByBooks } from '../../../shared/content/booksView.js';
 
@@ -80,35 +78,32 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   if (active) {
     const b = active.beast;
     return (
-      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-          <Typography sx={detailTitleSx} component="span">Transformed —</Typography>
-          <BeastNameLink name={b.name} source={b.source} sx={detailTitleSx} />
-          <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
+      <DetailPanel
+        icon={PawPrint}
+        title="Transformed —"
+        titleNode={<BeastTitle name={b.name} source={b.source} />}
+        aside={(
+          <Button size="small" onClick={revert} sx={dismissButtonSx}>
             Revert to normal form
           </Button>
-        </Box>
+        )}
+      >
         {b.tempHpGrant != null
           ? <BeastStatBlock b={b} typeLabel="Wild Shape form" hpLabel="Temp HP" showCr={false} />
           : <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={wildShapeTempHp(character, b, lv)} />}
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
+        <DetailNote>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
-        </Typography>
-      </Box>
+        </DetailNote>
+      </DetailPanel>
     );
   }
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-        <Typography sx={detailTitleSx}>Known Beast Forms</Typography>
-      </Box>
+    <DetailPanel icon={PawPrint} title="Known Beast Forms">
       {!forms.length && !extraForms.length ? (
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>
+        <DetailNote sx={{ mt: 0 }}>
           No forms chosen yet — pick beasts in the character builder (Class Choices → Wild Shape).
-        </Typography>
+        </DetailNote>
       ) : (
         <Stack spacing={0.5}>
           {forms.map(({ ref, beast, parsed }) => (
@@ -117,9 +112,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
               beast={beast}
               name={parsed.name}
               source={beast?.source || parsed.source}
-              summary={beast
-                ? `CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`
-                : 'Beast data unavailable'}
+              summary={beast ? beastSummary(beast) : 'Beast data unavailable'}
               summaryColor={beast ? undefined : UI_COLORS.dangerMuted}
               actionLabel="Transform"
               onAction={() => transform(beast)}
@@ -145,12 +138,12 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         </Stack>
       )}
       {lv >= 2 ? (
-        <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
+        <DetailNote warn={usesLeft <= 0}>
           {usesLeft <= 0
             ? 'No Wild Shape uses left — finish a Short or Long Rest.'
             : `Transform spends one Wild Shape use (${usesLeft} left).`}
-        </Typography>
+        </DetailNote>
       ) : null}
-    </Box>
+    </DetailPanel>
   );
 }

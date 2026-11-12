@@ -9,7 +9,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
-import { detailTitleSx } from '../layout/layout.js';
+import { detailMetaSx, detailTitleSx } from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
@@ -49,6 +49,12 @@ export function BeastNameLink({ name, source, sx }) {
       <ExternalLink size={ICON_SIZES.xxs} style={{ flexShrink: 0, opacity: OPACITY.heavy }} />
     </Link>
   );
+}
+
+// A beast's name as the title of its detail panel: the panel title's gold
+// lettering, still the link to its stat block.
+export function BeastTitle({ name, source }) {
+  return <BeastNameLink name={name} source={source} sx={detailTitleSx} />;
 }
 
 // Compact 5e stat block from a normalized beast snapshot. Mirrors a Monster
@@ -301,7 +307,8 @@ const rollChipSx = {
   '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
 };
 
-export const subSx = { fontSize: FONT_SIZES.xs, color: 'text.secondary' };
+// A stat block's lines are a detail panel's quiet text.
+export const subSx = detailMetaSx;
 
 // A labelled row of choices above a summon's stat block (form, creature type,
 // damage type…), and the toggle look its buttons share.

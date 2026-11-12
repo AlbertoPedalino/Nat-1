@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
@@ -11,16 +11,13 @@ import {
 } from '../../../shared/character/forms/summonedCreatures.js';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
-import { BeastNameLink, BeastStatBlock, CreatureOptionRow, subSx } from './BeastStatBlock.jsx';
+import { BeastTitle, BeastStatBlock, CreatureOptionRow } from './BeastStatBlock.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
-import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import DetailPanel, { DetailNote, detailStatus } from '../layout/DetailPanel.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 
@@ -105,30 +102,20 @@ export default function SummonedCreaturePanel({
       : null)
     : null;
 
-  if (status === 'loading') {
+  const panelStatus = detailStatus(status, creature);
+  if (panelStatus) {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-        <LoadingLine label="Loading summoned statblock…" />
-      </Box>
-    );
-  }
-  if (!creature) {
-    return (
-      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-        <Typography sx={[subSx, { color: status === 'error' ? 'error.main' : 'text.secondary' }]}>
-          Summoned statblock unavailable.
-        </Typography>
-      </Box>
+      <DetailPanel
+        status={panelStatus}
+        loadingLabel="Loading summoned statblock…"
+        unavailableText="Summoned statblock unavailable."
+      />
     );
   }
 
   const hasFixedChoice = Boolean(choiceMatch);
   return (
-    <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-        <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
-      </Box>
+    <DetailPanel icon={PawPrint} titleNode={<BeastTitle name={creature.name} source={creature.source} />}>
       {versions.length > 1 ? (
         <CreatureOptionRow label="Form">
           <ChoiceToggle
@@ -175,13 +162,13 @@ export default function SummonedCreaturePanel({
         onRollFormula={rollFormulaToast}
         bonusActionAccessory={divinePowerAccessory}
       />
-      <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5 }}>
+      <DetailNote>
         {config.levelClass
           ? `Scaled for ${config.levelClass} level ${resolvedClassLevel}.`
           : `Scaled for a level ${resolvedSpellLevel} spell slot.`}
         {' '}Attack {signed(resolvedAttack)}; save DC {resolvedDc}.
-      </Typography>
-    </Box>
+      </DetailNote>
+    </DetailPanel>
   );
 }
 

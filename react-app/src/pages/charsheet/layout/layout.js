@@ -1,8 +1,3 @@
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
-
 export const SHEET_AREAS = {
   saves: 'saves',
   senses: 'senses',
@@ -49,17 +44,3 @@ export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
     px: embedded ? embeddedPx : SHEET_COLUMN_PX,
   };
 }
-
-// The panel that opens under a sheet row (an action's details, a beast form, a
-// created item) and its gold title.
-export const detailPanelSx = {
-  ...SURFACES.wash,
-  mt: 0.75,
-  p: 1,
-};
-
-export const detailTitleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.sm,
-  color: UI_COLORS.accentText,
-};

@@ -20,7 +20,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -167,24 +167,17 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
       || !canAddItem(value)
     ));
 
-  if (!items.length) {
-    return (
-      <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-        <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm }}>
-          {emptyHint}
-        </Typography>
-      </Box>
-    );
-  }
+  if (!items.length) return <DetailPanel status="unavailable" unavailableText={emptyHint} />;
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography sx={detailTitleSx}>{tagLabel}</Typography>
+    <DetailPanel
+      title={tagLabel}
+      aside={(
         <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xs, color: remaining > 0 ? UI_COLORS.accentText : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
-      </Box>
+      )}
+    >
 
       {searchable ? (
         <SearchField
@@ -262,15 +255,15 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
       </Box>
 
       {noneAddable ? (
-        <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.xxs, mt: 0.5 }}>
+        <DetailNote>
           {remaining <= 0
             ? 'Active limit reached. Remove one to make another.'
             : (requireResolvedItem && items.every((value) => !resolveItem(value))
               ? 'Item data unavailable. No item can be created.'
               : 'Each item already made or unavailable. Remove one to remake it.')}
-        </Typography>
+        </DetailNote>
       ) : null}
-    </Box>
+    </DetailPanel>
   );
 }
 

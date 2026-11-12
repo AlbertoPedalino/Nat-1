@@ -1,15 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
-import {
-  consumeSlot,
-  lowestAvailableSlotLevel,
-} from '../../../shared/character/spells/spellSlots.js';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import ACDisplay from '../stats/ACDisplay.jsx';
 import DefensesPanel from '../stats/DefensesPanel.jsx';
-import { subSx, creatureHpBoxSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { creatureHpBoxSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import {
   CANNON_AC,
@@ -31,9 +26,11 @@ import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
 import { clamp } from '../../../shared/numbers.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
+import DetailPanel, { DetailNote, detailTitleSx } from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { useCostMode } from './useCostMode.js';
+import CostModeToggle from './CostModeToggle.jsx';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -47,9 +44,8 @@ import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 const CANNON_DEFENSES = CANNON_DAMAGE_IMMUNITIES.map((type) => ({ kind: 'Immune', type }));
 
 export default function EldritchCannonPanel({ action, character, sheet, resources, onResChange }) {
-  const { onUpdateCharacter, onUpdateSheet, onRoll, onShowToast } = useSheetActions();
+  const { onUpdateCharacter, onRoll, onShowToast } = useSheetActions();
   const C = character;
-  const [costMode, setCostMode] = useState('use'); // 'use' | 'slot'
   const [size, setSize] = useState('S');
   const [hpAmt, setHpAmt] = useState({}); // per-cannon step amount
 
@@ -63,17 +59,16 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   const capacity = maxCannons(lv);
   const canAddMore = cannons.length < capacity;
 
+  // A cannon is created with the 1/Long Rest use or a spell slot.
   const resKey = action?.resKey; // 'eldritch_cannon'
-  const usesLeft = resKey ? Number(resources?.[resKey] ?? 0) : 0;
-  const regularSlots = useMemo(() => getSpellSlots(C)?.regular || [], [C]);
-  const slotLevel = useMemo(() => lowestAvailableSlotLevel(regularSlots, sheet), [regularSlots, sheet]);
-  const canUse = usesLeft > 0;
-  const canSlot = slotLevel > 0;
-  const canCreate = canUse || canSlot;
-  // Honor the picked cost but fall back to whichever is actually available.
-  const effectiveCost = costMode === 'slot'
-    ? (canSlot ? 'slot' : 'use')
-    : (canUse ? 'use' : 'slot');
+  const costMode = useCostMode({
+    character: C,
+    sheet,
+    usesLeft: resKey ? Number(resources?.[resKey] ?? 0) : 0,
+    resKey,
+    onResChange,
+  });
+  const { canPay: canCreate, cost, slotLevel } = costMode;
 
   const firingModes = useMemo(() => {
     const modes = [
@@ -113,13 +108,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   }, [dc, dmgDice, thpFormula, spellAtk, lv]);
 
   const activate = () => {
-    if (!canAddMore || !canCreate || !onUpdateCharacter) return;
-    if (effectiveCost === 'slot') {
-      if (!consumeSlot(regularSlots, sheet, slotLevel, onUpdateSheet, onUpdateCharacter)) return;
-    } else if (typeof onResChange === 'function') {
-      if (usesLeft <= 0) return;
-      onResChange(resKey, -1);
-    }
+    if (!canAddMore || !onUpdateCharacter || !costMode.spend()) return;
     onUpdateCharacter((prev) => ({
       ...prev,
       ...addCannonPatch(prev, { size, hpCurrent: cannonMaxHp(artificerLevel(prev)) }),
@@ -140,11 +129,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   };
 
   return (
-    <Box onClick={(e) => e.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <Typography sx={detailTitleSx} component="span">Eldritch Cannon</Typography>
-        <Typography sx={{ ...subSx, ml: 'auto' }}>{cannons.length}/{capacity} active</Typography>
-      </Box>
+    <DetailPanel title="Eldritch Cannon" meta={`${cannons.length}/${capacity} active`}>
 
       <CannonRulesSummary maxHp={maxHp} level={lv} />
 
@@ -218,16 +203,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
         <Box sx={{ mt: cannons.length ? 0.75 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
             <ChoiceToggle size="xs" stopPropagation value={size} onChange={setSize} options={[{ value: 'S', label: 'Small' }, { value: 'T', label: 'Tiny' }]} />
-            <ChoiceToggle
-              size="xs"
-              stopPropagation
-              value={canCreate ? effectiveCost : null}
-              onChange={setCostMode}
-              options={[
-                { value: 'use', disabled: !canUse, label: canUse ? `Use (${usesLeft})` : 'Use' },
-                { value: 'slot', disabled: !canSlot, label: canSlot ? `Slot (Lv ${slotLevel})` : 'Slot' },
-              ]}
-            />
+            <CostModeToggle costMode={costMode} useLabel="Use" slotLabel="Slot" size="xs" />
           </Box>
           <Button
             fullWidth
@@ -239,14 +215,14 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
           >
             Activate Cannon
           </Button>
-          <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: canCreate ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+          <DetailNote warn={!canCreate}>
             {!canCreate
               ? 'No Long Rest use left and no spell slot to expend — finish a rest.'
-              : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}
-          </Typography>
+              : `Creating spends ${cost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}
+          </DetailNote>
         </Box>
       ) : null}
-    </Box>
+    </DetailPanel>
   );
 }
 
@@ -262,7 +238,6 @@ const cannonBoardSx = {
   borderRadius: 1,
 };
 
-// The size of this panel's toggle keys; their look is the theme's.
 // AC shield beside the Defenses box, as in the character's header.
 const cannonDefenseSx = {
   display: 'flex',

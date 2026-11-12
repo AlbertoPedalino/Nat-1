@@ -29,16 +29,13 @@ import {
   setPrimalDamageTypePatch,
   summonPrimalBeastPatch,
 } from '../../../shared/character/forms/primalCompanionForm.js';
-import { BeastNameLink, BeastStatBlock, CreatureOptionRow, creatureHpBoxSx, subSx } from './BeastStatBlock.jsx';
+import { BeastTitle, BeastStatBlock, CreatureOptionRow, creatureHpBoxSx, subSx } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
-import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import DetailPanel, { DetailNote, detailStatus } from '../layout/DetailPanel.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
@@ -98,30 +95,23 @@ export default function PrimalCompanionPanel({ character, sheet }) {
     save(restorePrimalCompanionPatch(companion));
   };
 
-  if (status === 'loading') {
+  const panelStatus = detailStatus(status, creature);
+  if (panelStatus) {
     return (
-      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-        <LoadingLine label="Loading primal beast…" />
-      </Box>
-    );
-  }
-  if (!creature) {
-    return (
-      <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-        <Typography sx={[subSx, { color: status === 'error' ? 'error.main' : 'text.secondary' }]}>
-          Primal beast stat block unavailable.
-        </Typography>
-      </Box>
+      <DetailPanel
+        status={panelStatus}
+        loadingLabel="Loading primal beast…"
+        unavailableText="Primal beast stat block unavailable."
+      />
     );
   }
 
   return (
-    <Box onClick={(event) => event.stopPropagation()} sx={detailPanelSx}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <PawPrint size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
-        <BeastNameLink name={creature.name} source={creature.source} sx={detailTitleSx} />
-        <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
-      </Box>
+    <DetailPanel
+      icon={PawPrint}
+      titleNode={<BeastTitle name={creature.name} source={creature.source} />}
+      meta={`Ranger ${rangerLevel}`}
+    >
 
       <CreatureOptionRow label="Beast">
         <ChoiceToggle
@@ -170,11 +160,11 @@ export default function PrimalCompanionPanel({ character, sheet }) {
             >
               {reviveSlot ? `Revive (level ${reviveSlot} slot)` : 'Revive'}
             </Button>
-            <Typography sx={{ ...TEXT_STYLES.note, ...subSx, mt: 0.5, color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
+            <DetailNote warn={!reviveSlot}>
               {reviveSlot
                 ? 'Within an hour of its death: Magic action, touch it, expend a spell slot. It returns after 1 minute with all its HP.'
                 : 'No spell slot to expend — it can be summoned again after a Long Rest.'}
-            </Typography>
+            </DetailNote>
           </Box>
         ) : null}
       </Box>
@@ -196,7 +186,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
           ))}
         </Box>
       ) : null}
-    </Box>
+    </DetailPanel>
   );
 }
 

@@ -157,6 +157,13 @@ export function findBeast(beastsDb, ref) {
   )) || null;
 }
 
+// A beast's one-line summary in a picker: "CR 1/4 · M · AC 12 · HP 11". The
+// builder's known-forms list and the sheet's Wild Shape and familiar pickers
+// read the same line.
+export function beastSummary(beast) {
+  return `CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`;
+}
+
 // Whether a form has a Flying Speed (gated until Druid level 8, RAW 2024).
 export function beastHasFlySpeed(beast) {
   return Number(beast?.speed?.fly) > 0;
