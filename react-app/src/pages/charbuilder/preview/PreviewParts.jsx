@@ -1,6 +1,5 @@
 import {
   Box,
-  Chip,
   Stack,
   Typography,
 } from '@mui/material';
@@ -8,10 +7,10 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
-import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 
 // The builder preview's building blocks: section cards, chip lists, inline
@@ -72,26 +71,7 @@ export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
       {items.map((item) => (
-        <Chip
-          key={getKey(item)}
-          size="small"
-          variant="outlined"
-          label={getLabel(item)}
-          sx={{
-            ...chipTintStyle(tone),
-            flex: '0 1 auto',
-            minWidth: 0,
-            height: CONTROL_HEIGHTS.sm,
-            maxWidth: '100%',
-            '& .MuiChip-label': {
-              ...BUILDER_TEXT.chip,
-              color: tone,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            },
-          }}
-        />
+        <MiniBadge key={getKey(item)} label={getLabel(item)} color={tone} />
       ))}
     </Box>
   );

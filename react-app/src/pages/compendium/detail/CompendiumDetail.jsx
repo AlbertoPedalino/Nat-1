@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Box, Chip, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ItemNameIcon, SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { HigherLevelBlock, SpellMetaGrid } from '../../../shared/character/spells/SpellReference.jsx';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
-import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { COMPENDIUM_KIND_COLORS } from '../../../shared/ui/entityColors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
@@ -44,7 +45,7 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
           {kind === 'item' ? <ItemNameIcon item={record} /> : null}
         </Stack>
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
-          <Chip size="small" variant="outlined" label={compendiumKind(kind)?.single || kind} sx={chipTintStyle(COMPENDIUM_KIND_COLORS[kind])} />
+          <MiniBadge label={compendiumKind(kind)?.single || kind} color={COMPENDIUM_KIND_COLORS[kind]} />
           {/* "Condition" beside a Condition tag says nothing new. */}
           {entry.subtitle && entry.subtitle !== compendiumKind(kind)?.single
             ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>{entry.subtitle}</Typography>

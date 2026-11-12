@@ -1,4 +1,4 @@
-import { Box, Chip, Tooltip, Typography } from '@mui/material';
+import { Box, Tooltip, Typography } from '@mui/material';
 import { AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getFinal, exhaustionSpeedPenalty } from '../../../shared/character/sheet/sheetStats.js';
@@ -21,7 +21,8 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { chipTintStyle, PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 
@@ -121,18 +122,16 @@ export default function Movement({ C, sheet }) {
         {movementEffects.length ? (
           <Box sx={{ display: 'grid', gap: 0.25, mt: 0.25 }}>
             {movementEffects.map((effect, index) => (
-              <Chip
+              <MiniBadge
                 key={`${effect.ownerName}-${effect.type}-${index}`}
-                size="small"
                 label={`${effectTitle(effect)}${effectSummary(effect) ? `: ${effectSummary(effect)}` : ''}`}
-                variant="outlined"
-                sx={{ ...chipTintStyle(UI_COLORS.accentText), fontSize: FONT_SIZES.xxxs, justifyContent: 'flex-start' }}
+                color={UI_COLORS.accentText}
               />
             ))}
           </Box>
         ) : null}
         {hasPenalty ? (
-          <Chip size="small" label={reason} variant="outlined" sx={{ ...chipTintStyle(UI_COLORS.penaltyText), fontSize: FONT_SIZES.xxxs, justifyContent: 'flex-start' }} />
+          <MiniBadge label={reason} color={UI_COLORS.penaltyText} />
         ) : null}
       </Box>
     </Panel>

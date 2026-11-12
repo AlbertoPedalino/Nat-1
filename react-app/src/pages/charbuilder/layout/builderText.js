@@ -46,6 +46,4 @@ export const BUILDER_TEXT = Object.freeze({
   figure: Object.freeze({ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, lineHeight: LINE_HEIGHTS.none }),
   // The text of a chip: a count, a step number, a proficiency.
   chip: Object.freeze({ fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold }),
-  // An uppercase chip (Level 3).
-  chipLabel: Object.freeze({ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs }),
 });

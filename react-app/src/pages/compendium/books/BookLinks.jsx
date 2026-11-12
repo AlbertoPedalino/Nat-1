@@ -1,6 +1,5 @@
 import {
   Box,
-  Chip,
   List,
   ListItemButton,
   ListSubheader,
@@ -9,7 +8,8 @@ import {
 import { ExternalLink } from 'lucide-react';
 import { loadBookList } from './books.js';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { rowChipSx } from '../compendiumStyles.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
@@ -44,7 +44,7 @@ export default function BookLinks() {
           {books.map((book) => (
             <ListItemButton key={book.id} component="a" href={book.url} target="_blank" rel="noopener" sx={rowSx}>
               <Typography variant="body2" sx={{ fontWeight: FONT_WEIGHTS.bold, flex: 1 }}>{book.name}</Typography>
-              <Chip size="small" variant="outlined" label={book.id} sx={rowChipSx} />
+              <MiniBadge label={book.id} color={UI_COLORS.textSecondary} />
               <ExternalLink size={ICON_SIZES.sm} />
             </ListItemButton>
           ))}

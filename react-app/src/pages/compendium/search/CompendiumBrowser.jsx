@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   List,
   ListItemButton,
   Stack,
@@ -15,11 +14,12 @@ import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { emptyTextSx } from '../../../shared/ui/PanelHeader.jsx';
-import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { COMPENDIUM_KIND_COLORS } from '../../../shared/ui/entityColors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendiumIndex.js';
 import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
-import { entryNameSx, fillColumnSx, rowChipSx } from '../compendiumStyles.js';
+import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -99,12 +99,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
                     {[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
                   </Typography>
                 </Box>
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  label={compendiumKind(entry.kind)?.single || entry.kind}
-                  sx={[rowChipSx, chipTintStyle(COMPENDIUM_KIND_COLORS[entry.kind])]}
-                />
+                <MiniBadge label={compendiumKind(entry.kind)?.single || entry.kind} color={COMPENDIUM_KIND_COLORS[entry.kind]} />
               </ListItemButton>
             ))}
           </List>

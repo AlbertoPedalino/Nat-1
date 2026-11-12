@@ -691,3 +691,9 @@ test('floating surfaces are drawn by the theme', () => {
   const localPaper = /paper: \{[^}]*sx: \{[^}]*\.\.\.SURFACES\./;
   assert.deepEqual(sourceLinesMatching(localPaper).filter((hit) => !hit.startsWith('pages/vtt/')), []);
 });
+
+test("a row's tag is a MiniBadge, never a hand-tinted Chip", () => {
+  assert.deepEqual(sourceFilesMatching(/\bchipTintStyle\(/, {
+    allow: ['app/theme.js', 'shared/ui/entityColors.js'],
+  }), []);
+});

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Box, Card, CardContent, Chip, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, Divider, Grid, Stack, Typography } from '@mui/material';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
@@ -8,7 +8,8 @@ import {
 } from '../../../shared/character/combat/ac.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
-import { ENTITY_COLORS as SOURCE_COLOR, chipTintStyle } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -22,7 +23,6 @@ import {
 } from './PreviewParts.jsx';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CharacterName from '../../../shared/character/profile/CharacterName.jsx';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
@@ -89,15 +89,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
-        <Chip
-          size="small"
-          label={`Level ${level}`}
-          sx={{
-            ...chipTintStyle(UI_COLORS.accentText),
-            height: CONTROL_HEIGHTS.sm,
-            '& .MuiChip-label': BUILDER_TEXT.chipLabel,
-          }}
-        />
+        <MiniBadge label={`Level ${level}`} color={UI_COLORS.accentText} />
         <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.shade) }} />
       </Box>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
