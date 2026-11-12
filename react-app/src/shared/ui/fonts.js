@@ -49,6 +49,7 @@ export const LETTER_SPACINGS = Object.freeze({
 // Font weights. Rubik and Nunito Sans draw all three.
 export const FONT_WEIGHTS = Object.freeze({
   regular: 400,
+  semibold: 600,
   bold: 700,
   heavy: 800,
 });

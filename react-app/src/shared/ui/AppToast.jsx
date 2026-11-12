@@ -1,10 +1,11 @@
-import { Snackbar, Alert, Portal } from '@mui/material';
+import { Snackbar, Alert, AlertTitle, Portal } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
 import { bubbleSx, bubbleTailSx } from './bubble.js';
+import { TEXT_STYLES } from './textStyles.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -17,6 +18,16 @@ const SEVERITY_COLOR = {
   info: UI_COLORS.infoText,
 };
 
+// What the bubble shouts over its message, as a comic would: one short
+// exclamation per kind of notice, in the comic's lettering. The message stays
+// in the reading face, since an error can be a long sentence.
+const SEVERITY_SHOUT = {
+  success: 'Done!',
+  error: 'Oops!',
+  warning: 'Careful!',
+  info: 'Heads up!',
+};
+
 // Just under the app's top bar on every screen: centred on a phone, at the
 // right from a tablet up. Set per breakpoint so it wins over the Snackbar's own
 // `top: 24px` media query, which put it over the bar on a desktop.
@@ -25,7 +36,8 @@ const MOBILE_ANCHOR = { vertical: 'top', horizontal: 'center' };
 const DESKTOP_ANCHOR = { vertical: 'top', horizontal: 'right' };
 
 export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
-  const color = SEVERITY_COLOR[toast?.severity] || SEVERITY_COLOR.info;
+  const severity = SEVERITY_COLOR[toast?.severity] ? toast.severity : 'info';
+  const color = SEVERITY_COLOR[severity];
 
   // noSsr resolves the breakpoint from matchMedia on the first paint (same
   // pattern as CurrencyCoinBox). Phone: top centre; tablet and desktop: top right.
@@ -49,13 +61,14 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
       >
         {toast ? (
           <Alert
-            severity={toast.severity || 'info'}
+            severity={severity}
             variant="outlined"
             onClose={onClose}
             sx={{
               fontFamily: UI_FONTS.prose,
               fontSize: FONT_SIZES.xl,
-              alignItems: 'center',
+              // Icon and close beside the exclamation, the message under it.
+              alignItems: 'flex-start',
               minWidth: 240,
               maxWidth: 360,
               // A speech bubble, its shadow in the notice's colour, its tail
@@ -69,6 +82,9 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               '& .MuiAlert-action': { color: UI_COLORS.textSecondary },
             }}
           >
+            <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25 }}>
+              {SEVERITY_SHOUT[severity]}
+            </AlertTitle>
             {toast.msg}
           </Alert>
         ) : undefined}

@@ -2,7 +2,7 @@ import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Sta
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
-import { panelBarSx, panelScreentone } from './PanelHeader.jsx';
+import { panelBarSx, panelScreentone, panelTitleSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
@@ -31,9 +31,9 @@ const titleSx = {
   py: 1,
 };
 
+// Lettered like a panel's title.
 const titleTextSx = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.md,
+  ...panelTitleSx,
   lineHeight: LINE_HEIGHTS.snug,
 };
 

@@ -106,7 +106,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {layout.total != null && (
           <Typography sx={{
             ...totalSx,
-            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.title,
+            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
             color: layout.isCrit ? inkOn(VTT_COLORS.accent) : layout.isFail ? VTT_COLORS.text : layout.totalColor,
             ...(layout.isCrit ? { ...starburstSx(VTT_COLORS.accent), textShadow: 'none' } : null),
             ...(layout.isFail ? splatSx(VTT_COLORS.danger) : null),
@@ -192,10 +192,11 @@ const actorSx = {
   lineHeight: LINE_HEIGHTS.tight,
 };
 
+// The roll's name, lettered like the sheet toast's.
 const labelSx = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.xs,
-  color: 'text.secondary',
+  ...TEXT_STYLES.shout,
+  fontSize: FONT_SIZES.xxl,
+  color: 'text.primary',
   mb: 0.25,
 };
 
@@ -219,8 +220,9 @@ const modeChipSx = (chip) => ({
 });
 
 
+// A roll's numbers are shouted, as on the sheet's toast.
 const totalSx = {
-  ...TEXT_STYLES.figure,
+  ...TEXT_STYLES.shout,
   lineHeight: LINE_HEIGHTS.none,
   my: 0.25,
 };

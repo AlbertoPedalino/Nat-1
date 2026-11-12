@@ -50,9 +50,10 @@ const rowSx = {
   alignItems: 'center',
 };
 
+// The modifier beside the dice, shouted like the roll's total.
 const modifierSx = {
-  ...TEXT_STYLES.figure,
-  fontSize: FONT_SIZES.xxl,
+  ...TEXT_STYLES.shout,
+  fontSize: FONT_SIZES.title,
   color: 'text.secondary',
   ml: 0.25,
 };

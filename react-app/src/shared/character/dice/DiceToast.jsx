@@ -73,7 +73,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         <X size={ICON_SIZES.sm} />
       </IconButton>
 
-      <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.sm, color: layout.tone || 'text.secondary', mb: 0.25 }}>
+      <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
         {layout.label}
       </Typography>
 
@@ -112,8 +112,9 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       {layout.total != null && (
         <Box sx={{ textAlign: 'center', my: 0.25 }}>
           <Typography component="span" sx={{
-            ...TEXT_STYLES.figure, lineHeight: LINE_HEIGHTS.none,
-            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.heading,
+            // A roll's numbers are shouted, in the comic's lettering.
+            ...TEXT_STYLES.shout, lineHeight: LINE_HEIGHTS.none,
+            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.display,
             color: layout.isCrit ? inkOn(UI_COLORS.accent) : layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
             ...(layout.isCrit ? { ...starburstSx(UI_COLORS.accent), textShadow: 'none' } : null),
             ...(layout.isFail ? splatSx(UI_COLORS.dangerDeep) : null),
