@@ -55,10 +55,9 @@ export function panelBadgeSx(tone = 'primary.main') {
 }
 
 export const panelTitleSx = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.xs,
+  ...TEXT_STYLES.shout,
+  fontSize: FONT_SIZES.xxl,
   color: 'primary.main',
-  textShadow: UI_SHADOWS.inkText,
 };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's

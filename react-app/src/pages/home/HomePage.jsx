@@ -199,9 +199,10 @@ function getCardSx(color) {
   };
 }
 
+// A tool's name, lettered like every panel's title (the shout face).
 const cardLabelSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xxl,
+  ...TEXT_STYLES.shout,
+  fontSize: FONT_SIZES.title,
   textAlign: 'center',
   color: UI_COLORS.textPrimary,
   transition: `color ${DURATIONS.fast}ms ease`,

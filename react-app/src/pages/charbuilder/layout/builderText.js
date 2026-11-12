@@ -14,7 +14,9 @@ export const BUILDER_TEXT = Object.freeze({
   // The open step's name over its panels.
   stepTitle: Object.freeze({ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxl }),
   // A panel's name in its PanelHeader bar.
-  panelTitle: Object.freeze({ ...panelTitleSx, fontSize: FONT_SIZES.xl }),
+  panelTitle: Object.freeze({ ...panelTitleSx, fontSize: FONT_SIZES.title }),
+  // The character's name in the preview (CharacterName sets the lettering).
+  characterName: Object.freeze({ fontSize: FONT_SIZES.title }),
   // A framed box inside a panel (a feat's choices, a starting equipment set,
   // an ability score).
   boxTitle: Object.freeze({ ...sheetBoxTitleSx, fontSize: FONT_SIZES.md }),

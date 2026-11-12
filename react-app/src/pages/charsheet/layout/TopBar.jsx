@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import IconColorPicker from '../../../shared/ui/IconColorPicker.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
+import CharacterName from '../../../shared/character/profile/CharacterName.jsx';
 import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/characterArt.js';
 import SheetActions from './SheetActions.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
@@ -176,9 +177,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-              <Typography sx={{ ...TEXT_STYLES.title, fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }, color: UI_COLORS.accentText, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {C.name || 'Unnamed Character'}
-              </Typography>
+              <CharacterName name={C.name} sx={{ fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead } }} />
               {readOnly && (
                 <Chip size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY"
                   sx={{ flexShrink: 0, height: CONTROL_HEIGHTS.xs, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}

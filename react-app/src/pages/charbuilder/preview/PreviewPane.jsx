@@ -21,8 +21,9 @@ import {
   PROFICIENCY_TONE, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import CharacterName from '../../../shared/character/profile/CharacterName.jsx';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { captionLabelSx, sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
+import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -50,20 +51,12 @@ function PreviewHeader({ character, hp }) {
   ];
 
   return (
-    <Card variant="outlined" sx={{ ...sheetBoxSx, minWidth: 0 }}>
-      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <Typography sx={{ ...captionLabelSx, color: 'primary.main' }}>Preview</Typography>
-          <Typography
-            noWrap
-            sx={{ ...BUILDER_TEXT.displayTitle, color: UI_COLORS.accentText }}
-          >
-            {character.name || 'Unnamed Character'}
-          </Typography>
-          <InlineMetadata items={metadata} />
-        </Stack>
-      </CardContent>
-    </Card>
+    <PreviewSection icon={GAME_ICONS.preview} title="Preview">
+      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+        <CharacterName name={character.name} sx={BUILDER_TEXT.characterName} />
+        <InlineMetadata items={metadata} />
+      </Stack>
+    </PreviewSection>
   );
 }
 
