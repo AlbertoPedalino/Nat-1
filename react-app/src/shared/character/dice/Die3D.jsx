@@ -62,10 +62,11 @@ export default function Die3D({
   const glyph = numberSize(size, room, digits);
 
   return (
-    // A die the mode threw away is faded on the scene round it: an opacity on
-    // the solid itself would flatten it (a translucent preserve-3d element is
-    // drawn flat), so it would tumble as a picture instead of a die.
-    <Box sx={{ ...sceneSx, width: size, height: size, opacity: dimmed ? OPACITY.line : 1 }}>
+    // A die the mode threw away is greyed by its own colours, never by an
+    // opacity: on the solid a translucent preserve-3d element is drawn flat (it
+    // tumbled as a picture), and on the scene round it the whole 3D group is
+    // redrawn every frame of the throw.
+    <Box sx={{ ...sceneSx, width: size, height: size }}>
       <Box
         ref={solidRef}
         sx={{
@@ -100,7 +101,7 @@ export default function Die3D({
                 // Only the face that landed carries the result's colour — red
                 // for a 1, gold for the top of the die — and the rest are
                 // scenery that must not shout "natural 20" at you.
-                color: index === landed ? color : OTHER_FACE_INK,
+                color: index === landed && !dimmed ? color : OTHER_FACE_INK,
               }}
             >
               <Box sx={{
