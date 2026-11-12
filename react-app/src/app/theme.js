@@ -135,13 +135,13 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: UI_FONTS.body,
-    // Headings are titles: the display face, as TEXT_STYLES.title.
+    // Headings are lettered like a panel's title: TEXT_STYLES.heading.
     h1: {
-      ...TEXT_STYLES.title,
+      ...TEXT_STYLES.heading,
       fontSize: FONT_SIZES.hero,
     },
     h2: {
-      ...TEXT_STYLES.title,
+      ...TEXT_STYLES.heading,
       fontSize: FONT_SIZES.title,
     },
     button: {

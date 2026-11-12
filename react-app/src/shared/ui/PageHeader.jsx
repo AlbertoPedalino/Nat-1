@@ -39,8 +39,9 @@ const headerSx = {
 
 const titleBlockSx = { flex: '1 1 160px', minWidth: 0 };
 
+// Lettered like a panel's title, in the heading's blackletter.
 const titleSx = {
-  ...TEXT_STYLES.title,
+  ...TEXT_STYLES.heading,
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',
   color: UI_COLORS.accentText,
   overflowWrap: 'anywhere',
