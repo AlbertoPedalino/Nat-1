@@ -756,3 +756,7 @@ test('a drag source onto the map takes DRAG_SOURCE_SX', () => {
 test('an icon button with a tooltip is a TipIconButton', () => {
   assert.deepEqual(sourceFilesMatching(/<Tooltip\b[^>]*>\s*(?:<span>\s*)?<IconButton\b/, { allow: ['shared/ui/TipIconButton.jsx'] }), []);
 });
+
+test('one choice among a few is a ChoiceToggle', () => {
+  assert.deepEqual(sourceFilesMatching(/<ToggleButtonGroup\b/, { allow: ['shared/ui/ChoiceToggle.jsx'] }), []);
+});

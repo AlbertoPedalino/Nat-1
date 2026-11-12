@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
-import {
-  Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography,
-} from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
 // (surprise, a ruling), one row per creature — the second of three goblins can
@@ -107,22 +106,19 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
 
 function ModeToggle({ label, value, onChange }) {
   return (
-    <ToggleButtonGroup
-      size="small"
-      exclusive
+    <ChoiceToggle
+      ariaLabel={`${label} initiative`}
       value={value}
-      onChange={(_event, next) => { if (next) onChange(next); }}
-      aria-label={`${label} initiative`}
+      onChange={onChange}
+      options={[
+        { value: 'disadv', label: 'DIS', color: 'error', ariaLabel: `${label}: disadvantage` },
+        { value: 'none', label: '—', ariaLabel: `${label}: normal` },
+        { value: 'adv', label: 'ADV', color: 'success', ariaLabel: `${label}: advantage` },
+      ]}
       sx={{ flexShrink: 0 }}
-    >
-      <ToggleButton value="disadv" color="error" aria-label={`${label}: disadvantage`} sx={toggleSizeSx}>DIS</ToggleButton>
-      <ToggleButton value="none" aria-label={`${label}: normal`} sx={toggleSizeSx}>—</ToggleButton>
-      <ToggleButton value="adv" color="success" aria-label={`${label}: advantage`} sx={toggleSizeSx}>ADV</ToggleButton>
-    </ToggleButtonGroup>
+    />
   );
 }
 
 const rowSx = { display: 'flex', alignItems: 'center', gap: 1 };
 
-// The size of the ADV / — / DIS keys; their look is the theme's.
-const toggleSizeSx = { px: 1, py: 0.25, fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.heavy, letterSpacing: LETTER_SPACINGS.md, minWidth: 38 };

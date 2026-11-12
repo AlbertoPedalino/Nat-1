@@ -1,22 +1,13 @@
-import {
-  Box,
-  FormControlLabel,
-  Stack,
-  Switch,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from '@mui/material';
+import { FormControlLabel, Stack, Switch, TextField, Typography } from '@mui/material';
 import { Grid3x3, Hexagon } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { numberSx, pillLabelSx } from './panelStyles.js';
+import { numberSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // The scene panel's Grid section: shape, calibration over the picture, how the
 // lines look, and whether scenery snaps to the cells.
@@ -37,23 +28,16 @@ export function GridControls({ grid, onGridChange }) {
       {/* Squares for a dungeon, hexes for the wilderness. Changing it changes
           what a piece's stored position means, so it is asked once, here with
           the calibration, rather than offered as a view option. */}
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Grid shape"
         value={gridShape(grid)}
-        onChange={(_, value) => value && setGrid({ shape: value })}
-        aria-label="Grid shape"
-      >
-        <ToggleButton value="square" aria-label="Square grid">
-          <Grid3x3 size={ICON_SIZES.sm} />
-          <Box component="span" sx={pillLabelSx}>Squares</Box>
-        </ToggleButton>
-        <ToggleButton value="hex" aria-label="Hex grid">
-          <Hexagon size={ICON_SIZES.sm} />
-          <Box component="span" sx={pillLabelSx}>Hexes</Box>
-        </ToggleButton>
-      </ToggleButtonGroup>
+        onChange={(shape) => setGrid({ shape })}
+        options={[
+          { value: 'square', icon: Grid3x3, label: 'Squares', ariaLabel: 'Square grid' },
+          { value: 'hex', icon: Hexagon, label: 'Hexes', ariaLabel: 'Hex grid' },
+        ]}
+      />
 
       <SectionLabel
         label="Alignment"

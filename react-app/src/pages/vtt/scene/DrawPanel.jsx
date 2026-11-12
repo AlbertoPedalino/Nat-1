@@ -1,11 +1,4 @@
-import {
-  Button,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material';
+import { Button, Stack, TextField, Tooltip } from '@mui/material';
 import {
   CircleDashed,
   Eraser,
@@ -23,6 +16,7 @@ import AreaEffectSelect from '../map/AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Shared by both audiences: drawing and notes are everyone's. The laser is its
 // own tool — it leaves nothing behind, so it does not belong beside the ones
@@ -36,25 +30,19 @@ export function DrawPanel({
 
   return (
     <Stack spacing={1}>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        allowClear
+        ariaLabel="Drawing tool"
         value={DRAW_MODES.includes(paintMode) ? paintMode : null}
-        onChange={(_, value) => onPaintModeChange(value || 'select')}
-        aria-label="Drawing tool"
-      >
-        <Tooltip title="Draw"><ToggleButton value="draw" aria-label="Draw"><Pencil size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Mark an area of effect">
-          <ToggleButton value="area" aria-label="Area"><CircleDashed size={ICON_SIZES.sm} /></ToggleButton>
-        </Tooltip>
-        <Tooltip title="Erase your strokes">
-          <ToggleButton value="erase" aria-label="Erase"><Eraser size={ICON_SIZES.sm} /></ToggleButton>
-        </Tooltip>
-        <Tooltip title="Write on the map">
-          <ToggleButton value="text" aria-label="Write"><Type size={ICON_SIZES.sm} /></ToggleButton>
-        </Tooltip>
-      </ToggleButtonGroup>
+        onChange={(value) => onPaintModeChange(value || 'select')}
+        options={[
+          { value: 'draw', icon: Pencil, tooltip: 'Draw', ariaLabel: 'Draw' },
+          { value: 'area', icon: CircleDashed, tooltip: 'Mark an area of effect', ariaLabel: 'Area' },
+          { value: 'erase', icon: Eraser, tooltip: 'Erase your strokes', ariaLabel: 'Erase' },
+          { value: 'text', icon: Type, tooltip: 'Write on the map', ariaLabel: 'Write' },
+        ]}
+      />
 
       {paintMode === 'area' && areaOptions ? (
         <AreaOptions
@@ -115,34 +103,32 @@ export function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetP
 
   return (
     <Stack spacing={1}>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Area shape"
         value={options.shape}
-        onChange={(_, value) => value && onChange?.({ shape: value })}
-        aria-label="Area shape"
-      >
-        <Tooltip title="Circle"><ToggleButton value="circle" aria-label="Circle"><Circle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Line"><ToggleButton value="line" aria-label="Line"><Minus size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-      </ToggleButtonGroup>
+        onChange={(shape) => onChange?.({ shape })}
+        options={[
+          { value: 'circle', icon: Circle, tooltip: 'Circle' },
+          { value: 'square', icon: Square, tooltip: 'Square' },
+          { value: 'cone', icon: Triangle, tooltip: 'Cone' },
+          { value: 'line', icon: Minus, tooltip: 'Line' },
+        ]}
+      />
 
       {/* An effect paints the inside itself, so outline or fill only matters
           for a plain area. */}
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Area fill"
         value={options.filled || options.effect ? 'filled' : 'outline'}
         disabled={Boolean(options.effect)}
-        onChange={(_, value) => value && onChange?.({ filled: value === 'filled' })}
-        aria-label="Area fill"
-      >
-        <ToggleButton value="outline" aria-label="Outline only">Outline</ToggleButton>
-        <ToggleButton value="filled" aria-label="Filled">Filled</ToggleButton>
-      </ToggleButtonGroup>
+        onChange={(value) => onChange?.({ filled: value === 'filled' })}
+        options={[
+          { value: 'outline', label: 'Outline', ariaLabel: 'Outline only' },
+          { value: 'filled', label: 'Filled' },
+        ]}
+      />
 
       <Stack direction="row" spacing={1}>
         <TextField

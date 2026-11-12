@@ -1,13 +1,4 @@
-import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import {
-  Box,
-  Button,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material';
+import { Box, Button, Stack, TextField } from '@mui/material';
 import {
   Cloud,
   Eye,
@@ -18,10 +9,9 @@ import {
   SquareDashedMousePointer,
   Users,
 } from 'lucide-react';
-import { pillLabelSx } from './panelStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -29,25 +19,18 @@ import Caption from '../../../shared/ui/Caption.jsx';
 
 export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }) {
   const buttons = (
-    <ToggleButtonGroup
-      size="small"
-      exclusive
+    <ChoiceToggle
       fullWidth={!compact}
+      onMap={compact}
+      ariaLabel="Active layer"
       value={activeLayer}
-      onChange={(_, value) => onActiveLayerChange(value || activeLayer)}
-      aria-label="Active layer"
-      sx={compact ? compactLayerSx : null}
-    >
-      <Tooltip title="Map: scenery and props">
-        <ToggleButton value="map" aria-label="Map layer"><ImageIcon size={ICON_SIZES.sm} /></ToggleButton>
-      </Tooltip>
-      <Tooltip title="Tokens: the pieces everyone sees">
-        <ToggleButton value="tokens" aria-label="Token layer"><Users size={ICON_SIZES.sm} /></ToggleButton>
-      </Tooltip>
-      <Tooltip title="GM: never sent to the players">
-        <ToggleButton value="gm" aria-label="GM layer"><EyeOff size={ICON_SIZES.sm} /></ToggleButton>
-      </Tooltip>
-    </ToggleButtonGroup>
+      onChange={onActiveLayerChange}
+      options={[
+        { value: 'map', icon: ImageIcon, tooltip: 'Map: scenery and props', ariaLabel: 'Map layer' },
+        { value: 'tokens', icon: Users, tooltip: 'Tokens: the pieces everyone sees', ariaLabel: 'Token layer' },
+        { value: 'gm', icon: EyeOff, tooltip: 'GM: never sent to the players', ariaLabel: 'GM layer' },
+      ]}
+    />
   );
 
   if (compact) return buttons;
@@ -62,12 +45,6 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
     </Stack>
   );
 }
-
-const compactLayerSx = {
-  ...SURFACES.mapControl,
-  '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
-  '& .MuiToggleButton-root': { border: 0, px: 1 },
-};
 
 export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPaintModeChange, onBrushSizeChange, onFogAll }) {
   if (!scene.fog) {
@@ -85,17 +62,17 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
 
   return (
     <Stack spacing={1}>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        allowClear
+        ariaLabel="Fog tool"
         value={paintMode === 'reveal' || paintMode === 'hide' ? paintMode : null}
-        onChange={(_, value) => onPaintModeChange(value || 'select')}
-        aria-label="Fog tool"
-      >
-        <ToggleButton value="reveal" aria-label="Reveal fog"><Eye size={ICON_SIZES.sm} /></ToggleButton>
-        <ToggleButton value="hide" aria-label="Cover with fog"><EyeOff size={ICON_SIZES.sm} /></ToggleButton>
-      </ToggleButtonGroup>
+        onChange={(value) => onPaintModeChange(value || 'select')}
+        options={[
+          { value: 'reveal', icon: Eye, ariaLabel: 'Reveal fog' },
+          { value: 'hide', icon: EyeOff, ariaLabel: 'Cover with fog' },
+        ]}
+      />
       <TextField
         label="Brush (cells)"
         size="small"
@@ -121,23 +98,16 @@ export function CursorPanel({ paintMode, onPaintModeChange }) {
   const boxSelect = paintMode === 'marquee';
   return (
     <Stack spacing={1}>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Cursor mode"
         value={boxSelect ? 'marquee' : 'select'}
-        onChange={(_, value) => value && onPaintModeChange(value)}
-        aria-label="Cursor mode"
-      >
-        <ToggleButton value="select" aria-label="Pointer">
-          <MousePointer2 size={ICON_SIZES.sm} />
-          <Box component="span" sx={pillLabelSx}>Pointer</Box>
-        </ToggleButton>
-        <ToggleButton value="marquee" aria-label="Box select">
-          <SquareDashedMousePointer size={ICON_SIZES.sm} />
-          <Box component="span" sx={pillLabelSx}>Box select</Box>
-        </ToggleButton>
-      </ToggleButtonGroup>
+        onChange={onPaintModeChange}
+        options={[
+          { value: 'select', icon: MousePointer2, label: 'Pointer' },
+          { value: 'marquee', icon: SquareDashedMousePointer, label: 'Box select' },
+        ]}
+      />
       <Caption>
         {boxSelect
           ? 'Drag a rectangle over pieces you can control. Drag any selected piece to move the group; hold Shift or Ctrl to add another area. Use Delete or Backspace to remove it, and Escape to clear.'

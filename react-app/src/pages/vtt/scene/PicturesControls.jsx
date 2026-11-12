@@ -1,12 +1,10 @@
 import { useRef } from 'react';
-import { Box, Button, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { Grid3x3, Image as ImageIcon, ImagePlus, Trash2 } from 'lucide-react';
-import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // The scene panel's Pictures section: which picture is on show, the battlemap,
 // the backgrounds, and images placed on the map as pieces.
@@ -98,32 +96,19 @@ export function PicturesControls({
 // which is where the switching actually happens.
 export function ShownImageSwitch({ scene, compact = false, onShownImageChange }) {
   return (
-    <ToggleButtonGroup
-      size="small"
-      exclusive
+    <ChoiceToggle
       fullWidth={!compact}
+      onMap={compact}
+      ariaLabel="Shown image"
       value={scene.shownImage}
-      onChange={(_, value) => value && onShownImageChange(value)}
-      aria-label="Shown image"
-      sx={compact ? compactSwitchSx : null}
-    >
-      <ToggleButton value="map" aria-label="Show the battlemap">
-        <Grid3x3 size={ICON_SIZES.sm} />
-        <Box component="span" sx={pillLabelSx}>Battlemap</Box>
-      </ToggleButton>
-      <ToggleButton value="background" aria-label="Show the background">
-        <ImageIcon size={ICON_SIZES.sm} />
-        <Box component="span" sx={pillLabelSx}>Background</Box>
-      </ToggleButton>
-    </ToggleButtonGroup>
+      onChange={onShownImageChange}
+      options={[
+        { value: 'map', icon: Grid3x3, label: 'Battlemap', ariaLabel: 'Show the battlemap' },
+        { value: 'background', icon: ImageIcon, label: 'Background', ariaLabel: 'Show the background' },
+      ]}
+    />
   );
 }
-
-const compactSwitchSx = {
-  ...SURFACES.mapControl,
-  '& .MuiToggleButton-root:not(.Mui-selected)': { color: VTT_COLORS.textSecondary },
-  '& .MuiToggleButton-root': { border: 0, px: 1, py: 0.5 },
-};
 
 function HiddenFileInput({ inputRef, onPick }) {
   return (

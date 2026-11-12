@@ -1,11 +1,4 @@
-import {
-  Button,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 import {
   Circle,
   Ruler,
@@ -15,6 +8,7 @@ import {
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
@@ -30,40 +24,37 @@ export function MeasurePanel({
   const miles = measureUnit === 'miles';
   return (
     <Stack spacing={1}>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Ruler shape"
         value={measureShape}
-        onChange={(_, value) => {
-          if (!value) return;
+        onChange={(value) => {
           onShapeChange(value);
           onPaintModeChange('measure');
         }}
-        aria-label="Ruler shape"
-      >
-        <Tooltip title="Distance"><ToggleButton value="line" aria-label="Distance"><Ruler size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Radius"><ToggleButton value="radius" aria-label="Radius"><Circle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={ICON_SIZES.sm} /></ToggleButton></Tooltip>
-      </ToggleButtonGroup>
+        options={[
+          { value: 'line', icon: Ruler, tooltip: 'Distance' },
+          { value: 'radius', icon: Circle, tooltip: 'Radius' },
+          { value: 'cone', icon: Triangle, tooltip: 'Cone' },
+          { value: 'square', icon: Square, tooltip: 'Square' },
+        ]}
+      />
 
       {/* Which scale this map is read at, said outright rather than inferred
           from whether a miles box happens to be filled in. A dungeon is feet
           across a square; a wilderness map is miles across a hex, and the ruler
           answers in whichever one is picked. */}
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
         fullWidth
+        ariaLabel="Measure in"
         value={miles ? 'miles' : 'feet'}
         disabled={!onMeasureUnitChange}
-        onChange={(_, value) => value && onMeasureUnitChange?.(value)}
-        aria-label="Measure in"
-      >
-        <ToggleButton value="feet" aria-label="Measure in feet">Feet</ToggleButton>
-        <ToggleButton value="miles" aria-label="Measure in miles">Miles</ToggleButton>
-      </ToggleButtonGroup>
+        onChange={(value) => onMeasureUnitChange?.(value)}
+        options={[
+          { value: 'feet', label: 'Feet', ariaLabel: 'Measure in feet' },
+          { value: 'miles', label: 'Miles', ariaLabel: 'Measure in miles' },
+        ]}
+      />
 
       {miles ? (
         <TextField

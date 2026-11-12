@@ -1,15 +1,5 @@
 import { useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  LinearProgress,
-  Link,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from '@mui/material';
+import { Box, Button, CircularProgress, LinearProgress, Link, Stack, Typography } from '@mui/material';
 import {
   ArrowLeft, Castle, Columns2, Home, Landmark, Layers, Map as MapIcon, Mountain, Trees, Upload,
 } from 'lucide-react';
@@ -21,13 +11,13 @@ import { stitchImages } from './stitch.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { pillLabelSx } from './panelStyles.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -173,23 +163,16 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
           {/* Several pictures are two different things, and which one is a
               decision about the table rather than about the files: a stair
               you point at, or a scene you switch to. */}
-          <ToggleButtonGroup
-            size="small"
-            exclusive
+          <ChoiceToggle
+            ariaLabel="What several pictures make"
             value={mode}
             disabled={Boolean(progress)}
-            onChange={(_, value) => value && setMode(value)}
-            aria-label="What several pictures make"
-          >
-            <ToggleButton value="scenes" aria-label="A scene each">
-              <Layers size={ICON_SIZES.sm} />
-              <Box component="span" sx={pillLabelSx}>A scene each</Box>
-            </ToggleButton>
-            <ToggleButton value="joined" aria-label="One map, side by side">
-              <Columns2 size={ICON_SIZES.sm} />
-              <Box component="span" sx={pillLabelSx}>One map, side by side</Box>
-            </ToggleButton>
-          </ToggleButtonGroup>
+            onChange={setMode}
+            options={[
+              { value: 'scenes', icon: Layers, label: 'A scene each' },
+              { value: 'joined', icon: Columns2, label: 'One map, side by side' },
+            ]}
+          />
 
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Button
