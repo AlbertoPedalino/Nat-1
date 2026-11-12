@@ -29,6 +29,7 @@ import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.j
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -182,7 +183,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.25, px: 0.5, color: UI_COLORS.accentText, borderColor: uiAlpha(UI_COLORS.accentText, OPACITY.line), '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
+                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>

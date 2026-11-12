@@ -32,7 +32,7 @@ import {
 import { BeastNameLink, BeastStatBlock, CreatureOptionRow, creatureHpBoxSx, subSx } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
@@ -40,6 +40,7 @@ import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -220,7 +221,5 @@ function companionRules(rangerLevel) {
 
 const reviveButtonSx = {
   fontSize: FONT_SIZES.sm,
-  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong),
-  color: UI_COLORS.accentText,
-  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) },
+  ...actionButtonToneSx(UI_COLORS.accentText),
 };

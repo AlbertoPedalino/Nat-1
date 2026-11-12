@@ -15,6 +15,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -194,7 +195,7 @@ export function BeastPickerRow({
           variant="outlined"
           disabled={actionDisabled}
           onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText }}
+          sx={{ fontSize: FONT_SIZES.sm, flexShrink: 0, ...actionButtonToneSx(UI_COLORS.accentText) }}
         >
           {actionLabel}
         </Button>
@@ -323,11 +324,9 @@ export const dismissButtonSx = {
   py: 0.25,
   fontSize: FONT_SIZES.xxs,
   ...TEXT_STYLES.title,
-  color: UI_COLORS.dangerMuted,
   border: 2,
-  borderColor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.edge),
   borderRadius: 1,
-  '&:hover': { borderColor: UI_COLORS.dangerMuted, bgcolor: uiAlpha(UI_COLORS.dangerMuted, OPACITY.tint) },
+  ...actionButtonToneSx(UI_COLORS.dangerMuted),
 };
 
 // The box holding a summon's HP bar (and, at 0 HP, what brings it back):

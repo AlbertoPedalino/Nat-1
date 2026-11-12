@@ -10,7 +10,7 @@ import {
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -20,6 +20,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -127,7 +128,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   variant="outlined"
                   startIcon={<X size={ICON_SIZES.xs} />}
                   onClick={onClear}
-                  sx={{ mt: 0.5, fontSize: FONT_SIZES.xxxs, py: 0.25, lineHeight: LINE_HEIGHTS.normal, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, OPACITY.soft) } }}
+                  sx={{ mt: 0.5, fontSize: FONT_SIZES.xxxs, py: 0.25, lineHeight: LINE_HEIGHTS.normal, ...actionButtonToneSx(UI_COLORS.dangerDeep) }}
                 >
                   Clear all
                 </Button>
