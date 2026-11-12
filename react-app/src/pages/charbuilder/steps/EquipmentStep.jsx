@@ -1,7 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Box, Divider, List, Stack, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
-import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
@@ -27,6 +26,7 @@ import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import SelectionSearch from '../choices/SelectionSearch.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -143,12 +143,10 @@ export default function EquipmentStep({ state, dispatch }) {
 
       <BuilderPanel id="panel-inventory" tone={ENTITY_COLORS.tool} title="Inventory" icon={GAME_ICONS.inventory} note={`${formatPounds(totalWeight)} carried`}>
         <Stack spacing={1.5}>
-          <SearchField
+          <SelectionSearch
             value={localQuery}
             onChange={setLocalQuery}
             placeholder="Search items"
-            size="medium"
-            iconSize={18}
           />
           <ItemGroupFilter
             value={inventoryFilter}
@@ -174,12 +172,10 @@ export default function EquipmentStep({ state, dispatch }) {
           <Typography sx={BUILDER_TEXT.sectionHeader}>Current Inventory</Typography>
           {character.inventory.length ? (
             <>
-              <SearchField
+              <SelectionSearch
                 value={currentQuery}
                 onChange={setCurrentQuery}
                 placeholder="Search current inventory"
-                size="medium"
-                iconSize={18}
               />
               <ItemGroupFilter
                 chips={OWNED_ITEM_CHIPS}

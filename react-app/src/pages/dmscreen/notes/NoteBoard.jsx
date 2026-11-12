@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, InputAdornment, TextField } from '@mui/material';
-import { Plus, Search, SearchX, StickyNote, X } from 'lucide-react';
+import { Box, Button } from '@mui/material';
+import { Plus, Search, SearchX, StickyNote } from 'lucide-react';
 import { useDmScreen } from '../state/DmScreenContext.jsx';
 import { BOARD_COLUMNS, GRID_GAP, ROW_UNIT } from './layout.js';
 import { describeNotePosition, moveNote as moveNoteInList } from './notes.js';
@@ -11,7 +11,7 @@ import NoteCard from './NoteCard.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
-import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -78,29 +78,11 @@ export default function NoteBoard() {
       <Box role="status" aria-live="polite" sx={liveRegionSx}>{announcement}</Box>
       <Box sx={actionsSx}>
         {notes.length > 0 ? (
-          <TextField
+          <SearchField
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => { if (event.key === 'Escape') setQuery(''); }}
+            onChange={setQuery}
             placeholder="Search titles and text"
-            size="small"
-            slotProps={{
-              htmlInput: { 'aria-label': 'Search notes' },
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={ICON_SIZES.md} aria-hidden="true" />
-                  </InputAdornment>
-                ),
-                endAdornment: query ? (
-                  <InputAdornment position="end">
-                    <TipIconButton title="Clear search (Esc)" size="small" ariaLabel="Clear search" onClick={() => setQuery('')}>
-                      <X size={ICON_SIZES.sm} />
-                    </TipIconButton>
-                  </InputAdornment>
-                ) : null,
-              },
-            }}
+            ariaLabel="Search notes"
             sx={searchSx}
           />
         ) : null}

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, List, ListItemButton, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
@@ -20,6 +19,7 @@ import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SelectionSearch from '../choices/SelectionSearch.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -90,12 +90,10 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               <TagChip size="medium" tone={selectedSpellsCount > spells ? UI_COLORS.danger : UI_COLORS.accent} label={`Spells ${selectedSpellsCount}/${spells}`} />
               {profile.ability ? <TagChip size="medium" label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
-            <SearchField
+            <SelectionSearch
               value={state.search.spells}
               onChange={(value) => dispatch({ type: 'search/set', scope: 'spells', value })}
               placeholder="Search spells"
-              size="medium"
-              iconSize={18}
             />
             <ToggleButtonGroup size="small" exclusive value={level} onChange={(_, next) => next != null && dispatch({ type: 'field/set', field: 'activeSpellLevel', value: next })}>
               {levels.map((spellLevel) => (

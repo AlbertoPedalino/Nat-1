@@ -8,12 +8,7 @@ import { FILTERS, SECTION_DEFS, buildActionTags } from './actionTags.js';
 import { normalizeResourceMax } from '../../../shared/character/resources/restResources.js';
 import { makeWeaponActions } from './weaponActions.js';
 import { loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
-import {
-  compactInputSx,
-  levelHeaderSx,
-  panelRootSx,
-  panelToolbarSx,
-} from '../spells/spellsTabStyles.js';
+import { levelHeaderSx, panelRootSx, panelToolbarSx } from '../spells/spellsTabStyles.js';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import SlotDialogs from './SlotDialogs.jsx';
 import { useResourceSideEffects } from './useResourceSideEffects.js';
@@ -156,8 +151,8 @@ export default function ActionsTab({ C, sheet, resources }) {
           placeholder="Search actions..."
           value={search}
           onChange={setSearch}
-          iconSize={14}
-          sx={{ ...compactInputSx, flex: 1, minWidth: 140 }}
+          density="compact"
+          sx={{ flex: 1, minWidth: 140 }}
         />
       </Box>
 

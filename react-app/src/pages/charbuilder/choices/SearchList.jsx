@@ -1,19 +1,17 @@
 import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
-import SearchField from '../../../shared/ui/SearchField.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import SelectionSearch from './SelectionSearch.jsx';
 
 export default function SearchList({ value, onSearch, placeholder, items, selectedName, onSelect, meta }) {
   return (
     <Stack spacing={0.75}>
-      <SearchField
+      <SelectionSearch
         value={value}
         placeholder={placeholder}
         onChange={onSearch}
-        size="medium"
-        iconSize={14}
       />
       <Box sx={scrollWellSx(390)}>
         <List dense disablePadding>

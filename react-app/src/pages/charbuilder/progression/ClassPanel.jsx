@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { describeMulticlassProficiencies, getMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
@@ -22,6 +21,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SelectionSearch from '../choices/SelectionSearch.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -188,12 +188,10 @@ export default function ClassPanel({ state, character, dispatch }) {
             {activeClass.name} is a hero class: it normally starts at level 3. Below that it needs your DM&apos;s permission.
           </Typography>
         ) : null}
-        <SearchField
+        <SelectionSearch
           value={search}
           placeholder="Search classes"
           onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
-          size="medium"
-          iconSize={14}
         />
         <Box sx={scrollWellSx(390)}>
           <List dense disablePadding>

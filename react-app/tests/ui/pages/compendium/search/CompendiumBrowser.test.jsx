@@ -17,7 +17,7 @@ test('search, filter by kind, and read an entry', () => {
   const results = () => within(screen.getByRole('list', { name: 'Results' })).getAllByRole('button').map((row) => row.textContent);
   expect(results()).toHaveLength(3);
 
-  fireEvent.change(screen.getByRole('textbox', { name: 'Search the compendium' }), { target: { value: 'fireball' } });
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Search the compendium' }), { target: { value: 'fireball' } });
   expect(results()[0]).toMatch(/^Fireball/);
   expect(results()[1]).toMatch(/^Wand of Fireballs/);
 

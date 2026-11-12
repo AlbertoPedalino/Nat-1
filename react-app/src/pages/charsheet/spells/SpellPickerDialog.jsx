@@ -11,7 +11,7 @@ import {
   getSpellcastingProfile,
   hasSpellcastingProfile,
 } from '../../../shared/character/spells/spellcasting.js';
-import { compactInputSx, levelToggleSx } from './spellsTabStyles.js';
+import { levelToggleSx } from './spellsTabStyles.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
@@ -155,8 +155,7 @@ export function SpellPickerDialog({
           placeholder={spellDb.length ? 'Search spells...' : 'Loading spells...'}
           value={pickerSearch}
           onChange={setPickerSearch}
-          iconSize={14}
-          sx={compactInputSx}
+          density="compact"
         />
         <Box sx={{ overflowX: 'auto', pb: 0.25 }}>
           <ToggleButtonGroup

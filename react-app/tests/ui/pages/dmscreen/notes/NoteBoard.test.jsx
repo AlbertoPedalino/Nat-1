@@ -29,13 +29,13 @@ async function addNote(user, title, body) {
   await user.type(bodies[bodies.length - 1], body);
 }
 
-const search = () => screen.getByRole('textbox', { name: 'Search notes' });
+const search = () => screen.getByRole('searchbox', { name: 'Search notes' });
 const cards = () => screen.queryAllByRole('article');
 
 describe('NoteBoard', () => {
   test('offers no search until there is something to search', async () => {
     const user = renderBoard();
-    expect(screen.queryByRole('textbox', { name: 'Search notes' })).toBeNull();
+    expect(screen.queryByRole('searchbox', { name: 'Search notes' })).toBeNull();
 
     await addNote(user, 'Tavern', 'Garret the barkeep');
     expect(search()).toBeInTheDocument();

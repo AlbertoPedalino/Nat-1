@@ -10,7 +10,7 @@ test('the objects panel searches and paginates the complete Lucide catalog', () 
   expect(screen.getByText(new RegExp(`^${new Set(iconNames).size} icons`))).toBeInTheDocument();
   expect(screen.getByRole('navigation')).toBeInTheDocument();
 
-  fireEvent.change(screen.getByRole('textbox', { name: 'Search Lucide icons' }), {
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Search Lucide icons' }), {
     target: { value: 'zodiac virgo' },
   });
   const colorInput = screen.getByLabelText('Object color');

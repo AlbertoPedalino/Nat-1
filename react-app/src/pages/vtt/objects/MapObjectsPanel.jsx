@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Box, InputAdornment, Pagination, Slider, TextField, Typography,
-} from '@mui/material';
+import { Box, Pagination, Slider, Typography } from '@mui/material';
 import { Search } from 'lucide-react';
 import { iconNames } from 'lucide-react/dynamic';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -17,12 +15,12 @@ import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -72,17 +70,11 @@ export default function MapObjectsPanel({
         {' '}Placed objects can be moved, resized and rotated.
       </Typography>
       <Box sx={filtersSx}>
-        <TextField
-          size="small"
+        <SearchField
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={setQuery}
           placeholder="Search Lucide icons…"
-          slotProps={{
-            htmlInput: { 'aria-label': 'Search Lucide icons' },
-            input: {
-              startAdornment: <InputAdornment position="start"><Search size={ICON_SIZES.sm} /></InputAdornment>,
-            },
-          }}
+          ariaLabel="Search Lucide icons"
           sx={{ flex: 1, minWidth: 0 }}
         />
         <ColorField

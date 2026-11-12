@@ -14,7 +14,7 @@ import { ITEM_GROUP_CHIPS, ITEM_GROUP_KEYS, OWNED_ITEM_CHIPS, itemGroupKey as it
 import { byItemName } from '../../../shared/character/inventory/itemSearch.js';
 import ItemGroupFilter, { ITEM_GROUP_ICONS } from '../../../shared/character/inventory/ItemGroupFilter.jsx';
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
-import { compactInputSx, inventorySectionSx } from './inventoryControls.jsx';
+import { inventorySectionSx } from './inventoryControls.jsx';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
@@ -118,8 +118,8 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
         placeholder="Search inventory by name, source, type, property..."
         value={inventorySearch}
         onChange={setInventorySearch}
-        iconSize={14}
-        sx={{ ...compactInputSx, mb: 0.5 }}
+        density="compact"
+        sx={{ mb: 0.5 }}
       />
 
       <ItemGroupFilter value={inventoryFilter} onChange={setInventoryFilter} chips={OWNED_ITEM_CHIPS} />

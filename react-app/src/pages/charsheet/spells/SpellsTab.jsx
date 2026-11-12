@@ -12,7 +12,7 @@ import { SPELL_ACTION_FILTERS, buildSpellInfo, expandSpellInfoBySlots, getSpellA
 import { SpellPickerDialog } from './SpellPickerDialog.jsx';
 import { getSpellAbility } from './spellAbility.js';
 import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
-import { addButtonSx, compactInputSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
+import { addButtonSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
 import { SlotPanel, SpellSection } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -108,8 +108,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
           placeholder="Search spells..."
           value={spellSearch}
           onChange={setSpellSearch}
-          iconSize={14}
-          sx={{ ...compactInputSx, flex: 1, minWidth: 140 }}
+          density="compact"
+          sx={{ flex: 1, minWidth: 140 }}
         />
       </Box>
 

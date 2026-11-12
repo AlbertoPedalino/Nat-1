@@ -191,9 +191,9 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           value={query}
           onChange={setQuery}
           placeholder="Search items…"
-          iconSize={14}
+          density="compact"
           stopPropagation
-          sx={{ mb: 0.5, '& .MuiInputBase-input': { fontSize: FONT_SIZES.lg, py: 0.75 } }}
+          sx={{ mb: 0.5 }}
         />
       ) : null}
 

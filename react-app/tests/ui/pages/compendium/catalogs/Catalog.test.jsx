@@ -38,7 +38,7 @@ test('magic items list with rarity, type and attunement, and open their entry', 
   expect(screen.queryByRole('button', { name: /Rope/ })).not.toBeInTheDocument();
   expect(wand.querySelector('img')).toBeNull();
 
-  fireEvent.change(screen.getByRole('textbox', { name: 'Search magic items' }), { target: { value: 'bag' } });
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Search magic items' }), { target: { value: 'bag' } });
   expect(screen.getByText('1 magic items')).toBeInTheDocument();
   const bag = screen.getByRole('button', { name: /Bag of Holding/ });
   expect(bag.querySelector('img')).toHaveAttribute('src', 'https://img.test/items/XDMG/Bag%20of%20Holding.webp');

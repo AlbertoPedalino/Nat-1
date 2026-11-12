@@ -155,7 +155,8 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         onChange={setQuery}
         placeholder="Search beasts…"
         stopPropagation
-        sx={{ mb: 0.5, '& .MuiInputBase-input': { fontSize: FONT_SIZES.md, py: 0.75 } }}
+        density="compact"
+        sx={{ mb: 0.5 }}
       />
       {!familiars.length ? (
         <Typography sx={{ ...TEXT_STYLES.note, ...subSx }}>Loading beasts…</Typography>

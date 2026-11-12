@@ -8,7 +8,8 @@ import { useItemListQuery } from '../../../shared/character/inventory/useItemLis
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
-import { compactInputSx, inventorySectionSx } from './inventoryControls.jsx';
+import { inventorySectionSx } from './inventoryControls.jsx';
+import { COMPACT_INPUT_SX } from '../../../shared/ui/controlHeights.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
@@ -106,8 +107,8 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             placeholder="Search 2024 items by name, source, type, property..."
             value={search}
             onChange={setSearch}
-            iconSize={14}
-            sx={{ ...compactInputSx, mb: 0.5 }}
+            density="compact"
+            sx={{ mb: 0.5 }}
           />
 
           <ItemGroupFilter value={filter} onChange={setFilter} />
@@ -124,11 +125,11 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
             <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-              sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
+              sx={{ flex: 1, minWidth: 120 }} />
             <TextField size="small" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 58 }} slotProps={{ htmlInput: { inputMode: 'decimal' } }} />
+              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...COMPACT_INPUT_SX, width: 58 }} slotProps={{ htmlInput: { inputMode: 'decimal' } }} />
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...compactInputSx, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
+              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...COMPACT_INPUT_SX, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
               sx={{ ...SURFACES.panel, px: 1.75, color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
               + Add

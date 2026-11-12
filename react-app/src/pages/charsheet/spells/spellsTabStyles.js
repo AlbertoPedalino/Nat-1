@@ -74,10 +74,6 @@ export const inlineButtonSx = {
   ...TEXT_STYLES.title,
 };
 
-export const compactInputSx = {
-  '& input': { fontSize: FONT_SIZES.lg, py: 1 },
-};
-
 export const levelToggleSx = {
   flexWrap: 'wrap',
   '& .MuiToggleButton-root': {

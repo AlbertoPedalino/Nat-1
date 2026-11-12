@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Stack,
-  TextField,
-  ToggleButton,
-  Typography,
-} from '@mui/material';
+import { Box, Stack, ToggleButton, Typography } from '@mui/material';
 import {
   Ban,
   Cloud,
@@ -29,6 +23,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -104,13 +99,11 @@ export function AtmospherePicker({ value, onSelect }) {
 
   return (
     <Stack spacing={0.75} role="group" aria-label="Atmosphere">
-      <TextField
-        size="small"
-        type="search"
+      <SearchField
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={setQuery}
         placeholder="Search atmospheres…"
-        slotProps={{ htmlInput: { 'aria-label': 'Search atmospheres' } }}
+        ariaLabel="Search atmospheres"
         autoFocus
       />
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 0.5 }}>

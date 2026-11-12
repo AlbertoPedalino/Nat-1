@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Tooltip, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
@@ -19,6 +19,7 @@ import { ErrorLine } from '../ui/LoadStatus.jsx';
 import Caption from '../ui/Caption.jsx';
 import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
+import SearchField from '../ui/SearchField.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -75,12 +76,11 @@ export default function MonsterBrowser({
       ) : null}
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
-        <TextField
-          size="small"
-          label="Search"
+        <SearchField
           value={filters.search}
-          onChange={(event) => onFilterChange('search', event.target.value)}
-          fullWidth
+          onChange={(value) => onFilterChange('search', value)}
+          placeholder="Search monsters…"
+          ariaLabel="Search monsters"
         />
         <FormControl size="small" sx={{ minWidth: 130 }}>
           <InputLabel>CR</InputLabel>
