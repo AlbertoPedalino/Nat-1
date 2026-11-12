@@ -62,7 +62,10 @@ export default function Die3D({
   const glyph = numberSize(size, room, digits);
 
   return (
-    <Box sx={{ ...sceneSx, width: size, height: size }}>
+    // A die the mode threw away is faded on the scene round it: an opacity on
+    // the solid itself would flatten it (a translucent preserve-3d element is
+    // drawn flat), so it would tumble as a picture instead of a die.
+    <Box sx={{ ...sceneSx, width: size, height: size, opacity: dimmed ? OPACITY.line : 1 }}>
       <Box
         ref={solidRef}
         sx={{
@@ -76,7 +79,6 @@ export default function Die3D({
             '--gb-die-x': `${-tumble.x * turns}deg`,
             '--gb-die-y': `${-tumble.y * turns}deg`,
           } : null),
-          opacity: dimmed ? OPACITY.line : 1,
         }}
       >
         {drawn.map((face, offset) => {
