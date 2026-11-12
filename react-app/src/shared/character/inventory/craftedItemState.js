@@ -1,6 +1,7 @@
 // Data-only state helpers for crafted/created inventory items. This module is
 // deliberately free of registry/UI imports so creation semantics are reusable
 // and testable outside the Vite runtime.
+import { itemQty } from './weight.js';
 
 export const CRAFTED_FLAG_META = {
   replicated: { originKind: 'class', vanishesOnLongRest: false },
@@ -14,9 +15,6 @@ export const VANISH_ON_LONG_REST_FLAGS = CRAFTED_FLAGS.filter(
   (flag) => CRAFTED_FLAG_META[flag].vanishesOnLongRest,
 );
 
-function itemQty(item) {
-  return Math.max(1, Number(item?.qty ?? 1) || 1);
-}
 
 export function craftedFlagOf(item) {
   if (!Array.isArray(item?.flags)) return '';

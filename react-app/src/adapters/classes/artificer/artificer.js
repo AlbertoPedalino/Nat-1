@@ -11,6 +11,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import {
   MAGIC_ITEM_TINKER_DRAIN_RESOURCE,
   MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
+  replicatedNonArmorCount,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
@@ -229,14 +230,7 @@ registerClassSheetActions("Artificer", [
         canAddItem: improvedArmorer
           ? ({ resolvedItem, inventory }) => {
               if (isReplicateArmorItem(resolvedItem)) return true;
-              const activeNonArmor = (inventory || []).reduce((sum, item) => (
-                Array.isArray(item?.flags)
-                && item.flags.includes('replicated')
-                && !isReplicateArmorItem(item)
-                  ? sum + Math.max(1, Number(item.qty || 1))
-                  : sum
-              ), 0);
-              return activeNonArmor < baseMax;
+              return replicatedNonArmorCount(inventory) < baseMax;
             }
           : null,
         emptyHint: 'No plans chosen yet — pick them in the character builder.',

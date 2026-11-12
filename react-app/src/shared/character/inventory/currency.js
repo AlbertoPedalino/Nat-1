@@ -5,6 +5,12 @@ import { formatNumber } from '../../ui/numberFormat.js';
 // An amount in copper pieces (how 5etools prices items) in the largest coin
 // that shows it whole: 1500 → "15 gp", 50 → "5 sp", 7 → "7 cp"; '' for none.
 // The one way an item's price is written.
+// An amount in copper pieces as gold (1500 -> 15); 0 for none.
+export function copperToGp(copper) {
+  const cp = Number(copper);
+  return Number.isFinite(cp) ? cp / 100 : 0;
+}
+
 export function formatCopper(copper) {
   const cp = Math.round(Number(copper) || 0);
   if (!cp) return '';

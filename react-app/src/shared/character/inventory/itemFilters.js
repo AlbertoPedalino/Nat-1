@@ -6,6 +6,8 @@ import {
 } from './itemCodes.js';
 import { compareText } from '../../lists.js';
 import { withinTypedRange } from '../../numbers.js';
+import { itemWeight } from './weight.js';
+import { copperToGp } from './currency.js';
 
 // Single source of truth for the advanced item filters. The empty state, the
 // active-value count, the dropdown options, the match test and the panel rows
@@ -20,17 +22,9 @@ import { withinTypedRange } from '../../numbers.js';
 // "multiSelect" (item has all of these values) into the same containment test.
 
 // Item weight/value are optional in the 5etools data; a missing one counts as 0
-// so a "max 5 lb" filter still keeps weightless gear.
-function itemWeightLb(item) {
-  const weight = Number(item?.weight);
-  return Number.isFinite(weight) ? weight : 0;
-}
-
-// `value` is stored in copper. The filter — like the item card — speaks gp.
-function itemValueGp(item) {
-  const value = Number(item?.value);
-  return Number.isFinite(value) ? value / 100 : 0;
-}
+// so a "max 5 lb" filter still keeps weightless gear. `value` is stored in
+// copper; the filter, like the item card, speaks gp.
+const itemValueGp = (item) => copperToGp(item?.value);
 
 // "1d6" sorts before "1d10" before "2d6" — numeric on both parts, not lexical.
 function compareDamageDice(a, b) {
@@ -84,7 +78,7 @@ export const ITEM_FILTER_FIELDS = Object.freeze([
     label: 'Weight',
     unit: 'lb',
     step: 0.1,
-    valueOf: itemWeightLb,
+    valueOf: itemWeight,
   },
   {
     kind: 'range',

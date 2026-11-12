@@ -1,4 +1,5 @@
 import { clamp } from '../../numbers.js';
+import { requiresAttunement } from './itemAttunement.js';
 export function itemChargeMaximum(item) {
   const maximum = Number(item?.charges);
   return Number.isFinite(maximum) && maximum > 0 ? Math.floor(maximum) : 0;
@@ -13,7 +14,7 @@ export function itemChargeCurrent(item) {
 
 export function shouldShowItemCharges(item) {
   if (!itemChargeMaximum(item)) return false;
-  return !item?.reqAttune || Boolean(item.attuned);
+  return !requiresAttunement(item) || Boolean(item.attuned);
 }
 
 export function withItemCharges(item, value) {

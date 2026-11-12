@@ -10,6 +10,7 @@ import { loadGameData } from '../../content/gameData.js';
 import { titleCase } from '../../ui/textCase.js';
 import { stripMarkup } from '../../content/markupText.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
+import { nameWithoutBonus } from '../inventory/itemIdentity.js';
 
 const _masteries = new Map();
 
@@ -213,7 +214,7 @@ function itemMasteryFromEntries(item) {
 export function normalizeWeaponName(value) {
   const { name } = splitNameAndSource(typeof value === 'object' ? (value?.name ?? value?.label ?? value?.value ?? '') : value);
   if (!name) return '';
-  return titleCase(name.replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim().toLowerCase());
+  return titleCase(nameWithoutBonus(name).toLowerCase());
 }
 
 export function collectWeaponMasteryChoiceEntries(character) {

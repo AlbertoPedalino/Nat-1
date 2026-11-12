@@ -8,7 +8,7 @@ import {
 import { toggleItemAttunement } from '../../../shared/character/inventory/itemAttunement.js';
 import { extractTomeBonus } from '../../../shared/character/inventory/itemEffects.js';
 import { writeOnScroll } from '../../../shared/character/inventory/spellScrolls.js';
-import { isItemCarried, itemQty as qty } from '../../../shared/character/inventory/weight.js';
+import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import {
   itemChargeCurrent,
   itemChargeMaximum,
@@ -40,7 +40,7 @@ function normalizeStoredItem(item) {
     rarity: baseItem.rarity || 'none',
     weight: Number(baseItem.weight ?? 0),
     value: Number(baseItem.value || 0),
-    qty: Math.max(1, Number(baseItem.qty ?? 1) || 1),
+    qty: itemQty(baseItem),
     equipped: carried && !!_sourceEquipped,
     custom: !!baseItem.custom,
     ...(carried && _sourceEquippedSlot ? { equippedSlot: _sourceEquippedSlot } : {}),
@@ -89,7 +89,7 @@ export function useInventoryActions({
     }
     const next = current.flatMap((item, idx) => {
       if (idx !== index) return [item];
-      const nextQty = Math.max(0, qty(item) + delta);
+      const nextQty = Math.max(0, itemQty(item) + delta);
       return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
     });
     updateInv(next);
@@ -199,7 +199,7 @@ export function useInventoryActions({
     });
     const nextInv = current.flatMap((item, idx) => {
       if (idx !== index) return [item];
-      const nextQty = Math.max(0, qty(item) - 1);
+      const nextQty = Math.max(0, itemQty(item) - 1);
       return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
     });
     updateInv(nextInv);

@@ -5,7 +5,7 @@ import { countAttunedItems } from '../../../shared/character/inventory/itemAttun
 import {
   carryCapacity,
   formatWeight,
-  itemQty as qty,
+  itemQty,
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
@@ -13,6 +13,7 @@ import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
+import { formatCopper } from '../../../shared/character/inventory/currency.js';
 
 // A total read at the top of the inventory: flat.
 const statPillSx = {
@@ -27,9 +28,9 @@ const statPillSx = {
 // Carried weight against capacity, total value and attuned items, with the
 // encumbrance bar under them.
 export default function InventoryStats({ inv, currency, character: C, attunementLimit }) {
-  const { totalWeight, totalGp } = useMemo(() => ({
+  const { totalWeight, totalCopper } = useMemo(() => ({
     totalWeight: totalCarriedWeight(inv, currency),
-    totalGp: inv.reduce((sum, item) => sum + (Number(item.value || 0) / 100) * qty(item), 0),
+    totalCopper: inv.reduce((sum, item) => sum + (Number(item.value) || 0) * itemQty(item), 0),
   }), [inv, currency]);
   const maxCarry = useMemo(() => carryCapacity(getFinal(C, 'str')), [C]);
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
@@ -40,7 +41,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
   return (
     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
       <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</b></Box>
-      <Box sx={statPillSx}>Value: <b>{totalGp.toFixed(1)} GP</b></Box>
+      <Box sx={statPillSx}>Value: <b>{formatCopper(totalCopper) || '0 gp'}</b></Box>
       <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, OPACITY.tint) : UI_COLORS.surfaceHeader, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.accentText, fontFamily: UI_FONTS.display } }}>
         Attuned: <b>{attunedCount} / {attunementLimit}</b>{over ? ' (over limit)' : ''}
       </Box>

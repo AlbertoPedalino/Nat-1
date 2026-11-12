@@ -19,7 +19,7 @@ import {
 import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/inventory/itemFlags.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
-import { isItemCarried, itemQty as qty } from '../../../shared/character/inventory/weight.js';
+import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
@@ -170,7 +170,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               sx={{ ...itemStateChipBaseSx, ...toggleSx(!carried, UI_COLORS.outline) }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
-            <CountStepper value={qty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
+            <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
             <Tooltip title="Remove">
               <IconButton size="small" aria-label={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
                 <Trash2 size={ICON_SIZES.xs} />

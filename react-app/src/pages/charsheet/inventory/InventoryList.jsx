@@ -6,7 +6,7 @@ import { getSlotConflictWarnings } from './equipmentSlots.js';
 import { getArmorPenalties } from './armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import InventoryRow from './InventoryRow.jsx';
-import { itemQty as qty } from '../../../shared/character/inventory/weight.js';
+import { itemQty } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import {
   hasActiveItemFilters,
@@ -125,8 +125,8 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
     return GROUPS.flatMap((group) => groups[group.key]);
   }, [visibleInventory]);
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
-  const totalItems = useMemo(() => inv.reduce((sum, item) => sum + qty(item), 0), [inv]);
-  const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + qty(entry.item), 0), [visibleInventory]);
+  const totalItems = useMemo(() => inv.reduce((sum, item) => sum + itemQty(item), 0), [inv]);
+  const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + itemQty(entry.item), 0), [visibleInventory]);
   const inventoryFiltered = inventoryFilter !== 'all'
     || deferredInventorySearch.trim().length > 0
     || hasActiveItemFilters(inventoryList.filters);

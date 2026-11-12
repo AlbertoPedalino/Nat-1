@@ -1,6 +1,6 @@
-import { canStackInventoryItems } from './itemIdentity.js';
+import { canStackInventoryItems, itemIdentityKey } from './itemIdentity.js';
 import { itemChargeMaximum } from './itemCharges.js';
-import { isItemCarried } from './weight.js';
+import { isItemCarried, itemQty } from './weight.js';
 import { matchKey, splitNameSource } from '../../content/nameKeys.js';
 import { stripMarkup } from '../../content/markupText.js';
 
@@ -22,9 +22,6 @@ function matchSource(item, source) {
   return !source || String(item?.source || '').toUpperCase() === String(source || '').toUpperCase();
 }
 
-function inventoryQty(item) {
-  return Math.max(1, Number(item?.qty ?? 1) || 1);
-}
 
 export function findInventoryItem(itemDb, name, source = '') {
   const targetName = matchKey(name);
@@ -66,10 +63,10 @@ function specialItem(entry, qty, parent) {
 export function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) {
   if (!item?.name) return [];
 
-  const itemQty = Math.max(1, Number(qty ?? 1) || 1);
-  const key = `${matchKey(item.name)}|${String(item.source || '').toUpperCase()}`;
+  const count = itemQty({ qty });
+  const key = itemIdentityKey(item);
   if (visited.has(key) || !shouldExpandItemContents(item)) {
-    return [{ ...item, qty: itemQty }];
+    return [{ ...item, qty: count }];
   }
 
   const nextVisited = new Set(visited);
@@ -81,24 +78,24 @@ export function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) 
     if (typeof entry === 'string') {
       const ref = parseInventoryItemRef(entry);
       const child = findInventoryItem(itemDb, ref.name, ref.source);
-      return child ? expandInventoryItem(child, itemDb, itemQty, nextVisited) : [];
+      return child ? expandInventoryItem(child, itemDb, count, nextVisited) : [];
     }
 
     if (entry.item) {
       const ref = parseInventoryItemRef(entry.item);
-      const childQty = Math.max(1, Number(entry.quantity || 1)) * itemQty;
+      const childQty = Math.max(1, Number(entry.quantity || 1)) * count;
       const child = findInventoryItem(itemDb, ref.name, ref.source);
       return child ? expandInventoryItem(child, itemDb, childQty, nextVisited) : [];
     }
 
     if (entry.special) {
-      const custom = specialItem(entry, Math.max(1, Number(entry.quantity || 1)) * itemQty, item);
+      const custom = specialItem(entry, Math.max(1, Number(entry.quantity || 1)) * count, item);
       return custom ? [custom] : [];
     }
 
     return [];
   });
-  return expanded.length ? expanded : [{ ...item, qty: itemQty }];
+  return expanded.length ? expanded : [{ ...item, qty: count }];
 }
 
 export function addInventoryEntries(inventory, entries, itemDb = null, normalizeEntry = null) {
@@ -106,13 +103,13 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   const normalize = typeof normalizeEntry === 'function' ? normalizeEntry : (entry) => entry;
   const additions = (entries || []).flatMap((item) => {
     if (!item?.name) return [];
-    const qty = inventoryQty(item);
+    const qty = itemQty(item);
     const expanded = itemDb ? expandInventoryItem(item, itemDb, qty) : [{ ...item, qty }];
     return expanded
       .map(normalize)
       .filter((entry) => entry?.name)
       .flatMap((entry) => {
-        const entryQty = inventoryQty(entry);
+        const entryQty = itemQty(entry);
         if (!itemChargeMaximum(entry) || entryQty <= 1) return [entry];
         return Array.from({ length: entryQty }, () => ({ ...entry, qty: 1 }));
       });
@@ -120,9 +117,9 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
 
   additions.forEach((item) => {
     const idx = next.findIndex((entry) => canStackInventoryItems(entry, item));
-    const qty = inventoryQty(item);
+    const qty = itemQty(item);
     if (idx === -1) next.push({ ...item, qty });
-    else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };
+    else next[idx] = { ...next[idx], qty: itemQty(next[idx]) + qty };
   });
   return next;
 }
@@ -146,7 +143,7 @@ export function setOneInventoryUnitCarried(inventory, index, carried) {
   const target = current[index];
   if (!target || isItemCarried(target) === carried) return current;
 
-  const count = inventoryQty(target);
+  const count = itemQty(target);
   if (count <= 1) {
     return addInventoryEntries(
       current.filter((_, idx) => idx !== index),

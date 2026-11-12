@@ -4,12 +4,14 @@ import {
   itemChargeMaximum,
   withItemCharges,
 } from './itemCharges.js';
+import { hasItemFlag } from './itemFlags.js';
+import { itemQty } from './weight.js';
 
 export const MAGIC_ITEM_TINKER_DRAIN_RESOURCE = 'artificer_magic_item_tinker_drain';
 export const MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE = 'artificer_magic_item_tinker_transmute';
 
 export function isReplicatedItem(item) {
-  return Array.isArray(item?.flags) && item.flags.includes('replicated');
+  return hasItemFlag(item, 'replicated');
 }
 
 export function pruneReplicatedItemsForPlans(inventory, plans) {
@@ -26,7 +28,7 @@ export function pruneReplicatedItemsForPlans(inventory, plans) {
 export function replicatedNonArmorCount(inventory) {
   return (inventory || []).reduce((sum, item) => (
     isReplicatedItem(item) && !isReplicateArmorItem(item)
-      ? sum + Math.max(1, Number(item.qty || 1))
+      ? sum + itemQty(item)
       : sum
   ), 0);
 }

@@ -1,6 +1,6 @@
-import { findInventoryItem } from '../../../shared/character/inventory/itemContainers.js';
+import { findInventoryItem, parseInventoryItemRef } from '../../../shared/character/inventory/itemContainers.js';
 import { strip5eMarkup } from '../../../shared/content/entryText.js';
-import { splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
 
 // A class or background's starting equipment: choice blocks, the items and
@@ -17,13 +17,6 @@ export function cpToCoins(cpValue) {
   return { gp, sp, cp };
 }
 
-function parseItemRef(ref) {
-  const { name, source } = splitNameSource(ref);
-  return {
-    name: strip5eMarkup(name || '').trim(),
-    source: String(source || '').trim().toUpperCase(),
-  };
-}
 
 export function itemSearchText(item) {
   return [
@@ -35,7 +28,7 @@ export function itemSearchText(item) {
     item?.scfType,
     Array.isArray(item?.focus) ? item.focus.join(' ') : '',
     Array.isArray(item?.group) ? item.group.join(' ') : '',
-    Array.isArray(item?.items) ? item.items.map((ref) => parseItemRef(ref).name).join(' ') : '',
+    Array.isArray(item?.items) ? item.items.map((ref) => parseInventoryItemRef(ref).name).join(' ') : '',
   ].filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -95,8 +88,8 @@ export function extractEquipItems(node, result = { items: [], cp: 0 }) {
   if (typeof node === 'object') {
     if (node.value) result.cp += Number(node.value || 0);
     if (node.containsValue) result.cp += Number(node.containsValue || 0);
-    if (node.item) result.items.push({ ...parseItemRef(node.item), qty: node.quantity || 1 });
-    else if (node.equipmentType) result.items.push({ ...parseItemRef(node.equipmentType), qty: node.quantity || 1, equipmentType: true });
+    if (node.item) result.items.push({ ...parseInventoryItemRef(node.item), qty: node.quantity || 1 });
+    else if (node.equipmentType) result.items.push({ ...parseInventoryItemRef(node.equipmentType), qty: node.quantity || 1, equipmentType: true });
     else if (node.entries) extractEquipItems(node.entries, result);
     else Object.entries(node).forEach(([key, value]) => {
       if (!['source', 'page', 'type', 'displayName', 'quantity', 'value', 'containsValue'].includes(key)) extractEquipItems(value, result);

@@ -6,7 +6,7 @@
 // support for a new 5etools field requires one mapper case + one consumer.
 
 import { parseSignedBonus } from './itemBonus.js';
-import { isItemEffectActive } from './itemAttunement.js';
+import { isItemEffectActive, requiresAttunement } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
 import { itemEffectInventory } from '../forms/wildShapeForm.js';
 import { ABILITIES } from '../../content/rulesVocabulary.js';
@@ -308,7 +308,7 @@ export function getFinalAbilityScore(C, stat, baseScore, { ignoreWildShape = fal
 // XPHB/XDMG "study for 48 hours" pattern without enumerating each book.
 export function isConsumableTome(item) {
   if (!item?.name) return false;
-  if (item.reqAttune) return false;
+  if (requiresAttunement(item)) return false;
   if (!item.ability || typeof item.ability !== 'object') return false;
   if (item.ability.static || item.ability.choose || item.ability.from) return false;
   if (!ABILITIES.some((key) => item.ability[key] != null)) return false;

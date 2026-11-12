@@ -56,3 +56,9 @@ export function matchesItemReference(item, reference) {
   if (!item?.name || !item?.source || !reference?.name || !reference?.source) return false;
   return itemIdentityKey(item) === itemIdentityKey(reference);
 }
+
+// A name without its magic bonus suffix: "Longsword +1" and "Longsword, +2"
+// are the Longsword.
+export function nameWithoutBonus(name) {
+  return String(name || '').replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim();
+}

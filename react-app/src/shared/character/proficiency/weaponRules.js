@@ -7,6 +7,7 @@ import { canonicalProperty, itemHasProperty } from '../inventory/weaponPropertie
 import { capitalize } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
+import { nameWithoutBonus } from '../inventory/itemIdentity.js';
 
 // Properties are read by the shared reader.
 export { canonicalProperty, itemHasProperty };
@@ -32,7 +33,7 @@ function stripPluralSuffix(key) {
 }
 
 export function weaponNameKeys(item) {
-  const raw = String(item?.name || '').replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim();
+  const raw = nameWithoutBonus(item?.name);
   const key = matchKey(raw);
   const keys = new Set([key]);
   if (WEAPON_NAME_ALIASES[key]) keys.add(WEAPON_NAME_ALIASES[key]);

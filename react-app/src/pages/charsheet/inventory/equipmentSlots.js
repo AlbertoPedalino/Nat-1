@@ -6,6 +6,7 @@ import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeat
 import { itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { isShield, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
+import { itemQty } from '../../../shared/character/inventory/weight.js';
 
 export const THROWN_SLOT = 'thrown';
 
@@ -134,9 +135,6 @@ export function getSlotConflictWarnings(inventory) {
   return warnings;
 }
 
-function itemQty(item) {
-  return Math.max(1, Number(item?.qty ?? 1) || 1);
-}
 
 function unequipItem(item) {
   const next = { ...item, equipped: false };

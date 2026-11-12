@@ -29,6 +29,7 @@ import { stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
 import { byName, compareText } from '../../lists.js';
 import { ARMOR_OR_SHIELD_CODES, isBodyArmor, isWeaponItem, itemBaseType } from './itemKinds.js';
+import { hasItemFlag } from './itemFlags.js';
 
 const lc = (value) => String(value || '').toLowerCase();
 // 5etools type codes excluded from the Common bucket.
@@ -318,7 +319,7 @@ export function applyReplicateItemPlan(item, bucket) {
 // weapon it is, rather than as a suffix on its name. Null for anything that is
 // not a replicated plan item.
 export function replicatedItemProperty(item) {
-  if (!Array.isArray(item?.flags) || !item.flags.includes('replicated')) return null;
+  if (!hasItemFlag(item, 'replicated')) return null;
   const parsed = parseReplicateBucketChoice(item.craftedFrom);
   if (!parsed) return null;
   const plan = parsed.bucket.itemPlan;
@@ -369,11 +370,7 @@ export function resolveReplicateChoice(value, items) {
 // This keeps database reconciliation from replacing plan effects with the base
 // item's fields.
 export function resolveReplicateCraftedItem(item, items) {
-  if (
-    !Array.isArray(item?.flags)
-    || !item.flags.includes('replicated')
-    || !item.craftedFrom
-  ) return null;
+  if (!hasItemFlag(item, 'replicated') || !item.craftedFrom) return null;
   return resolveReplicateChoice(item.craftedFrom, items)?.item || null;
 }
 

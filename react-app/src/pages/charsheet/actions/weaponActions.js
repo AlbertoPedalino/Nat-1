@@ -7,7 +7,7 @@ import {
   normalizeWeaponName,
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/combat/weaponMastery.js';
-import { getWeaponDamageDice, canUseLightExtraAttack, getOffHandDamageMod, hasTwoWeaponFightingStyle, isTwoHandedWeapon, isThrownWeapon, isHeavyWeapon, isWieldingWeaponOrShield, isLightWeapon, isFinesseWeapon, isCrossbow, isPolearmMasterWeapon, hasEquippedShield } from '../inventory/equipmentSlots.js';
+import { getOneHandDamageDice, getWeaponDamageDice, canUseLightExtraAttack, getOffHandDamageMod, hasTwoWeaponFightingStyle, isTwoHandedWeapon, isThrownWeapon, isHeavyWeapon, isWieldingWeaponOrShield, isLightWeapon, isFinesseWeapon, isCrossbow, isPolearmMasterWeapon, hasEquippedShield } from '../inventory/equipmentSlots.js';
 import { weaponEnhancement, weaponExtraDamage } from '../../../shared/character/inventory/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import {
@@ -25,7 +25,8 @@ import {
   getWeaponNotes,
 } from '../../../shared/character/sheet/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { isMeleeWeapon, isRangedWeapon, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
+import { isMeleeWeapon, isRangedWeapon, isWeaponItem, itemBaseType } from '../../../shared/character/inventory/itemKinds.js';
+import { hasItemFlag } from '../../../shared/character/inventory/itemFlags.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -35,15 +36,8 @@ import { isMeleeWeapon, isRangedWeapon, isWeaponItem } from '../../../shared/cha
 
 function weaponAbility(C, item, weaponOverride) {
   if (weaponOverride?.ability) return weaponOverride.ability;
-  const type = String(item?.type || '').toUpperCase();
-  const overrides = adapterRegistry.getWeaponAbilityOverrides();
-  for (const o of overrides) {
-    if (o.weaponTypes && !o.weaponTypes.includes(type)) continue;
-    if (o.itemFlag && !(item?.flags || []).includes(o.itemFlag)) continue;
-    if (typeof o.condition === 'function' && !o.condition(C)) continue;
-    return o.ability;
-  }
-  return baseWeaponAbility(C, item);
+  const override = matchingWeaponOverride(C, item, adapterRegistry.getWeaponAbilityOverrides());
+  return override ? override.ability : baseWeaponAbility(C, item);
 }
 
 // The ability a weapon uses by the rules alone: Dexterity for a ranged
@@ -52,10 +46,6 @@ function baseWeaponAbility(C, item) {
   if (isRangedWeapon(item)) return 'dex';
   if (isFinesseWeapon(item)) return getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str')) ? 'dex' : 'str';
   return 'str';
-}
-
-function weaponDamageBase(item) {
-  return item?.damage?.[0]?.damage || item?.dmg1 || item?.damageDice || item?.dmg || '';
 }
 
 function weaponDamageType(item) {
@@ -86,13 +76,29 @@ function weaponKindInfo(item, ctx = {}) {
 }
 
 function matchingWeaponOverride(C, item, overrides) {
-  const type = String(item?.type || '').toUpperCase();
+  const type = itemBaseType(item);
   return overrides.find((o) => {
     if (o.weaponTypes && !o.weaponTypes.includes(type)) return false;
-    if (o.itemFlag && !(item?.flags || []).includes(o.itemFlag)) return false;
+    if (o.itemFlag && !hasItemFlag(item, o.itemFlag)) return false;
     if (typeof o.condition === 'function' && !o.condition(C)) return false;
     return true;
   }) || null;
+}
+
+// XPHB 2024 Heavy property: Disadvantage on attack rolls with both Strength
+// and Dexterity under 13.
+function heavyWeaponDisadvantage(C, item) {
+  return isHeavyWeapon(item) && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
+}
+
+// The mastery chosen for this weapon (Weapon Mastery), read off the choice,
+// the weapon itself, or its base item in the database; null when none.
+function selectedWeaponMastery(item, selectedMasteriesByWeapon, items) {
+  const selectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(item?.name || '')) || null;
+  if (!selectedEntry) return null;
+  const directMastery = resolveWeaponMasteryForItem(item);
+  const dbItem = directMastery ? null : findWeaponItemByName(items, item?.name || '', item?.source || '');
+  return selectedEntry.mastery || directMastery || resolveWeaponMasteryForItem(dbItem) || null;
 }
 
 function isHeldWeapon(item) {
@@ -150,7 +156,7 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
     damageFormula,
     damageType: weaponDamageType(item),
     extraRollers: weaponExtraDamageRollers(item),
-    disadvantage: isHeavyWeapon(item) && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13,
+    disadvantage: heavyWeaponDisadvantage(C, item),
   };
 }
 
@@ -180,13 +186,12 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const finalAbility = overrideBlocked ? baseWeaponAbility(C, item) : ability;
   const mod = getMod(getFinal(C, finalAbility));
   const enhancement = weaponEnhancement(item);
-  const base = opts.damageBase != null ? opts.damageBase : weaponDamageBase(item);
+  const base = opts.damageBase != null ? opts.damageBase : getOneHandDamageDice(item);
   // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
   const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon(item) ? (ctx.strMeleeDamageBonus || 0) : 0;
   // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon)
   // plus weapon-scoped rule reminders (Great Weapon Master) share one weapon profile.
   const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
-  const isHeavy = isHeavyWeapon(item);
   const weaponInfo = {
     ...weaponKindInfo(item, ctx),
     twoHanded: wieldedTwoHanded,
@@ -200,17 +205,8 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus + fsBonus.damage;
   const damageFormula = base ? withModifier(base, finalMod) : '';
   const dtype = weaponDamageType(item);
-  // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
-  const heavyUnderStat = isHeavy && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
-  const disAdv = (untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex')) || heavyUnderStat;
-  const selectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(item?.name || '')) || null;
-  const directMastery = selectedEntry ? resolveWeaponMasteryForItem(item) : null;
-  const dbItem = selectedEntry && !directMastery
-    ? findWeaponItemByName(items, item?.name || '', item?.source || '')
-    : null;
-  const mastery = selectedEntry
-    ? (selectedEntry.mastery || directMastery || resolveWeaponMasteryForItem(dbItem))
-    : null;
+  const disAdv = (untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex')) || heavyWeaponDisadvantage(C, item);
+  const mastery = selectedWeaponMastery(item, selectedMasteriesByWeapon, items);
   const card = weaponCardName(item);
   return {
     name: opts.name || card.name,
@@ -272,9 +268,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   // "Solo weapon" = exactly one weapon wielded (any hand slot, or equipped with no
   // explicit slot). Gates Fighting Style: Dueling ("a melee weapon in one hand and
   // no other weapons"); a Shield is not a weapon, so sword-and-board still qualifies.
-  const wieldedWeaponCount = (inventory || []).filter((i) =>
-    isWeaponItem(i) && (['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) || (i.equipped && !i.equippedSlot)),
-  ).length;
+  const wieldedWeaponCount = (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length;
   const ctx = {
     profSets: equipmentSets,
     untrainedArmor,
@@ -304,7 +298,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohAbility = weaponAbility(C, offHandItem, ohOverride);
     const ohMod = getMod(getFinal(C, ohAbility));
     const ohEnhancement = weaponEnhancement(offHandItem);
-    const ohBase = weaponDamageBase(offHandItem);
+    const ohBase = getOneHandDamageDice(offHandItem);
     const ohDtype = weaponDamageType(offHandItem);
     const ohStrMeleeDamageBonus = ohAbility === 'str' && !isRangedWeapon(offHandItem) ? ctx.strMeleeDamageBonus : 0;
     // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
@@ -317,14 +311,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     };
     const ohFsBonus = getWeaponEffectBonuses(C, ohWeaponInfo);
     const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus + ohFsBonus.damage;
-    const ohSelectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(offHandItem?.name || '')) || null;
-    const ohDirectMastery = ohSelectedEntry ? resolveWeaponMasteryForItem(offHandItem) : null;
-    const ohDbItem = ohSelectedEntry && !ohDirectMastery
-      ? findWeaponItemByName(items, offHandItem?.name || '', offHandItem?.source || '')
-      : null;
-    const ohMastery = ohSelectedEntry
-      ? (ohSelectedEntry.mastery || ohDirectMastery || resolveWeaponMasteryForItem(ohDbItem))
-      : null;
+    const ohMastery = selectedWeaponMastery(offHandItem, selectedMasteriesByWeapon, items);
     const isNick = ohMastery === 'Nick';
     const ohDamageFormula = ohBase ? withModifier(ohBase, ohDmgMod) : '';
 
