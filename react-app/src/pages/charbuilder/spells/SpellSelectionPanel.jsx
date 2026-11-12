@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, List, ListItemButton, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, List, ListItemButton, Stack } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
@@ -20,6 +20,7 @@ import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -95,19 +96,15 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               onChange={(value) => dispatch({ type: 'search/set', scope: 'spells', value })}
               placeholder="Search spells"
             />
-            <ToggleButtonGroup size="small" exclusive value={level} onChange={(_, next) => next != null && dispatch({ type: 'field/set', field: 'activeSpellLevel', value: next })}>
-              {levels.map((spellLevel) => (
-                <ToggleButton key={spellLevel} value={spellLevel}>
-                  {SPELL_LEVEL_LABELS[spellLevel] || `L${spellLevel}`}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+            <ChoiceToggle
+              wrap
+              value={level}
+              onChange={(next) => dispatch({ type: 'field/set', field: 'activeSpellLevel', value: next })}
+              options={levels.map((spellLevel) => ({ value: spellLevel, label: SPELL_LEVEL_LABELS[spellLevel] || `L${spellLevel}` }))}
+            />
             {activeIsWizard ? (
               <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-                <ToggleButtonGroup size="small" exclusive value={wizardMode} onChange={(_, next) => next && setWizardMode(next)}>
-                  <ToggleButton value="prepare">Prepare</ToggleButton>
-                  <ToggleButton value="book">Spellbook</ToggleButton>
-                </ToggleButtonGroup>
+                <ChoiceToggle value={wizardMode} onChange={setWizardMode} options={WIZARD_MODES} />
                 <TagChip label={`Spellbook ${activeSpellbookSize}`} />
               </Stack>
             ) : null}

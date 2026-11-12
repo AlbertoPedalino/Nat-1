@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography,
-} from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import {
@@ -35,6 +33,7 @@ import { CannonRulesSummary, CannonActionRow } from './EldritchCannonParts.jsx';
 import { clamp } from '../../../shared/numbers.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -218,23 +217,17 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
       {canAddMore ? (
         <Box sx={{ mt: cannons.length ? 0.75 : 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
-            <ToggleButtonGroup size="small" exclusive value={size} onChange={(e, v) => { e.stopPropagation(); if (v) setSize(v); }}>
-              <ToggleButton value="S" sx={toggleSizeSx}>Small</ToggleButton>
-              <ToggleButton value="T" sx={toggleSizeSx}>Tiny</ToggleButton>
-            </ToggleButtonGroup>
-            <ToggleButtonGroup
-              size="small"
-              exclusive
+            <ChoiceToggle size="xs" stopPropagation value={size} onChange={setSize} options={[{ value: 'S', label: 'Small' }, { value: 'T', label: 'Tiny' }]} />
+            <ChoiceToggle
+              size="xs"
+              stopPropagation
               value={canCreate ? effectiveCost : null}
-              onChange={(e, v) => { e.stopPropagation(); if (v) setCostMode(v); }}
-            >
-              <ToggleButton value="use" disabled={!canUse} sx={toggleSizeSx}>
-                {canUse ? `Use (${usesLeft})` : 'Use'}
-              </ToggleButton>
-              <ToggleButton value="slot" disabled={!canSlot} sx={toggleSizeSx}>
-                {canSlot ? `Slot (Lv ${slotLevel})` : 'Slot'}
-              </ToggleButton>
-            </ToggleButtonGroup>
+              onChange={setCostMode}
+              options={[
+                { value: 'use', disabled: !canUse, label: canUse ? `Use (${usesLeft})` : 'Use' },
+                { value: 'slot', disabled: !canSlot, label: canSlot ? `Slot (Lv ${slotLevel})` : 'Slot' },
+              ]}
+            />
           </Box>
           <Button
             fullWidth
@@ -270,13 +263,6 @@ const cannonBoardSx = {
 };
 
 // The size of this panel's toggle keys; their look is the theme's.
-const toggleSizeSx = {
-  fontSize: FONT_SIZES.xs,
-  py: 0.5,
-  px: 1.25,
-  textTransform: 'none',
-};
-
 // AC shield beside the Defenses box, as in the character's header.
 const cannonDefenseSx = {
   display: 'flex',

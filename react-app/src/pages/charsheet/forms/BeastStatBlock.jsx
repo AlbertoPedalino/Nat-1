@@ -313,15 +313,6 @@ export function CreatureOptionRow({ label, children }) {
   );
 }
 
-export const optionToggleSx = {
-  fontSize: FONT_SIZES.xs,
-  py: 0.5,
-  px: 1,
-  textTransform: 'none',
-  color: UI_COLORS.accentText,
-  borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
-};
-
 // Muted text button for "dismiss / revert" actions on summon-style panels
 // (Wild Companion, Wild Shape, Eldritch Cannon). No outline/icon — a small
 // low-emphasis control so it never competes with the roll/HP controls above it.

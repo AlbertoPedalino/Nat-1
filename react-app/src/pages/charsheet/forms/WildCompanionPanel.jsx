@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
@@ -30,12 +30,12 @@ import {
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { filterByBooks } from '../../../shared/content/booksView.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -136,20 +136,16 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         <Sparkles size={ICON_SIZES.sm} color={UI_COLORS.accentText} />
         <Typography sx={detailTitleSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
+      <ChoiceToggle
+        stopPropagation
         value={canSummon ? effectiveCost : null}
-        onChange={(e, v) => { e.stopPropagation(); if (v) setCostMode(v); }}
+        onChange={setCostMode}
+        options={[
+          { value: 'ws', disabled: !canWildShape, label: canWildShape ? `Wild Shape (${usesLeft})` : 'Wild Shape' },
+          { value: 'slot', disabled: !canSlot, label: canSlot ? `Spell Slot (Lv ${slotLevel})` : 'Spell Slot' },
+        ]}
         sx={{ mb: 0.5 }}
-      >
-        <ToggleButton value="ws" disabled={!canWildShape} sx={toggleSizeSx}>
-          {canWildShape ? `Wild Shape (${usesLeft})` : 'Wild Shape'}
-        </ToggleButton>
-        <ToggleButton value="slot" disabled={!canSlot} sx={toggleSizeSx}>
-          {canSlot ? `Spell Slot (Lv ${slotLevel})` : 'Spell Slot'}
-        </ToggleButton>
-      </ToggleButtonGroup>
+      />
       <SearchField
         value={query}
         onChange={setQuery}
@@ -188,9 +184,3 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
 }
 
 // The size of this panel's toggle keys; their look is the theme's.
-const toggleSizeSx = {
-  fontSize: FONT_SIZES.sm,
-  py: 0.5,
-  px: 1.25,
-  textTransform: 'none',
-};

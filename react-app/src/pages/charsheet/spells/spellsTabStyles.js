@@ -74,16 +74,3 @@ export const inlineButtonSx = {
   ...TEXT_STYLES.title,
 };
 
-export const levelToggleSx = {
-  flexWrap: 'wrap',
-  '& .MuiToggleButton-root': {
-    minHeight: 0,
-    px: 1.25,
-    py: 0.5,
-    ...TEXT_STYLES.title,
-    fontSize: FONT_SIZES.xxs,
-    color: 'text.secondary',
-    borderColor: 'divider',
-  },
-};
-

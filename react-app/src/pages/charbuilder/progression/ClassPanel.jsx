@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -22,6 +22,7 @@ import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -175,14 +176,15 @@ export default function ClassPanel({ state, character, dispatch }) {
       }
     >
       <Stack spacing={0.75}>
-        <ToggleButtonGroup value={character.activeClassTab} exclusive size="small" onChange={(_, tab) => tab != null && dispatch({ type: 'class-tab/set', tab })}>
-          <ToggleButton value={0}>{character.className || 'Primary'} Lv {primaryLevel}</ToggleButton>
-          {character.extraClasses.map((extraClass, index) => (
-            <ToggleButton key={`${extraClass.name}-${index}`} value={index + 1}>
-              {extraClass.name || `Class ${index + 2}`} Lv {extraClass.level || 1}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <ChoiceToggle
+          wrap
+          value={character.activeClassTab}
+          onChange={(tab) => dispatch({ type: 'class-tab/set', tab })}
+          options={[
+            { value: 0, label: `${character.className || 'Primary'} Lv ${primaryLevel}` },
+            ...character.extraClasses.map((extraClass, index) => ({ value: index + 1, label: `${extraClass.name || `Class ${index + 2}`} Lv ${extraClass.level || 1}` })),
+          ]}
+        />
         {activeClass?.isHero && activeLevel < 3 ? (
           <Typography sx={{ ...BUILDER_TEXT.hint, color: 'warning.main' }}>
             {activeClass.name} is a hero class: it normally starts at level 3. Below that it needs your DM&apos;s permission.

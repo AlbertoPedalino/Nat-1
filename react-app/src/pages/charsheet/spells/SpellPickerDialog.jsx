@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import {
   getMaxLearnableSpellLevel,
@@ -11,7 +11,6 @@ import {
   getSpellcastingProfile,
   hasSpellcastingProfile,
 } from '../../../shared/character/spells/spellcasting.js';
-import { levelToggleSx } from './spellsTabStyles.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellSourceKey } from '../../../shared/character/spells/spellNameIndex.js';
@@ -31,6 +30,7 @@ import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // The sheet's Add / Remove Spell dialog: one caster class at a time, a spell
 // level, and the spells it may pick (spellPickerPool) — or, for a Wizard,
@@ -142,10 +142,7 @@ export function SpellPickerDialog({
             {activeIsWizard ? <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.info }}>Spellbook {activeSpellbookSize}</Typography> : null}
           </Box>
           {activeIsWizard ? (
-            <ToggleButtonGroup size="small" exclusive value={pickerWizardMode} onChange={(_, next) => next && setPickerWizardMode(next)} sx={levelToggleSx}>
-              <ToggleButton value="prepare">Prepare</ToggleButton>
-              <ToggleButton value="book">Spellbook</ToggleButton>
-            </ToggleButtonGroup>
+            <ChoiceToggle value={pickerWizardMode} onChange={setPickerWizardMode} options={WIZARD_MODES} />
           ) : null}
         </Box>
       ) : null}
@@ -158,19 +155,16 @@ export function SpellPickerDialog({
           density="compact"
         />
         <Box sx={{ overflowX: 'auto', pb: 0.25 }}>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
+          <ChoiceToggle
             value={pickerLevel}
-            onChange={(_, next) => next != null && setPickerLevel(next)}
-            sx={{ ...levelToggleSx, flexWrap: 'nowrap', minWidth: 'max-content' }}
-          >
-            {SPELL_LEVEL_LABELS.map((label, level) => (
-              <ToggleButton key={label} value={level} disabled={level > 0 && activePicker && level > activePicker.maxLevel}>
-                {level === 0 ? `Can ${activePicker?.bucket?.selectedCantrips?.length || 0}/${activeLimits.cantrips ?? '-'}` : `${level} ${activePicker?.bucket?.selectedSpells?.[level]?.length || 0}/${activeLimits.spells ?? '-'}`}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+            onChange={setPickerLevel}
+            options={SPELL_LEVEL_LABELS.map((label, level) => ({
+              value: level,
+              disabled: Boolean(level > 0 && activePicker && level > activePicker.maxLevel),
+              label: level === 0 ? `Can ${activePicker?.bucket?.selectedCantrips?.length || 0}/${activeLimits.cantrips ?? '-'}` : `${level} ${activePicker?.bucket?.selectedSpells?.[level]?.length || 0}/${activeLimits.spells ?? '-'}`,
+            }))}
+            sx={{ minWidth: 'max-content' }}
+          />
         </Box>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, maxHeight: '58vh', overflowY: 'auto' }}>

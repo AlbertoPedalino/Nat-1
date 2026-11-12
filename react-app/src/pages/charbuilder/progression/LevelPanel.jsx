@@ -1,4 +1,4 @@
-import { Chip, Grid, MenuItem, Select, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Chip, Grid, MenuItem, Select, Stack, TextField } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
@@ -6,6 +6,7 @@ import { multiclassLevels, primaryClassLevel } from '../../../shared/character/p
 import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -49,10 +50,11 @@ export default function LevelPanel({ character, dispatch }) {
           </Select>
         </Grid>
         <Grid size={{ xs: 12, md: 'auto' }}>
-          <ToggleButtonGroup value={character.hpMode} exclusive size="small" onChange={(_, mode) => mode && dispatch({ type: 'hp/mode', mode })}>
-            <ToggleButton value="average">Average HP</ToggleButton>
-            <ToggleButton value="rolled">Manual HP</ToggleButton>
-          </ToggleButtonGroup>
+          <ChoiceToggle
+            value={character.hpMode}
+            onChange={(mode) => dispatch({ type: 'hp/mode', mode })}
+            options={[{ value: 'average', label: 'Average HP' }, { value: 'rolled', label: 'Manual HP' }]}
+          />
         </Grid>
         {/* The level picks take the room the HP toggle leaves, so they start
             right after it and wrap under each other. */}

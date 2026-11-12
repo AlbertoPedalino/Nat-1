@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getPB } from '../../../shared/character/sheet/sheetStats.js';
@@ -29,14 +29,7 @@ import {
   setPrimalDamageTypePatch,
   summonPrimalBeastPatch,
 } from '../../../shared/character/forms/primalCompanionForm.js';
-import {
-  BeastNameLink,
-  BeastStatBlock,
-  CreatureOptionRow,
-  creatureHpBoxSx,
-  optionToggleSx,
-  subSx,
-} from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, CreatureOptionRow, creatureHpBoxSx, subSx } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
@@ -46,6 +39,7 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -129,32 +123,26 @@ export default function PrimalCompanionPanel({ character, sheet }) {
       </Box>
 
       <CreatureOptionRow label="Beast">
-        <ToggleButtonGroup
-          size="small"
-          exclusive
+        <ChoiceToggle
+          size="xs"
+          wrap
+          stopPropagation
           value={companion.beast}
-          onChange={(event, value) => { event.stopPropagation(); if (value && value !== companion.beast) summon(value); }}
-          sx={{ flexWrap: 'wrap' }}
-        >
-          {PRIMAL_BEASTS.map((beast) => (
-            <ToggleButton key={beast.name} value={beast.name} sx={optionToggleSx}>{beast.short}</ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+          onChange={summon}
+          options={PRIMAL_BEASTS.map((beast) => ({ value: beast.name, label: beast.short }))}
+        />
       </CreatureOptionRow>
 
       {damageTypes.length > 1 ? (
         <CreatureOptionRow label="Beast's Strike damage">
-          <ToggleButtonGroup
-            size="small"
-            exclusive
+          <ChoiceToggle
+            size="xs"
+            wrap
+            stopPropagation
             value={companion.damageType}
-            onChange={(event, value) => { event.stopPropagation(); if (value) save(setPrimalDamageTypePatch(companion, value)); }}
-            sx={{ flexWrap: 'wrap' }}
-          >
-            {damageTypes.map((type) => (
-              <ToggleButton key={type} value={type} sx={optionToggleSx}>{type}</ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+            onChange={(type) => save(setPrimalDamageTypePatch(companion, type))}
+            options={damageTypes.map((type) => ({ value: type, label: type }))}
+          />
         </CreatureOptionRow>
       ) : null}
 

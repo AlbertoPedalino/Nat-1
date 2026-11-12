@@ -1,15 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
@@ -21,13 +11,7 @@ import {
 } from '../../../shared/character/forms/summonedCreatures.js';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
-import {
-  BeastNameLink,
-  BeastStatBlock,
-  CreatureOptionRow,
-  optionToggleSx,
-  subSx,
-} from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, CreatureOptionRow, subSx } from './BeastStatBlock.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
@@ -37,6 +21,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -145,34 +130,26 @@ export default function SummonedCreaturePanel({
       </Box>
       {versions.length > 1 ? (
         <CreatureOptionRow label="Form">
-          <ToggleButtonGroup
-            size="small"
-            exclusive
+          <ChoiceToggle
+            size="xs"
+            wrap
+            stopPropagation
             value={activeVersion?.name || ''}
-            onChange={(event, value) => { event.stopPropagation(); if (value && !hasFixedChoice) setSelectedVersion(value); }}
-            sx={{ flexWrap: 'wrap' }}
-          >
-            {versions.map((version) => (
-              <ToggleButton key={version.name} value={version.name} disabled={hasFixedChoice} sx={optionToggleSx}>
-                {variantToken(version.name)}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+            onChange={(name) => { if (!hasFixedChoice) setSelectedVersion(name); }}
+            options={versions.map((version) => ({ value: version.name, label: variantToken(version.name), disabled: hasFixedChoice }))}
+          />
         </CreatureOptionRow>
       ) : null}
       {creatureTypeChoices.length > 1 ? (
         <CreatureOptionRow label="Creature Type">
-          <ToggleButtonGroup
-            size="small"
-            exclusive
+          <ChoiceToggle
+            size="xs"
+            wrap
+            stopPropagation
             value={activeCreatureType}
-            onChange={(event, value) => { event.stopPropagation(); if (value) setSelectedCreatureType(value); }}
-            sx={{ flexWrap: 'wrap' }}
-          >
-            {creatureTypeChoices.map((type) => (
-              <ToggleButton key={type} value={type} sx={optionToggleSx}>{capitalize(type || 'Creature')}</ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+            onChange={setSelectedCreatureType}
+            options={creatureTypeChoices.map((type) => ({ value: type, label: capitalize(type || 'Creature') }))}
+          />
         </CreatureOptionRow>
       ) : null}
       {!config.levelClass && config.minimumSpellLevel ? (

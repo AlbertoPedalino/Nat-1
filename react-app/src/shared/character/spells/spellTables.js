@@ -3,6 +3,13 @@
 
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 
+// A Wizard picks spells two ways: the ones prepared today, or the ones copied
+// into the spellbook. The builder and the sheet's picker offer the same two.
+export const WIZARD_MODES = Object.freeze([
+  Object.freeze({ value: 'prepare', label: 'Prepare' }),
+  Object.freeze({ value: 'book', label: 'Spellbook' }),
+]);
+
 export const FULL_SLOTS = {
   1: [2], 2: [3], 3: [4, 2], 4: [4, 3], 5: [4, 3, 2], 6: [4, 3, 3], 7: [4, 3, 3, 1],
   8: [4, 3, 3, 2], 9: [4, 3, 3, 3, 1], 10: [4, 3, 3, 3, 2], 11: [4, 3, 3, 3, 2, 1],
