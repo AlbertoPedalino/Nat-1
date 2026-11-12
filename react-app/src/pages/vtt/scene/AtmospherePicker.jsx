@@ -19,7 +19,7 @@ import {
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { ATMOSPHERE_PRESETS } from '../../../shared/vtt/scene/atmosphere.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
@@ -70,7 +70,8 @@ function AtmosphereOption({ type, selected, onSelect }) {
         textTransform: 'none',
         '&:hover': {
           borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
-          bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint),
+          // Over the control's own solid surface, not in place of it.
+          ...tintedSurfaceSx(VTT_COLORS.accent, { base: VTT_COLORS.surface }),
           color: VTT_COLORS.text,
         },
       }}

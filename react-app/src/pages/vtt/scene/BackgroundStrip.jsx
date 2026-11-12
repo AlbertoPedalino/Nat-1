@@ -9,7 +9,7 @@ import { useStoredFlag } from '../../../shared/ui/useStoredFlag.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
@@ -266,7 +266,8 @@ const addSx = {
   borderRadius: 1,
   color: VTT_COLORS.accent,
   border: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
+  // Washed over the strip's own surface, so the tile stays solid.
+  '&:hover': tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.soft, base: VTT_COLORS.surface }),
 };
 
 // The folded strip is one of the map's round buttons, with its count.

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Box, Button, IconButton, Tooltip, Typography, alpha } from '@mui/material';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { AlertTriangle, Archive, Check, Trash2 } from 'lucide-react';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
@@ -23,7 +23,8 @@ import { isItemCarried, itemQty } from '../../../shared/character/inventory/weig
 import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
 import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 import ItemExtras from './ItemExtras.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
@@ -90,7 +91,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, bgcolor: item.equipped ? uiAlpha(UI_COLORS.secondaryStrong, OPACITY.wash) : (!carried ? uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong) : UI_COLORS.surfaceHeader), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(item.equipped ? tintedSurfaceSx(UI_COLORS.secondaryStrong, { amount: OPACITY.wash }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
@@ -149,7 +150,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
                 gap: 0.5,
                 borderColor: ITEM_ATTUNEMENT,
                 color: ITEM_ATTUNEMENT,
-                bgcolor: alpha(ITEM_ATTUNEMENT, OPACITY.fill),
+                // Washed over the summary's header tone, so the chip stays solid.
+                ...tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.fill, base: UI_COLORS.surfaceHeader }),
               }}
             >
               <Box component="span">

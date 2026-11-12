@@ -16,6 +16,7 @@ import {
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
@@ -218,11 +219,15 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             />
           );
           const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.edge) : UI_COLORS.edge;
-          const rowBg = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.wash) : UI_COLORS.surfaceHeader;
+          // A chosen row: the accent washed over the row's header tone, not in
+          // place of it, so the row stays solid.
+          const rowSurface = count > 0
+            ? tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash, base: UI_COLORS.surfaceHeader })
+            : { bgcolor: UI_COLORS.surfaceHeader };
 
           if (!dbItem) {
             return (
-              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 2, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
+              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 2, borderColor: rowBorder, borderRadius: 1, ...rowSurface }}>
                 <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
                 {unavailable ? (
                   <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
@@ -235,7 +240,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           return (
             <ExpandableCard
               key={value}
-              containerSx={{ border: 2, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
+              containerSx={{ border: 2, borderColor: rowBorder, borderRadius: 1, ...rowSurface, overflow: 'hidden' }}
               detailsSx={ITEM_DETAILS_SX}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (

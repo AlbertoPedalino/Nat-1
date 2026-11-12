@@ -43,11 +43,28 @@ export function scrollWellSx(maxHeight) {
   return { ...SURFACES.inset, maxHeight, overflow: 'auto' };
 }
 
+// A surface lit in a tone (the combatant whose turn it is, the step to take
+// next, a chosen option, a callout): the tone laid as a wash OVER a solid
+// base, never in place of it. A translucent background would let the page's
+// drawings show through what is being read. `amount` is how strong the wash
+// is (an OPACITY step); `base` the solid surface under it.
+export function tintedSurfaceSx(tone, { amount = OPACITY.tint, base = 'background.paper' } = {}) {
+  return { bgcolor: base, backgroundImage: washImage(tone, amount) };
+}
+
+// The wash alone, as a background image: laid over whatever background the
+// element already has (a lit button half, a toggle under the cursor), so a
+// solid fill stays solid. tintedSurfaceSx when the element needs its base too.
+export function washImage(tone, amount = OPACITY.tint) {
+  const wash = uiAlpha(tone, amount);
+  return `linear-gradient(${wash}, ${wash})`;
+}
+
 // A callout in a tone, set apart from the dialog or list it sits in: a
 // concluded negotiation, a rolled fumble, a condition's rules card. The 2px
 // edge in its tone over a soft wash of it. `tone` is a palette colour (hex).
 export function calloutSx(tone) {
-  return { border: 2, borderColor: tone, borderRadius: 1, bgcolor: uiAlpha(tone, OPACITY.soft) };
+  return { border: 2, borderColor: tone, borderRadius: 1, ...tintedSurfaceSx(tone, { amount: OPACITY.soft }) };
 }
 
 // The empty track of a meter (a combatant's HP bar, the encounter's XP bar, a
@@ -99,7 +116,7 @@ export const SURFACES = Object.freeze({
   }),
   // A light row or tile laid on the page: list entries, stat tiles.
   wash: Object.freeze({
-    bgcolor: uiAlpha(UI_COLORS.white, OPACITY.faint),
+    ...tintedSurfaceSx(UI_COLORS.white, { amount: OPACITY.faint }),
     border: 2,
     borderColor: UI_COLORS.edge,
     borderRadius: 1,

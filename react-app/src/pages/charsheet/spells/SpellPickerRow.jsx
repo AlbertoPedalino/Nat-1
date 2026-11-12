@@ -7,7 +7,8 @@ import {
   SpellRowLabel,
   SpellSelectButton,
 } from '../../../shared/character/spells/SpellReference.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
@@ -30,7 +31,7 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
       summary={({ toggle }) => (
         <Box
           onClick={toggle}
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.75, cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.success, OPACITY.soft) : 'transparent' }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.75, cursor: 'pointer', ...(selected ? tintedSurfaceSx(UI_COLORS.success, { amount: OPACITY.soft }) : { bgcolor: 'transparent' }) }}
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.5 }} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />

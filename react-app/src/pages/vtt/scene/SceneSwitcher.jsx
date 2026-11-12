@@ -6,7 +6,8 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import MapMenu from '../map/MapMenu.jsx';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
@@ -87,7 +88,8 @@ const buttonSx = {
   '&:hover': {
     color: VTT_COLORS.accent,
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
-    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft),
+    // Washed over the top bar's own header tone, so the button stays solid.
+    ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.soft, base: UI_COLORS.surfaceHeader }),
   },
 };
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, Button, CircularProgress, ListItemText, MenuItem, Stack, Typography } from '@mui/material';
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_STRIP } from '../map/MapCornerPopout.jsx';
 import MapMenu from '../map/MapMenu.jsx';
@@ -279,9 +279,10 @@ const placeableSx = {
   touchAction: 'pan-x',
 };
 
-// The same colour as the halo on the acting piece, so the two read as one.
+// The same colour as the halo on the acting piece, so the two read as one:
+// washed over the strip's own surface, so the entry stays solid.
 const activeEntrySx = {
-  bgcolor: vttAlpha(VTT_COLORS.turnActive, OPACITY.fill),
+  ...tintedSurfaceSx(VTT_COLORS.turnActive, { amount: OPACITY.fill, base: VTT_COLORS.surface }),
   borderColor: VTT_COLORS.turnActive,
   color: VTT_COLORS.text,
   boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.strong)}`,

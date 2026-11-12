@@ -80,7 +80,8 @@ export function readoutSx({ clickable = false, tone = null } = {}) {
 // score): a readout on the header tint. What is pressed is a stat tile
 // (charsheet StatTile) or a button.
 export function tileSx({ tone = null } = {}) {
-  return { ...readoutSx({ tone }), bgcolor: UI_COLORS.surfaceHeader };
+  // The header tint alone: the readout's white wash is not laid over it.
+  return { ...readoutSx({ tone }), bgcolor: UI_COLORS.surfaceHeader, backgroundImage: 'none' };
 }
 
 // A <button> that wears no button look of its own: a card, a row, a chip or a

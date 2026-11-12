@@ -9,10 +9,10 @@ import {
   itemQty,
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
 
@@ -43,7 +43,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
       <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatPounds(maxCarry)}</b></Box>
       <Box sx={statPillSx}>Value: <b>{formatCopper(totalCopper) || '0 gp'}</b></Box>
-      <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, OPACITY.tint) : UI_COLORS.surfaceHeader, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.accentText, fontFamily: UI_FONTS.display } }}>
+      <Box sx={{ ...statPillSx, ...(over ? tintedSurfaceSx(UI_COLORS.danger, { base: UI_COLORS.surfaceHeader }) : null), borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.accentText, fontFamily: UI_FONTS.display } }}>
         Attuned: <b>{attunedCount} / {attunementLimit}</b>{over ? ' (over limit)' : ''}
       </Box>
       <Box sx={{ width: '100%', mt: 0.25 }}>
@@ -52,7 +52,7 @@ export default function InventoryStats({ inv, currency, character: C, attunement
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: FONT_SIZES.sm, mt: 0.25 }}>
           <Box sx={{ color: 'text.secondary', fontFamily: UI_FONTS.display }}>{formatWeight(totalWeight)} / {formatPounds(maxCarry)}</Box>
-          <Box sx={{ px: 0.75, py: 0.25, borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, OPACITY.fill) : uiAlpha(UI_COLORS.success, OPACITY.fill), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xs }}>
+          <Box sx={{ px: 0.75, py: 0.25, borderRadius: 1, ...tintedSurfaceSx(overloaded ? UI_COLORS.danger : UI_COLORS.success, { amount: OPACITY.fill }), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xs }}>
             {overloaded ? 'Over Capacity' : 'OK'}
           </Box>
         </Box>

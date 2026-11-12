@@ -13,11 +13,12 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { canAdvanceHex, missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -130,7 +131,7 @@ const moveBarSx = {
   border: '2px solid',
   borderColor: 'primary.main',
   borderRadius: 2,
-  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash),
+  ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }),
 };
 
 const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };

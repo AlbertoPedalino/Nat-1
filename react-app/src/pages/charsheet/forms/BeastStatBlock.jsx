@@ -4,13 +4,13 @@ import { getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 import { detailMetaSx, detailTitleSx } from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
@@ -297,13 +297,14 @@ const rollChipSx = {
   display: 'inline-flex',
   alignItems: 'baseline',
   border: INK_EDGE,
-  bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
+  // Washed over the stat block's paper, so the chip stays solid.
+  ...tintedSurfaceSx(UI_COLORS.accent),
   color: UI_COLORS.accentText,
   borderRadius: 0.5,
   px: '0.28em',
   py: 0,
   lineHeight: LINE_HEIGHTS.normal,
-  '&:hover': { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.shade) },
+  '&:hover': tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.shade }),
 };
 
 // A stat block's lines are a detail panel's quiet text.

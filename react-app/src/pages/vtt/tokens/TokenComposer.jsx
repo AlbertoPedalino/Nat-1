@@ -10,6 +10,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
@@ -139,7 +140,8 @@ const composerSx = {
   p: 1,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
+  // Darkened over the panel's own surface, so the composer stays solid.
+  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.shade, base: VTT_COLORS.surface }),
 };
 
 const draftSx = {

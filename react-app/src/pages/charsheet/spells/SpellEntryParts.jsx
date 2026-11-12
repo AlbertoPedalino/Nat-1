@@ -3,6 +3,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -32,7 +33,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 0.625, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.wash), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 0.625, ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>

@@ -19,7 +19,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
-import { SURFACES, calloutSx, meterTrackSx } from '../../../shared/ui/surfaces.js';
+import { SURFACES, calloutSx, meterTrackSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -223,7 +223,7 @@ const meterCardSx = {
 
 const prominentMeterSx = {
   borderColor: uiAlpha(UI_COLORS.secondary, OPACITY.edge),
-  bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.wash),
+  ...tintedSurfaceSx(UI_COLORS.secondary, { amount: OPACITY.wash }),
 };
 
 const meterLabelSx = {

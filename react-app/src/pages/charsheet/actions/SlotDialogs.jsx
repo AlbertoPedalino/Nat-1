@@ -2,9 +2,26 @@ import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+
+// A choice row of these dialogs (a slot level, an option): edged and washed in
+// the accent while chosen, a fainter wash under the cursor. The wash is laid
+// over the dialog's own surface, so nothing behind the dialog shows through.
+function optionRowSx(selected) {
+  return {
+    display: 'flex', alignItems: 'center', gap: 1, border: 2,
+    borderColor: selected ? UI_COLORS.accentText : UI_COLORS.edge,
+    borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
+    ...(selected ? tintedSurfaceSx(UI_COLORS.accentText, { base: UI_COLORS.surfaceDeep }) : null),
+    '&:hover': {
+      borderColor: UI_COLORS.accentText,
+      ...tintedSurfaceSx(UI_COLORS.accentText, { amount: OPACITY.wash, base: UI_COLORS.surfaceDeep }),
+    },
+  };
+}
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
 // the slot to create, convert or spend, the Wild Resurgence option, the Pact
@@ -64,13 +81,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
               <Box
                 key={level}
                 onClick={() => setCreateSlotSelection(level)}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
-                  borderColor: createSlotSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
-                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
-                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
-                }}
+                sx={optionRowSx(createSlotSelection === level)}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level}
@@ -106,13 +117,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
               <Box
                 key={level}
                 onClick={() => setConvertSlotSelection(level)}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
-                  borderColor: convertSlotSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
-                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
-                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
-                }}
+                sx={optionRowSx(convertSlotSelection === level)}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
@@ -141,11 +146,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
               <Box
                 key={opt.key}
                 onClick={() => { confirmWildResurgence(opt.key); }}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
-                  borderColor: UI_COLORS.edge, borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
-                }}
+                sx={optionRowSx(false)}
               >
                 <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
               </Box>
@@ -177,13 +178,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
               <Box
                 key={level}
                 onClick={() => setSpendSlotRecoverSelection(level)}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1, border: 2,
-                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.accentText : UI_COLORS.edge,
-                  borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
-                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.accentText, OPACITY.tint) : 'transparent',
-                  '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash) },
-                }}
+                sx={optionRowSx(spendSlotRecoverSelection === level)}
               >
                 <Typography sx={{ flex: 1, fontSize: FONT_SIZES.lg, color: 'text.primary' }}>
                   {SPELL_LEVEL_LABELS[level] || `Level ${level}`} · {available} available

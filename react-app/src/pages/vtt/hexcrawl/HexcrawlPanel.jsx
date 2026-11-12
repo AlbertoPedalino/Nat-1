@@ -5,7 +5,8 @@ import {
   CalendarDays, Compass, Dices, Footprints, Rabbit, Swords,
 } from 'lucide-react';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import {
   advanceMinutes, formatDate, formatCampaignDateTime, formatDuration, formatHM,
 } from '../../../shared/gmboard/campaignTime.js';
@@ -231,7 +232,7 @@ const nextHexSx = {
   border: '2px solid',
   borderColor: UI_COLORS.edge,
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
+  ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.wash, base: VTT_COLORS.surface }),
 };
 const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight, color: VTT_COLORS.accent };
 
@@ -249,7 +250,7 @@ const lastCardSx = {
   border: '2px solid',
   borderColor: UI_COLORS.edge,
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
+  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.shade, base: VTT_COLORS.surface }),
 };
 
 const lastHexSx = {

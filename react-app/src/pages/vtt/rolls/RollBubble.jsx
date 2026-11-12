@@ -3,11 +3,12 @@ import { Box, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
@@ -168,7 +169,8 @@ const closeSx = {
   justifyContent: 'center',
   borderRadius: '50%',
   color: 'text.secondary',
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.line),
+  // Darkened over the bubble's own fill, so the button stays solid.
+  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.line, base: UI_COLORS.bubble }),
 };
 
 // A natural 20 or 1 throws the bubble's shadow in its own colour.

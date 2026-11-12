@@ -1,6 +1,7 @@
 import { Box, ButtonBase, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { tintedSurfaceSx, washImage } from '../../../shared/ui/surfaces.js';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -52,7 +53,8 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
 const sectionSx = {
   borderRadius: 1,
   border: INK_EDGE,
-  bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.faint),
+  // Washed over the panel's own surface, so the section stays solid.
+  ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.faint, base: VTT_COLORS.surface }),
   overflow: 'hidden',
 };
 
@@ -64,7 +66,8 @@ const sectionHeaderSx = {
   px: 1,
   py: 0.75,
   color: VTT_COLORS.text,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
+  // Laid over the section's own solid wash.
+  '&:hover': { backgroundImage: washImage(VTT_COLORS.accent, OPACITY.soft) },
   // Inside the section's clipped frame, so the ring is drawn within the header.
   ...focusRingSx({ inset: true, tone: VTT_COLORS.accent }),
 };

@@ -15,6 +15,7 @@ import { BeastTitle, BeastStatBlock, CreatureOptionRow } from './BeastStatBlock.
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import DetailPanel, { DetailNote, detailStatus } from '../layout/DetailPanel.jsx';
@@ -193,10 +194,11 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         textTransform: 'none',
         color: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
         borderColor: available ? uiAlpha(UI_COLORS.success, OPACITY.strong) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.strong),
-        bgcolor: available ? uiAlpha(UI_COLORS.success, OPACITY.soft) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.soft),
+        // Washed over the outlined button's own raised surface, so it stays solid.
+        ...tintedSurfaceSx(available ? UI_COLORS.success : UI_COLORS.dangerMuted, { amount: OPACITY.soft, base: UI_COLORS.surfaceRaised }),
         '&:hover': {
           borderColor: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
-          bgcolor: available ? uiAlpha(UI_COLORS.success, OPACITY.fill) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.fill),
+          ...tintedSurfaceSx(available ? UI_COLORS.success : UI_COLORS.dangerMuted, { amount: OPACITY.fill, base: UI_COLORS.surfaceRaised }),
         },
       }}
     >

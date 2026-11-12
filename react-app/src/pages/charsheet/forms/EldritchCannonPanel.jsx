@@ -21,6 +21,7 @@ import {
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
@@ -211,7 +212,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft) } }}
+            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, ...tintedSurfaceSx(UI_COLORS.accentText, { amount: OPACITY.soft, base: UI_COLORS.surfaceRaised }) } }}
           >
             Activate Cannon
           </Button>

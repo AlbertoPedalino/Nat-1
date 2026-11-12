@@ -11,7 +11,7 @@ import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldrit
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 // The cannon's rules at a glance, folded under the active boards.
@@ -110,11 +110,12 @@ const rulesToggleSx = {
   border: 2,
   borderColor: UI_COLORS.edge,
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.strong),
+  // Washes over the panel's paper: the toggle stays solid.
+  ...tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }),
   cursor: 'pointer',
   '&:hover': {
     borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
-    bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft),
+    ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.soft }),
   },
 };
 
@@ -144,7 +145,7 @@ const rulesGroupSx = {
   border: 2,
   borderColor: UI_COLORS.edge,
   borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.surfaceHeader, OPACITY.edge),
+  ...tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.edge }),
 };
 
 const rulesGroupTitleSx = {

@@ -3,12 +3,12 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollTables.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import DetailPanel from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -142,7 +142,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               </Typography>
             ) : null}
             {result ? (
-              <Box sx={{ mt: 0.5, p: 0.5, bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.wash), borderRadius: 1 }}>
+              <Box sx={{ mt: 0.5, p: 0.5, ...tintedSurfaceSx(UI_COLORS.accentText, { amount: OPACITY.wash }), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
                     <Typography sx={{ fontSize: FONT_SIZES.sm, color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold, mb: 0.25 }}>

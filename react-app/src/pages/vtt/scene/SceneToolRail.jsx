@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 import { MousePointer2 } from 'lucide-react';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -117,7 +117,8 @@ const railButtonSx = {
   py: 0.75,
   borderRadius: 1,
   color: VTT_COLORS.textSecondary,
-  '&:hover': { color: VTT_COLORS.accent, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
+  // Washed over the rail's own surface, so the button stays solid.
+  '&:hover': { color: VTT_COLORS.accent, ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.soft, base: VTT_COLORS.surface }) },
 };
 
 const railButtonActiveSx = {

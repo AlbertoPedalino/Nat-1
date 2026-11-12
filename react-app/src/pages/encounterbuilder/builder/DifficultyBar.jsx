@@ -2,8 +2,8 @@ import { Box, LinearProgress, Stack, Typography } from '@mui/material';
 import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { SURFACES, meterTrackSx } from '../../../shared/ui/surfaces.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { SURFACES, meterTrackSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -33,7 +33,7 @@ export default function DifficultyBar({ encounter, party }) {
               p: 1,
               // The band the encounter falls in: edged in its colour.
               ...(difficulty.difficultyIndex === index
-                ? { borderColor: difficulty.color, bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint) }
+                ? { borderColor: difficulty.color, ...tintedSurfaceSx(UI_COLORS.accent) }
                 : null),
             }}
           >

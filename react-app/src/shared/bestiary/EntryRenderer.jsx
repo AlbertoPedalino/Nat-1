@@ -1,6 +1,7 @@
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import InlineText from './InlineText.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
+import { UI_COLORS, OPACITY } from '../ui/colors.js';
+import { tintedSurfaceSx } from '../ui/surfaces.js';
 import { TEXT_STYLES } from '../ui/textStyles.js';
 
 export default function EntryRenderer({ entries, onRoll }) {
@@ -66,7 +67,7 @@ export default function EntryRenderer({ entries, onRoll }) {
   }
   if (entries.type === 'insetReadaloud') {
     return (
-      <Box sx={{ ...TEXT_STYLES.note, my: 1, p: 1, borderLeft: '3px solid', borderColor: 'primary.main', bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.soft) }}>
+      <Box sx={{ ...TEXT_STYLES.note, my: 1, p: 1, borderLeft: '3px solid', borderColor: 'primary.main', ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.soft }) }}>
         <EntryRenderer entries={entries.entries} onRoll={onRoll} />
       </Box>
     );

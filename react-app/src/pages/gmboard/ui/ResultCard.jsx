@@ -1,10 +1,11 @@
-import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
+import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { microLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
 // Roll tab): a header band with an icon, a title and whatever `header` adds
@@ -35,7 +36,7 @@ export function ResultSlot({
   tone, icon: Icon, label, badges = null, dice, children,
 }) {
   return (
-    <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, OPACITY.soft) }}>
+    <Box sx={{ ...slotSx, borderLeftColor: tone, ...tintedSurfaceSx(tone, { amount: OPACITY.soft }) }}>
       {label ? (
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           {Icon ? <Icon size={ICON_SIZES.xs} color={tone} /> : null}

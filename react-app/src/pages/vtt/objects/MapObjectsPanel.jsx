@@ -15,6 +15,7 @@ import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
@@ -161,9 +162,10 @@ const objectButtonSx = {
   p: 0.5,
   borderRadius: 1,
   border: INK_EDGE,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),
+  // Washed over the panel's own surface, so the tile stays solid.
+  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.fill, base: VTT_COLORS.surface }),
   '&:hover': {
-    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint),
+    ...tintedSurfaceSx(VTT_COLORS.accent, { base: VTT_COLORS.surface }),
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),
   },
   '&:disabled': { opacity: OPACITY.edge, cursor: 'default' },

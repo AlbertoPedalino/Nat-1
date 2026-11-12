@@ -1,4 +1,4 @@
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { SURFACES, washImage } from '../../../shared/ui/surfaces.js';
 import { panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
@@ -199,8 +199,10 @@ export const sheetViewSx = {
   border: '2px solid',
   borderColor: 'gmboard.vtt.accentBorderStrong',
   borderRadius: 1.5,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.veil),
-  backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, OPACITY.faint)}, transparent 42%)`,
+  // The dark glass laid over the page's plain colour rather than over the page
+  // itself, so the paper's drawings do not show through the sheet.
+  bgcolor: UI_COLORS.page,
+  backgroundImage: `linear-gradient(145deg, ${vttAlpha(VTT_COLORS.white, OPACITY.faint)}, transparent 42%), ${washImage(VTT_COLORS.black, OPACITY.veil)}`,
   boxShadow: UI_SHADOWS.overlay,
   isolation: 'isolate',
   '& > *': {

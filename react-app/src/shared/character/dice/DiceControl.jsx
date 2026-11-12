@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Box, Button, ButtonGroup, Popover } from '@mui/material';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { actionButtonTextSx, actionButtonToneSx } from '../../ui/actionButton.js';
-import { SURFACES } from '../../ui/surfaces.js';
+import { SURFACES, washImage } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -97,8 +97,11 @@ function dividerSx(color = UI_COLORS.edge) {
   return { borderLeft: '2px solid', borderLeftColor: color };
 }
 
-// The half whose popover is open is lit.
-const openSx = { bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.fill) };
+// The half whose popover is open is lit: the wash laid over the button's own
+// solid background (replacing it would let the page show through), and kept
+// under the cursor.
+const OPEN_WASH = washImage(UI_COLORS.accent, OPACITY.fill);
+const openSx = { backgroundImage: OPEN_WASH, '&:hover': { backgroundImage: OPEN_WASH } };
 
 const settingsSx = { pb: 1, mb: 1, ...LIST_ROW_RULE_SX };
 

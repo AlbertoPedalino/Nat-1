@@ -8,13 +8,26 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
-import { SURFACES } from '../shared/ui/surfaces.js';
+import { SURFACES, washImage } from '../shared/ui/surfaces.js';
 
-const SELECTED_ROW_SX = {
-  color: UI_COLORS.textPrimary,
-  backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.shade),
-  boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
-};
+// A chosen row, on `base`: the surface it lies on (the paper of a list, the
+// raised surface of a menu). The accent is a wash over that base, not in
+// place of it (surfaces.js tintedSurfaceSx), and under the cursor the same
+// wash a step stronger. CSS names: the theme's overrides do not read `bgcolor`.
+function selectedRowSx(base) {
+  return {
+    '&.Mui-selected': {
+      color: UI_COLORS.textPrimary,
+      backgroundColor: base,
+      backgroundImage: washImage(UI_COLORS.accent, OPACITY.shade),
+      boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
+    },
+    '&.Mui-selected:hover': {
+      backgroundColor: base,
+      backgroundImage: washImage(UI_COLORS.accent, OPACITY.line),
+    },
+  };
+}
 
 export const theme = createTheme({
   palette: {
@@ -223,18 +236,13 @@ export const theme = createTheme({
     // A chosen row (lists, menus): an accent wash with a bar on its left edge.
     MuiListItemButton: {
       styleOverrides: {
-        root: {
-          '&.Mui-selected': SELECTED_ROW_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.line) },
-        },
+        root: selectedRowSx(UI_COLORS.surface),
       },
     },
+    // A menu item lies on the floating surface of its menu (SURFACES.floating).
     MuiMenuItem: {
       styleOverrides: {
-        root: {
-          '&.Mui-selected': SELECTED_ROW_SX,
-          '&.Mui-selected:hover': { backgroundColor: uiAlpha(UI_COLORS.accent, OPACITY.line) },
-        },
+        root: selectedRowSx(UI_COLORS.surfaceRaised),
       },
     },
     MuiOutlinedInput: {

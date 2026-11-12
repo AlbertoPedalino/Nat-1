@@ -1,7 +1,6 @@
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
@@ -16,7 +15,9 @@ export const mapIconButtonSx = {
   ...SURFACES.mapControl,
   ...PRESSABLE_EDGE_SX,
   color: VTT_COLORS.accent,
-  '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
+  // Its own solid surface under the cursor too (an icon button's hover would
+  // otherwise lay a see-through wash over the board).
+  '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], bgcolor: VTT_COLORS.surface },
 };
 
 // A panel floating over the board (the scene and hexcrawl corners, the tool

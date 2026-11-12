@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 
@@ -104,7 +105,8 @@ const phoneSurface = {
     color: 'primary.contrastText',
     px: 1.5,
     py: 0.75,
-    '&:hover': { bgcolor: uiAlpha(UI_COLORS.black, OPACITY.tint) },
+    // Darkened over the pill's gold, not see-through.
+    '&:hover': tintedSurfaceSx(UI_COLORS.black, { base: 'primary.main' }),
   },
 };
 

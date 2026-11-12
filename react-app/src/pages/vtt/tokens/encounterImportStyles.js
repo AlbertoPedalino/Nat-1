@@ -1,6 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
@@ -12,10 +13,11 @@ export const placementCardSx = {
   p: 1,
   borderRadius: 1,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
+  // Washed over the map dialog's own surface, so the card stays solid.
+  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.shade, base: VTT_COLORS.surface }),
   '&:hover': {
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),
-    bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),
+    ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.wash, base: VTT_COLORS.surface }),
   },
 };
 

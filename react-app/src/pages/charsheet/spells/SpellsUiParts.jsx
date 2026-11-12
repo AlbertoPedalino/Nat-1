@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { levelHeaderSx, panelSurfaceSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
@@ -79,7 +80,8 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
             sx={{
               width: 14, height: 14, borderRadius: '50%', cursor: dotCursor,
               border: '1.5px dashed', borderColor: UI_COLORS.success,
-              bgcolor: uiAlpha(UI_COLORS.success, OPACITY.tint),
+              // Washed over the panel's paper, so the dot stays solid.
+              ...tintedSurfaceSx(UI_COLORS.success),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               ...dotHover,
             }}

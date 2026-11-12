@@ -1,7 +1,8 @@
 import { FONT_SIZES } from './fonts.js';
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { UI_COLORS, OPACITY } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { toggleSx } from './pressable.js';
+import { washImage } from './surfaces.js';
 
 // The label of a compact action button in a button group (the sheet's Rest
 // group, the dice control): small uppercase display face, one line, the buttons of
@@ -18,11 +19,10 @@ export const actionButtonTextSx = {
 // button has, and a faint wash of the colour on hover — laid over the button's
 // own background, so a button with a solid fill (a floating one) stays solid.
 export function actionButtonToneSx(color) {
-  const wash = uiAlpha(color, OPACITY.soft);
   return {
     color,
     borderColor: UI_COLORS.edge,
-    '&:hover': { borderColor: UI_COLORS.edge, backgroundImage: `linear-gradient(${wash}, ${wash})` },
+    '&:hover': { borderColor: UI_COLORS.edge, backgroundImage: washImage(color, OPACITY.soft) },
   };
 }
 

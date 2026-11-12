@@ -1,10 +1,11 @@
 import { useId } from 'react';
-import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
+import { Box, Button, Typography, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { focusRingSx } from '../../ui/interactive.js';
+import { tintedSurfaceSx } from '../../ui/surfaces.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -76,8 +77,10 @@ function optionSx(tone, selected, dense) {
     textTransform: 'none',
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
     color: selected ? tone.color : (tone.dim || 'text.secondary'),
-    bgcolor: selected ? alpha(tone.color, OPACITY.fill) : 'transparent',
-    '&:hover': { borderColor: tone.color, bgcolor: alpha(tone.color, OPACITY.tint) },
+    // Flat while not chosen; chosen or under the cursor, its tone washed over
+    // the panel's paper rather than in place of it, so the option stays solid.
+    ...(selected ? tintedSurfaceSx(tone.color, { amount: OPACITY.fill }) : { bgcolor: 'transparent' }),
+    '&:hover': { borderColor: tone.color, ...tintedSurfaceSx(tone.color) },
     ...focusRingSx({ tone: tone.color }),
   };
 }

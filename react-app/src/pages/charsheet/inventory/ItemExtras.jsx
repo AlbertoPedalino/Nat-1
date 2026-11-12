@@ -6,7 +6,8 @@ import {
   isConsumableTome,
 } from '../../../shared/character/inventory/itemEffects.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -35,7 +36,7 @@ function TomeConsumePanel({ item, onConsume }) {
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.accentText }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
-        sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, borderColor: UI_COLORS.accentText, color: UI_COLORS.accentText, '&:hover': { bgcolor: uiAlpha(UI_COLORS.accentText, OPACITY.soft), borderColor: UI_COLORS.accentText } }}>
+        sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, borderColor: UI_COLORS.accentText, color: UI_COLORS.accentText, '&:hover': { ...tintedSurfaceSx(UI_COLORS.accentText, { amount: OPACITY.soft, base: UI_COLORS.surfaceRaised }), borderColor: UI_COLORS.accentText } }}>
         Read & Consume
       </Button>
     </CardSection>

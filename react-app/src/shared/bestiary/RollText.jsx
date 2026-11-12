@@ -4,6 +4,7 @@ import { advArgFor } from '../character/dice/advantage.js';
 import { advTag, situationalNote, useStatRollSources } from './statRolls.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
 import { BARE_BUTTON_SX } from '../ui/interactive.js';
+import { tintedSurfaceSx } from '../ui/surfaces.js';
 
 // An inline roller in a stat block ("+5", "2d6 + 3", "Dex +4"). A d20 test
 // also takes a one-off advantage/disadvantage on right-click or long press,
@@ -43,13 +44,12 @@ function RollButton(props) {
 const rollableSx = {
   ...BARE_BUTTON_SX,
   border: `2px solid ${uiAlpha(UI_COLORS.secondary, OPACITY.edge)}`,
-  bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.tint),
+  // Washed over the stat block's paper, so the roller stays solid.
+  ...tintedSurfaceSx(UI_COLORS.secondary),
   color: UI_COLORS.secondaryText,
   borderRadius: 0.5,
   px: '0.25rem',
   py: 0,
   mx: '0.1rem',
-  '&:hover': {
-    bgcolor: uiAlpha(UI_COLORS.secondary, OPACITY.shade),
-  },
+  '&:hover': tintedSurfaceSx(UI_COLORS.secondary, { amount: OPACITY.shade }),
 };
