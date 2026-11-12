@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
 import { isBookAllowed } from '../../../shared/content/sourcePriority.js';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -11,6 +11,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -57,18 +58,18 @@ export default function SubclassPanel({ character, dispatch }) {
   return (
     <BuilderPanel id="panel-subclass" tone={ENTITY_COLORS.subclass} title={isExtra ? `${title} — ${extra?.name || ''}` : title} icon={GAME_ICONS.subclass} note={`Unlock level ${unlockLevel}`}>
       <Stack spacing={1.5}>
-        <FormControl fullWidth size="small">
-          <InputLabel>{title}</InputLabel>
-          <Select label={title} value={subclassShortName} disabled={Boolean(fixed)} onChange={(event) => onChange(event.target.value)}>
-            <MenuItem value="">None</MenuItem>
-            {subclasses.map((subclass) => (
-              <MenuItem key={`${subclass.shortName || subclass.name}-${subclass.source}`} value={subclass.shortName || subclass.name}>
-                {subclass.name || subclass.shortName} ({subclass.source})
-              </MenuItem>
-            ))}
-          </Select>
-          {fixed ? <FormHelperText>The subclass of this hero class is fixed.</FormHelperText> : null}
-        </FormControl>
+        <SelectField
+          label={title}
+          value={subclassShortName}
+          disabled={Boolean(fixed)}
+          onChange={onChange}
+          emptyOption={{ label: 'None' }}
+          options={subclasses.map((subclass) => ({
+            value: subclass.shortName || subclass.name,
+            label: `${subclass.name || subclass.shortName} (${subclass.source})`,
+          }))}
+          helperText={fixed ? 'The subclass of this hero class is fixed.' : null}
+        />
         {subclassShortName ? (
           <Box sx={{ maxHeight: 450, overflowY: 'auto', overflowX: 'hidden', minWidth: 0 }}>
             <Stack spacing={0.5} sx={{ minWidth: 0 }}>

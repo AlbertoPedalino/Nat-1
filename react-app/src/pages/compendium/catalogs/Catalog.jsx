@@ -1,6 +1,6 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import {
-  Box, Button, MenuItem, Stack, TextField, Typography,
+  Box, Button, Stack, Typography,
 } from '@mui/material';
 import { List } from 'react-window';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -20,6 +20,7 @@ import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -95,20 +96,17 @@ export default function Catalog({
         <SearchField value={filters.search} onChange={set('search')} placeholder={`Search ${label}…`} ariaLabel={`Search ${label}`} />
         <Box sx={controlsSx}>
           {selects.map((control) => (
-            <TextField
+            <SelectField
               key={control.key}
-              select
-              size="small"
               label={control.label}
               value={filters[control.key]}
-              onChange={(event) => set(control.key)(event.target.value)}
+              onChange={set(control.key)}
+              emptyOption={control.any ? { label: 'Any' } : undefined}
+              emptyValue={control.any || undefined}
+              options={control.options.map((option) => ({ value: option.key, label: option.label }))}
+              fullWidth={false}
               sx={controlSx}
-            >
-              {control.any ? <MenuItem value={control.any}>Any</MenuItem> : null}
-              {control.options.map((option) => (
-                <MenuItem key={option.key} value={option.key}>{option.label}</MenuItem>
-              ))}
-            </TextField>
+            />
           ))}
           {ranges.map((field) => {
             const [minKey, maxKey] = rangeFilterKeys(field);

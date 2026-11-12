@@ -1,23 +1,22 @@
 import { Cloud } from 'lucide-react';
-import { Box, MenuItem, TextField } from '@mui/material';
+import { Box } from '@mui/material';
 import { cloudBadgeSx, instanceNameSx, instanceRowSx } from './encounterImportStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // The Encounter Builder save to import from; one only in the cloud is badged.
 export default function EncounterSaveSelect({
   instances, value, onPick, fetching,
 }) {
   return (
-    <TextField
-      select
-      size="small"
+    <SelectField
       label="Encounter builder"
       value={value}
-      onChange={(event) => onPick(event.target.value)}
+      onChange={onPick}
       helperText={fetching ? 'Downloading from the cloud…' : null}
-    >
-      {instances.map((instance) => (
-        <MenuItem key={instance.id} value={instance.id}>
+      options={instances.map((instance) => ({
+        value: instance.id,
+        label: (
           <Box component="span" sx={instanceRowSx}>
             <Box component="span" sx={instanceNameSx}>{instance.name || instance.id}</Box>
             {instance.hasLocal ? null : (
@@ -27,8 +26,8 @@ export default function EncounterSaveSelect({
               </Box>
             )}
           </Box>
-        </MenuItem>
-      ))}
-    </TextField>
+        ),
+      }))}
+    />
   );
 }

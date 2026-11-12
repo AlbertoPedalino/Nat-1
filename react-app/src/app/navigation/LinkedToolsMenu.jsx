@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Button, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Network, Plus, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
@@ -20,6 +20,7 @@ import { TOOL_CATALOG } from './toolCatalog.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import SheetDialog from '../../shared/ui/SheetDialog.jsx';
+import SelectField from '../../shared/ui/SelectField.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
@@ -244,34 +245,31 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                   {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Caption component="div" sx={{ mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
                     Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
                   </Caption>}
-                  {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
+                  {row.sectionKey === 'campaign' && <SelectField
                     label={`Time, weather & tables for ${row.name}`} sx={{ mt: 1 }}
-                    slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
                     value={row.hexcrawlBoardId || ''}
                     disabled={disabled || !campaignBoards.length || (campaignBoards.length === 1 && Boolean(row.hexcrawlBoardId))}
-                    onChange={(event) => handleSelectBoard(row, event.target.value)}>
-                    {!row.hexcrawlBoardId && <MenuItem value="" disabled>
-                      {campaignBoards.length ? 'Choose a GM Board' : 'Link a GM Board to use time, weather and tables'}
-                    </MenuItem>}
-                    {campaignBoards.map((board) => <MenuItem key={board.id} value={board.id}>
-                      {campaignBoards.length === 1 ? `Automatic: ${board.name}` : board.name}
-                    </MenuItem>)}
-                  </TextField>}
-                  {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
+                    placeholder={campaignBoards.length ? 'Choose a GM Board' : 'Link a GM Board to use time, weather and tables'}
+                    options={campaignBoards.map((board) => ({
+                      value: board.id,
+                      label: campaignBoards.length === 1 ? `Automatic: ${board.name}` : board.name,
+                    }))}
+                    onChange={(value) => handleSelectBoard(row, value)} />}
+                  {row.sectionKey === 'campaign' && <SelectField
                     label="Dungeon fights" sx={{ mt: 1 }}
-                    slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
                     value={dungeonSelection} disabled={disabled || !dungeonBuilders.length || singleDungeonBuilder}
                     helperText="Destination for new fights. Previously sent fights stay in their original builder."
-                    onChange={(event) => handleSelectDungeonEncounter(row, event.target.value)}>
-                    {!dungeonSelection && <MenuItem value="" disabled>
-                      {dungeonBuilders.length ? 'Choose an Encounter Builder' : 'Link an Encounter Builder to send dungeon fights'}
-                    </MenuItem>}
-                    {row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
-                      && <MenuItem value={row.dungeonEncounterId} disabled>Previously selected builder is no longer linked</MenuItem>}
-                    {dungeonBuilders.map((tool) => <MenuItem key={tool.id} value={tool.id}>
-                      {singleDungeonBuilder ? `Automatic: ${tool.name}` : tool.name}
-                    </MenuItem>)}
-                  </TextField>}
+                    placeholder={dungeonBuilders.length ? 'Choose an Encounter Builder' : 'Link an Encounter Builder to send dungeon fights'}
+                    options={[
+                      ...(row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
+                        ? [{ value: row.dungeonEncounterId, label: 'Previously selected builder is no longer linked', disabled: true }]
+                        : []),
+                      ...dungeonBuilders.map((tool) => ({
+                        value: tool.id,
+                        label: singleDungeonBuilder ? `Automatic: ${tool.name}` : tool.name,
+                      })),
+                    ]}
+                    onChange={(value) => handleSelectDungeonEncounter(row, value)} />}
                 </Box>
                 {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
                   size="small" disabled={working} aria-label={`Open ${row.name}`} onClick={() => setOpen(false)}>Open</Button>}
@@ -280,16 +278,16 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
             })}
           </Stack>
           {!linkedRows.length && <EmptyLine>No other tools are linked yet.</EmptyLine>}
-          {adding ? <TextField select fullWidth size="small" label="Add a tool or campaign" value="" disabled={disabled}
-            onChange={(event) => {
-              const value = event.target.value;
+          {adding ? <SelectField label="Add a tool or campaign" value="" disabled={disabled}
+            options={[
+              ...SECTION_KEYS.map((key) => ({ value: `new:${key}`, label: `New ${TOOL_UI[key].label}` })),
+              ...candidates.map((row) => ({ value: rowKey(row), label: `${row.name} · ${TOOL_UI[row.sectionKey].label}` })),
+            ]}
+            onChange={(value) => {
               if (value.startsWith('new:')) handleCreate(value.slice(4));
               else handleLink(candidates.find((row) => rowKey(row) === value));
               setAdding(false);
-            }}>
-            {SECTION_KEYS.map((key) => <MenuItem key={`new:${key}`} value={`new:${key}`}>New {TOOL_UI[key].label}</MenuItem>)}
-            {candidates.map((row) => <MenuItem key={rowKey(row)} value={rowKey(row)}>{row.name} · {TOOL_UI[row.sectionKey].label}</MenuItem>)}
-          </TextField> : <Button startIcon={<Plus size={ICON_SIZES.md} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
+            }} /> :<Button startIcon={<Plus size={ICON_SIZES.md} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
         </Stack>}
     </SheetDialog>
   </>;

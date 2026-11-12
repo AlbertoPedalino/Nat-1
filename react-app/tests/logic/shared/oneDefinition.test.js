@@ -613,7 +613,7 @@ test('a thin frame or rule is drawn only by its recipe, board pieces and tiny ma
     'shared/character/combat/DeathSaveDots.jsx', 'shared/ui/PipButton.jsx', 'shared/ui/MiniBadge.jsx',
     'shared/bestiary/EntryRenderer.jsx', 'pages/gmboard/tables/TableEditorGrid.jsx',
     'shared/ui/interactive.js', 'shared/ui/PanelHeader.jsx',
-    'shared/character/inventory/CurrencyCoinBox.jsx', 'shared/character/progression/XpDeltaControl.jsx',
+    'shared/character/progression/XpDeltaControl.jsx',
   ];
   assert.deepEqual(sourceLinesMatching(thin, { allow }), []);
 });
@@ -767,4 +767,30 @@ test('a short table of facts is a LabelValueGrid', () => {
 
 test("a dialog's Cancel is the CancelButton", () => {
   assert.deepEqual(sourceFilesMatching(/>Cancel<\/Button>/, { allow: ['shared/ui/SheetDialog.jsx'] }), []);
+});
+
+// TextField's `select` may sit on a line of its own, after props holding arrows
+// or strings that mention "select"; quoted text is stepped over as a whole.
+const DROP_DOWN = /<Select\b|<select\b|NativeSelect|component="select"|<TextField\b(?:=>|"[^"]*"|'[^']*'|`[^`]*`|[^>"'`])*?\sselect(?=\s|\/?>|=\{)/;
+
+test('a drop-down is a SelectField', () => {
+  for (const sample of [
+    '<TextField\n  select\n  size="small"',
+    '<TextField size="small" onChange={(e) => go(e)} select>',
+    '<TextField select={true} />',
+    '<Select value={x}>',
+    '<Box component="select">',
+  ]) assert.match(sample, DROP_DOWN);
+  for (const sample of [
+    '<TextField placeholder="Type or select one" />',
+    '<SelectField value={x} />',
+  ]) assert.doesNotMatch(sample, DROP_DOWN);
+  assert.deepEqual(sourceFilesMatching(DROP_DOWN, { allow: ['shared/ui/SelectField.jsx'] }), []);
+});
+
+// A − and + around a count is the CountStepper (the dice pickers through
+// DiceCountPicker): a hand-made pair of "-"/"+" buttons is one a change to the
+// stepper never reaches.
+test('a count stepper is the CountStepper', () => {
+  assert.deepEqual(sourceFilesMatching(/>\s*[-−+]\s*<\/(Button|IconButton)>/, { allow: ['shared/ui/CountStepper.jsx'] }), []);
 });

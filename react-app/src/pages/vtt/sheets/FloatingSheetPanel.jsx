@@ -18,12 +18,12 @@ import {
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { clamp } from '../../../shared/numbers.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
+import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -270,21 +270,19 @@ export default function FloatingSheetPanel({
         <Typography sx={titleSx}>Sheet</Typography>
         <Box sx={{ flex: 1 }} />
         {choices.length > 1 || (choices.length && !picked) ? (
-          <Box
-            component="select"
-            aria-label="Character sheet"
+          // Native, so its list opens inside a fullscreen map too. No
+          // character picked: a stat block is on show.
+          <SelectField
+            native
+            ariaLabel="Character sheet"
             value={picked ? selectedId : ''}
-            onChange={(event) => onSelectionChange(event.target.value)}
+            onChange={onSelectionChange}
+            placeholder="Character…"
+            options={choices.map((entry) => ({ value: entry.characterId, label: entry.name }))}
+            fullWidth={false}
+            onMap
             sx={selectSx}
-          >
-            {/* No character picked: a stat block is on show. */}
-            {picked ? null : <option value="" disabled>Character…</option>}
-            {choices.map((entry) => (
-              <option key={entry.characterId} value={entry.characterId}>
-                {entry.name}
-              </option>
-            ))}
-          </Box>
+          />
         ) : null}
         <IconButton size="small" aria-label="Close floating sheet" onClick={onClose} sx={closeSx}>
           <X size={ICON_SIZES.sm} />
@@ -349,21 +347,7 @@ const titleSx = {
   
 };
 
-const selectSx = {
-  width: { xs: 145, sm: 220 },
-  height: CONTROL_HEIGHTS.lg,
-  px: 0.75,
-  border: INK_EDGE,
-  borderRadius: 1,
-  outline: 0,
-  bgcolor: VTT_COLORS.surfaceRaised,
-  color: VTT_COLORS.text,
-  fontFamily: 'inherit',
-  fontSize: FONT_SIZES.md,
-  cursor: 'pointer',
-  '&:focus': { borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy) },
-  '& option': { bgcolor: VTT_COLORS.surfaceRaised, color: VTT_COLORS.text },
-};
+const selectSx = { width: { xs: 145, sm: 220 } };
 
 const closeSx = {
   color: VTT_COLORS.textSecondary,

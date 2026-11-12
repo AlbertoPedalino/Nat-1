@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { consumePactSlot, consumeSlot, getAvailablePactSlots, getRegularSlotUsed, persistCreatedSlots } from '../../../shared/character/spells/spellSlots.js';
@@ -32,6 +32,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 const sectionSx = {
   ...SURFACES.panel,
@@ -42,12 +43,7 @@ const labelSx = {
   fontSize: FONT_SIZES.xs,
   color: UI_COLORS.accentText,
 };
-const selectSx = {
-  flex: 1,
-  minWidth: 150,
-  fontSize: FONT_SIZES.md,
-  '& .MuiSelect-select': { py: 0.75 },
-};
+const selectSx = { flex: 1, minWidth: 150 };
 
 function availableSlotOptions(regularSlots, pactSlots, sheet) {
   const used = sheet?.spellSlotUsed || {};
@@ -192,22 +188,28 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
           Spend a level 1+ spell slot; the replicated item regains charges equal to the slot level.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
-          <Select size="small" displayEmpty value={chargeSource} onChange={(event) => setChargeSource(event.target.value)} sx={selectSx}>
-            <MenuItem value=""><em>Select charged item…</em></MenuItem>
-            {chargeable.map((item) => (
-              <MenuItem key={item.craftedFrom} value={item.craftedFrom}>
-                {itemDisplayName(item)} ({itemChargeCurrent(item)}/{itemChargeMaximum(item)})
-              </MenuItem>
-            ))}
-          </Select>
-          <Select size="small" displayEmpty value={chargeLevel} onChange={(event) => setChargeLevel(event.target.value)} sx={{ ...selectSx, minWidth: 115, flex: '0 1 135px' }}>
-            <MenuItem value=""><em>Slot level…</em></MenuItem>
-            {slotOptions.map(({ key, source, level, available }) => (
-              <MenuItem key={key} value={key}>
-                Level {level} · {source === 'pact' ? 'Pact Magic' : 'Regular'} ({available})
-              </MenuItem>
-            ))}
-          </Select>
+          <SelectField
+            value={chargeSource}
+            onChange={setChargeSource}
+            emptyOption={{ label: 'Select charged item…' }}
+            options={chargeable.map((item) => ({
+              value: item.craftedFrom,
+              label: `${itemDisplayName(item)} (${itemChargeCurrent(item)}/${itemChargeMaximum(item)})`,
+            }))}
+            fullWidth={false}
+            sx={selectSx}
+          />
+          <SelectField
+            value={chargeLevel}
+            onChange={setChargeLevel}
+            emptyOption={{ label: 'Slot level…' }}
+            options={slotOptions.map(({ key, source, level, available }) => ({
+              value: key,
+              label: `Level ${level} · ${source === 'pact' ? 'Pact Magic' : 'Regular'} (${available})`,
+            }))}
+            fullWidth={false}
+            sx={{ ...selectSx, minWidth: 115, flex: '0 1 135px' }}
+          />
         </Stack>
         {selectedChargeItem ? (
           <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 0.5 }}>
@@ -224,10 +226,14 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
           Destroy a Common item for a level 1 slot, or an Uncommon/Rare item for a level 2 slot. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5}>
-          <Select size="small" displayEmpty value={drainSource} onChange={(event) => setDrainSource(event.target.value)} sx={selectSx}>
-            <MenuItem value=""><em>Select replicated item…</em></MenuItem>
-            {drainable.map((item) => <MenuItem key={item.craftedFrom} value={item.craftedFrom}>{itemDisplayName(item)} · {rarityLabel(item)}</MenuItem>)}
-          </Select>
+          <SelectField
+            value={drainSource}
+            onChange={setDrainSource}
+            emptyOption={{ label: 'Select replicated item…' }}
+            options={drainable.map((item) => ({ value: item.craftedFrom, label: `${itemDisplayName(item)} · ${rarityLabel(item)}` }))}
+            fullWidth={false}
+            sx={selectSx}
+          />
           <Button variant="contained" size="small" onClick={drainItem} disabled={readOnly || !selectedDrainItem || drainUses <= 0}>Drain</Button>
         </Stack>
       </Box>
@@ -238,14 +244,22 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
           Transform one replicated item into a different item based on another plan you know. Once per Long Rest.
         </Typography>
         <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
-          <Select size="small" displayEmpty value={transmuteSource} onChange={(event) => { setTransmuteSource(event.target.value); setTransmuteTarget(''); }} sx={selectSx}>
-            <MenuItem value=""><em>Transform item…</em></MenuItem>
-            {sourceOptions.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
-          </Select>
-          <Select size="small" displayEmpty value={transmuteTarget} onChange={(event) => setTransmuteTarget(event.target.value)} sx={selectSx}>
-            <MenuItem value=""><em>Into known plan…</em></MenuItem>
-            {targetOptions.map((option) => <MenuItem key={option.plan} value={option.plan}>{option.label}</MenuItem>)}
-          </Select>
+          <SelectField
+            value={transmuteSource}
+            onChange={(value) => { setTransmuteSource(value); setTransmuteTarget(''); }}
+            emptyOption={{ label: 'Transform item…' }}
+            options={sourceOptions}
+            fullWidth={false}
+            sx={selectSx}
+          />
+          <SelectField
+            value={transmuteTarget}
+            onChange={setTransmuteTarget}
+            emptyOption={{ label: 'Into known plan…' }}
+            options={targetOptions.map((option) => ({ value: option.plan, label: option.label }))}
+            fullWidth={false}
+            sx={selectSx}
+          />
           <Button variant="contained" size="small" onClick={transmuteItem} disabled={readOnly || !transmuteSource || !selectedTarget || transmuteUses <= 0}>Transmute</Button>
         </Stack>
       </Box>

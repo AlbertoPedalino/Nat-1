@@ -1,4 +1,4 @@
-import { Grid, MenuItem, Select, Stack, TextField } from '@mui/material';
+import { Grid, Stack, TextField } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
@@ -7,6 +7,7 @@ import { activeClassCharacter, activeExtraClass } from '../state/activeClass.js'
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -43,11 +44,12 @@ export default function LevelPanel({ character, dispatch }) {
     >
       <Grid container spacing={1.5} sx={{ alignItems: 'center' }}>
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'block', md: 'none' } }}>
-          <Select fullWidth value={currentLevel} onChange={(event) => setLevel(Number(event.target.value))}>
-            {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
-              <MenuItem key={level} value={level}>Level {level}</MenuItem>
-            ))}
-          </Select>
+          <SelectField
+            ariaLabel="Class level"
+            value={currentLevel}
+            onChange={(value) => setLevel(Number(value))}
+            options={Array.from({ length: maxLv }, (_, index) => ({ value: index + 1, label: `Level ${index + 1}` }))}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 'auto' }}>
           <ChoiceToggle

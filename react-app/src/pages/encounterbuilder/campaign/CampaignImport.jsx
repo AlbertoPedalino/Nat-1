@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { clampInt } from '../../../shared/numbers.js';
@@ -11,6 +11,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -54,20 +55,15 @@ export default function CampaignImport() {
         {selected ? (
           <>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <FormControl size="small" fullWidth>
-                <InputLabel>Campaign</InputLabel>
-                <Select
-                  label="Campaign"
-                  value={selected.id}
-                  onChange={(event) => setSelectedId(event.target.value)}
-                >
-                  {campaignPlayers.campaigns.map((campaign) => (
-                    <MenuItem key={campaign.id} value={campaign.id}>
-                      {campaign.name} ({campaign.players.length})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <SelectField
+                label="Campaign"
+                value={selected.id}
+                onChange={setSelectedId}
+                options={campaignPlayers.campaigns.map((campaign) => ({
+                  value: campaign.id,
+                  label: `${campaign.name} (${campaign.players.length})`,
+                }))}
+              />
               <Button
                 variant="outlined"
                 startIcon={<Users size={ICON_SIZES.sm} />}

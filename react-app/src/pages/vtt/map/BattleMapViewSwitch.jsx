@@ -1,11 +1,10 @@
-import { Button, MenuItem, Stack, TextField } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { PanelRightClose, ScrollText } from 'lucide-react';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 export default function BattleMapViewSwitch({
   view,
@@ -26,26 +25,16 @@ export default function BattleMapViewSwitch({
   return (
     <Stack direction="row" spacing={0.75} sx={rootSx}>
       {showingSheet && (choices.length > 1 || (choices.length && !picked)) ? (
-        <TextField
-          select
-          size="small"
+        <SelectField
+          ariaLabel="Character sheet"
           value={picked ? selectedId : ''}
-          onChange={(event) => onSelectionChange(event.target.value)}
+          onChange={onSelectionChange}
+          placeholder="Character…"
+          options={choices.map((entry) => ({ value: entry.characterId, label: entry.name }))}
+          fullWidth={false}
+          onMap
           sx={selectSx}
-          slotProps={{
-            select: {
-              displayEmpty: true,
-              renderValue: (value) => choices.find((entry) => entry.characterId === value)?.name || 'Character…',
-              inputProps: { 'aria-label': 'Character sheet' },
-            },
-          }}
-        >
-          {choices.map((entry) => (
-            <MenuItem key={entry.characterId} value={entry.characterId}>
-              {entry.name}
-            </MenuItem>
-          ))}
-        </TextField>
+        />
       ) : null}
 
       <Button
@@ -70,14 +59,7 @@ const rootSx = {
   flexShrink: 0,
 };
 
-const selectSx = {
-  width: { xs: 148, sm: 210 },
-  '& .MuiInputBase-root': {
-    height: CONTROL_HEIGHTS.xl,
-    bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
-    fontSize: FONT_SIZES.md,
-  },
-};
+const selectSx = { width: { xs: 148, sm: 210 } };
 
 const buttonSx = {
   minWidth: 92,

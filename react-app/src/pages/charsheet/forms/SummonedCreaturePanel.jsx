@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
@@ -22,6 +22,7 @@ import { detailPanelSx, detailTitleSx } from '../layout/layout.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -153,20 +154,18 @@ export default function SummonedCreaturePanel({
         </CreatureOptionRow>
       ) : null}
       {!config.levelClass && config.minimumSpellLevel ? (
-        <FormControl size="small" sx={{ mb: 0.75, minWidth: 130 }}>
-          <InputLabel>Spell Slot</InputLabel>
-          <Select
-            label="Spell Slot"
-            value={resolvedSpellLevel}
-            onChange={(event) => setSelectedSpellLevel(Number(event.target.value))}
-            onClick={(event) => event.stopPropagation()}
-          >
-            {Array.from(
-              { length: 10 - Number(config.minimumSpellLevel) },
-              (_, index) => Number(config.minimumSpellLevel) + index,
-            ).map((level) => <MenuItem key={level} value={level}>Level {level}</MenuItem>)}
-          </Select>
-        </FormControl>
+        <SelectField
+          label="Spell Slot"
+          value={resolvedSpellLevel}
+          onChange={(value) => setSelectedSpellLevel(Number(value))}
+          stopPropagation
+          options={Array.from(
+            { length: 10 - Number(config.minimumSpellLevel) },
+            (_, index) => Number(config.minimumSpellLevel) + index,
+          ).map((level) => ({ value: level, label: `Level ${level}` }))}
+          fullWidth={false}
+          sx={{ mb: 0.75, minWidth: 130 }}
+        />
       ) : null}
       <BeastStatBlock
         b={creature}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, MenuItem, Select } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { ChevronDown, ChevronRight, SlidersHorizontal, X } from 'lucide-react';
 import { RICH_TEXT_ACCENT } from '../../ui/entityColors.js';
 import {
@@ -8,13 +8,14 @@ import {
   emptyItemFilters,
   rangeFilterKeys,
 } from './itemFilters.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { goldToggleSx } from '../../ui/actionButton.js';
 import RangeInputs from '../../ui/RangeInputs.jsx';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SURFACES } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import SelectField from '../../ui/SelectField.jsx';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -44,15 +45,6 @@ const labelSx = {
   whiteSpace: 'nowrap',
 };
 
-const controlSx = {
-  width: '100%',
-  fontSize: FONT_SIZES.md,
-  bgcolor: UI_COLORS.surfaceHeader,
-  borderRadius: 1,
-  '& .MuiSelect-select': { py: 0.75 },
-};
-
-
 const gridSx = {
   ...SURFACES.inset,
   display: 'grid',
@@ -64,15 +56,7 @@ const gridSx = {
   p: 1,
 };
 
-const placeholderSx = { color: 'text.secondary', opacity: OPACITY.heavy };
-const menuProps = { PaperProps: { sx: { maxHeight: 320 } } };
-const menuItemSx = { fontSize: FONT_SIZES.lg };
-
 const ANY = 'Any';
-
-function Placeholder() {
-  return <Box component="span" sx={placeholderSx}>{ANY}</Box>;
-}
 
 function FilterRow({ label, children }) {
   return (
@@ -83,69 +67,28 @@ function FilterRow({ label, children }) {
   );
 }
 
-function ChoiceSelect({ value, options, onChange }) {
+function ChoiceSelect({ label, value, options, onChange }) {
   return (
-    <Select
-      size="small"
-      displayEmpty
+    <SelectField
+      ariaLabel={label}
       value={value || ''}
-      onChange={(event) => onChange(event.target.value)}
-      MenuProps={menuProps}
-      sx={controlSx}
-      renderValue={(selected) => (selected || <Placeholder />)}
-    >
-      <MenuItem value=""><Placeholder /></MenuItem>
-      {options.map((option) => (
-        <MenuItem key={option} value={option} sx={menuItemSx}>{option}</MenuItem>
-      ))}
-    </Select>
+      onChange={onChange}
+      emptyOption={{ label: ANY }}
+      options={options.map((option) => ({ value: option, label: option }))}
+    />
   );
 }
 
-function SelectedChips({ values }) {
+function MultiChoiceSelect({ label, value, options, onChange }) {
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-      {values.map((value) => (
-        <Box
-          key={value}
-          component="span"
-          sx={{
-            px: 0.75,
-            border: 2,
-            borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
-            borderRadius: 0.375,
-            bgcolor: uiAlpha(UI_COLORS.accent, OPACITY.tint),
-            color: UI_COLORS.accentText,
-            fontSize: FONT_SIZES.xs,
-          }}
-        >
-          {value}
-        </Box>
-      ))}
-    </Box>
-  );
-}
-
-function MultiChoiceSelect({ value, options, onChange }) {
-  const selected = Array.isArray(value) ? value : [];
-  return (
-    <Select
-      size="small"
+    <SelectField
       multiple
-      displayEmpty
-      value={selected}
-      onChange={(event) => {
-        const next = event.target.value;
-        onChange(typeof next === 'string' ? next.split(',') : next);
-      }}
-      MenuProps={menuProps}
-      sx={controlSx}
-      renderValue={(picked) => (picked.length ? <SelectedChips values={picked} /> : <Placeholder />)}
-    >
-      {options.map((option) => (
-        <MenuItem key={option} value={option} sx={menuItemSx}>{option}</MenuItem>
-      ))}
-    </Select>
+      ariaLabel={label}
+      value={value}
+      onChange={onChange}
+      placeholder={ANY}
+      options={options.map((option) => ({ value: option, label: option }))}
+    />
   );
 }
 
@@ -209,12 +152,14 @@ export default function ItemFilterPanel({ filters, onChange, options, sx }) {
               <FilterRow key={field.key} label={field.label}>
                 {field.kind === 'multiSelect' ? (
                   <MultiChoiceSelect
+                    label={field.label}
                     value={filters[field.key]}
                     options={fieldOptions}
                     onChange={(value) => setField(field.key, value)}
                   />
                 ) : (
                   <ChoiceSelect
+                    label={field.label}
                     value={filters[field.key]}
                     options={fieldOptions}
                     onChange={(value) => setField(field.key, value)}

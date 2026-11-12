@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography, useTheme,
+  Box, Button, CircularProgress, Stack, TextField, Typography, useTheme,
 } from '@mui/material';
 import {
   Coins, Dices, Flame, Leaf, Swords, Trash2, Users,
@@ -19,6 +19,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // The dungeon this map is being played as.
 //
@@ -54,32 +55,24 @@ export default function DungeonPanel({
           slotProps={{ htmlInput: { min: MIN_ROOM_COUNT, max: MAX_ROOM_COUNT } }}
           sx={{ width: 90 }}
         />
-        <TextField
-          select
-          size="small"
+        <SelectField
           label="How busy"
           value={popMode}
           disabled={busy}
-          onChange={(event) => setPopMode(event.target.value)}
+          onChange={setPopMode}
+          options={DUNGEON_POPULATION_OPTIONS.map((option) => ({ value: option.id, label: `${option.label} · ${option.sub}` }))}
+          fullWidth={false}
           sx={{ flex: 1 }}
-        >
-          {DUNGEON_POPULATION_OPTIONS.map((option) => (
-            <MenuItem key={option.id} value={option.id}>{option.label} · {option.sub}</MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          select
-          size="small"
+        />
+        <SelectField
           label="Tier"
           value={tier}
           disabled={busy}
-          onChange={(event) => setTier(Number(event.target.value))}
+          onChange={(value) => setTier(Number(value))}
+          options={TIER_OPTIONS.map((option) => ({ value: option.tier, label: option.shortLabel }))}
+          fullWidth={false}
           sx={{ width: 92 }}
-        >
-          {TIER_OPTIONS.map((option) => (
-            <MenuItem key={option.tier} value={option.tier}>{option.shortLabel}</MenuItem>
-          ))}
-        </TextField>
+        />
       </Stack>
 
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>

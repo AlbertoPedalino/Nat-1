@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
@@ -21,6 +21,7 @@ import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
 import SearchField from '../ui/SearchField.jsx';
 import FilterToggles from '../ui/FilterToggles.jsx';
+import SelectField from '../ui/SelectField.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -74,20 +75,24 @@ export default function MonsterBrowser({
           placeholder="Search monsters…"
           ariaLabel="Search monsters"
         />
-        <FormControl size="small" sx={{ minWidth: 130 }}>
-          <InputLabel>CR</InputLabel>
-          <Select label="CR" value={filters.cr} onChange={(event) => onFilterChange('cr', event.target.value)}>
-            <MenuItem value="">All CR</MenuItem>
-            {CR_OPTIONS.map(({ key, label }) => <MenuItem key={key} value={key}>{label}</MenuItem>)}
-          </Select>
-        </FormControl>
-        <FormControl size="small" sx={{ minWidth: 170 }}>
-          <InputLabel>Type</InputLabel>
-          <Select label="Type" value={filters.type} onChange={(event) => onFilterChange('type', event.target.value)}>
-            <MenuItem value="">All types</MenuItem>
-            {CREATURE_TYPE_OPTIONS.map(({ key, label }) => <MenuItem key={key} value={key}>{label}</MenuItem>)}
-          </Select>
-        </FormControl>
+        <SelectField
+          label="CR"
+          value={filters.cr}
+          onChange={(value) => onFilterChange('cr', value)}
+          emptyOption={{ label: 'All CR' }}
+          options={CR_OPTIONS.map(({ key, label }) => ({ value: key, label }))}
+          fullWidth={false}
+          sx={{ minWidth: 130 }}
+        />
+        <SelectField
+          label="Type"
+          value={filters.type}
+          onChange={(value) => onFilterChange('type', value)}
+          emptyOption={{ label: 'All types' }}
+          options={CREATURE_TYPE_OPTIONS.map(({ key, label }) => ({ value: key, label }))}
+          fullWidth={false}
+          sx={{ minWidth: 170 }}
+        />
       </Stack>
 
       <Caption>

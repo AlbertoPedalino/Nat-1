@@ -76,7 +76,9 @@ describe('BattleMapViewSwitch', () => {
     const select = screen.getByRole('combobox');
     expect(select).toHaveTextContent('Character…');
     fireEvent.mouseDown(select);
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['Arannis']);
+    // The prompt is listed as every drop-down's is, but cannot be picked.
+    const pickable = screen.getAllByRole('option').filter((option) => option.getAttribute('aria-disabled') !== 'true');
+    expect(pickable.map((option) => option.textContent)).toEqual(['Arannis']);
     fireEvent.click(screen.getByRole('option', { name: 'Arannis' }));
     expect(onSelectionChange).toHaveBeenCalledWith('c1');
   });

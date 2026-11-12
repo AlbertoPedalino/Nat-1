@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Button,
-  MenuItem,
   Popover,
   Slider,
   Stack,
@@ -18,6 +17,7 @@ import { ATMOSPHERE_ICONS, AtmospherePicker, atmospherePresetsByType } from './A
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -65,17 +65,13 @@ function ImageLightSection({ scene, onImageFilterChange }) {
         label={showingBackground ? 'Light on this background' : 'Light on the battlemap'}
         hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night."
       />
-      <TextField
-        select
-        size="small"
+      <SelectField
+        ariaLabel="Light filter"
         value={filter.type}
-        onChange={(event) => setFilter({ type: event.target.value })}
-        slotProps={{ select: { inputProps: { 'aria-label': 'Light filter' } } }}
-      >
-        {IMAGE_FILTER_PRESETS.map((preset) => (
-          <MenuItem key={preset.value} value={preset.value}>{preset.label}</MenuItem>
-        ))}
-      </TextField>
+        onChange={(type) => setFilter({ type })}
+        options={IMAGE_FILTER_PRESETS.map((preset) => ({ value: preset.value, label: preset.label }))}
+        fullWidth={false}
+      />
       {filter.type === 'none' ? null : (
         <Slider
           size="small"
@@ -92,6 +88,13 @@ function ImageLightSection({ scene, onImageFilterChange }) {
     </Stack>
   );
 }
+
+const WIND_SPEEDS = [
+  { value: 0.5, label: 'Slow' },
+  { value: 1, label: 'Normal' },
+  { value: 1.5, label: 'Fast' },
+  { value: 2, label: 'Violent' },
+];
 
 // The weather of the picture on show, kept per picture like its light: the
 // battlemap under a storm, the tavern background dry.
@@ -183,19 +186,14 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
               slotProps={{ htmlInput: { min: 0, max: 359, step: 1 } }}
               sx={numberSx}
             />
-            <TextField
-              select
-              size="small"
+            <SelectField
               label="Movement"
               value={atmosphere.speed}
-              onChange={(event) => setAtmosphere({ speed: Number(event.target.value) })}
+              onChange={(speed) => setAtmosphere({ speed: Number(speed) })}
+              options={WIND_SPEEDS}
+              fullWidth={false}
               sx={{ flex: 1 }}
-            >
-              <MenuItem value={0.5}>Slow</MenuItem>
-              <MenuItem value={1}>Normal</MenuItem>
-              <MenuItem value={1.5}>Fast</MenuItem>
-              <MenuItem value={2}>Violent</MenuItem>
-            </TextField>
+            />
           </Stack>
         </Stack>
       )}

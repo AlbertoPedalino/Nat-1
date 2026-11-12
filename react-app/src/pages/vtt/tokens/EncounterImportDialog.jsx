@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, FormControlLabel, MenuItem, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
 import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
@@ -18,6 +18,7 @@ import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
@@ -125,38 +126,31 @@ export default function EncounterImportDialog({
             {fetchNotice ? <Typography sx={noticeSx}>{fetchNotice}</Typography> : null}
 
             {quests.length ? (
-              <TextField
-                select
-                size="small"
+              <SelectField
                 label="Quest"
                 value={questKey}
-                onChange={(event) => setQuestKey(event.target.value)}
-              >
-                <MenuItem value={ANY_QUEST}>All quests</MenuItem>
-                {quests.map((quest) => (
-                  <MenuItem key={quest} value={questValue(quest)}>{quest}</MenuItem>
-                ))}
-                {unquested ? <MenuItem value={NO_QUEST}>No quest</MenuItem> : null}
-              </TextField>
+                onChange={setQuestKey}
+                emptyOption={{ label: 'All quests' }}
+                emptyValue={ANY_QUEST}
+                options={[
+                  ...quests.map((quest) => ({ value: questValue(quest), label: quest })),
+                  ...(unquested ? [{ value: NO_QUEST, label: 'No quest' }] : []),
+                ]}
+              />
             ) : null}
 
-            <TextField
-              select
-              size="small"
+            <SelectField
               label="Encounter"
               value={currentKey}
-              onChange={(event) => setEntryKey(event.target.value)}
+              onChange={setEntryKey}
               disabled={!visible.length}
               helperText={visible.length
                 ? null
                 : fetching ? 'Waiting for the cloud copy…' : (entries.length
                   ? 'No encounter in this quest.'
                   : 'This save has no encounter to import yet.')}
-            >
-              {visible.map((entry) => (
-                <MenuItem key={entry.key} value={entry.key}>{entry.name}</MenuItem>
-              ))}
-            </TextField>
+              options={visible.map((entry) => ({ value: entry.key, label: entry.name }))}
+            />
 
             <FormControlLabel
               control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}

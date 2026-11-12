@@ -6,7 +6,6 @@ import {
   Typography,
   Stack,
   TextField,
-  MenuItem,
   Chip,
   IconButton,
   Divider,
@@ -38,6 +37,7 @@ import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import TagChip from '../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
+import SelectField from '../../shared/ui/SelectField.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { BARE_BUTTON_SX } from '../../shared/ui/interactive.js';
 
@@ -275,20 +275,14 @@ export default function CampaignsPage() {
                     )}
 
                     {assignable.length > 0 ? (
-                      <TextField
-                        select
-                        size="small"
+                      <SelectField
                         value=""
-                        fullWidth
                         sx={characterSelectSx}
                         label="Add one of my characters"
-                        onChange={(e) => assignChar(e.target.value, c.id)}
+                        options={assignable.map((mc) => ({ value: mc.id, label: mc.name || mc.id }))}
+                        onChange={(value) => assignChar(value, c.id)}
                         disabled={busy}
-                      >
-                        {assignable.map((mc) => (
-                          <MenuItem key={mc.id} value={mc.id}>{mc.name || mc.id}</MenuItem>
-                        ))}
-                      </TextField>
+                      />
                     ) : null}
                   </Box>
                 );

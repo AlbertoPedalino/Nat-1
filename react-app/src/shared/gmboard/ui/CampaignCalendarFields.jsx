@@ -9,6 +9,7 @@ import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
+import SelectField from '../../ui/SelectField.jsx';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -99,19 +100,15 @@ function DateTimeForm({ clock, disabled, onChange }) {
           slotProps={{ htmlInput: { inputMode: 'numeric' } }}
         />
         {/* Native, so its list opens inside a fullscreen map too. */}
-        <TextField
-          select
-          size="small"
+        <SelectField
+          native
           label="Month"
           value={month}
-          onChange={(event) => setMonth(event.target.value)}
+          onChange={setMonth}
           disabled={disabled}
-          slotProps={{ select: { native: true } }}
-        >
-          {MONTH_NAMES.map((name, index) => (
-            <option key={name} value={String(index + 1)}>{name}</option>
-          ))}
-        </TextField>
+          options={MONTH_OPTIONS}
+          fullWidth={false}
+        />
         <TextField
           size="small"
           label="Year"
@@ -135,6 +132,8 @@ function DateTimeForm({ clock, disabled, onChange }) {
     </Box>
   );
 }
+
+const MONTH_OPTIONS = MONTH_NAMES.map((name, index) => ({ value: String(index + 1), label: name }));
 
 // The quick steps of time passing, shared with the GM Board's clock bar.
 export const QUICK_HOURS = Object.freeze([1, 4, 8, 24]);

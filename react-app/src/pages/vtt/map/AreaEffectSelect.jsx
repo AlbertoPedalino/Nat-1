@@ -1,26 +1,29 @@
-import { Box, MenuItem, TextField } from '@mui/material';
+import { Box } from '@mui/material';
 import { AREA_EFFECTS } from '../../../shared/vtt/map/areas.js';
+import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // The effect an area paints inside itself, each named with its colour dot.
 // `onChange` gets the effect key, or null for a plain area.
 export default function AreaEffectSelect({ value, onChange, sx = null }) {
   return (
-    <TextField
-      select
+    <SelectField
       label="Effect"
-      size="small"
       value={value || 'none'}
-      onChange={(event) => onChange(event.target.value === 'none' ? null : event.target.value)}
+      onChange={(next) => onChange(next === 'none' ? null : next)}
+      emptyOption={{ label: 'None' }}
+      emptyValue="none"
+      options={AREA_EFFECTS.map((effect) => ({
+        value: effect.key,
+        label: (
+          <>
+            <Box component="span" sx={{ ...effectDotSx, bgcolor: effect.color }} />
+            {effect.label}
+          </>
+        ),
+      }))}
+      fullWidth={false}
       sx={sx}
-    >
-      <MenuItem value="none">None</MenuItem>
-      {AREA_EFFECTS.map((effect) => (
-        <MenuItem key={effect.key} value={effect.key}>
-          <Box component="span" sx={{ ...effectDotSx, bgcolor: effect.color }} />
-          {effect.label}
-        </MenuItem>
-      ))}
-    </TextField>
+    />
   );
 }
 
