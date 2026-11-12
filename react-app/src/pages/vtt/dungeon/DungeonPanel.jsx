@@ -18,6 +18,7 @@ import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
 // The dungeon this map is being played as.
 //
@@ -295,26 +296,20 @@ const roomMetaSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary' };
 
 
 const dragSx = {
+  ...DRAG_SOURCE_SX,
   alignItems: 'center',
   p: 0.5,
   borderRadius: 1,
   border: '1px dashed',
   borderColor: 'primary.main',
-  cursor: 'grab',
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
 };
 
 const markerSx = {
+  ...DRAG_SOURCE_SX,
   px: 0.5,
   py: 0.25,
   borderRadius: 1,
   border: '1px dashed',
   borderColor: 'divider',
   fontSize: FONT_SIZES.sm,
-  cursor: 'grab',
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
 };

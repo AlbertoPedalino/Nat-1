@@ -1,14 +1,13 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { Skull, Swords } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
-import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
+import PiecePreview from './PiecePreview.jsx';
 import TokenComposer from './TokenComposer.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
-import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import RosterCharacterList from './RosterCharacterList.jsx';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -43,61 +42,17 @@ export default function RosterPanel({
           </Caption>
         ) : null}
 
-        <Stack spacing={0.5}>
-          {roster.map((entry) => {
-            const isPlaced = placed.has(entry.characterId);
-            const placement = {
-              kind: 'character',
-              characterId: entry.characterId,
-              token: {
-                characterId: entry.characterId,
-                label: entry.name,
-                color: entry.color,
-                className: entry.className,
-                deathSaves: entry.deathSaves,
-                imageUrl: portraits[entry.portraitPath] || null,
-                layer: 'tokens',
-                w: 1,
-                h: 1,
-              },
-            };
-            return (
-              <Box
-                key={entry.characterId}
-                onPointerDown={(event) => {
-                  if (isPlaced || placementDisabled || busy) return;
-                  beginPiecePointerDrag(event, placement, {
-                    onPlacementDragStart,
-                    onPlacementDragEnd,
-                  });
-                }}
-                sx={{
-                  ...rowSx,
-                  cursor: isPlaced || placementDisabled || busy ? 'default' : 'grab',
-                }}
-              >
-                <PiecePreview token={{
-                  characterId: entry.characterId,
-                  label: entry.name,
-                  color: entry.color,
-                  className: entry.className,
-                  imageUrl: portraits[entry.portraitPath] || null,
-                }} />
-                <Typography sx={nameSx}>{entry.name}</Typography>
-                <Button
-                  size="small"
-                  variant={isPlaced ? 'text' : 'outlined'}
-                  disabled={busy || (!isPlaced && placementDisabled)}
-                  onClick={() => (isPlaced
-                    ? onRemoveCharacter?.(entry)
-                    : onPlaceCharacter(entry))}
-                >
-                  {isPlaced ? 'Remove' : 'Place'}
-                </Button>
-              </Box>
-            );
-          })}
-        </Stack>
+        <RosterCharacterList
+          roster={roster}
+          portraits={portraits}
+          placed={placed}
+          busy={busy}
+          placementDisabled={placementDisabled}
+          onPlaceCharacter={onPlaceCharacter}
+          onRemoveCharacter={onRemoveCharacter}
+          onPlacementDragStart={onPlacementDragStart}
+          onPlacementDragEnd={onPlacementDragEnd}
+        />
 
         {/* New pieces land on the layer being edited: there is no separate
             "hidden token" button, because the GM layer is a layer. */}
@@ -141,21 +96,6 @@ export default function RosterPanel({
   );
 }
 
-const rowSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  py: 0.25,
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
-};
 
 const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };
 
-const nameSx = {
-  ...ONE_LINE_SX,
-  flex: 1,
-  minWidth: 0,
-  fontSize: FONT_SIZES.xxl,
-};

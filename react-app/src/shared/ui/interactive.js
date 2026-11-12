@@ -69,3 +69,13 @@ export const BARE_BUTTON_SX = Object.freeze({
   textAlign: 'left',
   cursor: 'pointer',
 });
+
+// Something dragged out onto the battle map (a creature, a map object, a
+// room's marker, a roster row): the grab cursor, no text selection or iOS
+// callout while it is held, and a vertical swipe still scrolls its list.
+export const DRAG_SOURCE_SX = Object.freeze({
+  cursor: 'grab',
+  touchAction: 'pan-y',
+  WebkitTouchCallout: 'none',
+  userSelect: 'none',
+});

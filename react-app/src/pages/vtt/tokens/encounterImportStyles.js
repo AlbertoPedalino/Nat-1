@@ -2,8 +2,10 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
 export const placementCardSx = {
+  ...DRAG_SOURCE_SX,
   display: 'flex',
   alignItems: 'center',
   gap: 1.25,
@@ -11,9 +13,6 @@ export const placementCardSx = {
   borderRadius: 1,
   border: `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.shade),
-  userSelect: 'none',
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
   '&:hover': {
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),
     bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.wash),

@@ -9,6 +9,7 @@ import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -143,16 +144,13 @@ const composerSx = {
 };
 
 const draftSx = {
+  ...DRAG_SOURCE_SX,
   display: 'flex',
   alignItems: 'center',
   gap: 1,
   p: 0.75,
   borderRadius: 1,
   border: `1px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.strong)}`,
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
-  cursor: 'grab',
 };
 
 const draftDisabledSx = { opacity: OPACITY.strong, cursor: 'default' };

@@ -22,6 +22,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -176,15 +177,12 @@ const gridSx = {
 };
 
 const objectButtonSx = {
+  ...DRAG_SOURCE_SX,
   minWidth: 0,
   p: 0.5,
   borderRadius: 1,
   border: INK_EDGE,
   bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.fill),
-  cursor: 'grab',
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
   '&:hover': {
     bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.tint),
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.strong),

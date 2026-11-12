@@ -29,6 +29,7 @@ import { ICON_SIZES } from '../ui/iconSizes.js';
 import EmptyLine from '../ui/EmptyLine.jsx';
 import { ErrorLine } from '../ui/LoadStatus.jsx';
 import Caption from '../ui/Caption.jsx';
+import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 
 const PAGE_SIZE = 50;
 
@@ -123,7 +124,7 @@ export default function MonsterBrowser({
               : undefined}
             onClick={() => onSelect?.(monster)}
             onKeyDown={(event) => { if (event.key === 'Enter') onSelect?.(monster); }}
-            sx={[rowSx, onPointerDragStart ? pointerDragRowSx : null]}
+            sx={[rowSx, onPointerDragStart ? DRAG_SOURCE_SX : null]}
           >
             <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
             <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -180,4 +181,3 @@ const rowSx = {
   },
 };
 
-const pointerDragRowSx = { touchAction: 'pan-y', WebkitTouchCallout: 'none' };

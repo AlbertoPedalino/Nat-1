@@ -746,3 +746,9 @@ test("a bare <button>'s chrome is taken off by BARE_BUTTON_SX", () => {
 test('text is cut to one line by ONE_LINE_SX', () => {
   assert.deepEqual(sourceFilesMatching(/textOverflow: 'ellipsis'/, { allow: ['shared/ui/textStyles.js', 'app/theme.js'] }), []);
 });
+
+test('a drag source onto the map takes DRAG_SOURCE_SX', () => {
+  assert.deepEqual(sourceFilesMatching(/WebkitTouchCallout: 'none'/, {
+    allow: ['shared/ui/interactive.js', 'shared/character/dice/RollModeArea.jsx'],
+  }), []);
+});
