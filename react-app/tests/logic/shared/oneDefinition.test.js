@@ -659,3 +659,18 @@ test('the screentone and the halftone are drawn in one place each', () => {
   assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);
 });
+
+// What kind an item is — weapon, armor, shield, ammunition, equippable — is
+// asked of itemKinds.js. A page that reads the type code itself
+// (`item.type === 'LA'`) misses the source suffix ('LA|XPHB') and custom items
+// ('WEAPON'); code tables (labels, catalog groups, adapter data) are not tests
+// and stay, and so does itemData.js, which scores raw 5etools records before
+// they are items. The kind tests and how much an item counts are defined once.
+test('an item kind is asked of itemKinds.js', () => {
+  const rawType = /itemBaseType\([^)]*\)\s*[!=]==\s*'(M|R|LA|MA|HA|S|A|AF)'|\.type\)?\.toUpperCase\(\)\s*[!=]==\s*'|String\(item\??\.type/;
+  const allow = ['shared/character/inventory/itemKinds.js', 'shared/content/catalogs/itemData.js'];
+  assert.deepEqual(sourceLinesMatching(rawType, { allow }), []);
+  const kinds = /^\s*(const|function|export const|export function)\s+(isWeaponItem|isMeleeWeapon|isRangedWeapon|isBodyArmor|isHeavyArmor|isShield|isArmorOrShield|isAmmo|isEquippable|itemBaseType|itemQty|stepInventoryQty|formatPounds)\b/;
+  const homes = ['shared/character/inventory/itemKinds.js', 'shared/character/inventory/weight.js', 'shared/character/inventory/itemContainers.js'];
+  assert.deepEqual(sourceLinesMatching(kinds).filter((hit) => !homes.some((home) => hit.startsWith(home))), []);
+});

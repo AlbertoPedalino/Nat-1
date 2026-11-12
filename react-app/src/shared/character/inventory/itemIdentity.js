@@ -1,7 +1,7 @@
 import { itemChargeMaximum } from './itemCharges.js';
 import { matchKey } from '../../content/nameKeys.js';
 
-export function normalizeItemIdentitySource(value) {
+function normalizeItemIdentitySource(value) {
   return String(value || '').trim().toUpperCase();
 }
 

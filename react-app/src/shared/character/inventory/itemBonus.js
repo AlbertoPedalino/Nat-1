@@ -67,17 +67,17 @@ export function aggregateMiscAcBonus(inventory) {
 
 // Sum `bonusSavingThrow` across all equipped items. 5etools tags apply to all
 // save categories unless qualified, so we aggregate to a single +N.
-export function aggregateSavingThrowBonus(inventory) {
+function aggregateSavingThrowBonus(inventory) {
   return sumField(inventory, 'bonusSavingThrow');
 }
 
 // Sum `bonusAbilityCheck` across all equipped items (Cloak of Protection-like).
-export function aggregateAbilityCheckBonus(inventory) {
+function aggregateAbilityCheckBonus(inventory) {
   return sumField(inventory, 'bonusAbilityCheck');
 }
 
 // Spellcasting focuses (Wand of the War Mage +1 etc.).
-export function aggregateSpellBonuses(inventory) {
+function aggregateSpellBonuses(inventory) {
   return {
     spellAttack: sumField(inventory, 'bonusSpellAttack'),
     spellSaveDc: sumField(inventory, 'bonusSpellSaveDc'),

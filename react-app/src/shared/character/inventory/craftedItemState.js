@@ -9,7 +9,7 @@ export const CRAFTED_FLAG_META = {
   fastcraft: { originFeat: 'Crafter', vanishesOnLongRest: true },
 };
 
-export const CRAFTED_FLAGS = Object.keys(CRAFTED_FLAG_META);
+const CRAFTED_FLAGS = Object.keys(CRAFTED_FLAG_META);
 
 export const VANISH_ON_LONG_REST_FLAGS = CRAFTED_FLAGS.filter(
   (flag) => CRAFTED_FLAG_META[flag].vanishesOnLongRest,

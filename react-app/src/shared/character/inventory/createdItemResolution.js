@@ -1,5 +1,5 @@
 import { matchKey } from '../../content/nameKeys.js';
-export function looseCreatedItemKey(value) {
+function looseCreatedItemKey(value) {
   return String(value || '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')

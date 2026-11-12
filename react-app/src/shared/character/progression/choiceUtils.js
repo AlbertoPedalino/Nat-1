@@ -1,6 +1,7 @@
 import { asArray } from '../../lists.js';
 import { choiceKey, stripSource } from '../../content/nameKeys.js';
 import { classEntities } from './classLevel.js';
+import { itemBaseType } from '../inventory/itemKinds.js';
 // A choice is saved under its base key, or under a multiclass-prefixed copy
 // (`mc1_<key>`) when its class was added as a multiclass.
 export function baseChoiceKey(key) {
@@ -78,7 +79,7 @@ export function inventoryHasFlag(inventory, requirement) {
   return inventory.some((item) => {
     if (requireEquipped && !item.equipped) return false;
     if (itemType) {
-      const type = String(item.type || '').toUpperCase();
+      const type = itemBaseType(item);
       const types = asArray(itemType);
       if (!types.some((t) => String(t).toUpperCase() === type)) return false;
     }

@@ -31,7 +31,7 @@ function clampNonNegativeInt(value, fallback = 0) {
 }
 
 // The hit point maximum a fight's combatant may have: 1-999.
-export const COMBAT_HP_MAX = 999;
+const COMBAT_HP_MAX = 999;
 export function clampCombatHpMax(value, fallback = 10) {
   return clampInt(value, 1, COMBAT_HP_MAX, fallback);
 }

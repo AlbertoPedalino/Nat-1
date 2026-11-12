@@ -41,7 +41,7 @@ export function getEquippedShield(character, items) {
   return (items || []).find((i) => i.equipped && isShield(i));
 }
 
-export function computeArmorItemAc(character, items) {
+function computeArmorItemAc(character, items) {
   const armor = getEquippedArmor(character, items);
   if (!armor) return null;
   const dex = finalAbilityModifier(character, 'dex');

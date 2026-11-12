@@ -22,7 +22,7 @@ export const CONDITIONS = [
 // Conditions that inherently impose other conditions (XPHB 2024). Applying the
 // parent auto-applies these so the sheet reflects the full rules effect. Removal
 // is not cascaded (the implied condition may also stand on its own).
-export const CONDITION_IMPLIES = {
+const CONDITION_IMPLIES = {
   paralyzed: ['incapacitated'],
   petrified: ['incapacitated'],
   stunned: ['incapacitated'],
@@ -81,7 +81,7 @@ export const CONDITION_EFFECTS = {
 
 const CONDITION_LABELS = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.label]));
 
-export const CONDITION_KEYS = CONDITIONS.map((c) => c.key);
+const CONDITION_KEYS = CONDITIONS.map((c) => c.key);
 
 // Exhaustion is graded 0–6 and that level lives outside the condition list
 // (`exhaustionLevel`), so a surface that does not own the level must not offer

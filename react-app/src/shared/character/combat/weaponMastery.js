@@ -11,16 +11,13 @@ import { titleCase } from '../../ui/textCase.js';
 import { stripMarkup } from '../../content/markupText.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
 import { nameWithoutBonus } from '../inventory/itemIdentity.js';
+import { ANY_WEAPON_CODES, isMeleeWeapon, itemBaseType } from '../inventory/itemKinds.js';
 
 const _masteries = new Map();
 
 function isMundaneWeapon(item) {
   if (!item || typeof item !== 'object' || !item.name) return false;
-  const type = String(item.type || '').toLowerCase();
-  const isWeapon = type === 'm'
-    || type === 'r'
-    || type === 'weapon'
-    || item?._meta?.isWeapon === true;
+  const isWeapon = ANY_WEAPON_CODES.has(itemBaseType(item)) || item?._meta?.isWeapon === true;
   const rarity = String(item.rarity || 'none').toLowerCase();
   return isWeapon && rarity === 'none';
 }
@@ -71,8 +68,7 @@ const WEAPON_MASTERY_PROGRESSIONS = Object.freeze({
 
 function weaponMatchesRule(item, rule) {
   if (rule?.melee === true) {
-    const type = String(item?.type || '').toLowerCase();
-    if (type !== 'm' && item?._meta?.isMeleeWeapon !== true) return false;
+    if (!isMeleeWeapon(item) && item?._meta?.isMeleeWeapon !== true) return false;
   }
 
   if (rule?.category) {
@@ -217,7 +213,7 @@ export function normalizeWeaponName(value) {
   return titleCase(nameWithoutBonus(name).toLowerCase());
 }
 
-export function collectWeaponMasteryChoiceEntries(character) {
+function collectWeaponMasteryChoiceEntries(character) {
   const choices = character?.choices && typeof character.choices === 'object' ? character.choices : {};
   const out = [];
 

@@ -3,11 +3,11 @@ import { CURRENCY_TYPES, normalizeCoinAmount, customCurrencyUnits } from './curr
 const WEIGHT_PRECISION = 1000;
 
 // XPHB 2024: 50 coins weigh 1 lb, regardless of denomination.
-export const COIN_WEIGHT_LB = 1 / 50;
+const COIN_WEIGHT_LB = 1 / 50;
 
 // XPHB 2024 (p.362): carrying capacity = Strength score × 15 (Medium size).
 // Over this, Speed is capped at 5 ft. No "encumbered" tiers in 2024.
-export const CARRY_CAPACITY_PER_STR = 15;
+const CARRY_CAPACITY_PER_STR = 15;
 
 export function carryCapacity(strScore) {
   const str = Math.max(0, Number(strScore) || 0);
@@ -26,18 +26,18 @@ export function isItemCarried(item) {
   return item?.carried !== false;
 }
 
-export function roundWeight(value) {
+function roundWeight(value) {
   return Math.round(((Number(value) || 0) + Number.EPSILON) * WEIGHT_PRECISION) / WEIGHT_PRECISION;
 }
 
-export function totalInventoryWeight(inventory) {
+function totalInventoryWeight(inventory) {
   const total = (inventory || []).reduce((sum, item) => (
     isItemCarried(item) ? sum + itemWeight(item) * itemQty(item) : sum
   ), 0);
   return roundWeight(total);
 }
 
-export function currencyWeight(currency) {
+function currencyWeight(currency) {
   // Custom entries weigh the same as a coin (50 units = 1 lb).
   const coins = CURRENCY_TYPES.reduce((sum, coin) => sum + normalizeCoinAmount(currency?.[coin.key]), 0);
   const custom = customCurrencyUnits(currency);

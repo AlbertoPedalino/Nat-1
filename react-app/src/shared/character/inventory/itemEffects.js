@@ -264,7 +264,7 @@ function computeEffects(inventory) {
 
 // Item-level: the effects of these items, whoever holds them. With a
 // character, read `characterItemEffects` instead.
-export function collectItemEffects(inventory) {
+function collectItemEffects(inventory) {
   if (!Array.isArray(inventory) || inventory.length === 0) {
     return createEmptyEffects();
   }

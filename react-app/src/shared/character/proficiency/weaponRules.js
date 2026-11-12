@@ -8,6 +8,7 @@ import { capitalize } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 import { nameWithoutBonus } from '../inventory/itemIdentity.js';
+import { isMeleeWeapon, isRangedWeapon, itemBaseType } from '../inventory/itemKinds.js';
 
 // Properties are read by the shared reader.
 export { canonicalProperty, itemHasProperty };
@@ -43,13 +44,13 @@ export function weaponNameKeys(item) {
 
 export function weaponMatchesRule(item, rule) {
   if (!item || !rule || typeof rule !== 'object') return false;
-  const itemType = String(item.type || '').toUpperCase();
+  const itemType = itemBaseType(item);
   if (rule.type && itemType !== rule.type) return false;
   if (Array.isArray(rule.types) && !rule.types.includes(itemType)) return false;
   const cat = getWeaponCategory(item);
   if (rule.category && cat !== String(rule.category).toLowerCase()) return false;
-  if (rule.melee === true && itemType !== 'M') return false;
-  if (rule.ranged === true && itemType !== 'R') return false;
+  if (rule.melee === true && !isMeleeWeapon(item)) return false;
+  if (rule.ranged === true && !isRangedWeapon(item)) return false;
   if (rule.weaponName) {
     const target = stripPluralSuffix(matchKey(rule.weaponName));
     const names = weaponNameKeys(item);

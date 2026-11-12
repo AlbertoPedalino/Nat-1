@@ -6,23 +6,23 @@ import { stripSource } from '../../content/nameKeys.js';
 // in the sheet carry the app's own 'weapon' / 'armor' kinds.
 
 // The type codes, by kind.
-export const WEAPON_CODES = Object.freeze(new Set(['M', 'R']));
-export const BODY_ARMOR_CODES = Object.freeze(new Set(['LA', 'MA', 'HA']));
-export const SHIELD_CODE = 'S';
+const WEAPON_CODES = Object.freeze(new Set(['M', 'R']));
+const BODY_ARMOR_CODES = Object.freeze(new Set(['LA', 'MA', 'HA']));
+const SHIELD_CODE = 'S';
 export const ARMOR_OR_SHIELD_CODES = Object.freeze(new Set([...BODY_ARMOR_CODES, SHIELD_CODE]));
 // The kinds a custom item can be given in the sheet.
-export const CUSTOM_WEAPON_CODE = 'WEAPON';
-export const CUSTOM_ARMOR_CODE = 'ARMOR';
+const CUSTOM_WEAPON_CODE = 'WEAPON';
+const CUSTOM_ARMOR_CODE = 'ARMOR';
 // A weapon or armor of any origin (the 5etools codes and the custom kinds).
 export const ANY_WEAPON_CODES = Object.freeze(new Set([...WEAPON_CODES, CUSTOM_WEAPON_CODE]));
 export const ANY_ARMOR_CODES = Object.freeze(new Set([...ARMOR_OR_SHIELD_CODES, CUSTOM_ARMOR_CODE]));
 // Ammunition (Arrow, Firearm bullet).
-export const AMMO_CODES = Object.freeze(new Set(['A', 'AF']));
+const AMMO_CODES = Object.freeze(new Set(['A', 'AF']));
 // Held or worn while it works: weapons, armor and shields, spellcasting
 // focuses (wand, rod, staff, focus).
-export const HELD_OR_WORN_CODES = Object.freeze(new Set([...ANY_WEAPON_CODES, ...ANY_ARMOR_CODES, 'WD', 'RD', 'ST', 'SCF']));
+const HELD_OR_WORN_CODES = Object.freeze(new Set([...ANY_WEAPON_CODES, ...ANY_ARMOR_CODES, 'WD', 'RD', 'ST', 'SCF']));
 // What the inventory lets you equip: held or worn, and wondrous items.
-export const EQUIPPABLE_CODES = Object.freeze(new Set([...HELD_OR_WORN_CODES, 'WI']));
+const EQUIPPABLE_CODES = Object.freeze(new Set([...HELD_OR_WORN_CODES, 'WI']));
 
 // An item's type code without its source, upper case ('M|XPHB' -> 'M').
 export function itemBaseType(item) {
@@ -37,7 +37,6 @@ export const isMeleeWeapon = (item) => itemBaseType(item) === 'M';
 export const isRangedWeapon = (item) => itemBaseType(item) === 'R';
 // Light, medium or heavy armor (not a shield).
 export const isBodyArmor = is(BODY_ARMOR_CODES);
-export const isLightArmor = (item) => itemBaseType(item) === 'LA';
 export const isHeavyArmor = (item) => itemBaseType(item) === 'HA';
 export const isShield = (item) => itemBaseType(item) === SHIELD_CODE;
 export const isArmorOrShield = is(ARMOR_OR_SHIELD_CODES);

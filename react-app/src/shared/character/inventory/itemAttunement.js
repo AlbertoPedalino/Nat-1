@@ -4,7 +4,7 @@ import { stripSource } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 import { isHeldOrWorn } from './itemKinds.js';
 
-export const BASE_ATTUNEMENT_LIMIT = 3;
+const BASE_ATTUNEMENT_LIMIT = 3;
 
 const SUPPORTED_REQUIREMENT_TAGS = new Set(['class', 'race', 'spellcasting']);
 
@@ -12,7 +12,7 @@ export function requiresAttunement(item) {
   return Boolean(item?.reqAttune);
 }
 
-export function requiresEquipmentForEffect(item) {
+function requiresEquipmentForEffect(item) {
   return isHeldOrWorn(item);
 }
 

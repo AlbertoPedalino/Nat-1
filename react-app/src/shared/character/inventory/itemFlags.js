@@ -1,6 +1,7 @@
 import { classLevel } from '../progression/classLevel.js';
 import { warlockHasInvocation } from '../progression/warlockUtils.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { itemBaseType } from './itemKinds.js';
 
 // Item flags a feature lets the player set on an inventory item (Pact Weapon,
 // Arcane Armor…). Adapters declare them with `registerItemFlagDef(key, def)`:
@@ -17,7 +18,7 @@ import { matchKey } from '../../content/nameKeys.js';
 // Rules effects read the flag itself (`requiredItemFlag`, weapon overrides);
 // this module only decides who may set it and on what.
 
-export function itemFlagsOf(item) {
+function itemFlagsOf(item) {
   return Array.isArray(item?.flags) ? item.flags : [];
 }
 
@@ -32,7 +33,7 @@ function hasSubclass(C, className, subclass) {
   return (C?.extraClasses || []).some((extra) => matchKey(extra?.name) === cls && matchKey(extra?.subclassShortName) === sub);
 }
 
-export function itemFlagDefAvailable(def, C) {
+function itemFlagDefAvailable(def, C) {
   if (!def?.key || !C) return false;
   if (def.requireClass) {
     const level = classLevel(C, def.requireClass);
@@ -52,7 +53,7 @@ export function availableItemFlagDefs(defs, C) {
 export function itemFlagFitsItem(def, item) {
   if (!def || !item) return false;
   const types = (def.types || []).map((type) => String(type).toUpperCase());
-  return !types.length || types.includes(String(item.type || '').toUpperCase());
+  return !types.length || types.includes(itemBaseType(item));
 }
 
 // Sets or clears `def.key` on inventory[index]. With `maxCount: 1` setting it

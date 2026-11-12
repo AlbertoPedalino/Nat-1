@@ -9,7 +9,7 @@ function hasSpellcastingConfig(config) {
   return Boolean(config?.spellcasting && Object.keys(config.spellcasting).length);
 }
 
-export function characterCanCastSpells(character) {
+function characterCanCastSpells(character) {
   if ((character?.spellSnapshots || []).length) return true;
 
   // Any class, subclass or species with a spellcasting config (feats have none).

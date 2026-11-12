@@ -25,7 +25,7 @@ function levelEntry(character, key, faces) {
 // `amount` once its owner reaches `minLevel`, `perLevelAfter` for each owner
 // level beyond it (Draconic Resilience), `perLevel` for each character level
 // (Dwarven Toughness, Tough).
-export function hpBonusFromEffect(effect, ownerLevel, characterLevel) {
+function hpBonusFromEffect(effect, ownerLevel, characterLevel) {
   if (!effect || effect.type !== 'hpBonus') return 0;
   const min = Number(effect.minLevel || 1);
   const level = Number(ownerLevel || 1);

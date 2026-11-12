@@ -12,7 +12,7 @@
 // Adding an entry here is the canonical way to enable an item's narrative
 // effect in calculations — no per-item code is needed.
 
-export const ITEM_NARRATIVE_EFFECTS = {
+const ITEM_NARRATIVE_EFFECTS = {
   // Cloak of Elvenkind: advantage on Dex (Stealth) checks while hooded.
   'Cloak of Elvenkind|XDMG': {
     advantageOnSkill: ['stealth'],

@@ -1,4 +1,5 @@
 import { matchKey } from '../../content/nameKeys.js';
+import { itemBaseType } from '../inventory/itemKinds.js';
 
 export const ARMOR_KIND_KEYS = {
   LA: { kind: 'Light Armor', set: new Set(['light', 'lightarmor']) },
@@ -8,7 +9,7 @@ export const ARMOR_KIND_KEYS = {
 };
 
 export function getArmorKindEntry(item) {
-  return ARMOR_KIND_KEYS[String(item?.type || '').toUpperCase()] || null;
+  return ARMOR_KIND_KEYS[itemBaseType(item)] || null;
 }
 
 export function armorSetTrainsKind(armorSet, entry) {

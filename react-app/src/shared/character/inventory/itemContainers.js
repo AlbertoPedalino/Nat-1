@@ -15,7 +15,7 @@ export function parseInventoryItemRef(ref) {
   };
 }
 
-export function cleanItemName(name) {
+function cleanItemName(name) {
   return stripMarkup(name)
     .replace(/\s+/g, ' ')
     .trim();
@@ -44,7 +44,7 @@ export function findInventoryItem(itemDb, name, source = '') {
   return null;
 }
 
-export function shouldExpandItemContents(item) {
+function shouldExpandItemContents(item) {
   return Array.isArray(item?.packContents) && item.packContents.length > 0;
 }
 
@@ -63,7 +63,7 @@ function specialItem(entry, qty, parent) {
   };
 }
 
-export function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) {
+function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) {
   if (!item?.name) return [];
 
   const count = itemQty({ qty });
@@ -154,7 +154,7 @@ export function stepInventoryQty(inventory, index, delta) {
   });
 }
 
-export function setInventoryItemCarried(item, carried) {
+function setInventoryItemCarried(item, carried) {
   const wasCarried = isItemCarried(item);
   const next = {
     ...item,

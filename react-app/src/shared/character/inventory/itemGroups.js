@@ -26,8 +26,8 @@ export function isItemEquipped(item) {
   return Boolean(item?.equipped || item?.equippedSlot);
 }
 
-export const ALL_ITEMS_CHIP = Object.freeze({ key: 'all', label: 'All' });
-export const EQUIPPED_CHIP = Object.freeze({ key: 'equipped', label: 'Equipped' });
+const ALL_ITEMS_CHIP = Object.freeze({ key: 'all', label: 'All' });
+const EQUIPPED_CHIP = Object.freeze({ key: 'equipped', label: 'Equipped' });
 
 // Chip set for a list of items you can only browse (an item database).
 export const ITEM_GROUP_CHIPS = Object.freeze([

@@ -1,5 +1,5 @@
 import { byName } from '../../lists.js';
-import { isWeaponItem, itemBaseType } from '../../character/inventory/itemKinds.js';
+import { isMeleeWeapon, isWeaponItem, itemBaseType } from '../../character/inventory/itemKinds.js';
 
 const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
 
@@ -14,9 +14,9 @@ export const EQUIPMENT_TYPE_MATCHERS = Object.freeze({
   setGaming: (item) => itemBaseType(item) === 'GS',
   toolArtisan: (item) => itemBaseType(item) === 'AT',
   weaponSimple: (item) => weaponCategoryOf(item) === 'simple' && isWeaponItem(item),
-  weaponSimpleMelee: (item) => weaponCategoryOf(item) === 'simple' && itemBaseType(item) === 'M',
+  weaponSimpleMelee: (item) => weaponCategoryOf(item) === 'simple' && isMeleeWeapon(item),
   weaponMartial: (item) => weaponCategoryOf(item) === 'martial' && isWeaponItem(item),
-  weaponMartialMelee: (item) => weaponCategoryOf(item) === 'martial' && itemBaseType(item) === 'M',
+  weaponMartialMelee: (item) => weaponCategoryOf(item) === 'martial' && isMeleeWeapon(item),
 });
 
 // Concrete items the player can pick for an `equipmentType` slot (e.g. setGaming

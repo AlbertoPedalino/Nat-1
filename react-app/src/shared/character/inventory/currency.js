@@ -40,7 +40,7 @@ export function sanitizeCoinInput(value) {
 // Custom currency entries (banknotes, gems, tokens, pine cones...) live next to
 // the standard coins under `currency.custom`. Their weight is identical to a
 // coin (XPHB: 50 units = 1 lb), so no per-entry weight is stored.
-export const CUSTOM_CURRENCY_KEY = 'custom';
+const CUSTOM_CURRENCY_KEY = 'custom';
 // Default tone for a fresh custom currency. The color picker (IconColorPicker)
 // supplies the selectable palette + arbitrary RGB.
 export const CUSTOM_CURRENCY_TONE = '#9c8cff';
@@ -50,30 +50,30 @@ const CUSTOM_SHORT_MAX = 5;
 const DEFAULT_CUSTOM_LABEL = 'Custom';
 const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
-export function generateCustomCurrencyId() {
+function generateCustomCurrencyId() {
   return makeId('cur');
 }
 
 // Heavy, canonical sanitizing — used for new entries and at load. Trims,
 // applies fallbacks and uppercases. Not used live (see applyCustomCurrencyPatch).
-export function sanitizeCurrencyLabel(value, fallback = DEFAULT_CUSTOM_LABEL) {
+function sanitizeCurrencyLabel(value, fallback = DEFAULT_CUSTOM_LABEL) {
   const text = String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, CUSTOM_LABEL_MAX);
   return text || fallback;
 }
 
-export function sanitizeCurrencyShortLabel(value, sourceLabel) {
+function sanitizeCurrencyShortLabel(value, sourceLabel) {
   const raw = String(value ?? '').replace(/\s+/g, '').slice(0, CUSTOM_SHORT_MAX);
   if (raw) return raw.toUpperCase();
   const fromLabel = String(sourceLabel ?? '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 3);
   return (fromLabel || 'CUR').toUpperCase();
 }
 
-export function sanitizeCurrencyTone(value, fallback = CUSTOM_CURRENCY_TONE) {
+function sanitizeCurrencyTone(value, fallback = CUSTOM_CURRENCY_TONE) {
   const text = String(value ?? '').trim();
   return HEX_COLOR_RE.test(text) ? text : fallback;
 }
 
-export function createCustomCurrencyEntry(partial = {}) {
+function createCustomCurrencyEntry(partial = {}) {
   const label = sanitizeCurrencyLabel(partial.label);
   return {
     id: partial.id || generateCustomCurrencyId(),
@@ -86,7 +86,7 @@ export function createCustomCurrencyEntry(partial = {}) {
 
 // Light, edit-friendly patch — used while the user is typing so we never fight
 // the cursor (no trimming/fallback). Canonicalized later by normalize at load.
-export function applyCustomCurrencyPatch(entry, patch = {}) {
+function applyCustomCurrencyPatch(entry, patch = {}) {
   const next = { ...entry };
   if ('label' in patch) next.label = String(patch.label ?? '').slice(0, CUSTOM_LABEL_MAX);
   if ('shortLabel' in patch) next.shortLabel = String(patch.shortLabel ?? '').slice(0, CUSTOM_SHORT_MAX);
@@ -95,7 +95,7 @@ export function applyCustomCurrencyPatch(entry, patch = {}) {
   return next;
 }
 
-export function normalizeCustomCurrencyList(list) {
+function normalizeCustomCurrencyList(list) {
   if (!Array.isArray(list)) return [];
   const seen = new Set();
   const out = [];
@@ -108,7 +108,7 @@ export function normalizeCustomCurrencyList(list) {
   return out;
 }
 
-export function getCustomCurrency(currency) {
+function getCustomCurrency(currency) {
   const list = currency?.[CUSTOM_CURRENCY_KEY];
   return Array.isArray(list) ? list : [];
 }
@@ -121,9 +121,9 @@ export function customCurrencyUnits(currency) {
 // keys under currency.order. It is "soft": repaired on read so adding/removing
 // a custom entry never needs to touch it — unknown keys are dropped and missing
 // ones appended in canonical order (coins first, then custom in list order).
-export const CURRENCY_ORDER_KEY = 'order';
+const CURRENCY_ORDER_KEY = 'order';
 
-export function computeCurrencyOrder(currency, rawOrder = currency?.[CURRENCY_ORDER_KEY]) {
+function computeCurrencyOrder(currency, rawOrder = currency?.[CURRENCY_ORDER_KEY]) {
   const customIds = getCustomCurrency(currency).map((entry) => entry.id);
   const valid = new Set([...CURRENCY_TYPES.map((coin) => coin.key), ...customIds]);
   const seen = new Set();

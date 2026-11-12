@@ -285,7 +285,7 @@ export function parseReplicateChoice(value) {
   return null;
 }
 
-export function parseReplicateBucketChoice(value) {
+function parseReplicateBucketChoice(value) {
   const parsed = parseReplicateChoice(value);
   return parsed?.kind === 'plan' ? parsed : null;
 }
@@ -346,7 +346,7 @@ function findReferencedItem(items, itemName, itemSource) {
   return (items || []).find((candidate) => itemIdentityKey(candidate) === targetKey) || null;
 }
 
-export function resolveReplicateBucketChoice(value, items) {
+function resolveReplicateBucketChoice(value, items) {
   const parsed = parseReplicateBucketChoice(value);
   if (!parsed) return null;
   const item = findReferencedItem(items, parsed.itemName, parsed.itemSource);

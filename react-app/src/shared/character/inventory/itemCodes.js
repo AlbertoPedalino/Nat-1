@@ -12,7 +12,7 @@ import { ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
 // Disambiguation is by source field (item.type vs item.property).
-export const ITEM_TYPE_LABELS = {
+const ITEM_TYPE_LABELS = {
   M: 'Melee Weapon',
   R: 'Ranged Weapon',
   LA: 'Light Armor',
@@ -47,12 +47,12 @@ export const ITEM_TYPE_LABELS = {
   ARMOR: 'Armor',
 };
 
-export const WEAPON_CATEGORY_LABELS = {
+const WEAPON_CATEGORY_LABELS = {
   simple: 'Simple',
   martial: 'Martial',
 };
 
-export const WEAPON_PROPERTY_LABELS = {
+const WEAPON_PROPERTY_LABELS = {
   A: 'Ammunition',
   AF: 'Ammunition (Firearm)',
   BF: 'Burst Fire',
@@ -70,7 +70,7 @@ export const WEAPON_PROPERTY_LABELS = {
   N: 'Net',
 };
 
-export const WEAPON_PROPERTY_DESCRIPTIONS = {
+const WEAPON_PROPERTY_DESCRIPTIONS = {
   A: 'Requires ammunition. You can use a weapon with this property to make a ranged attack only if you have ammunition to fire from it.',
   AF: 'Firearm ammunition. Requires firearm-specific ammo.',
   BF: 'Can fire a burst attack covering an area.',
@@ -120,7 +120,7 @@ export function decodeItemTypeLabel(item) {
   return base;
 }
 
-export function decodeProperty(rawCode, item) {
+function decodeProperty(rawCode, item) {
   const code = rawPropertyCode(rawCode);
   const base = WEAPON_PROPERTY_LABELS[code];
   if (!base) return null;
@@ -203,7 +203,7 @@ function formatAbilitySet(ability) {
 const SEGMENT_BUILDERS = new Map();
 const SEGMENT_ORDER = [];
 
-export function registerItemPropertySegment(kind, builder) {
+function registerItemPropertySegment(kind, builder) {
   if (!kind || typeof builder !== 'function') return;
   if (!SEGMENT_BUILDERS.has(kind)) SEGMENT_ORDER.push(kind);
   SEGMENT_BUILDERS.set(kind, builder);

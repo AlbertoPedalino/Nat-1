@@ -12,7 +12,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
-export function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder' }) {
+function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder' }) {
   const v = currencyVariant(mode);
   const btnSx = {
     p: 0.25,
@@ -52,7 +52,7 @@ export function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder
 }
 
 // Dashed "+" tile that appends a new custom currency entry.
-export function AddCurrencyTile({ onClick, mode = 'builder' }) {
+function AddCurrencyTile({ onClick, mode = 'builder' }) {
   const v = currencyVariant(mode);
   return (
     <Box
@@ -102,7 +102,7 @@ export function AddCurrencyTile({ onClick, mode = 'builder' }) {
 }
 
 // Per-mode row layout. `basis` is each coin's preferred width.
-export const ROW_LAYOUT = {
+const ROW_LAYOUT = {
   builder: { gap: 1, basis: 108 },
   sheet: { gap: 0.75, basis: 96 },
 };

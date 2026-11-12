@@ -13,7 +13,7 @@ export function isLightWeapon(item) {
   return itemHasProperty(item, 'light');
 }
 
-export function isVersatileWeapon(item) {
+function isVersatileWeapon(item) {
   return itemHasProperty(item, 'versatile');
 }
 
@@ -76,7 +76,7 @@ export function canTwoHand(item) {
   return isTwoHandedWeapon(item) || isVersatileWeapon(item);
 }
 
-export function getVersatileDamageDice(item) {
+function getVersatileDamageDice(item) {
   return item?.damage?.[1]?.damage || item?.dmg2 || '';
 }
 
@@ -91,11 +91,11 @@ export function getWeaponDamageDice(item, equippedSlot) {
   return getOneHandDamageDice(item);
 }
 
-export function getEquippedMainHandWeapon(inventory) {
+function getEquippedMainHandWeapon(inventory) {
   return (inventory || []).find(i => i.equippedSlot === 'mainHand');
 }
 
-export function getEquippedOffHandWeapon(inventory) {
+function getEquippedOffHandWeapon(inventory) {
   return (inventory || []).find(i => i.equippedSlot === 'offHand');
 }
 

@@ -39,7 +39,7 @@ export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, exclude, sx 
 // Quantity stepper + Add button. Holds local qty state and calls onAdd(qty).
 // Stops click propagation so it can sit inside a click-to-expand row without
 // toggling the row. `addColor` themes the Add button per context.
-export function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
+function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
   const [qty, setQty] = useState(1);
   const clampQty = (value) => clampInt(value, 1, max, 1);
   return (

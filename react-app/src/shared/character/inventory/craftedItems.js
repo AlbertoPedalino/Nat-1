@@ -9,7 +9,7 @@ import { OPACITY } from '../../ui/colors.js';
 // usable by non-UI consumers; colour resolution stays here because it depends
 // on character feat provenance and the installed adapter registry.
 
-export function craftedTagColor(flag, character) {
+function craftedTagColor(flag, character) {
   const meta = CRAFTED_FLAG_META[flag];
   if (!meta) return null;
   if (meta.originKind) return ENTITY_COLORS[meta.originKind] || ENTITY_COLORS.class;
