@@ -1,11 +1,8 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { equipmentTypeCandidates } from '../../../shared/content/catalogs/equipmentTypes.js';
 import {
-  cpToCoins,
   flattenEquip,
-  extractEquipItems,
   collectChoiceBlocks,
-  resolveEquipmentItems,
   collectEquipmentTypeSlots,
 } from './startingEquipment.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
@@ -51,17 +48,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
                     size="small"
                     variant={selected ? 'contained' : 'outlined'}
                     sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                    onClick={() => {
-                      dispatch({ type: 'equipment/select', key: block.key, value: option.value });
-                      if (!selected) {
-                        const extracted = extractEquipItems(option.node);
-                        dispatch({
-                          type: 'equipment/add-extracted',
-                          currency: cpToCoins(extracted.cp),
-                          items: resolveEquipmentItems(extracted, items),
-                        });
-                      }
-                    }}
+                    onClick={() => dispatch({ type: 'equipment/choose', block, value: option.value })}
                   >
                     {option.value.toUpperCase()}) {option.label}
                   </Button>

@@ -127,6 +127,29 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   return next;
 }
 
+function sameInventoryItem(row, item) {
+  return matchKey(row?.name) === matchKey(item?.name)
+    && String(row?.source || '').toUpperCase() === String(item?.source || '').toUpperCase();
+}
+
+// Takes back what addInventoryEntries gave: the same entries, expanded the
+// same way (a pack is its contents), each unit off the first rows of that
+// item. Units no longer there — removed or used up by hand — are skipped.
+export function removeInventoryEntries(inventory, entries, itemDb = null) {
+  let next = [...(inventory || [])];
+  addInventoryEntries([], entries, itemDb).forEach((removal) => {
+    let left = itemQty(removal);
+    next = next.flatMap((row) => {
+      if (left <= 0 || !sameInventoryItem(row, removal)) return [row];
+      const take = Math.min(left, itemQty(row));
+      left -= take;
+      const qty = itemQty(row) - take;
+      return qty > 0 ? [{ ...row, qty }] : [];
+    });
+  });
+  return next;
+}
+
 // One more or one fewer of an inventory row, the same on the sheet and in the
 // builder. A row at zero goes. Adding to a row that must stay a single unit —
 // something equipped (a stack readied to throw excepted) or an item with its

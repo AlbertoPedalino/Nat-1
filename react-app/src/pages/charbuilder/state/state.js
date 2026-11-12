@@ -4,7 +4,6 @@ import {
 } from './stateHandlers.js';
 import { rollPool } from '../../../shared/character/dice/dice.js';
 import {
-  normalizeCoinAmount,
   setCoinAmount,
   addCustomCurrency,
   updateCustomCurrency,
@@ -14,7 +13,6 @@ import {
 import { addInventoryEntries, stepInventoryQty } from '../../../shared/character/inventory/itemContainers.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
-import { splitNameSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
 import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
@@ -24,6 +22,7 @@ import {
   clearChoicePrefix,
 } from './choiceCleanup.js';
 import { initialCharacter } from './initialState.js';
+import { chooseStartingEquipment, removeOneByRef } from './equipmentChoices.js';
 import {
   handleExtraClassLevel, handleExtraClassSelect, handleExtraSubclassSelect, handleMulticlassAdd,
   handleMulticlassRemove, handleSubclassSelect,
@@ -60,12 +59,6 @@ function findByNameSource(list, name, source) {
 
 // One fewer of the item a type picker had added (`name|source`), when the
 // pick changes.
-function removeOneByRef(inventory, ref) {
-  const { name, source } = splitNameSource(ref);
-  const index = (inventory || []).findIndex((item) => item.name === name && (item.source || '') === source);
-  return index === -1 ? inventory || [] : stepInventoryQty(inventory, index, -1);
-}
-
 export function builderReducer(state, action) {
   switch (action.type) {
     case 'data/load-start':
@@ -257,8 +250,8 @@ export function builderReducer(state, action) {
       const inventory = addInventoryEntries(state.character.inventory, [action.item], state.data.items);
       return updateCharacter(state, { inventory });
     }
-    case 'equipment/select':
-      return updateNestedCharacter(state, 'equipChoices', { [action.key]: state.character.equipChoices[action.key] === action.value ? null : action.value });
+    case 'equipment/choose':
+      return updateCharacter(state, chooseStartingEquipment(state.character, action.block, action.value, state.data.items));
     case 'equipment/select-type-item': {
       const { key, item } = action;
       const prevRef = action.prevRef || null;
@@ -270,18 +263,6 @@ export function builderReducer(state, action) {
       }
       const equipChoices = { ...state.character.equipChoices, [key]: toggleOff ? null : newRef };
       return updateCharacter(state, { inventory, equipChoices });
-    }
-    case 'equipment/add-extracted': {
-      const currency = { ...state.character.currency };
-      Object.entries(action.currency || {}).forEach(([coin, value]) => {
-        currency[coin] = normalizeCoinAmount(currency[coin]) + normalizeCoinAmount(value);
-      });
-      const inventory = addInventoryEntries(
-        state.character.inventory,
-        action.items || [],
-        state.data.items,
-      );
-      return updateCharacter(state, { currency, inventory });
     }
     case 'inventory/qty':
       return updateCharacter(state, { inventory: stepInventoryQty(state.character.inventory, action.index, action.delta) });

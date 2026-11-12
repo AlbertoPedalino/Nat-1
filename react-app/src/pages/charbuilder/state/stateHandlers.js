@@ -6,6 +6,7 @@ import {
 } from '../../../shared/character/spells/spellBuckets.js';
 import { clamp } from '../../../shared/numbers.js';
 import { classScopedData } from '../../../shared/content/catalogs/classScope.js';
+import { clearStartingEquipment } from './equipmentChoices.js';
 
 // The class entry a spell action edits: an extra class by index, else the
 // character (the primary class).
@@ -72,6 +73,7 @@ export function handleClassSelect(state, action, { findByNameSource, updateChara
     wizardSpellMastery: {},
     wizardSignatureSpells: {},
     choices: {},
+    ...clearStartingEquipment(state.character, state.character.cls?.startingEquipment, 'cls', state.data.items),
   });
 }
 
@@ -105,6 +107,7 @@ export function handleBackgroundSelect(state, action, { findByNameSource, update
     backgroundPatternIdx: 0,
     backgroundAbilities: [],
     choices,
+    ...clearStartingEquipment(state.character, state.character.backgroundObj?.startingEquipment, 'bg', state.data.items),
   });
 }
 
