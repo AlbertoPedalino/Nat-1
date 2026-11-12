@@ -3,14 +3,16 @@ import { Upload } from 'lucide-react';
 import { useRef } from 'react';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
-export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
+// The builder header's import of a sheet saved as JSON: a button over a
+// hidden file input that takes only JSON.
+export default function ImportSheetFab({ onNotify, onFile }) {
   const inputRef = useRef(null);
 
   return (
     <Stack
       direction="row"
       spacing={1}
-      sx={[{ alignItems: 'center' }, sx]}
+      sx={{ alignItems: 'center' }}
     >
       <input
         ref={inputRef}
@@ -32,7 +34,7 @@ export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
           event.target.value = '';
         }}
       />
-      <Button variant="outlined" size="small" startIcon={<Upload size={ICON_SIZES.md} />} onClick={() => inputRef.current?.click()} sx={buttonSx}>
+      <Button variant="outlined" size="small" startIcon={<Upload size={ICON_SIZES.md} />} onClick={() => inputRef.current?.click()}>
         Load Sheet JSON
       </Button>
     </Stack>

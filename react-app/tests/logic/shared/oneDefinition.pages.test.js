@@ -6,7 +6,7 @@ import { readSource, sourceFilesMatching } from '../sourceScan.js';
 // its header, the top bar's buttons, a list's rows, a row's remove button.
 // A page that writes one of them out again is one a restyle never reaches.
 // The files allowed below besides each piece's home are pages not moved onto
-// it yet (the sheet, the builder and the battle map keep bars of their own).
+// it yet.
 
 // A JSX element's opening tag from `start` (its "<") to its closing ">", over
 // the braces of its props (an arrow function or an icon prop holds a ">").
@@ -30,15 +30,19 @@ function filesWithTag(tag, pattern, { allow = [] } = {}) {
   });
 }
 
-const OWN_BARS = ['pages/charbuilder/layout/BuilderAppBar.jsx', 'pages/charsheet/layout/TopBar.jsx', 'pages/vtt/VttPage.jsx'];
-
+// Every page, the sheet, the builder and the battle map included: one bar
+// and one paper, both drawn by AppPage (the bar imported nowhere else, the
+// paper spread or passed as an sx nowhere else; the theme lays its halftone
+// on the body). A bar of a page's own (an MUI AppBar
+// or Toolbar) is a second app bar.
 test('a page is framed by AppPage', () => {
-  assert.deepEqual(sourceFilesMatching(/<AppTopBar\b/, {
-    allow: ['app/navigation/AppPage.jsx', ...OWN_BARS],
+  assert.deepEqual(sourceFilesMatching(/<AppTopBar\b|\/AppTopBar\.jsx'/, {
+    allow: ['app/navigation/AppPage.jsx'],
   }), []);
-  assert.deepEqual(sourceFilesMatching(/\.\.\.SURFACES\.page\b/, {
-    allow: ['app/navigation/AppPage.jsx', 'pages/charbuilder/CharBuilder.jsx', 'pages/charsheet/CharacterSheet.jsx', 'pages/vtt/VttPage.jsx'],
+  assert.deepEqual(sourceFilesMatching(/\.\.\.SURFACES\.page\b|[{[,]\s*SURFACES\.page\s*[}\],]/, {
+    allow: ['app/navigation/AppPage.jsx'],
   }), []);
+  assert.deepEqual(sourceFilesMatching(/<(AppBar|Toolbar)\b/), []);
 });
 
 test('a page header is the PageHeader', () => {
@@ -52,7 +56,7 @@ test("a top bar's button is a TopBarButton", () => {
   assert.deepEqual(sourceFilesMatching(/\bappTopBarButtonSx\b|\bphoneHiddenLabelSx\b/, {
     allow: [
       'shared/ui/TopBarButton.jsx', 'shared/ui/appBar.js', 'shared/ui/iconOnlyOnPhone.js',
-      'pages/charsheet/layout/SheetActions.jsx', ...OWN_BARS,
+      'pages/charsheet/layout/SheetActions.jsx',
     ],
   }), []);
 });

@@ -1,4 +1,4 @@
-import { FONT_SIZES, FONT_WEIGHTS, LETTER_SPACINGS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import {
   captionLabelSx, cardTitleSx, panelTitleSx, sheetBoxTitleSx, sheetSectionHeaderSx,
@@ -9,8 +9,6 @@ import {
 // rather than a block of a dense sheet. Every builder heading, note and value
 // takes its size from here.
 export const BUILDER_TEXT = Object.freeze({
-  // The builder's name in its app bar, and the character's in the preview.
-  displayTitle: Object.freeze({ ...TEXT_STYLES.title, fontSize: FONT_SIZES.lead, letterSpacing: LETTER_SPACINGS.sm, lineHeight: LINE_HEIGHTS.tight }),
   // The open step's name over its panels.
   stepTitle: Object.freeze({ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxl }),
   // A panel's name in its PanelHeader bar.

@@ -12,9 +12,14 @@ import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 
 export { APP_TOP_BAR_HEIGHT };
 
-// Every bar offers the compendium, except the compendium's own page. `start`
-// adds page buttons next to Home/Back; `children` sit on the right, before
-// the compendium and the cloud menu (which takes `cloudMenuProps`).
+// The app's one top bar, on every page (through AppPage, never on its own):
+// `home` offers Home, `backTo` a Back link to that path named `backLabel`.
+// `start` adds the page's own navigation next to them (the sheet's Builder);
+// `children` sit on the right, before the compendium and the cloud menu
+// (which takes `cloudMenuProps`: the builder's draft upload), for the page's
+// own tools (Links). Every button placed in it is a TopBarButton. Every bar
+// offers the compendium, except the compendium's own page (`compendium`).
+// `sx` adds to the bar's look.
 export default function AppTopBar({
   sx, children, home = false, backTo, backLabel = 'Back', compendium = true, start = null, cloudMenuProps = null,
 }) {

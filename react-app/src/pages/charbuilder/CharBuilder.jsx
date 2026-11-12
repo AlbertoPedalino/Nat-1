@@ -1,7 +1,9 @@
 import { useMemo, useReducer } from 'react';
 import { Box, Button, Divider, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import BuilderAppBar from './layout/BuilderAppBar.jsx';
+import { ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import AppPage from '../../app/navigation/AppPage.jsx';
+import PageHeader from '../../shared/ui/PageHeader.jsx';
+import ImportSheetFab from './layout/ImportSheetFab.jsx';
 import PreviewPane from './preview/PreviewPane.jsx';
 import { STEPS } from './constants.js';
 import { useBuilderData } from './state/useBuilderData.js';
@@ -22,7 +24,6 @@ import { UI_COLORS } from '../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
-import { SURFACES } from '../../shared/ui/surfaces.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 import { panelBarSx, panelFrameSx, panelScreentone } from '../../shared/ui/PanelHeader.jsx';
 import TagChip from '../../shared/ui/TagChip.jsx';
@@ -90,99 +91,101 @@ export default function CharBuilder() {
   // each load and each restored character.
 
   return (
-    <Box sx={{ ...SURFACES.page, minHeight: '100vh' }}>
-      <BuilderAppBar
-        canUploadDraft={importDraft && cloudActive}
-        onUploadDraft={handleUploadToCloud}
-        onNotify={notify}
-        onImportFile={handleImportSheetFile}
+    // The cloud menu offers to upload an imported draft.
+    <AppPage
+      dense
+      maxWidth={1360}
+      topBar={{ home: true, cloudMenuProps: { canUploadDraft: importDraft && cloudActive, onUploadDraft: handleUploadToCloud } }}
+    >
+      <PageHeader
+        icon={Wand2}
+        title="Character Builder"
+        subtitle="D&D 5e 2024"
+        actions={<ImportSheetFab onNotify={notify} onFile={handleImportSheetFile} />}
+        sx={{ mb: 1 }}
       />
-
-      <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1 }, py: 1 }}>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 320px', xl: 'minmax(0, 1fr) 360px' },
-            alignItems: 'start',
-            gap: 1,
-          }}
-        >
-          {/* The steps head the left column, level with the preview's top. */}
-          <Box sx={{ minWidth: 0 }}>
-            {/* The steps' bar: a panel's bar, as the sheet's tab bar. */}
-            <Paper variant="outlined" sx={{ ...panelFrameSx, mb: 1 }}>
-              <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(UI_COLORS.accent), borderBottom: 0 }}>
-                <Tabs
-                  sx={{ flex: 1, minWidth: 0 }}
-                  value={state.tab}
-                  onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
-                  // The steps fill the bar; on a phone, too narrow for six, they scroll.
-                  variant={isPhone ? 'scrollable' : 'fullWidth'}
-                  scrollButtons="auto"
-                  aria-label="Character builder steps"
-                >
-                  {STEPS.map((step, index) => (
-                    <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
-                  ))}
-                </Tabs>
-              </Box>
-            </Paper>
-            <BuilderDataAlert errors={state.errors} onRetry={reloadData} />
-            {cloudConflict ? (
-              <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
-            ) : null}
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
-              <ActiveIcon size={ICON_SIZES.md} />
-              <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: 'primary.main' }}>{activeStep.label}</Typography>
-              <TagChip label={`${state.tab + 1} / ${STEPS.length}`} />
-            </Stack>
-
-            <ActiveStep
-              state={viewState}
-              dispatch={dispatch}
-              sheetProps={{
-                importDraft,
-                onUploadToCloud: handleUploadToCloud,
-                onDraftLocalSaved: handleDraftLocalSaved,
-                onCloudCopySavedLocally: handleCloudCopySavedLocally,
-                onNotify: notify,
-              }}
-            />
-
-            <Divider sx={{ my: 1 }} />
-            <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-              <Button
-                startIcon={<ChevronLeft size={ICON_SIZES.md} />}
-                disabled={state.tab === 0}
-                onClick={() => dispatch({ type: 'tab/set', tab: Math.max(0, state.tab - 1) })}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 320px', xl: 'minmax(0, 1fr) 360px' },
+          alignItems: 'start',
+          gap: 1,
+        }}
+      >
+        {/* The steps head the left column, level with the preview's top. */}
+        <Box sx={{ minWidth: 0 }}>
+          {/* The steps' bar: a panel's bar, as the sheet's tab bar. */}
+          <Paper variant="outlined" sx={{ ...panelFrameSx, mb: 1 }}>
+            <Box sx={{ ...panelBarSx, backgroundImage: panelScreentone(UI_COLORS.accent), borderBottom: 0 }}>
+              <Tabs
+                sx={{ flex: 1, minWidth: 0 }}
+                value={state.tab}
+                onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
+                // The steps fill the bar; on a phone, too narrow for six, they scroll.
+                variant={isPhone ? 'scrollable' : 'fullWidth'}
+                scrollButtons="auto"
+                aria-label="Character builder steps"
               >
-                Back
-              </Button>
-              <Button
-                variant="contained"
-                endIcon={<ChevronRight size={ICON_SIZES.md} />}
-                disabled={state.tab === STEPS.length - 1}
-                onClick={() => dispatch({ type: 'tab/set', tab: Math.min(STEPS.length - 1, state.tab + 1) })}
-              >
-                Next
-              </Button>
-            </Stack>
-          </Box>
+                {STEPS.map((step, index) => (
+                  <Tab key={step.id} label={<StepLabel step={step} index={index} />} />
+                ))}
+              </Tabs>
+            </Box>
+          </Paper>
+          <BuilderDataAlert errors={state.errors} onRetry={reloadData} />
+          {cloudConflict ? (
+            <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
+          ) : null}
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
+            <ActiveIcon size={ICON_SIZES.md} />
+            <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: 'primary.main' }}>{activeStep.label}</Typography>
+            <TagChip label={`${state.tab + 1} / ${STEPS.length}`} />
+          </Stack>
 
-          <Box sx={{ minWidth: 0 }}>
-            <PreviewPane
-              character={state.character}
-              items={state.data.items}
-              feats={state.data.feats}
-            />
-          </Box>
+          <ActiveStep
+            state={viewState}
+            dispatch={dispatch}
+            sheetProps={{
+              importDraft,
+              onUploadToCloud: handleUploadToCloud,
+              onDraftLocalSaved: handleDraftLocalSaved,
+              onCloudCopySavedLocally: handleCloudCopySavedLocally,
+              onNotify: notify,
+            }}
+          />
+
+          <Divider sx={{ my: 1 }} />
+          <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+            <Button
+              startIcon={<ChevronLeft size={ICON_SIZES.md} />}
+              disabled={state.tab === 0}
+              onClick={() => dispatch({ type: 'tab/set', tab: Math.max(0, state.tab - 1) })}
+            >
+              Back
+            </Button>
+            <Button
+              variant="contained"
+              endIcon={<ChevronRight size={ICON_SIZES.md} />}
+              disabled={state.tab === STEPS.length - 1}
+              onClick={() => dispatch({ type: 'tab/set', tab: Math.min(STEPS.length - 1, state.tab + 1) })}
+            >
+              Next
+            </Button>
+          </Stack>
         </Box>
 
-        <Typography component="footer" sx={{ ...BUILDER_TEXT.caption, mt: 1.5, textAlign: 'center' }}>
-          Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
-        </Typography>
+        <Box sx={{ minWidth: 0 }}>
+          <PreviewPane
+            character={state.character}
+            items={state.data.items}
+            feats={state.data.feats}
+          />
+        </Box>
       </Box>
 
-    </Box>
+      <Typography component="footer" sx={{ ...BUILDER_TEXT.caption, mt: 1.5, textAlign: 'center' }}>
+        Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
+      </Typography>
+    </AppPage>
   );
 }

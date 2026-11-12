@@ -4,10 +4,11 @@ import { sourceLinesMatching } from '../../sourceScan.js';
 
 // The builder's text takes the sheet's roles (PanelHeader, sheetBoxTitleSx,
 // sheetSectionHeaderSx, cardTitleSx): a heading variant brings the theme's
-// page-title size into a panel. Only the page title and the app bar use one.
+// page-title size into a panel. Only the open step's title uses one (the
+// page's title is the shared PageHeader).
 test('builder headings take a shared role, not a heading variant', () => {
   const hits = sourceLinesMatching(/variant="h[1-6]"/, {
-    allow: ['pages/charbuilder/CharBuilder.jsx', 'pages/charbuilder/layout/BuilderAppBar.jsx'],
+    allow: ['pages/charbuilder/CharBuilder.jsx'],
   }).filter((hit) => hit.startsWith('pages/charbuilder/'));
   assert.deepEqual(hits, []);
 });

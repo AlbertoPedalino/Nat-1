@@ -64,7 +64,9 @@ vi.mock('../../../../src/pages/charsheet/resources/HPBlock.jsx', () => ({ defaul
     <button onClick={() => onDamage(1)}>Damage</button>
   </>
 ) }));
-vi.mock('../../../../src/pages/charsheet/layout/TopBar.jsx', () => ({ default: () => null }));
+vi.mock('../../../../src/pages/charsheet/layout/SheetHeader.jsx', () => ({ default: () => null }));
+// The app's top bar (its links and cloud menu) is not what these tests are about.
+vi.mock('../../../../src/app/navigation/AppTopBar.jsx', () => ({ default: () => null, APP_TOP_BAR_HEIGHT: '48px' }));
 vi.mock('../../../../src/pages/charsheet/stats/AbilityScores.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/stats/SavingThrows.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/stats/Senses.jsx', () => ({ default: () => null }));

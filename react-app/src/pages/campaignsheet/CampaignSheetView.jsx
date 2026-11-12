@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import AppPage from '../../app/navigation/AppPage.jsx';
 import CharacterSheet from '../charsheet/CharacterSheet.jsx';
 import { useCloudCharacterRow } from '../../shared/cloud/sync/useCloudCharacterRow.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
@@ -29,26 +29,26 @@ export default function CampaignSheetView({
   const canEdit = editable ?? editFromUrl();
   const { row, loading, error, replaceRow, markDeleted } = useCloudCharacterRow(charId);
 
-  return (
-    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: embedded ? 'transparent' : 'background.default' }}>
-      {loading ? (
-        <LoadingLine centered label="Loading sheet…" />
-      ) : !row ? (
-        <ErrorLine sx={{ m: 4 }}>{error}</ErrorLine>
-      ) : (
-        <CharacterSheet
-          externalChar={row.data}
-          externalCharId={charId}
-          externalSheetRevision={row.sheet_revision ?? -1}
-          onSheetRow={replaceRow}
-          onSheetDeleted={markDeleted}
-          readOnly={!canEdit}
-          embedded={embedded}
-          onRoll={onRoll}
-          showOwnRollToast={showOwnRollToast}
-          liveDigest={liveDigest}
-        />
-      )}
-    </Box>
-  );
+  if (!loading && row) {
+    return (
+      <CharacterSheet
+        externalChar={row.data}
+        externalCharId={charId}
+        externalSheetRevision={row.sheet_revision ?? -1}
+        onSheetRow={replaceRow}
+        onSheetDeleted={markDeleted}
+        readOnly={!canEdit}
+        embedded={embedded}
+        onRoll={onRoll}
+        showOwnRollToast={showOwnRollToast}
+        liveDigest={liveDigest}
+      />
+    );
+  }
+  // Until there is a sheet, its own page is still the app's page, bar and
+  // all; embedded, the panel around it is the frame.
+  const status = loading
+    ? <LoadingLine centered label="Loading sheet…" />
+    : <ErrorLine sx={embedded ? { m: 4 } : undefined}>{error}</ErrorLine>;
+  return embedded ? status : <AppPage topBar={{ home: true }}>{status}</AppPage>;
 }

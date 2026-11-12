@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
-import { Box, Typography, Button, Menu, MenuItem } from '@mui/material';
-import { ArrowLeft, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Menu, MenuItem } from '@mui/material';
+import { Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import IconColorPicker from '../../../shared/ui/IconColorPicker.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
@@ -11,13 +10,9 @@ import SheetActions from './SheetActions.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
-import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
-import { appTopBarButtonSx } from '../../../shared/ui/appBar.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { sheetColumnSx } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
@@ -26,7 +21,10 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 
-export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
+// The character's own header, the band the sheet opens on under the app's top
+// bar (AppPage): portrait, name, class line, XP and the rests. Page content,
+// not a bar: the navigation (Home, Builder) is the app's top bar's.
+export default function SheetHeader({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
   const [colorAnchor, setColorAnchor] = useState(null);
   const [badgeAnchor, setBadgeAnchor] = useState(null);
@@ -58,7 +56,6 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
     if (previous) deletePortrait(previous);
     notify('success', 'Portrait removed.');
   };
-  const navigate = useNavigate();
   const extra = C.extraClasses || [];
   const pLv = primaryClassLevel(C);
   const sc = C.subclassShortName ? ` (${C.subclassShortName})` : '';
@@ -86,31 +83,6 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
 
   return (
     <Box sx={SURFACES.pageHeader}>
-      {!embedded ? (
-        <>
-          <AppTopBar
-            home
-            start={readOnly ? null : (
-              <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={ICON_SIZES.sm} />}
-                onClick={() => {
-                  const params = new URLSearchParams(window.location.search);
-                  // Use the sheet's own id first: the online sheet route is
-                  // /campaign-sheet?id=…, so params.get('char') is null there and we
-                  // must not fall back to a stale gb:active_char (would open a blank
-                  // or wrong builder). C.id covers chars whose id lives in the data.
-                  const targetId = charId || C?.id
-                    || params.get('char') || params.get('id')
-                    || getActiveCharId() || NEW_CHARACTER;
-                  navigate(characterBuilderPath(targetId));
-                }}
-                sx={appTopBarButtonSx}>
-                Builder
-              </Button>
-            )}
-          />
-          <Box sx={{ height: APP_TOP_BAR_HEIGHT }} />
-        </>
-      ) : null}
       <Box sx={sheetColumnSx(embedded, { embeddedPx: '0.45rem' })}>
       {/* On a desktop three columns — identity, XP, actions — with XP in the
           middle; below that a column (see the XP and actions row). */}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX, sheetColumnSx } from './layout/layout.js';
-import TopBar from './layout/TopBar.jsx';
+import SheetHeader from './layout/SheetHeader.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
 import HPBlock from './resources/HPBlock.jsx';
 import SavingThrows from './stats/SavingThrows.jsx';
@@ -22,10 +24,35 @@ import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetDocument } from './state/useSheetDocument.js';
 import { useSheetEditors } from './state/useSheetEditors.js';
-import { SURFACES } from '../../shared/ui/surfaces.js';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
+import AppPage from '../../app/navigation/AppPage.jsx';
+import TopBarButton from '../../shared/ui/TopBarButton.jsx';
+import { getActiveCharId } from '../../shared/character/profile/store.js';
+import { NEW_CHARACTER, characterBuilderPath } from '../../shared/character/profile/characterRoutes.js';
 
 const noopEffect = () => {};
+
+// The top bar's way back to this character's builder.
+function BuilderButton({ C, charId }) {
+  const navigate = useNavigate();
+  return (
+    <TopBarButton
+      icon={ArrowLeft}
+      label="Builder"
+      onClick={() => {
+        const params = new URLSearchParams(window.location.search);
+        // Use the sheet's own id first: the online sheet route is
+        // /campaign-sheet?id=…, so params.get('char') is null there and we
+        // must not fall back to a stale gb:active_char (would open a blank
+        // or wrong builder). C.id covers chars whose id lives in the data.
+        const targetId = charId || C?.id
+          || params.get('char') || params.get('id')
+          || getActiveCharId() || NEW_CHARACTER;
+        navigate(characterBuilderPath(targetId));
+      }}
+    />
+  );
+}
 
 const EMBEDDED_SHEET_GRID = {
   gridTemplateColumns: '1fr',
@@ -110,9 +137,8 @@ export default function CharacterSheet({
   const noop = useCallback(() => {}, []);
 
   if (!C || !sheet) {
-    return (
-      <StatePanel title="No character found">Go back to the builder to create a character.</StatePanel>
-    );
+    const notFound = <StatePanel title="No character found">Go back to the builder to create a character.</StatePanel>;
+    return embedded ? notFound : <AppPage topBar={{ home: true }}>{notFound}</AppPage>;
   }
 
   const sheetGridSx = embedded ? EMBEDDED_SHEET_GRID : SHEET_GRID;
@@ -120,9 +146,21 @@ export default function CharacterSheet({
   return (
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
-    {/* No bottom padding: the dice dock is the sheet's last row and holds it. */}
-    <Box sx={{ ...SURFACES.page, minHeight: embedded ? 'auto' : '100vh', width: '100%' }}>
-      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
+    {/* Full bleed: the header is a band across the page, the panels a column
+        of their own. No bottom padding: the dice dock is the sheet's last row
+        and holds it. A read-only sheet has no builder to go back to. */}
+    <AppPage
+      embedded={embedded}
+      fullBleed
+      topBar={{ home: true, start: readOnly ? null : <BuilderButton C={C} charId={charId} /> }}
+      after={(
+        <>
+          {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+          <RestDialogs C={C} sheet={sheet} rest={rest} />
+        </>
+      )}
+    >
+      <SheetHeader C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
       {/* Clipped sideways only, so the panels' ink shadows show at the bottom. */}
       <Box sx={{ ...sheetColumnSx(embedded), overflowX: 'clip' }}>
         {sheetConflict ? (
@@ -187,10 +225,7 @@ export default function CharacterSheet({
         </Box>
       </Box>
       <SheetDiceDock embedded={embedded} rollLog={rollLog} onRoll={rollCustom} onClearLog={() => setRollLog([])} />
-      {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
-
-      <RestDialogs C={C} sheet={sheet} rest={rest} />
-    </Box>
+    </AppPage>
     </SheetActionsProvider>
     </ProficiencySetsProvider>
   );

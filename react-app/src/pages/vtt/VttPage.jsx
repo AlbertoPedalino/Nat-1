@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
-import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import AppPage from '../../app/navigation/AppPage.jsx';
 import { toCampaignMembers } from '../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../shared/campaign/useGmCampaigns.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
@@ -23,7 +23,6 @@ import { UI_FONTS, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import { OPACITY } from '../../shared/ui/colors.js';
-import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
@@ -191,129 +190,83 @@ export default function VttPage() {
     return campaigns.some((campaign) => campaign.id === id) ? id : '';
   }, [campaigns, joinedCampaign, scene]);
 
+  // The projector is the map alone on a black screen. A GM or a player gets
+  // the app's page, a screen in map mode (`fill`, the column's cap lifted:
+  // a live scene is a screen-sized workspace, and battle maps boxed into
+  // 1600 px left wide displays half empty).
+  const pageProps = spectator.requested
+    ? { topBar: false, fullBleed: true, fill: true, sx: spectatorPageSx }
+    : {
+      tight: true,
+      maxWidth: mapMode ? 'none' : 1600,
+      fill: mapMode,
+      sx: mapMode && { overflow: 'hidden' },
+      topBar: mapFullscreen ? false : {
+        home: true,
+        backTo: atRoot ? '/campaigns' : '/vtt',
+        backLabel: atRoot ? 'Campaigns' : 'Tables',
+        children: ownCampaignId ? <CampaignLinksMenu campaignId={ownCampaignId} /> : null,
+      },
+    };
+
   return (
-    <Box
-      sx={spectator.requested
-        ? spectatorPageSx
-        : [pageSx, mapMode && pageMapSx, mapFullscreen && pageCoveredSx]}
-    >
-      {!spectator.requested && !mapFullscreen ? (
-        <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'}>
-          {ownCampaignId ? <CampaignLinksMenu campaignId={ownCampaignId} /> : null}
-        </AppTopBar>
+    <AppPage {...pageProps}>
+      {gate ? <Typography sx={s.noticeSx}>{gate}</Typography> : null}
+      {!gate && busy ? <LoadingLine centered /> : null}
+      {!gate && !busy && error && (requestedScene || joinedCampaign) ? (
+        <ErrorLine sx={{ mb: 1 }}>{error}</ErrorLine>
       ) : null}
-      <Box
-        component="main"
-        sx={spectator.requested ? spectatorContentSx : [contentSx, mapMode && contentMapSx]}
-      >
-        {gate ? <Typography sx={s.noticeSx}>{gate}</Typography> : null}
-        {!gate && busy ? <LoadingLine centered /> : null}
-        {!gate && !busy && error && (requestedScene || joinedCampaign) ? (
-          <ErrorLine sx={{ mb: 1 }}>{error}</ErrorLine>
-        ) : null}
 
-        {/* At the root a GM manages their scenes; everyone also sees the tables
-            they play at, because running one campaign does not stop you being a
-            player in another. */}
-        {!gate && !busy && atRoot ? (
-          <Box sx={s.rootStackSx}>
-            {runsCampaigns ? (
-              <ScenePicker
-                campaigns={campaigns}
-                loadingCampaigns={loadingCampaigns}
-                campaignError={campaignError}
-                onOpen={openScene}
-              />
-            ) : null}
-            <CampaignSessionPicker
-              campaigns={allCampaigns}
-              onJoin={joinCampaign}
-              showEmpty={!runsCampaigns}
+      {/* At the root a GM manages their scenes; everyone also sees the tables
+          they play at, because running one campaign does not stop you being a
+          player in another. */}
+      {!gate && !busy && atRoot ? (
+        <Box sx={s.rootStackSx}>
+          {runsCampaigns ? (
+            <ScenePicker
+              campaigns={campaigns}
+              loadingCampaigns={loadingCampaigns}
+              campaignError={campaignError}
+              onOpen={openScene}
             />
-          </Box>
-        ) : null}
-
-        {!gate && !busy && joinedCampaign && !scene && !error ? (
-          spectator.requested
-            ? <Typography sx={spectatorWaitingSx}>Waiting for the live scene…</Typography>
-            : <SessionGate loading={false} />
-        ) : null}
-        {!gate && !busy && scene ? (
-          <SceneEditor
-            scene={scene}
-            onSceneChange={setScene}
-            // A player is carried by the live scene and never navigates: the
-            // editor only offers this to the GM.
-            onOpenScene={openScene}
-            onMapFullscreenChange={setMapFullscreen}
-            spectator={spectator.requested}
-            spectatorSource={spectator.source}
-            cameraSourceId={presenterSourceRef.current}
-            presenterFollowingRef={presenterFollowingRef}
-            projectorWindowRef={projectorWindowRef}
+          ) : null}
+          <CampaignSessionPicker
+            campaigns={allCampaigns}
+            onJoin={joinCampaign}
+            showEmpty={!runsCampaigns}
           />
-        ) : null}
-      </Box>
-    </Box>
+        </Box>
+      ) : null}
+
+      {!gate && !busy && joinedCampaign && !scene && !error ? (
+        spectator.requested
+          ? <Typography sx={spectatorWaitingSx}>Waiting for the live scene…</Typography>
+          : <SessionGate loading={false} />
+      ) : null}
+      {!gate && !busy && scene ? (
+        <SceneEditor
+          scene={scene}
+          onSceneChange={setScene}
+          // A player is carried by the live scene and never navigates: the
+          // editor only offers this to the GM.
+          onOpenScene={openScene}
+          onMapFullscreenChange={setMapFullscreen}
+          spectator={spectator.requested}
+          spectatorSource={spectator.source}
+          cameraSourceId={presenterSourceRef.current}
+          presenterFollowingRef={presenterFollowingRef}
+          projectorWindowRef={projectorWindowRef}
+        />
+      ) : null}
+    </AppPage>
   );
 }
 
-const pageSx = {
-  ...SURFACES.page,
-  minHeight: '100vh',
-  pt: APP_TOP_BAR_HEIGHT,
-};
-
-const contentSx = {
-  maxWidth: 1600,
-  mx: 'auto',
-  px: { xs: 1, md: 2 },
-  // Tighter than the other tools on purpose: every pixel here is map.
-  py: 1,
-  boxSizing: 'border-box',
-};
-
-// `dvh` rather than `vh`: on a phone `100vh` counts the strip behind the address
-// bar, so the bottom of the map was under the browser's own chrome. `dvh`
-// follows the bar as it hides and shows.
-const pageMapSx = {
-  height: '100dvh',
-  minHeight: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-};
-
-// Nothing is left to make room for once the bar is gone: the padding that held
-// its place would otherwise show as a strip of background under a map that is
-// supposed to be the whole screen.
-const pageCoveredSx = {
-  pt: 0,
-};
-
-const contentMapSx = {
-  flex: 1,
-  minHeight: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  // A live scene is a screen-sized workspace. The document layout above is
-  // capped for readable lists, but carrying that cap into map mode leaves
-  // battle maps and backgrounds boxed into 1600 px on wider displays.
-  maxWidth: 'none',
-};
-
+// The projector's screen: black, not the page's paper, and nothing past it.
 const spectatorPageSx = {
-  width: '100vw',
-  height: '100vh',
   overflow: 'hidden',
   bgcolor: VTT_COLORS.black,
-};
-
-const spectatorContentSx = {
-  width: '100%',
-  height: '100%',
-  overflow: 'hidden',
+  backgroundImage: 'none',
 };
 
 const spectatorWaitingSx = {
