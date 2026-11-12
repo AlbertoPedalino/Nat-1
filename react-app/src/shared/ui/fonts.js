@@ -1,5 +1,4 @@
-// The interface's font stacks, from one place (Rubik and Nunito Sans are
-// loaded in index.html). The theme's body text uses `body`; titles, labels and
+// The interface's font stacks, from one place (all loaded in index.html). The theme's body text uses `body`; titles, labels and
 // numbers use `display`, a sturdy, lightly softened face that gives the
 // interface its voice; longer flavour text uses `prose`; formulas and code use
 // `mono`.
@@ -7,9 +6,13 @@ export const UI_FONTS = Object.freeze({
   display: '"Rubik", "Nunito Sans", system-ui, sans-serif',
   prose: '"Nunito Sans", system-ui, sans-serif',
   body: '"Nunito Sans", system-ui, sans-serif',
-  // Comic lettering: what a roll shouts (NATURAL 20!) and the app's name on
-  // the home page's cover.
-  shout: '"Bangers", "Rubik", system-ui, sans-serif',
+  // Comic lettering with a fantasy cut (a narrow, heavy face with blackletter
+  // serifs): what a roll shouts (NATURAL 20!), a character's name, the app's
+  // name on the home page's cover.
+  shout: '"Germania One", "Rubik", system-ui, sans-serif',
+  // A panel's title, lettered like a rulebook's heading: a readable
+  // blackletter.
+  heading: '"Grenze Gotisch", "Germania One", Georgia, serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 

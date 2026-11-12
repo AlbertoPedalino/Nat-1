@@ -39,3 +39,13 @@ export function isMagicItem(item) {
   const rarity = rarityKey(item);
   return rarity !== 'none' && rarity !== 'unknown';
 }
+
+// The rarities lettered in their tier's colour (the theme's gmboard.rarity).
+const TONED_RARITIES = new Set(['common', 'uncommon', 'rare', 'very rare', 'legendary', 'artifact']);
+
+// The colour an item's name is lettered in, as a theme path
+// ('gmboard.rarity.Rare'); null for a mundane item or one of no set tier.
+export function rarityTone(item) {
+  const key = rarityKey(item);
+  return TONED_RARITIES.has(key) ? `gmboard.rarity.${rarityLabel(item)}` : null;
+}

@@ -78,12 +78,15 @@ export const theme = createTheme({
         Moderate: UI_COLORS.warning,
         Low: UI_COLORS.success,
       },
+      // A looter's tiers, bright enough to letter an item's name on the
+      // dark paper: white-ish, green, blue, purple, orange, pink.
       rarity: {
-        Legendary: '#e8a030',
-        'Very Rare': '#a070d0',
-        Rare: '#4080c0',
-        Uncommon: '#50a850',
-        Common: '#7a6040',
+        Artifact: '#ff6fb5',
+        Legendary: '#ff9a3c',
+        'Very Rare': '#c38cff',
+        Rare: '#5aa9ff',
+        Uncommon: '#5fd48a',
+        Common: '#d6cdc1',
         '—': '#7a6040',
       },
       // Origin badges in the instance picker (cloud vs local-only sheets).

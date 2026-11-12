@@ -26,14 +26,22 @@ export const TEXT_STYLES = Object.freeze({
     fontWeight: FONT_WEIGHTS.heavy,
     ...inkLettering(2, 2),
   }),
-  // Comic lettering for what names or shouts: a panel's or dialog's title, a
-  // character's name, a roll's name, NATURAL 20!. Always inked: an ink
+  // Comic lettering for what names or shouts: a character's name, a roll's name, NATURAL 20!. Always inked: an ink
   // outline and its solid shadow.
   shout: Object.freeze({
     fontFamily: UI_FONTS.shout,
     fontWeight: FONT_WEIGHTS.regular,
     letterSpacing: LETTER_SPACINGS.md,
     ...inkLettering(2, 2),
+  }),
+  // A panel's or dialog's title (Saving Throws, Spells, a builder step): the
+  // heading face, inked like the shout.
+  heading: Object.freeze({
+    fontFamily: UI_FONTS.heading,
+    fontWeight: FONT_WEIGHTS.bold,
+    // A thinner outline than the shout's: the blackletter's fine strokes
+    // would fill in under 2px.
+    ...inkLettering(1.5, 2),
   }),
   // A comic cover's title (the app's name on the home page): the shout face,
   // outlined in ink, its solid shadow set well off.

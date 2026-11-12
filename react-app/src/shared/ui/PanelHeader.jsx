@@ -5,6 +5,7 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { UI_SHADOWS } from './shadows.js';
+import { BAR_STUDS_SX, RULE_GEM_SX } from './ornaments.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -20,6 +21,11 @@ export const panelBarSx = {
   borderBottom: 2,
   borderColor: UI_COLORS.edge,
 };
+
+// The bar of a whole panel (PanelHeader, the sheet's tab bar, a dialog's
+// title): a gem studs each end, so the bar reads as a cartouche across it.
+// A stat tile's small bar goes without.
+export const panelTitleBarSx = { ...panelBarSx, ...BAR_STUDS_SX };
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
@@ -55,9 +61,16 @@ export function panelBadgeSx(tone = 'primary.main') {
 }
 
 export const panelTitleSx = {
+  ...TEXT_STYLES.heading,
+  fontSize: FONT_SIZES.body,
+  color: 'primary.main',
+};
+
+// A stat tile's name (AC, Initiative, STR): short, so shouted in the comic
+// face rather than in the panel's blackletter.
+export const tileTitleSx = {
   ...TEXT_STYLES.shout,
   fontSize: FONT_SIZES.xxl,
-  color: 'primary.main',
 };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
@@ -96,14 +109,14 @@ export const microLabelSx = {
 };
 
 // The heading of a group of rows on a sheet tab (a spell level, an inventory
-// section, a feature list): uppercase, over a rule. `color` tints the text,
-// `rule` the line under it (null: no line).
+// section, a feature list): uppercase, over a rule with a gem in its middle.
+// `color` tints the text, `rule` the line under it (null: no line).
 export function sheetSectionHeaderSx({ color = 'text.secondary', rule = 'divider' } = {}) {
   return {
     ...TEXT_STYLES.label,
     fontSize: FONT_SIZES.sm,
     color,
-    ...(rule ? { borderBottom: 1, borderColor: rule, pb: 0.5 } : {}),
+    ...(rule ? { ...RULE_GEM_SX, borderBottom: 1, borderColor: rule, pb: 0.5 } : {}),
   };
 }
 
@@ -147,7 +160,7 @@ export const sectionLabelSx = {
 // builder); the sheet keeps panelTitleSx as it is.
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
   return (
-    <Box sx={{ ...panelBarSx, ...panelBarPadSx, backgroundImage: panelScreentone(tone) }}>
+    <Box sx={{ ...panelTitleBarSx, ...panelBarPadSx, backgroundImage: panelScreentone(tone) }}>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}

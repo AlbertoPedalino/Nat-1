@@ -6,7 +6,7 @@ import {
 import { SPELL_CATALOG, spellLevelLabel } from './spellCatalog.js';
 import { MONSTER_CATALOG, monsterStats } from './monsterCatalog.js';
 import { attunementRequirementText } from '../../../shared/character/inventory/itemAttunement.js';
-import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
+import { rarityLabel, rarityTone } from '../../../shared/character/inventory/itemRarity.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 
 // The compendium's catalogs as tabs: each one's definition (what it lists and
@@ -51,24 +51,15 @@ const MONSTER_COLUMNS = [
 const MAGIC_TYPE_LABEL = Object.fromEntries(MAGIC_TYPES.map(({ key, label }) => [key, label]));
 const EQUIPMENT_LABEL = Object.fromEntries(EQUIPMENT_CATEGORIES.map(({ key, label }) => [key, label]));
 
-// The rarity's own colour on its line (the theme's rarity palette).
-const RARITY_TONES = {
-  Common: 'gmboard.rarity.Common',
-  Uncommon: 'gmboard.rarity.Uncommon',
-  Rare: 'gmboard.rarity.Rare',
-  'Very Rare': 'gmboard.rarity.Very Rare',
-  Legendary: 'gmboard.rarity.Legendary',
-  Artifact: 'error.main',
-};
-
 const MAGIC_COLUMNS = [
   {
     key: 'name',
     label: 'Name',
     width: '2fr',
     render: (entry) => {
-      const rarity = rarityLabel(entry.record);
-      return <NameCell entry={entry}>{secondLine(rarity, { color: RARITY_TONES[rarity] || 'text.secondary' })}</NameCell>;
+      // The name and its rarity lettered in the rarity's colour.
+      const tone = rarityTone(entry.record);
+      return <NameCell entry={entry} tone={tone}>{secondLine(rarityLabel(entry.record), { color: tone || 'text.secondary' })}</NameCell>;
     },
   },
   { key: 'type', label: 'Type', width: '1fr', render: (entry) => MAGIC_TYPE_LABEL[magicItemType(entry.record)] },

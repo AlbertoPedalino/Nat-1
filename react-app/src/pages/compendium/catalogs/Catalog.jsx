@@ -32,7 +32,7 @@ const ROW_HEIGHT = 52;
 // the names in a column when there is none), its name and a second line.
 // `thumb={false}` for a kind that never has one (spells).
 export function NameCell({
-  entry, name = entry.name, thumb = true, children,
+  entry, name = entry.name, thumb = true, tone = null, children,
 }) {
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
@@ -43,7 +43,7 @@ export function NameCell({
         </Box>
       ) : null}
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="body2" sx={entryNameSx}>{name}</Typography>
+        <Typography variant="body2" sx={tone ? { ...entryNameSx, color: tone } : entryNameSx}>{name}</Typography>
         {children}
       </Box>
     </Stack>
