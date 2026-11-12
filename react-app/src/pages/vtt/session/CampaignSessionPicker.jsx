@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Box, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -55,7 +54,7 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
               <Flag size={ICON_SIZES.md} />
               <Typography sx={{ flex: 1, minWidth: 0 }}>{campaign.name}</Typography>
               {campaign.hasLive ? (
-                <Chip size="small" color="success" icon={<Radio size={ICON_SIZES.xs} />} label="Live" sx={chipSx} />
+                <TagChip tone={UI_COLORS.success} icon={<Radio size={ICON_SIZES.xs} />} label="Live" />
               ) : (
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map up</Typography>
               )}
@@ -97,8 +96,3 @@ const rowButtonSx = {
   p: 1,
 };
 
-const chipSx = {
-  height: CONTROL_HEIGHTS.sm,
-  fontSize: FONT_SIZES.xs,
-  ...TEXT_STYLES.figure,
-};

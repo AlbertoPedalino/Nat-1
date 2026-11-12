@@ -36,6 +36,8 @@ import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
+import TagChip from '../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../shared/ui/colors.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -199,7 +201,7 @@ export default function CampaignsPage() {
                     <Box sx={campaignHeaderSx}>
                       <Box sx={campaignTitleRowSx}>
                         <Typography component="h2" sx={campaignNameSx}>{c.name}</Typography>
-                        {isCampaignGm ? <Chip size="small" label="GM" color="primary" variant="outlined" sx={smallChipSx} /> : null}
+                        {isCampaignGm ? <TagChip label="GM" tone={UI_COLORS.accent} /> : null}
                         {isCampaignGm ? (
                           <Chip
                             size="small"
@@ -247,7 +249,7 @@ export default function CampaignsPage() {
                                   <Box component="span" sx={characterNameRowSx}>
                                     <Typography component="span" sx={characterNameSx}>{ch.name || ch.id}</Typography>
                                     {!canEditChar ? (
-                                      <Chip component="span" size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" sx={readOnlyChipSx} variant="outlined" />
+                                      <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
                                     ) : null}
                                   </Box>
                                   <Typography component="span" sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
@@ -370,7 +372,6 @@ const characterInfoSx = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 
 const characterNameRowSx = { display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flexWrap: 'wrap' };
 const characterNameSx = { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.primary', overflowWrap: 'anywhere' };
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
-const readOnlyChipSx = { flexShrink: 0, height: CONTROL_HEIGHTS.xs, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: 'gmboard.badge.cloud', borderColor: 'gmboard.badge.cloud', '& .MuiChip-icon': { color: 'gmboard.badge.cloud', ml: 0.5 }, '& .MuiChip-label': { px: 0.75 } };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.5 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
 const hpStatSx = { color: 'error.main' };

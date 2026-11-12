@@ -5,7 +5,6 @@ import { useCallback } from 'react';
 import {
   Box,
   Button,
-  Chip,
   Divider,
   IconButton,
   Link,
@@ -31,6 +30,8 @@ import { crKey, crPB, crXP } from './challengeRating.js';
 import { get5eToolsBestiaryUrl } from '../content/fiveEToolsLinks.js';
 import { FONT_WEIGHTS } from '../ui/fonts.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
+import TagChip from '../ui/TagChip.jsx';
+import { UI_COLORS } from '../ui/colors.js';
 
 export function StatBlockHeader({ monster, onClose }) {
   const url = get5eToolsBestiaryUrl(monster?.name, monster?.source);
@@ -47,7 +48,7 @@ export function StatBlockHeader({ monster, onClose }) {
             {getTypeTags(monster.type)}
             {formatAlignment(monster.alignment) ? `, ${formatAlignment(monster.alignment)}` : ''}
           </Typography>
-          <Chip size="small" label={monster.source} color="primary" sx={{ mt: 0.75 }} />
+          <TagChip label={monster.source} tone={UI_COLORS.accent} sx={{ mt: 0.75 }} />
         </Box>
       </Stack>
       {onClose ? (

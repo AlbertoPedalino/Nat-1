@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Chip, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import { Lock } from 'lucide-react';
 import ChoiceSpec from './ChoiceSpec.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
@@ -16,6 +16,8 @@ import { asArray } from '../../../shared/lists.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
+import TagChip from '../../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -75,12 +77,10 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
         {listLabel}
       </Typography>
       {locked ? (
-        <Chip
-          size="small"
-          color="primary"
-          variant="outlined"
+        <TagChip
           icon={<Lock size={ICON_SIZES.xs} />}
           label={grantLabel(additional[entryIdx] || additional[0])}
+          tone={UI_COLORS.accent}
           sx={{ alignSelf: 'flex-start' }}
         />
       ) : (

@@ -1,7 +1,6 @@
-import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
-import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
@@ -131,20 +130,6 @@ export const deleteBtnSx = {
   ...iconBtnSx,
   '&:hover': { borderColor: UI_COLORS.dangerStrong, color: UI_COLORS.dangerStrong },
 };
-
-export function badgeSx(kind, theme) {
-  const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : UI_COLORS.textSecondary;
-  return {
-    height: '18px',
-    fontSize: FONT_SIZES.xs,
-    ...TEXT_STYLES.title,
-    borderRadius: 0.5,
-    color,
-    bgcolor: alpha(color, OPACITY.tint),
-    border: '2px solid',
-    borderColor: alpha(color, OPACITY.line),
-  };
-}
 
 // An empty list: the shared state panel (it has its own paper, so it reads
 // over the page's drawings), sized to the list.

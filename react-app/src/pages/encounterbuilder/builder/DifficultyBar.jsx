@@ -1,9 +1,10 @@
-import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material';
+import { Box, LinearProgress, Stack, Typography } from '@mui/material';
 import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);
@@ -13,7 +14,7 @@ export default function DifficultyBar({ encounter, party }) {
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total XP</Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{formatNumber(difficulty.totalXp)} XP</Typography>
-          <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: UI_COLORS.onAccent }} />
+          <TagChip label={difficulty.label} tone={difficulty.color} filled />
         </Stack>
       </Stack>
       <LinearProgress

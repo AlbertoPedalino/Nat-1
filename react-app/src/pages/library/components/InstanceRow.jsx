@@ -1,9 +1,10 @@
-import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import * as s from '../styles.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 // Shared row for every instance picker: generic tool lists render it with a
 // plain `to` link, the characters picker renders it with an async `onOpen`
@@ -11,7 +12,6 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 export default function InstanceRow({
   name, updatedAtLabel, to, onOpen, onRename, onDelete, opening, badge, subtitle, extraAction,
 }) {
-  const theme = useTheme();
   // The open control is a native <button> (via `component="button"`), whose
   // content model only allows phrasing content: every child here renders as
   // a span, never a div/p, so nothing here is a block element.
@@ -20,7 +20,7 @@ export default function InstanceRow({
       <Box component="span" sx={{ minWidth: 0, flex: 1, display: 'block' }}>
         <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Typography component="span" sx={s.nameSx}>{name}</Typography>
-          {badge ? <Chip component="span" size="small" label={badge.label} sx={s.badgeSx(badge.kind, theme)} /> : null}
+          {badge ? <TagChip component="span" label={badge.label} tone={badge.kind === 'cloud' ? UI_COLORS.infoText : UI_COLORS.textSecondary} /> : null}
         </Box>
         {subtitle ? <Typography component="span" sx={{ ...s.subtitleSx, display: 'block' }}>{subtitle}</Typography> : null}
       </Box>

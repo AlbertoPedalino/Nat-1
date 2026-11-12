@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, List, ListItemButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, List, ListItemButton, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
@@ -18,6 +18,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -84,9 +85,9 @@ export default function SpellSelectionPanel({ state, dispatch }) {
         ) : (
           <>
             <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              <Chip color={selectedCantrips.length > cantrips ? 'error' : 'primary'} label={`Cantrips ${selectedCantrips.length}/${cantrips}`} />
-              <Chip color={selectedSpellsCount > spells ? 'error' : 'primary'} label={`Spells ${selectedSpellsCount}/${spells}`} />
-              {profile.ability ? <Chip label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
+              <TagChip size="medium" tone={selectedCantrips.length > cantrips ? UI_COLORS.danger : UI_COLORS.accent} label={`Cantrips ${selectedCantrips.length}/${cantrips}`} />
+              <TagChip size="medium" tone={selectedSpellsCount > spells ? UI_COLORS.danger : UI_COLORS.accent} label={`Spells ${selectedSpellsCount}/${spells}`} />
+              {profile.ability ? <TagChip size="medium" label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
             <SearchField
               value={state.search.spells}
@@ -108,7 +109,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                   <ToggleButton value="prepare">Prepare</ToggleButton>
                   <ToggleButton value="book">Spellbook</ToggleButton>
                 </ToggleButtonGroup>
-                <Chip label={`Spellbook ${activeSpellbookSize}`} size="small" />
+                <TagChip label={`Spellbook ${activeSpellbookSize}`} />
               </Stack>
             ) : null}
             <Box sx={scrollWellSx(460)}>

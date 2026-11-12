@@ -24,6 +24,7 @@ import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -189,23 +190,23 @@ function SetupSummary({ season, defaults, mountSpeed, tones }) {
   // the chip reads as the button it was picked from.
   return (
     <Box sx={chipRowSx} aria-label="Hexcrawl setup">
-      <Chip
+      <SettingChip
         icon={(season && SEASON_ICONS[season]) || CalendarDays}
         label={season || 'No season'}
         missing={!season}
       />
-      <Chip
+      <SettingChip
         icon={(population && POPULATION_ICONS[population.id]) || Compass}
         label={population?.label || 'No population'}
         missing={!population}
       />
-      <Chip
+      <SettingChip
         icon={Swords}
         label={tier ? `${tier.shortLabel} · ${tier.shortLevels}` : 'No tier'}
         missing={!tier}
         tone={tierTone?.color}
       />
-      <Chip
+      <SettingChip
         icon={mountSpeed === 1 ? Footprints : Rabbit}
         label={mount ? mount.label : `×${mountSpeed} mount`}
       />
@@ -213,20 +214,10 @@ function SetupSummary({ season, defaults, mountSpeed, tones }) {
   );
 }
 
-function Chip({ icon: Icon, label, missing = false, tone = null }) {
-  return (
-    <Box
-      component="span"
-      sx={{
-        ...chipSx,
-        ...(tone ? { color: tone, borderColor: alpha(tone, OPACITY.strong) } : null),
-        ...(missing ? missingChipSx : null),
-      }}
-    >
-      {Icon ? <Icon size={ICON_SIZES.xs} aria-hidden /> : null}
-      {label}
-    </Box>
-  );
+// One of the hexcrawl's settings, as the sticker it was picked from; a setting
+// not made yet stands out in the warning tone.
+function SettingChip({ icon: Icon, label, missing = false, tone = null }) {
+  return <TagChip icon={<Icon size={ICON_SIZES.xs} aria-hidden />} label={label} tone={missing ? UI_COLORS.warning : tone} />;
 }
 
 // Where the party stands, and what the hex did to them on the way in. The
@@ -300,26 +291,6 @@ const nextHexSx = {
 const nextHexTitleSx = { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight, color: VTT_COLORS.accent };
 
 const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
-
-const chipSx = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 0.5,
-  px: 0.75,
-  py: 0.25,
-  fontSize: FONT_SIZES.sm,
-  lineHeight: LINE_HEIGHTS.normal,
-  color: VTT_COLORS.text,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
-  borderRadius: 1,
-};
-
-const missingChipSx = {
-  color: 'warning.main',
-  borderColor: 'warning.main',
-  borderStyle: 'dashed',
-};
 
 const linkButtonSx = {
   px: 0.75,

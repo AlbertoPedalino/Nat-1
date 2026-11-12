@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
+import { Box, Typography, Button, Menu, MenuItem } from '@mui/material';
 import { ArrowLeft, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
@@ -13,7 +13,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
@@ -24,7 +24,7 @@ import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter }) {
   const { notify } = useToast();
@@ -179,9 +179,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               <CharacterName name={C.name} sx={{ fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead } }} />
               {readOnly && (
-                <Chip size="small" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: CONTROL_HEIGHTS.xs, ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.infoText, borderColor: uiAlpha(UI_COLORS.infoText, OPACITY.edge), bgcolor: uiAlpha(UI_COLORS.infoText, OPACITY.soft), '& .MuiChip-icon': { color: UI_COLORS.infoText, ml: 0.5 } }}
-                  variant="outlined" />
+                <TagChip icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
               )}
             </Box>
             <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

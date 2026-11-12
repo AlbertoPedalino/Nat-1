@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
+import { readSource, sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
 
 // Rules the app computes in exactly one place. A copy elsewhere drifts: the
 // inline proficiency bonus, for one, missed the bonus magic items grant.
@@ -696,4 +696,25 @@ test("a row's tag is a MiniBadge, never a hand-tinted Chip", () => {
   assert.deepEqual(sourceFilesMatching(/\bchipTintStyle\(/, {
     allow: ['app/theme.js', 'shared/ui/entityColors.js'],
   }), []);
+});
+
+// A JSX element's opening tag from `start` (its "<") to its closing ">", over
+// the braces of its props (an icon prop holds a tag of its own).
+function openingTag(text, start) {
+  let depth = 0;
+  for (let index = start + 1; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === '{') depth += 1;
+    else if (char === '}') depth -= 1;
+    else if (char === '>' && depth === 0) return text.slice(start, index + 1);
+  }
+  return text.slice(start);
+}
+
+test('a chip that is only read is a TagChip', () => {
+  const offenders = sourceFilesMatching(/<Chip/, { allow: ['shared/ui/TagChip.jsx'] }).filter((file) => {
+    const text = readSource(file);
+    return [...text.matchAll(/<Chip/g)].some(({ index }) => !/onClick|clickable/.test(openingTag(text, index)));
+  });
+  assert.deepEqual(offenders, []);
 });

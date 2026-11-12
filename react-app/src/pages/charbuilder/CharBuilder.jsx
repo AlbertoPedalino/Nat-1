@@ -1,5 +1,5 @@
 import { useMemo, useReducer } from 'react';
-import { Box, Button, Chip, Divider, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, Divider, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BuilderAppBar from './layout/BuilderAppBar.jsx';
 import PreviewPane from './preview/PreviewPane.jsx';
@@ -20,18 +20,18 @@ import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 import { panelBarSx, panelFrameSx, panelScreentone } from '../../shared/ui/PanelHeader.jsx';
+import TagChip from '../../shared/ui/TagChip.jsx';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
     <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-      <Chip size="small" label={index + 1} sx={{ height: CONTROL_HEIGHTS.xs, '& .MuiChip-label': BUILDER_TEXT.chip }} />
+      <TagChip label={index + 1} />
       <Icon size={ICON_SIZES.sm} />
       <span>{step.label}</span>
     </Stack>
@@ -134,7 +134,7 @@ export default function CharBuilder() {
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={ICON_SIZES.md} />
               <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: 'primary.main' }}>{activeStep.label}</Typography>
-              <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: CONTROL_HEIGHTS.xs, '& .MuiChip-label': BUILDER_TEXT.chip }} />
+              <TagChip label={`${state.tab + 1} / ${STEPS.length}`} />
             </Stack>
 
             <ActiveStep

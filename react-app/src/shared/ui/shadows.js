@@ -31,16 +31,6 @@ export function inkTextShadow(color = UI_COLORS.edge) {
   return `1px 1px 0 ${color}`;
 }
 
-// Big lettering standing out of the page: a solid block `depth` pixels deep
-// in `color`, one pixel at a time so it has no gaps, an ink line between it
-// and the letters and its far side edged in ink. The first shadow is drawn on
-// top, so the line comes first.
-export function inkExtrusion(color, depth = 6, edge = UI_COLORS.edge) {
-  const at = (offset, tone) => `${offset}px ${offset}px 0 ${tone}`;
-  const block = Array.from({ length: depth }, (_, index) => at(index + 3, color));
-  return [at(1, edge), at(2, edge), ...block, at(depth + 3, edge), at(depth + 4, edge)].join(', ');
-}
-
 // An ink outline drawn round big lettering (a cover title), under the fill so
 // the letters keep their full weight.
 export function inkStroke(width = 3, color = UI_COLORS.edge) {

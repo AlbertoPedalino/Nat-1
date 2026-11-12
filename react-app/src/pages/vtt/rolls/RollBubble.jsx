@@ -1,21 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
 import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -91,7 +91,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
 
         {layout.modeChip && (
-          <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
+          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
         )}
 
         <DiceRow
@@ -206,18 +206,6 @@ const natSx = {
   mb: 0.25,
 };
 
-const modeChipSx = (chip) => ({
-  height: CONTROL_HEIGHTS.xs,
-  fontSize: FONT_SIZES.xxxs,
-  fontWeight: FONT_WEIGHTS.bold,
-  letterSpacing: LETTER_SPACINGS.md,
-  borderRadius: 1,
-  mb: 0.25,
-  color: chip.color,
-  borderColor: chip.borderColor,
-  bgcolor: chip.bgColor,
-  '& .MuiChip-label': { px: 0.5 },
-});
 
 
 // A roll's numbers are shouted, as on the sheet's toast.

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, Chip, Button, alpha } from '@mui/material';
+import { Box, Typography, Button, alpha } from '@mui/material';
 import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
 import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
@@ -19,6 +19,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -65,7 +66,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
     <Panel icon={GAME_ICONS.conditions} title="Conditions" tone={PANEL_TONES.conditions} sx={{ flex: 1, minWidth: 140 }} bodySx={{ p: '0.4rem 0.62rem' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
-          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: FONT_SIZES.xxxs }} />}
+          {active.length === 0 && <TagChip label="— None" />}
           {active.map((c) => (
             c.key === EXHAUSTION_KEY ? (
               <ExhaustionPill

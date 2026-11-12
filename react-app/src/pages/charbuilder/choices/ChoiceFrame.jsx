@@ -1,7 +1,9 @@
-import { Chip, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // The frame every builder choice sits in: its label and how many of the
 // allowed picks are taken ("2/3", or `countLabel` for a count that says more),
@@ -15,12 +17,7 @@ export default function ChoiceFrame({
       <Stack direction="row" spacing={0.75} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography sx={labelSx}>{label}</Typography>
         {max != null ? (
-          <Chip
-            size="small"
-            label={countLabel || `${count}/${max}`}
-            color={full ? 'primary' : 'default'}
-            variant={full ? 'filled' : 'outlined'}
-          />
+          <TagChip label={countLabel || `${count}/${max}`} tone={full ? UI_COLORS.accent : null} filled={full} />
         ) : null}
       </Stack>
       {children}

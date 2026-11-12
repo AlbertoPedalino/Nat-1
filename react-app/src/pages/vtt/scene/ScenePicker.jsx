@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Chip, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -13,17 +13,16 @@ import {
 import { uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -190,7 +189,7 @@ export default function ScenePicker({
                       <Typography sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {scene.name}
                       </Typography>
-                      {scene.isLive ? <Chip size="small" color="primary" label="Live" sx={liveChipSx} /> : null}
+                      {scene.isLive ? <TagChip tone={UI_COLORS.accent} label="Live" /> : null}
                       {!scene.imagePath ? (
                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map yet</Typography>
                       ) : null}
@@ -239,12 +238,6 @@ const emptySx = {
   textAlign: 'center',
 };
 
-const liveChipSx = {
-  height: CONTROL_HEIGHTS.xs,
-  fontSize: FONT_SIZES.xs,
-  ...TEXT_STYLES.title,
-  flexShrink: 0,
-};
 
 // A scene: the drawn card, lit under the cursor.
 const rowSx = {

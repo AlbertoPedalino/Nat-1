@@ -34,3 +34,8 @@ export function sourceLinesMatching(pattern, { allow = [] } = {}) {
   }
   return hits;
 }
+
+// The text of a file under src/ (a path as sourceFilesMatching gives it).
+export function readSource(file) {
+  return readFileSync(join(SRC, file), 'utf8');
+}

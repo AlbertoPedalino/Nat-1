@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
 import { LAYERS } from '../../ui/layers.js';
-import { Box, Chip, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
 import { inkOn } from '../../ui/pressable.js';
 import { celebrateNatural20 } from '../../ui/celebrate.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
 import { inkShadow } from '../../ui/shadows.js';
+import TagChip from '../../ui/TagChip.jsx';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -30,11 +30,6 @@ const toastRootSx = {
   // second for as long as the toast was up.
 };
 
-const modeChipSx = (chip) => ({
-  height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxs, fontWeight: FONT_WEIGHTS.bold, letterSpacing: LETTER_SPACINGS.md,
-  borderRadius: 1, mb: 0.25, color: chip.color, borderColor: chip.borderColor,
-  bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
-});
 
 export default function DiceToast({ toast, onClose, hidden = false }) {
   useEffect(() => {
@@ -89,7 +84,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.modeChip && (
-        <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
+        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
       )}
 
       <DiceRow

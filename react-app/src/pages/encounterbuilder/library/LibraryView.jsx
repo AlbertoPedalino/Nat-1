@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Library as LibraryIcon, Play, RotateCcw, ScrollText, SlidersHorizontal, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
@@ -17,6 +17,8 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -97,20 +99,18 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
       <Stack spacing={0.75}>
         <Typography variant="h2" noWrap>{enc.name}</Typography>
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
-          <Chip size="small" color="primary" label={enc.diffLabel || 'Trivial'} />
-          <Chip size="small" label={`${formatNumber(enc.totalXp)} XP`} />
-          <Chip size="small" label={`Lv ${enc.partyLevel} · ${enc.partyCount} PC`} />
+          <TagChip tone={UI_COLORS.accent} label={enc.diffLabel || 'Trivial'} />
+          <TagChip label={`${formatNumber(enc.totalXp)} XP`} />
+          <TagChip label={`Lv ${enc.partyLevel} · ${enc.partyCount} PC`} />
           {enc.quest ? (
-            <Chip
-              size="small"
+            <TagChip
               icon={<ScrollText size={ICON_SIZES.xs} />}
               label={enc.quest}
             />
           ) : null}
           {fight ? (
-            <Chip
-              size="small"
-              color="secondary"
+            <TagChip
+              tone={UI_COLORS.secondary}
               label={`Round ${fight.fight?.round || 1} · ${alive} alive${dead ? ` · ${dead} dead` : ''}`}
             />
           ) : null}

@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { equipmentTypeCandidates } from '../../../shared/content/catalogs/equipmentTypes.js';
 import {
   cpToCoins,
@@ -11,6 +11,7 @@ import {
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 // One source's starting-equipment choices (class or background) in the
 // builder's equipment step.
@@ -103,7 +104,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
             </Box>
           );
         })}
-        {!blocks.length ? summary.map((line, index) => <Chip key={`${line}-${index}`} label={line} sx={{ justifyContent: 'flex-start' }} />) : null}
+        {!blocks.length ? summary.map((line, index) => <TagChip key={`${line}-${index}`} size="medium" label={line} sx={{ justifyContent: 'flex-start' }} />) : null}
       </Stack>
     </BuilderBox>
   );

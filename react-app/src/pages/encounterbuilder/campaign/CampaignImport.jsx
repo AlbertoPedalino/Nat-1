@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { clampInt } from '../../../shared/numbers.js';
@@ -8,6 +8,7 @@ import { runBusy } from '../../../shared/ui/busyAction.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import TagChip from '../../../shared/ui/TagChip.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -81,13 +82,12 @@ export default function CampaignImport() {
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
               {selected.players.slice(0, 10).map((player) => (
-                <Chip
+                <TagChip
                   key={player.sourceId}
-                  size="small"
                   label={`${player.name} Lv ${player.level}${player.ownerUsername ? ` - ${player.ownerUsername}` : ''}`}
                 />
               ))}
-              {selected.players.length > 10 ? <Chip size="small" label={`+${selected.players.length - 10} more`} /> : null}
+              {selected.players.length > 10 ? <TagChip label={`+${selected.players.length - 10} more`} /> : null}
             </Box>
             {state.campaignNotice ? (
               <Typography variant="caption" sx={{ color: 'primary.main' }}>{state.campaignNotice}</Typography>
