@@ -116,6 +116,9 @@ export const PANEL_TONES = Object.freeze({
   defenses: ENTITY_COLORS.background,
   conditions: UI_COLORS.danger,
   reminders: UI_COLORS.spell,
+  // Everything an item is (starting equipment, currency, the inventory)
+  // wears the items' bordeaux, as the attune button and item tags do.
+  items: ITEM_ATTUNEMENT,
   // The stat tiles beside Defenses, each its own: AC steel, Initiative the
   // accent its roll wears, Proficiency Bonus the skills' green, Inspiration
   // the violet.
