@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import { CircularProgress, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
+import { CircularProgress, ListItemIcon, MenuItem, Typography } from '@mui/material';
 import { Layers, Radio } from 'lucide-react';
 import { listScenes } from '../../../shared/cloud/api/vttScenes.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import MapMenu from '../map/MapMenu.jsx';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -50,13 +50,8 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
       <TipIconButton title="Switch scene" size="small" aria-controls={anchor ? 'scene-switcher-menu' : undefined} aria-haspopup="menu" aria-expanded={anchor ? 'true' : undefined} onClick={open} sx={buttonSx}>
         <Layers size={ICON_SIZES.md} />
       </TipIconButton>
-      <Menu
-        id="scene-switcher-menu"
-        anchorEl={anchor}
-        open={Boolean(anchor)}
-        onClose={close}
-        slotProps={{ paper: { sx: menuPaperSx } }}
-      >
+      {/* The same glass as the bar this hangs from. */}
+      <MapMenu id="scene-switcher-menu" anchorEl={anchor} onClose={close} minWidth={220} maxHeight={360}>
         {loading && !scenes.length ? (
           <MenuItem disabled sx={noticeSx}><CircularProgress size={16} /></MenuItem>
         ) : null}
@@ -76,7 +71,7 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
             <Typography noWrap sx={nameSx}>{entry.name}</Typography>
           </MenuItem>
         ))}
-      </Menu>
+      </MapMenu>
     </>
   );
 }
@@ -94,13 +89,6 @@ const buttonSx = {
     borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
     bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft),
   },
-};
-
-// Same glass as the bar this hangs from.
-const menuPaperSx = {
-  ...battleMapDialogPaperSx,
-  maxHeight: 360,
-  minWidth: 220,
 };
 
 const noticeSx = {

@@ -1,5 +1,5 @@
 import {
-  Box, Button, FormControlLabel, Stack, Switch, Typography, alpha, useTheme,
+  Box, Button, Stack, Typography, alpha, useTheme,
 } from '@mui/material';
 import {
   CalendarDays, Compass, Dices, Footprints, Rabbit, Swords,
@@ -19,7 +19,7 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
@@ -27,6 +27,9 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import { hexLabel } from './hexLabel.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -66,23 +69,13 @@ export default function HexcrawlPanel({
 
       {/* Off while a map is being drawn up: laying out terrain would otherwise
           cost the party a day of travel per click. */}
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <FormControlLabel
-          sx={{ mr: 0 }}
-          control={(
-            <Switch
-              size="small"
-              checked={Boolean(armed)}
-              onChange={(event) => onArmedChange(event.target.checked)}
-            />
-          )}
-          label={<Typography variant="body2">Clicking a hex enters it and rolls</Typography>}
-        />
-        <InfoHint
-          label="About clicking a hex"
-          text="Click a hex to walk the party into it. Click a visited one to take the visit back — its terrain stays, the hours already played do not come back."
-        />
-      </Stack>
+      <ToggleRow
+        label="Clicking a hex enters it and rolls"
+        checked={armed}
+        onChange={onArmedChange}
+        hint="Click a hex to walk the party into it. Click a visited one to take the visit back — its terrain stays, the hours already played do not come back."
+        hintLabel="About clicking a hex"
+      />
 
       <HexcrawlLinkWarnings board={board} clockLinked={clockLinked} error={error} />
 
@@ -220,14 +213,11 @@ function LastHexCard({ last, onOpenResult }) {
 
   return (
     <Box sx={lastCardSx}>
-      <Typography sx={sectionSx}>Last hex visited</Typography>
+      <MapSectionTitle sx={{ mb: 0.5 }}>Last hex visited</MapSectionTitle>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
         <Box sx={{ pt: 0.25 }}><TerrainIcon size={ICON_SIZES.md} color={VTT_COLORS.accent} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={lastHexSx}>
-            Hex {last.hex.q}, {last.hex.r}
-            {terrain ? ` · ${terrain.label} (${last.travelHours ?? terrain.hours}h)` : ''}
-          </Typography>
+          <Typography sx={lastHexSx}>{hexLabel(last.hex, last.travelHours)}</Typography>
           {last.headline ? <Typography sx={lastHeadlineSx}>{last.headline}</Typography> : null}
           {(last.lines || []).map((line) => (
             <Typography key={line} sx={lastLineSx}>{line}</Typography>
@@ -256,7 +246,6 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-const sectionSx = { color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs, letterSpacing: LETTER_SPACINGS.sm, mb: 0.5 };
 const clockSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.md };
 
 const cardSx = {

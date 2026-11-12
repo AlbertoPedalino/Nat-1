@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
-import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../shared/gmboard/weather.js';
-import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
+import { weatherTone } from '../../../shared/gmboard/weather.js';
+import { TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -10,6 +10,8 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BARE_BUTTON_SX, CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
+import { hexLabel } from './hexLabel.js';
+import WeatherTag from './WeatherTag.jsx';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -26,8 +28,6 @@ export default function HexBubble({ bubble, x, y, onClose }) {
   const terrain = terrainOption(bubble.hex?.terrain);
   const TerrainIcon = terrain ? TERRAIN_ICONS[terrain.id] : null;
   const tone = clock ? weatherTone(theme.palette, clock.weather) : null;
-  const WeatherIcon = clock ? weatherIcon(clock.weather) : null;
-  const disadvantage = clock ? hasWeatherDisadvantage(clock.weather, clock.intensity) : false;
 
   return (
     <Box sx={{ ...rootSx, transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` }}>
@@ -43,12 +43,9 @@ export default function HexBubble({ bubble, x, y, onClose }) {
       >
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25 }}>
           {TerrainIcon ? <TerrainIcon size={ICON_SIZES.xs} color={theme.palette.text.secondary} /> : null}
-          <Typography sx={coordSx}>
-            Hex {bubble.hex.q}, {bubble.hex.r}
-            {/* What the leg cost, weather and mount included, rather than what
-                the terrain costs a party on foot in the sun. */}
-            {terrain ? ` · ${terrain.label} (${bubble.travelHours ?? terrain.hours}h)` : ''}
-          </Typography>
+          {/* What the leg cost, weather and mount included, rather than what
+              the terrain costs a party on foot in the sun. */}
+          <Typography sx={coordSx}>{hexLabel(bubble.hex, bubble.travelHours)}</Typography>
         </Stack>
 
         <Typography sx={headlineSx}>{bubble.headline}</Typography>
@@ -65,11 +62,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
             spacing={0.75}
             sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, OPACITY.edge) }}
           >
-            {WeatherIcon ? <WeatherIcon size={ICON_SIZES.xs} color={tone} /> : null}
-            <Typography sx={{ ...footerTextSx, color: tone }}>
-              {weatherName(clock.weather, clock.intensity)}
-              {disadvantage ? ' · Dis' : ''}
-            </Typography>
+            <WeatherTag weather={clock.weather} intensity={clock.intensity} />
             <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatCampaignDateTime(clock)}</Typography>
           </Stack>
         ) : null}

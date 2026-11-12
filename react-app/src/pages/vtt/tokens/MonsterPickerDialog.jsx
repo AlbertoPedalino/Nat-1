@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import {
   Button,
-  FormControlLabel,
   Stack,
-  Switch,
   TextField,
-  Typography,
 } from '@mui/material';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { monsterToToken } from '../../../shared/vtt/tokens/encounterImport.js';
 import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import PlacementDialog from './PlacementDialog.jsx';
+import GmLayerSwitch from './GmLayerSwitch.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 
@@ -65,13 +63,7 @@ export default function MonsterPickerDialog({
             onChange={(event) => setCount(Number(event.target.value))}
             sx={{ width: 110 }}
           />
-          <FormControlLabel
-            control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
-            label={<Typography variant="body2">GM layer</Typography>}
-          />
-          <Caption>
-            {hidden ? 'The party will not receive these pieces.' : 'The party sees them as soon as they land.'}
-          </Caption>
+          <GmLayerSwitch checked={hidden} onChange={setHidden} />
         </Stack>
 
         <MonsterBrowser

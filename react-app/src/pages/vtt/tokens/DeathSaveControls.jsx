@@ -1,12 +1,12 @@
-import { Box, Typography } from '@mui/material';
-import { sectionTitleSx } from './tokenMenuStyles.js';
+import { Box } from '@mui/material';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 
 // A character piece's three success and three failure dots in its menu at 0 HP.
 export default function DeathSaveControls({ deathSaves, disabled, onChange }) {
   return (
     <Box sx={deathSavePanelSx}>
-      <Typography sx={sectionTitleSx}>Death saves</Typography>
+      <MapSectionTitle>Death saves</MapSectionTitle>
       <DeathSaveDots
         deathSaves={deathSaves}
         disabled={disabled}

@@ -1,7 +1,6 @@
 import { Box, ButtonBase, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -9,27 +8,9 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
-import Caption from '../../../shared/ui/Caption.jsx';
 
-// The building blocks of the GM's scene panel (MapPanel): a collapsible section
-// with a one-line summary, and the small labels inside it.
-
-// The explanations used to sit under the controls as captions. Over a map they
-// are the wrong trade: the panel lives inside the board, so every line of prose
-// is a line of map, and the text is read once and then in the way forever.
-// Behind an icon it is still one hover away for whoever has not met the control
-// yet.
-//
-// Focusable on purpose: a tooltip only reachable by hover is not reachable at
-// all on a touch screen or from the keyboard.
-export function SectionLabel({ label, hint }) {
-  return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-      <Caption>{label}</Caption>
-      {hint ? <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} /> : null}
-    </Stack>
-  );
-}
+// The building block of the GM's scene panel (MapPanel): a collapsible section
+// with a one-line summary. The labels inside it are MapSectionTitle.
 
 // One question about the scene behind one header. Closed, the header still
 // answers it in a line ("Squares · 70 px · shown"), so the panel reads as an

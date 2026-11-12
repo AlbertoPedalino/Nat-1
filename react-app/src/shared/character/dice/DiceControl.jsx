@@ -21,8 +21,8 @@ import TipIconButton from '../../ui/TipIconButton.jsx';
 // `variant`: 'text' (labelled buttons) or 'icon' (a pill of two icons, for a
 // corner of the map). `surface` restyles the pieces for a screen with its own
 // chrome — the map, which is often fullscreen: { groupSx, segmentSx,
-// dividerColor, paperSx, dialog } where `dialog` holds CustomRollDialog's
-// style props. `settings` (the GM's GmRollsShownSwitch) is shown where the
+// dividerColor, paperSx, dialog } where `dialog` holds props for
+// CustomRollDialog's SheetDialog (the map passes `surface: 'map'`). `settings` (the GM's GmRollsShownSwitch) is shown where the
 // roll is made and on top of the log.
 export default function DiceControl({
   log, onRoll, onClear, emptyText, variant = 'text', surface = {}, settings = null, placement = 'down', sx,

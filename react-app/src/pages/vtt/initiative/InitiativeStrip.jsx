@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, ListItemText, MenuItem, Stack, Typography } from '@mui/material';
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { ICON_STRIP } from '../scene/MapCorner.jsx';
+import { ICON_STRIP } from '../map/MapCornerPopout.jsx';
+import MapMenu from '../map/MapMenu.jsx';
 import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -156,7 +157,7 @@ export function InitiativeButton({ choices = [], onChoose }) {
 
 function FightMenu({ anchor, choices, selectedKey = null, onChoose, onClose }) {
   return (
-    <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={onClose}>
+    <MapMenu anchorEl={anchor} onClose={onClose}>
       {choices.map((choice) => (
         <MenuItem
           key={choice.key}
@@ -172,7 +173,7 @@ function FightMenu({ anchor, choices, selectedKey = null, onChoose, onClose }) {
           <ListItemText primary="Hide initiative" />
         </MenuItem>
       ) : null}
-    </Menu>
+    </MapMenu>
   );
 }
 

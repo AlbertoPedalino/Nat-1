@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Box, Button, Stack } from '@mui/material';
 import { Grid3x3, Image as ImageIcon, ImagePlus, Trash2 } from 'lucide-react';
-import { SectionLabel } from './ScenePanelSection.jsx';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
@@ -32,7 +32,7 @@ export function PicturesControls({
     <>
       {hideSwitch ? null : <ShownImageSwitch scene={scene} onShownImageChange={onShownImageChange} />}
 
-      <SectionLabel label="Battlemap" />
+      <MapSectionTitle>Battlemap</MapSectionTitle>
       <Stack direction="row" spacing={0.5}>
         <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => mapRef.current?.click()}>
           {scene.imagePath ? 'Replace map' : 'Upload map'}
@@ -44,10 +44,7 @@ export function PicturesControls({
         ) : null}
       </Stack>
 
-      <SectionLabel
-        label="Backgrounds"
-        hint="Establishing shots without a grid. A scene can hold several; switch between them from the strip at the bottom of the map while the background is on show."
-      />
+      <MapSectionTitle hint="Establishing shots without a grid. A scene can hold several; switch between them from the strip at the bottom of the map while the background is on show.">Backgrounds</MapSectionTitle>
       <Stack direction="row" spacing={0.5}>
         <Button
           size="small"
@@ -68,10 +65,7 @@ export function PicturesControls({
       {/* Anything else that belongs on the map — a rug, a door, a handout — is a
           piece on the map layer, so it can be moved, resized and removed like
           everything else instead of being a third special slot. */}
-      <SectionLabel
-        label="Images on the map"
-        hint="It lands on the layer you are editing. Click it to get its corner handles: the corner moves each side on its own — drag it diagonally to scale, sideways or downwards to stretch — and the top handle turns it."
-      />
+      <MapSectionTitle hint="It lands on the layer you are editing. Click it to get its corner handles: the corner moves each side on its own — drag it diagonally to scale, sideways or downwards to stretch — and the top handle turns it.">Images on the map</MapSectionTitle>
       <Button
         size="small"
         variant="outlined"

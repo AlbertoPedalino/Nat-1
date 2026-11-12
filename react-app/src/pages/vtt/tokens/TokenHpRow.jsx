@@ -3,7 +3,7 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { STEP_TARGETS } from './useTokenMenuState.js';
-import { compactFieldSx } from './tokenMenuStyles.js';
+import { battleMapCompactFieldSx } from '../map/battleMapSurface.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 
 // The piece menu's `HP / Max / Temp` row and its one "+ 5 -" stepper. `fields`
@@ -31,7 +31,7 @@ export default function TokenHpRow({ fields, withVitals, onClose }) {
           event.stopPropagation();
           if (event.key === 'Enter') { save({}); onClose(); }
         }}
-        sx={{ ...compactFieldSx, ...stepTargetSx(withVitals && stepTarget === 'hp'), width: hpFieldWidth }}
+        sx={{ ...battleMapCompactFieldSx, ...stepTargetSx(withVitals && stepTarget === 'hp'), width: hpFieldWidth }}
       />
       <Typography sx={slashSx}>/</Typography>
       <Box sx={maxSlotSx}>
@@ -47,7 +47,7 @@ export default function TokenHpRow({ fields, withVitals, onClose }) {
             event.stopPropagation();
             if (event.key === 'Enter') { flushVitals(); save({}); onClose(); }
           }}
-          sx={{ ...compactFieldSx, ...stepTargetSx(withVitals && stepTarget === 'max'), width: hpFieldWidth }}
+          sx={{ ...battleMapCompactFieldSx, ...stepTargetSx(withVitals && stepTarget === 'max'), width: hpFieldWidth }}
         />
         {/* A maximum above or below the base one (Aid, a curse) says
             by how much, on the field's corner. */}
@@ -75,7 +75,7 @@ export default function TokenHpRow({ fields, withVitals, onClose }) {
             event.stopPropagation();
             if (event.key === 'Enter') { flushVitals(); onClose(); }
           }}
-          sx={{ ...compactFieldSx, ...tempFieldSx, ...stepTargetSx(stepTarget === 'temp'), width: hpFieldWidth }}
+          sx={{ ...battleMapCompactFieldSx, ...tempFieldSx, ...stepTargetSx(stepTarget === 'temp'), width: hpFieldWidth }}
         />
         <Box sx={stepperSlotSx} onKeyDown={(event) => event.stopPropagation()}>
           <HpStepper

@@ -7,14 +7,12 @@ import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS } from '../../../shared/gmboard
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
-import BattleMapDialog from '../map/BattleMapDialog.jsx';
+import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 
@@ -38,25 +36,20 @@ export default function HexcrawlSettingsDialog({
   const locked = busy || !clockLinked || !board;
 
   return (
-    <BattleMapDialog
+    <SheetDialog
+      surface="map"
       open={open}
       onClose={onClose}
       maxWidth="md"
-      titleSx={titleSx}
-      title={(
-        <>
-          <Settings size={ICON_SIZES.sm} />
-          Hexcrawl settings
-        </>
-      )}
-      contentProps={{ dividers: true }}
+      icon={<Settings size={ICON_SIZES.md} />}
+      title="Hexcrawl settings"
       actions={<Button onClick={onClose}>Done</Button>}
     >
       <HexcrawlLinkWarnings board={board} clockLinked={clockLinked} error={error} />
 
       <Box sx={columnsSx}>
         <Stack spacing={2} sx={sectionCardSx}>
-          <Typography sx={sectionTitleSx}><CalendarDays size={ICON_SIZES.xs} />Calendar</Typography>
+          <MapSectionTitle icon={CalendarDays}>Calendar</MapSectionTitle>
           {sky ? (
             <CampaignCalendarFields
               clock={sky}
@@ -71,7 +64,7 @@ export default function HexcrawlSettingsDialog({
         </Stack>
 
         <Stack spacing={2} sx={sectionCardSx}>
-          <Typography sx={sectionTitleSx}><Hexagon size={ICON_SIZES.xs} />A hex is, unless it says otherwise</Typography>
+          <MapSectionTitle icon={Hexagon}>A hex is, unless it says otherwise</MapSectionTitle>
           <SelectorGroup
             label="Terrain"
             options={TERRAIN_OPTIONS}
@@ -119,7 +112,7 @@ export default function HexcrawlSettingsDialog({
           read it too. */}
       {onHexColorChange ? (
         <Box sx={[sectionCardSx, { mt: 2 }]}>
-          <Typography sx={[sectionTitleSx, { mb: 1.25 }]}><Palette size={ICON_SIZES.xs} />Map</Typography>
+          <MapSectionTitle icon={Palette} sx={{ mb: 1.25 }}>Map</MapSectionTitle>
           <Typography sx={groupLabelSx}>Explored hex colour</Typography>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
             {/* Deferred, as the grid's own colour is: a controlled colour
@@ -138,11 +131,9 @@ export default function HexcrawlSettingsDialog({
           </Stack>
         </Box>
       ) : null}
-    </BattleMapDialog>
+    </SheetDialog>
   );
 }
-
-const titleSx = { display: 'flex', alignItems: 'center', gap: 0.75 };
 
 const columnsSx = {
   display: 'grid',
@@ -159,19 +150,6 @@ const sectionCardSx = {
   borderColor: 'gmboard.vtt.accentBorder',
   bgcolor: 'gmboard.vtt.inset',
 };
-
-const sectionTitleSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0.5,
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.md,
-  color: 'gmboard.vtt.accent',
-  pb: 0.5,
-  ...LIST_ROW_RULE_SX,
-};
-
-
 
 const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 

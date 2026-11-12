@@ -1,24 +1,25 @@
-import { Button, DialogContentText } from '@mui/material';
+import { Box, Button, DialogContentText } from '@mui/material';
 import { Trash2 } from 'lucide-react';
-import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
-import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 
+// Asking before the selected pieces are taken off the map: a map dialog, named
+// by its title and described by its question (the dialog's own aria wiring
+// gives the title the labelling id).
 export default function DeletePiecesDialog({
   open, pieces, busy, error, container, onCancel, onConfirm,
 }) {
   return (
-    <BattleMapDialog
+    <SheetDialog
+      surface="map"
       open={open}
       onClose={onCancel}
       container={container}
       maxWidth="xs"
       aria-labelledby="delete-pieces-title"
       aria-describedby="delete-pieces-description"
-      titleId="delete-pieces-title"
       title="Delete selected pieces?"
-      contentProps={{ 'aria-busy': busy }}
       actions={(
         <>
           <CancelButton autoFocus disabled={busy} onClick={onCancel} />
@@ -34,13 +35,15 @@ export default function DeletePiecesDialog({
         </>
       )}
     >
-      <DialogContentText id="delete-pieces-description" sx={{ pt: 2 }}>
-        {pieces.length === 1
-          ? `Remove ${pieces[0]?.label || 'this piece'} from the map?`
-          : `Remove ${pieces.length} selected pieces from the map?`}
-        {' '}This cannot be undone.
-      </DialogContentText>
-      {error ? <ErrorLine sx={{ mt: 2 }}>{error}</ErrorLine> : null}
-    </BattleMapDialog>
+      <Box aria-busy={busy}>
+        <DialogContentText id="delete-pieces-description">
+          {pieces.length === 1
+            ? `Remove ${pieces[0]?.label || 'this piece'} from the map?`
+            : `Remove ${pieces.length} selected pieces from the map?`}
+          {' '}This cannot be undone.
+        </DialogContentText>
+        {error ? <ErrorLine sx={{ mt: 2 }}>{error}</ErrorLine> : null}
+      </Box>
+    </SheetDialog>
   );
 }

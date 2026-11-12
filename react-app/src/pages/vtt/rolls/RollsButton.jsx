@@ -1,13 +1,8 @@
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import {
-  battleMapDialogActionsSx,
-  battleMapDialogContentSx,
-  battleMapDialogPaperSx,
-  battleMapDialogTitleSx,
-  mapIconButtonSx,
-} from '../map/battleMapSurface.js';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { MAP_PAPER_SX } from '../../../shared/ui/mapPaper.js';
 
 // The map's dice, in its top-right corner beside the tools toggle: the shared
 // DiceControl as a pill of two icons in the map's chrome. Being on the map,
@@ -29,18 +24,12 @@ export default function RollsButton({
   );
 }
 
+// The pill is the map's round button stretched over two halves: its surface,
+// edge and press from mapIconButtonSx, each half lit as that button is.
 const MAP_SURFACE = Object.freeze({
-  groupSx: {
-    bgcolor: mapIconButtonSx.bgcolor,
-    border: mapIconButtonSx.border,
-  },
+  groupSx: mapIconButtonSx,
   dividerColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
-  segmentSx: { color: VTT_COLORS.accent, '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) } },
-  paperSx: battleMapDialogPaperSx,
-  dialog: {
-    slotProps: { paper: { sx: battleMapDialogPaperSx } },
-    titleSx: battleMapDialogTitleSx,
-    contentSx: battleMapDialogContentSx,
-    actionsSx: battleMapDialogActionsSx,
-  },
+  segmentSx: { color: mapIconButtonSx.color, '&:hover': { bgcolor: mapIconButtonSx['&:hover'].bgcolor } },
+  paperSx: MAP_PAPER_SX,
+  dialog: { surface: 'map' },
 });

@@ -1,10 +1,10 @@
-import { FormControlLabel, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Stack, TextField } from '@mui/material';
 import { Grid3x3, Hexagon } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import { numberSx } from './panelStyles.js';
-import { SectionLabel } from './ScenePanelSection.jsx';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
@@ -39,10 +39,7 @@ export function GridControls({ grid, onGridChange }) {
         ]}
       />
 
-      <SectionLabel
-        label="Alignment"
-        hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it."
-      />
+      <MapSectionTitle hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it.">Alignment</MapSectionTitle>
       <Stack direction="row" spacing={0.75}>
         <TextField
           label="Cell"
@@ -73,10 +70,7 @@ export function GridControls({ grid, onGridChange }) {
       {/* How the lines look: a printed battlemap already has squares of its
           own, and gold over a snowfield is not the same read as gold over a
           cave. */}
-      <SectionLabel
-        label="Lines"
-        hint="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through."
-      />
+      <MapSectionTitle hint="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through.">Lines</MapSectionTitle>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <ColorField
           value={grid.color || DEFAULT_GRID.color}
@@ -94,15 +88,10 @@ export function GridControls({ grid, onGridChange }) {
           slotProps={{ htmlInput: { min: 0.5, max: 6, step: 0.5 } }}
           sx={numberSx}
         />
-        <FormControlLabel
-          control={(
-            <Switch
-              size="small"
-              checked={grid.visible}
-              onChange={(event) => setGrid({ visible: event.target.checked })}
-            />
-          )}
-          label={<Typography variant="body2">Show</Typography>}
+        <ToggleRow
+          label="Show"
+          checked={grid.visible}
+          onChange={(visible) => setGrid({ visible })}
           sx={{ ml: 0, mr: 0 }}
         />
       </Stack>
@@ -110,22 +99,13 @@ export function GridControls({ grid, onGridChange }) {
       {/* Creatures always take a square — that is what a battlemap is for. This
           is about the scenery: a door across a wall, a rug at an angle, a
           handout dropped between two squares. */}
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <FormControlLabel
-          control={(
-            <Switch
-              size="small"
-              checked={grid.snapObjects !== false}
-              onChange={(event) => setGrid({ snapObjects: event.target.checked })}
-            />
-          )}
-          label={<Typography variant="body2">Objects snap to the grid</Typography>}
-        />
-        <InfoHint
-          label="About snapping"
-          text="Off, objects and pictures are placed and dragged freely. Creature pieces keep their square either way."
-        />
-      </Stack>
+      <ToggleRow
+        label="Objects snap to the grid"
+        checked={grid.snapObjects !== false}
+        onChange={(snapObjects) => setGrid({ snapObjects })}
+        hint="Off, objects and pictures are placed and dragged freely. Creature pieces keep their square either way."
+        hintLabel="About snapping"
+      />
     </>
   );
 }

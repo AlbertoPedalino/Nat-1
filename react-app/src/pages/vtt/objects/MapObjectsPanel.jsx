@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Pagination, Slider, Typography } from '@mui/material';
+import { Box, Pagination, Typography } from '@mui/material';
 import { Search } from 'lucide-react';
 import { iconNames } from 'lucide-react/dynamic';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -22,6 +22,7 @@ import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.accent;
@@ -88,21 +89,17 @@ export default function MapObjectsPanel({
         />
       </Box>
 
-      <Box sx={strokeControlSx}>
-        <Typography sx={strokeLabelSx}>Stroke</Typography>
-        <Slider
-          size="small"
-          aria-label="Icon stroke width"
-          min={MIN_MAP_OBJECT_STROKE}
-          max={MAX_MAP_OBJECT_STROKE}
-          step={0.1}
-          value={strokeWidth}
-          valueLabelDisplay="auto"
-          onChange={(_, value) => setStrokeWidth(Number(value))}
-          sx={strokeSliderSx}
-        />
-        <Typography sx={strokeValueSx}>{strokeWidth.toFixed(1)}</Typography>
-      </Box>
+      <LabeledSlider
+        label="Stroke"
+        valueText={strokeWidth.toFixed(1)}
+        ariaLabel="Icon stroke width"
+        min={MIN_MAP_OBJECT_STROKE}
+        max={MAX_MAP_OBJECT_STROKE}
+        step={0.1}
+        value={strokeWidth}
+        onChange={(value) => setStrokeWidth(Number(value))}
+        sx={{ mb: 0.5 }}
+      />
 
       <Typography sx={countSx}>{filtered.length} icons · page {page} of {pageCount}</Typography>
       {visible.length ? (
@@ -151,16 +148,6 @@ export default function MapObjectsPanel({
 
 const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 };
 const countSx = { mb: 0.75, color: VTT_COLORS.textMuted, fontSize: FONT_SIZES.xs };
-const strokeControlSx = {
-  display: 'grid',
-  gridTemplateColumns: '42px minmax(0, 1fr) 26px',
-  alignItems: 'center',
-  gap: 0.75,
-  mb: 0.5,
-};
-const strokeLabelSx = { color: VTT_COLORS.text, fontSize: FONT_SIZES.sm };
-const strokeSliderSx = { py: 0.5, color: VTT_COLORS.accent };
-const strokeValueSx = { color: VTT_COLORS.textSecondary, fontSize: FONT_SIZES.xs, textAlign: 'right' };
 
 const gridSx = {
   display: 'grid',

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { MousePointer2, X } from 'lucide-react';
+import { Box, Stack, Typography } from '@mui/material';
+import { MousePointer2 } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -9,6 +9,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import MapFloatingPanel from '../map/MapFloatingPanel.jsx';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -79,16 +80,14 @@ export default function SceneToolRail({
           the button underneath, so it never appeared to close at all. It also
           portals to the document root, which a fullscreen element hides. */}
       {open ? (
-        <Box data-viewport-control sx={[panelSx, placing && panelPlacingSx]}>
-          <Stack direction="row" sx={{ alignItems: 'center', mb: 1 }}>
-            <Typography sx={panelTitleSx}>{open.label}</Typography>
-            <Box sx={{ flex: 1 }} />
-            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: VTT_COLORS.textSecondary }}>
-              <X size={ICON_SIZES.sm} />
-            </IconButton>
-          </Stack>
+        <MapFloatingPanel
+          data-viewport-control
+          title={open.label}
+          onClose={closePanel}
+          sx={[panelSx, placing && panelPlacingSx]}
+        >
           {typeof open.content === 'function' ? open.content({ closePanel }) : open.content}
-        </Box>
+        </MapFloatingPanel>
       ) : null}
     </>
   );
@@ -137,17 +136,12 @@ const railLabelSx = {
 // Immediately to the left of the rail, and scrollable rather than tall: a panel
 // that runs past the bottom of the map would be unreachable in fullscreen.
 const panelSx = {
-  ...SURFACES.map,
   position: 'absolute',
   top: 48,
   right: 80,
   zIndex: 6,
   width: { xs: 260, sm: 330 },
   maxHeight: 'calc(100% - 104px)',
-  overflowY: 'auto',
-  p: 1.25,
-  borderRadius: 1,
-  cursor: 'default',
   transition: `opacity ${DURATIONS.fast}ms ease`,
 };
 
@@ -156,10 +150,4 @@ const panelSx = {
 const panelPlacingSx = {
   opacity: 0,
   pointerEvents: 'none',
-};
-
-const panelTitleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.md,
-  color: 'primary.main',
 };

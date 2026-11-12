@@ -135,12 +135,10 @@ test('fonts are not aliased', () => {
   assert.deepEqual(sourceLinesMatching(/^const \w+ = UI_FONTS\.\w+;/), []);
 });
 
-// Every dialog is a SheetDialog, or a BattleMapDialog over the map: one
+// Every dialog is a SheetDialog (surface="map" over the battle map): one
 // surface, one title bar, one close button.
-test('dialogs go through SheetDialog or BattleMapDialog', () => {
-  assert.deepEqual(sourceFilesMatching(/<Dialog\b/, {
-    allow: ['shared/ui/SheetDialog.jsx', 'pages/vtt/map/BattleMapDialog.jsx'],
-  }), []);
+test('dialogs go through SheetDialog', () => {
+  assert.deepEqual(sourceFilesMatching(/<Dialog\b/, { allow: ['shared/ui/SheetDialog.jsx'] }), []);
 });
 
 // What a database error code means is pgErrors.js's to say.

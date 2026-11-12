@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import { compareText } from '../../../shared/lists.js';
 import PlacementDialog from './PlacementDialog.jsx';
+import GmLayerSwitch from './GmLayerSwitch.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 import { useEncounterSaves } from './useEncounterSaves.js';
 import {
@@ -16,7 +17,6 @@ import EncounterGroupCard from './EncounterGroupCard.jsx';
 import { noticeSx } from './encounterImportStyles.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import Caption from '../../../shared/ui/Caption.jsx';
 import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 
@@ -152,15 +152,7 @@ export default function EncounterImportDialog({
               options={visible.map((entry) => ({ value: entry.key, label: entry.name }))}
             />
 
-            <FormControlLabel
-              control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
-              label={<Typography variant="body2">Place on the GM layer</Typography>}
-            />
-            <Caption>
-              {hidden
-                ? 'The party will not receive these pieces until you move them to the token layer.'
-                : 'The party sees these pieces as soon as they land.'}
-            </Caption>
+            <GmLayerSwitch checked={hidden} onChange={setHidden} />
 
             <EncounterGroupCard
               combatants={combatants}

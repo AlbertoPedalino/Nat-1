@@ -13,6 +13,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -266,15 +267,13 @@ const addSx = {
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
 };
 
+// The folded strip is one of the map's round buttons, with its count.
 const collapsedSx = {
-  ...SURFACES.mapControl,
+  ...mapIconButtonSx,
   height: CONTROL_HEIGHTS.xl,
   px: 1.25,
-  color: VTT_COLORS.accent,
-  boxShadow: 6,
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
 };
 
 const arrowSx = {

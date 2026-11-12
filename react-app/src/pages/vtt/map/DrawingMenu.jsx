@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  Menu,
-  Slider,
   Stack,
   TextField,
   Typography,
@@ -17,21 +11,17 @@ import {
   areaEffect, areaSizeFeet, feetToCells, resizedAreaPoints,
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints, strokeExtent } from '../../../shared/vtt/map/drawing.js';
-import { useMenuPlacement } from './menuPlacement.js';
-import {
-  battleMapCheckboxRowSx,
-  battleMapCompactFieldSx,
-  battleMapControlLabelSx,
-  battleMapMenuPaperSx,
-} from './battleMapSurface.js';
+import { battleMapCompactFieldSx, mapPanelTitleSx } from './battleMapSurface.js';
+import MapMenu, { HiddenFromPlayersToggle, MenuFooterActions } from './MapMenu.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { useDebouncedPatch } from '../../../shared/ui/useDebouncedPatch.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
+import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
+import { CONTROL_LABEL_SX } from '../../../shared/ui/controlLabel.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, its thickness, and taking it
@@ -77,10 +67,6 @@ export default function DrawingMenu({
     setSize(isNoteDrawing(drawing) ? drawing.width || 3 : strokeExtent(drawing.points));
     setThickness(drawing.width || 3);
   }, [drawing, feetPerCell]);
-
-  // At the press; on a touch screen left there while typing, lifted only to
-  // keep the field above the keyboard.
-  const placement = useMenuPlacement(anchor);
 
   useEffect(() => () => cancelAnimationFrame(previewFrameRef.current), []);
 
@@ -147,115 +133,117 @@ export default function DrawingMenu({
     circle: 'Radius (ft)', square: 'Side (ft)', cone: 'Length (ft)', line: 'Length (ft)',
   }[area?.shape];
 
+  // At the press; on a touch screen left there while typing, lifted only to
+  // keep the field above the keyboard (MapMenu's placement).
   return (
-    <Menu
-      open={Boolean(anchor)}
+    <MapMenu
+      point={anchor}
       onClose={() => {
         typed.cancel();
         onClose();
       }}
-      {...placement.menuProps}
-      slotProps={{
-        transition: placement.transitionProps,
-        paper: {
-          sx: battleMapMenuPaperSx(MENU_WIDTH),
-        },
-      }}
+      width={MENU_WIDTH}
     >
-      <Stack spacing={0.75} sx={{ px: 1, py: 0.75 }}>
-        <Typography sx={sectionTitleSx}>{kind}</Typography>
+      <Typography sx={mapPanelTitleSx}>{kind}</Typography>
 
-        {onVisibility ? (
-          <FormControlLabel
-            control={(
-              <Checkbox
-                size="small"
-                checked={Boolean(drawing.hiddenFromPlayers)}
-                onChange={(event) => onVisibility(drawing, event.target.checked)}
-              />
-            )}
-            label={<Typography sx={battleMapControlLabelSx}>Hidden from the players</Typography>}
-            sx={battleMapCheckboxRowSx}
-          />
-        ) : null}
+      {onVisibility ? (
+        <HiddenFromPlayersToggle
+          checked={Boolean(drawing.hiddenFromPlayers)}
+          onChange={(hidden) => onVisibility(drawing, hidden)}
+        />
+      ) : null}
 
-        {canLabel ? (
-          <TextField
-            label={isNote ? 'Text' : 'Label'}
-            size="small"
-            value={text}
-            onChange={(event) => {
-              setText(event.target.value);
-              const patch = textPatch(event.target.value);
-              if (patch) saveSoon(patch);
-            }}
-            onBlur={() => {
+      {canLabel ? (
+        <TextField
+          label={isNote ? 'Text' : 'Label'}
+          size="small"
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value);
+            const patch = textPatch(event.target.value);
+            if (patch) saveSoon(patch);
+          }}
+          onBlur={() => {
+            const patch = textPatch(text);
+            if (patch && (drawing.text || '') !== text) saveNow(patch);
+          }}
+          onKeyDown={(event) => {
+            // The menu swallows keys otherwise; Enter closes, the text is saved.
+            event.stopPropagation();
+            if (event.key === 'Enter') {
               const patch = textPatch(text);
-              if (patch && (drawing.text || '') !== text) saveNow(patch);
-            }}
-            onKeyDown={(event) => {
-              // The menu swallows keys otherwise; Enter closes, the text is saved.
-              event.stopPropagation();
-              if (event.key === 'Enter') {
-                const patch = textPatch(text);
-                if (patch) saveNow(patch);
-                onClose();
+              if (patch) saveNow(patch);
+              onClose();
+            }
+          }}
+          slotProps={{ htmlInput: { maxLength: 120 } }}
+          sx={battleMapCompactFieldSx}
+        />
+      ) : null}
+
+      <Box sx={colorRowSx}>
+        <Typography sx={CONTROL_LABEL_SX}>Colour</Typography>
+        {/* Nothing reaches the board until the hand rests: redrawing the
+            scene for every step of the native palette is what made it
+            stutter. */}
+        <ColorField
+          label="Colour"
+          value={drawing.color || VTT_COLORS.accent}
+          deferMs={COLOR_DELAY}
+          onChange={(color) => onSave(drawing, { color })}
+        />
+      </Box>
+
+      {area ? (
+        <AreaEffectSelect
+          value={area.effect}
+          onChange={(effect) => {
+            // An effect brings its colour, as it does in the Draw panel.
+            const colour = effect ? areaEffect(effect)?.color : null;
+            onSave(drawing, { area: { ...area, effect }, ...(colour ? { color: colour } : null) });
+          }}
+          sx={battleMapCompactFieldSx}
+        />
+      ) : null}
+
+      {area && !area.effect ? (
+        <ToggleRow
+          dense
+          control="checkbox"
+          label="Filled"
+          checked={Boolean(area.filled)}
+          onChange={(filled) => onSave(drawing, { area: { ...area, filled } })}
+        />
+      ) : null}
+
+      {area ? (
+        <Stack direction="row" spacing={0.5}>
+          <TextField
+            label={sizeLabel}
+            size="small"
+            type="number"
+            value={sizeFeet}
+            onChange={(event) => {
+              setSizeFeet(event.target.value);
+              const patch = sizePatch(event.target.value, breadthFeet);
+              if (patch) {
+                preview(patch);
+                saveSoon(patch);
               }
             }}
-            slotProps={{ htmlInput: { maxLength: 120 } }}
-            sx={battleMapCompactFieldSx}
+            onKeyDown={(event) => event.stopPropagation()}
+            slotProps={{ htmlInput: { min: feetPerCell, step: feetPerCell } }}
+            sx={{ ...battleMapCompactFieldSx, flex: 1 }}
           />
-        ) : null}
-
-        <Box sx={colorRowSx}>
-          <Typography sx={battleMapControlLabelSx}>Colour</Typography>
-          {/* Nothing reaches the board until the hand rests: redrawing the
-              scene for every step of the native palette is what made it
-              stutter. */}
-          <ColorField
-            label="Colour"
-            value={drawing.color || VTT_COLORS.accent}
-            deferMs={COLOR_DELAY}
-            onChange={(color) => onSave(drawing, { color })}
-          />
-        </Box>
-
-        {area ? (
-          <AreaEffectSelect
-            value={area.effect}
-            onChange={(effect) => {
-              // An effect brings its colour, as it does in the Draw panel.
-              const colour = effect ? areaEffect(effect)?.color : null;
-              onSave(drawing, { area: { ...area, effect }, ...(colour ? { color: colour } : null) });
-            }}
-            sx={battleMapCompactFieldSx}
-          />
-        ) : null}
-
-        {area && !area.effect ? (
-          <FormControlLabel
-            control={(
-              <Checkbox
-                size="small"
-                checked={Boolean(area.filled)}
-                onChange={(event) => onSave(drawing, { area: { ...area, filled: event.target.checked } })}
-              />
-            )}
-            label={<Typography sx={battleMapControlLabelSx}>Filled</Typography>}
-            sx={battleMapCheckboxRowSx}
-          />
-        ) : null}
-
-        {area ? (
-          <Stack direction="row" spacing={0.5}>
+          {area.shape === 'line' ? (
             <TextField
-              label={sizeLabel}
+              label="Width (ft)"
               size="small"
               type="number"
-              value={sizeFeet}
+              value={breadthFeet}
               onChange={(event) => {
-                setSizeFeet(event.target.value);
-                const patch = sizePatch(event.target.value, breadthFeet);
+                setBreadthFeet(event.target.value);
+                const patch = sizePatch(sizeFeet, event.target.value);
                 if (patch) {
                   preview(patch);
                   saveSoon(patch);
@@ -265,98 +253,49 @@ export default function DrawingMenu({
               slotProps={{ htmlInput: { min: feetPerCell, step: feetPerCell } }}
               sx={{ ...battleMapCompactFieldSx, flex: 1 }}
             />
-            {area.shape === 'line' ? (
-              <TextField
-                label="Width (ft)"
-                size="small"
-                type="number"
-                value={breadthFeet}
-                onChange={(event) => {
-                  setBreadthFeet(event.target.value);
-                  const patch = sizePatch(sizeFeet, event.target.value);
-                  if (patch) {
-                    preview(patch);
-                    saveSoon(patch);
-                  }
-                }}
-                onKeyDown={(event) => event.stopPropagation()}
-                slotProps={{ htmlInput: { min: feetPerCell, step: feetPerCell } }}
-                sx={{ ...battleMapCompactFieldSx, flex: 1 }}
-              />
-            ) : null}
-          </Stack>
-        ) : null}
-
-        {canSize ? (
-          <MenuSlider
-            label="Size"
-            valueText={sizeText}
-            value={size}
-            {...sizeRange}
-            onChange={(value) => {
-              setSize(value);
-              preview(sizePatchOf(value));
-            }}
-            onCommit={(value) => onSave(drawing, sizePatchOf(value))}
-          />
-        ) : null}
-
-        {canThicken ? (
-          <MenuSlider
-            label="Thickness"
-            valueText={trimNumber(thickness)}
-            value={thickness}
-            min={0.5}
-            max={Math.max(opened.width || 3, MAX_THICKNESS)}
-            step={0.5}
-            onChange={(value) => {
-              setThickness(value);
-              preview({ width: value });
-            }}
-            onCommit={(value) => onSave(drawing, { width: value })}
-          />
-        ) : null}
-
-        {area ? (
-          <Typography sx={helperSx}>{`${feetPerCell} ft per ${cellWord}, as set on the ruler.`}</Typography>
-        ) : null}
-
-        <Divider />
-
-        <Stack direction="row" spacing={0.5}>
-          <Button size="small" variant="outlined" onClick={onClose} sx={{ ...menuButtonSx, flex: 1 }}>Done</Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            startIcon={<Trash2 size={ICON_SIZES.sm} />}
-            onClick={() => { onDelete(drawing); onClose(); }}
-            sx={menuButtonSx}
-          >
-            Delete
-          </Button>
+          ) : null}
         </Stack>
-      </Stack>
-    </Menu>
-  );
-}
+      ) : null}
 
-// A labelled slider of the menu, its value beside the name.
-function MenuSlider({ label, valueText, value, min, max, step, onChange, onCommit }) {
-  return (
-    <Box>
-      <Typography sx={battleMapControlLabelSx}>{`${label} ${valueText}`}</Typography>
-      <Slider
-        size="small"
-        aria-label={label}
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(_, next) => onChange(next)}
-        onChangeCommitted={(_, next) => onCommit(next)}
+      {canSize ? (
+        <LabeledSlider
+          label="Size"
+          valueText={sizeText}
+          value={size}
+          {...sizeRange}
+          onChange={(value) => {
+            setSize(value);
+            preview(sizePatchOf(value));
+          }}
+          onCommit={(value) => onSave(drawing, sizePatchOf(value))}
+        />
+      ) : null}
+
+      {canThicken ? (
+        <LabeledSlider
+          label="Thickness"
+          valueText={trimNumber(thickness)}
+          value={thickness}
+          min={0.5}
+          max={Math.max(opened.width || 3, MAX_THICKNESS)}
+          step={0.5}
+          onChange={(value) => {
+            setThickness(value);
+            preview({ width: value });
+          }}
+          onCommit={(value) => onSave(drawing, { width: value })}
+        />
+      ) : null}
+
+      {area ? (
+        <Typography sx={helperSx}>{`${feetPerCell} ft per ${cellWord}, as set on the ruler.`}</Typography>
+      ) : null}
+
+      <MenuFooterActions
+        onClose={onClose}
+        actions={[{ label: 'Delete', icon: Trash2, color: 'error', onClick: () => onDelete(drawing) }]}
       />
-    </Box>
+    </MapMenu>
   );
 }
 
@@ -375,12 +314,6 @@ const MAX_NOTE_SCALE = 30;
 const MAX_THICKNESS = 100;
 const COLOR_DELAY = 180;
 
-const sectionTitleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.md,
-  color: 'primary.main',
-};
-
 const helperSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxs, lineHeight: LINE_HEIGHTS.snug };
 
 const colorRowSx = {
@@ -389,6 +322,4 @@ const colorRowSx = {
   justifyContent: 'space-between',
   gap: 0.5,
 };
-
-const menuButtonSx = { fontSize: FONT_SIZES.sm, py: 0.25 };
 

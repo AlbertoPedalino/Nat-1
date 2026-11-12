@@ -23,7 +23,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import SelectField from '../../../shared/ui/SelectField.jsx';
+import SheetCharacterSelect from './SheetCharacterSelect.jsx';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -47,7 +47,6 @@ export default function FloatingSheetPanel({
   // on whether its queued style write had run yet, and would fold in the
   // container's border on every cycle.
   const placementRef = useRef(null);
-  const picked = choices.some((entry) => entry.characterId === selectedId);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -269,21 +268,8 @@ export default function FloatingSheetPanel({
         <GripHorizontal size={ICON_SIZES.sm} aria-hidden="true" />
         <Typography sx={titleSx}>Sheet</Typography>
         <Box sx={{ flex: 1 }} />
-        {choices.length > 1 || (choices.length && !picked) ? (
-          // Native, so its list opens inside a fullscreen map too. No
-          // character picked: a stat block is on show.
-          <SelectField
-            native
-            ariaLabel="Character sheet"
-            value={picked ? selectedId : ''}
-            onChange={onSelectionChange}
-            placeholder="Character…"
-            options={choices.map((entry) => ({ value: entry.characterId, label: entry.name }))}
-            fullWidth={false}
-            onMap
-            sx={selectSx}
-          />
-        ) : null}
+        {/* Native, so its list opens inside a fullscreen map too. */}
+        <SheetCharacterSelect native choices={choices} selectedId={selectedId} onChange={onSelectionChange} />
         <IconButton size="small" aria-label="Close floating sheet" onClick={onClose} sx={closeSx}>
           <X size={ICON_SIZES.sm} />
         </IconButton>
@@ -346,8 +332,6 @@ const titleSx = {
   fontSize: FONT_SIZES.md,
   
 };
-
-const selectSx = { width: { xs: 145, sm: 220 } };
 
 const closeSx = {
   color: VTT_COLORS.textSecondary,

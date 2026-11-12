@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Button,
   Popover,
-  Slider,
   Stack,
   TextField,
 } from '@mui/material';
@@ -10,14 +9,15 @@ import { ChevronDown, Cloud } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { atmosphereFor } from '../../../shared/vtt/scene/atmosphere.js';
 import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/imageFilters.js';
-import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { numberSx } from './panelStyles.js';
-import { SectionLabel } from './ScenePanelSection.jsx';
+import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import { ATMOSPHERE_ICONS, AtmospherePicker, atmospherePresetsByType } from './AtmospherePicker.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
+import { MAP_PAPER_SX } from '../../../shared/ui/mapPaper.js';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -61,10 +61,9 @@ function ImageLightSection({ scene, onImageFilterChange }) {
 
   return (
     <Stack spacing={0.5}>
-      <SectionLabel
-        label={showingBackground ? 'Light on this background' : 'Light on the battlemap'}
-        hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night."
-      />
+      <MapSectionTitle hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night.">
+        {showingBackground ? 'Light on this background' : 'Light on the battlemap'}
+      </MapSectionTitle>
       <SelectField
         ariaLabel="Light filter"
         value={filter.type}
@@ -73,16 +72,13 @@ function ImageLightSection({ scene, onImageFilterChange }) {
         fullWidth={false}
       />
       {filter.type === 'none' ? null : (
-        <Slider
-          size="small"
+        <LabeledSlider
+          ariaLabel="Light filter strength"
           min={0.1}
           max={1}
           step={0.05}
           value={filter.intensity}
-          valueLabelDisplay="auto"
-          aria-label="Light filter strength"
-          onChange={(_, value) => setFilter({ intensity: value })}
-          sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
+          onChange={(value) => setFilter({ intensity: value })}
         />
       )}
     </Stack>
@@ -114,10 +110,9 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
 
   return (
     <Stack spacing={0.75}>
-      <SectionLabel
-        label={showingBackground ? 'Atmosphere on this background' : 'Atmosphere on the battlemap'}
-        hint="A procedural weather layer over the picture on show. Every picture keeps its own, so the battlemap can be under a storm while a background stays dry. It is rendered locally as a continuous field, so denser rain or fog does not create more particles."
-      />
+      <MapSectionTitle hint="A procedural weather layer over the picture on show. Every picture keeps its own, so the battlemap can be under a storm while a background stays dry. It is rendered locally as a continuous field, so denser rain or fog does not create more particles.">
+        {showingBackground ? 'Atmosphere on this background' : 'Atmosphere on the battlemap'}
+      </MapSectionTitle>
       <Button
         fullWidth
         size="small"
@@ -147,7 +142,7 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
         slotProps={{
           paper: {
             sx: {
-              ...battleMapDialogPaperSx,
+              ...MAP_PAPER_SX,
               width: 320,
               maxWidth: 'calc(100vw - 24px)',
               mt: 0.5,
@@ -161,21 +156,18 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
       {/* Under the picker, like the light filter's strength: it is the knob
           turned mid-scene, so it should not sit behind a second click. */}
       {atmosphere.type === 'none' ? null : (
-        <Slider
-          size="small"
+        <LabeledSlider
+          ariaLabel="Atmosphere intensity"
           min={0.1}
           max={1}
           step={0.05}
           value={atmosphere.intensity}
-          valueLabelDisplay="auto"
-          aria-label="Atmosphere intensity"
-          onChange={(_, value) => setAtmosphere({ intensity: value })}
-          sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
+          onChange={(value) => setAtmosphere({ intensity: value })}
         />
       )}
       {atmosphere.type === 'none' ? null : (
         <Stack spacing={0.5}>
-          <SectionLabel label="Wind" hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view." />
+          <MapSectionTitle hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view.">Wind</MapSectionTitle>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <TextField
               size="small"

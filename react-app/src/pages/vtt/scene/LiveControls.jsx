@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
-  Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip,
+  Button, Divider, ListItemIcon, ListItemText, MenuItem, Stack, Tooltip,
 } from '@mui/material';
 import {
   ChevronDown, Lock, LockOpen, MonitorOff, MonitorPlay, Radio, RadioTower,
 } from 'lucide-react';
-import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import MapMenu from '../map/MapMenu.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 
 // Everything that decides what the table sees, in one place: whether this scene
@@ -85,13 +85,7 @@ export default function LiveControls({
           {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
         </Button>
       </Tooltip>
-      <Menu
-        id="scene-live-menu"
-        anchorEl={anchor}
-        open={Boolean(anchor)}
-        onClose={close}
-        slotProps={{ paper: { sx: menuPaperSx } }}
-      >
+      <MapMenu id="scene-live-menu" anchorEl={anchor} onClose={close} minWidth={220}>
         {projectorAttached ? (
           <MenuItem onClick={run(onStopProjector)}>
             <ListItemIcon sx={iconSx}><MonitorOff size={ICON_SIZES.sm} /></ListItemIcon>
@@ -108,15 +102,10 @@ export default function LiveControls({
           <ListItemIcon sx={iconSx}><RadioTower size={ICON_SIZES.sm} /></ListItemIcon>
           <ListItemText primary="Stop live" secondary="Players no longer see this scene" />
         </MenuItem>
-      </Menu>
+      </MapMenu>
     </Stack>
   );
 }
-
-const menuPaperSx = {
-  ...battleMapDialogPaperSx,
-  minWidth: 220,
-};
 
 const iconSx = {
   minWidth: 28,

@@ -1,21 +1,13 @@
-import { Box, Stack, Typography } from '@mui/material';
-import { Images, X } from 'lucide-react';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { Images } from 'lucide-react';
 import { MapPanel } from './MapPanel.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
-
-// How far under the top of the strip a panel starts: the icon button, plus the
-// gap that keeps it from touching one.
-export const ICON_STRIP = 38;
+import MapCornerPopout from '../map/MapCornerPopout.jsx';
 
 // Everything about the scene behind one icon: its pictures, atmosphere, grid
 // and playable edge. They were split across two corners for a while and
 // finishing a single thought meant crossing the map.
+//
+// Only the icon sits on the map: the switch lives with the rest of the picture
+// settings, one click away, instead of taking a permanent strip of the board.
 export default function MapCorner({
   scene,
   busy,
@@ -34,82 +26,30 @@ export default function MapCorner({
   onFitPlayArea,
 }) {
   return (
-    <Box sx={cornerSx}>
-      {/* Only the icon sits on the map: the switch lives with the rest of the
-          picture settings, one click away, instead of taking a permanent strip
-          of the board. */}
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <TipIconButton title={open ? 'Hide the scene settings' : 'Pictures, atmosphere, grid and play area'} size="small" ariaLabel="Picture settings" aria-expanded={open} onClick={() => onOpenChange?.(!open)} sx={buttonSx}>
-          {open ? <X size={ICON_SIZES.md} /> : <Images size={ICON_SIZES.md} />}
-        </TipIconButton>
-      </Stack>
-
-      {open ? (
-        <Box sx={panelSx}>
-          <Typography sx={titleSx}>Scene</Typography>
-          <MapPanel
-            scene={scene}
-            busy={busy}
-            onUploadMap={onUploadMap}
-            onUploadBackground={onUploadBackground}
-            onRemoveMap={onRemoveMap}
-            onRemoveBackground={onRemoveBackground}
-            onAddImage={onAddImage}
-            onGridChange={onGridChange}
-            onAtmosphereChange={onAtmosphereChange}
-            onImageFilterChange={onImageFilterChange}
-            onPlayAreaChange={onPlayAreaChange}
-            onFitPlayArea={onFitPlayArea}
-            onShownImageChange={onShownImageChange}
-          />
-        </Box>
-      ) : null}
-    </Box>
+    <MapCornerPopout
+      icon={Images}
+      label="Picture settings"
+      showTip="Pictures, atmosphere, grid and play area"
+      hideTip="Hide the scene settings"
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Scene"
+    >
+      <MapPanel
+        scene={scene}
+        busy={busy}
+        onUploadMap={onUploadMap}
+        onUploadBackground={onUploadBackground}
+        onRemoveMap={onRemoveMap}
+        onRemoveBackground={onRemoveBackground}
+        onAddImage={onAddImage}
+        onGridChange={onGridChange}
+        onAtmosphereChange={onAtmosphereChange}
+        onImageFilterChange={onImageFilterChange}
+        onPlayAreaChange={onPlayAreaChange}
+        onFitPlayArea={onFitPlayArea}
+        onShownImageChange={onShownImageChange}
+      />
+    </MapCornerPopout>
   );
 }
-
-// Only as wide as its icon, and as tall as the strip it stands in: the panel
-// floats under the icon rather than sitting in the flow, so opening the
-// pictures never shoves the hexcrawl button along the top of the map, and the
-// full height is what the panel measures its own against.
-const cornerSx = {
-  position: 'relative',
-  height: '100%',
-  minHeight: 0,
-};
-
-const buttonSx = {
-  // The strip around it is click-through; the icon and the panel are not.
-  ...SURFACES.mapControl,
-  pointerEvents: 'auto',
-  color: VTT_COLORS.accent,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.solid) },
-};
-
-// Scrollable rather than tall: in fullscreen a panel that runs past the bottom
-// of the map has no page to scroll behind it. Bounded by the map rather than by
-// the window — the map is a cell in the page and is usually much shorter, which
-// is what let this panel grow until its own edge cut it off. The strip it hangs
-// from is that height, so `100%` here is the map, less the icon it hangs under.
-const panelSx = {
-  ...SURFACES.mapControl,
-  pointerEvents: 'auto',
-  position: 'absolute',
-  top: ICON_STRIP,
-  left: 0,
-  zIndex: 2,
-  width: { xs: 240, sm: 290 },
-  maxHeight: `calc(100% - ${ICON_STRIP}px)`,
-  minHeight: 0,
-  overflowY: 'auto',
-  p: 1.25,
-  borderRadius: 1,
-  boxShadow: 6,
-};
-
-const titleSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.md,
-  color: 'primary.main',
-  mb: 1,
-};

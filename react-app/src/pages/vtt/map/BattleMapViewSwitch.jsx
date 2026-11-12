@@ -4,7 +4,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import SelectField from '../../../shared/ui/SelectField.jsx';
+import SheetCharacterSelect from '../sheets/SheetCharacterSelect.jsx';
 
 export default function BattleMapViewSwitch({
   view,
@@ -18,23 +18,11 @@ export default function BattleMapViewSwitch({
 }) {
   const hasSheets = available;
   const showingSheet = view === 'sheet';
-  // No character picked: something else (a stat block) is on show, and the
-  // selector is the way back to a character, even to the only one.
-  const picked = choices.some((entry) => entry.characterId === selectedId);
 
   return (
     <Stack direction="row" spacing={0.75} sx={rootSx}>
-      {showingSheet && (choices.length > 1 || (choices.length && !picked)) ? (
-        <SelectField
-          ariaLabel="Character sheet"
-          value={picked ? selectedId : ''}
-          onChange={onSelectionChange}
-          placeholder="Character…"
-          options={choices.map((entry) => ({ value: entry.characterId, label: entry.name }))}
-          fullWidth={false}
-          onMap
-          sx={selectSx}
-        />
+      {showingSheet ? (
+        <SheetCharacterSelect choices={choices} selectedId={selectedId} onChange={onSelectionChange} />
       ) : null}
 
       <Button
@@ -58,8 +46,6 @@ const rootSx = {
   alignItems: 'center',
   flexShrink: 0,
 };
-
-const selectSx = { width: { xs: 148, sm: 210 } };
 
 const buttonSx = {
   minWidth: 92,
