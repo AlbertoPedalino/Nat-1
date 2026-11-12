@@ -27,6 +27,7 @@ import { SURFACES } from '../ui/surfaces.js';
 import { FONT_WEIGHTS } from '../ui/fonts.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
 import EmptyLine from '../ui/EmptyLine.jsx';
+import { ErrorLine } from '../ui/LoadStatus.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -56,7 +57,7 @@ export default function MonsterBrowser({
   }
 
   if (monsterDb.status === 'error') {
-    return <Typography sx={{ color: 'error.main' }}>{monsterDb.error}</Typography>;
+    return <ErrorLine>{monsterDb.error}</ErrorLine>;
   }
 
   const allSourcesActive = !filters.sources?.length;

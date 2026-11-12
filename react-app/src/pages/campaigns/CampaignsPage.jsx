@@ -184,9 +184,7 @@ export default function CampaignsPage() {
 
             {loading ? <LoadingLine centered label="Loading campaigns…" sx={{ py: 2 }} /> : null}
             {!loading && campaigns.length === 0 ? (
-              <Box sx={emptyPanelSx}>
-                <Typography sx={msgSx}>No campaigns yet. Create one or join with a code.</Typography>
-              </Box>
+              <StatePanel title="No campaigns yet">Create one or join with a code.</StatePanel>
             ) : null}
 
             <Stack spacing={2}>
@@ -323,13 +321,11 @@ const headerSx = { display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.5 };
 const headerIconSx = { color: 'primary.main', flexShrink: 0 };
 const titleSx = { ...TEXT_STYLES.title, fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: 'primary.main' };
 
-const msgSx = { color: 'text.secondary', fontSize: FONT_SIZES.xxl, maxWidth: 520 };
 
 const setupStackSx = { mb: 2.5 };
 const setupPanelSx = { ...SURFACES.panel, flex: 1, minWidth: 0, p: 1.5 };
 const sectionTitleSx = { ...captionLabelSx, mb: 1 };
 const setupActionSx = { width: { xs: '100%', sm: 'auto' }, flexShrink: 0 };
-const emptyPanelSx = { textAlign: 'center', p: 3, mb: 2, border: '1px dashed', borderColor: 'divider' };
 
 const campaignCardSx = { ...SURFACES.panel, p: { xs: 1.25, sm: 1.75 } };
 const campaignHeaderSx = { display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' };

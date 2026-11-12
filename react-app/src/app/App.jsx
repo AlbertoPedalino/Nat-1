@@ -1,9 +1,9 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
 import HomePage from '../pages/home/HomePage.jsx';
 import CloudAutoSync from '../shared/cloud/sync/CloudAutoSync.jsx';
 import { pageTitleForPath } from '../shared/ui/pageTitle.js';
+import { LoadingLine } from '../shared/ui/LoadStatus.jsx';
 
 // Home is the landing route and ships in the entry chunk. Every other page is
 // loaded on demand: the tool pages carry the bulk of the app, and nobody opens
@@ -58,15 +58,7 @@ function PageTitle() {
 
 function RouteFallback() {
   return (
-    <Box sx={fallbackSx}>
-      <CircularProgress aria-label="Loading page" />
-    </Box>
+    <LoadingLine centered label="Loading page…" sx={{ minHeight: '60vh' }} />
   );
 }
 
-const fallbackSx = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '60vh',
-};

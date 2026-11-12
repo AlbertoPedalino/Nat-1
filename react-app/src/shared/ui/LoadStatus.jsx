@@ -16,13 +16,18 @@ export function LoadingLine({ label = 'Loading…', centered = false, sx }) {
   );
 }
 
+// The one "could not" look: what went wrong, in an error alert. A load that
+// failed, a save that was refused, a scene that could not be opened. A field
+// that is filled in wrong says so under the field instead.
+export function ErrorLine({ children, sx }) {
+  return <Alert severity="error" sx={sx}>{children}</Alert>;
+}
+
 // What a panel shows while its data is on the way, or when it could not come:
-// LoadingLine, or an error alert. Nothing once it is ready.
+// LoadingLine, or ErrorLine. Nothing once it is ready.
 export default function LoadStatus({ status, loadingLabel = 'Loading…', errorMessage }) {
   if (status === 'loading' || status === 'idle') return <LoadingLine label={loadingLabel} sx={{ p: 2 }} />;
-  if (status === 'error') {
-    return <Alert severity="error" sx={{ m: 1 }}>{errorMessage}</Alert>;
-  }
+  if (status === 'error') return <ErrorLine sx={{ m: 1 }}>{errorMessage}</ErrorLine>;
   return null;
 }
 

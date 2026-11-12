@@ -139,10 +139,5 @@ export const emptyStateSx = {
   minHeight: 0,
 };
 
-export const errorTextSx = {
-  width: '100%',
-  maxWidth: '640px',
-  color: UI_COLORS.danger,
-  fontSize: FONT_SIZES.xl,
-  mb: '0.75rem',
-};
+// The picker's error, as wide as its list.
+export const errorLineSx = { mb: '0.75rem', width: '100%', maxWidth: '640px' };

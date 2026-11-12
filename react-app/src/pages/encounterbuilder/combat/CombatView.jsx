@@ -10,7 +10,7 @@ import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
@@ -35,14 +35,13 @@ export default function CombatView() {
 
   if (!combat?.combatants?.length) {
     return (
-      <Box sx={{ ...SURFACES.panel, p: 4, textAlign: 'center' }}>
-        <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
-          <Swords size={ICON_SIZES.display} />
-          <Typography variant="h2">No active encounter</Typography>
-          <Typography sx={{ color: 'text.secondary' }}>Launch an encounter from Builder or resume a saved fight from Library.</Typography>
-          <Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>
-        </Stack>
-      </Box>
+      <StatePanel
+        icon={Swords}
+        title="No active encounter"
+        action={<Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>}
+      >
+        Launch an encounter from Builder or resume a saved fight from Library.
+      </StatePanel>
     );
   }
 

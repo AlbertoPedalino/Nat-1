@@ -24,6 +24,7 @@ import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
+import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -218,7 +219,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Tools in this list are connected to each other. Removing one keeps the others connected.
           </Typography>
-          {error && <Typography role="alert" color="error" variant="body2">{error}</Typography>}
+          {error ? <ErrorLine>{error}</ErrorLine> : null}
           <Stack spacing={1}>
             {[...(current ? [current] : []), ...linkedRows].map((row) => {
               const isCurrent = rowKey(row) === `${sectionKey}:${instanceId}`;

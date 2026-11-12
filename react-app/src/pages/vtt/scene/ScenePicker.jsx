@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -20,10 +20,11 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
-import { SURFACES } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -146,15 +147,13 @@ export default function ScenePicker({
   return (
     <Stack spacing={2}>
       {campaignError || error ? (
-        <Typography sx={{ color: 'error.main' }}>{campaignError || error}</Typography>
+        <ErrorLine>{campaignError || error}</ErrorLine>
       ) : null}
 
       {!campaigns.length ? (
-        <Paper sx={emptySx}>
-          <Typography sx={{ color: 'text.secondary' }}>
-            Maps belong to a campaign you run. Create one from the Campaigns page first.
-          </Typography>
-        </Paper>
+        <StatePanel title="No campaign to map">
+          Maps belong to a campaign you run. Create one from the Campaigns page first.
+        </StatePanel>
       ) : null}
 
       {campaigns.map((campaign) => {
@@ -233,11 +232,6 @@ export default function ScenePicker({
   );
 }
 
-const emptySx = {
-  ...SURFACES.panel,
-  p: 4,
-  textAlign: 'center',
-};
 
 
 // A scene: the drawn card, lit under the cursor.

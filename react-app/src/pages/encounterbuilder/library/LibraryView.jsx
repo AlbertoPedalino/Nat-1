@@ -16,9 +16,9 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -74,9 +74,7 @@ export default function LibraryView() {
           </Stack>
         ))
       ) : (
-        <Box sx={{ ...SURFACES.panel, p: 4, textAlign: 'center' }}>
-          <Typography sx={TEXT_STYLES.note}>No encounters saved.</Typography>
-        </Box>
+        <StatePanel title="No encounters saved">Save an encounter from the Builder and it shows up here.</StatePanel>
       )}
     </Stack>
   );

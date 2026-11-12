@@ -728,3 +728,7 @@ test('outlined lettering is inked only by inkLettering', () => {
 test('a list with nothing in it says so through EmptyLine', () => {
   assert.deepEqual(sourceFilesMatching(/\bemptyTextSx\b/, { allow: ['shared/ui/EmptyLine.jsx'] }), []);
 });
+
+test('what went wrong is said through ErrorLine', () => {
+  assert.deepEqual(sourceFilesMatching(/<Alert severity="error"/, { allow: ['shared/ui/LoadStatus.jsx'] }), []);
+});

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listInstances, renameInstance } from '../../shared/instances/instanceStore.js';
 import {
@@ -19,6 +19,7 @@ import { promptText } from '../../shared/ui/promptText.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -74,7 +75,7 @@ export default function SectionPicker({ meta }) {
 
   return (
     <>
-      {error ? <Typography sx={s.errorTextSx}>{error}</Typography> : null}
+      {error ? <ErrorLine sx={s.errorLineSx}>{error}</ErrorLine> : null}
       {loading && !rows.length ? <LoadingLine label="Loading saves…" /> : null}
       {!loading && !rows.length ? (
         <StatePanel sx={s.emptyStateSx}>No saved {meta.label.toLowerCase()} sessions yet.</StatePanel>

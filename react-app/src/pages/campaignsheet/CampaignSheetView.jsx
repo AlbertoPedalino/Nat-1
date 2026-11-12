@@ -1,8 +1,8 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import CharacterSheet from '../charsheet/CharacterSheet.jsx';
 import { useCloudCharacterRow } from '../../shared/cloud/sync/useCloudCharacterRow.js';
-import { UI_COLORS } from '../../shared/ui/colors.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 function charIdFromUrl() {
   return new URLSearchParams(window.location.search).get('id');
@@ -34,7 +34,7 @@ export default function CampaignSheetView({
       {loading ? (
         <LoadingLine centered label="Loading sheet…" />
       ) : !row ? (
-        <Typography sx={{ p: 4, color: UI_COLORS.danger, textAlign: 'center' }}>{error}</Typography>
+        <ErrorLine sx={{ m: 4 }}>{error}</ErrorLine>
       ) : (
         <CharacterSheet
           externalChar={row.data}

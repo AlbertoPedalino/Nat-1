@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Box, Button, IconButton, InputAdornment, Paper, TextField, Tooltip, Typography,
-} from '@mui/material';
+import { Box, Button, IconButton, InputAdornment, TextField, Tooltip, Typography } from '@mui/material';
 import { Plus, Search, SearchX, StickyNote, X } from 'lucide-react';
 import { useDmScreen } from '../state/DmScreenContext.jsx';
 import { BOARD_COLUMNS, GRID_GAP, ROW_UNIT } from './layout.js';
@@ -11,6 +9,7 @@ import { filterNotes, queryTokens } from '../search/search.js';
 import { useNoteDragReorder } from '../drag/useNoteDragReorder.js';
 import NoteCard from './NoteCard.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -116,27 +115,23 @@ export default function NoteBoard() {
       </Box>
 
       {notes.length === 0 ? (
-        <Paper variant="outlined" sx={emptySx}>
-          <StickyNote size={ICON_SIZES.hero} aria-hidden="true" />
-          <Typography variant="h2">Build your quick-reference screen</Typography>
-          <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
-            Keep house rules, NPC names, session hooks, loot, and reminders close during play.
-          </Typography>
-          <Button variant="outlined" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>
-            Add first note
-          </Button>
-        </Paper>
+        <StatePanel
+          icon={StickyNote}
+          title="Build your quick-reference screen"
+          action={<Button variant="outlined" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>Add first note</Button>}
+        >
+          Keep house rules, NPC names, session hooks, loot, and reminders close during play.
+        </StatePanel>
       ) : visibleNotes.length === 0 ? (
-        <Paper variant="outlined" sx={emptySx}>
-          <SearchX size={ICON_SIZES.hero} aria-hidden="true" />
-          <Typography variant="h2">No notes match that search</Typography>
-          <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
-            Every word has to appear in a note's title or text.
-          </Typography>
-          {/* Not another "Clear search": two controls with the same accessible
-              name are ambiguous for anyone navigating by name. */}
-          <Button variant="outlined" onClick={() => setQuery('')}>Show all notes</Button>
-        </Paper>
+        <StatePanel
+          icon={SearchX}
+          title="No notes match that search"
+          // Not another "Clear search": two controls with the same accessible
+          // name are ambiguous for anyone navigating by name.
+          action={<Button variant="outlined" onClick={() => setQuery('')}>Show all notes</Button>}
+        >
+          Every word has to appear in a note's title or text.
+        </StatePanel>
       ) : (
         <Box sx={gridSx}>
           {visibleNotes.map((note, index) => (
@@ -194,19 +189,6 @@ const searchSx = {
   mr: 'auto',
 };
 
-const emptySx = {
-  borderStyle: 'dashed',
-  borderColor: 'divider',
-  bgcolor: 'background.paper',
-  color: 'text.secondary',
-  textAlign: 'center',
-  px: { xs: 2, md: 4 },
-  py: { xs: 5, md: 7 },
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 1.5,
-};
 
 const gridSx = {
   minWidth: 0,

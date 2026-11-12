@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
@@ -8,6 +8,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -35,12 +36,10 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
   if (!state.campaigns.length) {
     if (!showEmpty) return null;
     return (
-      <Paper sx={emptySx}>
-        <Typography sx={{ color: 'text.secondary' }}>
-          You have not joined a campaign yet. Ask your GM for the invite code and join it from the
-          Campaigns page.
-        </Typography>
-      </Paper>
+      <StatePanel title="No campaign yet">
+        You have not joined a campaign yet. Ask your GM for the invite code and join it from the
+        Campaigns page.
+      </StatePanel>
     );
   }
 
@@ -69,11 +68,6 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
   );
 }
 
-const emptySx = {
-  p: 4,
-  bgcolor: 'background.paper',
-  textAlign: 'center',
-};
 
 const rowSx = {
   ...CARD_SX,

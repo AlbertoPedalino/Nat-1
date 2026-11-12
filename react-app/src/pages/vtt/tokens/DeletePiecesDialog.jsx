@@ -1,7 +1,8 @@
-import { Alert, Button, DialogContentText } from '@mui/material';
+import { Button, DialogContentText } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import BattleMapDialog from '../map/BattleMapDialog.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 
 export default function DeletePiecesDialog({
   open, pieces, busy, error, container, onCancel, onConfirm,
@@ -38,7 +39,7 @@ export default function DeletePiecesDialog({
           : `Remove ${pieces.length} selected pieces from the map?`}
         {' '}This cannot be undone.
       </DialogContentText>
-      {error ? <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert> : null}
+      {error ? <ErrorLine sx={{ mt: 2 }}>{error}</ErrorLine> : null}
     </BattleMapDialog>
   );
 }

@@ -24,6 +24,7 @@ import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import { OPACITY } from '../../shared/ui/colors.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
+import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -208,7 +209,7 @@ export default function VttPage() {
         {gate ? <Typography sx={s.noticeSx}>{gate}</Typography> : null}
         {!gate && busy ? <LoadingLine centered /> : null}
         {!gate && !busy && error && (requestedScene || joinedCampaign) ? (
-          <Typography sx={s.errorSx}>{error}</Typography>
+          <ErrorLine sx={{ mb: 1 }}>{error}</ErrorLine>
         ) : null}
 
         {/* At the root a GM manages their scenes; everyone also sees the tables

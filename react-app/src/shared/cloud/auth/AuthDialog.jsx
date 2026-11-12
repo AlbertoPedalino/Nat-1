@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Tabs, Tab, Alert } from '@mui/material';
+import { Box, Button, TextField, Tabs, Tab } from '@mui/material';
 import { LogIn } from 'lucide-react';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { useAuth } from './AuthProvider.jsx';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { ErrorLine } from '../../ui/LoadStatus.jsx';
 
 export default function AuthDialog({ open, onClose }) {
   const { signIn, signUp } = useAuth();
@@ -87,7 +88,7 @@ export default function AuthDialog({ open, onClose }) {
         <button type="submit" hidden aria-hidden />
       </Box>
 
-      {error ? <Alert severity="error" sx={{ mt: 1.25 }}>{error}</Alert> : null}
+      {error ? <ErrorLine sx={{ mt: 1.25 }}>{error}</ErrorLine> : null}
     </SheetDialog>
   );
 }

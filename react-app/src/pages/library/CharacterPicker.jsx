@@ -24,6 +24,7 @@ import { campaignSheetPath } from '../../shared/character/profile/characterRoute
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -133,7 +134,7 @@ export default function CharacterPicker() {
     <>
       <Typography sx={s.sectionHeadSx}>{isGm ? 'Players sheets' : 'My sheets'}</Typography>
 
-      {error ? <Typography sx={s.errorTextSx}>{error}</Typography> : null}
+      {error ? <ErrorLine sx={s.errorLineSx}>{error}</ErrorLine> : null}
       {loading && !rows.length ? <LoadingLine label="Loading sheets…" /> : null}
 
       {!loading && rows.length === 0 ? (

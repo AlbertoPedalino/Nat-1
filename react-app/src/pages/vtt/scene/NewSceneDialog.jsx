@@ -27,6 +27,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -243,7 +244,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
         </Stack>
       )}
 
-      {error ? <Typography sx={errorSx}>{error}</Typography> : null}
+      {error ? <ErrorLine sx={{ mt: 1 }}>{error}</ErrorLine> : null}
     </SheetDialog>
   );
 }
@@ -293,5 +294,4 @@ const frameSx = {
   bgcolor: VTT_COLORS.white,
 };
 
-const errorSx = { mt: 1, fontSize: FONT_SIZES.lg, color: 'error.main' };
 
