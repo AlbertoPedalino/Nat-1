@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Box, Button, IconButton, Stack, TextField, Tooltip, Typography,
-} from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { FastForward } from 'lucide-react';
 import SelectorGroup from './SelectorGroup.jsx';
 import { SELECTOR_CONTRACTS } from './selectorContracts.js';
@@ -10,6 +8,7 @@ import { SEASON_ICONS, WEATHER_ICONS } from '../../hexcrawl/hexIcons.js';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import TipIconButton from '../../ui/TipIconButton.jsx';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -173,18 +172,9 @@ function AdvanceForm({ disabled, onAdvance }) {
           slotProps={{ htmlInput: { inputMode: 'decimal' } }}
           sx={{ width: 80 }}
         />
-        <Tooltip title="Advance by these hours">
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Advance the clock"
-              disabled={disabled || !valid}
-              onClick={() => advance(hours)}
-            >
-              <FastForward size={ICON_SIZES.md} />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <TipIconButton title="Advance by these hours" size="small" ariaLabel="Advance the clock" disabled={disabled || !valid} onClick={() => advance(hours)}>
+          <FastForward size={ICON_SIZES.md} />
+        </TipIconButton>
       </Stack>
     </Box>
   );

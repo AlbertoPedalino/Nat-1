@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Button, IconButton, MenuItem, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Network, Plus, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
@@ -26,6 +26,7 @@ import { INK_EDGE } from '../../shared/ui/shadows.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 import Caption from '../../shared/ui/Caption.jsx';
+import TipIconButton from '../../shared/ui/TipIconButton.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -274,8 +275,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                 </Box>
                 {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
                   size="small" disabled={working} aria-label={`Open ${row.name}`} onClick={() => setOpen(false)}>Open</Button>}
-                {groupId && <Tooltip title={`Unlink ${row.name}`}><span><IconButton size="small" color="error"
-                  aria-label={`Unlink ${row.name}`} disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={ICON_SIZES.md} /></IconButton></span></Tooltip>}
+                {groupId && <TipIconButton title={`Unlink ${row.name}`} size="small" color="error" disabled={disabled} onClick={() => handleUnlink(row)}><Unlink size={ICON_SIZES.md} /></TipIconButton>}
               </Stack>;
             })}
           </Stack>

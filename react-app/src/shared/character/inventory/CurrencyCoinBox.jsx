@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, TextField, Tooltip, Typography } from '@mui/material';
 import { Minus, Plus, X } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
@@ -13,6 +7,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 import { currencyVariant, HOVER_SUBTRACT, HOVER_ADD, buttonBaseSx } from './currencyVariants.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { ONE_LINE_SX } from '../../ui/textStyles.js';
+import TipIconButton from '../../ui/TipIconButton.jsx';
 
 export function CurrencyCoinBox({
   coin,
@@ -120,12 +115,7 @@ export function CurrencyCoinBox({
               }}
             />
           </Tooltip>
-          <Tooltip title="Remove currency">
-            <IconButton
-              size="small"
-              onClick={() => onRemove?.()}
-              aria-label="Remove currency"
-              sx={{
+          <TipIconButton title="Remove currency" size="small" onClick={() => onRemove?.()} sx={{
                 position: 'absolute',
                 top: 1,
                 right: 1,
@@ -133,11 +123,9 @@ export function CurrencyCoinBox({
                 color: 'text.secondary',
                 '&:hover': { color: HOVER_SUBTRACT },
                 zIndex: 1,
-              }}
-            >
-              <X size={v.stepper.icon} />
-            </IconButton>
-          </Tooltip>
+              }}>
+            <X size={v.stepper.icon} />
+          </TipIconButton>
           <TextField
             value={coin.label}
             onChange={(event) => onLabelChange?.(event.target.value)}
@@ -228,18 +216,9 @@ export function CurrencyCoinBox({
           bgcolor: v.stepper.bgcolor,
         }}
       >
-        <Tooltip title={`Subtract ${addStep}`}>
-          <span>
-            <IconButton
-              size="small"
-              disabled={amount <= 0 && (!focused || draft === '')}
-              onClick={() => step(-addStep)}
-              sx={{ ...stepButtonSx, '&:hover': { color: HOVER_SUBTRACT } }}
-            >
-              <Minus size={v.stepper.icon} />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <TipIconButton title={`Subtract ${addStep}`} size="small" disabled={amount <= 0 && (!focused || draft === '')} onClick={() => step(-addStep)} sx={{ ...stepButtonSx, '&:hover': { color: HOVER_SUBTRACT } }}>
+          <Minus size={v.stepper.icon} />
+        </TipIconButton>
         <TextField
           value={stepDraft}
           onChange={handleStepChange}
@@ -268,20 +247,14 @@ export function CurrencyCoinBox({
             'aria-label': `Custom ${coin.label} add amount`,
           }, input: { disableUnderline: true } }}
         />
-        <Tooltip title={`Add ${addStep}`}>
-          <IconButton
-            size="small"
-            onClick={() => step(addStep)}
-            sx={{
+        <TipIconButton title={`Add ${addStep}`} size="small" onClick={() => step(addStep)} sx={{
               ...stepButtonSx,
               borderLeft: 1,
               borderColor: 'divider',
               '&:hover': { color: HOVER_ADD },
-            }}
-          >
-            <Plus size={v.stepper.icon} />
-          </IconButton>
-        </Tooltip>
+            }}>
+          <Plus size={v.stepper.icon} />
+        </TipIconButton>
       </Box>
     </Box>
   );

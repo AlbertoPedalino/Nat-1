@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { Library as LibraryIcon, Play, RotateCcw, ScrollText, SlidersHorizontal, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
@@ -20,6 +20,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -147,18 +148,9 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         >
           Launch
         </Button>
-        <Tooltip title="Launch with initiative advantage / disadvantage">
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Launch with initiative options"
-              onClick={() => setInitiativeOpen(true)}
-              disabled={missingMonster}
-            >
-              <SlidersHorizontal size={ICON_SIZES.sm} />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <TipIconButton title="Launch with initiative advantage / disadvantage" size="small" ariaLabel="Launch with initiative options" onClick={() => setInitiativeOpen(true)} disabled={missingMonster}>
+          <SlidersHorizontal size={ICON_SIZES.sm} />
+        </TipIconButton>
         {fight ? (
           <Button
             size="small"

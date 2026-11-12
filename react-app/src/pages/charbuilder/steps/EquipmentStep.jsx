@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Divider, IconButton, List, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Divider, List, Stack, Typography } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -26,6 +26,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -63,16 +64,9 @@ function CurrentInventoryRow({ item, index, dispatch }) {
           </Box>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
             <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => dispatch({ type: 'inventory/qty', index, delta })} />
-            <Tooltip title="Remove row">
-              <IconButton
-                size="small"
-                aria-label={`Remove ${item.name}`}
-                onClick={() => dispatch({ type: 'inventory/remove', index })}
-                sx={stepButtonSx(20, { danger: true })}
-              >
-                <Trash2 size={ICON_SIZES.xs} />
-              </IconButton>
-            </Tooltip>
+            <TipIconButton title="Remove row" size="small" ariaLabel={`Remove ${item.name}`} onClick={() => dispatch({ type: 'inventory/remove', index })} sx={stepButtonSx(20, { danger: true })}>
+              <Trash2 size={ICON_SIZES.xs} />
+            </TipIconButton>
           </Stack>
         </Box>
       )}

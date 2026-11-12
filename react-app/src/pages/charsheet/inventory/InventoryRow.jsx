@@ -32,6 +32,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
 import { isEquippable, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The size and lettering of the row's small controls and tags; a control's
 // look is toggleSx (raised, filled while on), a tag's the flat tint.
@@ -172,11 +173,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
-            <Tooltip title="Remove">
-              <IconButton size="small" aria-label={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
-                <Trash2 size={ICON_SIZES.xs} />
-              </IconButton>
-            </Tooltip>
+            <TipIconButton title="Remove" size="small" ariaLabel={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
+              <Trash2 size={ICON_SIZES.xs} />
+            </TipIconButton>
           </Box>
         </Box>
       </Box>

@@ -1,17 +1,5 @@
 import { useMemo } from 'react';
-import {
-  Box,
-  Chip,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
@@ -30,6 +18,7 @@ import EmptyLine from '../ui/EmptyLine.jsx';
 import { ErrorLine } from '../ui/LoadStatus.jsx';
 import Caption from '../ui/Caption.jsx';
 import { DRAG_SOURCE_SX } from '../ui/interactive.js';
+import TipIconButton from '../ui/TipIconButton.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -136,18 +125,12 @@ export default function MonsterBrowser({
             <Typography variant="caption" sx={{ color: 'primary.main', minWidth: 92, textAlign: 'right' }}>
               CR {crKey(monster.cr)} · {formatNumber(crXP(monster.cr))} XP
             </Typography>
-            <Tooltip title={pickLabel}>
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={(event) => {
+            <TipIconButton title={pickLabel} size="small" color="primary" onClick={(event) => {
                   event.stopPropagation();
                   onPick(monster);
-                }}
-              >
-                <Plus size={ICON_SIZES.md} />
-              </IconButton>
-            </Tooltip>
+                }}>
+              <Plus size={ICON_SIZES.md} />
+            </TipIconButton>
           </Box>
         )) : (
           <EmptyLine inList>No monsters found.</EmptyLine>

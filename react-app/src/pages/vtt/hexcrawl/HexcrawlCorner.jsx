@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  Box, IconButton, Stack, Tooltip, Typography,
-} from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Hexagon, Settings, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import HexcrawlPanel from './HexcrawlPanel.jsx';
@@ -12,6 +10,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Top left, beside the picture settings: the hexcrawl is how this map is played
 // rather than a tool you pick up, so it belongs with the scene's own settings
@@ -25,27 +24,17 @@ export default function HexcrawlCorner({ open = false, onOpenChange, ...props })
 
   return (
     <Box sx={cornerSx}>
-      <Tooltip title={open ? 'Hide the hexcrawl' : 'Hexcrawl: time, weather, travel'}>
-        <IconButton
-          size="small"
-          aria-label="Hexcrawl"
-          aria-expanded={open}
-          onClick={() => onOpenChange?.(!open)}
-          sx={buttonSx}
-        >
-          {open ? <X size={ICON_SIZES.md} /> : <Hexagon size={ICON_SIZES.md} />}
-        </IconButton>
-      </Tooltip>
+      <TipIconButton title={open ? 'Hide the hexcrawl' : 'Hexcrawl: time, weather, travel'} size="small" ariaLabel="Hexcrawl" aria-expanded={open} onClick={() => onOpenChange?.(!open)} sx={buttonSx}>
+        {open ? <X size={ICON_SIZES.md} /> : <Hexagon size={ICON_SIZES.md} />}
+      </TipIconButton>
 
       {open ? (
         <Box sx={panelSx}>
           <Stack direction="row" sx={titleRowSx}>
             <Typography sx={titleSx}>Hexcrawl</Typography>
-            <Tooltip title="Hexcrawl settings">
-              <IconButton size="small" aria-label="Hexcrawl settings" onClick={openSettings} sx={settingsButtonSx}>
-                <Settings size={ICON_SIZES.sm} />
-              </IconButton>
-            </Tooltip>
+            <TipIconButton title="Hexcrawl settings" size="small" onClick={openSettings} sx={settingsButtonSx}>
+              <Settings size={ICON_SIZES.sm} />
+            </TipIconButton>
           </Stack>
           <HexcrawlPanel {...props} onOpenSettings={openSettings} />
         </Box>

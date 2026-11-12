@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Card, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Card, TextField, Tooltip, Typography } from '@mui/material';
 import { Eye, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import {
@@ -17,6 +17,7 @@ import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -176,40 +177,19 @@ export default function NoteCard({
         {/* Arrow keys reorder too, but that stays a keyboard affordance rather
             than tooltip text. */}
         {reorderable ? (
-          <Tooltip title="Drag to reorder">
-            <IconButton
-              size="small"
-              aria-label={`Reorder note ${index + 1} of ${count}`}
-              onKeyDown={handleHandleKeyDown}
-              sx={handleSx}
-              {...dragHandleProps}
-            >
-              <GripVertical size={ICON_SIZES.md} />
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title="Drag to reorder" size="small" ariaLabel={`Reorder note ${index + 1} of ${count}`} onKeyDown={handleHandleKeyDown} sx={handleSx} {...dragHandleProps}>
+            <GripVertical size={ICON_SIZES.md} />
+          </TipIconButton>
         ) : null}
         <Box sx={{ flex: 1 }} />
         {note.body ? (
-          <Tooltip title={showEditor ? 'Preview markdown' : 'Edit note'}>
-            <IconButton
-              size="small"
-              onClick={() => setEditing((previous) => !previous)}
-              aria-label={showEditor ? 'Preview note' : 'Edit note'}
-            >
-              {showEditor ? <Eye size={ICON_SIZES.md} /> : <Pencil size={ICON_SIZES.md} />}
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title={showEditor ? 'Preview markdown' : 'Edit note'} size="small" onClick={() => setEditing((previous) => !previous)} ariaLabel={showEditor ? 'Preview note' : 'Edit note'}>
+            {showEditor ? <Eye size={ICON_SIZES.md} /> : <Pencil size={ICON_SIZES.md} />}
+          </TipIconButton>
         ) : null}
-        <Tooltip title="Delete note">
-          <IconButton
-            size="small"
-            color="error"
-            onClick={handleRemove}
-            aria-label="Delete note"
-          >
-            <Trash2 size={ICON_SIZES.md} />
-          </IconButton>
-        </Tooltip>
+        <TipIconButton title="Delete note" size="small" color="error" onClick={handleRemove}>
+          <Trash2 size={ICON_SIZES.md} />
+        </TipIconButton>
       </Box>
 
       {showTitleField ? (

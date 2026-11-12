@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Stack, Tooltip, Typography } from '@mui/material';
 import { Eye, EyeOff, Pencil } from 'lucide-react';
 import { sceneTitleFor } from '../../../shared/vtt/scene/scene.js';
 import { InitiativeButton } from '../initiative/InitiativeStrip.jsx';
@@ -18,6 +18,7 @@ import {
   viewButtonSx,
 } from './sceneEditorStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The scene's title row: scene switcher (GM), name and rename, live and
 // projector controls, initiative, the GM's player-view toggle, and the
@@ -42,11 +43,9 @@ export default function SceneTopBar({
           })}
         </Typography>
         {role.isGm && !gmPlayerPreview ? (
-          <Tooltip title="Rename scene">
-            <IconButton size="small" aria-label="Rename scene" onClick={handleRename} sx={sceneRenameButtonSx}>
-              <Pencil size={ICON_SIZES.xxs} />
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title="Rename scene" size="small" onClick={handleRename} sx={sceneRenameButtonSx}>
+            <Pencil size={ICON_SIZES.xxs} />
+          </TipIconButton>
         ) : null}
       </Box>
       {/* On a phone the GM's four buttons share one row under the name: what

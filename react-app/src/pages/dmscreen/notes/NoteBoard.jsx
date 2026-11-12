@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, IconButton, InputAdornment, TextField, Tooltip } from '@mui/material';
+import { Box, Button, InputAdornment, TextField } from '@mui/material';
 import { Plus, Search, SearchX, StickyNote, X } from 'lucide-react';
 import { useDmScreen } from '../state/DmScreenContext.jsx';
 import { BOARD_COLUMNS, GRID_GAP, ROW_UNIT } from './layout.js';
@@ -11,6 +11,7 @@ import NoteCard from './NoteCard.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -93,11 +94,9 @@ export default function NoteBoard() {
                 ),
                 endAdornment: query ? (
                   <InputAdornment position="end">
-                    <Tooltip title="Clear search (Esc)">
-                      <IconButton size="small" aria-label="Clear search" onClick={() => setQuery('')}>
-                        <X size={ICON_SIZES.sm} />
-                      </IconButton>
-                    </Tooltip>
+                    <TipIconButton title="Clear search (Esc)" size="small" ariaLabel="Clear search" onClick={() => setQuery('')}>
+                      <X size={ICON_SIZES.sm} />
+                    </TipIconButton>
                   </InputAdornment>
                 ) : null,
               },

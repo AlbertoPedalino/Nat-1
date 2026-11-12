@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Images, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { MapPanel } from './MapPanel.jsx';
@@ -7,6 +7,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
 // gap that keeps it from touching one.
@@ -38,17 +39,9 @@ export default function MapCorner({
           picture settings, one click away, instead of taking a permanent strip
           of the board. */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Tooltip title={open ? 'Hide the scene settings' : 'Pictures, atmosphere, grid and play area'}>
-          <IconButton
-            size="small"
-            aria-label="Picture settings"
-            aria-expanded={open}
-            onClick={() => onOpenChange?.(!open)}
-            sx={buttonSx}
-          >
-            {open ? <X size={ICON_SIZES.md} /> : <Images size={ICON_SIZES.md} />}
-          </IconButton>
-        </Tooltip>
+        <TipIconButton title={open ? 'Hide the scene settings' : 'Pictures, atmosphere, grid and play area'} size="small" ariaLabel="Picture settings" aria-expanded={open} onClick={() => onOpenChange?.(!open)} sx={buttonSx}>
+          {open ? <X size={ICON_SIZES.md} /> : <Images size={ICON_SIZES.md} />}
+        </TipIconButton>
       </Stack>
 
       {open ? (

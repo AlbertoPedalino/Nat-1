@@ -1,6 +1,4 @@
-import {
-  Button, IconButton, Stack, Tooltip, Typography,
-} from '@mui/material';
+import { Button, IconButton, Stack, Typography } from '@mui/material';
 import {
   Maximize2, Minimize2, ScrollText, Settings2, Trash2, X,
 } from 'lucide-react';
@@ -13,6 +11,7 @@ import {
   selectionToolbarSx,
 } from './sceneViewportStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Buttons that sit on the map. Each is marked `data-viewport-control`, so the
 // map does not take their clicks for the start of a pan.
@@ -67,17 +66,9 @@ export function CornerButtons({
         </Button>
       ) : null}
       {hasControls ? (
-        <Tooltip title={controlsOpen ? 'Hide the tools' : 'Show the tools'}>
-          <IconButton
-            size="small"
-            aria-label={controlsOpen ? 'Hide the tools' : 'Show the tools'}
-            aria-expanded={controlsOpen}
-            onClick={onToggleControls}
-            sx={mapIconButtonSx}
-          >
-            {controlsOpen ? <X size={ICON_SIZES.md} /> : <Settings2 size={ICON_SIZES.md} />}
-          </IconButton>
-        </Tooltip>
+        <TipIconButton title={controlsOpen ? 'Hide the tools' : 'Show the tools'} size="small" aria-expanded={controlsOpen} onClick={onToggleControls} sx={mapIconButtonSx}>
+          {controlsOpen ? <X size={ICON_SIZES.md} /> : <Settings2 size={ICON_SIZES.md} />}
+        </TipIconButton>
       ) : null}
     </Stack>
   );
@@ -85,16 +76,8 @@ export function CornerButtons({
 
 export function FullscreenButton({ active, onToggle }) {
   return (
-    <Tooltip title={active ? 'Leave fullscreen' : 'Fullscreen map'}>
-      <IconButton
-        size="small"
-        data-viewport-control
-        aria-label={active ? 'Leave fullscreen' : 'Fullscreen map'}
-        onClick={onToggle}
-        sx={fullscreenBtnSx}
-      >
-        {active ? <Minimize2 size={ICON_SIZES.md} /> : <Maximize2 size={ICON_SIZES.md} />}
-      </IconButton>
-    </Tooltip>
+    <TipIconButton title={active ? 'Leave fullscreen' : 'Fullscreen map'} size="small" data-viewport-control onClick={onToggle} sx={fullscreenBtnSx}>
+      {active ? <Minimize2 size={ICON_SIZES.md} /> : <Maximize2 size={ICON_SIZES.md} />}
+    </TipIconButton>
   );
 }

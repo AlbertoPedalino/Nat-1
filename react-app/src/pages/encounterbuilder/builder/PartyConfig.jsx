@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { ExternalLink, Trash2, Users } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
@@ -10,6 +10,7 @@ import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -95,11 +96,9 @@ export default function PartyConfig() {
                 onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { initMod: event.target.value } })}
                 sx={{ width: 78 }}
               />
-              <Tooltip title="Remove from encounter">
-                <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removePlayer', index })}>
-                  <Trash2 size={ICON_SIZES.sm} />
-                </IconButton>
-              </Tooltip>
+              <TipIconButton title="Remove from encounter" size="small" color="error" onClick={() => dispatch({ type: 'removePlayer', index })}>
+                <Trash2 size={ICON_SIZES.sm} />
+              </TipIconButton>
             </Box>
           ))}
         </Stack>

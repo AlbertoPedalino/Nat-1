@@ -752,3 +752,7 @@ test('a drag source onto the map takes DRAG_SOURCE_SX', () => {
     allow: ['shared/ui/interactive.js', 'shared/character/dice/RollModeArea.jsx'],
   }), []);
 });
+
+test('an icon button with a tooltip is a TipIconButton', () => {
+  assert.deepEqual(sourceFilesMatching(/<Tooltip\b[^>]*>\s*(?:<span>\s*)?<IconButton\b/, { allow: ['shared/ui/TipIconButton.jsx'] }), []);
+});

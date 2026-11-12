@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  Box, Button, CircularProgress, IconButton, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography,
-} from '@mui/material';
+import { Box, Button, CircularProgress, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -14,6 +12,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -59,13 +58,9 @@ export default function InitiativeStrip({
     <Box data-viewport-control sx={stripRootSx}>
       <Stack direction="row" spacing={0.5} sx={[{ alignItems: 'center' }, stripSx]}>
         {controls ? (
-          <Tooltip title="Previous turn">
-            <span>
-              <IconButton size="small" aria-label="Previous turn" disabled={busy} onClick={() => onStep?.(-1)} sx={turnArrowSx}>
-                <ChevronLeft size={ICON_SIZES.md} />
-              </IconButton>
-            </span>
-          </Tooltip>
+          <TipIconButton title="Previous turn" size="small" disabled={busy} onClick={() => onStep?.(-1)} sx={turnArrowSx}>
+            <ChevronLeft size={ICON_SIZES.md} />
+          </TipIconButton>
         ) : null}
         {round ? <Typography sx={roundSx}>Round {round}</Typography> : null}
         <Box component="ol" ref={listRef} aria-label="Initiative order" sx={listSx}>
@@ -117,23 +112,12 @@ export default function InitiativeStrip({
         </Box>
         {controls ? (
           <>
-            <Tooltip title="Next turn">
-              <span>
-                <IconButton size="small" aria-label="Next turn" disabled={busy} onClick={() => onStep?.(1)} sx={turnArrowSx}>
-                  {busy ? <CircularProgress size={14} /> : <ChevronRight size={ICON_SIZES.md} />}
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Which fight this scene shows">
-              <IconButton
-                size="small"
-                aria-label="Choose the fight shown"
-                onClick={(event) => setMenuAnchor(event.currentTarget)}
-                sx={turnArrowSx}
-              >
-                <Swords size={ICON_SIZES.sm} />
-              </IconButton>
-            </Tooltip>
+            <TipIconButton title="Next turn" size="small" disabled={busy} onClick={() => onStep?.(1)} sx={turnArrowSx}>
+              {busy ? <CircularProgress size={14} /> : <ChevronRight size={ICON_SIZES.md} />}
+            </TipIconButton>
+            <TipIconButton title="Which fight this scene shows" size="small" ariaLabel="Choose the fight shown" onClick={(event) => setMenuAnchor(event.currentTarget)} sx={turnArrowSx}>
+              <Swords size={ICON_SIZES.sm} />
+            </TipIconButton>
           </>
         ) : null}
       </Stack>

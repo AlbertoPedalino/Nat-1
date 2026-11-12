@@ -1,4 +1,4 @@
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, orderedCurrencyEntries } from './currency.js';
 import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
@@ -9,6 +9,7 @@ import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { DURATIONS } from '../../ui/motion.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import TipIconButton from '../../ui/TipIconButton.jsx';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -33,20 +34,12 @@ function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder' }) {
         bgcolor: v.stepper.bgcolor,
       }}
     >
-      <Tooltip title="Move left">
-        <span>
-          <IconButton size="small" disabled={!canLeft} onClick={onLeft} aria-label="Move currency left" sx={btnSx}>
-            <ChevronLeft size={v.stepper.icon} />
-          </IconButton>
-        </span>
-      </Tooltip>
-      <Tooltip title="Move right">
-        <span>
-          <IconButton size="small" disabled={!canRight} onClick={onRight} aria-label="Move currency right" sx={btnSx}>
-            <ChevronRight size={v.stepper.icon} />
-          </IconButton>
-        </span>
-      </Tooltip>
+      <TipIconButton title="Move left" size="small" disabled={!canLeft} onClick={onLeft} ariaLabel="Move currency left" sx={btnSx}>
+        <ChevronLeft size={v.stepper.icon} />
+      </TipIconButton>
+      <TipIconButton title="Move right" size="small" disabled={!canRight} onClick={onRight} ariaLabel="Move currency right" sx={btnSx}>
+        <ChevronRight size={v.stepper.icon} />
+      </TipIconButton>
     </Box>
   );
 }

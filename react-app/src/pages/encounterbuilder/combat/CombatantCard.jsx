@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  Avatar, Box, Button, Collapse, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip,
-  Typography,
-} from '@mui/material';
+import { Avatar, Box, Button, Collapse, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, ExternalLink, HeartPulse, Shield, Sparkles, X } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
@@ -25,6 +22,7 @@ import {
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -69,11 +67,9 @@ export default function CombatantCard({ combatant, active }) {
         ...(combatant.isDead ? deadSx : null),
       })}
     >
-      <Tooltip title="Remove">
-        <IconButton color="error" onClick={remove} size="small" sx={removeButtonSx} aria-label="Remove combatant">
-          <X size={ICON_SIZES.sm} />
-        </IconButton>
-      </Tooltip>
+      <TipIconButton title="Remove" color="error" onClick={remove} size="small" sx={removeButtonSx} ariaLabel="Remove combatant">
+        <X size={ICON_SIZES.sm} />
+      </TipIconButton>
       <Box sx={rowSx}>
         {/* Identity cluster: initiative + token + name + AC */}
         <Box sx={identityClusterSx}>
@@ -120,19 +116,9 @@ export default function CombatantCard({ combatant, active }) {
                   <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.heavy }}>{combatant.name}</Typography>
                 )}
                 {!isMonster && combatant.sourceId ? (
-                  <Tooltip title="Open sheet">
-                    <IconButton
-                      component="a"
-                      href={campaignSheetUrl(combatant.sourceId, { edit: true })}
-                      target="_blank"
-                      rel="noopener"
-                      size="small"
-                      sx={sheetLinkButtonSx}
-                      aria-label={`Open ${combatant.name} sheet`}
-                    >
-                      <ExternalLink size={ICON_SIZES.xs} />
-                    </IconButton>
-                  </Tooltip>
+                  <TipIconButton title="Open sheet" component="a" href={campaignSheetUrl(combatant.sourceId, { edit: true })} target="_blank" rel="noopener" size="small" sx={sheetLinkButtonSx} ariaLabel={`Open ${combatant.name} sheet`}>
+                    <ExternalLink size={ICON_SIZES.xs} />
+                  </TipIconButton>
                 ) : null}
               </Stack>
               {/* AC only: the initiative modifier lived here too, but the rolled

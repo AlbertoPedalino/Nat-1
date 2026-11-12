@@ -16,6 +16,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -97,11 +98,9 @@ export default function EncounterList() {
                   label="quantity"
                   onStep={(delta) => dispatch({ type: 'changeMonsterQty', id: item.id, delta })}
                 />
-                <Tooltip title="Remove">
-                  <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removeEncounterItem', id: item.id })}>
-                    <Trash2 size={ICON_SIZES.sm} />
-                  </IconButton>
-                </Tooltip>
+                <TipIconButton title="Remove" size="small" color="error" onClick={() => dispatch({ type: 'removeEncounterItem', id: item.id })}>
+                  <Trash2 size={ICON_SIZES.sm} />
+                </TipIconButton>
               </Stack>
             </Box>
           )) : (

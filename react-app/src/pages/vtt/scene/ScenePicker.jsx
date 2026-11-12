@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -27,6 +27,7 @@ import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -196,23 +197,13 @@ export default function ScenePicker({
                         <Caption>no map yet</Caption>
                       ) : null}
                     </Box>
-                    <Tooltip title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'}>
-                      <IconButton
-                        size="small"
-                        color={scene.isLive ? 'primary' : 'default'}
-                        onClick={() => handleLive(scene)}
-                      >
-                        {scene.isLive ? <Radio size={ICON_SIZES.sm} /> : <RadioTower size={ICON_SIZES.sm} />}
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Rename">
-                      <IconButton size="small" onClick={() => handleRename(scene)}><Pencil size={ICON_SIZES.sm} /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton size="small" color="error" onClick={() => handleDelete(scene)}>
-                        <Trash2 size={ICON_SIZES.sm} />
-                      </IconButton>
-                    </Tooltip>
+                    <TipIconButton title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'} size="small" color={scene.isLive ? 'primary' : 'default'} onClick={() => handleLive(scene)}>
+                      {scene.isLive ? <Radio size={ICON_SIZES.sm} /> : <RadioTower size={ICON_SIZES.sm} />}
+                    </TipIconButton>
+                    <TipIconButton title="Rename" size="small" onClick={() => handleRename(scene)}><Pencil size={ICON_SIZES.sm} /></TipIconButton>
+                    <TipIconButton title="Delete" size="small" color="error" onClick={() => handleDelete(scene)}>
+                      <Trash2 size={ICON_SIZES.sm} />
+                    </TipIconButton>
                   </Box>
                 ))}
               </Stack>

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  Box, Button, ButtonGroup, IconButton, Popover, Tooltip,
-} from '@mui/material';
+import { Box, Button, ButtonGroup, Popover } from '@mui/material';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
@@ -11,6 +9,7 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { KEY_BAR_SX } from '../../ui/pressable.js';
+import TipIconButton from '../../ui/TipIconButton.jsx';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one joined control, rolling first and the log second, so the roll
@@ -41,16 +40,12 @@ export default function DiceControl({
     <>
       {variant === 'icon' ? (
         <Box role="group" aria-label="Dice" sx={[iconGroupSx, surface.groupSx, sx]}>
-          <Tooltip title="Roll dice">
-            <IconButton size="small" aria-label="Roll dice" onClick={() => setRollerOpen(true)} sx={[iconSegmentSx, surface.segmentSx]}>
-              <GAME_ICONS.roll size={ICON_SIZES.md} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Roll log">
-            <IconButton size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
-              <GAME_ICONS.rollLog size={ICON_SIZES.md} />
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title="Roll dice" size="small" onClick={() => setRollerOpen(true)} sx={[iconSegmentSx, surface.segmentSx]}>
+            <GAME_ICONS.roll size={ICON_SIZES.md} />
+          </TipIconButton>
+          <TipIconButton title="Roll log" size="small" {...logProps} sx={[iconSegmentSx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
+            <GAME_ICONS.rollLog size={ICON_SIZES.md} />
+          </TipIconButton>
         </Box>
       ) : (
         <ButtonGroup size="small" variant="outlined" aria-label="Dice" sx={sx}>

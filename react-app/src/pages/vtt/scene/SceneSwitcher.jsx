@@ -1,7 +1,5 @@
 import { useCallback, useState } from 'react';
-import {
-  CircularProgress, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography,
-} from '@mui/material';
+import { CircularProgress, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
 import { Layers, Radio } from 'lucide-react';
 import { listScenes } from '../../../shared/cloud/api/vttScenes.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -11,6 +9,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -48,19 +47,9 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
 
   return (
     <>
-      <Tooltip title="Switch scene">
-        <IconButton
-          size="small"
-          aria-label="Switch scene"
-          aria-controls={anchor ? 'scene-switcher-menu' : undefined}
-          aria-haspopup="menu"
-          aria-expanded={anchor ? 'true' : undefined}
-          onClick={open}
-          sx={buttonSx}
-        >
-          <Layers size={ICON_SIZES.md} />
-        </IconButton>
-      </Tooltip>
+      <TipIconButton title="Switch scene" size="small" aria-controls={anchor ? 'scene-switcher-menu' : undefined} aria-haspopup="menu" aria-expanded={anchor ? 'true' : undefined} onClick={open} sx={buttonSx}>
+        <Layers size={ICON_SIZES.md} />
+      </TipIconButton>
       <Menu
         id="scene-switcher-menu"
         anchorEl={anchor}

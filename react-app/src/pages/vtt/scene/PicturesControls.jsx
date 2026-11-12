@@ -1,19 +1,12 @@
 import { useRef } from 'react';
-import {
-  Box,
-  Button,
-  IconButton,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material';
+import { Box, Button, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Grid3x3, Image as ImageIcon, ImagePlus, Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { pillLabelSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The scene panel's Pictures section: which picture is on show, the battlemap,
 // the backgrounds, and images placed on the map as pieces.
@@ -47,11 +40,9 @@ export function PicturesControls({
           {scene.imagePath ? 'Replace map' : 'Upload map'}
         </Button>
         {scene.imagePath ? (
-          <Tooltip title="Remove battlemap">
-            <IconButton size="small" color="error" disabled={busy} aria-label="Remove battlemap" onClick={onRemoveMap}>
-              <Trash2 size={ICON_SIZES.sm} />
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title="Remove battlemap" size="small" color="error" disabled={busy} onClick={onRemoveMap}>
+            <Trash2 size={ICON_SIZES.sm} />
+          </TipIconButton>
         ) : null}
       </Stack>
 
@@ -70,11 +61,9 @@ export function PicturesControls({
           {scene.backgroundPath ? 'Add another background' : 'Upload background'}
         </Button>
         {scene.backgroundPath ? (
-          <Tooltip title="Remove the background on show">
-            <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={() => onRemoveBackground()}>
-              <Trash2 size={ICON_SIZES.sm} />
-            </IconButton>
-          </Tooltip>
+          <TipIconButton title="Remove the background on show" size="small" color="error" disabled={busy} ariaLabel="Remove background" onClick={() => onRemoveBackground()}>
+            <Trash2 size={ICON_SIZES.sm} />
+          </TipIconButton>
         ) : null}
       </Stack>
 
