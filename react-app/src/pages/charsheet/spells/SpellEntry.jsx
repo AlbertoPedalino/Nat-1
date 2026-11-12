@@ -51,6 +51,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function SpellEntry({
   entry,
@@ -370,9 +371,9 @@ export default function SpellEntry({
                         <Typography sx={{ fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, lineHeight: LINE_HEIGHTS.tight }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: LINE_HEIGHTS.snug, mt: 0.25 }}>
+                        <Caption sx={{ display: 'block', lineHeight: LINE_HEIGHTS.snug, mt: 0.25 }}>
                           {modifier.detailText || modifier.description}
-                        </Typography>
+                        </Caption>
                       </Box>
                     ))}
                   </Stack>

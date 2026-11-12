@@ -5,7 +5,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import {
   CircleDashed,
@@ -23,6 +22,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import AreaEffectSelect from '../map/AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Shared by both audiences: drawing and notes are everyone's. The laser is its
 // own tool — it leaves nothing behind, so it does not belong beside the ones
@@ -179,9 +179,9 @@ export function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetP
         slotProps={{ htmlInput: { maxLength: 120 } }}
       />
 
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Caption>
         {`Press where it starts and drag it out, one ${cellWord} (${feetPerCell} ft) at a time; a cone or a line faces where you drag. Right-click it (or hold it on a touch screen) to change it later.`}
-      </Typography>
+      </Caption>
     </Stack>
   );
 }

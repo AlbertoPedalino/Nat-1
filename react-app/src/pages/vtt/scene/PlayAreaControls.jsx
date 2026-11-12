@@ -3,10 +3,10 @@ import {
   Stack,
   TextField,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import { numberSx } from './panelStyles.js';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The scene panel's Play area section: the part of the scene the players
 // receive; outside it is staging.
@@ -19,9 +19,9 @@ export function playAreaSummary(scene) {
 export function PlayAreaControls({ scene, busy, onPlayAreaChange, onFitPlayArea }) {
   return (
     <>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Caption>
         Outside it is staging: the players never receive what stands there.
-      </Typography>
+      </Caption>
       {scene.playArea ? (
         <>
           <Stack direction="row" spacing={0.75}>

@@ -5,7 +5,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import {
   Circle,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
@@ -86,11 +86,11 @@ export function MeasurePanel({
         />
       )}
 
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Caption>
         {miles
           ? `Drag from the origin. Distance is counted in ${cellPlural} — on hexes every neighbour is one step, which is what travel time is reckoned in.`
           : 'Drag from the origin. A 5e cone is as wide at the far end as it is long, and a diagonal counts as one square — three across and two down is 15 ft.'}
-      </Typography>
+      </Caption>
 
       <Button
         size="small"

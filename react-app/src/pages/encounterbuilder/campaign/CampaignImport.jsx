@@ -10,6 +10,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
@@ -76,11 +77,11 @@ export default function CampaignImport() {
                 {importing ? 'Adding…' : 'Add'}
               </Button>
             </Stack>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            <Caption>
               {selected.players.length
                 ? `${selected.players.length} sheet${selected.players.length === 1 ? '' : 's'} · avg Lv ${campaignAverageLevel(selected.players)}`
                 : 'No sheets attached to this campaign.'}
-            </Typography>
+            </Caption>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
               {selected.players.slice(0, 10).map((player) => (
                 <TagChip

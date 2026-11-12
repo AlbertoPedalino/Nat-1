@@ -13,6 +13,7 @@ import { monsterToToken } from '../../../shared/vtt/tokens/encounterImport.js';
 import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import PlacementDialog from './PlacementDialog.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const EMPTY_FILTERS = { search: '', cr: '', type: '', sources: [] };
 
@@ -45,9 +46,9 @@ export default function MonsterPickerDialog({
         <>
           {/* The dialog stays open after a pick: placing a pack one creature at a
               time is the normal case, and reopening it each time is not. */}
-          <Typography variant="caption" sx={{ color: 'text.secondary', mr: 'auto', pl: 1 }}>
+          <Caption sx={{ mr: 'auto', pl: 1 }}>
             Drag with mouse, touch or pen, or use + to place automatically.
-          </Typography>
+          </Caption>
           <Button onClick={onClose} disabled={busy}>Done</Button>
         </>
       )}
@@ -68,9 +69,9 @@ export default function MonsterPickerDialog({
             control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
             label={<Typography variant="body2">GM layer</Typography>}
           />
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             {hidden ? 'The party will not receive these pieces.' : 'The party sees them as soon as they land.'}
-          </Typography>
+          </Caption>
         </Stack>
 
         <MonsterBrowser

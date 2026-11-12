@@ -6,6 +6,7 @@ import { composeMissingPath } from './notFoundPath.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import Caption from '../../shared/ui/Caption.jsx';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -32,9 +33,9 @@ export default function NotFoundPage() {
               </Typography>
             </Box>
             <Box sx={pathBoxSx}>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <Caption>
                 Missing path
-              </Typography>
+              </Caption>
               <Typography component="code" sx={pathTextSx}>
                 {missingPath}
               </Typography>

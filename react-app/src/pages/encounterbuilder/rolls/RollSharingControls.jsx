@@ -1,6 +1,7 @@
-import { MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { MenuItem, Stack, TextField } from '@mui/material';
 import GmRollsShownSwitch from '../../../shared/character/dice/GmRollsShownSwitch.jsx';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Which campaign this builder's rolls go to, and whether the GM's rolls are
 // shown to its players (the same switch as on the battle map).
@@ -22,9 +23,9 @@ export default function RollSharingControls() {
       <Stack>
         <GmRollsShownSwitch campaignId={rollSync.campaignId} />
         {rollSync.campaignId ? (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Applies to new creature and custom rolls, here and on the campaign's map. Hidden rolls stay in the GM logs.
-          </Typography>
+          </Caption>
         ) : null}
       </Stack>
     </Stack>

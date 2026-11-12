@@ -20,6 +20,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { stepButtonSx } from '../../../shared/ui/pressable.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -135,9 +136,9 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       <Box sx={sectionSx}>
         <Stack spacing={0.5}>
           <Typography sx={dialogSectionTitleSx}>Dice combination</Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Choose any combination. At least one die is always kept.
-          </Typography>
+          </Caption>
         </Stack>
         <Box sx={diceGridSx}>
           {FUMBLE_DICE_TYPES.map((faces) => {
@@ -177,9 +178,9 @@ export default function CriticalFumblesDialog({ open, onClose }) {
           sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}
         >
           <Typography sx={formulaSx}>{formula}</Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Results {range.min}–{range.max} · {range.count} entries
-          </Typography>
+          </Caption>
         </Stack>
       </Box>
 
@@ -189,16 +190,16 @@ export default function CriticalFumblesDialog({ open, onClose }) {
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={outcomeTitleSx}>{outcome.categoryLabel} Fumble</Typography>
             <Typography sx={outcomeTextSx}>{outcome.consequence}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{outcome.mathStr}</Typography>
+            <Caption>{outcome.mathStr}</Caption>
           </Box>
         </Paper>
       ) : null}
 
       <Stack spacing={0.5} sx={{ mt: 1.75, mb: 1 }}>
         <Typography sx={dialogSectionTitleSx}>Result table</Typography>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <Caption>
           Entries outside the current range are preserved when you change dice.
-        </Typography>
+        </Caption>
       </Stack>
       <Stack spacing={0.75}>
         {resultValues.map((result) => (

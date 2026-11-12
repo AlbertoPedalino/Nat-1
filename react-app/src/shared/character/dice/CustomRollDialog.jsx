@@ -9,6 +9,7 @@ import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import Caption from '../../ui/Caption.jsx';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -110,12 +111,9 @@ export default function CustomRollDialog({
       <Typography sx={{ ...CUSTOM_ROLL_SX.formula, visibility: hasSelection ? 'visible' : 'hidden' }}>
         {hasSelection ? formula : ' '}
       </Typography>
-      <Typography
-        variant="caption"
-        sx={{ color: 'text.secondary', display: 'block', textAlign: 'center', visibility: totalDice >= DICE_LIMITS.maxDice ? 'visible' : 'hidden' }}
-      >
+      <Caption sx={{ display: 'block', textAlign: 'center', visibility: totalDice >= DICE_LIMITS.maxDice ? 'visible' : 'hidden' }}>
         Maximum {DICE_LIMITS.maxDice} dice per roll.
-      </Typography>
+      </Caption>
       {footer ? <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>{footer}</Box> : null}
     </SheetDialog>
   );

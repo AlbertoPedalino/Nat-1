@@ -5,6 +5,7 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);
@@ -39,7 +40,7 @@ export default function DifficultyBar({ encounter, party }) {
               bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.accent, OPACITY.tint) : uiAlpha(UI_COLORS.white, OPACITY.faint),
             }}
           >
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
+            <Caption>{label}</Caption>
             <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{formatNumber(difficulty.thresholds[index])}</Typography>
           </Box>
         ))}

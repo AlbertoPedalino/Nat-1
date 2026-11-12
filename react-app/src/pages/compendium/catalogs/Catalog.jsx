@@ -19,6 +19,7 @@ import { entryNameSx, fillColumnSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -130,7 +131,7 @@ export default function Catalog({
             <Button size="small" onClick={() => setFilters(defaults)}>Reset filters</Button>
           ) : null}
         </Box>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{results.length} {label}</Typography>
+        <Caption>{results.length} {label}</Caption>
       </Stack>
       {!narrow ? (
         <Box aria-hidden sx={[headerRowSx, { gridTemplateColumns: template }]}>
@@ -177,9 +178,9 @@ function CatalogRow({
       {narrow ? (
         <>
           <Box>{cells[0]}</Box>
-          <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
+          <Caption noWrap>
             {cells.slice(1).filter((value) => value && value !== '—').join(' · ')}
-          </Typography>
+          </Caption>
         </>
       ) : cells.map((cell, cellIndex) => (
         <Box key={columns[cellIndex].key} sx={cellSx}>

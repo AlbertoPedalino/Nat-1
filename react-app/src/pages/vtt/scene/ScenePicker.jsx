@@ -25,6 +25,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -191,7 +192,7 @@ export default function ScenePicker({
                       </Typography>
                       {scene.isLive ? <TagChip tone={UI_COLORS.accent} label="Live" /> : null}
                       {!scene.imagePath ? (
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map yet</Typography>
+                        <Caption>no map yet</Caption>
                       ) : null}
                     </Box>
                     <Tooltip title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'}>

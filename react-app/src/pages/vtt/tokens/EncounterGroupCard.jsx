@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import { placementCardSx } from './encounterImportStyles.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The group about to be placed: a preview that can be dragged onto the map,
 // and a line saying what placing it will do.
@@ -34,13 +35,13 @@ export default function EncounterGroupCard({
               ? `${combatants.length} creature${combatants.length === 1 ? '' : 's'} to place`
               : 'Nothing to import from this fight.')}
         </Typography>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <Caption>
           {combatants.length
             ? (selected?.fight
               ? 'Drag this group with mouse, touch or pen, or use Place them.'
               : 'Never launched: placing it starts its fight in the Encounter Builder.')
             : 'Player characters are skipped: they are already on the map.'}
-        </Typography>
+        </Caption>
       </Box>
     </Box>
   );

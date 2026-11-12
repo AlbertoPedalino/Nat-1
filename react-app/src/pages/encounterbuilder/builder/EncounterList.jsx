@@ -15,6 +15,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -82,9 +83,9 @@ export default function EncounterList() {
             <Box key={item.id} sx={rowSx}>
               <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{item.name}</Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <Caption>
                   {item.source} · CR {item.cr}
-                </Typography>
+                </Caption>
               </Box>
               <Typography variant="body2" sx={{ color: 'primary.main', minWidth: 90, textAlign: 'right' }}>
                 {formatNumber(item.xp * item.qty)} XP
@@ -144,9 +145,9 @@ export default function EncounterList() {
             {editingExisting ? 'Update in Library' : 'Save to Library'}
           </Button>
         </Stack>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <Caption>
           Launch saves a new encounter in Library and starts combat.
-        </Typography>
+        </Caption>
         <InitiativeLaunchDialog
           open={initiativeOpen}
           onClose={() => setInitiativeOpen(false)}

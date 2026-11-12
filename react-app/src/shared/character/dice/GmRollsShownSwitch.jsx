@@ -1,6 +1,7 @@
-import { FormControlLabel, Switch, Typography } from '@mui/material';
+import { FormControlLabel, Switch } from '@mui/material';
 import { useGmRollsShown } from '../../cloud/sync/rollVisibility.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
+import Caption from '../../ui/Caption.jsx';
 
 // Whether the players see the creatures' rolls — and the GM's own custom
 // rolls with them — for a campaign (rollVisibility.js): the same switch
@@ -10,7 +11,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 export default function GmRollsShownSwitch({ campaignId, sx }) {
   const [shown, setShown] = useGmRollsShown(campaignId);
   if (!campaignId) {
-    return <Typography variant="caption" sx={{ color: 'text.secondary', ...sx }}>No campaign: rolls stay on this screen.</Typography>;
+    return <Caption sx={{ ...sx }}>No campaign: rolls stay on this screen.</Caption>;
   }
   return (
     <FormControlLabel

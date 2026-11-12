@@ -7,6 +7,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -81,9 +82,9 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
 export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
   if (!options.length) {
     return (
-      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.75 }}>
+      <Caption sx={{ display: 'block', mt: 0.75 }}>
         No weapon you are proficient with in your inventory.
-      </Typography>
+      </Caption>
     );
   }
   return (

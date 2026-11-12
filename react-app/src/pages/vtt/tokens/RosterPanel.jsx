@@ -7,6 +7,7 @@ import TokenComposer from './TokenComposer.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -36,9 +37,9 @@ export default function RosterPanel({
         {!roster.length ? (
           <EmptyLine>No characters in this campaign yet.</EmptyLine>
         ) : placementDisabled ? (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Switch to the battlemap to place or move pieces.
-          </Typography>
+          </Caption>
         ) : null}
 
         <Stack spacing={0.5}>
@@ -129,11 +130,11 @@ export default function RosterPanel({
         >
           Import encounter
         </Button>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <Caption>
           {activeLayer === 'gm'
             ? 'GM pieces are filtered out by the database, not just hidden in the view.'
             : 'Right-click a piece for its label and conditions.'}
-        </Typography>
+        </Caption>
       </Stack>
     </Box>
   );

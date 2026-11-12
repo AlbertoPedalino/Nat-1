@@ -19,6 +19,7 @@ import { SURFACES } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -53,9 +54,9 @@ export default function LibraryView() {
             <Typography variant="h2" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <ScrollText size={ICON_SIZES.md} />
               {group.quest || 'Unassigned'}
-              <Typography component="span" variant="caption" sx={{ color: 'text.secondary' }}>
+              <Caption component="span">
                 {group.items.length}
-              </Typography>
+              </Caption>
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,minmax(0,1fr))', xl: 'repeat(3,minmax(0,1fr))' }, gap: 2 }}>
               {group.items.map((item) => (
@@ -182,7 +183,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           Delete
         </Button>
       </Stack>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatDateTime(toTime(date))}</Typography>
+      <Caption>{formatDateTime(toTime(date))}</Caption>
       <InitiativeLaunchDialog
         open={initiativeOpen}
         onClose={() => setInitiativeOpen(false)}

@@ -28,6 +28,7 @@ import { FONT_WEIGHTS } from '../ui/fonts.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
 import EmptyLine from '../ui/EmptyLine.jsx';
 import { ErrorLine } from '../ui/LoadStatus.jsx';
+import Caption from '../ui/Caption.jsx';
 
 const PAGE_SIZE = 50;
 
@@ -107,9 +108,9 @@ export default function MonsterBrowser({
         </FormControl>
       </Stack>
 
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Caption>
         {formatNumber(filtered.length)} monsters from allowed 2024 sources
-      </Typography>
+      </Caption>
 
       <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }} {...page.listProps}>
         {page.visible.length ? page.visible.map((monster) => (
@@ -127,9 +128,9 @@ export default function MonsterBrowser({
             <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{monster.name}</Typography>
-              <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
+              <Caption noWrap>
                 {getType(monster.type)} · {monster.source}
-              </Typography>
+              </Caption>
             </Box>
             <Typography variant="caption" sx={{ color: 'primary.main', minWidth: 92, textAlign: 'right' }}>
               CR {crKey(monster.cr)} · {formatNumber(crXP(monster.cr))} XP

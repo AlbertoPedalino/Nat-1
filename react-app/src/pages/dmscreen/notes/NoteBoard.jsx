@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, IconButton, InputAdornment, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, IconButton, InputAdornment, TextField, Tooltip } from '@mui/material';
 import { Plus, Search, SearchX, StickyNote, X } from 'lucide-react';
 import { useDmScreen } from '../state/DmScreenContext.jsx';
 import { BOARD_COLUMNS, GRID_GAP, ROW_UNIT } from './layout.js';
@@ -10,6 +10,7 @@ import { useNoteDragReorder } from '../drag/useNoteDragReorder.js';
 import NoteCard from './NoteCard.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -106,9 +107,9 @@ export default function NoteBoard() {
         ) : null}
         {/* Always rendered so the live region exists before it has anything to
             say; a region added to the page mid-update is announced unreliably. */}
-        <Typography variant="caption" role="status" aria-live="polite" sx={{ color: 'text.secondary' }}>
+        <Caption role="status" aria-live="polite">
           {partial ? `${visibleNotes.length} of ${notes.length} notes` : ''}
-        </Typography>
+        </Caption>
         <Button variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>
           Add note
         </Button>

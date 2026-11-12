@@ -19,6 +19,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -73,9 +74,9 @@ export default function NegotiationDialog({ open, onClose }) {
       <Stack spacing={1.75}>
         <Box>
           <Typography sx={dialogSectionTitleSx}>NPC attitude</Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Changing attitude resets Patience and Interest. The threshold is preserved.
-          </Typography>
+          </Caption>
           <Box sx={attitudeGridSx}>
             {NPC_ATTITUDES.map((item) => {
               const selected = item.id === negotiation.attitude;
@@ -127,11 +128,11 @@ export default function NegotiationDialog({ open, onClose }) {
           <Paper sx={finalResultSx}>
             <Typography sx={finalEyebrowSx}>Negotiation concluded</Typography>
             <Typography sx={finalResultTextSx}>{status.result}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{status.reason}</Typography>
+            <Caption>{status.reason}</Caption>
           </Paper>
         ) : (
           <Paper variant="outlined" sx={currentStateSx}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Current position</Typography>
+            <Caption>Current position</Caption>
             <Typography sx={currentResultSx}>
               Interest {negotiation.interest}: {NEGOTIATION_RESULTS[negotiation.interest]}
             </Typography>

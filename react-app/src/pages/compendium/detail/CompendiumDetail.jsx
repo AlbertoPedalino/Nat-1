@@ -12,6 +12,7 @@ import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { compendiumKind } from '../search/compendiumIndex.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // One compendium entry, shown the way the rest of the app shows that kind: a
 // spell as on the sheet, a monster as the encounter builder's stat block (its
@@ -50,7 +51,7 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
           {entry.subtitle && entry.subtitle !== compendiumKind(kind)?.single
             ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>{entry.subtitle}</Typography>
             : null}
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{entry.source}</Typography>
+          <Caption>{entry.source}</Caption>
         </Stack>
       </Box>
       {entry.image ? (

@@ -9,6 +9,7 @@ import { CARD_SX } from '../../../shared/ui/interactive.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -55,15 +56,15 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
               {campaign.hasLive ? (
                 <TagChip tone={UI_COLORS.success} icon={<Radio size={ICON_SIZES.xs} />} label="Live" />
               ) : (
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map up</Typography>
+                <Caption>no map up</Caption>
               )}
             </Box>
           </Box>
         ))}
       </Stack>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      <Caption>
         Join a table with no map up and the page will wait; it opens by itself when the GM puts one on.
-      </Typography>
+      </Caption>
     </Stack>
   );
 }

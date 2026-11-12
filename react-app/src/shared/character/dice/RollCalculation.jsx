@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import DieFace2D from './DieFace2D.jsx';
 import { rollLogCalculation, rollLogDieColor, rollOutcome } from './rollLogPresentation.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
+import Caption from '../../ui/Caption.jsx';
 
 export default function RollCalculation({ entry }) {
   const { dice, modifier, total, formula, modeLabel } = rollLogCalculation(entry);
@@ -9,9 +10,9 @@ export default function RollCalculation({ entry }) {
   return (
     <Box>
       {formula || modeLabel ? (
-        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', overflowWrap: 'anywhere' }}>
+        <Caption sx={{ display: 'block', overflowWrap: 'anywhere' }}>
           {modeLabel ? `${modeLabel} · ` : ''}{formula}
-        </Typography>
+        </Caption>
       ) : null}
       <Box role="group" aria-label="Roll calculation" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, my: 0.5 }}>
         {dice.map((die, index) => {
@@ -21,7 +22,7 @@ export default function RollCalculation({ entry }) {
             <Box key={index} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
               {operator ? <Typography sx={{ color: 'text.secondary' }}>{operator}</Typography> : null}
               <DieFace2D value={die.v} faces={die.faces} color={rollLogDieColor(die)} dimmed={die.kept === false} />
-              {die.kept === false ? <Typography variant="caption" sx={{ color: 'text.secondary' }}>discarded</Typography> : null}
+              {die.kept === false ? <Caption>discarded</Caption> : null}
             </Box>
           );
         })}

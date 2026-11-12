@@ -732,3 +732,7 @@ test('a list with nothing in it says so through EmptyLine', () => {
 test('what went wrong is said through ErrorLine', () => {
   assert.deepEqual(sourceFilesMatching(/<Alert severity="error"/, { allow: ['shared/ui/LoadStatus.jsx'] }), []);
 });
+
+test('a quiet line beside something is a Caption', () => {
+  assert.deepEqual(sourceFilesMatching(/variant="caption"\s+(?:[\w-]+(?:="[^"]*")?\s+)*sx=\{\{ color: 'text\.secondary'/, { allow: ['shared/ui/Caption.jsx'] }), []);
+});

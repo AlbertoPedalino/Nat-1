@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material';
 import { NameCell } from './Catalog.jsx';
 import {
   EQUIPMENT_CATALOG, EQUIPMENT_CATEGORIES, MAGIC_ITEM_CATALOG, MAGIC_TYPES,
@@ -8,12 +7,13 @@ import { SPELL_CATALOG, spellLevelLabel } from './spellCatalog.js';
 import { MONSTER_CATALOG, monsterStats } from './monsterCatalog.js';
 import { attunementRequirementText } from '../../../shared/character/inventory/itemAttunement.js';
 import { rarityLabel } from '../../../shared/character/inventory/itemRarity.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The compendium's catalogs as tabs: each one's definition (what it lists and
 // how it filters, in its *Catalog.js) with the columns its rows show. A column
 // is { key, label, width, render(entry) }; the first one is the name.
 const secondLine = (text, sx) => (
-  <Typography variant="caption" noWrap component="div" sx={[{ color: 'text.secondary' }, sx]}>{text}</Typography>
+  <Caption noWrap component="div" sx={sx}>{text}</Caption>
 );
 
 const sourceColumn = { key: 'source', label: 'Source', width: '0.6fr', render: (entry) => entry.source };

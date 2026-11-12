@@ -25,6 +25,7 @@ import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
+import Caption from '../../shared/ui/Caption.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -238,11 +239,10 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                 <Icon size={ICON_SIZES.lg} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
-                  <Typography component="div" variant="caption" sx={{ color: 'text.secondary' }}>{TOOL_UI[row.sectionKey].label}</Typography>
-                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography component="div" variant="caption"
-                    sx={{ color: 'text.secondary', mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
+                  <Caption component="div">{TOOL_UI[row.sectionKey].label}</Caption>
+                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Caption component="div" sx={{ mt: 0.5, lineHeight: LINE_HEIGHTS.normal, overflowWrap: 'anywhere' }}>
                     Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
-                  </Typography>}
+                  </Caption>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
                     label={`Time, weather & tables for ${row.name}`} sx={{ mt: 1 }}
                     slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}

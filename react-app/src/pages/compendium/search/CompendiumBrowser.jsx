@@ -23,6 +23,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The kind filter: everything, or one kind.
 const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
@@ -95,9 +96,9 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
               >
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography variant="body2" sx={entryNameSx}>{entry.name}</Typography>
-                  <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
+                  <Caption noWrap component="div">
                     {[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
-                  </Typography>
+                  </Caption>
                 </Box>
                 <MiniBadge label={compendiumKind(entry.kind)?.single || entry.kind} color={COMPENDIUM_KIND_COLORS[entry.kind]} />
               </ListItemButton>

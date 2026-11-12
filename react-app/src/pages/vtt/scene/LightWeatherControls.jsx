@@ -6,7 +6,6 @@ import {
   Slider,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material';
 import { ChevronDown, Cloud } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -18,6 +17,7 @@ import { SectionLabel } from './ScenePanelSection.jsx';
 import { ATMOSPHERE_ICONS, AtmospherePicker, atmospherePresetsByType } from './AtmospherePicker.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -40,9 +40,9 @@ export function LightWeatherControls({ scene, onImageFilterChange, onAtmosphereC
   return (
     <>
       {pictureOnShow ? null : (
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <Caption>
           Upload a battlemap or a background first: light and weather belong to a picture.
-        </Typography>
+        </Caption>
       )}
       <ImageLightSection scene={scene} onImageFilterChange={onImageFilterChange} />
       <ImageAtmosphereSection scene={scene} onAtmosphereChange={onAtmosphereChange} />

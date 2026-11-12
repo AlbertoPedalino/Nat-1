@@ -8,6 +8,7 @@ import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/chara
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
 // (surprise, a ruling), one row per creature — the second of three goblins can
@@ -83,9 +84,9 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold }}>{row.name}</Typography>
                       {own || choice ? (
-                        <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
+                        <Caption noWrap component="div">
                           {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
-                        </Typography>
+                        </Caption>
                       ) : null}
                     </Box>
                     <ModeToggle

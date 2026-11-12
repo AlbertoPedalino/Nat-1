@@ -9,6 +9,7 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The building blocks of the GM's scene panel (MapPanel): a collapsible section
 // with a one-line summary, and the small labels inside it.
@@ -24,7 +25,7 @@ import { INK_EDGE } from '../../../shared/ui/shadows.js';
 export function SectionLabel({ label, hint }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
+      <Caption>{label}</Caption>
       {hint ? <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} /> : null}
     </Stack>
   );

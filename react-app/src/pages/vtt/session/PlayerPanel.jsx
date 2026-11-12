@@ -7,6 +7,7 @@ import TokenComposer from '../tokens/TokenComposer.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
 // character, add a token piece of their own (name, colour, picture), and move
@@ -104,9 +105,9 @@ export default function PlayerPanel({
 
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ color: 'text.secondary', mt: 0.25 }}><MapPin size={ICON_SIZES.xs} /></Box>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Caption>
             Right-click any creature to flag a condition on it — that works on enemies too.
-          </Typography>
+          </Caption>
         </Stack>
       </Stack>
     </Box>

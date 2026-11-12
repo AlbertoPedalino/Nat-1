@@ -16,6 +16,7 @@ import EncounterGroupCard from './EncounterGroupCard.jsx';
 import { noticeSx } from './encounterImportStyles.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
@@ -160,11 +161,11 @@ export default function EncounterImportDialog({
               control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
               label={<Typography variant="body2">Place on the GM layer</Typography>}
             />
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            <Caption>
               {hidden
                 ? 'The party will not receive these pieces until you move them to the token layer.'
                 : 'The party sees these pieces as soon as they land.'}
-            </Typography>
+            </Caption>
 
             <EncounterGroupCard
               combatants={combatants}
