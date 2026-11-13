@@ -790,3 +790,12 @@ test('a drop-down is a SelectField', () => {
 test('a count stepper is the CountStepper', () => {
   assert.deepEqual(sourceFilesMatching(/>\s*[-−+]\s*<\/(Button|IconButton)>/, { allow: ['shared/ui/CountStepper.jsx'] }), []);
 });
+
+// A panel's title bar is panelTitleBarSx: one built by hand from the bar's
+// pieces (panelBarSx and a screentone) is one a restyle of the bar never
+// reaches. The app's top bar is a bar of its own, not a panel's.
+test("a panel's title bar is panelTitleBarSx", () => {
+  assert.deepEqual(sourceFilesMatching(/panelBarSx/, {
+    allow: ['shared/ui/PanelHeader.jsx', 'app/navigation/AppTopBar.jsx'],
+  }), []);
+});

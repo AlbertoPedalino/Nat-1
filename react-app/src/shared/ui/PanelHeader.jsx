@@ -54,16 +54,29 @@ function ribbonSx(notch, px) {
   };
 }
 
-// A whole panel's bar (PanelHeader, the sheet's tab bar, a dialog's title).
-export const panelRibbonSx = ribbonSx(10, 2.25);
+const PANEL_RIBBON_SX = ribbonSx(10, 2.25);
 // A stat tile's narrow bar: a shallower notch, so its name keeps the room.
-export const tileRibbonSx = ribbonSx(6, 1);
+const TILE_RIBBON_SX = ribbonSx(6, 1);
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
 export function panelScreentone(tone = UI_COLORS.accent) {
   const ink = String(tone).startsWith('#') ? tone : UI_COLORS.accent;
   return `repeating-linear-gradient(-45deg, ${uiAlpha(ink, OPACITY.soft)} 0 2px, transparent 2px 7px)`;
+}
+
+// The title bar of every panel, whole: the bar, its padding, its ribbon cut
+// and its screentone in `tone`. PanelHeader, a stat tile (`tile`: a
+// narrower notch), the sheet's tab bar and a dialog's title all take it, so a
+// restyle of the bar reaches every one; nothing outside this file builds a
+// panel's bar from the pieces.
+export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) {
+  return {
+    ...panelBarSx,
+    ...panelBarPadSx,
+    ...(tile ? TILE_RIBBON_SX : PANEL_RIBBON_SX),
+    backgroundImage: panelScreentone(tone),
+  };
 }
 
 // The icon's badge in a panel bar: the tone filled, edged in ink, its game
@@ -75,7 +88,7 @@ export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 8;
 
 // The room round a panel bar's badge, the same for every bar (a PanelHeader,
 // the sheet's tab bar).
-export const panelBarPadSx = { px: '0.8rem', py: '0.36rem' };
+const panelBarPadSx = { px: '0.8rem', py: '0.36rem' };
 
 export function panelBadgeSx(tone = 'primary.main') {
   return {
@@ -192,7 +205,7 @@ export const sectionLabelSx = {
 // builder); the sheet keeps panelTitleSx as it is.
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
   return (
-    <Box sx={{ ...panelBarSx, ...panelBarPadSx, ...panelRibbonSx, backgroundImage: panelScreentone(tone) }}>
+    <Box sx={panelTitleBarSx(tone)}>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
       {children}

@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { inkOn } from '../../../shared/ui/pressable.js';
-import { PANEL_BADGE_BOX, panelBarPadSx, panelFrameSx, panelBarSx, panelScreentone, STAT_TILE_SIZE, tileRibbonSx, tileTitleSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { PANEL_BADGE_BOX, panelFrameSx, panelTitleBarSx, STAT_TILE_SIZE, tileTitleSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { PRESS_MOTION_SX } from '../../../shared/ui/pressable.js';
 
 // A stat tile (AC, Initiative, Proficiency Bonus, Inspiration): a small panel
@@ -15,7 +15,7 @@ import { PRESS_MOTION_SX } from '../../../shared/ui/pressable.js';
 export default function StatTile({ tone, label, value, clickable = false, active = false, onClick, bodySx }) {
   return (
     <Box onClick={onClick} sx={{ ...tileFrameSx, ...(clickable ? clickableSx(tone) : null) }}>
-      <Box sx={{ ...panelBarSx, ...panelBarPadSx, ...tileRibbonSx, gap: 0, backgroundImage: panelScreentone(tone), justifyContent: 'center' }}>
+      <Box sx={{ ...panelTitleBarSx(tone, { tile: true }), gap: 0, justifyContent: 'center' }}>
         <Box sx={{ width: 0, height: PANEL_BADGE_BOX, flexShrink: 0 }} />
         <Typography noWrap sx={{ ...tileTitleSx, color: tone }}>{label}</Typography>
       </Box>
