@@ -135,11 +135,17 @@ export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.xxl}, 
 // A layer is a containing block for `position: fixed`, so what floats over
 // the page (menus, toasts, dialogs) portals out of the panel, as it already
 // does. A phone, with one narrow column, was smooth without.
+//
+// A box can turn the layers off for the panels inside it with
+// NO_PANEL_LAYERS_SX: the sheet embedded in the battle map, where twenty
+// layers over a moving board doubled the dropped frames of a pan.
+export const NO_PANEL_LAYERS_SX = Object.freeze({ '--gb-panel-layer': 'auto' });
+
 export const panelFrameSx = {
   border: `3px solid ${UI_COLORS.edge}`,
   boxShadow: UI_SHADOWS.panel,
   overflow: 'hidden',
-  willChange: { md: 'transform' },
+  willChange: { md: 'var(--gb-panel-layer, transform)' },
 };
 
 // The name on a card or row (an action, a chosen species or background): the
