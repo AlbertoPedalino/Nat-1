@@ -5,7 +5,7 @@ import { OPACITY } from './colors.js';
 import { ENTRY_BODY_SX, ENTRY_ROW_PADDING } from './entryCard.js';
 
 // An entry offered to take (entryCard.js): a spell in a picker, an item to add
-// or to create. A ruled row of its list (lay the list in scrollWellSx), the
+// or to create. A ruled row of its list (lay the list in a ScrollWell), the
 // head as `children` with its one action at the right — the action stops its
 // click, so it does not also open the row — and `details` opened below on the
 // entry body. `selected` (already taken) is the theme's selected row; `dimmed`

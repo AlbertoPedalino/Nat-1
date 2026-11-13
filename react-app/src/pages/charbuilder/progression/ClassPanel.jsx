@@ -19,7 +19,7 @@ import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
@@ -188,7 +188,7 @@ export default function ClassPanel({ state, character, dispatch }) {
           value={search}
           onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
         />
-        <Box sx={scrollWellSx(390)}>
+        <ScrollWell maxHeight={390} revealKey={character.activeClassTab}>
           <List dense disablePadding>
             {visibleClasses.map((cls) => {
               const selected = activeExtra
@@ -245,7 +245,7 @@ export default function ClassPanel({ state, character, dispatch }) {
               <EmptyLine inList>No classes found.</EmptyLine>
             ) : null}
           </List>
-        </Box>
+        </ScrollWell>
       </Stack>
       {pendingConfirm && (
         <SheetDialog

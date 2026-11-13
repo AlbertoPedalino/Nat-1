@@ -1,8 +1,8 @@
-import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import DraftSearchField from '../../../shared/ui/DraftSearchField.jsx';
 
 // The search follows the typing and reaches the builder's reducer on a pause
@@ -11,7 +11,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
   return (
     <Stack spacing={0.75}>
       <DraftSearchField value={value} placeholder={placeholder} onChange={onSearch} />
-      <Box sx={scrollWellSx(390)}>
+      <ScrollWell maxHeight={390}>
         <List dense disablePadding>
           {items.map((item) => {
             const selected = selectedName === item.name;
@@ -33,7 +33,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
             );
           })}
         </List>
-      </Box>
+      </ScrollWell>
     </Stack>
   );
 }

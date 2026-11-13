@@ -15,7 +15,7 @@ import { heldProficiencyLabels } from '../../../shared/character/proficiency/hel
 import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
@@ -172,7 +172,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={max}>
       {showSearch ? <SearchField density="compact" value={query} onChange={setQuery} /> : null}
-      <Box sx={scrollWellSx(210)}>
+      <ScrollWell maxHeight={210}>
         {visibleOptions.length ? (
         <List dense disablePadding>
           {visibleOptions.map(({ value, label }) => {
@@ -227,7 +227,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
             <Typography sx={BUILDER_TEXT.hint}>No matches.</Typography>
           </Box>
         )}
-      </Box>
+      </ScrollWell>
     </ChoiceFrame>
   );
 }

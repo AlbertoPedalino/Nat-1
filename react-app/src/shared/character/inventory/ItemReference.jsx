@@ -83,7 +83,7 @@ export function itemCardSurfaceSx(item, fallback = null) {
 
 // An item offered to add (shared/ui/entryCard.js), on the sheet's add panel
 // and the builder's equipment list: a pickable row, its quantity and Add at
-// the right, its reference opened below. Lay the list in scrollWellSx.
+// the right, its reference opened below. Lay the list in a ScrollWell.
 export function ItemAddRow({ item, onAdd }) {
   return (
     <PickableRow details={<ItemReferenceBody item={item} />}>

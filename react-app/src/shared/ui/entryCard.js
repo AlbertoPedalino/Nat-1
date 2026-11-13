@@ -22,7 +22,7 @@ export const ENTRY_CARD_SX = Object.freeze({ ...CARD_SX, overflow: 'hidden' });
 
 // A list of owned cards that scrolls (the builder's current inventory): the
 // sunken well, padded so the cards' own margins space them. A pickable list
-// is a plain scrollWellSx: its rows are ruled edge to edge.
+// is a plain ScrollWell: its rows are ruled edge to edge.
 export function entryCardWellSx(maxHeight) {
   return { ...scrollWellSx(maxHeight), p: 0.5 };
 }

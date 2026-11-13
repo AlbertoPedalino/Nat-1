@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, List, Stack } from '@mui/material';
+import { List, Stack } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
@@ -14,7 +14,7 @@ import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import PickCount from '../../../shared/ui/PickCount.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
@@ -107,7 +107,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                 <TagChip label={`Spellbook ${activeSpellbookSize}`} />
               </Stack>
             ) : null}
-            <Box sx={scrollWellSx(460)}>
+            <ScrollWell maxHeight={460} revealKey={`${activeTab}:${level}:${wizardMode}`}>
               <List dense disablePadding>
                 {pool.map((spell) => {
                   const autoSelected = autoByName.has(matchKey(spell.name));
@@ -147,7 +147,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                   );
                 })}
               </List>
-            </Box>
+            </ScrollWell>
             {!pool.length ? (
               <EmptyLine>
                 {activeIsWizard && !wizardBookMode ? 'No spells in this Wizard spellbook level.' : 'No spells found for this level/filter.'}

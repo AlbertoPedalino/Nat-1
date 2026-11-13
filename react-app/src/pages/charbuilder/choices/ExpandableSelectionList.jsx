@@ -1,9 +1,9 @@
-import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import PickCount from '../../../shared/ui/PickCount.jsx';
@@ -34,7 +34,7 @@ export default function ExpandableSelectionList({
         ) : !visibleOptions.length ? (
           <EmptyLine>No matches.</EmptyLine>
         ) : (
-          <Box sx={scrollWellSx(maxHeight)}>
+          <ScrollWell maxHeight={maxHeight}>
             <List dense disablePadding>
               {visibleOptions.map((option) => (
                 <ExpandableCard
@@ -73,7 +73,7 @@ export default function ExpandableSelectionList({
                 />
               ))}
             </List>
-          </Box>
+          </ScrollWell>
         )}
     </BuilderBox>
   );

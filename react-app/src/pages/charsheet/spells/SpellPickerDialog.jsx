@@ -22,7 +22,7 @@ import {
   wizardBookSize,
 } from '../../../shared/character/spells/spellBuckets.js';
 import { PickerSpellRow } from './SpellPickerRow.jsx';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import { getPickerLimits } from './spellPickerLimits.js';
 import { spellPickerActions } from './spellPickerActions.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
@@ -162,7 +162,7 @@ export function SpellPickerDialog({
           />
         </Box>
       </Box>
-      <Box sx={scrollWellSx('58vh')}>
+      <ScrollWell maxHeight="58vh" revealKey={`${pickerClassIndex}:${pickerLevel}:${pickerWizardMode}`}>
         {pickerList.map((spell) => {
           const manualSelected = selectedManualNames.has(spell.name);
           // `autoGranted` = the spell is granted by a source (class/subclass/feat/…),
@@ -202,7 +202,7 @@ export function SpellPickerDialog({
         {!pickerList.length ? (
           <EmptyLine framed>{activeIsWizard && pickerWizardMode === 'prepare' ? 'No spells in this Wizard spellbook level.' : 'No spells found for this class/level.'}</EmptyLine>
         ) : null}
-      </Box>
+      </ScrollWell>
     </SheetDialog>
   );
 }

@@ -19,7 +19,7 @@ import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 
@@ -101,7 +101,7 @@ function ItemPlanPanel({
       {showSearch ? (
         <SearchField density="compact" value={query} onChange={setQuery} placeholder={searchPlaceholder} />
       ) : null}
-      <Box sx={scrollWellSx(210)}>
+      <ScrollWell maxHeight={210}>
         {visibleOptions.length ? (
           <List dense disablePadding>
             {visibleOptions.map(({ value, name, source, item }) => {
@@ -126,7 +126,7 @@ function ItemPlanPanel({
             </Typography>
           </Box>
         )}
-      </Box>
+      </ScrollWell>
     </Stack>
   );
 }

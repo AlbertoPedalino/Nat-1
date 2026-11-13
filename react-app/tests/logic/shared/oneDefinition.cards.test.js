@@ -87,3 +87,12 @@ test('the weather card is WeatherCard', () => {
     allow: ['shared/gmboard/weather.js', 'shared/gmboard/ui/WeatherSummary.jsx'],
   }), []);
 });
+
+// A scrolling list is a ScrollWell: it opens on its chosen row, so a choice
+// made earlier is in view without scrolling for it. A well drawn with
+// scrollWellSx by hand would open at the top again.
+test('a scrolling list is a ScrollWell', () => {
+  assert.deepEqual(sourceFilesMatching(/\bscrollWellSx\(/, {
+    allow: ['shared/ui/surfaces.js', 'shared/ui/ScrollWell.jsx', 'shared/ui/entryCard.js'],
+  }), []);
+});

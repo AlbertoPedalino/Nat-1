@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Box, List, ListItemButton } from '@mui/material';
+import { List, ListItemButton } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { PickableSpellRow, SpellRowLabel } from '../../../shared/character/spells/SpellReference.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 
@@ -83,7 +83,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
       {showSearch ? (
         <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search spells" />
       ) : null}
-      <Box sx={scrollWellSx(260)}>
+      <ScrollWell maxHeight={260}>
         <List dense disablePadding>
           {pool.map((spell) => {
             const active = selected.includes(spell.name);
@@ -113,7 +113,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             );
           })}
         </List>
-      </Box>
+      </ScrollWell>
       {!pool.length ? <EmptyLine>No spells found for this filter.</EmptyLine> : null}
     </ChoiceFrame>
   );

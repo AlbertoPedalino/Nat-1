@@ -11,7 +11,7 @@ import ChoiceFrame from './ChoiceFrame.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
@@ -72,7 +72,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
           : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}
       </Typography>
       {showSearch ? <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search beasts…" /> : null}
-      <Box sx={scrollWellSx(260)}>
+      <ScrollWell maxHeight={260}>
         {visibleOptions.length ? (
           <List dense disablePadding>
             {visibleOptions.map(({ value, beast }) => {
@@ -102,7 +102,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
             </Typography>
           </Box>
         )}
-      </Box>
+      </ScrollWell>
     </ChoiceFrame>
   );
 }

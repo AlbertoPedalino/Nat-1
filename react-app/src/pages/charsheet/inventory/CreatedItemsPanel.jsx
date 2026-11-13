@@ -15,7 +15,7 @@ import {
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
@@ -190,7 +190,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         />
       ) : null}
 
-      <Box sx={scrollWellSx(maxHeight)}>
+      <ScrollWell maxHeight={maxHeight}>
         {visibleItems.length ? visibleItems.map((value) => {
           const label = itemLabel(value);
           const count = craftedCountFor(inv, flag, value);
@@ -225,7 +225,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         }) : (
           <EmptyLine inList>No items match “{query.trim()}”.</EmptyLine>
         )}
-      </Box>
+      </ScrollWell>
 
       {noneAddable ? (
         <DetailNote>
