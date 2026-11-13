@@ -685,7 +685,7 @@ test('floating surfaces are drawn by the theme', () => {
 
 test("a row's tag is a MiniBadge, never a hand-tinted Chip", () => {
   assert.deepEqual(sourceFilesMatching(/\bchipTintStyle\(/, {
-    allow: ['app/theme.js', 'shared/ui/entityColors.js'],
+    allow: ['app/theme.js', 'shared/ui/entityColors.js', 'shared/ui/TagChip.jsx', 'shared/ui/MiniBadge.jsx'],
   }), []);
 });
 

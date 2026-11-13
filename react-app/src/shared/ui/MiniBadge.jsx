@@ -1,12 +1,15 @@
-import { Box, alpha } from '@mui/material';
+import { Box } from '@mui/material';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
-import { OPACITY } from './colors.js';
+import { OPACITY, normalizeHexColor } from './colors.js';
+import { chipTintStyle } from './entityColors.js';
 
-// The badge's wash: its own colour, faint. A colour MUI cannot read (a theme
-// path) gets no wash.
+// The badge's tint: the one chip tint (its colour washed over the raised
+// paper), its edge the full colour. A colour MUI cannot read (a theme path)
+// gets no wash.
 function tint(color) {
-  try { return alpha(color, OPACITY.fill); } catch { return 'transparent'; }
+  if (!normalizeHexColor(color)) return { borderColor: color, color };
+  return chipTintStyle(color, { bgAlpha: OPACITY.fill, borderAlpha: 1 });
 }
 
 // The badge: a small bordered, tinted label for an attribute of a row — a
@@ -23,9 +26,7 @@ export default function MiniBadge({ label, color, bg, title, sx }) {
       sx={{
         flexShrink: 0,
         border: 1,
-        borderColor: color,
-        color,
-        bgcolor: bg ?? tint(color),
+        ...(bg ? { borderColor: color, color, bgcolor: bg } : tint(color)),
         borderRadius: 0.375,
         px: 0.75,
         py: 0.25,

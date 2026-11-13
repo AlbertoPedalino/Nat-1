@@ -120,7 +120,9 @@ const heroLogoSx = {
   display: 'block',
   // The logo is drawn inked (outline, shadow, tilt), so it takes no filter.
   width: 'clamp(96px, 18vw, 140px)',
-  mb: '0.25rem',
+  // The die sits a little behind the name, as a cover's art does under its
+  // title, so the two read as one logo.
+  mb: 'clamp(-3rem, -4vw, -1.5rem)',
 };
 
 // The name's tilt; when the cover rolls the name waits for the die to land on
@@ -129,6 +131,9 @@ const HERO_TITLE_TILT = 'rotate(-4deg)';
 
 const heroTitleSx = {
   ...TEXT_STYLES.cover,
+  // Over the die it overlaps.
+  position: 'relative',
+  zIndex: 1,
   transform: HERO_TITLE_TILT,
   fontSize: 'clamp(3.5rem, 12vw, 6.5rem)',
   lineHeight: LINE_HEIGHTS.tight,

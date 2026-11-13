@@ -58,12 +58,14 @@ export const LETTER_SPACINGS = Object.freeze({
   xxl: '0.12em',
 });
 
-// Font weights. Rubik and Nunito Sans draw all three.
+// Font weights. Rubik and Nunito Sans draw regular to heavy; `black` is the
+// heading face's heaviest cut, for the app's name on the home cover.
 export const FONT_WEIGHTS = Object.freeze({
   regular: 400,
   semibold: 600,
   bold: 700,
   heavy: 800,
+  black: 900,
 });
 
 // Line heights: `none` for figures and one-line chips, `tight`–`snug` for

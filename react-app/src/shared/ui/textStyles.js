@@ -57,7 +57,8 @@ export const TEXT_STYLES = Object.freeze({
   // face, the app's own sign, outlined in ink, its solid shadow set well off.
   cover: Object.freeze({
     fontFamily: UI_FONTS.heading,
-    fontWeight: FONT_WEIGHTS.bold,
+    // The blackletter's heaviest cut: a title, not a heading.
+    fontWeight: FONT_WEIGHTS.black,
     letterSpacing: LETTER_SPACINGS.sm,
     ...inkLettering(3, 6),
   }),

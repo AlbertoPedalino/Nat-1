@@ -1,6 +1,7 @@
 import { alpha } from '@mui/material';
 import { UI_COLORS, OPACITY } from './colors.js';
 import { pressableSx } from './pressable.js';
+import { washImage } from './surfaces.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
@@ -185,12 +186,15 @@ export function attackRollerToneSx({ disadv = false, notProficient = false } = {
   return rollerToneSx(notProficient ? ROLL_TONES.attackNotProficient : ROLL_TONES.attack);
 }
 
-// Single recipe for the translucent tint+border chip look. The theme's MuiChip
-// colour overrides and every tinted chip derive from this, so the visual
+// Single recipe for a tinted chip or badge: its tone washed over the raised
+// paper (never see-through, so it reads the same on a panel, a bubble or the
+// map), an edge in the tone and its text. The theme's MuiChip colours,
+// TagChip, MiniBadge and every tinted chip derive from this, so the visual
 // language stays in one place.
 export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPACITY.heavy, text = tone } = {}) {
   return {
-    backgroundColor: alpha(tone, bgAlpha),
+    backgroundColor: UI_COLORS.surfaceRaised,
+    backgroundImage: washImage(tone, bgAlpha),
     borderColor: alpha(tone, borderAlpha),
     color: text,
   };
