@@ -113,6 +113,9 @@ const heroSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  // On a phone the page starts right under the top bar: room above the die
+  // for the stars that circle it once it lands.
+  pt: { xs: 5, sm: 0 },
   mb: '2.5rem',
 };
 

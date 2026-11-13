@@ -156,7 +156,7 @@ function ProficiencySection({ sections }) {
 function WeaponMasterySection({ items }) {
   if (!items.length) return null;
   return (
-    <PreviewSection icon={GAME_ICONS.attack} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
+    <PreviewSection icon={GAME_ICONS.weaponMasteries} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
       <PreviewChipList
         items={items}
         getKey={(item) => `${item.weaponName}-${item.mastery || 'none'}`}

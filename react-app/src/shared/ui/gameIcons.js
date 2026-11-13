@@ -12,7 +12,7 @@ import {
   GiThrownSpear, GiTorch, GiTowerFlag, GiTrident, GiVisoredHelm, GiWarhammer, GiWarlockEye, GiWaterDrop,
   GiWhiteTower, GiWolfHead, GiMushroomGills,
 } from 'react-icons/gi';
-import { Dices, HeartPulse, History, ShieldPlus, Sword, Swords } from 'lucide-react';
+import { Dices, HeartPulse, History, ShieldPlus, Sword, Swords, Target } from 'lucide-react';
 
 // The interface's game icons, by what they stand for: one place picks the
 // drawing for a role, and every panel, tile and roll button that plays that
@@ -41,7 +41,7 @@ export const GAME_ICONS = Object.freeze({
   actions: GiSwordClash,
 
   // Roll buttons, by what the roll does: small, so simple strokes.
-  attack: Swords,
+  attack: Target,
   damage: Sword,
   heal: HeartPulse,
   tempHp: ShieldPlus,
@@ -57,6 +57,7 @@ export const GAME_ICONS = Object.freeze({
   subclass: GiStarFormation,
   spells: GiSpellBook,
   spellSlots: GiMagicSwirl,
+  weaponMasteries: Swords,
   species: GiDualityMask,
   background: GiTiedScroll,
   equipment: GiKnapsack,

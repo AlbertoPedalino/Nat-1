@@ -7,6 +7,7 @@ import { sourcesFromAdvArg } from '../../../shared/character/dice/advantage.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import RollerVerb from '../../../shared/character/dice/RollerVerb.jsx';
 
 // Single source for the "Hit +X" attack-roll button (weapon + spell). It both
 // renders the modifier and fires the roll, so the two can never diverge: the
@@ -44,7 +45,7 @@ export default function AttackRollButton({
       onClick={(e) => { e.stopPropagation(); roll(advArg); }}
       sx={{ ...inlineButtonSx, ...attackRollerToneSx({ disadv, notProficient }), ...sx }}
     >
-      <GAME_ICONS.attack size={ICON_SIZES.xs} style={{ marginRight: 2 }} /> Hit {signed(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}
+      <GAME_ICONS.attack size={ICON_SIZES.xs} style={{ marginRight: 2 }} /><RollerVerb>Hit</RollerVerb>{signed(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}
     </RollModeArea>
   );
   return tooltip ? <Tooltip title={tooltip}>{button}</Tooltip> : button;

@@ -4,6 +4,7 @@ import { normalizeRollerKind, resolveRollers } from './rollers.js';
 import { ROLL_TONES, rollerToneSx } from '../../ui/entityColors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
+import RollerVerb from './RollerVerb.jsx';
 
 const ROLLER_PRESENTATION = {
   damage: {
@@ -49,9 +50,11 @@ export default function RollerButtons({
   return resolvedRollers.map((roller, index) => {
     const presentation = getPresentation(roller.kind);
     const RollerIcon = presentation.Icon;
-    const buttonLabel = roller.kind === 'damage'
-      ? `${presentation.verb} ${roller.formula}`
-      : (roller.label || `${presentation.verb} ${roller.formula}`);
+    // A custom label replaces verb and formula alike; damage always shows
+    // its formula. `roller.verb` renames the kind's verb (a spell's "Bonus").
+    const custom = roller.kind !== 'damage' && roller.label;
+    const verb = custom ? '' : (roller.verb || presentation.verb);
+    const text = custom ? roller.label : roller.formula;
     const title = `${roller.title || presentation.title}${titleSuffix}`;
 
     return (
@@ -76,7 +79,7 @@ export default function RollerButtons({
         sx={{ ...buttonSx, ...presentation.tone }}
       >
         <RollerIcon size={ICON_SIZES.xs} style={{ marginRight: 2 }} />
-        {buttonLabel}
+        <RollerVerb>{verb}</RollerVerb>{text}
       </Button>
     );
   });

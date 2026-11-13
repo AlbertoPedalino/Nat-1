@@ -234,7 +234,7 @@ export default function SpellEntry({
           key: 'utility',
           kind: 'utility',
           formula: utilityDie,
-          label: `${utilityLabel} ${utilityDie}`,
+          verb: utilityLabel,
           title: utilityLabel,
         }]
       : []),
