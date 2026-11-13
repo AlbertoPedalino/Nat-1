@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import {
-  SpellMetaGrid,
-  HigherLevelBlock,
+  HigherLevelBlock, SpellCardTitle, SpellMetaGrid,
 } from '../../../shared/character/spells/SpellReference.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -28,12 +26,11 @@ import {
   extractDamageDice,
   getUpcastStep,
 } from './spellDice.js';
-import { inlineButtonSx, spellBodySx, spellCardSx, spellRowSx } from './spellsTabStyles.js';
+import { ENTRY_BODY_SX, ENTRY_BUTTON_SX, ENTRY_CARD_SX, ENTRY_ROW_SX } from '../../../shared/ui/entryCard.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';
 import {
-  ACTION_COLORS,
   CHIP_TONES,
   ENTITY_COLORS,
   RICH_TEXT_ACCENT,
@@ -53,14 +50,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
-import ToneBar from '../../../shared/ui/ToneBar.jsx';
-import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
-import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
-import ScrollingName from '../../../shared/ui/ScrollingName.jsx';
 
-// A spell's casting time as an action card's category: a minute or more is
-// the actions' "Other".
-const CAST_UNIT_CATEGORY = Object.freeze({ action: 'action', bonus: 'bonus', reaction: 'reaction', other: 'special' });
 
 export default function SpellEntry({
   entry,
@@ -253,17 +243,15 @@ export default function SpellEntry({
 
   return (
     <ExpandableCard
-      containerSx={{ ...spellCardSx, mb: 0.5 }}
-      detailsSx={spellBodySx}
+      containerSx={{ ...ENTRY_CARD_SX, mb: 0.5 }}
+      detailsSx={ENTRY_BODY_SX}
       summary={({ toggle, open }) => (
         <Box onClick={toggle}
-          sx={{ ...spellRowSx, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
+          sx={{ ...ENTRY_ROW_SX, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           {/* What casting it takes (action, bonus, reaction, longer), marked as
               an action card's category is. */}
-          <ToneBar tone={ACTION_COLORS[CAST_UNIT_CATEGORY[spellCastUnit(entry)]] || null} />
-          <SpellNameIcon spell={entry} />
-          <ScrollingName sx={cardTitleSx}>{entry.name}</ScrollingName>
+          <SpellCardTitle spell={entry} />
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
@@ -299,7 +287,7 @@ export default function SpellEntry({
                   subject={entry.name}
                   titleSuffix={levelLabel}
                   onShowToast={onShowToast}
-                  buttonSx={inlineButtonSx}
+                  buttonSx={ENTRY_BUTTON_SX}
                 />
               </Box>
             ) : null}

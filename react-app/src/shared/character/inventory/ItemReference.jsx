@@ -5,13 +5,12 @@ import { ItemPropertyTable } from './ItemPropertyTable.jsx';
 import { WeaponMasteryBlock } from '../combat/WeaponMasteryBlock.jsx';
 import { clampInt } from '../../numbers.js';
 import CountStepper from '../../ui/CountStepper.jsx';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { UI_COLORS } from '../../ui/colors.js';
-import { CARD_SX } from '../../ui/interactive.js';
-import { ExpandableCard } from '../../ui/ExpandableCard.jsx';
+import { FONT_SIZES } from '../../ui/fonts.js';
+import PickableRow from '../../ui/PickableRow.jsx';
+import { PICK_ACTION_SX } from '../../ui/entryCard.js';
 import { ItemNameIcon } from '../../content/FiveEToolsLink.jsx';
 import ToneBar from '../../ui/ToneBar.jsx';
-import { cardToneSx, scrollWellSx } from '../../ui/surfaces.js';
+import { cardToneSx } from '../../ui/surfaces.js';
 import { rarityTone } from './itemRarity.js';
 import { cardTitleSx } from '../../ui/PanelHeader.jsx';
 import ScrollingName from '../../ui/ScrollingName.jsx';
@@ -43,14 +42,14 @@ export function ItemReferenceBody({ item, fontSize = FONT_SIZES.md, exclude, sx 
 
 // Quantity stepper + Add button. Holds local qty state and calls onAdd(qty).
 // Stops click propagation so it can sit inside a click-to-expand row without
-// toggling the row. `addColor` themes the Add button per context.
-function QuantityAdder({ onAdd, max = 999, addColor = 'primary', sx }) {
+// toggling the row.
+function QuantityAdder({ onAdd, max = 999, sx }) {
   const [qty, setQty] = useState(1);
   const clampQty = (value) => clampInt(value, 1, max, 1);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, ...sx }} onClick={(event) => event.stopPropagation()}>
       <CountStepper value={qty} size={17} onStep={(delta) => setQty((value) => clampQty(value + delta))} />
-      <Button size="small" variant="contained" color={addColor} onClick={() => onAdd(qty)} sx={{ ml: 0.25, minWidth: 0, px: 1, py: 0.25, fontSize: FONT_SIZES.xs, lineHeight: LINE_HEIGHTS.normal }}>Add</Button>
+      <Button size="small" variant="contained" color="primary" onClick={() => onAdd(qty)} sx={{ ...PICK_ACTION_SX, ml: 0.25 }}>Add</Button>
     </Box>
   );
 }
@@ -81,30 +80,14 @@ export function itemCardSurfaceSx(item, fallback = null) {
   return tone ? cardToneSx(tone) : fallback;
 }
 
-// The sunken well an item list scrolls in (the items to add, an
-// inventory), `maxHeight` tall at most: the same in the builder and on the
-// sheet, its cards spaced by their own margin.
-export function itemListWellSx(maxHeight) {
-  return { ...scrollWellSx(maxHeight), p: 0.5 };
-}
-
+// An item offered to add (shared/ui/entryCard.js), on the sheet's add panel
+// and the builder's equipment list: a pickable row, its quantity and Add at
+// the right, its reference opened below. Lay the list in scrollWellSx.
 export function ItemAddRow({ item, onAdd }) {
   return (
-    <ExpandableCard
-      containerSx={{ ...CARD_SX, flexShrink: 0, overflow: 'hidden', mb: 0.5 }}
-      detailsSx={ITEM_DETAILS_SX}
-      details={<ItemReferenceBody item={item} />}
-      summary={({ toggle }) => (
-        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.75, cursor: 'pointer', ...itemCardSurfaceSx(item) }}>
-          <ItemCardTitle item={item} />
-          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
-        </Box>
-      )}
-    />
+    <PickableRow details={<ItemReferenceBody item={item} />}>
+      <ItemCardTitle item={item} />
+      <QuantityAdder onAdd={(qty) => onAdd(item, qty)} />
+    </PickableRow>
   );
 }
-
-// The opened part of an item card: its reference text on the sunken tint.
-export const ITEM_DETAILS_SX = Object.freeze({
-  px: 1.25, pt: 0.25, pb: 1, bgcolor: UI_COLORS.surfaceSunken, fontSize: FONT_SIZES.md, color: 'text.secondary',
-});

@@ -23,6 +23,7 @@ import {
   wizardBookSize,
 } from '../../../shared/character/spells/spellBuckets.js';
 import { PickerSpellRow } from './SpellPickerRow.jsx';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { getPickerLimits } from './spellPickerLimits.js';
 import { spellPickerActions } from './spellPickerActions.js';
 import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
@@ -161,7 +162,7 @@ export function SpellPickerDialog({
           />
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, maxHeight: '58vh', overflowY: 'auto' }}>
+      <Box sx={scrollWellSx('58vh')}>
         {pickerList.map((spell) => {
           const manualSelected = selectedManualNames.has(spell.name);
           // `autoGranted` = the spell is granted by a source (class/subclass/feat/…),

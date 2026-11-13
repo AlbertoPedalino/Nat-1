@@ -4,8 +4,10 @@ import { Trash2 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import { ENTRY_BODY_SX, ENTRY_CARD_SX, ENTRY_ROW_PADDING, entryCardWellSx } from '../../../shared/ui/entryCard.js';
 import {
-  ITEM_DETAILS_SX, ItemAddRow, ItemCardTitle, ItemReferenceBody, itemCardSurfaceSx, itemListWellSx,
+  ItemAddRow, ItemCardTitle, ItemReferenceBody, itemCardSurfaceSx,
 } from '../../../shared/character/inventory/ItemReference.jsx';
 import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
@@ -22,7 +24,6 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
@@ -54,11 +55,11 @@ function useDebouncedSearch(value, commit) {
 function CurrentInventoryRow({ item, index, dispatch }) {
   return (
     <ExpandableCard
-      containerSx={{ ...CARD_SX, overflow: 'hidden', mb: 0.5 }}
-      detailsSx={{ ...ITEM_DETAILS_SX, ...CARD_PART_RULE_SX }}
+      containerSx={{ ...ENTRY_CARD_SX, mb: 0.5 }}
+      detailsSx={ENTRY_BODY_SX}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.75, ...itemCardSurfaceSx(item) }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ...ENTRY_ROW_PADDING, ...itemCardSurfaceSx(item) }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex' }}>
             <ItemCardTitle item={item} />
           </Box>
@@ -162,7 +163,7 @@ export default function EquipmentStep({ state, dispatch }) {
             {sortedItems.length} of {state.data.items.length} items
           </Typography>
 
-          <Box {...addPage.listProps} sx={itemListWellSx(430)}>
+          <Box {...addPage.listProps} sx={scrollWellSx(430)}>
             {addPage.visible.map((item) => (
               <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
             ))}
@@ -187,7 +188,7 @@ export default function EquipmentStep({ state, dispatch }) {
               <ItemFilterPanel {...currentList.panelProps} />
             </>
           ) : null}
-          <Box {...currentPage.listProps} sx={itemListWellSx(430)}>
+          <Box {...currentPage.listProps} sx={entryCardWellSx(430)}>
             {currentPage.visible.map(({ item, index }) => (
               <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
             ))}

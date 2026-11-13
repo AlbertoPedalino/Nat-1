@@ -849,3 +849,28 @@ test('a loader run once is a cachedLoader', () => {
     allow: ['shared/content/cachedLoader.js'],
   }), []);
 });
+
+// An entry's card (an action, a spell, an item) takes its pieces from
+// shared/ui/entryCard.js: owned cards ENTRY_CARD_SX / ENTRY_ROW_SX /
+// ENTRY_BODY_SX / ENTRY_BUTTON_SX, pickable ones PickableRow. The per-tab
+// copies they replaced never come back.
+test("an entry card's pieces come from entryCard.js", () => {
+  assert.deepEqual(sourceLinesMatching(
+    /\b(spellCardSx|spellRowSx|spellBodySx|inlineButtonSx|ITEM_DETAILS_SX|itemListWellSx|itemStateChipBaseSx)\b/,
+  ), []);
+});
+
+// A row to pick that opens (a spell, an item to add or make) is a PickableRow.
+// The builder's choice lists (ExpandableSelectionList and the panels built
+// like it) are their own family: click to choose, the chevron to open.
+test('an expandable row to pick is a PickableRow', () => {
+  assert.deepEqual(sourceFilesMatching(/<ListItemButton[\s\S]*<\/ListItemButton>/, {
+    allow: [
+      'shared/ui/PickableRow.jsx',
+      'pages/charbuilder/choices/ChoiceBlock.jsx',
+      'pages/charbuilder/choices/ExpandableSelectionList.jsx',
+      'pages/charbuilder/choices/ReplicateMagicItemChoice.jsx',
+      'pages/charbuilder/progression/ClassPanel.jsx',
+    ],
+  }).filter((file) => readSource(file).includes('ExpandableCard')), []);
+});

@@ -1,6 +1,6 @@
 import { Button, Tooltip } from '@mui/material';
 import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
-import { inlineButtonSx } from '../spells/spellsTabStyles.js';
+import { ENTRY_BUTTON_SX } from '../../../shared/ui/entryCard.js';
 import { attackRollerToneSx } from '../../../shared/ui/entityColors.js';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { sourcesFromAdvArg } from '../../../shared/character/dice/advantage.js';
@@ -43,7 +43,7 @@ export default function AttackRollButton({
       sources={sources || sourcesFromAdvArg(advArg)}
       onPick={(picked) => roll(picked)}
       onClick={(e) => { e.stopPropagation(); roll(advArg); }}
-      sx={{ ...inlineButtonSx, ...attackRollerToneSx({ disadv, notProficient }), ...sx }}
+      sx={{ ...ENTRY_BUTTON_SX, ...attackRollerToneSx({ disadv, notProficient }), ...sx }}
     >
       <GAME_ICONS.attack size={ICON_SIZES.xs} style={{ marginRight: 2 }} /><RollerVerb>Hit</RollerVerb>{signed(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}
     </RollModeArea>

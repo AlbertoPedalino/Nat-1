@@ -5,7 +5,7 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { RichText } from '../../../shared/content/RichText.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
-import { inlineButtonSx } from '../spells/spellsTabStyles.js';
+import { ENTRY_BUTTON_SX } from '../../../shared/ui/entryCard.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
@@ -83,7 +83,7 @@ export function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) 
               rollers={mode.rollers}
               subject={`Cannon: ${mode.name}`}
               onShowToast={onShowToast}
-              buttonSx={inlineButtonSx}
+              buttonSx={ENTRY_BUTTON_SX}
             />
           </Box>
         </Box>

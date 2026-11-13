@@ -1,15 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, List, ListItemButton, Stack } from '@mui/material';
+import { Box, List, Stack } from '@mui/material';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
-import {
-  SpellReferenceBody,
-  SpellRowLabel,
-  SpellSelectButton,
-} from '../../../shared/character/spells/SpellReference.jsx';
-import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import { PickableSpellRow } from '../../../shared/character/spells/SpellReference.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { spellNameIndex } from '../../../shared/character/spells/spellNameIndex.js';
@@ -19,7 +14,6 @@ import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import PickCount from '../../../shared/ui/PickCount.jsx';
@@ -166,26 +160,17 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   );
 }
 
-// One spell row. Tapping the row expands the full rich-text reference
-// (SpellReferenceBody: meta grid + description + upcast). Selection is an
-// explicit Add/Remove button on the right (auto-granted spells show a static
-// source chip instead). Expand mechanic lives in ExpandableCard.
+// One spell to pick (PickableSpellRow); an auto-granted spell shows its source
+// chip instead of Add/Remove.
 function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind, onToggle }) {
   return (
-    <ExpandableCard
-      containerSx={{ ...LIST_ROW_RULE_SX }}
-      detailsSx={{ px: 2, pt: 0.25, pb: 1.25 }}
-      details={<SpellReferenceBody spell={spell} />}
-      summary={({ open, toggle }) => (
-        <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
-          <SpellRowLabel
-            spell={spell}
-            selected={selected}
-            source={autoSelected ? <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} /> : null}
-            control={autoSelected ? null : <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />}
-          />
-        </ListItemButton>
-      )}
+    <PickableSpellRow
+      spell={spell}
+      selected={selected}
+      disabled={disabled}
+      locked={autoSelected}
+      onToggle={onToggle}
+      source={autoSelected ? <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} /> : null}
     />
   );
 }

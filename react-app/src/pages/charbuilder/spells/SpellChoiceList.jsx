@@ -1,18 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Box, List, ListItemButton } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
-import {
-  SpellReferenceBody,
-  SpellRowLabel,
-  SpellSelectButton,
-} from '../../../shared/character/spells/SpellReference.jsx';
-import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import { PickableSpellRow, SpellRowLabel } from '../../../shared/character/spells/SpellReference.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
-import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
@@ -104,21 +98,17 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                   disabled={full}
                   onClick={toggle}
                 >
-                  <SpellRowLabel spell={spell} selected={active} showIcon={false} />
+                  <SpellRowLabel spell={spell} showIcon={false} />
                 </ListItemButton>
               );
             }
             return (
-              <ExpandableCard
+              <PickableSpellRow
                 key={`${spec.key}-${spell.name}-${spell.source}`}
-                containerSx={{ ...LIST_ROW_RULE_SX }}
-                detailsSx={{ px: 2, pt: 0.25, pb: 1.25 }}
-                details={<SpellReferenceBody spell={spell} />}
-                summary={({ open, toggle: toggleOpen }) => (
-                  <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
-                    <SpellRowLabel spell={spell} selected={active} control={<SpellSelectButton selected={active} disabled={full} onToggle={toggle} />} />
-                  </ListItemButton>
-                )}
+                spell={spell}
+                selected={active}
+                disabled={full}
+                onToggle={toggle}
               />
             );
           })}

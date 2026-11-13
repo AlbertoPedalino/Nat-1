@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { ITEM_DETAILS_SX, ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
+import PickableRow from '../../../shared/ui/PickableRow.jsx';
+import ScrollingName from '../../../shared/ui/ScrollingName.jsx';
+import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
+import { ItemCardTitle, ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import { addCraftedItem, removeOneCrafted, craftedCount, craftedCountFor } from '../../../shared/character/inventory/craftedItemState.js';
 import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
@@ -15,8 +16,8 @@ import {
   resolveCreatedItemValue,
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { useItemsDb } from './useItemsDb.js';
@@ -24,7 +25,6 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -192,16 +192,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         />
       ) : null}
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 0.5,
-          // Rows must not flex-shrink, else they collapse to thin lines when
-          // their total height exceeds maxHeight — they should scroll instead.
-          ...(maxHeight ? { maxHeight, overflowY: 'auto', pr: 0.5, '& > *': { flexShrink: 0 } } : {}),
-        }}
-      >
+      <Box sx={scrollWellSx(maxHeight)}>
         {visibleItems.length ? visibleItems.map((value) => {
           const label = itemLabel(value);
           const count = craftedCountFor(inv, flag, value);
@@ -209,51 +200,31 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           const unavailable = requireResolvedItem && !dbItem;
           const addDisabled = remaining <= 0 || count >= maxPerItem || unavailable || !canAddItem(value, dbItem);
           const removeDisabled = count <= 0;
-          const stepper = (
-            <CountStepper
-              value={count}
-              size={22}
-              label={label}
-              canDecrease={!removeDisabled}
-              canIncrease={!addDisabled}
-              onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
-            />
-          );
-          const rowBorder = count > 0 ? ITEM_ATTUNEMENT : UI_COLORS.edge;
-          // A chosen row: the items' bordeaux washed over the row's header
-          // tone, not in place of it, so the row stays solid.
-          const rowSurface = count > 0
-            ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader })
-            : { bgcolor: UI_COLORS.surfaceHeader };
-
-          if (!dbItem) {
-            return (
-              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75, border: 2, borderColor: rowBorder, borderRadius: 1, ...rowSurface }}>
-                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
-                {unavailable ? (
-                  <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
-                ) : null}
-                {stepper}
-              </Box>
-            );
-          }
-
+          // An item to make, a pickable row: made ones are the selected rows,
+          // the count its one action (its clicks do not open the row).
           return (
-            <ExpandableCard
+            <PickableRow
               key={value}
-              containerSx={{ border: 2, borderColor: rowBorder, borderRadius: 1, ...rowSurface, overflow: 'hidden' }}
-              detailsSx={ITEM_DETAILS_SX}
-              details={<ItemReferenceBody item={dbItem} />}
-              summary={({ toggle }) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.75 }}>
-                  <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0, cursor: 'pointer' }}>
-                    <ItemNameIcon item={dbItem} />
-                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>{label}</Typography>
-                  </Box>
-                  {stepper}
-                </Box>
-              )}
-            />
+              selected={count > 0}
+              details={dbItem ? <ItemReferenceBody item={dbItem} /> : null}
+            >
+              {dbItem
+                ? <ItemCardTitle item={dbItem} name={label} />
+                : <ScrollingName sx={{ ...cardTitleSx, flex: 1 }}>{label}</ScrollingName>}
+              {unavailable ? (
+                <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
+              ) : null}
+              <Box onClick={(event) => event.stopPropagation()} sx={{ flexShrink: 0 }}>
+                <CountStepper
+                  value={count}
+                  size={22}
+                  label={label}
+                  canDecrease={!removeDisabled}
+                  canIncrease={!addDisabled}
+                  onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
+                />
+              </Box>
+            </PickableRow>
           );
         }) : (
           <EmptyLine inList>No items match “{query.trim()}”.</EmptyLine>

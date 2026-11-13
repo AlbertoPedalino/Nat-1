@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Tooltip, Typography } from '@mui/material';
 import { AlertTriangle, Archive, Check, Trash2 } from 'lucide-react';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -24,25 +24,17 @@ import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
+import { ENTRY_BODY_SX, ENTRY_BUTTON_SX, ENTRY_CARD_SX, ENTRY_ROW_PADDING } from '../../../shared/ui/entryCard.js';
+import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { isEquippable, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // The size and lettering of the row's small controls and tags; a control's
 // look is toggleSx (raised, filled while on), a tag's the flat tint.
-const itemStateChipBaseSx = {
-  minWidth: 0,
-  px: 1,
-  py: 0.25,
-  borderRadius: 0.375,
-  fontSize: FONT_SIZES.xxs,
-  lineHeight: LINE_HEIGHTS.relaxed,
-};
 
 // Provenance tags ([custom] + crafted badges) on their own row beneath the item
 // name so a long name truncates cleanly instead of being shoved by trailing tags
@@ -76,8 +68,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
 
   return (
     <ExpandableCard
-      containerSx={{ ...CARD_SX, mb: 0.5, overflow: 'hidden', borderColor: rowBorderColor }}
-      detailsSx={{ fontSize: FONT_SIZES.md, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal, bgcolor: UI_COLORS.surfaceSunken, ...CARD_PART_RULE_SX, px: 1.25, py: 0.75 }}
+      containerSx={{ ...ENTRY_CARD_SX, mb: 0.5, borderColor: rowBorderColor }}
+      detailsSx={ENTRY_BODY_SX}
       details={(
         <>
           <ItemReferenceBody item={item} />
@@ -91,7 +83,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...itemCardSurfaceSx(item, item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, ...ENTRY_ROW_PADDING, ...itemCardSurfaceSx(item, item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <ItemCardTitle item={item} name={scrollCardName(item, itemCardName(item))} />
@@ -126,7 +118,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}
-              sx={{ ...itemStateChipBaseSx, ...toggleSx(item.equipped, ITEM_ATTUNEMENT) }}>
+              sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(item.equipped, ITEM_ATTUNEMENT) }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -137,23 +129,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             <AttuneButton item={item} index={index} attunement={attunement} character={character} onAttune={actions.attune} />
           ) : null}
           {shouldShowItemCharges(item) ? (
-            <Box
-              aria-label={`${item.name} charges`}
-              sx={{
-                ...itemStateChipBaseSx,
-                border: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                borderColor: ITEM_ATTUNEMENT,
-                color: ITEM_ATTUNEMENT,
-                // Washed over the summary's header tone, so the chip stays solid.
-                ...tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.fill, base: UI_COLORS.surfaceHeader }),
-              }}
-            >
-              <Box component="span">
-                Charges
-              </Box>
+            // Charges read as an action card's uses: its label, its count.
+            <Box aria-label={`${item.name} charges`} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography component="span" sx={inlineMetaLabelSx}>Charges</Typography>
               <CountStepper
                 value={`${chargeCurrent}/${chargeMaximum}`}
                 size={16}
@@ -168,7 +146,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={ICON_SIZES.xxs} /> : null}
-              sx={{ ...itemStateChipBaseSx, ...toggleSx(!carried, UI_COLORS.outline) }}>
+              sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(!carried, UI_COLORS.outline) }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
@@ -187,7 +165,7 @@ function ItemFlagButton({ def, active, onClick }) {
   const tone = def.tone || ENTITY_COLORS.class;
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={ICON_SIZES.xxs} /> : null}
-      sx={{ ...itemStateChipBaseSx, ...toggleSx(active, tone) }}>
+      sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(active, tone) }}>
       {active ? (def.activeLabel || def.label) : def.label}
     </Button>
   );
@@ -195,16 +173,9 @@ function ItemFlagButton({ def, active, onClick }) {
 
 function SlotBtn({ active, onClick, label }) {
   return (
-    <IconButton size="small" onClick={onClick}
-      sx={{
-        ...toggleSx(active, ITEM_ATTUNEMENT),
-        minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
-        borderRadius: 0.375,
-        fontSize: FONT_SIZES.xxxs,
-      }}
-    >
+    <Button size="small" onClick={onClick} sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(active, ITEM_ATTUNEMENT) }}>
       {label}
-    </IconButton>
+    </Button>
   );
 }
 
@@ -231,7 +202,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={ICON_SIZES.xxs} /> : (item.attuned ? <Check size={ICON_SIZES.xxs} /> : (hasRequirementWarning ? <AlertTriangle size={ICON_SIZES.xxs} /> : null))}
-            sx={{ ...itemStateChipBaseSx, ...toggleSx(item.attuned, ITEM_ATTUNEMENT), ...(hasRequirementWarning && !item.attuned ? { color: UI_COLORS.accentText } : null), '&.Mui-disabled': { opacity: OPACITY.edge } }}>
+            sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(item.attuned, ITEM_ATTUNEMENT), ...(hasRequirementWarning && !item.attuned ? { color: UI_COLORS.accentText } : null), '&.Mui-disabled': { opacity: OPACITY.edge } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </Box>
@@ -239,7 +210,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ ...itemStateChipBaseSx, ...pressableSx(UI_COLORS.dangerDeep) }}>
+            sx={{ ...ENTRY_BUTTON_SX, ...pressableSx(UI_COLORS.dangerDeep) }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>
