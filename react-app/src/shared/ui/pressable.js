@@ -58,16 +58,21 @@ export function pressableSx(fill) {
 // theme gives it to every IconButton (`radius` in px there; a multiple of the
 // theme radius in sx), so a screen never draws its own; a remove (`danger`,
 // TipIconButton's) keeps its red. In plain CSS names, so it works in both.
-export function iconButtonLook(radius = 1) {
+//
+// A surface of its own (the battle map's glass: mapIconButtonSx) is passed as
+// `surface`, its icon colour as `tone` (kept under the cursor too), and
+// `solidHover` keeps that surface under the cursor rather than lightening it,
+// where a lighter wash would show the board through.
+export function iconButtonLook(radius = 1, { surface = UI_COLORS.surfaceRaised, tone = null, solidHover = false } = {}) {
   return {
     ...PRESSABLE_EDGE_SX,
     borderRadius: radius,
-    backgroundColor: UI_COLORS.surfaceRaised,
-    color: UI_COLORS.textSecondary,
+    backgroundColor: surface,
+    color: tone || UI_COLORS.textSecondary,
     '&:hover': {
       ...PRESSABLE_EDGE_SX['&:hover'],
-      backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.08),
-      color: UI_COLORS.accent,
+      backgroundColor: solidHover ? surface : lighten(surface, 0.08),
+      color: tone || UI_COLORS.accent,
     },
     '&.Mui-disabled': { opacity: OPACITY.edge, boxShadow: 'none' },
   };

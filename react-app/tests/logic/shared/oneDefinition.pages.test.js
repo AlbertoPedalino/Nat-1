@@ -51,12 +51,23 @@ test('a page header is the PageHeader', () => {
   }), []);
 });
 
-// SheetActions hides only the word "rest" of its own buttons on a phone.
+// A top bar's button is a TopBarButton: its look is never put together by
+// hand from appTopBarButtonSx.
 test("a top bar's button is a TopBarButton", () => {
-  assert.deepEqual(sourceFilesMatching(/\bappTopBarButtonSx\b|\bphoneHiddenLabelSx\b/, {
+  assert.deepEqual(sourceFilesMatching(/\bappTopBarButtonSx\b/, {
+    allow: ['shared/ui/TopBarButton.jsx', 'shared/ui/appBar.js', 'shared/ui/iconOnlyOnPhone.js'],
+  }), []);
+});
+
+// A word a phone has no room for is dropped through phoneHiddenLabelSx, the
+// one rule for it: a top bar button's label (TopBarButton), the word "rest" of
+// SheetActions, a roller's verb (RollerVerb), the dice pill's Roll and Log
+// (DiceControl).
+test('a word dropped on a phone goes through phoneHiddenLabelSx', () => {
+  assert.deepEqual(sourceFilesMatching(/\bphoneHiddenLabelSx\b/, {
     allow: [
-      'shared/ui/TopBarButton.jsx', 'shared/ui/appBar.js', 'shared/ui/iconOnlyOnPhone.js',
-      'pages/charsheet/layout/SheetActions.jsx',
+      'shared/ui/iconOnlyOnPhone.js', 'shared/ui/TopBarButton.jsx', 'pages/charsheet/layout/SheetActions.jsx',
+      'shared/character/dice/RollerVerb.jsx', 'shared/character/dice/DiceControl.jsx',
     ],
   }), []);
 });

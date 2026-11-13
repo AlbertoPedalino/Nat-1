@@ -1,20 +1,15 @@
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
-import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
+import { sheetColumnSx } from './layout.js';
 import { useStoreValue } from '../../../shared/valueStore.js';
 import { useRootStyle } from '../../../shared/ui/liveStyle.js';
 
-// The sheet's dice, always at hand: the shared DiceControl floating at the
-// bottom of the sheet, so a roll never needs a scroll back to the top.
-// On a phone a compact pill of two icons in solid gold in the bottom right:
-// small enough to cover little, bright enough to be found without looking for
-// it. On a tablet the labelled control, centred; on a desktop at the left,
-// clear of the toasts in the bottom right, and out in the empty margin beside
-// the sheet when the screen leaves room for it. In a corner it sits as far
-// from the side as from the bottom (DOCK_INSET).
+// The sheet's dice, always at hand: the shared DiceControl (the gold pill,
+// Roll and Log written beside the icons from a tablet up) floating in the
+// bottom-right corner of the sheet on every screen, so a roll never needs a
+// scroll back to the top. Small enough to cover little, bright enough to be
+// found without looking for it. It sits as far from the side as from the
+// bottom (DOCK_INSET).
 //
 // Sticky to the sheet, not fixed to the window: it rides the bottom edge of
 // whatever scrolls the sheet (the page, or the panel an embedded sheet sits
@@ -24,7 +19,6 @@ import { useRootStyle } from '../../../shared/ui/liveStyle.js';
 export default function SheetDiceDock({
   embedded, logStore, onRoll,
 }) {
-  const phone = useIsPhone();
   // Read here, from its store (useSheetRolls): a roll redraws the dock, not the
   // sheet.
   const rollLog = useStoreValue(logStore);
@@ -36,85 +30,44 @@ export default function SheetDiceDock({
   useRootStyle({ overscrollBehaviorY: 'none' }, { enabled: !embedded });
 
   return (
-    <Box sx={embedded ? embeddedDockSx : pageDockSx}>
+    <Box sx={embedded ? dockSx : pageDockSx}>
       <DiceControl
         log={rollLog}
         onRoll={onRoll}
         onClear={() => logStore.set([])}
-        variant={phone ? 'icon' : 'text'}
         emptyText="No rolls yet. Make an ability check, save, or attack to see it here."
         placement="up"
-        surface={phone ? phoneSurface : undefined}
-        sx={phone ? phonePillSx : labelledPillSx}
       />
     </Box>
   );
 }
 
-// The pill's distance from the bottom, and from the side when it sits in a
-// corner: the same on both, so it reads as placed rather than pushed there.
+// The pill's distance from the bottom and from the right: the same on both,
+// so it reads as placed rather than pushed there.
 const DOCK_INSET = { xs: '24px', md: '40px' };
 const inset = (size, edge) => `calc(${DOCK_INSET[size]} + env(safe-area-inset-${edge}, 0px))`;
 
 // The band sits on the bottom edge and carries the space under the pill
 // itself. Being the last thing in the sheet, its place while scrolling and its
 // place at the end are the same: nothing jumps, and at the end it has its own
-// room below the last panel.
+// room below the last panel. Bottom right, on every screen.
 const dockSx = {
   position: 'sticky',
   bottom: 0,
   zIndex: 5,
   display: 'flex',
+  justifyContent: 'flex-end',
   pt: 1.5,
   pb: { xs: inset('xs', 'bottom'), md: inset('md', 'bottom') },
+  pr: { xs: inset('xs', 'right'), md: inset('md', 'right') },
   pointerEvents: 'none',
   '& > *': { pointerEvents: 'auto' },
 };
 
-// An embedded sheet: bottom right on a phone, centred in its panel on
-// anything larger.
-const embeddedDockSx = {
-  ...dockSx,
-  justifyContent: { xs: 'flex-end', sm: 'center' },
-  pr: { xs: inset('xs', 'right'), sm: 0 },
-};
-
-// On its own page: bottom right on a phone, centred on a tablet, at the left of
-// the sheet's column on a desktop, and out in the margin left of the column
-// where that margin holds it.
-const SIDE_MARGIN_FITS = '@media (min-width: 1680px)';
+// On its own page: in the sheet's column, so the pill stays by the sheet's
+// right edge on a wide screen.
 const pageDockSx = {
   ...dockSx,
   ...sheetColumnSx(false),
-  justifyContent: { xs: 'flex-end', sm: 'center', md: 'flex-start' },
-  // The phone's corner on the right, the desktop's on the left; centred on a
-  // tablet, with the column's own padding on both sides.
-  pr: { xs: inset('xs', 'right'), sm: SHEET_COLUMN_PX.xs, md: SHEET_COLUMN_PX.md },
-  pl: { md: inset('md', 'left') },
-  [SIDE_MARGIN_FITS]: { maxWidth: 'none', mx: 0 },
-};
-
-// Floating over the sheet, raised like every button.
-// The phone's pill: filled with the accent, dark icons, inked edge — the one
-// bright thing at the bottom of a dark sheet; a touch larger to tap.
-const phoneSurface = {
-  groupSx: { bgcolor: 'primary.main' },
-  segmentSx: {
-    color: 'primary.contrastText',
-    px: 1.5,
-    py: 0.75,
-    // Darkened over the pill's gold, not see-through.
-    '&:hover': tintedSurfaceSx(UI_COLORS.black, { base: 'primary.main' }),
-  },
-};
-
-const phonePillSx = {};
-
-// The labelled control made into the same pill.
-const labelledPillSx = {
-  bgcolor: 'background.paper',
-  borderRadius: 999,
-  '& .MuiButton-root': { px: 2, py: 0.5 },
-  '& .MuiButtonGroup-firstButton': { borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
-  '& .MuiButtonGroup-lastButton': { borderTopRightRadius: 999, borderBottomRightRadius: 999 },
+  pr: { xs: inset('xs', 'right'), md: inset('md', 'right') },
 };

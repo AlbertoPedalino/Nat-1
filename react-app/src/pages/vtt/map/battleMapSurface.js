@@ -3,7 +3,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
+import { iconButtonLook } from '../../../shared/ui/pressable.js';
 
 // The battle map's own recipes: what sits on the board itself. A dialog over
 // the map is SheetDialog with `surface="map"`, a menu is MapMenu, a floating
@@ -14,15 +14,7 @@ import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
 // Round, the board's own controls' shape (every other icon button is the
 // theme's rounded square): a circle on a square button, a pill on a wider one
 // (the dice pill, the folded backgrounds strip) — never an ellipse.
-export const mapIconButtonSx = {
-  ...SURFACES.mapControl,
-  ...PRESSABLE_EDGE_SX,
-  borderRadius: 999,
-  color: VTT_COLORS.accent,
-  // Its own solid surface under the cursor too (an icon button's hover would
-  // otherwise lay a see-through wash over the board).
-  '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], bgcolor: VTT_COLORS.surface },
-};
+export const mapIconButtonSx = iconButtonLook(999, { surface: VTT_COLORS.surface, tone: VTT_COLORS.accent, solidHover: true });
 
 // A panel floating over the board (the scene and hexcrawl corners, the tool
 // rail's panel): the map's glass, padded, scrolling inside its own height

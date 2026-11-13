@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import SheetDiceDock from '../../../../../src/pages/charsheet/layout/SheetDiceDock.jsx';
@@ -75,33 +74,16 @@ test('it floats at the bottom without taking clicks from what passes under it', 
   expect(log).toHaveAccessibleName('Roll log, 0 rolls');
 });
 
-// A phone as MUI asks for one: the breakpoint below `sm`.
-function asPhone() {
-  return vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
-    matches: query.includes('max-width'),
-    media: query,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-  }));
-}
-
-test('on a phone it is a compact pill of two icons, always out', () => {
-  const matchMedia = asPhone();
-  try {
-    render(<SheetDiceDock logStore={createValueStore([])} />);
-    expect(screen.getByRole('button', { name: 'Roll dice' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Roll log, 0 rolls' })).toBeInTheDocument();
-    expect(screen.queryByText('Roll')).not.toBeInTheDocument();
-  } finally {
-    matchMedia.mockRestore();
-  }
-});
-
-test('from a tablet up it keeps its labels', () => {
+// One look on every screen: the gold pill in the bottom-right corner, Roll and
+// Log written beside the icons (a phone drops the words: phoneHiddenLabelSx).
+test('it is the gold pill in the bottom-right corner, with Roll and Log', () => {
   render(<SheetDiceDock logStore={createValueStore([])} />);
-  expect(screen.getByRole('button', { name: 'Roll' })).toBeInTheDocument();
+  const group = screen.getByRole('group', { name: 'Dice' });
+  expect(group.parentElement).toHaveStyle({ justifyContent: 'flex-end' });
+  const roll = screen.getByRole('button', { name: 'Roll dice' });
+  const log = screen.getByRole('button', { name: 'Roll log, 0 rolls' });
+  expect(roll).toHaveTextContent('Roll');
+  expect(log).toHaveTextContent('Log');
 });
 
 test('on its own page the end-of-scroll stretch is off while the sheet is open', () => {

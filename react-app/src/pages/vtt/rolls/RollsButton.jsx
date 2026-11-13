@@ -13,7 +13,7 @@ export default function RollsButton({
 }) {
   return (
     <DiceControl
-      variant="icon"
+      labels={false}
       log={feed}
       onRoll={onCustomRoll}
       onClear={onClear}
@@ -29,7 +29,7 @@ export default function RollsButton({
 const MAP_SURFACE = Object.freeze({
   groupSx: mapIconButtonSx,
   dividerColor: vttAlpha(VTT_COLORS.accent, OPACITY.line),
-  segmentSx: { color: mapIconButtonSx.color, '&:hover': { bgcolor: mapIconButtonSx['&:hover'].bgcolor } },
+  segmentSx: { color: mapIconButtonSx.color, '&:hover': { backgroundColor: mapIconButtonSx['&:hover'].backgroundColor } },
   paperSx: MAP_PAPER_SX,
   dialog: { surface: 'map' },
 });
