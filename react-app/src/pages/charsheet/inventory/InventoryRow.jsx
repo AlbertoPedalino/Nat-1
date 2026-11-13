@@ -73,7 +73,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   const chargeMaximum = itemChargeMaximum(item);
   const chargeCurrent = itemChargeCurrent(item);
 
-  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.secondaryStrong : (!carried ? UI_COLORS.outline : UI_COLORS.edge));
+  // Everything about an item wears the items' bordeaux (ITEM_ATTUNEMENT):
+  // equipped, its slot, attuned.
+  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? ITEM_ATTUNEMENT : (!carried ? UI_COLORS.outline : UI_COLORS.edge));
   // A magic item's card is washed in its rarity's colour; equipped still
   // shows on its edge.
   const rarity = rarityTone(item);
@@ -95,7 +97,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? tintedSurfaceSx(rarity, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : item.equipped ? tintedSurfaceSx(UI_COLORS.secondaryStrong, { amount: OPACITY.wash }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? tintedSurfaceSx(rarity, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
@@ -135,7 +137,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}
-              sx={{ ...itemStateChipBaseSx, ...toggleSx(item.equipped, UI_COLORS.secondaryStrong) }}>
+              sx={{ ...itemStateChipBaseSx, ...toggleSx(item.equipped, ITEM_ATTUNEMENT) }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -206,7 +208,7 @@ function SlotBtn({ active, onClick, label }) {
   return (
     <IconButton size="small" onClick={onClick}
       sx={{
-        ...toggleSx(active),
+        ...toggleSx(active, ITEM_ATTUNEMENT),
         minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
         borderRadius: 0.375,
         ...TEXT_STYLES.title,

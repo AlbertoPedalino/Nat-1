@@ -15,7 +15,7 @@ import {
   resolveCreatedItemValue,
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
@@ -24,6 +24,7 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -218,11 +219,11 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               onStep={(delta) => (delta < 0 ? handleRemove(value) : handleAdd(value))}
             />
           );
-          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.accent, OPACITY.edge) : UI_COLORS.edge;
-          // A chosen row: the accent washed over the row's header tone, not in
-          // place of it, so the row stays solid.
+          const rowBorder = count > 0 ? ITEM_ATTUNEMENT : UI_COLORS.edge;
+          // A chosen row: the items' bordeaux washed over the row's header
+          // tone, not in place of it, so the row stays solid.
           const rowSurface = count > 0
-            ? tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash, base: UI_COLORS.surfaceHeader })
+            ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader })
             : { bgcolor: UI_COLORS.surfaceHeader };
 
           if (!dbItem) {

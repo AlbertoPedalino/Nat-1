@@ -21,6 +21,7 @@ import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 
 // The result list renders in pages instead of hard-capping: a broad filter can
 // legitimately match most of the item DB (~2500 entries once magic variants are
@@ -128,7 +129,7 @@ export default function InventoryAddPanel({ itemsDb, onAddItem }) {
             <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
               onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }} sx={{ ...COMPACT_INPUT_SX, width: 62 }} slotProps={{ htmlInput: { min: 0, step: 0.01 } }} />
             <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ ...SURFACES.panel, px: 1.75, color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.accent, color: UI_COLORS.accent } }}>
+              sx={{ ...SURFACES.panel, px: 1.75, color: 'text.secondary', ...TEXT_STYLES.figure, fontSize: FONT_SIZES.sm, whiteSpace: 'nowrap', '&:hover': { borderColor: ITEM_ATTUNEMENT, color: 'text.primary' } }}>
               + Add
             </Button>
           </Box>
