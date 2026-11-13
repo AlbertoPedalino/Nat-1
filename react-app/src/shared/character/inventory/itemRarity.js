@@ -40,12 +40,23 @@ export function isMagicItem(item) {
   return rarity !== 'none' && rarity !== 'unknown';
 }
 
-// The rarities lettered in their tier's colour (the theme's gmboard.rarity).
-const TONED_RARITIES = new Set(['common', 'uncommon', 'rare', 'very rare', 'legendary', 'artifact']);
+// Each tier's colour, a looter's tiers bright enough to letter a name on the
+// dark paper: white-ish, green, blue, purple, orange, pink. Game data, not
+// interface style; the theme lays it out as gmboard.rarity.<Label> and '—'
+// is the GM board's "no rarity".
+export const RARITY_COLORS = Object.freeze({
+  Artifact: '#ff6fb5',
+  Legendary: '#ff9a3c',
+  'Very Rare': '#c38cff',
+  Rare: '#5aa9ff',
+  Uncommon: '#5fd48a',
+  Common: '#d6cdc1',
+  '—': '#7a6040',
+});
 
-// The colour an item's name is lettered in, as a theme path
-// ('gmboard.rarity.Rare'); null for a mundane item or one of no set tier.
+// The colour a magic item wears (its name, its bar, its card's wash), as a
+// palette colour; null for a mundane item or one of no set tier.
 export function rarityTone(item) {
-  const key = rarityKey(item);
-  return TONED_RARITIES.has(key) ? `gmboard.rarity.${rarityLabel(item)}` : null;
+  // "Varies" and "Unknown Rarity" have no tier, so no colour.
+  return isMagicItem(item) ? RARITY_COLORS[rarityLabel(item)] || null : null;
 }

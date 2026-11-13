@@ -9,6 +9,7 @@ import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
+import { RARITY_COLORS } from '../shared/character/inventory/itemRarity.js';
 
 // A chosen row, on `base`: the surface it lies on (the paper of a list, the
 // raised surface of a menu). The accent is a wash over that base, not in
@@ -78,17 +79,8 @@ export const theme = createTheme({
         Moderate: UI_COLORS.warning,
         Low: UI_COLORS.success,
       },
-      // A looter's tiers, bright enough to letter an item's name on the
-      // dark paper: white-ish, green, blue, purple, orange, pink.
-      rarity: {
-        Artifact: '#ff6fb5',
-        Legendary: '#ff9a3c',
-        'Very Rare': '#c38cff',
-        Rare: '#5aa9ff',
-        Uncommon: '#5fd48a',
-        Common: '#d6cdc1',
-        '—': '#7a6040',
-      },
+      // Item rarity's tiers (shared/character/inventory/itemRarity.js).
+      rarity: RARITY_COLORS,
       // Origin badges in the instance picker (cloud vs local-only sheets).
       badge: {
         cloud: UI_COLORS.infoText,

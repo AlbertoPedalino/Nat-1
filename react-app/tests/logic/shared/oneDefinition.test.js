@@ -168,7 +168,7 @@ test('no inline style on HTML elements', () => {
 test('no literal colours outside the palettes and colour data', () => {
   const DATA = [
     'shared/ui/colors.js', 'shared/vtt/colors.js', 'app/theme.js', 'shared/ui/entityColors.js',
-    'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js',
+    'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js', 'shared/character/inventory/itemRarity.js',
     'shared/ui/swatches.js', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
     'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
     'shared/character/dice/D100Orb.jsx',

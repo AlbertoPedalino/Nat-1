@@ -74,6 +74,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   const chargeCurrent = itemChargeCurrent(item);
 
   const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? UI_COLORS.secondaryStrong : (!carried ? UI_COLORS.outline : UI_COLORS.edge));
+  // A magic item's card is washed in its rarity's colour; equipped still
+  // shows on its edge.
+  const rarity = rarityTone(item);
 
   return (
     <ExpandableCard
@@ -92,14 +95,14 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(item.equipped ? tintedSurfaceSx(UI_COLORS.secondaryStrong, { amount: OPACITY.wash }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? tintedSurfaceSx(rarity, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : item.equipped ? tintedSurfaceSx(UI_COLORS.secondaryStrong, { amount: OPACITY.wash }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               {/* A magic item's rarity, marked as an action's category is. */}
-              <ToneBar tone={rarityTone(item)} />
+              <ToneBar tone={rarity} />
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: rarityTone(item) || 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
+              <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: rarity || 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
