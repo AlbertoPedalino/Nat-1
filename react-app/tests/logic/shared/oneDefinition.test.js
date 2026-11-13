@@ -808,3 +808,10 @@ test("a control's lettering is the theme's", () => {
   assert.deepEqual(sourceFilesMatching(/textTransform:\s*'none'/, { allow: ['shared/ui/actionButton.js'] }), []);
   assert.deepEqual(sourceFilesMatching(/label=["']?[A-Z]{3,}["' ]|>\s*(HOME|LOGIN|LOG IN)\s*</, { allow: [] }), []);
 });
+
+// A count of picks taken out of those allowed ("1/1", "Cantrips 2/3") is the
+// PickCount sticker: a count written as text, or a chip tinted by hand, is one
+// that does not turn gold when the choice is complete.
+test('a count of picks is PickCount', () => {
+  assert.deepEqual(sourceFilesMatching(/\} \/ \$\{[^}]+\} selected|<TagChip[^>]*label=\{`[^`]*\$\{[^}]+\}\/\$\{/, { allow: ['shared/ui/PickCount.jsx'] }), []);
+});

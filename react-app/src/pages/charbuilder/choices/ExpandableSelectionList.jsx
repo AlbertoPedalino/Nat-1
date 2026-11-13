@@ -9,11 +9,7 @@ import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-
-function selectionStatus(selectedCount, max) {
-  if (!Number.isFinite(max) || max <= 0) return null;
-  return `${selectedCount} / ${max} selected`;
-}
+import PickCount from '../../../shared/ui/PickCount.jsx';
 
 export default function ExpandableSelectionList({
   title,
@@ -24,13 +20,12 @@ export default function ExpandableSelectionList({
   emptyText = 'No options available.',
   maxHeight = 320,
 }) {
-  const status = selectionStatus(selectedCount, max);
   const { query, setQuery, showSearch, visibleOptions } = useOptionSearch(options);
 
   return (
     <BuilderBox
       title={title}
-      aside={status ? <Typography sx={{ ...BUILDER_TEXT.hint, flexShrink: 0 }}>{status}</Typography> : null}
+      aside={<PickCount count={selectedCount} max={max} />}
     >
 
         {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}

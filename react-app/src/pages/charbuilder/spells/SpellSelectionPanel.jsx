@@ -18,6 +18,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import PickCount from '../../../shared/ui/PickCount.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
@@ -87,8 +88,8 @@ export default function SpellSelectionPanel({ state, dispatch }) {
         ) : (
           <>
             <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              <TagChip size="medium" tone={selectedCantrips.length > cantrips ? UI_COLORS.danger : UI_COLORS.accent} label={`Cantrips ${selectedCantrips.length}/${cantrips}`} />
-              <TagChip size="medium" tone={selectedSpellsCount > spells ? UI_COLORS.danger : UI_COLORS.accent} label={`Spells ${selectedSpellsCount}/${spells}`} />
+              <PickCount size="medium" prefix="Cantrips" count={selectedCantrips.length} max={cantrips} />
+              <PickCount size="medium" prefix="Spells" count={selectedSpellsCount} max={spells} />
               {profile.ability ? <TagChip size="medium" label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
             <SelectionSearch
