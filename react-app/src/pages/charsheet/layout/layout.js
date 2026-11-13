@@ -55,7 +55,7 @@ export const SHEET_COLUMN_PX = Object.freeze({ xs: '0.6rem', md: '1.1rem' });
 export function sheetColumnSx(embedded, { embeddedPx = 0 } = {}) {
   return {
     maxWidth: embedded ? 'none' : 1280,
-    mx: embedded ? 0 : { md: 'auto' },
+    mx: sheetResponsive(embedded, { xs: 0, md: 'auto' }),
     px: embedded ? embeddedPx : SHEET_COLUMN_PX,
   };
 }
