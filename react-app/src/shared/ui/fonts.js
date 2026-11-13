@@ -7,11 +7,13 @@ export const UI_FONTS = Object.freeze({
   prose: '"Nunito Sans", system-ui, sans-serif',
   body: '"Nunito Sans", system-ui, sans-serif',
   // Comic lettering with a fantasy cut (a narrow, heavy face with blackletter
-  // serifs): what a roll shouts (NATURAL 20!), a character's name, the app's
-  // name on the home page's cover.
+  // serifs): the voice, what happens in the moment (a roll, NATURAL 20!, a
+  // toast) and the numeral on the home page's die.
   shout: '"Germania One", "Rubik", system-ui, sans-serif',
-  // A panel's title, lettered like a rulebook's heading: a readable
-  // blackletter.
+  // The sign, lettered like a rulebook's heading (a readable blackletter):
+  // the names of places and people (pages, panels, dialogs, tools, scenes,
+  // characters) and the app's own name on the home page's cover.
+  // TEXT_STYLES.shout and .heading say which is which.
   heading: '"Grenze Gotisch", "Germania One", Georgia, serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });

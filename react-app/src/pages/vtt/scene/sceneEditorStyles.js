@@ -39,10 +39,10 @@ export const sceneIdentitySx = {
 };
 
 // The scene's name (the campaign's, for a player): lettered like a character's
-// name and a panel's title, the comic's shout face.
+// name and a panel's title, the heading face.
 export const sceneTitleSx = {
   ...ONE_LINE_SX,
-  ...TEXT_STYLES.shout,
+  ...TEXT_STYLES.heading,
   color: 'primary.main',
   fontSize: { xs: FONT_SIZES.body, md: FONT_SIZES.lead },
   lineHeight: LINE_HEIGHTS.tight,
