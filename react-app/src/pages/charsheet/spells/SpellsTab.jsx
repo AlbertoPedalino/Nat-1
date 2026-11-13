@@ -106,7 +106,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       <Box sx={panelToolbarSx}>
         <FilterToggles options={SPELL_ACTION_FILTERS} values={spellFilter} onChange={setSpellFilter} />
         <SearchField
-          placeholder="Search spells..."
+          placeholder="Search spells…"
           value={spellSearch}
           onChange={setSpellSearch}
           density="compact"

@@ -184,7 +184,7 @@ export default function ClassPanel({ state, character, dispatch }) {
           </Typography>
         ) : null}
         <DraftSearchField
-          placeholder="Search classes"
+          placeholder="Search classes…"
           value={search}
           onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
         />

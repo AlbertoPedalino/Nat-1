@@ -81,7 +81,7 @@ export default function NoteBoard() {
           <SearchField
             value={query}
             onChange={setQuery}
-            placeholder="Search titles and text"
+            placeholder="Search notes…"
             ariaLabel="Search notes"
             sx={searchSx}
           />

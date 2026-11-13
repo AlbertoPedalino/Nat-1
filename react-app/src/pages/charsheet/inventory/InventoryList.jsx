@@ -100,7 +100,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
         entries={entries}
         getItem={entryItem}
         search={search}
-        placeholder="Search inventory by name, source, type, property…"
+        placeholder="Search inventory…"
         chips={chips}
         states={states}
         order={byShelfThenName}

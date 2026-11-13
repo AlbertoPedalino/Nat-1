@@ -120,7 +120,7 @@ export default function BackgroundStep({ state, dispatch }) {
       <BuilderPanel id="panel-bg" tone={ENTITY_COLORS.background} title="Background" icon={GAME_ICONS.background} note="Pick a background; the card below shows its full details.">
         <SearchList
           value={search.background}
-          placeholder="Search background"
+          placeholder="Search backgrounds…"
           items={backgrounds}
           selectedName={character.backgroundName}
           onSearch={(value) => dispatch({ type: 'search/set', scope: 'background', value })}

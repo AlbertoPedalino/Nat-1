@@ -34,7 +34,7 @@ import { compareItemsBySearch } from './itemSearch.js';
 // - `empty` / `noMatch`: what the well says with no entries at all, or none
 //   that match.
 export default function ItemBrowser({
-  entries, getItem, search, placeholder = 'Search items by name, source, type, property…',
+  entries, getItem, search, placeholder = 'Search items…',
   chips, states = null, filtersState, order = null, pageSize = 50, total, renderRows,
   empty = null, noMatch = 'No items match this search or filter.',
 }) {

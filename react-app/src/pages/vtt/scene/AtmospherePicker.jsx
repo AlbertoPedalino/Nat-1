@@ -70,6 +70,7 @@ export function AtmospherePicker({ value, onSelect }) {
       <SearchField
         value={query}
         onChange={setQuery}
+        density="compact"
         placeholder="Search atmospheres…"
         ariaLabel="Search atmospheres"
         autoFocus

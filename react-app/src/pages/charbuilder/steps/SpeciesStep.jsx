@@ -50,7 +50,7 @@ export default function SpeciesStep({ state, dispatch }) {
       <BuilderPanel id="panel-species" tone={ENTITY_COLORS.species} title="Species" icon={GAME_ICONS.species} note="Pick a species; the card below shows its full details.">
         <SearchList
           value={search.species}
-          placeholder="Search species"
+          placeholder="Search species…"
           items={species}
           selectedName={character.speciesName}
           onSearch={(value) => dispatch({ type: 'search/set', scope: 'species', value })}

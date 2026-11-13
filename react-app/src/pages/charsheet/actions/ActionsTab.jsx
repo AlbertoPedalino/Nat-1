@@ -150,7 +150,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       <Box sx={panelToolbarSx}>
         <FilterToggles options={FILTER_OPTIONS} values={filter} onChange={setFilter} />
         <SearchField
-          placeholder="Search actions..."
+          placeholder="Search actions…"
           value={search}
           onChange={setSearch}
           density="compact"

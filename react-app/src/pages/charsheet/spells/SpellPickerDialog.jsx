@@ -144,7 +144,7 @@ export function SpellPickerDialog({
 
       <Box sx={{ display: 'grid', gap: 0.5, mb: 0.75 }}>
         <SearchField
-          placeholder={spellDb.length ? 'Search spells...' : 'Loading spells...'}
+          placeholder={spellDb.length ? 'Search spells…' : 'Loading spells…'}
           value={pickerSearch}
           onChange={setPickerSearch}
           density="compact"

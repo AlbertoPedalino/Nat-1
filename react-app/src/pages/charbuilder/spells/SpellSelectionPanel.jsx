@@ -91,7 +91,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               {profile.ability ? <TagChip size="medium" label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
             <DraftSearchField
-              placeholder="Search spells"
+              placeholder="Search spells…"
               value={state.search.spells}
               onChange={(value) => dispatch({ type: 'search/set', scope: 'spells', value })}
             />

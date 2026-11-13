@@ -90,6 +90,7 @@ export default function MapObjectsPanel({
         <SearchField
           value={query}
           onChange={setQuery}
+          density="compact"
           placeholder="Search icons…"
           ariaLabel="Search icons"
           sx={{ flex: 1, minWidth: 0 }}

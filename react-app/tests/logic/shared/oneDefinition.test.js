@@ -1073,6 +1073,19 @@ test('a search box is a SearchField or a DraftSearchField', () => {
   assert.deepEqual(sourceFilesMatching(/SelectionSearch/), []);
 });
 
+// A search box's placeholder reads one way everywhere: "Search <what>…", a
+// short plural noun and the ellipsis character — no "...", no list of fields.
+test('a search placeholder reads "Search <what>…"', () => {
+  const placeholder = /[pP]laceholder\s*[=:]?\s*\{?[^'"`]*['"`]Search\b/;
+  const shape = /['"`]Search( [a-z$][\w${}.() ]*)?…['"`]/;
+  const hits = sourceLinesMatching(placeholder).filter((hit) => {
+    const [file, line] = hit.split(':');
+    const text = readSource(file).split('\n')[Number(line) - 1];
+    return !shape.test(text) || /\.\.\./.test(text);
+  });
+  assert.deepEqual(hits, []);
+});
+
 // Every icon of the game's world (a weapon, a skull, a scroll, a castle, a
 // die, a rest…) is a role of GAME_ICONS (shared/ui/gameIcons.js), named by
 // what it stands for: a new look for the whole app is that one file. Plain

@@ -56,7 +56,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
       <SearchField
         value={query}
         onChange={(value) => { setQuery(value); if (panel) setSelectedKey(null); }}
-        placeholder="Search spells, items, monsters, rules…"
+        placeholder="Search compendium…"
         autoFocus={autoFocus}
         ariaLabel="Search the compendium"
       />

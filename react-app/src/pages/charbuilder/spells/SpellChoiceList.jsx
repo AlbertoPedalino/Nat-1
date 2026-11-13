@@ -81,7 +81,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={max}>
       {showSearch ? (
-        <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search spells" />
+        <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search spells…" />
       ) : null}
       <ScrollWell maxHeight={260}>
         <List dense disablePadding>
