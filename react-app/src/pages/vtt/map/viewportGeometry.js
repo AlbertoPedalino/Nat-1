@@ -15,6 +15,8 @@ import {
   isHexGrid,
 } from '../../../shared/vtt/map/hexGeometry.js';
 import { samePlayArea } from '../../../shared/vtt/scene/scene.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { svgPicture } from '../../../shared/ui/svgPicture.js';
 
 // Pure geometry and cursors of the battle-map viewport: brush radius and
 // cursor per tool, the selection marquee, the movement badge of a dragged piece,
@@ -23,9 +25,17 @@ import { samePlayArea } from '../../../shared/vtt/scene/scene.js';
 // Inline SVG cursors so the pointer says which tool is in hand. Hotspot at the
 // nib for the pencil and at the corner of the block for the eraser, or the mark
 // lands where the cursor is not.
-const PENCIL_CURSOR = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e8c96a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20h9'/><path d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/></svg>\") 2 22, crosshair";
+// Drawn in the map's colours: the pencil in its accent, the eraser in danger.
+function toolCursor(color, paths, hotspot) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
+    + `stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">`
+    + paths.map((d) => `<path d="${d}"/>`).join('') + '</svg>';
+  return `${svgPicture(svg)} ${hotspot}, crosshair`;
+}
 
-const ERASER_CURSOR = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23de675f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m7 21-4.3-4.3a1 1 0 0 1 0-1.4L15 3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3L10.5 19.5'/><path d='M22 21H7'/></svg>\") 3 21, crosshair";
+const PENCIL_CURSOR = toolCursor(VTT_COLORS.accent, ['M12 20h9', 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'], '2 22');
+
+const ERASER_CURSOR = toolCursor(VTT_COLORS.danger, ['m7 21-4.3-4.3a1 1 0 0 1 0-1.4L15 3a2 2 0 0 1 3 0l3 3a2 2 0 0 1 0 3L10.5 19.5', 'M22 21H7'], '3 21');
 
 // The map's mile scale, or nothing at all when it is being read in feet. The
 // scene keeps both numbers so switching back and forth loses neither, and this

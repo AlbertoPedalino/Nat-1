@@ -819,7 +819,7 @@ test('a count of picks is PickCount', () => {
 // An SVG built in code becomes a CSS image through svgPicture
 // (shared/ui/svgPicture.js) only, never by a hand-written data URL.
 test('an SVG drawing becomes a CSS image only through svgPicture', () => {
-  assert.deepEqual(sourceLinesMatching(/data:image\/svg\+xml,/, {
+  assert.deepEqual(sourceLinesMatching(/data:image\/svg\+xml[,;]/, {
     allow: ['shared/ui/svgPicture.js'],
   }), []);
 });
