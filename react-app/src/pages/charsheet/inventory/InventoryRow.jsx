@@ -202,7 +202,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
         <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={ICON_SIZES.xxs} /> : (item.attuned ? <Check size={ICON_SIZES.xxs} /> : (hasRequirementWarning ? <AlertTriangle size={ICON_SIZES.xxs} /> : null))}
-            sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(item.attuned, ITEM_ATTUNEMENT), ...(hasRequirementWarning && !item.attuned ? { color: UI_COLORS.accentText } : null), '&.Mui-disabled': { opacity: OPACITY.edge } }}>
+            sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(item.attuned, ITEM_ATTUNEMENT), ...(hasRequirementWarning && !item.attuned ? { color: UI_COLORS.accentText } : null) }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </Box>

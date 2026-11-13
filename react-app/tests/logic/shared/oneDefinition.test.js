@@ -989,3 +989,14 @@ test('hover is gated once, by the app style cache', () => {
     allow: ['shared/ui/hoverOnlyWithHover.js', 'main.jsx'],
   }), []);
 });
+
+// A button that cannot be pressed has one look (UNPRESSABLE_SX in
+// shared/ui/pressable.js, given by pressableSx/toggleSx and iconButtonLook):
+// its own fill and ink, flat and quieter. MUI's disabled grey wrote a pale
+// label over a coloured fill (white on gold). No screen restyles
+// `.Mui-disabled` by hand.
+test('a disabled button takes the one unpressable look', () => {
+  assert.deepEqual(sourceLinesMatching(/'&\.Mui-disabled'/, {
+    allow: ['shared/ui/pressable.js'],
+  }), []);
+});

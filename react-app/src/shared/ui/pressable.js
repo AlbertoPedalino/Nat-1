@@ -40,15 +40,24 @@ export function inkOn(fill) {
     : UI_COLORS.textPrimary;
 }
 
+// A button that cannot be pressed now (a core book always in use, an action
+// not available yet): it keeps its fill and its ink, so it reads as before,
+// lies flat — no shadow, nothing to press — and is quieter. MUI's own
+// disabled grey would write its label in a pale grey over the fill (white on
+// gold). The one disabled look of every raised button and icon button.
+export const UNPRESSABLE_SX = Object.freeze({ boxShadow: 'none', opacity: OPACITY.strong });
+
 // A raised button filled with `fill`, its label in the ink that reads on it.
 export function pressableSx(fill) {
+  const ink = inkOn(fill);
   return {
     ...PRESSABLE_EDGE_SX,
-    color: inkOn(fill),
+    color: ink,
     // Plain CSS names, so the recipe also works in the theme's overrides
     // (where the sx shorthand `bgcolor` is not read).
     backgroundColor: fill,
     '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], backgroundColor: lighten(fill, 0.12) },
+    '&.Mui-disabled': { ...UNPRESSABLE_SX, color: ink },
   };
 }
 
@@ -74,7 +83,7 @@ export function iconButtonLook(radius = 1, { surface = UI_COLORS.surfaceRaised, 
       backgroundColor: solidHover ? surface : lighten(surface, 0.08),
       color: tone || UI_COLORS.accent,
     },
-    '&.Mui-disabled': { opacity: OPACITY.edge, boxShadow: 'none' },
+    '&.Mui-disabled': { ...UNPRESSABLE_SX, color: tone || UI_COLORS.textSecondary },
   };
 }
 

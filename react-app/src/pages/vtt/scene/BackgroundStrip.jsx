@@ -283,5 +283,4 @@ const collapsedSx = {
 const arrowSx = {
   ...mapIconButtonSx,
   flexShrink: 0,
-  '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.accent, OPACITY.line) },
 };
