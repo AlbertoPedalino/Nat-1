@@ -66,7 +66,7 @@ export function ConditionCard({ label, entries, onClose, fontSize = FONT_SIZES.x
   return (
     <Box sx={cardSx}>
       <Box sx={cardHeaderSx}>
-        <Typography sx={cardTitleSx}>{label}</Typography>
+        <Typography sx={conditionTitleSx}>{label}</Typography>
         <Box component="button" type="button" onClick={onClose} aria-label={`Close ${label}`} sx={cardCloseSx}>
           <X size={ICON_SIZES.xs} />
         </Box>
@@ -92,8 +92,8 @@ const cardSx = {
 
 const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 };
 
-const cardTitleSx = {
-  ...TEXT_STYLES.title,
+const conditionTitleSx = {
+  ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.xs,
   color: CONDITION_ACCENT,
 };

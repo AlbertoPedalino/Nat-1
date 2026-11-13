@@ -1,7 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
-import { FONT_WEIGHTS } from '../ui/fonts.js';
+import { TEXT_STYLES } from '../ui/textStyles.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
 
 // One collapsed accordion row: title (+ optional `leading` element such as a
@@ -43,7 +43,7 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, flex: 1 }}>
           {leading}
-          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, flex: 1, color: titleColor }}>
+          <Typography variant="body2" noWrap sx={{ ...TEXT_STYLES.cardName, minWidth: 0, flex: 1, color: titleColor }}>
             {title}
           </Typography>
           {trailing}

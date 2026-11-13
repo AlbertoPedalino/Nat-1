@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from './fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
@@ -132,8 +132,10 @@ export const panelFrameSx = {
 // The name on a card or row (an action, a chosen species or background): the
 // body face, bold, a step over the body text.
 export const cardTitleSx = {
-  fontSize: FONT_SIZES.lg,
-  fontWeight: FONT_WEIGHTS.bold,
+  ...TEXT_STYLES.cardName,
+  // Small capitals stand lower than capitals: a step up, as item and spell
+  // cards already letter their names.
+  fontSize: FONT_SIZES.xxl,
   color: 'text.primary',
 };
 

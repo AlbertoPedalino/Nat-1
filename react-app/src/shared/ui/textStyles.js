@@ -62,11 +62,23 @@ export const TEXT_STYLES = Object.freeze({
     letterSpacing: LETTER_SPACINGS.sm,
     ...inkLettering(3, 6),
   }),
-  // A quiet aside in the body face: a hint, an empty state, a rules note.
+  // A quiet aside in the prose face: a hint, an empty state, a rules note.
   note: Object.freeze({
+    fontFamily: UI_FONTS.prose,
     fontStyle: 'italic',
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontWeight: FONT_WEIGHTS.regular,
     color: 'text.secondary',
+  }),
+  // The name on a card (an action, a spell, an item, a feature, a result):
+  // a rulebook's small capitals, bold.
+  cardName: Object.freeze({
+    fontFamily: UI_FONTS.cardName,
+    fontWeight: FONT_WEIGHTS.bold,
+    letterSpacing: LETTER_SPACINGS.sm,
+  }),
+  // Descriptive text (a description, a rules entry): the prose face.
+  prose: Object.freeze({
+    fontFamily: UI_FONTS.prose,
   }),
 });
 

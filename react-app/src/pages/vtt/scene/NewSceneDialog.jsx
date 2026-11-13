@@ -115,7 +115,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
       {!generator ? (
         <Stack spacing={1.25}>
           <Box component="button" type="button" onClick={() => onCreate(campaignId)} sx={freshSx}>
-            <Typography sx={cardTitleSx}>Fresh scene</Typography>
+            <Typography sx={sceneOptionTitleSx}>Fresh scene</Typography>
             <Typography sx={cardBlurbSx}>
               An empty board. Upload your own picture, or draw on the grid.
             </Typography>
@@ -135,7 +135,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
                 >
                   <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
                     <OptionIcon size={ICON_SIZES.sm} />
-                    <Typography sx={cardTitleSx}>{option.label}</Typography>
+                    <Typography sx={sceneOptionTitleSx}>{option.label}</Typography>
                   </Stack>
                   <Typography sx={cardBlurbSx}>{option.blurb}</Typography>
                 </Box>
@@ -252,8 +252,8 @@ const cardSx = {
 
 const freshSx = { ...cardSx, borderColor: 'primary.main' };
 
-const cardTitleSx = {
-  ...TEXT_STYLES.figure,
+const sceneOptionTitleSx = {
+  ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.xl,
   color: 'primary.main',
 };

@@ -4,6 +4,7 @@ import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
 import { LIST_ROW_RULE_SX } from '../../shared/ui/interactive.js';
+import { TEXT_STYLES } from '../ui/textStyles.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -46,7 +47,9 @@ export function EntryBlocks({
   const grouped = groupBlocks(resolved);
 
   return (
-    <Stack spacing={spacing}>
+    // Descriptive text, read as a rulebook's (TEXT_STYLES.prose); inline
+    // controls (roll pills) keep their own lettering.
+    <Stack spacing={spacing} sx={{ '& .MuiTypography-root': TEXT_STYLES.prose }}>
       {grouped.map((block, index) => {
         if (block.kind === 'heading') {
           return (

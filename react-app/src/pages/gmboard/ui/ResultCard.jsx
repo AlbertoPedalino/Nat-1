@@ -22,7 +22,7 @@ export function ResultCard({
         sx={{ ...headerBandSx, ...headerSx, bgcolor: theme.palette.gmboard.headerOverlay }}
       >
         <Icon size={ICON_SIZES.xs} color={theme.palette.primary.main} />
-        <Typography sx={cardTitleSx}>{title}</Typography>
+        <Typography sx={resultTitleSx}>{title}</Typography>
         {header}
       </Stack>
       <Stack spacing={spacing} sx={{ p: 1.25 }}>{children}</Stack>
@@ -76,8 +76,8 @@ const headerBandSx = {
   ...LIST_ROW_RULE_SX,
 };
 
-const cardTitleSx = {
-  ...TEXT_STYLES.title,
+const resultTitleSx = {
+  ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.lg,
   color: 'primary.main',
 };

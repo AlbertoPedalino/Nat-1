@@ -4,7 +4,12 @@
 // `mono`.
 export const UI_FONTS = Object.freeze({
   display: '"Rubik", "Nunito Sans", system-ui, sans-serif',
-  prose: '"Nunito Sans", system-ui, sans-serif',
+  // Descriptive text read as a rulebook's: a feature's or spell's
+  // description, a toast's message, a quiet note.
+  prose: '"Alegreya", Georgia, serif',
+  // The name on a card (an action, a spell, an item, a feature): the
+  // rulebook's small capitals.
+  cardName: '"Alegreya SC", "Alegreya", Georgia, serif',
   body: '"Nunito Sans", system-ui, sans-serif',
   // Comic lettering with a fantasy cut (a narrow, heavy face with blackletter
   // serifs): the voice, what happens in the moment (a roll, NATURAL 20!, a

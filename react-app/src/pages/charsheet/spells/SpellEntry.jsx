@@ -55,6 +55,7 @@ import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryPar
 import Caption from '../../../shared/ui/Caption.jsx';
 import ToneBar from '../../../shared/ui/ToneBar.jsx';
 import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
+import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 
 // A spell's casting time as an action card's category: a minute or more is
 // the actions' "Other".
@@ -260,7 +261,7 @@ export default function SpellEntry({
               an action card's category is. */}
           <ToneBar tone={ACTION_COLORS[CAST_UNIT_CATEGORY[spellCastUnit(entry)]] || null} />
           <SpellNameIcon spell={entry} />
-          <Typography noWrap sx={{ minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{entry.name}</Typography>
+          <Typography noWrap sx={{ ...cardTitleSx, minWidth: 0 }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
