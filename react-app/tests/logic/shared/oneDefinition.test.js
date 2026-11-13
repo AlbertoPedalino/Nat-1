@@ -841,10 +841,11 @@ test("a piece's secrecy is read through isSecretPiece", () => {
   ), []);
 });
 
-// Work kept once per key and forgotten on failure goes through rememberPromise
-// (shared/rememberPromise.js), never another hand-made cache of promises.
-test('a promise cached by key is kept through rememberPromise', () => {
+// Work done once and forgotten on failure goes through cachedLoader /
+// cachedLoaderByKey / fetchJsonOnce (shared/content/cachedLoader.js), never
+// another hand-made cache of promises.
+test('a loader run once is a cachedLoader', () => {
   assert.deepEqual(sourceLinesMatching(/\.catch\(\(\)\s*=>\s*\w+\.delete\(|\w+\.delete\(\w+\);\s*throw /, {
-    allow: ['shared/rememberPromise.js'],
+    allow: ['shared/content/cachedLoader.js'],
   }), []);
 });

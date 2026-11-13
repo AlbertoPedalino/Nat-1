@@ -1,10 +1,11 @@
 import { adapterRegistry, installAdapters } from './registry.js';
 import { asArray } from '../shared/lists.js';
-import { rememberPromise } from '../shared/rememberPromise.js';
+import { cachedLoaderByKey } from '../shared/content/cachedLoader.js';
 
 const adapterModules = import.meta.glob('./{classes,feats,species,spells,items}/**/*.js');
 const loadedPaths = new Set();
-const inFlightPathPromises = new Map();
+// Each adapter module imported once; a failed import is tried again.
+const importAdapterModule = cachedLoaderByKey((path) => adapterModules[path]());
 const installedAdapters = [];
 const speciesPathPattern = /^\.\/species\//;
 const featPathPattern = /^\.\/feats\//;
@@ -45,7 +46,7 @@ async function loadPaths(paths, context) {
   const entries = [];
   uniquePaths.forEach((path) => {
     if (loadedPaths.has(path)) return;
-    entries.push({ path, promise: rememberPromise(inFlightPathPromises, path, adapterModules[path]) });
+    entries.push({ path, promise: importAdapterModule(path) });
   });
   if (!entries.length) return [];
   const modules = await Promise.all(entries.map((entry) => entry.promise));
@@ -54,7 +55,6 @@ async function loadPaths(paths, context) {
   entries.forEach((entry, idx) => {
     if (loadedPaths.has(entry.path)) return;
     loadedPaths.add(entry.path);
-    inFlightPathPromises.delete(entry.path);
     triggeredPaths.push(entry.path);
     const adapter = modules[idx]?.default;
     if (adapter) {

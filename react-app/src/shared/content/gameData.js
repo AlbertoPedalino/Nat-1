@@ -4,7 +4,7 @@
 // reader (builder, sheet, compendium, bestiary, weapon masteries, summoned
 // creatures), through fetchJsonOnce.
 
-import { fetchJsonOnce } from '../fetchJsonOnce.js';
+import { fetchJsonOnce } from './cachedLoader.js';
 
 export const GAME_DATA_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/';
 export const GAME_IMAGE_BASE = 'https://raw.githubusercontent.com/5etools-mirror-2/5etools-img/main/';

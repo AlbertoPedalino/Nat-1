@@ -1,4 +1,4 @@
-import { fetchJsonOnce } from '../../../shared/fetchJsonOnce.js';
+import { fetchJsonOnce } from '../../../shared/content/cachedLoader.js';
 
 // The game-icons.net catalog as map objects, fetched the way Lucide's dynamic
 // icons are: the list of names when the objects panel opens, each drawing when

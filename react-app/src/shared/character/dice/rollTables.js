@@ -1,7 +1,7 @@
 import { loadGameData } from '../../content/gameData.js';
 import { stripMarkup } from '../../content/markupText.js';
 import { rollDie } from './dice.js';
-import { rememberPromise } from '../../rememberPromise.js';
+import { cachedLoaderByKey } from '../../content/cachedLoader.js';
 
 // Tables a feature rolls on (Wild Magic Surge), read from the 5etools data
 // like every other piece of game text: where the table lives, never its rows.
@@ -14,7 +14,6 @@ const TABLE_SOURCES = {
   },
 };
 
-const loaded = new Map();
 
 function findTable(node) {
   if (Array.isArray(node)) {
@@ -47,15 +46,17 @@ export function parseRollTable(name, table) {
 }
 
 // The table for a key, loaded once (a failed load is tried again next time).
-export function loadRollTable(key) {
+const loadTable = cachedLoaderByKey(async (key) => {
   const source = TABLE_SOURCES[key];
-  if (!source) return Promise.resolve(null);
-  return rememberPromise(loaded, key, () => loadGameData(source.file).then((data) => {
-    const feature = (data?.[source.list] || []).find((entry) => entry.name === source.name && entry.source === source.source);
-    const table = parseRollTable(source.name, findTable(feature?.entries));
-    if (!table) throw new Error(`No ${source.name} table in ${source.file}`);
-    return table;
-  }));
+  const data = await loadGameData(source.file);
+  const feature = (data?.[source.list] || []).find((entry) => entry.name === source.name && entry.source === source.source);
+  const table = parseRollTable(source.name, findTable(feature?.entries));
+  if (!table) throw new Error(`No ${source.name} table in ${source.file}`);
+  return table;
+});
+
+export function loadRollTable(key) {
+  return TABLE_SOURCES[key] ? loadTable(key) : Promise.resolve(null);
 }
 
 export function rollOnTable(table, { count = 1, rng = Math.random } = {}) {

@@ -17,3 +17,23 @@ export function cachedLoader(load, { failed = () => false } = {}) {
   run.reset = () => { promise = null; };
   return run;
 }
+
+// The same, one loader per key: `load(key)` runs once for each key, and a key
+// whose load failed is tried again (a downloaded file by URL, a roll table, an
+// adapter module by path).
+export function cachedLoaderByKey(load, options) {
+  const loaders = new Map();
+  return (key) => {
+    if (!loaders.has(key)) loaders.set(key, cachedLoader(() => load(key), options));
+    return loaders.get(key)();
+  };
+}
+
+// A JSON file fetched at most once per tab and shared by every reader, fetched
+// again after a failure: the 5etools data (gameData.js) and the map's game
+// drawings (pages/vtt/objects/gameDrawings.js).
+export const fetchJsonOnce = cachedLoaderByKey(async (url) => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  return response.json();
+});
