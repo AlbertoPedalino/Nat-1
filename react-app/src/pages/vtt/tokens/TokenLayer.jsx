@@ -8,6 +8,7 @@ import { liftMovablePieces } from '../../../shared/vtt/session/liveScene.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 const VIEWPORT_OVERSCAN = 180;
 
@@ -84,17 +85,22 @@ const TokenNode = memo(function TokenNode({
   const at = worldToScreen(rect, view);
   const onActiveLayer = !activeLayer || token.layer === activeLayer;
   const staged = showPlayArea && !isTokenInPlay(token, playArea);
+  // Its place and size move every frame of a drag, a pan or a zoom: written
+  // onto the element (useLiveStyle), not into sx.
+  const placeRef = useLiveStyle({
+    width: rect.width * view.zoom,
+    height: rect.height * view.zoom,
+    transform: `translate(${at.x}px, ${at.y}px)`,
+  });
 
   return (
     <Box
+      ref={placeRef}
       data-token-selected={selected ? 'true' : undefined}
       sx={{
         position: 'absolute',
         left: 0,
         top: 0,
-        width: rect.width * view.zoom,
-        height: rect.height * view.zoom,
-        transform: `translate(${at.x}px, ${at.y}px)`,
         outline: selected ? `2px solid ${VTT_COLORS.accent}` : 'none',
         outlineOffset: 3,
         boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}` : 'none',

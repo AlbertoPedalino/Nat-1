@@ -15,6 +15,7 @@ import BubbleSparkles from '../../../shared/ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
+import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -28,15 +29,14 @@ import { focusRingSx } from '../../../shared/ui/interactive.js';
 // back. The little cross only says that it can be closed.
 export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
   const layout = resolveToastLayout(rollToast(roll));
+  // It rides the board through a pan: its place is written onto the element
+  // (useLiveStyle), not into sx.
+  const placeRef = useLiveStyle({ transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` });
 
   return (
     // Outer box owns the position; the transform here must stay untouched, so
     // the entrance animation lives on the inner box instead.
-    <Box sx={{
-      ...rootSx,
-      ...(underFog ? underFogSx : null),
-      transform: `translate(${x}px, ${y}px) translate(-50%, -100%)`,
-    }}>
+    <Box ref={placeRef} sx={{ ...rootSx, ...(underFog ? underFogSx : null) }}>
       <Box
         {...(onDismiss ? {
           role: 'button',

@@ -7,6 +7,7 @@ import SquareGrid from './SquareGrid.jsx';
 import { playAreaBox, hexPlayAreaPolygon } from './viewportGeometry.js';
 import { playAreaSvgSx, placeholderSx, playAreaStrokeProps } from './sceneViewportStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // The still layers under everything on the battle map: the picture (with its
 // light-filter tint), the square or hex grid, and the play-area outline. No
@@ -17,10 +18,25 @@ export default function MapBackdrop({
   backgroundOnly, gridVisible, gridColor, gridLine, selectedHex, showPlayArea, hexMapBox,
   hexPlayAreaClip, hexPlayAreaMatchesMap, viewportSize,
 }) {
+  // The picture's pan and zoom, and the play area's place, move every frame of
+  // a pan or a zoom: written onto their elements (useLiveStyle), not into sx.
+  const viewTransform = `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`;
+  const imageRef = useLiveStyle({ transform: viewTransform });
+  const tintRef = useLiveStyle({ transform: viewTransform });
+  const playAreaTopLeft = scene.playArea
+    ? worldToScreen(cellToWorld({ col: scene.playArea.x, row: scene.playArea.y }, scene.grid), view)
+    : null;
+  const playAreaCell = cellSize(scene.grid) * view.zoom;
+  const playAreaRef = useLiveStyle(scene.playArea ? {
+    transform: `translate(${playAreaTopLeft.x}px, ${playAreaTopLeft.y}px)`,
+    width: scene.playArea.w * playAreaCell,
+    height: scene.playArea.h * playAreaCell,
+  } : {});
   return (
     <>
       {imageUrl ? (
         <Box
+          ref={imageRef}
           component="img"
           src={imageUrl}
           alt=""
@@ -40,7 +56,6 @@ export default function MapBackdrop({
             left: 0,
             top: 0,
             transformOrigin: '0 0',
-            transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
             imageRendering: 'auto',
             userSelect: 'none',
             pointerEvents: 'none',
@@ -54,6 +69,7 @@ export default function MapBackdrop({
           multiplied into it, under everything that stands on the map. */}
       {imageUrl && imageSize && imageLook.tint ? (
         <Box
+          ref={tintRef}
           data-image-tint
           aria-hidden
           sx={{
@@ -63,7 +79,6 @@ export default function MapBackdrop({
             width: imageSize.width,
             height: imageSize.height,
             transformOrigin: '0 0',
-            transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
             bgcolor: imageLook.tint.color,
             opacity: imageLook.tint.opacity,
             mixBlendMode: 'multiply',
@@ -130,27 +145,21 @@ export default function MapBackdrop({
             />
           )}
         </Box>
-      ) : (() => {
-        const topLeft = worldToScreen(cellToWorld({ col: scene.playArea.x, row: scene.playArea.y }, scene.grid), view);
-        const cell = cellSize(scene.grid) * view.zoom;
-        return (
+      ) : (
           <Box
+            ref={playAreaRef}
             aria-hidden
             data-play-area="square"
             sx={{
               position: 'absolute',
               left: 0,
               top: 0,
-              transform: `translate(${topLeft.x}px, ${topLeft.y}px)`,
-              width: scene.playArea.w * cell,
-              height: scene.playArea.h * cell,
               border: `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.heavy)}`,
               boxSizing: 'border-box',
               pointerEvents: 'none',
             }}
           />
-        );
-      })()) : null}
+      )) : null}
     </>
   );
 }

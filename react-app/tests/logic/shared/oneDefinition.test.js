@@ -920,3 +920,22 @@ test('panel layers are switched only through usePanelsWithoutLayers', () => {
     allow: ['shared/ui/PanelHeader.jsx', 'pages/vtt/VttPage.jsx'],
   }), []);
 });
+
+// A place that moves every frame (a dragged piece, the board under a pan, a
+// brush under the pointer) is written onto its element through useLiveStyle
+// (shared/ui/liveStyle.js) or a direct `.style` write, never into sx: each sx
+// value is a new CSS rule, and inserting one restyles the whole page.
+// stickerLayout.js builds an SVG string at build time, not an element.
+test('a place that moves every frame is written through useLiveStyle', () => {
+  const offenders = [];
+  for (const file of sourceFilesMatching(/translate(3d)?\(\$\{/, { allow: ['shared/ui/stickerLayout.js'] })) {
+    const lines = readSource(file).split('\n');
+    lines.forEach((line, index) => {
+      if (!/translate(3d)?\(\$\{/.test(line)) return;
+      if (/\.style\.|^\s*const \w+ = `/.test(line)) return;
+      if (lines.slice(Math.max(0, index - 4), index + 1).join('\n').includes('useLiveStyle(')) return;
+      offenders.push(`${file}:${index + 1}`);
+    });
+  }
+  assert.deepEqual(offenders, []);
+});
