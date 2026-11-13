@@ -2,13 +2,26 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { iconNames } from 'lucide-react/dynamic';
 import { vi } from 'vitest';
 import MapObjectsPanel from '../../../../../src/pages/vtt/objects/MapObjectsPanel.jsx';
-import { MAP_OBJECT_DRAWINGS } from '../../../../../src/shared/ui/gameIcons.js';
 
-test('the objects panel searches and paginates the game drawings and the complete Lucide catalog', () => {
+// The game drawings' generated files (scripts/build-game-icons.mjs), served.
+const DRAWING_NAMES = ['chest', 'treasure-map'];
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(async (url) => ({
+    ok: true,
+    json: async () => (String(url).endsWith('/index.json')
+      ? { version: 'test', names: DRAWING_NAMES }
+      : { viewBox: '0 0 512 512', paths: ['M0 0h512v512z'] }),
+  })));
+});
+afterEach(() => vi.unstubAllGlobals());
+
+test('the objects panel searches and paginates the game drawings and the complete Lucide catalog', async () => {
   const onPlace = vi.fn();
   render(<MapObjectsPanel layer="gm" onPlace={onPlace} />);
 
-  expect(screen.getByText(new RegExp(`^${Object.keys(MAP_OBJECT_DRAWINGS).length + new Set(iconNames).size} icons`))).toBeInTheDocument();
+  expect(await screen.findByText(new RegExp(`^${DRAWING_NAMES.length + new Set(iconNames).size} icons`))).toBeInTheDocument();
+  // The drawings come first, each fetched as it is shown.
+  expect(fetch).toHaveBeenCalledWith(expect.stringMatching(/game-icons\/chest\.json$/));
   expect(screen.getByRole('navigation')).toBeInTheDocument();
 
   fireEvent.change(screen.getByRole('searchbox', { name: 'Search icons' }), {
@@ -32,11 +45,11 @@ test('the objects panel searches and paginates the game drawings and the complet
   }));
 });
 
-test("a game drawing is placed under its game: key", () => {
+test("a game drawing is placed under its game: key", async () => {
   const onPlace = vi.fn();
   render(<MapObjectsPanel layer="tokens" onPlace={onPlace} />);
   fireEvent.change(screen.getByRole('searchbox', { name: 'Search icons' }), { target: { value: 'treasure map' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Place Treasure Map' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Place Treasure Map' }));
   expect(onPlace).toHaveBeenCalledWith(expect.objectContaining({ key: 'game:treasure-map', label: 'Treasure Map' }));
 });
 

@@ -1,10 +1,10 @@
 import { titleCase } from '../../ui/textCase.js';
 import { clamp } from '../../numbers.js';
-// A map object stores only a kebab-case name: a Lucide icon's, or a game
-// drawing's after `game:` (MAP_OBJECT_DRAWINGS in shared/ui/gameIcons.js).
-// Rendering resolves the name through Lucide's own dynamic catalog or that
-// list; arbitrary markup and image bytes can therefore never enter the token
-// row.
+// A map object stores only a kebab-case name: a Lucide icon's, or a
+// game-icons.net drawing's after `game:` (pages/vtt/objects/gameDrawings.js).
+// Rendering resolves the name through Lucide's own dynamic catalog or the
+// drawings' generated files; arbitrary markup and image bytes can therefore
+// never enter the token row.
 export const GAME_DRAWING_PREFIX = 'game:';
 const MAP_OBJECT_KEY_RE = /^(?:game:)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const DEFAULT_MAP_OBJECT_STROKE = 1.8;

@@ -12,7 +12,7 @@ import {
 } from '../../../shared/vtt/map/mapObjects.js';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
-import { MAP_OBJECT_DRAWINGS } from '../../../shared/ui/gameIcons.js';
+import { loadGameDrawingNames } from './gameDrawings.js';
 import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -28,7 +28,6 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
 
 const PAGE_SIZE = 32;
-const GAME_DRAWING_KEYS = Object.keys(MAP_OBJECT_DRAWINGS).sort(compareText).map((name) => `${GAME_DRAWING_PREFIX}${name}`);
 const DEFAULT_COLOR = VTT_COLORS.accent;
 
 export default function MapObjectsPanel({
@@ -38,14 +37,24 @@ export default function MapObjectsPanel({
   const [page, setPage] = useState(1);
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(DEFAULT_MAP_OBJECT_STROKE);
+  // The game drawings' names, fetched when the panel opens; Lucide's are
+  // listed meanwhile.
+  const [drawingKeys, setDrawingKeys] = useState([]);
+  useEffect(() => {
+    let live = true;
+    loadGameDrawingNames().then((names) => {
+      if (live) setDrawingKeys(names.map((name) => `${GAME_DRAWING_PREFIX}${name}`));
+    }, () => {});
+    return () => { live = false; };
+  }, []);
   const filtered = useMemo(() => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const matches = (name) => words.every((word) => name.includes(word));
     // The game drawings first (the app's own look), then Lucide's icons.
-    const drawings = GAME_DRAWING_KEYS.filter(matches);
+    const drawings = drawingKeys.filter(matches);
     const icons = [...new Set(iconNames)].filter(matches).sort(compareText);
     return [...drawings, ...icons];
-  }, [query]);
+  }, [query, drawingKeys]);
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 

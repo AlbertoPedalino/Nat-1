@@ -6,7 +6,7 @@ import {
   normalizeMapObjectKey,
   normalizeMapObjectStroke,
 } from '../../../shared/vtt/map/mapObjects.js';
-import { MAP_OBJECT_DRAWINGS } from '../../../shared/ui/gameIcons.js';
+import GameDrawing from './GameDrawing.jsx';
 
 export default function MapObjectGlyph({
   iconKey, size = '72%', strokeWidth = DEFAULT_MAP_OBJECT_STROKE,
@@ -14,8 +14,7 @@ export default function MapObjectGlyph({
   const name = normalizeMapObjectKey(iconKey);
   // A game drawing is filled, not stroked: it takes the colour, not the width.
   if (name?.startsWith(GAME_DRAWING_PREFIX)) {
-    const Drawing = MAP_OBJECT_DRAWINGS[name.slice(GAME_DRAWING_PREFIX.length)] || CircleDashed;
-    return <Drawing size={size} />;
+    return <GameDrawing name={name.slice(GAME_DRAWING_PREFIX.length)} size={size} />;
   }
   return name ? (
     <DynamicIcon
