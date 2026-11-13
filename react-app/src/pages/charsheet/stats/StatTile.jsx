@@ -36,6 +36,8 @@ const tileFrameSx = {
   display: 'flex',
   flexDirection: 'column',
   minWidth: Math.round(STAT_TILE_SIZE * 0.8),
+  // The tile's own width sizes its name (tileTitleSx).
+  containerType: 'inline-size',
 };
 
 const bodyBaseSx = {

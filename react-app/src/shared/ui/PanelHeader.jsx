@@ -116,9 +116,11 @@ export const panelTitleSx = {
   color: 'primary.main',
 };
 
-// A stat tile's name: the panel's title a step smaller, the tile being narrow
-// (Prof. Bonus, Inspiration, Armor Class).
-export const tileTitleSx = { ...panelTitleSx, fontSize: FONT_SIZES.xxl };
+// A stat tile's name: the panel title's size where the tile has room (Str,
+// Dex), shrinking with the tile's own width where it has not (Prof. Bonus,
+// Inspiration in their narrow row, any tile on a phone), so a name is never
+// cut. The tile is its container (containerType on the tile's frame).
+export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.xxl}, 14cqi)` };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
 // thicker ink frame and its solid shadow. Boxes inside it keep the thinner

@@ -25,7 +25,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <StatTile
             tone={shieldUnproficient ? UI_COLORS.penalty : PANEL_TONES.armorClass}
-            label="Armor Class"
+            label="AC"
             value={(
               <Box sx={shieldSx}>
                 {/* A drawn shield behind the figure, inked; an untrained Shield
