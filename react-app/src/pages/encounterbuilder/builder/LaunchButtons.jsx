@@ -11,6 +11,16 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 // itself first); `disabled` when the encounter cannot be launched; `size` is
 // both buttons'; `grow` lets Launch take the row's width (the builder panel).
 // The tooltip is shown on a disabled button too, through its span.
+// The Launch button itself: the launch pair's, and the confirming button of
+// the initiative dialog.
+export function LaunchButton({ size = 'medium', ...props }) {
+  return (
+    <Button variant="contained" size={size} startIcon={<Swords size={size === 'small' ? ICON_SIZES.sm : ICON_SIZES.md} />} {...props}>
+      Launch
+    </Button>
+  );
+}
+
 export default function LaunchButtons({
   encounter, players, onLaunch, disabled = false, size = 'medium', grow = false,
 }) {
@@ -18,16 +28,7 @@ export default function LaunchButtons({
   const icon = size === 'small' ? ICON_SIZES.sm : ICON_SIZES.md;
   return (
     <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'stretch', flex: grow ? 1 : '0 0 auto', minWidth: 0 }}>
-      <Button
-        variant="contained"
-        size={size}
-        startIcon={<Swords size={icon} />}
-        onClick={() => onLaunch()}
-        disabled={disabled}
-        sx={grow ? { flex: 1, minWidth: 0 } : null}
-      >
-        Launch
-      </Button>
+      <LaunchButton size={size} onClick={() => onLaunch()} disabled={disabled} sx={grow ? { flex: 1, minWidth: 0 } : null} />
       <Tooltip title="Launch with initiative advantage / disadvantage">
         <Box component="span" sx={{ display: 'flex', flexShrink: 0 }}>
           <Button

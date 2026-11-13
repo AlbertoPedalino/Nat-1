@@ -86,7 +86,7 @@ function reduceEncounterState(state, action) {
       return changeMonsterQty(state, action.id, action.delta);
     case 'removeEncounterItem':
       return { ...state, encounter: state.encounter.filter((item) => item.id !== action.id) };
-    case 'newEncounter':
+    case 'clearComposer':
       return { ...clearComposer(state), view: 'builder' };
     case 'setEncounterName':
       return { ...state, encounterName: action.value };

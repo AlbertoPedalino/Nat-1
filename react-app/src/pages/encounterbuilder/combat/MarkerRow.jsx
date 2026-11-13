@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Box, Button } from '@mui/material';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { Box } from '@mui/material';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 // The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
@@ -26,7 +25,7 @@ export default function MarkerRow({ label, count = 0, pills, onClear, belowRow, 
         {pills}
         <DisclosureButton open={open} onToggle={() => setOpen((prev) => !prev)} label={label} count={count} />
         {onClear && count > 0 ? (
-          <Button size="small" variant="outlined" color="error" onClick={onClear} sx={clearSx}>Clear</Button>
+          <ClearButton onClick={onClear} />
         ) : null}
       </Box>
 
@@ -49,11 +48,3 @@ const rowSx = {
   minHeight: CONTROL_HEIGHTS.sm,
 };
 
-const clearSx = {
-  flex: '0 0 auto',
-  minWidth: 0,
-  px: 1,
-  py: 0.25,
-  fontSize: FONT_SIZES.xxs,
-  ...TEXT_STYLES.label,
-};

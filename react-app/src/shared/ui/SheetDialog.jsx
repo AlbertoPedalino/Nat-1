@@ -62,19 +62,25 @@ export const dialogSectionTitleSx = {
   color: 'primary.main',
 };
 
-// A section of a dialog's content: its title, the line under it that says how
+// A section of a dialog's content: its title (with `action` at the end of
+// its line: a control for the whole section), the line under it that says how
 // it works (`hint`), then what it holds. `sx` frames or places it.
-export function DialogSection({ title, hint, children, sx }) {
+export function DialogSection({ title, hint, action = null, children, sx }) {
   return (
     <Box sx={sx}>
       <Stack spacing={0.5}>
-        <Typography sx={dialogSectionTitleSx}>{title}</Typography>
+        <Box sx={sectionHeadSx}>
+          <Typography sx={[dialogSectionTitleSx, { flex: 1, minWidth: 0 }]}>{title}</Typography>
+          {action}
+        </Box>
         {hint ? <Caption>{hint}</Caption> : null}
       </Stack>
       {children}
     </Box>
   );
 }
+
+const sectionHeadSx = { display: 'flex', alignItems: 'center', gap: 1 };
 
 // Starting a dialog's tool over (a negotiation, a fumble table): a quiet
 // button at the start of the action bar, away from the dialog's main action.

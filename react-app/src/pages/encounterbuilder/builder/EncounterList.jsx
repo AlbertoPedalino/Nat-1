@@ -15,7 +15,7 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
-import AddButton from '../../../shared/ui/AddButton.jsx';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -23,6 +23,9 @@ export default function EncounterList() {
   const difficulty = calculateDifficulty(state.encounter, state.party);
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
   const editingExisting = state.library.some((entry) => entry.id === state.currentEncounterId);
+  const hasComposition = Boolean(
+    state.encounter.length || state.encounterName || state.encounterQuest || state.currentEncounterId != null,
+  );
 
   const handleSave = () => {
     const entry = saveEncounterToLibrary();
@@ -40,13 +43,11 @@ export default function EncounterList() {
     <Panel
       icon={Swords}
       title="Encounter"
-      action={(
-        <AddButton
-          onClick={() => dispatch({ type: 'newEncounter' })}
-        >
-          New Encounter
-        </AddButton>
-      )}
+      // Clear starts the panel over without saving: a composition dropped, or a
+      // loaded encounter left as it is in the Library.
+      action={hasComposition ? (
+        <ClearButton onClick={() => dispatch({ type: 'clearComposer' })} />
+      ) : null}
     >
       <Stack spacing={2}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>{formatNumber(difficulty.totalXp)} XP</Typography>

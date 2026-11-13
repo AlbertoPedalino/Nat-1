@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
-import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton, DialogSection } from '../../../shared/ui/SheetDialog.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
+import { ROLL_MODE_CHIP } from '../../../shared/character/dice/rollToastLayout.js';
+import { LaunchButton } from './LaunchButtons.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
@@ -48,15 +51,13 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
       actions={(
         <>
           <CancelButton onClick={onClose} />
-          <Button variant="contained" startIcon={<Swords size={ICON_SIZES.md} />} onClick={() => onLaunch(choices)}>
-            Launch
-          </Button>
+          <LaunchButton onClick={() => onLaunch(choices)} />
         </>
       )}
     >
-      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+      <Caption sx={{ mb: 1.5 }}>
         Set only the exceptions; everyone else rolls as usual. Any advantage plus any disadvantage is a straight roll.
-      </Typography>
+      </Caption>
       <Stack spacing={2}>
         {SIDES.map(({ side, label }) => {
           const sideRows = rows.filter((row) => row.side === side);
@@ -64,15 +65,17 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
           const keys = sideRows.map((row) => row.key);
           const values = new Set(keys.map((key) => choices[key] || 'none'));
           return (
-            <Stack key={side} spacing={0.75}>
-              <Box sx={sideHeaderSx}>
-                <Typography variant="overline" sx={{ flex: 1, color: 'primary.main' }}>{label}</Typography>
+            <DialogSection
+              key={side}
+              title={label}
+              action={(
                 <ModeToggle
                   label={`All ${label.toLowerCase()}`}
                   value={values.size === 1 ? [...values][0] : null}
                   onChange={(value) => choose(keys, value)}
                 />
-              </Box>
+              )}
+            >
               {sideRows.map((row) => {
                 const choice = choices[row.key];
                 const own = row.sources.adv || row.sources.disadv;
@@ -95,7 +98,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
                   />
                 );
               })}
-            </Stack>
+            </DialogSection>
           );
         })}
       </Stack>
@@ -110,15 +113,16 @@ function ModeToggle({ label, value, onChange }) {
       value={value}
       onChange={onChange}
       options={[
-        { value: 'disadv', label: 'DIS', color: 'error', ariaLabel: `${label}: disadvantage` },
+        { value: 'disadv', label: DIS.label, color: DIS.color, ariaLabel: `${label}: disadvantage` },
         { value: 'none', label: '—', ariaLabel: `${label}: normal` },
-        { value: 'adv', label: 'ADV', color: 'success', ariaLabel: `${label}: advantage` },
+        { value: 'adv', label: ADV.label, color: ADV.color, ariaLabel: `${label}: advantage` },
       ]}
       sx={{ flexShrink: 0 }}
     />
   );
 }
 
-// A side's heading row: its name and the toggle for all of it.
-const sideHeaderSx = { display: 'flex', alignItems: 'center', gap: 1 };
+// The modes in the words and colours every roll shows them in.
+const ADV = ROLL_MODE_CHIP.advantage;
+const DIS = ROLL_MODE_CHIP.disadvantage;
 

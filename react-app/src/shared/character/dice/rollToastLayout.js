@@ -10,10 +10,12 @@ import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 // and they have to agree. Dependency-free so the plain node runner can cover it.
 
 // How the roll was made, stuck on the toast: filled in its tone, the
-// strongest fact on it after the total.
+// strongest fact on it after the total. The same words and colours wherever
+// a mode is shown or chosen (the launch's initiative keys take `color`, the
+// palette name of `tone`).
 export const ROLL_MODE_CHIP = {
-  advantage: { label: 'ADV', tone: UI_COLORS.success, filled: true },
-  disadvantage: { label: 'DIS', tone: UI_COLORS.warning, filled: true },
+  advantage: { label: 'ADV', tone: UI_COLORS.success, color: 'success', filled: true },
+  disadvantage: { label: 'DIS', tone: UI_COLORS.warning, color: 'warning', filled: true },
 };
 
 export function rollDieColor(value, faces) {

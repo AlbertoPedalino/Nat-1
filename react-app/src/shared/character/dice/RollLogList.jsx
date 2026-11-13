@@ -1,15 +1,14 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { Box, Stack, Typography } from '@mui/material';
 import RollActorLabel from './RollActorLabel.jsx';
 import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
 import { formatClockTime } from '../../ui/dateFormat.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { SURFACES } from '../../ui/surfaces.js';
-import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 import EmptyLine from '../../ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import ClearButton from '../../ui/ClearButton.jsx';
 
 // The roll log every screen shows (character sheet, battle map, encounter
 // builder): newest first, one row per roll in the shape rollFeed.normalizeRoll
@@ -21,9 +20,7 @@ export default function RollLogList({
   return (
     <Stack spacing={0.75}>
       {onClear && log?.length ? (
-        <Button size="small" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={onClear} sx={clearSx}>
-          Clear
-        </Button>
+        <ClearButton onClick={onClear} sx={{ alignSelf: 'flex-end' }} />
       ) : null}
       {log?.length ? log.map((entry) => <RollLogRow key={entry.id} entry={entry} />) : (
         <EmptyLine>{emptyText}</EmptyLine>
@@ -71,8 +68,6 @@ function splitTitle(label, detail) {
     rest: text.slice(at + formula.length).replace(/^[\s)]+/, '').trim(),
   };
 }
-
-const clearSx = { alignSelf: 'flex-end', color: 'text.secondary' };
 
 const rowSx = {
   ...SURFACES.wash,

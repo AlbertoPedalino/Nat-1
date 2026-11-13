@@ -238,6 +238,7 @@ export const theme = createTheme({
       variants: [
         { props: { color: 'error' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.danger, color: UI_COLORS.edge } } },
         { props: { color: 'success' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.success, color: UI_COLORS.edge } } },
+        { props: { color: 'warning' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.warning, color: UI_COLORS.edge } } },
       ],
     },
     // Every icon button stands raised (iconButtonLook): pressed, like every

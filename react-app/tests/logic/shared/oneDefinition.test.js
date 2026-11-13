@@ -1050,3 +1050,9 @@ test('an item list is an ItemBrowser', () => {
     allow: ['shared/character/inventory/ItemBrowser.jsx', 'shared/character/inventory/useItemListQuery.js'],
   }), []);
 });
+
+// A button that empties something and starts it over (the encounter panel,
+// the filters, conditions and effects, the roll log) is a ClearButton.
+test('a clear button is a ClearButton', () => {
+  assert.deepEqual(sourceFilesMatching(/<Button[^>]*>\s*Clear( all)?\s*<\/Button>/, { allow: ['shared/ui/ClearButton.jsx'] }), []);
+});

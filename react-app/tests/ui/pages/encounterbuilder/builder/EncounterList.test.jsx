@@ -85,17 +85,17 @@ test('Update and Launch keep the same library entry and empty the panel; a new l
   expect(persisted.fightsData.items).toEqual(next.fights);
 });
 
-test('New Encounter starts an empty draft after updating and saves it separately', async () => {
+test('Clear drops a loaded encounter without saving; the next one saves separately', async () => {
   const user = userEvent.setup();
   render(<EncounterBuilderProvider instanceId="test" instanceSaved><Harness /></EncounterBuilderProvider>);
   await user.click(screen.getByRole('button', { name: 'Open saved library' }));
   await user.click(screen.getByRole('button', { name: 'Load' }));
-  await user.click(screen.getByRole('button', { name: 'Increase quantity' }));
-  await user.click(screen.getByRole('button', { name: 'Update in Library' }));
   const readState = () => JSON.parse(screen.getByTestId('state').textContent);
   const saved = readState();
+  await user.click(screen.getByRole('button', { name: 'Increase quantity' }));
 
-  await user.click(screen.getByRole('button', { name: 'New Encounter' }));
+  await user.click(screen.getByRole('button', { name: 'Clear' }));
+  expect(screen.queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument();
   expect(screen.getByRole('textbox', { name: 'Library name' })).toHaveValue('');
   expect(screen.getByRole('combobox', { name: 'Quest category' })).toHaveValue('');
   expect(screen.getByText('Add monsters from the bestiary list.')).toBeInTheDocument();

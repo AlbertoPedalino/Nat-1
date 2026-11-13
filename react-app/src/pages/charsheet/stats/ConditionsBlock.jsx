@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, Typography, Button, alpha } from '@mui/material';
-import { ChevronDown, ListChecks, X } from 'lucide-react';
+import { Box, Typography, alpha } from '@mui/material';
+import { ChevronDown, ListChecks } from 'lucide-react';
 import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
 import {
@@ -11,7 +11,7 @@ import {
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
@@ -22,7 +22,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
 
@@ -122,15 +122,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 chipSx={{ fontSize: FONT_SIZES.xxxs }}
               />
               {active.length > 0 && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<X size={ICON_SIZES.xs} />}
-                  onClick={onClear}
-                  sx={{ mt: 0.5, fontSize: FONT_SIZES.xxxs, py: 0.25, lineHeight: LINE_HEIGHTS.normal, ...actionButtonToneSx(UI_COLORS.dangerDeep) }}
-                >
-                  Clear all
-                </Button>
+                <ClearButton onClick={onClear} sx={{ mt: 0.5 }}>Clear all</ClearButton>
               )}
             </Box>
           </CollapsibleBody>
