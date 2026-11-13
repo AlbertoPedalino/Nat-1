@@ -16,6 +16,7 @@ import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { hungOverStyle } from '../map/viewportGeometry.js';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -31,7 +32,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
   const layout = resolveToastLayout(rollToast(roll));
   // It rides the board through a pan: its place is written onto the element
   // (useLiveStyle), not into sx.
-  const placeRef = useLiveStyle({ transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` });
+  const placeRef = useLiveStyle(hungOverStyle(x, y));
 
   return (
     // Outer box owns the position; the transform here must stay untouched, so

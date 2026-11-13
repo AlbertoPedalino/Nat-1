@@ -13,6 +13,7 @@ import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/
 import { hexLabel } from './hexLabel.js';
 import WeatherTag from './WeatherTag.jsx';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { hungOverStyle } from '../map/viewportGeometry.js';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -31,7 +32,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
   const tone = clock ? weatherTone(theme.palette, clock.weather) : null;
   // It rides the board through a pan: its place is written onto the element
   // (useLiveStyle), not into sx.
-  const placeRef = useLiveStyle({ transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` });
+  const placeRef = useLiveStyle(hungOverStyle(x, y));
 
   return (
     <Box ref={placeRef} sx={rootSx}>

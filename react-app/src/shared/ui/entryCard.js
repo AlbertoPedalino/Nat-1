@@ -61,13 +61,11 @@ export const ENTRY_BUTTON_SX = Object.freeze({
   borderRadius: 1,
 });
 
-// A pickable row's one action (Add / Remove a spell, Add an item): the same
-// small button in every picker.
+// A pickable row's one action (Add / Remove a spell, Add an item): the cards'
+// small control (ENTRY_BUTTON_SX, the controls' small size like every button),
+// wide enough that Add and Remove keep one width.
 export const PICK_ACTION_SX = Object.freeze({
+  ...ENTRY_BUTTON_SX,
   flexShrink: 0,
   minWidth: 56,
-  px: 1,
-  py: 0.25,
-  fontSize: FONT_SIZES.xs,
-  lineHeight: LINE_HEIGHTS.normal,
 });

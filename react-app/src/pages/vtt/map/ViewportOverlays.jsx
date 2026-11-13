@@ -8,6 +8,7 @@ import { distanceSx, placementCountSx } from './sceneViewportStyles.js';
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { hungOverStyle, pieceScreenStyle } from './viewportGeometry.js';
 
 // Markers drawn over the board at screen positions, none of them interactive.
 
@@ -18,11 +19,7 @@ export function PlacementPreview({
   const token = { ...placementDrag.token, ...placementHover };
   const rect = tokenWorldRect(token, grid);
   const at = worldToScreen(rect, view);
-  const placeRef = useLiveStyle({
-    width: rect.width * view.zoom,
-    height: rect.height * view.zoom,
-    transform: `translate(${at.x}px, ${at.y}px)`,
-  });
+  const placeRef = useLiveStyle(pieceScreenStyle(rect, at, view.zoom));
   return (
     <Box
       ref={placeRef}
@@ -62,7 +59,7 @@ export function PartyHexMarker({
   const glyph = clamp(hexWidth(grid) * view.zoom * 0.66, 20, 96);
   // The pin points at the hex, so it hangs above the centre rather than
   // sitting on it.
-  const placeRef = useLiveStyle({ transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)` });
+  const placeRef = useLiveStyle(hungOverStyle(centre.x, centre.y, '-78%'));
   return (
     <Box
       ref={placeRef}

@@ -9,6 +9,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { pieceScreenStyle } from '../map/viewportGeometry.js';
 
 const VIEWPORT_OVERSCAN = 180;
 
@@ -87,11 +88,7 @@ const TokenNode = memo(function TokenNode({
   const staged = showPlayArea && !isTokenInPlay(token, playArea);
   // Its place and size move every frame of a drag, a pan or a zoom: written
   // onto the element (useLiveStyle), not into sx.
-  const placeRef = useLiveStyle({
-    width: rect.width * view.zoom,
-    height: rect.height * view.zoom,
-    transform: `translate(${at.x}px, ${at.y}px)`,
-  });
+  const placeRef = useLiveStyle(pieceScreenStyle(rect, at, view.zoom));
 
   return (
     <Box

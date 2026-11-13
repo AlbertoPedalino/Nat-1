@@ -18,12 +18,17 @@ in one folder.
 such as `ColorField` and `InfoHint` belong to `shared/ui/`, with the one piece for
 each recurring job (guarded by `tests/logic/shared/oneDefinition*.test.js`):
 `ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
-labelled stops), `TipIconButton` (an icon button, `danger` for one that removes),
+labelled stops), `TipIconButton` (an icon button, `danger` for one that removes; every icon button
+stands raised from the theme, `PART_ICON_BUTTON_SX` only for an icon that is part of
+something else), `CloseButton` / `CornerCloseButton` (every X), `RowExpandButton` (a
+row's chevron),
 `DisclosureButton` + `CollapsibleBody` / `ExpandableCard` (what opens and closes),
 `ScrollingName` (a card name on one line), `PickableRow` + `entryCard.js` (an
 action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
-`Panel` / `SidePanel` / `PageHeader`, `CornerCloseButton`, and the recipes in
+`Panel` / `SidePanel` / `PageHeader` (`usePanelsWithoutLayers` for a page over a moving
+board), `liveStyle.js` (whatever moves every frame: `useLiveStyle`, `writeLiveStyle`,
+`useRootStyle`; never sx), `CornerCloseButton`, and the recipes in
 `interactive.js` (`focusRingSx` with an optional `tone`, `LIST_ROW_SX`,
 `CARD_PART_RULE_SX`, `readoutSx`). The weather card is `WeatherCard` in
 `shared/gmboard/ui/WeatherSummary.jsx`.

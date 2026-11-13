@@ -206,3 +206,18 @@ export function hexPlayAreaLayout(scene, view, imageSize) {
     : null;
   return { hexMapBox, hexPlayAreaMatchesMap, hexPlayAreaClip };
 }
+
+// A piece's box on the screen (a token, the piece being placed): its size at
+// this zoom and its place, as the style useLiveStyle writes onto it.
+export function pieceScreenStyle(rect, at, zoom) {
+  const transform = `translate(${at.x}px, ${at.y}px)`;
+  return { width: rect.width * zoom, height: rect.height * zoom, transform };
+}
+
+// Something hung over a point of the board (a roll bubble, a hex bubble, the
+// party's pin): centred on it, its bottom on the point; `rise` is how much of
+// its own height it stands above (the pin hangs lower, so its tip touches).
+export function hungOverStyle(x, y, rise = '-100%') {
+  const transform = `translate(${x}px, ${y}px) translate(-50%, ${rise})`;
+  return { transform };
+}
