@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import { clampInt } from '../../../shared/numbers.js';
 import LoadStatus from '../../../shared/ui/LoadStatus.jsx';
 import { runBusy } from '../../../shared/ui/busyAction.js';
@@ -13,8 +13,13 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 
-export default function CampaignImport() {
-  const { campaignPlayers, state, dispatch } = useEncounterBuilder();
+// Campaign players: redrawn only when they or the notice change (encounterPanel).
+export default encounterPanel(
+  ({ campaignPlayers, state, dispatch }) => ({ campaignPlayers, campaignNotice: state.campaignNotice, dispatch }),
+  CampaignImport,
+);
+
+function CampaignImport({ campaignPlayers, campaignNotice, dispatch }) {
   const { notify } = useToast();
   const [selectedId, setSelectedId] = useState('');
   const [importing, setImporting] = useState(false);
@@ -87,8 +92,8 @@ export default function CampaignImport() {
               ))}
               {selected.players.length > 10 ? <TagChip label={`+${selected.players.length - 10} more`} /> : null}
             </Box>
-            {state.campaignNotice ? (
-              <Typography variant="caption" sx={{ color: 'primary.main' }}>{state.campaignNotice}</Typography>
+            {campaignNotice ? (
+              <Typography variant="caption" sx={{ color: 'primary.main' }}>{campaignNotice}</Typography>
             ) : null}
           </>
         ) : null}

@@ -13,7 +13,6 @@ import {
   subscribeInstances,
 } from './instanceStore.js';
 import {
-  getSyncState,
   isInstanceSyncOnline,
   openInstance,
   refreshInstance,
@@ -156,6 +155,12 @@ export function useToolInstance(sectionKey) {
     });
   }, [id, notify, online, sectionKey, shown]);
 
+  // The page is redrawn only when what it shows of the instance changes (that
+  // it exists, its name, its link group, a conflict), never for a save: every
+  // local save notifies, and redrawing the whole editor on each one doubled
+  // the cost of every edit (measured on the encounter builder, 2026-11-13).
+  const shownRef = useRef('');
+  shownRef.current = shownKey(id ? getInstance(sectionKey, id) : null);
   useEffect(() => {
     if (!id) return undefined;
     return subscribeInstances((event) => {
@@ -163,7 +168,7 @@ export function useToolInstance(sectionKey) {
       if (event.kind === 'pulled') {
         setGate((previous) => (previous.id === id && previous.ready ? { ...previous, revision: previous.revision + 1 } : previous));
       }
-      setTick((tick) => tick + 1);
+      if (shownKey(getInstance(sectionKey, id)) !== shownRef.current) setTick((tick) => tick + 1);
     });
   }, [id, sectionKey]);
 
@@ -183,9 +188,14 @@ export function useToolInstance(sectionKey) {
     revision: gate.id === id ? gate.revision : 0,
     name: entry?.name || '',
     linkGroupId: entry?.linkGroupId || null,
-    syncState: id ? getSyncState(sectionKey, id) : null,
     conflict: entry?.conflict || null,
     online,
     resolveConflict: resolve,
   };
+}
+
+// What a tool page shows of its instance; a change of anything else (a save,
+// a sync stamp) does not redraw it.
+function shownKey(entry) {
+  return JSON.stringify([Boolean(entry), entry?.name || '', entry?.linkGroupId || null, entry?.conflict || null]);
 }

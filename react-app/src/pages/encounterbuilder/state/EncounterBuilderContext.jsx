@@ -1,5 +1,5 @@
 import { markRender } from '../RenderClock.jsx';
-import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
+import { createContext, memo, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
@@ -117,4 +117,18 @@ export function useEncounterBuilder() {
   const context = useContext(EncounterBuilderContext);
   if (!context) throw new Error('useEncounterBuilder must be used within EncounterBuilderProvider.');
   return context;
+}
+
+// A panel of the builder that is redrawn only when what it shows changes:
+// `select(context)` picks its props (slices of state, dispatch, the campaign
+// players…; each one stable while unchanged), and the panel is memoized on
+// them. Every builder change otherwise redraws every panel that reads the
+// context; measured on a name typed (2026-11-13), Party alone took up to 20ms.
+export function encounterPanel(select, Panel) {
+  const Memo = memo(Panel);
+  function SelectedPanel(props) {
+    return <Memo {...props} {...select(useEncounterBuilder())} />;
+  }
+  SelectedPanel.displayName = `encounterPanel(${Panel.name || 'Panel'})`;
+  return SelectedPanel;
 }

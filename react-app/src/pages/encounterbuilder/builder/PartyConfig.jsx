@@ -3,7 +3,7 @@ import { ExternalLink, Trash2, Users } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
@@ -13,8 +13,13 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { LIST_ROW_SX } from '../../../shared/ui/interactive.js';
 
-export default function PartyConfig() {
-  const { state, dispatch } = useEncounterBuilder();
+// The party: redrawn only when it changes (encounterPanel).
+export default encounterPanel(
+  ({ state, dispatch }) => ({ party: state.party, players: state.players, dispatch }),
+  PartyConfig,
+);
+
+function PartyConfig({ party, players, dispatch }) {
 
   return (
     <Panel icon={Users} title="Party">
@@ -22,21 +27,21 @@ export default function PartyConfig() {
         <Stack direction="row" spacing={1}>
           <Stepper
             label="PCs"
-            value={state.party.count}
+            value={party.count}
             min={1}
             max={10}
             onChange={(value) => dispatch({ type: 'setPartyCount', value })}
           />
           <Stepper
             label="Level"
-            value={state.party.level}
+            value={party.level}
             min={1}
             max={20}
             onChange={(value) => dispatch({ type: 'setPartyLevel', value })}
           />
         </Stack>
         <Stack spacing={1}>
-          {state.players.map((player, index) => (
+          {players.map((player, index) => (
             <Box key={player.id ?? index} sx={playerRowSx}>
               {/* A character imported from a campaign wears the colour their
                   own sheet chose, so there is nothing to pick here: the badge
