@@ -200,3 +200,10 @@ export const BUBBLE_SHAKE_SX = Object.freeze({
   },
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 });
+
+// A bubble's X (BubbleCloseButton) sits in the same corner of every bubble —
+// a roll's toast, a map bubble over a piece or a hex, an app notice — and the
+// bubble's first line keeps clear of it (BUBBLE_TITLE_CLEAR_SX), so the X never
+// covers the title.
+export const BUBBLE_CLOSE_PLACE_SX = Object.freeze({ top: 6, right: 6, zIndex: 3 });
+export const BUBBLE_TITLE_CLEAR_SX = Object.freeze({ pr: 3.5 });

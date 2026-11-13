@@ -12,6 +12,7 @@ import {
 } from './sceneViewportStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { CloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
 
 // Buttons that sit on the map. Each is marked `data-viewport-control`, so the
 // map does not take their clicks for the start of a pan.
@@ -37,9 +38,7 @@ export function SelectionToolbar({
       >
         Delete
       </Button>
-      <TipIconButton title="Clear selection" size="small" onClick={onClear} sx={mapPanelButtonSx}>
-        <X size={ICON_SIZES.sm} />
-      </TipIconButton>
+      <CloseButton onClose={onClear} label="Clear selection" iconSize={ICON_SIZES.sm} sx={mapPanelButtonSx} />
     </Stack>
   );
 }

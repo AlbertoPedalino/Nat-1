@@ -1,9 +1,9 @@
 import { Box, Stack, Typography } from '@mui/material';
-import { X } from 'lucide-react';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { asArray } from '../../../shared/lists.js';
 import { mapPanelButtonSx, mapPanelSx, mapPanelTitleSx } from './battleMapSurface.js';
+import { CloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
 
 // A panel floating over the battle map (the scene and hexcrawl corners, the
 // tool rail's options): the map's glass, its title row, its content. A plain
@@ -29,9 +29,7 @@ export default function MapFloatingPanel({
           </TipIconButton>
         ))}
         {onClose ? (
-          <TipIconButton title="Close" size="small" onClick={onClose} sx={mapPanelButtonSx}>
-            <X size={ICON_SIZES.sm} />
-          </TipIconButton>
+          <CloseButton onClose={onClose} iconSize={ICON_SIZES.sm} sx={mapPanelButtonSx} />
         ) : null}
       </Stack>
       {children}

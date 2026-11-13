@@ -9,11 +9,12 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BARE_BUTTON_SX, CARD_PART_RULE_SX, focusRingSx } from '../../../shared/ui/interactive.js';
-import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx, BUBBLE_TITLE_CLEAR_SX } from '../../../shared/ui/bubble.js';
 import { hexLabel } from './hexLabel.js';
 import WeatherTag from './WeatherTag.jsx';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { hungOverStyle } from '../map/viewportGeometry.js';
+import { BubbleCloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small
@@ -46,7 +47,8 @@ export default function HexBubble({ bubble, x, y, onClose }) {
         aria-label={onClose ? `${bubble.headline} — close` : undefined}
         sx={{ ...(onClose ? clickableSx : null), ...hexBubbleSx }}
       >
-        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25 }}>
+        {onClose ? <BubbleCloseButton /> : null}
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 0.25, ...(onClose ? BUBBLE_TITLE_CLEAR_SX : null) }}>
           {TerrainIcon ? <TerrainIcon size={ICON_SIZES.xs} color={theme.palette.text.secondary} /> : null}
           {/* What the leg cost, weather and mount included, rather than what
               the terrain costs a party on foot in the sun. */}

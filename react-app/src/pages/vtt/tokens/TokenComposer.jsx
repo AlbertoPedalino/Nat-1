@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { ImagePlus, Plus, X } from 'lucide-react';
+import { ImagePlus, Plus } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
@@ -12,7 +12,7 @@ import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import { mapDangerButtonSx } from '../map/battleMapSurface.js';
-import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { CloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -115,9 +115,7 @@ export default function TokenComposer({
               />
             </Button>
             {image ? (
-              <TipIconButton title="Remove token image" size="small" onClick={() => setImage(null)} sx={mapDangerButtonSx}>
-                <X size={ICON_SIZES.sm} />
-              </TipIconButton>
+              <CloseButton onClose={() => setImage(null)} label="Remove token image" iconSize={ICON_SIZES.sm} sx={mapDangerButtonSx} />
             ) : null}
             <Button
               size="small"

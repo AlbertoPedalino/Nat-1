@@ -1,15 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx, BUBBLE_TITLE_CLEAR_SX } from '../../../shared/ui/bubble.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import BubbleSparkles from '../../../shared/ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -17,6 +13,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { hungOverStyle } from '../map/viewportGeometry.js';
+import { BubbleCloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -67,15 +64,18 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
         {layout.isCrit ? <BubbleSparkles key={roll.id} /> : null}
         {layout.isFail ? <BubbleDizzy /> : null}
-        {onDismiss ? (
-          <Box aria-hidden sx={closeSx}>
-            <X size={ICON_SIZES.xxs} strokeWidth={2.6} />
-          </Box>
-        ) : null}
+        {onDismiss ? <BubbleCloseButton /> : null}
 
-        {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
+        {roll.actorName ? <Typography sx={{ ...actorSx, ...(onDismiss ? BUBBLE_TITLE_CLEAR_SX : null) }}>{roll.actorName}</Typography> : null}
 
-        <Typography sx={{ ...labelSx, ...(layout.tone ? { color: layout.tone } : null) }}>{layout.label}</Typography>
+        <Typography sx={{
+          ...labelSx,
+          ...(onDismiss && !roll.actorName ? BUBBLE_TITLE_CLEAR_SX : null),
+          ...(layout.tone ? { color: layout.tone } : null),
+        }}
+        >
+          {layout.label}
+        </Typography>
 
         {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.accent }}>NATURAL 20!</Typography>}
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
@@ -142,25 +142,7 @@ const rollBubbleSx = {
 const dismissableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
-  // Room for the cross, so it never sits on the actor's name.
-  px: 2.25,
   ...focusRingSx({ tone: VTT_COLORS.accent }),
-};
-
-const closeSx = {
-  position: 'absolute',
-  zIndex: 3,
-  top: 4,
-  right: 4,
-  width: 16,
-  height: 16,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '50%',
-  color: 'text.secondary',
-  // Darkened over the bubble's own fill, so the button stays solid.
-  ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.line, base: UI_COLORS.bubble }),
 };
 
 // A natural 20 or 1 throws the bubble's shadow in its own colour.

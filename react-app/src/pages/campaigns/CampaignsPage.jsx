@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { Cloud, Flag, Users, Plus, ScrollText, Copy, LogIn, LogOut, X, Trash2, Eye } from 'lucide-react';
+import { Cloud, Flag, Users, Plus, ScrollText, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -42,6 +42,7 @@ import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
+import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -256,9 +257,7 @@ export default function CampaignsPage() {
                             ) : null}
                             subtitle={`${ch.owner_username || '—'}${mine ? ' · you' : ''}`}
                             actions={mine ? (
-                              <TipIconButton danger size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" ariaLabel={`Remove ${ch.name || ch.id} from campaign`}>
-                                <X size={ICON_SIZES.sm} />
-                              </TipIconButton>
+                              <CloseButton danger onClose={() => assignChar(ch.id, null)} label={`Remove ${ch.name || ch.id} from campaign`} iconSize={ICON_SIZES.sm} />
                             ) : null}
                           >
                             {s ? (

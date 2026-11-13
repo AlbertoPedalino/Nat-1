@@ -3,6 +3,14 @@ import { join, relative } from 'node:path';
 
 const SRC = new URL('../../src/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 
+// A source file's text with its line ends as \n, whatever the checkout wrote:
+// with core.autocrlf on Windows the files carry \r\n, and a guard that spans
+// lines (`...\n\s*</TipIconButton>`) would then never match and pass in
+// silence. Every scan reads through here.
+function readText(path) {
+  return readFileSync(path, 'utf8').replace(/\r\n?/g, '\n');
+}
+
 // Every .js/.jsx file under src/ (5etools data left out) whose text matches
 // `pattern`, as paths relative to src/ with forward slashes. `allow` lists the
 // files where the match is the one definition.
@@ -15,7 +23,7 @@ export function sourceFilesMatching(pattern, { allow = [] } = {}) {
       if (!/\.(js|jsx)$/.test(name)) continue;
       const file = relative(SRC, path).replace(/\\/g, '/');
       if (allow.includes(file)) continue;
-      if (pattern.test(readFileSync(path, 'utf8'))) offenders.push(file);
+      if (pattern.test(readText(path))) offenders.push(file);
     }
   };
   walk(SRC);
@@ -27,7 +35,7 @@ export function sourceFilesMatching(pattern, { allow = [] } = {}) {
 export function sourceLinesMatching(pattern, { allow = [] } = {}) {
   const hits = [];
   for (const file of sourceFilesMatching(pattern, { allow })) {
-    readFileSync(join(SRC, file), 'utf8').split('\n').forEach((line, index) => {
+    readText(join(SRC, file)).split('\n').forEach((line, index) => {
       if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;
       if (pattern.test(line)) hits.push(`${file}:${index + 1}`);
     });
@@ -37,5 +45,5 @@ export function sourceLinesMatching(pattern, { allow = [] } = {}) {
 
 // The text of a file under src/ (a path as sourceFilesMatching gives it).
 export function readSource(file) {
-  return readFileSync(join(SRC, file), 'utf8');
+  return readText(join(SRC, file));
 }

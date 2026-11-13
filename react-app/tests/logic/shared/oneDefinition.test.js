@@ -955,3 +955,15 @@ test('an element style is written only through liveStyle.js', () => {
     allow: ['shared/ui/liveStyle.js'],
   }), []);
 });
+
+// An icon button whose whole content is an X closes or removes something: it
+// is a CloseButton (or CornerCloseButton / BubbleCloseButton), the same X in
+// every dialog, panel, toast and bubble. A bubble's X sits in its corner and
+// its first line keeps clear of it (BUBBLE_TITLE_CLEAR_SX). A toggle that
+// shows an X while open (`open ? <X /> : <Icon />`) is not one; nor is the
+// search field's clear X, part of the field (PART_ICON_BUTTON_SX).
+test('an icon button that is only an X is a CloseButton', () => {
+  assert.deepEqual(sourceFilesMatching(/\n\s*<X size=[^\n]*\/>\n\s*<\/(TipIconButton|IconButton)>/, {
+    allow: ['shared/ui/CornerCloseButton.jsx', 'shared/ui/SearchField.jsx'],
+  }), []);
+});
