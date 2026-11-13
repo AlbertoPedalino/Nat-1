@@ -1,7 +1,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import { Box, Button, Chip, TextField } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import {
   MAX_EFFECTS,
   MAX_EFFECT_TEXT,
@@ -134,7 +134,9 @@ export function ReminderField({ effects, onAdd }) {
   );
 }
 
-// Dashed and faint: offered, not on the creature.
+// Offered, not on the creature: neutral grey, dashed and led by a +, so it never
+// reads as a reminder in force. The reminder blue is kept for what is on the
+// creature and only comes up under the cursor, as an off condition chip does.
 function RecentReminderChip({ text, disabled, onPick, onForget }) {
   return (
     <Chip
@@ -145,16 +147,26 @@ function RecentReminderChip({ text, disabled, onPick, onForget }) {
       onClick={onPick}
       onDelete={onForget}
       aria-label={`Add ${text}`}
+      icon={<Plus size={ICON_SIZES.xxs} aria-hidden />}
       deleteIcon={<X size={ICON_SIZES.xxs} aria-label={`Forget ${text}`} />}
       sx={(theme) => {
         const accent = theme.palette.info.main;
+        const muted = theme.palette.text.secondary;
         return {
           height: CONTROL_HEIGHTS.xs,
           fontSize: FONT_SIZES.xxs,
           maxWidth: '100%',
-          color: alpha(accent, OPACITY.veil),
-          borderColor: alpha(accent, OPACITY.strong),
-          '& .MuiChip-deleteIcon': { color: alpha(accent, OPACITY.strong), '&:hover': { color: accent } },
+          color: muted,
+          borderStyle: 'dashed',
+          borderColor: alpha(muted, OPACITY.edge),
+          bgcolor: 'transparent',
+          '& .MuiChip-icon': { color: muted, ml: 0.5, mr: -0.25 },
+          '& .MuiChip-deleteIcon': { color: alpha(muted, OPACITY.strong), '&:hover': { color: muted } },
+          '&:hover': {
+            color: accent,
+            borderColor: accent,
+            '& .MuiChip-icon': { color: accent },
+          },
         };
       }}
     />
