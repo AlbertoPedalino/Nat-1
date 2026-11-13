@@ -9,9 +9,11 @@ import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 // character sheet and the bubble over that character's piece on the battle map —
 // and they have to agree. Dependency-free so the plain node runner can cover it.
 
+// How the roll was made, stuck on the toast: filled in its tone, the
+// strongest fact on it after the total.
 export const ROLL_MODE_CHIP = {
-  advantage: { label: 'ADV', tone: UI_COLORS.success },
-  disadvantage: { label: 'DIS', tone: UI_COLORS.warning },
+  advantage: { label: 'ADV', tone: UI_COLORS.success, filled: true },
+  disadvantage: { label: 'DIS', tone: UI_COLORS.warning, filled: true },
 };
 
 export function rollDieColor(value, faces) {

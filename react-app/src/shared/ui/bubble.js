@@ -1,4 +1,4 @@
-import { UI_COLORS, uiMix, OPACITY } from './colors.js';
+import { UI_COLORS, uiMix } from './colors.js';
 import { inkShadow } from './shadows.js';
 import { DURATIONS } from './motion.js';
 
@@ -139,39 +139,8 @@ function shapeBehindSx(color, path, width, turn) {
   };
 }
 
-// Magic sparkles round a natural 20's burst: four-pointed stars inked like
-// everything else, a gold pair and a spell-coloured one, set off the burst's
-// edge in a box wider than it. They twinkle while the bubble is up.
-const SPARKLE_PATH = 'M0 -10C1 -3 3 -1 10 0C3 1 1 3 0 10C-1 3 -3 1 -10 0C-3 -1 -1 -3 0 -10Z';
-const SPARKLES = [[14, 22, 1.1, UI_COLORS.accentHighlight], [150, 16, 0.75, UI_COLORS.spell], [142, 86, 0.9, UI_COLORS.accentHighlight]];
-const SPARKLES_IMAGE = (() => {
-  const stars = SPARKLES.map(([x, y, scale, fill]) => `<path transform="translate(${x} ${y}) scale(${scale})" d="${SPARKLE_PATH}" fill="${fill}" stroke="${UI_COLORS.edge}" stroke-width="2.4" stroke-linejoin="round"/>`).join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 100">${stars}</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-})();
-
 export function starburstSx(color = UI_COLORS.accent) {
-  return {
-    ...shapeBehindSx(color, KAPOW_PATH, KAPOW_WIDTH, '-8deg'),
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      left: '50%',
-      top: '50%',
-      width: '3.6em',
-      height: '2.2em',
-      transform: 'translate(-50%, -50%)',
-      backgroundImage: SPARKLES_IMAGE,
-      backgroundSize: '100% 100%',
-      pointerEvents: 'none',
-      animation: `gbSparkle ${DURATIONS.slow * 4}ms ease-in-out infinite`,
-      '@keyframes gbSparkle': {
-        '0%, 100%': { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-        '50%': { opacity: OPACITY.strong, transform: 'translate(-50%, -50%) scale(0.92)' },
-      },
-      '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
-    },
-  };
+  return shapeBehindSx(color, KAPOW_PATH, KAPOW_WIDTH, '-8deg');
 }
 
 export function splatSx(color = UI_COLORS.danger) {

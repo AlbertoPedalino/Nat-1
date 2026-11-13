@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
@@ -11,8 +10,8 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
-import { celebrateNatural20 } from '../../../shared/ui/celebrate.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
+import BubbleSparkles from '../../../shared/ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
@@ -29,17 +28,6 @@ import { focusRingSx } from '../../../shared/ui/interactive.js';
 // back. The little cross only says that it can be closed.
 export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
   const layout = resolveToastLayout(rollToast(roll));
-  // A natural 20 throws its confetti from the bubble, over the token that
-  // rolled it, once when the bubble appears; a natural 1 leaves it seeing stars.
-  const bubbleRef = useRef(null);
-  const crit = layout.isCrit;
-  useEffect(() => {
-    if (!crit || !bubbleRef.current) return;
-    const rect = bubbleRef.current.getBoundingClientRect();
-    celebrateNatural20({
-      origin: { x: (rect.left + rect.width / 2) / window.innerWidth, y: rect.top / window.innerHeight },
-    });
-  }, [crit, roll.id]);
 
   return (
     // Outer box owns the position; the transform here must stay untouched, so
@@ -50,7 +38,6 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
       transform: `translate(${x}px, ${y}px) translate(-50%, -100%)`,
     }}>
       <Box
-        ref={bubbleRef}
         {...(onDismiss ? {
           role: 'button',
           tabIndex: 0,
@@ -76,6 +63,8 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           ...(onDismiss ? dismissableSx : {}),
         }}
       >
+        {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
+        {layout.isCrit ? <BubbleSparkles key={roll.id} /> : null}
         {layout.isFail ? <BubbleDizzy /> : null}
         {onDismiss ? (
           <Box aria-hidden sx={closeSx}>
@@ -91,7 +80,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
 
         {layout.modeChip && (
-          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
+          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} filled={layout.modeChip.filled} sx={{ mb: 0.25 }} />
         )}
 
         <DiceRow

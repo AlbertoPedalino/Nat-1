@@ -9,8 +9,8 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
-import { celebrateNatural20 } from '../../ui/celebrate.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
+import BubbleSparkles from '../../ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../ui/shadows.js';
 import TagChip from '../../ui/TagChip.jsx';
 
@@ -37,13 +37,6 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
-  // A natural 20 throws confetti from the toast's corner, once a throw (a
-  // natural 1 leaves the bubble seeing stars instead, below).
-  const crit = Boolean(toast && !hidden && resolveToastLayout(toast).isCrit);
-  useEffect(() => {
-    if (crit) celebrateNatural20();
-  }, [crit, toast?.timestamp]);
-
   // Keep the expiry running while hidden so returning to the map cannot revive
   // an old result that arrived during the background view.
   if (!toast || hidden) return null;
@@ -62,6 +55,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       ...(layout.isCrit ? { boxShadow: inkShadow(UI_COLORS.accent, 4), ...bubbleCheerSx(SHOUT_TILT) } : {}),
       ...(layout.isFail ? { boxShadow: inkShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
     }}>
+      {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
+      {layout.isCrit ? <BubbleSparkles key={seed} /> : null}
       {layout.isFail ? <BubbleDizzy key={seed} /> : null}
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary', zIndex: 3 }}>
         <X size={ICON_SIZES.sm} />
@@ -83,7 +78,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.modeChip && (
-        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
+        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} filled={layout.modeChip.filled} sx={{ mb: 0.25 }} />
       )}
 
       <DiceRow
