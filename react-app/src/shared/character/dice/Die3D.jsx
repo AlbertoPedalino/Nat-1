@@ -6,7 +6,7 @@ import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, uiAlpha, uiMix } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
-import { inkTextShadow } from '../../ui/shadows.js';
+import { APPLE_WEBKIT_QUERY, inkTextShadow } from '../../ui/shadows.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -252,7 +252,8 @@ const faceSx = {
   // No lettering shadow as a filter here: it would be one more filter on
   // every face of a tumbling solid (and would shadow the face itself). The
   // numbers keep their own text-shadow (numberSx).
-  filter: 'none',
+  textShadow: 'none',
+  [APPLE_WEBKIT_QUERY]: { filter: 'none' },
   backfaceVisibility: 'hidden',
 };
 

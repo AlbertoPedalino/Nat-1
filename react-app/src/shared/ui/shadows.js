@@ -34,14 +34,23 @@ export function inkTextShadow(color = UI_COLORS.edge) {
 // Comic lettering inked: an ink outline `width` thick round the letters, under
 // the fill so they keep their full weight, and their solid shadow `offset`
 // off. The one recipe for outlined lettering (TEXT_STYLES' shout, figure and
-// cover). The shadow is a filter under everything the text painted, outline
-// and all, not a text-shadow: Safari on iOS drops the text-shadow of text
-// drawn with a stroke, and only the outline showed.
+// cover). The shadow is a text-shadow, which every engine paints with the
+// text itself. Apple's WebKit (Safari, every browser on iOS) drops the
+// text-shadow of text drawn with a stroke, and only the outline showed: there
+// it is a drop-shadow filter instead. Only there: a filter on each of the
+// screen's dozens of headings and figures is a layer of its own, repainted on
+// every scroll, and made a desktop's large window stutter.
+export const APPLE_WEBKIT_QUERY = '@supports (font: -apple-system-body)';
+
 export function inkLettering(width, offset, color = UI_COLORS.edge) {
   return {
     WebkitTextStroke: `${width}px ${color}`,
     paintOrder: 'stroke fill',
-    filter: `drop-shadow(${offset}px ${offset}px 0 ${color})`,
+    textShadow: `${offset}px ${offset}px 0 ${color}`,
+    [APPLE_WEBKIT_QUERY]: {
+      textShadow: 'none',
+      filter: `drop-shadow(${offset}px ${offset}px 0 ${color})`,
+    },
   };
 }
 
