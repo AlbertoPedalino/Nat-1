@@ -44,3 +44,13 @@ test('a stashed item offers no flag and no equip', () => {
   expect(screen.queryByRole('button', { name: 'Equip' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Carry' })).toBeInTheDocument();
 });
+
+test("a magic item's name and bar wear its rarity's colour; a mundane one neither", () => {
+  const { container, unmount } = renderRow({ name: 'Flame Tongue Longsword', type: 'M', rarity: 'rare', qty: 1 }, actions());
+  const name = screen.getByText('Flame Tongue Longsword');
+  expect(getComputedStyle(name).color).toBe('rgb(90, 169, 255)');
+  expect(container.querySelector('[aria-hidden="true"][class*="MuiBox"]')).not.toBeNull();
+  unmount();
+  renderRow({ name: 'Rope', type: 'G', rarity: 'none', qty: 1 }, actions());
+  expect(getComputedStyle(screen.getByText('Rope')).color).not.toBe('rgb(90, 169, 255)');
+});
