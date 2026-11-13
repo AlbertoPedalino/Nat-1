@@ -18,18 +18,16 @@ export const TEXT_STYLES = Object.freeze({
     fontFamily: UI_FONTS.display,
     fontWeight: FONT_WEIGHTS.bold,
   }),
-  // A number or short value in the display face: HP, AC, a count, a die.
-  // Inked like a comic's lettering: the heaviest weight, an ink outline and
-  // its solid shadow.
+  // A number or short value: HP, AC, an ability score, a skill's modifier, a
+  // count, a die. Lettered in the shout face, as the numbers a roll shouts,
+  // with an ink outline and its solid shadow.
   figure: Object.freeze({
-    fontFamily: UI_FONTS.display,
-    fontWeight: FONT_WEIGHTS.heavy,
+    fontFamily: UI_FONTS.shout,
+    fontWeight: FONT_WEIGHTS.regular,
     ...inkLettering(2, 2),
   }),
   // The voice: what happens in the moment, shouted in comic lettering (a
-  // roll's name and total, NATURAL 20!, a toast's Done!/Oops!), and the short
-  // capitals of a stat tile (AC, STR), where the heading's blackletter would
-  // not read. Always inked: an ink outline and its solid shadow.
+  // roll's name and total, NATURAL 20!, a toast's Done!/Oops!). Always inked: an ink outline and its solid shadow.
   shout: Object.freeze({
     fontFamily: UI_FONTS.shout,
     fontWeight: FONT_WEIGHTS.regular,

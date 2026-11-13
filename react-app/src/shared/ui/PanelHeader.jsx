@@ -111,13 +111,6 @@ export const panelTitleSx = {
   color: 'primary.main',
 };
 
-// A stat tile's name (AC, Initiative, STR): short, so shouted in the comic
-// face rather than in the panel's blackletter.
-export const tileTitleSx = {
-  ...TEXT_STYLES.shout,
-  fontSize: FONT_SIZES.xxl,
-};
-
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
 // thicker ink frame and its solid shadow. Boxes inside it keep the thinner
 // edge, so the panels read first.
