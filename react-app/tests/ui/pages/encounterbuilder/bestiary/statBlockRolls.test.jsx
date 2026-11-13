@@ -6,8 +6,11 @@ import { StatBlockPanel } from '../../../../../src/pages/encounterbuilder/bestia
 // conditions say, and takes a one-off source on right-click.
 
 const builder = vi.hoisted(() => ({ current: null }));
+// A panel gets the whole stand-in context (encounterPanel picks from it).
 vi.mock('../../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.jsx', () => ({
   useEncounterBuilder: () => builder.current,
+  useEncounterDispatch: () => builder.current.dispatch,
+  encounterPanel: (_picks, Panel) => (props) => <Panel {...props} {...builder.current} />,
 }));
 
 const OGRE = {

@@ -10,7 +10,7 @@ import {
   fumbleResultValues,
   getFumbleRange,
 } from './fumbles.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
@@ -21,8 +21,9 @@ import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import DiceCountPicker from '../../../shared/character/dice/DiceCountPicker.jsx';
 
-export default function CriticalFumblesDialog({ open, onClose }) {
-  const { state, dispatch, roll } = useEncounterBuilder();
+export default encounterPanel({ state: ['fumbleTables'], context: ['dispatch', 'roll'] }, CriticalFumblesDialogView);
+
+function CriticalFumblesDialogView({ open, onClose, state, dispatch, roll }) {
   const [categoryId, setCategoryId] = useState(FUMBLE_CATEGORIES[0].id);
   const [outcome, setOutcome] = useState(null);
   const outcomeRef = useRef(null);

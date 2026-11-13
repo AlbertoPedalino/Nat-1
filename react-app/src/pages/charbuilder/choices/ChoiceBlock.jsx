@@ -4,7 +4,6 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
-import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import {
   isChoicePlaceholderValue,
@@ -20,6 +19,7 @@ import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -171,7 +171,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
 
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={max}>
-      {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
+      {showSearch ? <SearchField density="compact" value={query} onChange={setQuery} /> : null}
       <Box sx={scrollWellSx(210)}>
         {visibleOptions.length ? (
         <List dense disablePadding>

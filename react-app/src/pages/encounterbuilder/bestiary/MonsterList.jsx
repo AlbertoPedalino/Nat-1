@@ -2,13 +2,14 @@ import { useCallback } from 'react';
 import { Skull } from 'lucide-react';
 import Panel from '../../../shared/ui/Panel.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 
 // Thin wrapper: the browser itself is shared with the battle map, and only the
 // wiring to this page's reducer lives here. Its callbacks are stable, so the
 // (memoized) browser is not redrawn when the rest of the page changes.
-export default function MonsterList() {
-  const { state, dispatch, monsterDb } = useEncounterBuilder();
+export default encounterPanel({ state: ['filters'], context: ['dispatch', 'monsterDb'] }, MonsterListView);
+
+function MonsterListView({ state, dispatch, monsterDb }) {
   const onFilterChange = useCallback((key, value) => dispatch({ type: 'setFilter', key, value }), [dispatch]);
   const onToggleSource = useCallback((source) => dispatch({ type: 'toggleSource', source }), [dispatch]);
   const onSelect = useCallback((monster) => dispatch({ type: 'selectStatblock', payload: { monster } }), [dispatch]);

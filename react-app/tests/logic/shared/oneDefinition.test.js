@@ -1056,3 +1056,19 @@ test('an item list is an ItemBrowser', () => {
 test('a clear button is a ClearButton', () => {
   assert.deepEqual(sourceFilesMatching(/<Button[^>]*>\s*Clear( all)?\s*<\/Button>/, { allow: ['shared/ui/ClearButton.jsx'] }), []);
 });
+
+// The encounter builder's panels read it through encounterPanel (memoized on
+// the state keys and context values they declare) and its acting parts through
+// useEncounterDispatch: only the page shell reads the whole context.
+test('an encounter builder panel is an encounterPanel', () => {
+  assert.deepEqual(sourceLinesMatching(/useEncounterBuilder\(\)/, {
+    allow: ['pages/encounterbuilder/state/EncounterBuilderContext.jsx', 'pages/encounterbuilder/EncounterBuilderPage.jsx'],
+  }), []);
+});
+
+// A search box is a SearchField (compact in dense panels), or a
+// DraftSearchField when its text lives in a page reducer; there is no
+// builder-only search look.
+test('a search box is a SearchField or a DraftSearchField', () => {
+  assert.deepEqual(sourceFilesMatching(/SelectionSearch/), []);
+});

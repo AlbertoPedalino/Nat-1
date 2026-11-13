@@ -1,6 +1,6 @@
 import { effectId, normalizeEffects } from '../../../shared/character/combat/combatEffects.js';
 import { ReminderChip, ReminderField } from '../../../shared/character/combat/ReminderChips.jsx';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 
 // Reminders on a combatant ("Bardic Inspiration", "Guidance"), sharing the
@@ -18,7 +18,7 @@ import MarkerRow from './MarkerRow.jsx';
 // menu (ReminderChips.jsx).
 
 export default function CombatantReminders({ combatant }) {
-  const { dispatch } = useEncounterBuilder();
+  const dispatch = useEncounterDispatch();
   const active = normalizeEffects(combatant.activeEffects);
 
   return (

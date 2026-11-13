@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 // App-wide text-search utilities, shared by the builder selection panels and the
 // character-sheet panels. Pure helpers + one wiring hook; the visual field lives
-// in SearchField.jsx and the builder-styled wrapper in SelectionSearch.jsx.
+// in SearchField.jsx (and DraftSearchField.jsx for a costly owner).
 
 // Threshold above which a selection panel is worth a search field.
 export const SEARCH_MIN_OPTIONS = 6;

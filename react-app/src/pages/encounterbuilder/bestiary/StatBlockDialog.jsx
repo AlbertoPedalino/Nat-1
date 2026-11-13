@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Divider } from '@mui/material';
 import { ScrollText } from 'lucide-react';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import PlayerSheetPanel from '../campaign/PlayerSheetPanel.jsx';
@@ -12,8 +12,9 @@ import SidePanel from '../../../shared/ui/SidePanel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
 
-export default function StatBlockDialog() {
-  const { state, dispatch } = useEncounterBuilder();
+export default encounterPanel({ state: ['selectedStatblock', 'combat', 'view'], context: ['dispatch'] }, StatBlockDialogView);
+
+function StatBlockDialogView({ state, dispatch }) {
   const monster = state.selectedStatblock?.monster;
   if (state.view === 'combat' || !monster) return null;
   const close = () => dispatch({ type: 'closeStatblock' });
@@ -30,8 +31,9 @@ export default function StatBlockDialog() {
   );
 }
 
-export function StatBlockPanel() {
-  const { state, dispatch } = useEncounterBuilder();
+export const StatBlockPanel = encounterPanel({ state: ['selectedStatblock', 'combat', 'view'], context: ['dispatch'] }, StatBlockPanelView);
+
+function StatBlockPanelView({ state, dispatch }) {
   const selection = state.selectedStatblock;
   const monster = selection?.monster;
   const isPlayerSelection = selection && !monster && selection.combatantId != null;
@@ -52,8 +54,9 @@ export function StatBlockPanel() {
   );
 }
 
-function StatBlockBody({ monster, allowAdd = false }) {
-  const { state, dispatch, monsterDb, roll } = useEncounterBuilder();
+const StatBlockBody = encounterPanel({ state: ['selectedStatblock', 'combat', 'view'], context: ['dispatch', 'monsterDb', 'roll'] }, StatBlockBodyView);
+
+function StatBlockBodyView({ monster, allowAdd = false, state, dispatch, monsterDb, roll }) {
   const [diceToast, setDiceToast] = useState(null);
 
   // The combatant this stat block was opened for, if any: its conditions

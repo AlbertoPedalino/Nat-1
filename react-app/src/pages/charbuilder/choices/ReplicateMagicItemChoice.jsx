@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { Check } from 'lucide-react';
-import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
@@ -22,6 +21,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -99,7 +99,7 @@ function ItemPlanPanel({
         </Typography>
       ) : null}
       {showSearch ? (
-        <SelectionSearch value={query} onChange={setQuery} placeholder={searchPlaceholder} />
+        <SearchField density="compact" value={query} onChange={setQuery} placeholder={searchPlaceholder} />
       ) : null}
       <Box sx={scrollWellSx(210)}>
         {visibleOptions.length ? (

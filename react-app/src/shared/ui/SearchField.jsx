@@ -12,8 +12,9 @@ import { PART_ICON_BUTTON_SX } from './pressable.js';
 // or Escape in the field — calls `onChange('')`. Extra props are spread onto the underlying TextField.
 //
 // `density` sizes it for where it stands: 'standard' on a page or a dialog,
-// 'compact' in the sheet's dense panels and the cards on it. The builder's
-// panels take theirs through SelectionSearch. `sx` is for placement only.
+// 'compact' in the sheet's and the builder's dense panels and the cards on
+// them. A field fronting a costly owner (a page reducer) is a
+// DraftSearchField. `sx` is for placement only.
 const DENSITIES = Object.freeze({
   standard: { iconSize: 16, inputSx: null },
   compact: { iconSize: 14, inputSx: COMPACT_INPUT_SX },

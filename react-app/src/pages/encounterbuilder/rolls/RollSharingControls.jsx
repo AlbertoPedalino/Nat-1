@@ -1,13 +1,14 @@
 import { Stack } from '@mui/material';
 import GmRollsShownSwitch from '../../../shared/character/dice/GmRollsShownSwitch.jsx';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // Which campaign this builder's rolls go to, and whether the GM's rolls are
 // shown to its players (the same switch as on the battle map).
-export default function RollSharingControls() {
-  const { campaignPlayers, rollSync } = useEncounterBuilder();
+export default encounterPanel({ state: [], context: ['campaignPlayers', 'rollSync'] }, RollSharingControlsView);
+
+function RollSharingControlsView({ state, campaignPlayers, rollSync }) {
   return (
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'center' } }}>
       <SelectField

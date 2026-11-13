@@ -21,10 +21,10 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import SelectionSearch from '../choices/SelectionSearch.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
+import DraftSearchField from '../../../shared/ui/DraftSearchField.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -183,9 +183,9 @@ export default function ClassPanel({ state, character, dispatch }) {
             {activeClass.name} is a hero class: it normally starts at level 3. Below that it needs your DM&apos;s permission.
           </Typography>
         ) : null}
-        <SelectionSearch
-          value={search}
+        <DraftSearchField
           placeholder="Search classes"
+          value={search}
           onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
         />
         <Box sx={scrollWellSx(390)}>

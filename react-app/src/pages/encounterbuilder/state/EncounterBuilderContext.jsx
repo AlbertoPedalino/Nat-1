@@ -13,6 +13,10 @@ import { useEncounterRolls } from '../rolls/useEncounterRolls.js';
 import { encounterRollActor } from '../rolls/rollActor.js';
 
 const EncounterBuilderContext = createContext(null);
+// `dispatch` alone, which never changes: a part that only acts (a combatant's
+// card, its conditions and reminders) reads it here and is not redrawn by every
+// change of the builder.
+const EncounterDispatchContext = createContext(null);
 
 export function EncounterBuilderProvider({ instanceId, opening = true, children }) {
   const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
@@ -104,9 +108,11 @@ export function EncounterBuilderProvider({ instanceId, opening = true, children 
   }), [campaignPlayers, characterDigests, rollSync, instanceId, monsterDb, roll, state, dispatch]);
 
   return (
+    <EncounterDispatchContext.Provider value={dispatch}>
     <EncounterBuilderContext.Provider value={value}>
       {children}
     </EncounterBuilderContext.Provider>
+    </EncounterDispatchContext.Provider>
   );
 }
 
@@ -116,16 +122,41 @@ export function useEncounterBuilder() {
   return context;
 }
 
-// A panel of the builder that is redrawn only when what it shows changes:
-// `select(context)` picks its props (slices of state, dispatch, the campaign
-// players…; each one stable while unchanged), and the panel is memoized on
-// them. Every builder change otherwise redraws every panel that reads the
-// context; measured on a name typed (2026-11-13), Party alone took up to 20ms.
-export function encounterPanel(select, Panel) {
-  const Memo = memo(Panel);
+export function useEncounterDispatch() {
+  const dispatch = useContext(EncounterDispatchContext);
+  if (!dispatch) throw new Error('useEncounterDispatch must be used within EncounterBuilderProvider.');
+  return dispatch;
+}
+
+// A panel of the builder that is redrawn only when what it shows changes.
+// `picks.state` names the keys of the builder state it reads (it gets `state`
+// with those keys only), `picks.context` the other context values it uses
+// (dispatch, monsterDb, roll…; stable while unchanged), and the panel is
+// memoized on them, key by key. Every builder change otherwise redraws every
+// panel that reads the context; measured on a name typed (2026-11-13), Party
+// alone took up to 20ms. Every top-level panel of the page is one.
+export function encounterPanel({ state: stateKeys = [], context: contextKeys = [] }, Panel) {
+  const Memo = memo(Panel, (before, after) => sameProps(before, after, stateKeys));
   function SelectedPanel(props) {
-    return <Memo {...props} {...select(useEncounterBuilder())} />;
+    const context = useEncounterBuilder();
+    const picked = {};
+    contextKeys.forEach((key) => { picked[key] = context[key]; });
+    const state = {};
+    stateKeys.forEach((key) => { state[key] = context.state[key]; });
+    return <Memo {...props} {...picked} state={state} />;
   }
   SelectedPanel.displayName = `encounterPanel(${Panel.name || 'Panel'})`;
   return SelectedPanel;
+}
+
+function sameProps(before, after, stateKeys) {
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  for (const key of keys) {
+    if (key === 'state') {
+      if (stateKeys.some((name) => before.state[name] !== after.state[name])) return false;
+    } else if (before[key] !== after[key]) {
+      return false;
+    }
+  }
+  return true;
 }

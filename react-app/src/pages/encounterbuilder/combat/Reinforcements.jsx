@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Stack, TextField, Typography } from '@mui/material';
 import { Plus, Search } from 'lucide-react';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -15,8 +15,9 @@ import AddButton from '../../../shared/ui/AddButton.jsx';
 // combatant typed by hand. A panel like the round's above it, folded away
 // until it is wanted so the roster stays in view.
 
-export default function Reinforcements() {
-  const { state, dispatch, monsterDb } = useEncounterBuilder();
+export default encounterPanel({ state: ['quickFilters'], context: ['dispatch', 'monsterDb'] }, ReinforcementsView);
+
+function ReinforcementsView({ state, dispatch, monsterDb }) {
   const [manual, setManual] = useState({ name: '', hpMax: 10, ac: 10, initMod: 0 });
   const [open, setOpen] = useState(false);
 

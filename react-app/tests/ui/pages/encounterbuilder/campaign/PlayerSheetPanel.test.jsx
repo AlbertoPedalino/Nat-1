@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 
 const builder = vi.hoisted(() => ({ value: null, sheetProps: null }));
+// A panel gets the whole stand-in context (encounterPanel picks from it).
 vi.mock('../../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.jsx', () => ({
   useEncounterBuilder: () => builder.value,
+  encounterPanel: (_picks, Panel) => (props) => <Panel {...props} {...builder.value} />,
 }));
 vi.mock('../../../../../src/pages/campaignsheet/CampaignSheetView.jsx', () => ({
   default: (props) => { builder.sheetProps = props; return <div data-testid="sheet" />; },

@@ -17,8 +17,7 @@ import Caption from '../ui/Caption.jsx';
 import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
 import EntityRow from '../ui/EntityRow.jsx';
-import SearchField from '../ui/SearchField.jsx';
-import { useDraftText } from '../ui/useDraftText.js';
+import DraftSearchField from '../ui/DraftSearchField.jsx';
 import FilterToggles from '../ui/FilterToggles.jsx';
 import FilterFieldControls from '../ui/FilterFieldControls.jsx';
 
@@ -47,9 +46,6 @@ export default memo(function MonsterBrowser({
   fill = false,
   listSx,
 }) {
-  // The search box follows the typing; the filters (and the list) follow it
-  // after a pause.
-  const [search, setSearch, flushSearch] = useDraftText(filters.search, (value) => onFilterChange('search', value));
   const filtered = useMemo(() => filterMonsters(monsterDb.monsters, filters), [monsterDb.monsters, filters]);
   const page = usePagedList(filtered, { pageSize: PAGE_SIZE, resetKey: filters });
 
@@ -78,10 +74,12 @@ export default memo(function MonsterBrowser({
       ) : null}
 
       <Stack spacing={1.25}>
-        <SearchField
-          value={search}
-          onChange={setSearch}
-          onBlur={flushSearch}
+        {/* The box follows the typing; the filters (and the list) follow it
+            after a pause. */}
+        <DraftSearchField
+          density="standard"
+          value={filters.search}
+          onChange={(value) => onFilterChange('search', value)}
           placeholder="Search monsters…"
           ariaLabel="Search monsters"
         />

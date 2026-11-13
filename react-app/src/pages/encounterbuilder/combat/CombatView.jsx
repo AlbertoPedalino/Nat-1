@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { ArrowLeft, ArrowRight, RotateCcw, Swords, X } from 'lucide-react';
 import { isFightResumable } from '../../../shared/encounter/library.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
 import { StatBlockPanel } from '../bestiary/StatBlockDialog.jsx';
@@ -12,8 +12,9 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 
-export default function CombatView() {
-  const { state, dispatch } = useEncounterBuilder();
+export default encounterPanel({ state: ['activeFightId', 'combat', 'fights', 'library'], context: ['dispatch'] }, CombatViewView);
+
+function CombatViewView({ state, dispatch }) {
   const combat = state.combat;
   const listRef = useRef(null);
   const activeRef = useRef(null);

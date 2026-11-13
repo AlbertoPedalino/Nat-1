@@ -13,13 +13,9 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { LIST_ROW_SX } from '../../../shared/ui/interactive.js';
 
-// The party: redrawn only when it changes (encounterPanel).
-export default encounterPanel(
-  ({ state, dispatch }) => ({ party: state.party, players: state.players, dispatch }),
-  PartyConfig,
-);
+export default encounterPanel({ state: ['party', 'players'], context: ['dispatch'] }, PartyConfigView);
 
-function PartyConfig({ party, players, dispatch }) {
+function PartyConfigView({ state, dispatch }) {
 
   return (
     <Panel icon={Users} title="Party">
@@ -27,21 +23,21 @@ function PartyConfig({ party, players, dispatch }) {
         <Stack direction="row" spacing={1}>
           <Stepper
             label="PCs"
-            value={party.count}
+            value={state.party.count}
             min={1}
             max={10}
             onChange={(value) => dispatch({ type: 'setPartyCount', value })}
           />
           <Stepper
             label="Level"
-            value={party.level}
+            value={state.party.level}
             min={1}
             max={20}
             onChange={(value) => dispatch({ type: 'setPartyLevel', value })}
           />
         </Stack>
         <Stack spacing={1}>
-          {players.map((player, index) => (
+          {state.players.map((player, index) => (
             <Box key={player.id ?? index} sx={playerRowSx}>
               {/* A character imported from a campaign wears the colour their
                   own sheet chose, so there is nothing to pick here: the badge

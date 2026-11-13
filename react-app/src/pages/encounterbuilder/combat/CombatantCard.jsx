@@ -3,7 +3,7 @@ import { Avatar, Box, Button, LinearProgress, Paper, Stack, TextField, Tooltip, 
 import { ExternalLink, HeartPulse, Shield, Sparkles } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
 import CombatantReminders from './CombatantReminders.jsx';
 import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
@@ -28,7 +28,7 @@ import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 
 export default function CombatantCard({ combatant, active }) {
-  const { dispatch } = useEncounterBuilder();
+  const dispatch = useEncounterDispatch();
   const [hpAmt, setHpAmt] = useState('5');
   const [tempAmt, setTempAmt] = useState('5');
   const [modAmt, setModAmt] = useState('5');
@@ -296,7 +296,7 @@ function HpFlag({ Icon, title, text }) {
 }
 
 function DeathSaves({ combatant }) {
-  const { dispatch } = useEncounterBuilder();
+  const dispatch = useEncounterDispatch();
   return (
     <DeathSaveDots
       deathSaves={combatant.deathSaves}

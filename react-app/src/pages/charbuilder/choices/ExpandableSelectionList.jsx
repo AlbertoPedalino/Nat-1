@@ -1,6 +1,5 @@
 import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -9,6 +8,7 @@ import BuilderBox from '../layout/BuilderBox.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import PickCount from '../../../shared/ui/PickCount.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 export default function ExpandableSelectionList({
   title,
@@ -27,7 +27,7 @@ export default function ExpandableSelectionList({
       aside={<PickCount count={selectedCount} max={max} />}
     >
 
-        {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
+        {showSearch ? <SearchField density="compact" value={query} onChange={setQuery} /> : null}
 
         {!options.length ? (
           <EmptyLine>{emptyText}</EmptyLine>

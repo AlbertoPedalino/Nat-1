@@ -8,7 +8,7 @@ import { MAX_EFFECTS } from '../../../../../src/shared/character/combat/combatEf
 // The component only ever needs `dispatch`, so that is all this stands in for.
 const dispatch = vi.fn();
 vi.mock('../../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.jsx', () => ({
-  useEncounterBuilder: () => ({ dispatch }),
+  useEncounterDispatch: () => dispatch,
 }));
 
 function renderReminders(activeEffects = []) {

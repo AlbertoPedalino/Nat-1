@@ -11,7 +11,7 @@ import {
   negotiationStatus,
   NPC_ATTITUDES,
 } from './negotiation.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
@@ -28,8 +28,9 @@ const ACTION_UI = Object.freeze([
   { id: 'criticalFailure', Icon: Skull, color: 'error' },
 ]);
 
-export default function NegotiationDialog({ open, onClose }) {
-  const { state, dispatch } = useEncounterBuilder();
+export default encounterPanel({ state: ['negotiation'], context: ['dispatch'] }, NegotiationDialogView);
+
+function NegotiationDialogView({ open, onClose, state, dispatch }) {
   const negotiation = state.negotiation;
   const attitude = getNpcAttitude(negotiation.attitude);
   const status = negotiationStatus(negotiation);

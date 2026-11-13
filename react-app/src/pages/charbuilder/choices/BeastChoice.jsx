@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Box, List, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { Check } from 'lucide-react';
-import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { eligibleBeasts, beastRefValue, beastSummary, findBeast, parseBeastRef, wildShapeKnownFormsLimit } from '../../../shared/character/forms/beasts.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
@@ -13,6 +12,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -71,7 +71,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
           ? 'Wild Shape unlocks at Druid level 2.'
           : `Know up to ${limit} forms · CR ≤ ${formatCr(cap)}${lv < 8 ? ' · no Fly Speed' : ''} (Druid level ${lv}). Swap one per Long Rest.`}
       </Typography>
-      {showSearch ? <SelectionSearch value={query} onChange={setQuery} placeholder="Search beasts…" /> : null}
+      {showSearch ? <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search beasts…" /> : null}
       <Box sx={scrollWellSx(260)}>
         {visibleOptions.length ? (
           <List dense disablePadding>

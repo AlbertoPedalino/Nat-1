@@ -7,7 +7,7 @@ import {
 } from '../../../shared/encounter/library.js';
 import { normalizeEncounterQuest } from '../state/storage.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import LaunchButtons from '../builder/LaunchButtons.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
@@ -21,8 +21,9 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 
-export default function LibraryView() {
-  const { state, dispatch, monsterDb } = useEncounterBuilder();
+export default encounterPanel({ state: ['fights', 'library', 'players'], context: ['dispatch', 'monsterDb'] }, LibraryViewView);
+
+function LibraryViewView({ state, dispatch, monsterDb }) {
   const { notify } = useToast();
   const items = mergeLibrary(state.library, state.fights);
   const groups = groupLibraryByQuest(items);

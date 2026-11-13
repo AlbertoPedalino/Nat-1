@@ -18,8 +18,8 @@ import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import PickCount from '../../../shared/ui/PickCount.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import SelectionSearch from '../choices/SelectionSearch.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import DraftSearchField from '../../../shared/ui/DraftSearchField.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -90,10 +90,10 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               <PickCount size="medium" prefix="Spells" count={selectedSpellsCount} max={spells} />
               {profile.ability ? <TagChip size="medium" label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
-            <SelectionSearch
+            <DraftSearchField
+              placeholder="Search spells"
               value={state.search.spells}
               onChange={(value) => dispatch({ type: 'search/set', scope: 'spells', value })}
-              placeholder="Search spells"
             />
             <ChoiceToggle
               wrap
@@ -199,4 +199,3 @@ function containsSpellName(list, name) {
   const target = matchKey(name);
   return (list || []).some((entry) => matchKey(entry) === target);
 }
-

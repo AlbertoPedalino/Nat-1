@@ -5,7 +5,7 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../../../shared/encounter/library.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
 import LaunchButtons from './LaunchButtons.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
@@ -19,8 +19,9 @@ import ClearButton from '../../../shared/ui/ClearButton.jsx';
 import { useDraftText } from '../../../shared/ui/useDraftText.js';
 import { draftLibraryEntry } from '../state/libraryState.js';
 
-export default function EncounterList() {
-  const { state, dispatch } = useEncounterBuilder();
+export default encounterPanel({ state: ['encounter', 'encounterName', 'encounterQuest', 'currentEncounterId', 'library', 'party', 'players'], context: ['dispatch'] }, EncounterListView);
+
+function EncounterListView({ state, dispatch }) {
   const { notify } = useToast();
   const difficulty = calculateDifficulty(state.encounter, state.party);
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);

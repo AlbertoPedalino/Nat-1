@@ -11,7 +11,7 @@ import {
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
@@ -29,7 +29,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 const pillSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
 
 export default function CombatantConditions({ combatant }) {
-  const { dispatch } = useEncounterBuilder();
+  const dispatch = useEncounterDispatch();
   const conditionEntries = useConditionEntries();
   const active = normalizeConditions(combatant.activeConditions);
   const assignable = active.filter((key) => key !== EXHAUSTION_KEY);

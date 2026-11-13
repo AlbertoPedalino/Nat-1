@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
-import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -16,8 +16,9 @@ const CLOSE_LABEL = 'Close character sheet';
 // A player combatant's campaign sheet in the encounter's side panel, where a
 // monster's stat block shows: the same SidePanel, so the two read alike. `sx`
 // places the panel on the page.
-export default function PlayerSheetPanel({ selection, onClose, sx }) {
-  const { state, characterDigests } = useEncounterBuilder();
+export default encounterPanel({ state: ['combat'], context: ['characterDigests'] }, PlayerSheetPanelView);
+
+function PlayerSheetPanelView({ selection, onClose, sx, state, characterDigests }) {
   const combatant = state.combat?.combatants?.find((item) => item.id === selection?.combatantId);
   const sourceId = selection?.playerSourceId || combatant?.sourceId || null;
 

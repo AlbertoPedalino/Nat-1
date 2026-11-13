@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react';
 import { Box, List, ListItemButton } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { PickableSpellRow, SpellRowLabel } from '../../../shared/character/spells/SpellReference.jsx';
-import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import ChoiceFrame from '../choices/ChoiceFrame.jsx';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -81,7 +81,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   return (
     <ChoiceFrame label={spec.label} count={selected.length} max={max}>
       {showSearch ? (
-        <SelectionSearch value={query} onChange={setQuery} placeholder="Search spells" />
+        <SearchField density="compact" value={query} onChange={setQuery} placeholder="Search spells" />
       ) : null}
       <Box sx={scrollWellSx(260)}>
         <List dense disablePadding>
