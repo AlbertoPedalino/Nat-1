@@ -137,8 +137,9 @@ export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.xxl}, 
 // does. A phone, with one narrow column, was smooth without.
 //
 // A box can turn the layers off for the panels inside it with
-// NO_PANEL_LAYERS_SX: the sheet embedded in the battle map, where twenty
-// layers over a moving board doubled the dropped frames of a pan.
+// NO_PANEL_LAYERS_SX: the sheet embedded in the battle map (not the encounter
+// builder's, which sits on a still page), where twenty layers over a moving
+// board doubled the dropped frames of a pan.
 export const NO_PANEL_LAYERS_SX = Object.freeze({ '--gb-panel-layer': 'auto' });
 
 export const panelFrameSx = {

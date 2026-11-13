@@ -29,7 +29,6 @@ import AppPage from '../../app/navigation/AppPage.jsx';
 import TopBarButton from '../../shared/ui/TopBarButton.jsx';
 import { getActiveCharId } from '../../shared/character/profile/store.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../shared/character/profile/characterRoutes.js';
-import { NO_PANEL_LAYERS_SX } from '../../shared/ui/PanelHeader.jsx';
 
 const noopEffect = () => {};
 
@@ -162,9 +161,7 @@ export default function CharacterSheet({
     >
       <SheetHeader C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter} />
       {/* Clipped sideways only, so the panels' ink shadows show at the bottom. */}
-      {/* Embedded in the battle map, its panels are not layers of their own: the
-          board moving under them is what has to stay smooth (NO_PANEL_LAYERS_SX). */}
-      <Box sx={{ ...sheetColumnSx(embedded), overflowX: 'clip', ...(embedded ? NO_PANEL_LAYERS_SX : null) }}>
+      <Box sx={{ ...sheetColumnSx(embedded), overflowX: 'clip' }}>
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
