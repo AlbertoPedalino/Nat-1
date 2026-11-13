@@ -6,7 +6,7 @@ import { SELECTOR_CONTRACTS } from './selectorContracts.js';
 import { MONTH_NAMES, formatHM, validateStart } from '../campaignTime.js';
 import { SEASON_ICONS, WEATHER_ICONS } from '../../hexcrawl/hexIcons.js';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
-import { FONT_SIZES } from '../../ui/fonts.js';
+import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
 import SelectField from '../../ui/SelectField.jsx';
@@ -191,4 +191,4 @@ const dateRowSx = {
 
 const errorSx = { color: 'error.main', fontSize: FONT_SIZES.md, mt: 0.5 };
 
-export const quickButtonSx = { minWidth: 0, px: 1, fontSize: FONT_SIZES.md };
+export const quickButtonSx = { minWidth: 0, px: 1, fontSize: CONTROL_FONT_SIZES.normal };

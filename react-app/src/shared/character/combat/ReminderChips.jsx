@@ -15,8 +15,7 @@ import {
   subscribeReminderHistory,
   suggestReminders,
 } from './reminderHistory.js';
-import { FONT_SIZES } from '../../ui/fonts.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
+import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
@@ -179,7 +178,6 @@ const addSx = {
   minWidth: 0,
   px: 0.75,
   py: 0,
-  fontSize: FONT_SIZES.xs,
-  ...TEXT_STYLES.label,
-  
+  // Beside a dense field: the controls' small label.
+  fontSize: CONTROL_FONT_SIZES.small,
 };

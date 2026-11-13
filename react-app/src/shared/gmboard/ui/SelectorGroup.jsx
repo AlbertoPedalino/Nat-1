@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { captionLabelSx } from '../../ui/PanelHeader.jsx';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
+import { CONTROL_FONT_SIZES, FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { focusRingSx } from '../../ui/interactive.js';
@@ -73,7 +73,7 @@ function optionSx(tone, selected, dense) {
     minWidth: dense ? 54 : 72,
     py: 0.5,
     px: 0.75,
-    fontSize: dense ? FONT_SIZES.sm : FONT_SIZES.md,
+    fontSize: dense ? CONTROL_FONT_SIZES.small : CONTROL_FONT_SIZES.normal,
     lineHeight: LINE_HEIGHTS.tight,
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
     color: selected ? tone.color : (tone.dim || 'text.secondary'),
