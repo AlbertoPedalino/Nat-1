@@ -1,5 +1,4 @@
-import { Fragment } from 'react';
-import { MenuItem, TextField } from '@mui/material';
+import { Checkbox, ListItemText, MenuItem, TextField } from '@mui/material';
 import { CONTROL_HEIGHTS } from './controlHeights.js';
 import { FONT_SIZES } from './fonts.js';
 import { OPACITY } from './colors.js';
@@ -21,8 +20,11 @@ import { VTT_COLORS, vttAlpha } from '../vtt/colors.js';
 // unless `fullWidth` is false; `sx` is for placement only.
 //
 // `multiple`: several choices at once; `value` is an array and `onChange` gets
-// the array. The chosen labels are listed in the field, `placeholder` when
-// there are none.
+// the array. The field names the first choice and how many more ("Large +2"),
+// `placeholder` when there are none: it keeps its width however many are
+// chosen, and so does its menu (as wide as the field at least). Each choice in
+// the menu carries its check box, ticked while chosen (MUI's own pattern for a
+// select of several, "Checkmarks"); the menu stays open to tick more.
 // `native`: the browser's own list instead of a menu. A menu is portalled to
 // the page body, which a fullscreen map does not paint; a native list opens
 // over it.
@@ -37,6 +39,9 @@ const ON_MAP_SX = Object.freeze({
     bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
   },
 });
+
+// The check box of a choice in a menu of several: tight to its label.
+const CHECK_SX = Object.freeze({ p: 0, mr: 1 });
 
 export default function SelectField({
   label,
@@ -86,7 +91,7 @@ export default function SelectField({
           displayEmpty: showsEmpty,
           renderValue: multiple
             ? (chosen) => (chosen.length
-              ? chosen.map((entry, index) => <Fragment key={String(entry)}>{index ? ', ' : ''}{labelOf(entry)}</Fragment>)
+              ? <>{labelOf(chosen[0])}{chosen.length > 1 ? ` +${chosen.length - 1}` : ''}</>
               : placeholder)
             : undefined,
         },
@@ -98,7 +103,12 @@ export default function SelectField({
       {emptyOption ? <Item value={emptyValue}>{emptyOption.label}</Item> : null}
       {options.map((option) => (
         <Item key={String(option.value)} value={option.value} disabled={option.disabled}>
-          {option.label}
+          {multiple && !native ? (
+            <>
+              <Checkbox size="small" checked={current.includes(option.value)} sx={CHECK_SX} />
+              <ListItemText primary={option.label} />
+            </>
+          ) : option.label}
         </Item>
       ))}
     </TextField>

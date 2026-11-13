@@ -85,12 +85,14 @@ export default function FilterFieldControls({
 
 const controlsSx = { display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' };
 
-// A drop-down wide enough for its label, never wider than a column: several
-// chosen values are listed in it, cut with an ellipsis.
+// Every filter drop-down one width, whatever is chosen in it: on a phone they
+// share the row; from a tablet up each is a fixed column, so neither the
+// field nor its menu grows as choices are added. A long choice is cut with
+// an ellipsis (the menu lists it whole).
 const controlSx = {
   minWidth: 130,
-  maxWidth: 260,
-  flex: { xs: '1 1 130px', md: '0 0 auto' },
+  flex: { xs: '1 1 130px', sm: 'none' },
+  width: { sm: 160 },
   '& .MuiSelect-select': ONE_LINE_SX,
 };
 
