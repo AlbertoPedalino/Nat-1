@@ -33,13 +33,17 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
           onClick={toggle}
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.75, cursor: 'pointer', ...(selected ? tintedSurfaceSx(UI_COLORS.success, { amount: OPACITY.soft }) : { bgcolor: 'transparent' }) }}
         >
-          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: FONT_SIZES.xxl }} sx={{ gap: 0.5 }} />
+          <SpellRowLabel
+            spell={spell}
+            selected={selected}
+            nameSx={{ fontSize: FONT_SIZES.xxl }}
+            source={autoGranted ? (
+              sourceInfo
+                ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
+                : <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
+            ) : null}
+          />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-          {autoGranted ? (
-            sourceInfo
-              ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
-              : <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
-          ) : null}
           {!locked ? (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
           ) : null}

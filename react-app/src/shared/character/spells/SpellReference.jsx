@@ -65,13 +65,20 @@ export function SpellMiniTags({ spell, sx }) {
 
 // Icon + name cluster shared by every spell row. Callers place concentration
 // and ritual tags in their trailing-controls area.
-export function SpellRowLabel({ spell, selected = false, showIcon = true, nameSx, sx }) {
+// A spell's name in a picker row (the builder's lists, the sheet's picker and
+// the wizard's spellbook). `source` is where the spell comes from (a class's
+// or feat's chip, AUTO): a line of its own under the name, at its left, so a
+// long name keeps its room and every row's controls line up on the right.
+export function SpellRowLabel({ spell, selected = false, showIcon = true, source = null, nameSx, sx }) {
   return (
-    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
-      {showIcon ? <SpellNameIcon spell={spell} /> : null}
-      <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular, color: 'text.primary', ...nameSx }}>
-        {spell.name}
-      </Typography>
+    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.25, ...sx }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, maxWidth: '100%' }}>
+        {showIcon ? <SpellNameIcon spell={spell} /> : null}
+        <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular, color: 'text.primary', ...nameSx }}>
+          {spell.name}
+        </Typography>
+      </Box>
+      {source ? <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>{source}</Box> : null}
     </Box>
   );
 }

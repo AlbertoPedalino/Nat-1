@@ -174,11 +174,13 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind
       details={<SpellReferenceBody spell={spell} />}
       summary={({ open, toggle }) => (
         <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
-          <SpellRowLabel spell={spell} selected={selected} />
+          <SpellRowLabel
+            spell={spell}
+            selected={selected}
+            source={autoSelected ? <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} /> : null}
+          />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-          {autoSelected ? (
-            <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} />
-          ) : (
+          {autoSelected ? null : (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
           )}
         </ListItemButton>
