@@ -5,7 +5,7 @@ export default function install(registry, context = {}) {
     name: 'Transmuted Anatomy',
     actions: [{
       name: 'Resilient Anatomy', cat: 'reaction', resKey: 'transmuted_anatomy_resilience',
-      rollers: [{ kind: 'utility', formula: '1d4', label: 'Constitution save bonus' }],
+      rollers: [{ kind: 'bonus', formula: '1d4', label: 'Constitution save bonus' }],
     }],
     resources: [{ key: 'transmuted_anatomy_resilience', name: 'Resilient Anatomy', recharge: 'LR', max: 'proficiencyBonus' }],
     effects: [{ type: 'speed', value: 5, note: 'Lengthened Stride' }],

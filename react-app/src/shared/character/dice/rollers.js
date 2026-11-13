@@ -1,4 +1,4 @@
-const ROLLER_KINDS = new Set(['damage', 'heal', 'utility', 'tempHp']);
+const ROLLER_KINDS = new Set(['damage', 'heal', 'utility', 'bonus', 'tempHp']);
 
 function asText(value) {
   if (value == null || value === false) return '';
@@ -13,6 +13,7 @@ export function normalizeRollerKind(kind) {
   const compact = String(kind || 'damage').replace(/[^a-z]/gi, '').toLowerCase();
   if (compact === 'heal' || compact === 'healing') return 'heal';
   if (compact === 'utility' || compact === 'roll') return 'utility';
+  if (compact === 'bonus') return 'bonus';
   if (compact === 'temphp' || compact === 'temporaryhp') return 'tempHp';
   return 'damage';
 }

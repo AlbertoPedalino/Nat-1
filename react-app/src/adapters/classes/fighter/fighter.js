@@ -65,7 +65,7 @@ registerClassSheetActions("Fighter", [
     name: 'Tactical Mind',
     cat: 'special',
     minLevel: 2,
-    rollers: [{ kind: 'utility', formula: '1d10', label: '1d10', title: 'Bonus' }],
+    rollers: [{ kind: 'bonus', formula: '1d10' }],
     rollLabelPrefix: 'Tactical Mind'
   },
   {

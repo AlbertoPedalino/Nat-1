@@ -25,6 +25,13 @@ const ROLLER_PRESENTATION = {
     Icon: GAME_ICONS.roll,
     tone: rollerToneSx(ROLL_TONES.utility),
   },
+  // A die added to someone's roll (Guidance, Bardic Inspiration…).
+  bonus: {
+    verb: 'Bonus',
+    title: 'Bonus',
+    Icon: GAME_ICONS.bonus,
+    tone: rollerToneSx(ROLL_TONES.utility),
+  },
   tempHp: {
     verb: 'Temp HP',
     title: 'Temp HP',

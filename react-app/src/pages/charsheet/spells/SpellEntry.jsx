@@ -127,7 +127,8 @@ export default function SpellEntry({
   const cantripData = baseLevel === 0 ? getResolvedCantripData(C, entry.name) : null;
   const entryData = cantripData || spellData;
   const utilityDie = entryData?.utilityDie || null;
-  const utilityLabel = entryData?.utilityLabel || 'Roll';
+  const utilityKind = entryData?.utilityKind || 'utility';
+  const utilityLabel = entryData?.utilityLabel;
   const modifierDetails = normalizeModifierDetails({
     ...(cantripData || {}),
     grantModifiers: [
@@ -232,7 +233,7 @@ export default function SpellEntry({
     ...(utilityDie && !hasDamage && !hasHeal
       ? [{
           key: 'utility',
-          kind: 'utility',
+          kind: utilityKind,
           formula: utilityDie,
           verb: utilityLabel,
           title: utilityLabel,

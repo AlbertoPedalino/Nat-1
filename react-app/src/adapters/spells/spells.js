@@ -35,7 +35,7 @@ export default function install(registry, context = {}) {
     range: "30 ft", 
     heal: false, concentration: true,
     utilityDie: "1d4",
-    utilityLabel: "Bonus",
+    utilityKind: "bonus",
     
   });
   registerSpellData("Magic Missile", {

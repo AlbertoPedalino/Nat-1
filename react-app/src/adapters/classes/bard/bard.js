@@ -56,11 +56,11 @@ registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
 
 registerClassSheetActions("Bard", [
   { name: "Bardic Inspiration", cat: "bonus",  resKey: "bardic_insp",
-    rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => {
+    rollers: [{ kind: 'bonus', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 15 ? 12 : lv >= 10 ? 10 : lv >= 5 ? 8 : 6;
       return `1d${die}`;
-    }, label: ({ formula }) => String(formula || ""), title: 'Bonus' }],
+    } }],
     rollLabelPrefix: "Bardic Inspiration" },
   { name: "Font of Inspiration",cat: "action", resKey: "bard_font_insp", minLevel: 5,
     controller: true },

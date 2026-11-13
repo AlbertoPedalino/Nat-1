@@ -11,7 +11,7 @@ export default function install(registry, context = {}) {
       cat: 'special',
       resKey: 'mechagnome_built_for_success',
       minLevel: 1,
-      rollers: [{ kind: 'utility', formula: '1d4', label: 'D20 Test bonus' }],
+      rollers: [{ kind: 'bonus', formula: '1d4', label: 'D20 Test bonus' }],
     },
     { name: 'Emergency Fail-Safe', cat: 'reaction', resKey: 'mechagnome_fail_safe', minLevel: 1 },
   ]);

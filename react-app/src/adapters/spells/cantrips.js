@@ -118,7 +118,7 @@ export default function install(registry, context = {}) {
     range: "Touch",
     concentration: true,
     utilityDie: "1d4",
-    utilityLabel: "Bonus",
+    utilityKind: "bonus",
     
   });
   registerCantripData("Light", {

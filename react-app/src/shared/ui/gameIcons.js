@@ -12,7 +12,7 @@ import {
   GiThrownSpear, GiTorch, GiTowerFlag, GiTrident, GiVisoredHelm, GiWarhammer, GiWarlockEye, GiWaterDrop,
   GiWhiteTower, GiWolfHead, GiMushroomGills,
 } from 'react-icons/gi';
-import { Dices, HeartPulse, History, ShieldPlus, Sword, Swords, Target } from 'lucide-react';
+import { ArrowBigUp, Dices, HeartPulse, History, ShieldPlus, Sword, Swords, Target } from 'lucide-react';
 
 // The interface's game icons, by what they stand for: one place picks the
 // drawing for a role, and every panel, tile and roll button that plays that
@@ -46,6 +46,7 @@ export const GAME_ICONS = Object.freeze({
   heal: HeartPulse,
   tempHp: ShieldPlus,
   roll: Dices,
+  bonus: ArrowBigUp,
   rollLog: History,
 
   // The builder's steps and panels.
