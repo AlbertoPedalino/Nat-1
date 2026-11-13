@@ -15,11 +15,12 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { COLUMN_RULE_SX } from '../../../shared/ui/interactive.js';
 import { ROLL_FIGURE_MARK_STYLE } from '../../../shared/ui/pressable.js';
 import StatTile from './StatTile.jsx';
+import { sheetResponsive } from '../layout/layout.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 
-export default function AbilityScores({ C, sheet, onRoll }) {
+export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
   const profSets = useProficiencySets();
   const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
   const activeConditions = sheet?.activeConditions || [];
@@ -27,7 +28,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
   return (
     <Panel icon={GAME_ICONS.abilityScores} title="Ability Scores" tone={PANEL_TONES.abilityScores} sx={{ height: '100%' }} bodySx={{ p: '0.45rem' }}>
       <Box sx={{
-        display: 'grid', gridTemplateColumns: { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' },
+        // Two rows of three on a phone and in an embedded sheet, one row of six
+        // where the sheet has the width.
+        display: 'grid', gridTemplateColumns: sheetResponsive(embedded, { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' }),
         gap: '0.6rem', minWidth: 0,
       }}>
         {ABILITIES.map(s => {

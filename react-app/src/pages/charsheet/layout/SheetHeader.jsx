@@ -14,7 +14,7 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
-import { sheetColumnSx } from './layout.js';
+import { sheetColumnSx, sheetResponsive } from './layout.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -87,20 +87,20 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
       {/* On a desktop three columns — identity, XP, actions — with XP in the
           middle; below that a column (see the XP and actions row). */}
       <Box sx={{
-        display: embedded ? 'flex' : { xs: 'flex', md: 'grid' },
+        display: sheetResponsive(embedded, { xs: 'flex', md: 'grid' }),
         gridTemplateColumns: { md: 'minmax(0, 1fr) auto minmax(0, 1fr)' },
-        alignItems: 'center', gap: embedded ? '0.4rem' : { xs: '0.4rem', md: '1rem' },
+        alignItems: 'center', gap: sheetResponsive(embedded, { xs: '0.4rem', md: '1rem' }),
         flexDirection: 'column',
-        py: embedded ? '0.35rem' : { xs: '0.35rem', md: '0.6rem' },
+        py: sheetResponsive(embedded, { xs: '0.35rem', md: '0.6rem' }),
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: embedded ? '100%' : { xs: '100%', md: 'auto' } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: sheetResponsive(embedded, { xs: '100%', md: 'auto' }) }}>
           <PortraitBadge
             path={C.portraitPath}
             color={C.classIconColor}
-            size={embedded ? 36 : { xs: 36, md: 52 }}
+            size={sheetResponsive(embedded, { xs: 36, md: 52 })}
             sx={{
               cursor: readOnly ? 'default' : 'pointer',
-              fontSize: embedded ? FONT_SIZES.body : { xs: FONT_SIZES.body, md: FONT_SIZES.heading },
+              fontSize: sheetResponsive(embedded, { xs: FONT_SIZES.body, md: FONT_SIZES.heading }),
               transition: 'border-color 0.15s',
               ...(readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.accent } }),
             }}
@@ -149,7 +149,7 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-              <CharacterName name={C.name} sx={{ fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead } }} />
+              <CharacterName name={C.name} sx={{ fontSize: sheetResponsive(embedded, { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead }) }} />
               {readOnly && (
                 <TagChip icon={<Eye size={ICON_SIZES.xxs} />} label="Read only" tone={UI_COLORS.infoText} />
               )}
@@ -163,13 +163,13 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
         {/* XP and the actions: stacked on a phone, one row on a tablet; on a
             desktop the box dissolves and they take the grid's last columns. */}
         <Box sx={{
-          display: embedded ? 'flex' : { xs: 'flex', md: 'contents' },
-          alignItems: embedded ? 'stretch' : { xs: 'stretch', sm: 'center' },
-          flexDirection: embedded ? 'column' : { xs: 'column', sm: 'row' },
-          gap: embedded ? '0.4rem' : { xs: '0.4rem', sm: '1rem' },
-          width: embedded ? '100%' : { xs: '100%', md: 'auto' },
+          display: sheetResponsive(embedded, { xs: 'flex', md: 'contents' }),
+          alignItems: sheetResponsive(embedded, { xs: 'stretch', sm: 'center' }),
+          flexDirection: sheetResponsive(embedded, { xs: 'column', sm: 'row' }),
+          gap: sheetResponsive(embedded, { xs: '0.4rem', sm: '1rem' }),
+          width: sheetResponsive(embedded, { xs: '100%', md: 'auto' }),
         }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, width: embedded ? '100%' : { xs: '100%', sm: 'auto', md: 280, lg: 340 }, flex: embedded ? 'none' : { sm: 1, md: 'none' }, minWidth: 0, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, width: sheetResponsive(embedded, { xs: '100%', sm: 'auto', md: 280, lg: 340 }), flex: sheetResponsive(embedded, { xs: 'none', sm: 1, md: 'none' }), minWidth: 0, alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: UI_COLORS.accentText }}>
                 XP · Level {level}
@@ -186,7 +186,7 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
                 currentXp={currentXp}
                 onApply={(total) => onUpdateXp(String(total))}
                 variant="compact"
-                sx={{ width: embedded ? '100%' : { xs: '100%', md: 180 } }}
+                sx={{ width: sheetResponsive(embedded, { xs: '100%', md: 180 }) }}
               />
             )}
           </Box>

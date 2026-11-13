@@ -25,6 +25,7 @@ import { statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import StatTile from './StatTile.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { sheetResponsive } from '../layout/layout.js';
 
 export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -89,7 +90,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
   // sheet) Defenses comes straight under Reminders and the tiles close the
   // block. A sheet without reminders gives Conditions the whole row.
   return (
-    <Box sx={{ ...rightTopGridSx, gridTemplateColumns: embedded ? '1fr' : { xs: '1fr', md: '1fr 1fr' } }}>
+    <Box sx={{ ...rightTopGridSx, gridTemplateColumns: sheetResponsive(embedded, { xs: '1fr', md: '1fr 1fr' }) }}>
       <Box sx={{ display: 'flex', minWidth: 0, ...(effectActions ? null : { gridColumn: '1 / -1' }) }}>
         <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
       </Box>
@@ -98,7 +99,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
           <RemindersBlock sheet={sheet} actions={effectActions} />
         </Box>
       ) : null}
-      <Box sx={{ ...statRowSx, order: embedded ? 1 : { xs: 1, md: 0 } }}>
+      <Box sx={{ ...statRowSx, order: sheetResponsive(embedded, { xs: 1, md: 0 }) }}>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
         <Tooltip title={initTooltip}>
           <RollModeArea

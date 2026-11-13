@@ -958,12 +958,20 @@ test('an element style is written only through liveStyle.js', () => {
 
 // An icon button whose whole content is an X closes or removes something: it
 // is a CloseButton (or CornerCloseButton), the same X in every dialog, panel,
-// toast and bubble. A bubble's X stands beside its head in BubbleHeader, in the
-// layout, so it covers no word. A toggle that
+// toast and bubble. A bubble's X sits in the bubble's corner, BubbleHeader
+// keeping the head clear of it. A toggle that
 // shows an X while open (`open ? <X /> : <Icon />`) is not one; nor is the
 // search field's clear X, part of the field (PART_ICON_BUTTON_SX).
 test('an icon button that is only an X is a CloseButton', () => {
   assert.deepEqual(sourceFilesMatching(/\n\s*<X size=[^\n]*\/>\n\s*<\/(TipIconButton|IconButton)>/, {
     allow: ['shared/ui/CornerCloseButton.jsx', 'shared/ui/SearchField.jsx'],
   }), []);
+});
+
+// An embedded sheet takes the phone's layout through sheetResponsive
+// (pages/charsheet/layout/layout.js), never by spelling the phone's value
+// twice (`embedded ? 'column' : { xs: 'column', md: 'row' }`), nor by keeping
+// a hand copy of the phone's grid.
+test("an embedded sheet takes the phone's layout through sheetResponsive", () => {
+  assert.deepEqual(sourceLinesMatching(/embedded \? [^:]+ : \{ (xs|sm|md):/), []);
 });

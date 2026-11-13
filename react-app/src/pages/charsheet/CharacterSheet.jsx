@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX, sheetColumnSx } from './layout/layout.js';
+import { SHEET_AREAS, SHEET_GRID_ITEM_SX, sheetColumnSx, sheetGridSx, sheetResponsive } from './layout/layout.js';
 import SheetHeader from './layout/SheetHeader.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
 import HPBlock from './resources/HPBlock.jsx';
@@ -53,19 +53,6 @@ function BuilderButton({ C, charId }) {
     />
   );
 }
-
-const EMBEDDED_SHEET_GRID = {
-  gridTemplateColumns: '1fr',
-  gridTemplateAreas: `
-    "${SHEET_AREAS.saves}"
-    "${SHEET_AREAS.skills}"
-    "${SHEET_AREAS.senses}"
-    "${SHEET_AREAS.movement}"
-    "${SHEET_AREAS.profs}"
-    "${SHEET_AREAS.right}"
-  `,
-  gap: '0.55rem',
-};
 
 export default function CharacterSheet({
   externalChar = null,
@@ -140,7 +127,7 @@ export default function CharacterSheet({
     return embedded ? notFound : <AppPage topBar={{ home: true }}>{notFound}</AppPage>;
   }
 
-  const sheetGridSx = embedded ? EMBEDDED_SHEET_GRID : SHEET_GRID;
+  const gridSx = sheetGridSx(embedded);
 
   return (
     <ProficiencySetsProvider character={C}>
@@ -165,20 +152,20 @@ export default function CharacterSheet({
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
-        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.75} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
+        <Stack direction={sheetResponsive(embedded, { xs: 'column', md: 'row-reverse' })} spacing={0.75} sx={{ pt: '0.55rem', alignItems: 'stretch' }}>
           <HPBlock sheet={sheet} fillWidth={embedded}
             onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
             onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
             onSetHP={readOnly ? noop : setCurrentHP} onSetTempHP={readOnly ? noop : setTempHP} onSetMaxHPBonus={readOnly ? noop : setMaxHpBonus}
             onDeathSave={readOnly ? noop : rollDeathSave} onDeathSaveSet={readOnly ? noop : setDeathSave} />
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
+            <AbilityScores C={C} sheet={sheet} embedded={embedded} onRoll={rollD20} />
           </Box>
         </Stack>
         <Box sx={{
           display: 'grid',
           width: '100%',
-          ...sheetGridSx,
+          ...gridSx,
           pt: '0.55rem',
           alignItems: 'start',
           minWidth: 0,
@@ -188,10 +175,10 @@ export default function CharacterSheet({
               `leftCol` grid cell containing the panels as flex children, decoupling
               their row heights from the right column. */}
           <Box sx={{
-            display: embedded ? 'contents' : { xs: 'contents', md: 'flex' },
-            flexDirection: embedded ? undefined : { md: 'column' },
-            gap: embedded ? undefined : { md: '0.55rem' },
-            gridArea: embedded ? undefined : { md: SHEET_AREAS.leftCol },
+            display: sheetResponsive(embedded, { xs: 'contents', md: 'flex' }),
+            flexDirection: sheetResponsive(embedded, { md: 'column' }),
+            gap: sheetResponsive(embedded, { md: '0.55rem' }),
+            gridArea: sheetResponsive(embedded, { md: SHEET_AREAS.leftCol }),
             ...SHEET_GRID_ITEM_SX,
           }}>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
