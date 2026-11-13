@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lootLabel, roomMarkers, trapIconFor, trapLabel } from '../../../../src/shared/dungeon/roomMarkers.js';
+import * as gameIcons from 'react-icons/gi';
+import {
+  HAZARD_ICON, LOOT_ICON, TRAP_ICONS, lootLabel, roomMarkers, trapIconFor, trapLabel,
+} from '../../../../src/shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../../src/shared/seededRandom.js';
 import { fillBudget } from '../../../../src/shared/dungeon/roomBudget.js';
 
@@ -21,15 +24,15 @@ test('loot says what it is, how rare, and what it takes to get it out', () => {
 
 // A triangle says "something happens here", which the GM already knew.
 test('the icon follows the trap, in either language the tables are written in', () => {
-  assert.equal(trapIconFor('Hidden pit'), 'chevrons-down');
-  assert.equal(trapIconFor('Fossa nascosta'), 'chevrons-down');
+  assert.equal(trapIconFor('Hidden pit'), 'game:spiky-pit');
+  assert.equal(trapIconFor('Fossa nascosta'), 'game:spiky-pit');
   // "Poisoned darts" is both a dart trap and a poison one; either icon says
   // more than a triangle, and the first rule that matches wins.
-  assert.equal(trapIconFor('Poisoned darts'), 'move-right');
-  assert.equal(trapIconFor('Flame jet'), 'flame');
-  assert.equal(trapIconFor('Trappola di veleno'), 'skull');
-  assert.equal(trapIconFor('Something unheard of'), 'triangle-alert');
-  assert.equal(trapIconFor(null), 'triangle-alert');
+  assert.equal(trapIconFor('Poisoned darts'), 'game:dart');
+  assert.equal(trapIconFor('Flame jet'), 'game:flame');
+  assert.equal(trapIconFor('Trappola di veleno'), 'game:poison');
+  assert.equal(trapIconFor('Something unheard of'), 'game:wolf-trap');
+  assert.equal(trapIconFor(null), 'game:wolf-trap');
 });
 
 test('a rolled room offers its trap, its hazard and its hoard, and no empties', () => {
@@ -84,4 +87,14 @@ test('a different roll of the same dungeon buys different creatures', () => {
 
   const answers = new Set(['dungeon_a', 'dungeon_b', 'dungeon_c', 'dungeon_d'].map(pick));
   assert.ok(answers.size > 1, 'rolling again is what changes them');
+});
+
+// Every marker is a drawing the map can fetch: game:<name> is the react-icons
+// export Gi<Name> (scripts/build-game-icons.mjs names them the same way).
+test('every dungeon marker is a game-icons drawing that exists', () => {
+  const component = (key) => `Gi${key.replace(/^game:/, '').split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join('')}`;
+  for (const key of [...Object.values(TRAP_ICONS), HAZARD_ICON, LOOT_ICON]) {
+    assert.match(key, /^game:/);
+    assert.equal(typeof gameIcons[component(key)], 'function', key);
+  }
 });

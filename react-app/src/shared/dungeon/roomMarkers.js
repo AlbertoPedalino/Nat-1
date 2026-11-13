@@ -14,22 +14,25 @@ export const MARKER_COLORS = Object.freeze({
   loot: '#e8a030',
 });
 
-// Lucide's own names, which is what the map's object layer draws by.
-const TRAP_ICONS = Object.freeze({
-  default: 'triangle-alert',
-  pit: 'chevrons-down',
-  dart: 'move-right',
-  blade: 'swords',
-  fire: 'flame',
-  poison: 'skull',
-  gas: 'wind',
-  alarm: 'bell-ring',
-  magic: 'sparkles',
-  crush: 'hammer',
-  water: 'droplets',
-  cold: 'snowflake',
-  lightning: 'zap',
+// game-icons.net drawings (game:<name>), which the map's object layer draws
+// by: the board's other objects are drawn in the same hand.
+export const TRAP_ICONS = Object.freeze({
+  default: 'game:wolf-trap',
+  pit: 'game:spiky-pit',
+  dart: 'game:dart',
+  blade: 'game:spinning-blades',
+  fire: 'game:flame',
+  poison: 'game:poison',
+  gas: 'game:poison-gas',
+  alarm: 'game:ringing-bell',
+  magic: 'game:rune-stone',
+  crush: 'game:falling-boulder',
+  water: 'game:big-wave',
+  cold: 'game:snowflake1',
+  lightning: 'game:lightning-arc',
 });
+export const HAZARD_ICON = 'game:hazard-sign';
+export const LOOT_ICON = 'game:open-treasure-chest';
 
 // Matched on the words a table actually uses, in either of the two languages
 // these tables are written in, and never on the whole string: "Poisoned darts"
@@ -97,7 +100,7 @@ export function roomMarkers(keyRoom) {
     } else if (extra?.kind === 'env' && extra.data) {
       markers.push({
         kind: 'hazard',
-        iconKey: 'cloud-lightning',
+        iconKey: HAZARD_ICON,
         label: [slot.type, extra.data.severity].filter(Boolean).join(' · '),
       });
     }
@@ -107,7 +110,7 @@ export function roomMarkers(keyRoom) {
   if (!isNothingFound(loot)) {
     markers.push({
       kind: 'loot',
-      iconKey: 'gem',
+      iconKey: LOOT_ICON,
       label: lootLabel(loot, keyRoom.lootDc),
     });
   }
