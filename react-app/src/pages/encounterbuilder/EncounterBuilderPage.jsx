@@ -18,7 +18,6 @@ import { EncounterBuilderProvider, useEncounterBuilder } from './state/Encounter
 import { UI_COLORS, uiAlpha, OPACITY } from '../../shared/ui/colors.js';
 import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
-import { Mark, markRender, useCommitMarks } from './RenderClock.jsx';
 
 export default function EncounterBuilderPage() {
   const tool = useToolInstance('encounters');
@@ -34,8 +33,6 @@ export default function EncounterBuilderPage() {
 }
 
 function EncounterBuilderShell({ tool }) {
-  markRender('shell');
-  useCommitMarks('shell');
   const {
     state, dispatch, rollSync,
   } = useEncounterBuilder();
@@ -57,7 +54,6 @@ function EncounterBuilderShell({ tool }) {
       backLabel="Encounters"
       actions={(
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
-          <Mark at="actions" />
           <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
             <DiceControl
               log={state.rollLog}
@@ -95,23 +91,18 @@ function EncounterBuilderShell({ tool }) {
             <Tab icon={<Library size={ICON_SIZES.sm} />} iconPosition="start" value="library" label="Library" />
             <Tab icon={<Swords size={ICON_SIZES.sm} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
           </Tabs>
-          <Mark at="actions-end" />
         </Stack>
       )}
       after={(
         <>
-          <Mark at="after" />
           <StatBlockDialog />
           <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
           <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
           {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
-          <Mark at="after-end" />
         </>
       )}
     >
-      <Mark at="body" />
       <RollSharingControls />
-      <Mark at="view" />
       {state.view === 'builder' ? <BuilderView /> : null}
       {state.view === 'library' ? <LibraryView /> : null}
       {state.view === 'combat' ? <CombatView /> : null}

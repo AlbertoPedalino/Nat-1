@@ -1,4 +1,3 @@
-import { markRender } from '../RenderClock.jsx';
 import { createContext, memo, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { encounterReducer, createInitialState } from './reducer.js';
@@ -16,7 +15,6 @@ import { encounterRollActor } from '../rolls/rollActor.js';
 const EncounterBuilderContext = createContext(null);
 
 export function EncounterBuilderProvider({ instanceId, opening = true, children }) {
-  markRender('provider');
   const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
   // Enemy vitals go to their fight row; a linked player's to their sheet;
   // everything else straight to the reducer.
@@ -105,7 +103,6 @@ export function EncounterBuilderProvider({ instanceId, opening = true, children 
     roll,
   }), [campaignPlayers, characterDigests, rollSync, instanceId, monsterDb, roll, state, dispatch]);
 
-  markRender('provider-end');
   return (
     <EncounterBuilderContext.Provider value={value}>
       {children}
