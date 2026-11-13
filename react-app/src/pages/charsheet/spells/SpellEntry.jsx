@@ -33,6 +33,7 @@ import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';
 import {
+  ACTION_COLORS,
   CHIP_TONES,
   ENTITY_COLORS,
   RICH_TEXT_ACCENT,
@@ -52,6 +53,12 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
 import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import ToneBar from '../../../shared/ui/ToneBar.jsx';
+import { spellCastUnit } from '../../../shared/character/spells/spellMeta.js';
+
+// A spell's casting time as an action card's category: a minute or more is
+// the actions' "Other".
+const CAST_UNIT_CATEGORY = Object.freeze({ action: 'action', bonus: 'bonus', reaction: 'reaction', other: 'special' });
 
 export default function SpellEntry({
   entry,
@@ -249,6 +256,9 @@ export default function SpellEntry({
         <Box onClick={toggle}
           sx={{ ...spellRowSx, flexDirection: 'column', gap: 0.5, alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+          {/* What casting it takes (action, bonus, reaction, longer), marked as
+              an action card's category is. */}
+          <ToneBar tone={ACTION_COLORS[CAST_UNIT_CATEGORY[spellCastUnit(entry)]] || null} />
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ minWidth: 0, fontSize: FONT_SIZES.xxl, color: 'text.primary' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} /> : null}
