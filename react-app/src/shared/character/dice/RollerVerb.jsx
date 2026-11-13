@@ -9,6 +9,9 @@ export default function RollerVerb({ children }) {
   return <Box component="span" sx={verbSx}>{children}{' '}</Box>;
 }
 
+// Set off from the dice or modifier after it by more than a word space, so
+// "Dmg" and "2d6+3" read as name and number.
 const verbSx = (theme) => ({
+  mr: 0.5,
   [theme.breakpoints.down('sm')]: { display: 'none' },
 });
