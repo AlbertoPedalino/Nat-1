@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { ItemPropertyTable } from './ItemPropertyTable.jsx';
 import { WeaponMasteryBlock } from '../combat/WeaponMasteryBlock.jsx';
@@ -14,6 +14,7 @@ import ToneBar from '../../ui/ToneBar.jsx';
 import { cardToneSx, scrollWellSx } from '../../ui/surfaces.js';
 import { rarityTone } from './itemRarity.js';
 import { cardTitleSx } from '../../ui/PanelHeader.jsx';
+import ScrollingName from '../../ui/ScrollingName.jsx';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
@@ -68,7 +69,7 @@ export function ItemCardTitle({ item, name = item?.name }) {
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
       <ToneBar tone={tone} />
       <ItemNameIcon item={item} />
-      <Typography noWrap sx={{ ...cardTitleSx, minWidth: 0, color: tone || 'text.primary' }}>{name}</Typography>
+      <ScrollingName sx={{ ...cardTitleSx, color: tone || 'text.primary' }}>{name}</ScrollingName>
     </Box>
   );
 }
