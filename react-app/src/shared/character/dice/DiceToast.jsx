@@ -6,12 +6,12 @@ import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { BubbleCloseButton } from '../../ui/CornerCloseButton.jsx';
-import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx, BUBBLE_TITLE_CLEAR_SX } from '../../ui/bubble.js';
+import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
 import BubbleSparkles from '../../ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../ui/shadows.js';
 import TagChip from '../../ui/TagChip.jsx';
+import BubbleHeader from '../../ui/BubbleHeader.jsx';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -57,11 +57,11 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
       {layout.isCrit ? <BubbleSparkles key={seed} /> : null}
       {layout.isFail ? <BubbleDizzy key={seed} /> : null}
-      <BubbleCloseButton onClose={onClose} />
-
-      <Typography sx={{ ...TEXT_STYLES.shout, ...BUBBLE_TITLE_CLEAR_SX, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
-        {layout.label}
-      </Typography>
+      <BubbleHeader onClose={onClose}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
+          {layout.label}
+        </Typography>
+      </BubbleHeader>
 
       {layout.isCrit && (
         <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: UI_COLORS.accentText, mb: 0.25 }}>

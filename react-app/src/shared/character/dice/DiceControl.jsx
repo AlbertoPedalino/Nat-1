@@ -100,8 +100,9 @@ const GOLD_SURFACE = Object.freeze({
     color: 'primary.contrastText',
     px: 1.5,
     py: 0.75,
-    // Darkened over the pill's gold, not see-through.
-    '&:hover': tintedSurfaceSx(UI_COLORS.black, { base: 'primary.main' }),
+    // Darkened over the pill's gold, not see-through, its ink kept dark: the
+    // icon buttons' accent under the cursor would be gold on gold.
+    '&:hover': { ...tintedSurfaceSx(UI_COLORS.black, { base: 'primary.main' }), color: 'primary.contrastText' },
   },
 });
 

@@ -957,9 +957,9 @@ test('an element style is written only through liveStyle.js', () => {
 });
 
 // An icon button whose whole content is an X closes or removes something: it
-// is a CloseButton (or CornerCloseButton / BubbleCloseButton), the same X in
-// every dialog, panel, toast and bubble. A bubble's X sits in its corner and
-// its first line keeps clear of it (BUBBLE_TITLE_CLEAR_SX). A toggle that
+// is a CloseButton (or CornerCloseButton), the same X in every dialog, panel,
+// toast and bubble. A bubble's X stands beside its head in BubbleHeader, in the
+// layout, so it covers no word. A toggle that
 // shows an X while open (`open ? <X /> : <Icon />`) is not one; nor is the
 // search field's clear X, part of the field (PART_ICON_BUTTON_SX).
 test('an icon button that is only an X is a CloseButton', () => {

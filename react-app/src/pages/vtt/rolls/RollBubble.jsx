@@ -5,7 +5,7 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx, BUBBLE_TITLE_CLEAR_SX } from '../../../shared/ui/bubble.js';
+import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, BUBBLE_SHAKE_SX, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../../shared/ui/bubble.js';
 import BubbleDizzy from '../../../shared/ui/BubbleDizzy.jsx';
 import BubbleSparkles from '../../../shared/ui/BubbleSparkles.jsx';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -13,7 +13,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { hungOverStyle } from '../map/viewportGeometry.js';
-import { BubbleCloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
+import BubbleHeader from '../../../shared/ui/BubbleHeader.jsx';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
@@ -64,18 +64,10 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
         {layout.isCrit ? <BubbleSparkles key={roll.id} /> : null}
         {layout.isFail ? <BubbleDizzy /> : null}
-        {onDismiss ? <BubbleCloseButton /> : null}
-
-        {roll.actorName ? <Typography sx={{ ...actorSx, ...(onDismiss ? BUBBLE_TITLE_CLEAR_SX : null) }}>{roll.actorName}</Typography> : null}
-
-        <Typography sx={{
-          ...labelSx,
-          ...(onDismiss && !roll.actorName ? BUBBLE_TITLE_CLEAR_SX : null),
-          ...(layout.tone ? { color: layout.tone } : null),
-        }}
-        >
-          {layout.label}
-        </Typography>
+        <BubbleHeader hint={Boolean(onDismiss)} centered>
+          {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
+          <Typography sx={{ ...labelSx, ...(layout.tone ? { color: layout.tone } : null) }}>{layout.label}</Typography>
+        </BubbleHeader>
 
         {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.accent }}>NATURAL 20!</Typography>}
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}

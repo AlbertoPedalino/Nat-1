@@ -4,9 +4,9 @@ import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
-import { bubbleSx, bubbleTailSx, BUBBLE_TITLE_CLEAR_SX } from './bubble.js';
+import { bubbleSx, bubbleTailSx } from './bubble.js';
 import { TEXT_STYLES } from './textStyles.js';
-import { BubbleCloseButton } from './CornerCloseButton.jsx';
+import BubbleHeader from './BubbleHeader.jsx';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -81,10 +81,11 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               '& .MuiAlert-icon': { color },
             }}
           >
-            <BubbleCloseButton onClose={onClose} />
-            <AlertTitle sx={{ ...TEXT_STYLES.shout, ...BUBBLE_TITLE_CLEAR_SX, fontSize: FONT_SIZES.title, color, mb: 0.25 }}>
-              {SEVERITY_SHOUT[severity]}
-            </AlertTitle>
+            <BubbleHeader onClose={onClose}>
+              <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25 }}>
+                {SEVERITY_SHOUT[severity]}
+              </AlertTitle>
+            </BubbleHeader>
             {toast.msg}
           </Alert>
         ) : undefined}
