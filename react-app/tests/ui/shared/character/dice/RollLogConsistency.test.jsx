@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import DiceControl from '../../../../../src/shared/character/dice/DiceControl.jsx';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
 import SheetDiceDock from '../../../../../src/pages/charsheet/layout/SheetDiceDock.jsx';
+import { createValueStore } from '../../../../../src/shared/valueStore.js';
 import { UI_COLORS } from '../../../../../src/shared/ui/colors.js';
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
@@ -23,7 +24,7 @@ function renderSurface(surface, log) {
       <MemoryRouter>
         {surface === 'encounter' ? <DiceControl log={log} onRoll={vi.fn()} onClear={vi.fn()} /> : null}
         {surface === 'map' ? <RollsButton feed={log} onCustomRoll={vi.fn()} onClear={vi.fn()} /> : null}
-        {surface === 'player' ? <SheetDiceDock rollLog={log} /> : null}
+        {surface === 'player' ? <SheetDiceDock logStore={createValueStore(log)} /> : null}
       </MemoryRouter>
     </ThemeProvider>,
   );

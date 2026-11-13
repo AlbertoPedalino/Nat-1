@@ -43,7 +43,7 @@ export default function Die3D({
   const values = numbering || faceValues(geometry.faces.length, value, faces, seed, landed);
   const tumble = tumbleTurns(seed);
 
-  // A hundred-faced die is a hundred clipped planes, each composited on its own.
+  // A hundred-faced die is a hundred planes, each composited on its own.
   // That is worth paying for where the die is the point — rolling across the
   // table — and nowhere else: a roll log holding forty of them brought the whole
   // page down. Anywhere the die is only standing for a number it already knows,
@@ -97,10 +97,13 @@ export default function Die3D({
                 height: size,
                 fontSize: glyph,
                 lineHeight: LINE_HEIGHTS.none,
-                // A face is either a polygon cut out of the box, or — on a coin —
-                // a disc the browser rounds off for us.
-                clipPath: face.clipPath,
-                borderRadius: face.borderRadius,
+                // A face is either a polygon drawn as a picture (facePicture),
+                // or — on a coin — a disc the browser rounds off for us.
+                ...(face.corners ? {
+                  bgcolor: 'transparent',
+                  backgroundImage: facePicture(face.corners, faceTint(face, dimmed)),
+                  backgroundSize: '100% 100%',
+                } : { borderRadius: face.borderRadius }),
                 transform: face.transform,
                 // Only the face that landed carries the result's colour — red
                 // for a 1, gold for the top of the die — and the rest are
@@ -108,12 +111,9 @@ export default function Die3D({
                 color: index === landed && !dimmed ? color : OTHER_FACE_INK,
               }}
             >
-              <Box sx={{
-                ...faceFillSx,
-                clipPath: face.clipPath,
-                borderRadius: face.borderRadius,
-                bgcolor: faceTint(face, dimmed),
-              }} />
+              {face.corners ? null : (
+                <Box sx={{ ...faceFillSx, borderRadius: face.borderRadius, bgcolor: faceTint(face, dimmed) }} />
+              )}
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
                   made of. */}
@@ -269,7 +269,29 @@ const rimSx = {
   backfaceVisibility: 'hidden',
 };
 
+// A polygon face drawn as one picture: the ink rim, and the face's colour
+// inset within it as a coin's fill is (FACE_INSET). Not a box cut out with clip-path:
+// a clip on each face of a tumbling solid is redrawn every frame, and on a
+// desktop a throw of four dice dropped two frames in three (22ms a frame,
+// 13.7ms drawn this way). Kept per shape and colour, so a die draws each once.
+const FACE_PICTURES = new Map();
+const FACE_INSET = 9;
+function facePicture(corners, tint) {
+  const key = `${corners.join(' ')}|${tint}`;
+  let picture = FACE_PICTURES.get(key);
+  if (!picture) {
+    const points = (scale, shift) => corners.map(([x, y]) => `${shift + x * scale},${shift + y * scale}`).join(' ');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">'
+      + `<polygon points="${points(1, 0)}" fill="${UI_COLORS.dieEdge}"/>`
+      + `<polygon points="${points(1 - (2 * FACE_INSET) / 100, FACE_INSET)}" fill="${tint}"/></svg>`;
+    picture = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    FACE_PICTURES.set(key, picture);
+  }
+  return picture;
+}
+
+// A coin's disc of colour within its rim.
 const faceFillSx = {
   position: 'absolute',
-  inset: '9%',
+  inset: `${FACE_INSET}%`,
 };

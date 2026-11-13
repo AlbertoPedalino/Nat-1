@@ -381,13 +381,14 @@ export function dieGeometry(sides, radius = 16) {
       ...face.normal, 0,
       ...offset, 1,
     ];
-    const polygon = face.flat
-      .map(({ x, y }) => `${percent(x * scale, size)}% ${percent(y * scale, size)}%`)
-      .join(', ');
+    // The face's corners, in percent of the die's box.
+    const corners = face.flat.map(({ x, y }) => [percent(x * scale, size), percent(y * scale, size)]);
+    const polygon = corners.map(([x, y]) => `${x}% ${y}%`).join(', ');
 
     return {
       transform: `matrix3d(${matrix.map(round).join(',')})`,
       clipPath: `polygon(${polygon})`,
+      corners,
       towardsViewer: face.normal[2],
       // Which way the face looks and which way is up on it, for whoever has to
       // work out what a tumbling die is showing.
