@@ -93,9 +93,9 @@ export const initialBuilderState = {
   // `state.character`, so none of this reaches storage. It lives here rather
   // than in the step so it survives navigating away and back, the same way the
   // search boxes above already do.
-  inventoryFilter: 'all',
+  inventoryFilter: [],
   inventoryFilters: emptyItemFilters(),
-  currentInventoryFilter: 'all',
+  currentInventoryFilter: [],
   currentInventoryFilters: emptyItemFilters(),
   adaptersLoaded: false,
   adaptersVersion: 0,

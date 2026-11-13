@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { Stack } from '@mui/material';
 import { Plus } from 'lucide-react';
-import { MONSTER_FILTER_FIELDS, filterMonsters, monsterFilterDefaults } from './filters.js';
+import {
+  MONSTER_FILTER_FIELDS, filterMonsters, monsterFilterDefaults, monsterFiltering,
+} from './filters.js';
 import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { formatNumber } from '../ui/numberFormat.js';
@@ -20,7 +22,6 @@ import FilterToggles from '../ui/FilterToggles.jsx';
 import FilterFieldControls from '../ui/FilterFieldControls.jsx';
 
 const PAGE_SIZE = 50;
-const FILTER_DEFAULTS = monsterFilterDefaults();
 
 // The bestiary browser, with no idea who is asking. The encounter builder wires
 // it to its reducer; the battle map wires it to local state and drops the
@@ -57,9 +58,6 @@ export default function MonsterBrowser({
   }
 
   const allSourcesActive = !filters.sources?.length;
-  const changedKeys = Object.keys(FILTER_DEFAULTS).filter((key) => (
-    key === 'sources' ? !allSourcesActive : (filters[key] || FILTER_DEFAULTS[key]) !== FILTER_DEFAULTS[key]
-  ));
 
   return (
     <Stack spacing={2} sx={fill ? FILL_SX : null}>
@@ -84,8 +82,8 @@ export default function MonsterBrowser({
           fields={MONSTER_FILTER_FIELDS}
           filters={filters}
           onChange={onFilterChange}
-          changed={changedKeys.length > 0}
-          onReset={() => changedKeys.forEach((key) => onFilterChange(key, FILTER_DEFAULTS[key]))}
+          changed={monsterFiltering(filters)}
+          onReset={() => Object.entries(monsterFilterDefaults()).forEach(([key, value]) => onFilterChange(key, value))}
         />
       </Stack>
 

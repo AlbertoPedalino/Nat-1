@@ -13,14 +13,15 @@ const NO_STATES = Object.freeze([]);
 // from — not by the panel's own choices, or chip "Armor" would keep offering
 // "Martial Melee Weapon", which can only return nothing — then by the panel.
 //
-// `entries` are items, or rows holding one (`getItem` reads it: an owned
+// `chip` holds the shelves chosen (ItemGroupFilter: several at once, none for
+// every item). `entries` are items, or rows holding one (`getItem` reads it: an owned
 // item keeps its inventory index beside it). `filtersState` is the panel's
 // state when a reducer keeps it ([filters, setFilters]); `compare` orders the
 // results. `resetKey` changes with the *query*, not the array, so a list
 // pages back to the top on a new search but not on every quantity tick.
 // `states` are the owned-item states that must all hold (ITEM_STATE_CHIPS).
 export function useItemListQuery(entries, {
-  chip = 'all', states = NO_STATES, query = '', getItem = identity, filtersState, compare = null,
+  chip = NO_STATES, states = NO_STATES, query = '', getItem = identity, filtersState, compare = null,
 } = {}) {
   const q = String(query || '').trim();
   const pool = useMemo(() => (entries || []).filter((entry) => {

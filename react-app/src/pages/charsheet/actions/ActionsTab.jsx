@@ -27,6 +27,7 @@ import { useLoaded } from '../../../shared/ui/useLoaded.js';
 import { useMasteryEntries } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { toggleKeeps } from '../../../shared/ui/toggleChoices.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
@@ -57,7 +58,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   const {
     onRoll, setResources, onShowToast, onNotice, onUpdateSheet, onUpdateCharacter,
   } = useSheetActions();
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState([]);
   const [search, setSearch] = useState('');
   const itemsDb = useItemsDb();
   const variantRules = useLoaded(loadVariantRules, [], { initial: NO_RULES }).data;
@@ -90,19 +91,20 @@ export default function ActionsTab({ C, sheet, resources }) {
   const showAttacks = false;
   const matchesSearch = (action) => matchesQuery(search, action.name, action.desc);
   const actionSections = SECTION_DEFS
-    .filter(section => filter === 'all' || filter === section.key)
+    .filter(section => toggleKeeps(filter, section.key))
     .map(section => ({
       ...section,
       actions: adapterActions.filter(action => {
         const inPrimary = section.cats.includes(action.cat);
         // A card whose panel hosts other action types (e.g. Eldritch Cannon's
         // bonus-action firing + reaction Detonate) surfaces under those filters
-        // too, but only when that filter is active so it isn't duplicated in All.
+        // too, but only when its own section is not shown, so it is never
+        // listed twice (in All, or with both its sections chosen).
         // Entries may be a bare section key or { key, minLevel } to gate a type
         // that unlocks later (Detonate is a Reaction only from level 9). An
         // optional _alsoFiltersCondition(C, sheet) gates the whole card by
         // runtime state (Eldritch Cannon only hosts bonus/reaction while active).
-        const extraAllowed = filter !== 'all'
+        const extraAllowed = !SECTION_DEFS.some((own) => own.cats.includes(action.cat) && toggleKeeps(filter, own.key))
           && (typeof action._alsoFiltersCondition !== 'function' || action._alsoFiltersCondition(C, sheet));
         const inExtra = extraAllowed && (action._alsoFilters || []).some((f) => {
           const key = typeof f === 'string' ? f : f.key;
@@ -146,7 +148,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   return (
     <Box sx={panelRootSx}>
       <Box sx={panelToolbarSx}>
-        <FilterToggles options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
+        <FilterToggles options={FILTER_OPTIONS} values={filter} onChange={setFilter} />
         <SearchField
           placeholder="Search actions..."
           value={search}

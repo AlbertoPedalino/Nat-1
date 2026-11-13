@@ -1,3 +1,4 @@
+import { ALL_KEY } from '../../../shared/ui/toggleChoices.js';
 import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/spells/pactMagic.js';
 import { mergeFreeCastsById, normalizeFreeCast } from '../../../shared/character/spells/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
@@ -244,7 +245,7 @@ function sortByName(a, b) {
 
 // The tab's action filter chips, and which one a spell falls under.
 export const SPELL_ACTION_FILTERS = [
-  { key: 'all', label: 'All' },
+  { key: ALL_KEY, label: 'All' },
   { key: 'action', label: 'Action' },
   { key: 'bonus', label: 'Bonus Action' },
   { key: 'reaction', label: 'Reaction' },

@@ -57,7 +57,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
 export default function InventoryAddPanel({ itemsDb, onAddItem }) {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState([]);
   const [addPanelOpen, setAddPanelOpen] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customWeight, setCustomWeight] = useState('');

@@ -9,6 +9,7 @@ import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../..
 import { decodeItemTypeLabel } from '../../../shared/character/inventory/itemCodes.js';
 import { displayType } from '../../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { toggleKeeps } from '../../../shared/ui/toggleChoices.js';
 import { ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { crKey } from '../../../shared/bestiary/challengeRating.js';
 import { asArray, byName, compareText } from '../../../shared/lists.js';
@@ -170,9 +171,9 @@ function nameRank(entry, query, terms) {
 
 // Name matches first (exact, prefix, word starts, anywhere), then — from three
 // letters on — matches in the description. With no query, the kind's list.
-// `kind` is a key of COMPENDIUM_KINDS or 'all'.
-export function searchCompendium(index, query, { kind = 'all', limit = Infinity, inText = true } = {}) {
-  const pool = (index || []).filter((entry) => kind === 'all' || entry.kind === kind);
+// `kind`: the kinds chosen (a list, or one key; none or 'all': every kind).
+export function searchCompendium(index, query, { kind = [], limit = Infinity, inText = true } = {}) {
+  const pool = (index || []).filter((entry) => toggleKeeps(kind, entry.kind));
   const normalized = normalizeSearchText(query);
   if (!normalized) return pool.slice(0, limit);
   const terms = normalized.split(' ');

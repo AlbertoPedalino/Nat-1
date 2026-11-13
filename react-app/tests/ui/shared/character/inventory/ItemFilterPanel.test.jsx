@@ -4,13 +4,17 @@ import userEvent from '@testing-library/user-event';
 import ItemFilterPanel from '../../../../../src/shared/character/inventory/ItemFilterPanel.jsx';
 import { emptyItemFilters } from '../../../../../src/shared/character/inventory/itemFilters.js';
 
+// Options as buildItemFilterOptions gives them: { key, label } per value.
+const opts = (values) => values.map((value) => ({ key: value, label: value }));
 const OPTIONS = {
-  type: ['Simple Melee Weapon', 'Shield'],
-  damage: ['1d4', '1d6'],
-  damageType: ['piercing'],
-  properties: ['Thrown', 'Light'],
-  mastery: ['Nick'],
+  type: opts(['Simple Melee Weapon', 'Shield']),
+  damage: opts(['1d4', '1d6']),
+  damageType: opts(['piercing']),
+  properties: opts(['Thrown', 'Light']),
+  mastery: opts(['Nick']),
 };
+// A field's name shows once in its label (and again in its outline's notch).
+const shows = (label) => screen.queryAllByText(label).length > 0;
 
 function renderPanel({ filters = emptyItemFilters(), options = OPTIONS, onChange = vi.fn() } = {}) {
   render(<ItemFilterPanel filters={filters} onChange={onChange} options={options} />);
@@ -23,7 +27,7 @@ describe('ItemFilterPanel', () => {
     expect(screen.queryByText('Damage Type')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /filters/i }));
-    expect(screen.getByText('Damage Type')).toBeInTheDocument();
+    expect(shows('Damage Type')).toBe(true);
   });
 
   // Rows come from ITEM_FILTER_FIELDS, so a field added to the registry shows
@@ -33,19 +37,19 @@ describe('ItemFilterPanel', () => {
     await userEvent.click(screen.getByRole('button', { name: /filters/i }));
 
     ['Type', 'Damage', 'Damage Type', 'Properties', 'Mastery', 'Weight', 'Value']
-      .forEach((label) => expect(screen.getByText(label)).toBeInTheDocument());
+      .forEach((label) => expect(shows(label), label).toBe(true));
   });
 
   // A dropdown must never offer a value that matches nothing, so a field the
   // pool cannot answer is hidden entirely. Ranges always show.
   test('hides dropdown rows the pool has no values for', async () => {
-    renderPanel({ options: { type: ['Shield'], damage: [], damageType: [], properties: [], mastery: [] } });
+    renderPanel({ options: { type: opts(['Shield']), damage: [], damageType: [], properties: [], mastery: [] } });
     await userEvent.click(screen.getByRole('button', { name: /filters/i }));
 
-    expect(screen.getByText('Type')).toBeInTheDocument();
-    expect(screen.queryByText('Mastery')).not.toBeInTheDocument();
-    expect(screen.queryByText('Damage Type')).not.toBeInTheDocument();
-    expect(screen.getByText('Weight')).toBeInTheDocument();
+    expect(shows('Type')).toBe(true);
+    expect(shows('Mastery')).toBe(false);
+    expect(shows('Damage Type')).toBe(false);
+    expect(shows('Weight')).toBe(true);
   });
 
   test('the badge counts active values, and Clear all appears only with some', async () => {
@@ -60,7 +64,7 @@ describe('ItemFilterPanel', () => {
   });
 
   test('Clear all hands back a fully empty filter set', async () => {
-    const onChange = renderPanel({ filters: { ...emptyItemFilters(), type: 'Shield', weightMax: '5' } });
+    const onChange = renderPanel({ filters: { ...emptyItemFilters(), type: ['Shield'], weightMax: '5' } });
 
     await userEvent.click(screen.getByRole('button', { name: /clear all/i }));
     expect(onChange).toHaveBeenCalledWith(emptyItemFilters());

@@ -9,6 +9,7 @@ import InventoryRow from './InventoryRow.jsx';
 import { itemQty } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { hasActiveItemFilters } from '../../../shared/character/inventory/itemFilters.js';
+import { chosenToggles } from '../../../shared/ui/toggleChoices.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { ITEM_GROUP_CHIPS, ITEM_GROUP_KEYS, itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
 import { byItemName } from '../../../shared/character/inventory/itemSearch.js';
@@ -81,7 +82,7 @@ function groupEntriesByType(entries) {
 export default function InventoryList({ inv, character: C, itemFlagDefs, attunement, actions }) {
   const [inventorySearch, setInventorySearch] = useState('');
   const deferredInventorySearch = useDeferredValue(inventorySearch);
-  const [inventoryFilter, setInventoryFilter] = useState('all');
+  const [inventoryFilter, setInventoryFilter] = useState([]);
   const [inventoryStates, setInventoryStates] = useState([]);
 
   // Owned items, each beside its inventory index, narrowed as on every item
@@ -100,7 +101,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
   const totalItems = useMemo(() => inv.reduce((sum, item) => sum + itemQty(item), 0), [inv]);
   const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + itemQty(entry.item), 0), [visibleInventory]);
-  const inventoryFiltered = inventoryFilter !== 'all'
+  const inventoryFiltered = chosenToggles(inventoryFilter).length > 0
     || inventoryStates.length > 0
     || deferredInventorySearch.trim().length > 0
     || hasActiveItemFilters(inventoryList.filters);

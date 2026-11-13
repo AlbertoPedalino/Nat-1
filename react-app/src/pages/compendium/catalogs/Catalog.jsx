@@ -10,7 +10,7 @@ import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import {
-  catalogDefaults, catalogEntries, runCatalog, sourceOptions,
+  catalogDefaults, catalogEntries, catalogFields, catalogFiltering, runCatalog,
 } from './catalogFilter.js';
 import { entryNameSx, fillColumnSx, filterBarSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
@@ -60,7 +60,7 @@ export default function Catalog({
   // few letters.
   const phone = useIsPhone();
   const narrow = layout === 'panel' || phone;
-  const changed = Object.keys(defaults).some((key) => key !== 'sort' && filters[key] !== defaults[key]);
+  const changed = catalogFiltering(definition, filters);
   const { label } = definition;
 
   if (isLoadPending(compendium.status)) {
@@ -80,14 +80,11 @@ export default function Catalog({
       <Stack spacing={1} sx={filterBarSx}>
         <SearchField value={filters.search} onChange={set('search')} placeholder={`Search ${label}…`} ariaLabel={`Search ${label}`} />
         <FilterFieldControls
-          fields={definition.fields}
+          fields={catalogFields(definition)}
           filters={filters}
           onChange={(key, value) => set(key)(value)}
           entries={entries}
-          extra={[
-            { key: 'source', label: 'Source', any: 'all', options: sourceOptions(entries) },
-            { key: 'sort', label: 'Sort by', options: definition.sorts },
-          ]}
+          extra={[{ key: 'sort', label: 'Sort by', options: definition.sorts }]}
           changed={changed}
           onReset={() => setFilters(defaults)}
         />

@@ -3,7 +3,7 @@ import { crNumber } from './challengeRating.js';
 import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
 import { matchesQuery } from '../content/searchText.js';
 import { SIZE_NAMES } from '../content/rulesVocabulary.js';
-import { fieldDefaults, fieldTests } from '../content/filterFields.js';
+import { countChosenValues, fieldDefaults, fieldTests } from '../content/filterFields.js';
 
 // A creature's readings for a filter: its type lower-case ("dragon"), its
 // sizes (["L"]), its challenge rating as a number (1/4 -> 0.25).
@@ -30,11 +30,11 @@ export const MONSTER_SIZES = Object.freeze(Object.entries(SIZE_NAMES).map(([key,
 // compendium's monster catalog both filter and draw them from here.
 export const MONSTER_FILTER_FIELDS = Object.freeze([
   {
-    kind: 'select', key: 'crFrom', label: 'CR from', options: CR_OPTIONS,
+    kind: 'select', key: 'crFrom', label: 'CR from', single: true, options: CR_OPTIONS,
     match: (monster, cr) => monsterCrValue(monster) >= crNumber(cr),
   },
   {
-    kind: 'select', key: 'crTo', label: 'CR to', options: CR_OPTIONS,
+    kind: 'select', key: 'crTo', label: 'CR to', single: true, options: CR_OPTIONS,
     match: (monster, cr) => monsterCrValue(monster) <= crNumber(cr),
   },
   { kind: 'select', key: 'type', label: 'Type', options: CREATURE_TYPE_OPTIONS, valueOf: monsterTypeKey },
@@ -45,6 +45,13 @@ export const MONSTER_FILTER_FIELDS = Object.freeze([
 // switched on (none: every source) and the fields.
 export function monsterFilterDefaults() {
   return { search: '', sources: [], ...fieldDefaults(MONSTER_FILTER_FIELDS) };
+}
+
+// Whether anything is chosen: a search, a book switched off, a field.
+export function monsterFiltering(filters = {}) {
+  return Boolean(String(filters.search || '').trim())
+    || normalizeSourceFilter(filters.sources).size > 0
+    || countChosenValues(MONSTER_FILTER_FIELDS, filters) > 0;
 }
 
 export function filterMonsters(monsters, filters = {}) {

@@ -8,8 +8,8 @@ import {
   emptyItemFilters,
   hasActiveItemFilters,
   itemMatchesFilters,
-  rangeFilterKeys,
 } from '../../../../../src/shared/character/inventory/itemFilters.js';
+import { rangeFilterKeys } from '../../../../../src/shared/content/filterFields.js';
 
 const dagger = {
   name: 'Dagger',
@@ -73,6 +73,12 @@ test('damage and damage type filter on the decoded values', () => {
   assert.deepEqual(matching({ damageType: 'slashing' }), ['Greataxe']);
 });
 
+test('several values of a field widen: any of them', () => {
+  assert.deepEqual(matching({ type: ['Martial Melee Weapon', 'Adventuring Gear'] }), ['Greataxe', 'Rope']);
+  assert.deepEqual(matching({ damage: ['1d4', '1d12'] }), ['Dagger', 'Greataxe']);
+  assert.deepEqual(matching({ mastery: ['Nick', 'Sap'] }), ['Dagger', 'Spear']);
+});
+
 test('multiple properties narrow instead of widening', () => {
   assert.deepEqual(matching({ properties: ['Thrown'] }), ['Dagger', 'Spear']);
   assert.deepEqual(matching({ properties: ['Thrown', 'Light'] }), ['Dagger']);
@@ -113,7 +119,8 @@ test('active filter count tallies every set field', () => {
 });
 
 test('options come from the pool, deduped and ordered', () => {
-  const options = buildItemFilterOptions(pool);
+  const options = Object.fromEntries(Object.entries(buildItemFilterOptions(pool))
+    .map(([key, list]) => [key, list.map((option) => option.key)]));
   assert.deepEqual(options.type, ['Adventuring Gear', 'Martial Melee Weapon', 'Simple Melee Weapon']);
   assert.deepEqual(options.damage, ['1d4', '1d6', '1d12']);
   assert.deepEqual(options.damageType, ['piercing', 'slashing']);
@@ -137,9 +144,7 @@ test('every field is wired into the empty state', () => {
       rangeFilterKeys(field).forEach((key) => assert.equal(empty[key], '', `${key} missing`));
       return;
     }
-    const value = empty[field.key];
-    if (field.kind === 'multiSelect') assert.deepEqual(value, [], `${field.key} missing`);
-    else assert.equal(value, '', `${field.key} missing`);
+    assert.deepEqual(empty[field.key], [], `${field.key} missing`);
   });
   assert.equal(countActiveFilterValues(empty), 0);
 });
@@ -151,7 +156,7 @@ test('every field is both counted and matched', () => {
     // A value this item cannot possibly carry must both count and exclude it.
     const patch = field.kind === 'range'
       ? { [rangeFilterKeys(field)[0]]: '9999' }
-      : { [field.key]: field.kind === 'multiSelect' ? ['__nope__'] : '__nope__' };
+      : { [field.key]: ['__nope__'] };
     const filters = { ...emptyItemFilters(), ...patch };
 
     assert.equal(countActiveFilterValues(filters), 1, `${field.key} is not counted`);

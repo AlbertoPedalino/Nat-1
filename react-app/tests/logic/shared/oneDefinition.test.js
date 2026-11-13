@@ -1021,3 +1021,13 @@ test("a list's filters are described once and drawn by FilterFieldControls", () 
     allow: ['shared/bestiary/filters.js'],
   }), []);
 });
+
+// Every filter takes several choices at once. A drop-down filter is a field of
+// shared/content/filterFields.js (a list of values, any of them kept; `single`
+// only for a bound such as CR from), drawn by FilterFieldControls; a row of
+// toggles is FilterToggles with `values` (toggleChoices.js: All clears, the
+// others go on and off), never one `value` at a time.
+test('every filter takes several choices at once', () => {
+  assert.deepEqual(sourceLinesMatching(/<FilterToggles[^>]*\svalue=/), []);
+  assert.deepEqual(sourceLinesMatching(/kind: 'multiSelect'/), []);
+});

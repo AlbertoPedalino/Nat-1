@@ -1,3 +1,4 @@
+import { ALL_KEY } from '../../../shared/ui/toggleChoices.js';
 import {
   ACTION_COLORS,
   CHIP_TONES,
@@ -6,7 +7,7 @@ import {
 } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 
-export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
+export const FILTERS = [ALL_KEY, 'action', 'bonus', 'reaction', 'special'];
 
 // Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
 // Actions at a glance; the rest follow the shared action-economy colours.

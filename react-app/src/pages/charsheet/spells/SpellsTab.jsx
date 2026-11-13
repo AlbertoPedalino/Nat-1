@@ -26,6 +26,7 @@ import { spellcastingNumbers } from '../../../shared/character/spells/spellcasti
 import { useSpellCatalog } from './useSpellCatalog.js';
 import { useSpellSlotState } from './useSpellSlotState.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { chosenToggles, toggleKeeps } from '../../../shared/ui/toggleChoices.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
@@ -36,7 +37,8 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
   const [spellSearch, setSpellSearch] = useState('');
-  const [spellFilter, setSpellFilter] = useState('all');
+  const [spellFilter, setSpellFilter] = useState([]);
+  const anySpellFilter = chosenToggles(spellFilter).length > 0;
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const {
@@ -78,7 +80,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   const matchSpell = (entry) => (
     (catalogStatus === 'ready' || spellIndex.has(matchKey(entry.name)))
-    && (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
+    && toggleKeeps(spellFilter, getSpellActionFilter(entry))
     && matchesQuery(spellSearch, entry?.name)
   );
   const visibleCantrips = spellInfo.cantrips.filter(matchSpell);
@@ -87,10 +89,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     .map(([level, entries]) => [level, entries.filter(matchSpell)])
     .filter(([, entries]) => entries.length > 0);
   const hasVisibleSpells = visibleCantrips.length || visibleAtWill.length || visibleLeveled.length;
-  const showEmptyCantrips = catalogStatus === 'ready' && spellFilter === 'all' && !spellSearch.trim();
+  const showEmptyCantrips = catalogStatus === 'ready' && !anySpellFilter && !spellSearch.trim();
   const emptySpellText = spellSearch.trim()
     ? 'No spells match your search.'
-    : spellFilter === 'all' ? 'No spells selected.' : 'No spells match this filter.';
+    : !anySpellFilter ? 'No spells selected.' : 'No spells match this filter.';
 
   return (
     <Box sx={panelRootSx}>
@@ -103,7 +105,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       </Box>
 
       <Box sx={panelToolbarSx}>
-        <FilterToggles options={SPELL_ACTION_FILTERS} value={spellFilter} onChange={setSpellFilter} />
+        <FilterToggles options={SPELL_ACTION_FILTERS} values={spellFilter} onChange={setSpellFilter} />
         <SearchField
           placeholder="Search spells..."
           value={spellSearch}

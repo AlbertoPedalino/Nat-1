@@ -14,8 +14,8 @@ const EQUIPMENT_UI_ACTIONS = [
 ];
 
 test('the equipment step starts with no filters applied', () => {
-  assert.equal(initialBuilderState.inventoryFilter, 'all');
-  assert.equal(initialBuilderState.currentInventoryFilter, 'all');
+  assert.deepEqual(initialBuilderState.inventoryFilter, []);
+  assert.deepEqual(initialBuilderState.currentInventoryFilter, []);
   assert.equal(countActiveFilterValues(initialBuilderState.inventoryFilters), 0);
   assert.equal(countActiveFilterValues(initialBuilderState.currentInventoryFilters), 0);
   assert.equal(initialBuilderState.search.currentInventory, '');

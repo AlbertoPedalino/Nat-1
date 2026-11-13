@@ -1,6 +1,6 @@
 import { normalizeSearchText } from '../../../shared/content/searchText.js';
 import { sourceLabel } from '../../../shared/content/sourcePriority.js';
-import { fieldDefaults, fieldTests } from '../../../shared/content/filterFields.js';
+import { countChosenValues, fieldDefaults, fieldTests } from '../../../shared/content/filterFields.js';
 import { byName } from '../../../shared/lists.js';
 
 // A compendium catalog (spells, monsters, magic items, equipment) is one
@@ -10,10 +10,30 @@ import { byName } from '../../../shared/lists.js';
 //     fields: [...] — its filters (shared/content/filterFields.js),
 //     sorts: [{ key, label, compare? }] — the first is the default }
 //
-// The search (every word in the name) and the source are every catalog's.
+// The search (every word in the name) and the source are every catalog's:
+// the source is one more field (catalogFields), its books those the catalog
+// holds.
+
+const SOURCE_FIELD = Object.freeze({
+  kind: 'select',
+  key: 'source',
+  label: 'Source',
+  options: (entries) => sourceOptions(entries),
+  valueOf: (record, entry) => entry.source,
+});
+
+// A catalog's fields, its source included.
+export function catalogFields(definition) {
+  return [...definition.fields, SOURCE_FIELD];
+}
 
 export function catalogDefaults(definition) {
-  return { search: '', source: 'all', sort: definition.sorts[0].key, ...fieldDefaults(definition.fields) };
+  return { search: '', sort: definition.sorts[0].key, ...fieldDefaults(catalogFields(definition)) };
+}
+
+// Whether anything is chosen beyond the order: a search or a filter.
+export function catalogFiltering(definition, filters) {
+  return Boolean(String(filters?.search || '').trim()) || countChosenValues(catalogFields(definition), filters) > 0;
 }
 
 export function catalogEntries(definition, index) {
@@ -30,10 +50,9 @@ export function sourceOptions(entries) {
 export function runCatalog(definition, entries, filters = {}) {
   const f = { ...catalogDefaults(definition), ...filters };
   const terms = normalizeSearchText(f.search).split(' ').filter(Boolean);
-  const tests = fieldTests(definition.fields, f);
+  const tests = fieldTests(catalogFields(definition), f);
   const list = (entries || []).filter((entry) => (
     terms.every((term) => entry.nameText.includes(term))
-    && (f.source === 'all' || entry.source === f.source)
     && tests.every((test) => test(entry.record, entry))
   ));
   const compare = definition.sorts.find((sort) => sort.key === f.sort)?.compare;

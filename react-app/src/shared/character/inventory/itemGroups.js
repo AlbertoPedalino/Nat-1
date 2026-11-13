@@ -1,6 +1,7 @@
 import { isMagicItem } from './itemRarity.js';
 import { isItemCarried } from './weight.js';
 import { ANY_ARMOR_CODES, ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
+import { ALL_KEY, toggleKeeps } from '../../ui/toggleChoices.js';
 // The filter-chip taxonomy for item lists: which shelf an item sits on, the
 // chip set itself, and the test a chip applies. Shared so the builder and the
 // sheet cannot disagree — they used to classify independently, and a ring with
@@ -27,7 +28,7 @@ export function isItemEquipped(item) {
   return Boolean(item?.equipped || item?.equippedSlot);
 }
 
-const ALL_ITEMS_CHIP = Object.freeze({ key: 'all', label: 'All' });
+const ALL_ITEMS_CHIP = Object.freeze({ key: ALL_KEY, label: 'All' });
 
 // Chip set for a list of items you can only browse (an item database).
 export const ITEM_GROUP_CHIPS = Object.freeze([
@@ -38,9 +39,9 @@ export const ITEM_GROUP_CHIPS = Object.freeze([
   { key: 'magic', label: 'Magic' },
 ].map(Object.freeze));
 
-export function matchesItemGroupChip(item, chipKey) {
-  if (!chipKey || chipKey === ALL_ITEMS_CHIP.key) return true;
-  return itemGroupKey(item) === chipKey;
+// `chips`: the shelves chosen (a list, or one key; none or 'all': every item).
+export function matchesItemGroupChip(item, chips) {
+  return toggleKeeps(chips, itemGroupKey(item));
 }
 
 // What an owned item's state is, filtered beside its shelf rather than

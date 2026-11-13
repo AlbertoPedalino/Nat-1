@@ -10,6 +10,7 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
+import { ALL_KEY } from '../../../shared/ui/toggleChoices.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { COMPENDIUM_KIND_COLORS } from '../../../shared/ui/entityColors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
@@ -22,8 +23,8 @@ import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
 
-// The kind filter: everything, or one kind.
-const KIND_OPTIONS = [{ key: 'all', label: 'All' }, ...COMPENDIUM_KINDS];
+// The kind filter: everything, or the kinds chosen.
+const KIND_OPTIONS = [{ key: ALL_KEY, label: 'All' }, ...COMPENDIUM_KINDS];
 const PAGE_SIZE = 50;
 
 // Search, kind filter, results and the open entry. `layout`:
@@ -32,7 +33,7 @@ const PAGE_SIZE = 50;
 // `compendium` is useCompendium()'s state, so a page and a panel share one load.
 export default function CompendiumBrowser({ compendium, layout = 'page', autoFocus = false }) {
   const [query, setQuery] = useState('');
-  const [kind, setKind] = useState('all');
+  const [kind, setKind] = useState([]);
   const [selectedKey, setSelectedKey] = useState(null);
   // Typing stays immediate; the search over thousands of entries follows.
   const deferredQuery = useDeferredValue(query);
@@ -60,7 +61,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
         ariaLabel="Search the compendium"
       />
       <Box role="group" aria-label="Kind" sx={kindRowSx}>
-        <FilterToggles options={KIND_OPTIONS} value={kind} onChange={(key) => setKind(kind === key ? 'all' : key)} />
+        <FilterToggles options={KIND_OPTIONS} values={kind} onChange={setKind} />
       </Box>
     </Stack>
   );
