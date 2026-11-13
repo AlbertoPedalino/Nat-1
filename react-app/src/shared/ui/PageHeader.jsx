@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
+import { bannerSx } from './PanelHeader.jsx';
 import { asArray } from '../lists.js';
 
 // The header a page opens on, under the app's top bar (Campaigns, a tool's
@@ -17,7 +18,9 @@ export default function PageHeader({
     <Box sx={[headerSx, ...asArray(sx)]}>
       {icon ? <Box component={icon} size={PAGE_ICON_SIZE} strokeWidth={1.5} aria-hidden sx={{ color: iconColor, flexShrink: 0 }} /> : null}
       <Box sx={titleBlockSx}>
-        <Typography component="h1" sx={titleSx}>{title}</Typography>
+        <Box sx={bannerSx()}>
+          <Typography component="h1" sx={titleSx}>{title}</Typography>
+        </Box>
         {subtitle ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>{subtitle}</Typography> : null}
       </Box>
       {actions ? <Box sx={actionsSx}>{actions}</Box> : null}
@@ -39,7 +42,8 @@ const headerSx = {
 
 const titleBlockSx = { flex: '1 1 160px', minWidth: 0 };
 
-// Lettered like a panel's title, in the heading's blackletter.
+// Lettered like a panel's title, in the heading's blackletter, on a banner
+// cut in the panels' swallowtail.
 const titleSx = {
   ...TEXT_STYLES.heading,
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',

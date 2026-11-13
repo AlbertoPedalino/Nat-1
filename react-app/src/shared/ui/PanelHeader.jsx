@@ -27,7 +27,7 @@ export const panelBarSx = {
 // ornament poking out of a panel is cut by its frame and grows scrollbars).
 // Spread after the bar's padding: it widens the ends (`px`, theme units) to
 // clear the notch.
-function notchInk(side, notch) {
+function notchInk(side, notch, { edgeTop = false } = {}) {
   const points = side === 'left' ? `0,0 ${notch},50 0,100` : `${notch},0 0,50 ${notch},100`;
   // Twice the ink edge: the clip cuts the outer half of the line away.
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${notch} 100" preserveAspectRatio="none">`
@@ -36,8 +36,9 @@ function notchInk(side, notch) {
     content: '""',
     position: 'absolute',
     [side]: 0,
-    top: 0,
-    // Down over the bar's bottom border, as the clip is.
+    // Over the box's borders, as the clip is: the bottom one, and the top one
+    // of a banner that stands alone.
+    top: edgeTop ? -2 : 0,
     bottom: -2,
     width: notch,
     backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
@@ -45,13 +46,13 @@ function notchInk(side, notch) {
     pointerEvents: 'none',
   };
 }
-function ribbonSx(notch, px) {
+function ribbonSx(notch, px, ink = {}) {
   return {
     position: 'relative',
     px,
     clipPath: `polygon(0 0, 100% 0, calc(100% - ${notch}px) 50%, 100% 100%, 0 100%, ${notch}px 50%)`,
-    '&::before': notchInk('left', notch),
-    '&::after': notchInk('right', notch),
+    '&::before': notchInk('left', notch, ink),
+    '&::after': notchInk('right', notch, ink),
   };
 }
 
@@ -59,6 +60,23 @@ const PANEL_RIBBON_SX = ribbonSx(10, 2.25);
 // A stat tile's narrow bar: a shallow notch and slim ends, so its name
 // (Armor Class, Inspiration) keeps the room.
 const TILE_RIBBON_SX = ribbonSx(4, 0.625);
+
+// A banner standing on its own (a page's title): the panel bar's paper and
+// screentone in `tone`, inked above and below, its ends cut in the same
+// swallowtail. It is as wide as what it carries.
+export function bannerSx(tone = UI_COLORS.accent) {
+  return {
+    ...ribbonSx(12, 2.5, { edgeTop: true }),
+    display: 'inline-block',
+    maxWidth: '100%',
+    py: 0.5,
+    bgcolor: UI_COLORS.surfaceHeader,
+    backgroundImage: panelScreentone(tone),
+    borderTop: 2,
+    borderBottom: 2,
+    borderColor: UI_COLORS.edge,
+  };
+}
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
