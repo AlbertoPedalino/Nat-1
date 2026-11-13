@@ -102,7 +102,11 @@ export function tumbleTurns(seed) {
   return {
     x: (1 + Math.floor(next() * 3)) * 360 + Math.round(next() * 40) - 20,
     y: (1 + Math.floor(next() * 3)) * 360 + Math.round(next() * 40) - 20,
-    // Staggered so a handful of dice land one after another, like a real throw.
-    delayMs: Math.round(next() * 160),
+    // Staggered so a handful of dice land one after another, like a real throw:
+    // a die tumbles this much longer, never starts this much later. A delay
+    // held the die still on its starting pose, nearly showing the result, and
+    // then jerked it into motion — hidden on the first roll while the bubble
+    // popped in, plain to see on every roll after it.
+    lateMs: Math.round(next() * 160),
   };
 }

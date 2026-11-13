@@ -80,8 +80,7 @@ export default function Die3D({
           height: size,
           ...(spinning ? {
             animationName: 'gbDieTumble',
-            animationDuration: `${spinMs * spinShare}ms`,
-            animationDelay: `${tumble.delayMs}ms`,
+            animationDuration: `${spinMs * spinShare + tumble.lateMs}ms`,
             '--gb-die-x': `${-tumble.x * turns * spinShare}deg`,
             '--gb-die-y': `${-tumble.y * turns * spinShare}deg`,
           } : null),

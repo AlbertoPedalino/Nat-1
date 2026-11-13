@@ -58,10 +58,10 @@ test('two dice in one throw do not tumble in lockstep', () => {
 // the viewer, never edge-on.
 test('a die lands square, however far it travelled', () => {
   for (let index = 0; index < 30; index += 1) {
-    const { x, y, delayMs } = tumbleTurns(`roll:${index}`);
+    const { x, y, lateMs } = tumbleTurns(`roll:${index}`);
     assert.ok(Math.abs(x) >= 340, 'it turns at least once');
     assert.ok(Math.abs(y) >= 340);
-    assert.ok(delayMs >= 0 && delayMs <= 160);
+    assert.ok(lateMs >= 0 && lateMs <= 160);
   }
 });
 
