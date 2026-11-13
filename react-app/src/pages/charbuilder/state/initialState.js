@@ -54,6 +54,8 @@ export const initialCharacter = {
 
 export const initialBuilderState = {
   tab: 0,
+  // Whether the player has changed the character yet (builderReducer).
+  characterEdited: false,
   character: initialCharacter,
   loading: {
     classes: true,

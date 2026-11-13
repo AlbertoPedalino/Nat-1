@@ -56,3 +56,14 @@ test('equipment list UI state never touches the character', () => {
 test('an unknown action leaves the state untouched', () => {
   assert.equal(builderReducer(initialBuilderState, { type: 'nope/does-not-exist' }), initialBuilderState);
 });
+
+test('a new character counts as made only after the player changes it', () => {
+  let state = builderReducer(initialBuilderState, { type: 'tab/set', tab: 3 });
+  state = builderReducer(state, { type: 'search/set', scope: 'classes', value: 'wiz' });
+  state = builderReducer(state, { type: 'character/restore', character: { name: '' } });
+  assert.equal(state.characterEdited, false);
+  state = builderReducer(state, { type: 'field/set', field: 'name', value: 'Aldric' });
+  assert.equal(state.characterEdited, true);
+  state = builderReducer(state, { type: 'tab/set', tab: 0 });
+  assert.equal(state.characterEdited, true);
+});

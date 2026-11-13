@@ -192,10 +192,13 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
       const useCloud = cloudActive && !(activeId && isSyncExcluded(activeId));
 
       if (useCloud) {
-        // Save straight to the server on open (no need to "Open sheet" first) and
-        // on every edit — never touching localStorage. The first save inserts the
-        // row; later saves update it in place, one at a time.
+        // Saved straight to the server on every edit — never touching
+        // localStorage. A new character gets its id, its row and its URL only
+        // once the player changes something: opening the builder creates
+        // nothing. The first save inserts the row; later saves update it in
+        // place, one at a time.
         if (!builderIdRef.current) {
+          if (!state.characterEdited) return;
           builderIdRef.current = generateCharId();
           // Point the URL at the new id so a reload/edit targets the same character.
           replaceCharacterIdInUrl(builderIdRef.current);
@@ -204,8 +207,10 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
         return;
       }
 
-      // Logged out: persist to the local store as before.
+      // Logged out: persist to the local store as before; a new character
+      // only once the player has changed it.
       const hadId = getActiveCharId();
+      if (!hadId && !state.characterEdited) return;
       const saved = saveCharacter(state.character, state.data, { createIfMissing: true });
       if (saved?.id && !hadId) {
         replaceCharacterIdInUrl(saved.id);
@@ -214,7 +219,7 @@ export function useBuilderPersistence({ state, dispatch, notify }) {
     return () => clearTimeout(handle);
     // cloudSave.request is stable and reads refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.character, state.loading, state.data, authResolved, cloudActive, importDraft, cloudConflict]);
+  }, [state.character, state.characterEdited, state.loading, state.data, authResolved, cloudActive, importDraft, cloudConflict]);
 
   // A cloud character saved as a local copy: the copy is in sync with the
   // revision the builder holds.

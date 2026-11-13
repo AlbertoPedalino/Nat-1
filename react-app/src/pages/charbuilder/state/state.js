@@ -59,7 +59,26 @@ function findByNameSource(list, name, source) {
 
 // One fewer of the item a type picker had added (`name|source`), when the
 // pick changes.
+// Actions the builder makes by itself (loading the books, adapting them,
+// restoring a saved or cloud copy): they may reshape the character, but they
+// are not the player making it.
+const SYSTEM_ACTIONS = new Set([
+  'data/load-start', 'data/load-error', 'data/load-success', 'data/adapt',
+  'adapters/loaded', 'adapters/loaded-for-classes', 'character/restore',
+]);
+
+// The builder's reducer. `characterEdited` turns on with the first change the
+// player makes to the character, and stays on: a new character is created
+// (an id, a cloud row, a local entry) only then, never by opening the page.
 export function builderReducer(state, action) {
+  const next = reduceBuilder(state, action);
+  if (next === state || next.characterEdited || next.character === state.character || SYSTEM_ACTIONS.has(action.type)) {
+    return next;
+  }
+  return { ...next, characterEdited: true };
+}
+
+function reduceBuilder(state, action) {
   switch (action.type) {
     case 'data/load-start':
       return { ...state, loading: { ...state.loading, [action.scope]: true }, errors: { ...state.errors, [action.scope]: '' } };
