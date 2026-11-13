@@ -815,3 +815,19 @@ test("a control's lettering is the theme's", () => {
 test('a count of picks is PickCount', () => {
   assert.deepEqual(sourceFilesMatching(/\} \/ \$\{[^}]+\} selected|<TagChip[^>]*label=\{`[^`]*\$\{[^}]+\}\/\$\{/, { allow: ['shared/ui/PickCount.jsx'] }), []);
 });
+
+// An SVG built in code becomes a CSS image through svgPicture
+// (shared/ui/svgPicture.js) only, never by a hand-written data URL.
+test('an SVG drawing becomes a CSS image only through svgPicture', () => {
+  assert.deepEqual(sourceLinesMatching(/data:image\/svg\+xml,/, {
+    allow: ['shared/ui/svgPicture.js'],
+  }), []);
+});
+
+// A card's name kept to one line scrolls under the finger (ScrollingName); it is
+// never cut with an ellipsis.
+test('a card name on one line is a ScrollingName, never cut with an ellipsis', () => {
+  assert.deepEqual(sourceLinesMatching(
+    /(noWrap|ONE_LINE_SX)[^\n]*(cardTitleSx|TEXT_STYLES\.cardName|BUILDER_TEXT\.cardTitle)|(cardTitleSx|TEXT_STYLES\.cardName|BUILDER_TEXT\.cardTitle)[^\n]*(noWrap|ONE_LINE_SX)/,
+  ), []);
+});

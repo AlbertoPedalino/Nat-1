@@ -1,8 +1,9 @@
-import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Stack } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
 import { TEXT_STYLES } from '../ui/textStyles.js';
 import { ICON_SIZES } from '../ui/iconSizes.js';
+import ScrollingName from '../ui/ScrollingName.jsx';
 
 // One collapsed accordion row: title (+ optional `leading` element such as a
 // level chip) visible, body on expand. `tone` sets the left border (falls back
@@ -43,9 +44,9 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, flex: 1 }}>
           {leading}
-          <Typography variant="body2" noWrap sx={{ ...TEXT_STYLES.cardName, minWidth: 0, flex: 1, color: titleColor }}>
+          <ScrollingName variant="body2" sx={{ ...TEXT_STYLES.cardName, flex: 1, color: titleColor }}>
             {title}
-          </Typography>
+          </ScrollingName>
           {trailing}
         </Stack>
       </AccordionSummary>

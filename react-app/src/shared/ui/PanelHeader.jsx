@@ -6,6 +6,7 @@ import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { UI_SHADOWS } from './shadows.js';
 import { SEAL_RADIUS } from './radius.js';
+import { svgPicture } from './svgPicture.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -40,7 +41,7 @@ function notchInk(side, notch) {
     // Down over the bar's bottom border, as the clip is.
     bottom: -2,
     width: notch,
-    backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    backgroundImage: svgPicture(svg),
     backgroundSize: '100% 100%',
     pointerEvents: 'none',
   };

@@ -1,6 +1,7 @@
 import { UI_COLORS, uiMix } from './colors.js';
 import { inkShadow } from './shadows.js';
 import { DURATIONS } from './motion.js';
+import { svgPicture } from './svgPicture.js';
 
 // The comic speech bubble: every toast and roll bubble is one. A thick ink
 // edge, a solid offset shadow — in ink, or in the moment's colour (the accent
@@ -111,7 +112,7 @@ function shapeImage(path, width, color) {
     + `<g ${fit}><path d="${path}" fill="${color}"/>`
     + `<path d="${path}" fill="url(#d)"/>`
     + `<path d="${path}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="${INK_WIDTH}" stroke-linejoin="miter" stroke-miterlimit="6"/></g></svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  return svgPicture(svg);
 }
 
 // A shape's picture is the same for every throw of its colour: made once.
