@@ -21,16 +21,15 @@ export const panelBarSx = {
   borderColor: UI_COLORS.edge,
 };
 
-// A whole panel's bar cut as a ribbon: each end notched in a swallowtail,
-// the notch inked like every edge, all inside the bar's own box (an ornament
-// poking out of a panel is cut by its frame and grows scrollbars). Spread
-// after panelBarPadSx: it widens the ends to clear the notch. A stat tile's
-// small bar stays square.
-const RIBBON_NOTCH = 10;
-function notchInk(side) {
-  const points = side === 'left' ? `0,0 ${RIBBON_NOTCH},50 0,100` : `${RIBBON_NOTCH},0 0,50 ${RIBBON_NOTCH},100`;
+// A panel's bar cut as a ribbon: each end notched in a swallowtail `notch`
+// px deep, the notch inked like every edge, all inside the bar's own box (an
+// ornament poking out of a panel is cut by its frame and grows scrollbars).
+// Spread after the bar's padding: it widens the ends (`px`, theme units) to
+// clear the notch.
+function notchInk(side, notch) {
+  const points = side === 'left' ? `0,0 ${notch},50 0,100` : `${notch},0 0,50 ${notch},100`;
   // Twice the ink edge: the clip cuts the outer half of the line away.
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RIBBON_NOTCH} 100" preserveAspectRatio="none">`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${notch} 100" preserveAspectRatio="none">`
     + `<polyline points="${points}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="4" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/></svg>`;
   return {
     content: '""',
@@ -39,19 +38,26 @@ function notchInk(side) {
     top: 0,
     // Down over the bar's bottom border, as the clip is.
     bottom: -2,
-    width: RIBBON_NOTCH,
+    width: notch,
     backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
     backgroundSize: '100% 100%',
     pointerEvents: 'none',
   };
 }
-export const panelRibbonSx = {
-  position: 'relative',
-  px: 2.25,
-  clipPath: `polygon(0 0, 100% 0, calc(100% - ${RIBBON_NOTCH}px) 50%, 100% 100%, 0 100%, ${RIBBON_NOTCH}px 50%)`,
-  '&::before': notchInk('left'),
-  '&::after': notchInk('right'),
-};
+function ribbonSx(notch, px) {
+  return {
+    position: 'relative',
+    px,
+    clipPath: `polygon(0 0, 100% 0, calc(100% - ${notch}px) 50%, 100% 100%, 0 100%, ${notch}px 50%)`,
+    '&::before': notchInk('left', notch),
+    '&::after': notchInk('right', notch),
+  };
+}
+
+// A whole panel's bar (PanelHeader, the sheet's tab bar, a dialog's title).
+export const panelRibbonSx = ribbonSx(10, 2.25);
+// A stat tile's narrow bar: a shallower notch, so its name keeps the room.
+export const tileRibbonSx = ribbonSx(6, 1);
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
