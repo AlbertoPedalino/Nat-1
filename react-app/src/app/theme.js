@@ -138,8 +138,8 @@ export const theme = createTheme({
     },
     // Everything clicked (buttons, toggle keys, tabs, clickable chips) is
     // lettered one way: the display face's spaced capitals (TEXT_STYLES.label).
-    // A button that carries content rather than a label takes
-    // CONTENT_BUTTON_SX (shared/ui/actionButton.js).
+    // A line of description inside a button takes BUTTON_DESCRIPTION_SX
+    // (shared/ui/actionButton.js); its name stays in these capitals.
     button: {
       ...TEXT_STYLES.label,
     },

@@ -11,7 +11,6 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTENT_BUTTON_SX } from '../../../shared/ui/actionButton.js';
 
 export default function TablesView() {
   const { state, dispatch } = useGmBoard();
@@ -100,8 +99,6 @@ const tabSx = {
   minHeight: '48px',
   alignItems: 'flex-start',
   textAlign: 'left',
-  // A tab with its summary under its name: content, not a label.
-  ...CONTENT_BUTTON_SX,
 };
 
 const tabLabelSx = {

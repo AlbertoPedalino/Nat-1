@@ -1,4 +1,4 @@
-import { CONTROL_FONT_SIZES } from './fonts.js';
+import { CONTROL_FONT_SIZES, FONT_WEIGHTS } from './fonts.js';
 import { UI_COLORS, OPACITY } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { toggleSx } from './pressable.js';
@@ -40,12 +40,14 @@ export function goldToggleSx(active) {
   };
 }
 
-// A button that carries content rather than a label: an option with a line
-// of description under its name, a vertical tab with its summary, a button
-// that shows a chosen value (the atmosphere, "+1h"). It keeps the words as
-// written instead of the controls' spaced capitals; the only place a
-// button's lettering is turned back (guarded).
-export const CONTENT_BUTTON_SX = Object.freeze({
+// The line of description inside a button, under its name (an option's
+// "trigger: 1 only", "Lv 1–4"): the button's name keeps the controls'
+// capitals, its description reads as every description does, in the prose
+// face as written. The only place a button's lettering is turned back
+// (guarded).
+export const BUTTON_DESCRIPTION_SX = Object.freeze({
+  ...TEXT_STYLES.prose,
   textTransform: 'none',
   letterSpacing: 0,
+  fontWeight: FONT_WEIGHTS.regular,
 });

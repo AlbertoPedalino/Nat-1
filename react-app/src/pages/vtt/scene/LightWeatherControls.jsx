@@ -18,7 +18,6 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
 import { MAP_PAPER_SX } from '../../../shared/ui/mapPaper.js';
-import { CONTENT_BUTTON_SX } from '../../../shared/ui/actionButton.js';
 
 // The scene panel's Light & weather section: the light filter and the
 // atmosphere of the picture on show. Both belong to a picture, so without one
@@ -128,8 +127,6 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
           justifyContent: 'flex-start',
           color: atmosphere.type === 'none' ? VTT_COLORS.textSecondary : VTT_COLORS.accentHighlight,
           borderColor: vttAlpha(VTT_COLORS.textSecondary, OPACITY.line),
-          // Shows the chosen atmosphere, as a select shows its value.
-          ...CONTENT_BUTTON_SX,
           '& .MuiButton-endIcon': { ml: 'auto' },
         }}
       >

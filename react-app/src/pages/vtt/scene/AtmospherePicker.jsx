@@ -24,7 +24,6 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { CONTENT_BUTTON_SX } from '../../../shared/ui/actionButton.js';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
@@ -68,8 +67,6 @@ function AtmosphereOption({ type, selected, onSelect }) {
         py: 0.75,
         borderRadius: (theme) => `${theme.shape.borderRadius * 0.875}px !important`,
         color: VTT_COLORS.textSecondary,
-        // A preset's name beside its picture: content, not a label.
-        ...CONTENT_BUTTON_SX,
         '&:hover': {
           borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.heavy),
           // Over the control's own solid surface, not in place of it.

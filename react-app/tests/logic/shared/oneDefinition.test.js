@@ -801,9 +801,9 @@ test("a panel's title bar is panelTitleBarSx", () => {
 });
 
 // Everything clicked is lettered by the theme (TEXT_STYLES.label: the display
-// face's spaced capitals). A button whose words are content rather than a
-// label takes CONTENT_BUTTON_SX; turning the capitals back anywhere else is a
-// button lettered unlike the rest.
+// face's spaced capitals). Only a line of description inside a button takes
+// BUTTON_DESCRIPTION_SX; turning the capitals back anywhere else is a button
+// lettered unlike the rest.
 test("a control's lettering is the theme's", () => {
   assert.deepEqual(sourceFilesMatching(/textTransform:\s*'none'/, { allow: ['shared/ui/actionButton.js'] }), []);
   assert.deepEqual(sourceFilesMatching(/label=["']?[A-Z]{3,}["' ]|>\s*(HOME|LOGIN|LOG IN)\s*</, { allow: [] }), []);
