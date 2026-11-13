@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
@@ -136,17 +137,30 @@ export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.xxl}, 
 // the page (menus, toasts, dialogs) portals out of the panel, as it already
 // does. A phone, with one narrow column, was smooth without.
 //
-// A box can turn the layers off for the panels inside it with
-// NO_PANEL_LAYERS_SX: the sheet embedded in the battle map (not the encounter
-// builder's, which sits on a still page), where twenty layers over a moving
-// board doubled the dropped frames of a pan.
-export const NO_PANEL_LAYERS_SX = Object.freeze({ '--gb-panel-layer': 'auto' });
+// A page whose panels sit over a board that moves (the battle map) turns the
+// layers off for every panel on it, portalled ones included (the compendium
+// side panel), with usePanelsWithoutLayers: there twenty layers over the
+// moving board doubled the dropped frames of a pan. The one switch, on the
+// document root while that page is open.
+const PANEL_LAYER_VAR = '--gb-panel-layer';
+
+export function usePanelsWithoutLayers() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.getPropertyValue(PANEL_LAYER_VAR);
+    root.style.setProperty(PANEL_LAYER_VAR, 'auto');
+    return () => {
+      if (previous) root.style.setProperty(PANEL_LAYER_VAR, previous);
+      else root.style.removeProperty(PANEL_LAYER_VAR);
+    };
+  }, []);
+}
 
 export const panelFrameSx = {
   border: `3px solid ${UI_COLORS.edge}`,
   boxShadow: UI_SHADOWS.panel,
   overflow: 'hidden',
-  willChange: { md: 'var(--gb-panel-layer, transform)' },
+  willChange: { md: `var(${PANEL_LAYER_VAR}, transform)` },
 };
 
 // The name on a card or row (an action, a chosen species or background): the

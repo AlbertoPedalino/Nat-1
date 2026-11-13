@@ -907,3 +907,16 @@ test('a flat icon button is part of something else', () => {
     ],
   }), []);
 });
+
+// Whether panels are GPU layers is one switch: panelFrameSx reads it, a page
+// over a moving board (the battle map) turns it off with
+// usePanelsWithoutLayers. No box sets the variable or a panel's will-change
+// by hand.
+test('panel layers are switched only through usePanelsWithoutLayers', () => {
+  assert.deepEqual(sourceFilesMatching(/--gb-panel-layer/, {
+    allow: ['shared/ui/PanelHeader.jsx'],
+  }), []);
+  assert.deepEqual(sourceFilesMatching(/usePanelsWithoutLayers\(\)/, {
+    allow: ['shared/ui/PanelHeader.jsx', 'pages/vtt/VttPage.jsx'],
+  }), []);
+});

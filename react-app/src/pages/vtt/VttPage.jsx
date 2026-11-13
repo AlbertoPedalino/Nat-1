@@ -18,6 +18,7 @@ import CampaignSessionPicker from './session/CampaignSessionPicker.jsx';
 import SceneEditor from './scene/SceneEditor.jsx';
 import ScenePicker from './scene/ScenePicker.jsx';
 import SessionGate from './session/SessionGate.jsx';
+import { usePanelsWithoutLayers } from '../../shared/ui/PanelHeader.jsx';
 import * as s from './styles.js';
 import { UI_FONTS, LETTER_SPACINGS } from '../../shared/ui/fonts.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
@@ -34,6 +35,9 @@ import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 //   ?campaign=<id>  a player joining a table, put wherever the live scene is
 // A player never picks a scene, and is moved along when the GM switches.
 export default function VttPage() {
+  // Over the moving board no panel is a layer of its own (the embedded sheet,
+  // the compendium): see usePanelsWithoutLayers.
+  usePanelsWithoutLayers();
   const location = useLocation();
   const navigate = useNavigate();
   const { cloudEnabled, status, cloudActive } = useAuth();
