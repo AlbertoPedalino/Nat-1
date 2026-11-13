@@ -26,7 +26,7 @@ import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
 import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { cardToneSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
@@ -97,7 +97,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? tintedSurfaceSx(rarity, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? cardToneSx(rarity) : item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>

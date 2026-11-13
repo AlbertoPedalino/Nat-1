@@ -56,6 +56,13 @@ export function tintedSurfaceSx(tone, { amount = OPACITY.tint, base = 'backgroun
 // in colors.js, so the colour helpers can use it without importing surfaces.
 export { washImage };
 
+// A card that wears a colour for what it is (a magic item's rarity):
+// `tone` washed over the card's header paper, one strength for every such
+// card.
+export function cardToneSx(tone) {
+  return tintedSurfaceSx(tone, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader });
+}
+
 // A callout in a tone, set apart from the dialog or list it sits in: a
 // concluded negotiation, a rolled fumble, a condition's rules card. The 2px
 // edge in its tone over a soft wash of it. `tone` is a palette colour (hex).
