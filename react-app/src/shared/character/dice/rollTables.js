@@ -1,6 +1,7 @@
 import { loadGameData } from '../../content/gameData.js';
 import { stripMarkup } from '../../content/markupText.js';
 import { rollDie } from './dice.js';
+import { rememberPromise } from '../../rememberPromise.js';
 
 // Tables a feature rolls on (Wild Magic Surge), read from the 5etools data
 // like every other piece of game text: where the table lives, never its rows.
@@ -49,17 +50,12 @@ export function parseRollTable(name, table) {
 export function loadRollTable(key) {
   const source = TABLE_SOURCES[key];
   if (!source) return Promise.resolve(null);
-  if (!loaded.has(key)) {
-    const promise = loadGameData(source.file).then((data) => {
-      const feature = (data?.[source.list] || []).find((entry) => entry.name === source.name && entry.source === source.source);
-      const table = parseRollTable(source.name, findTable(feature?.entries));
-      if (!table) throw new Error(`No ${source.name} table in ${source.file}`);
-      return table;
-    });
-    promise.catch(() => loaded.delete(key));
-    loaded.set(key, promise);
-  }
-  return loaded.get(key);
+  return rememberPromise(loaded, key, () => loadGameData(source.file).then((data) => {
+    const feature = (data?.[source.list] || []).find((entry) => entry.name === source.name && entry.source === source.source);
+    const table = parseRollTable(source.name, findTable(feature?.entries));
+    if (!table) throw new Error(`No ${source.name} table in ${source.file}`);
+    return table;
+  }));
 }
 
 export function rollOnTable(table, { count = 1, rng = Math.random } = {}) {

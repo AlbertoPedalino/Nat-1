@@ -10,6 +10,7 @@ import {
   characterPieceSx,
 } from './tokenSpriteStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
 
 // What a piece looks like: its object glyph, artwork, class icon or initials,
 // inside the ring that says whose it is.
@@ -57,7 +58,7 @@ export default function TokenArt({
           ? (token.color || vttAlpha(VTT_COLORS.black, OPACITY.strong))
           : vttAlpha(VTT_COLORS.black, OPACITY.strong),
         bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
-        outline: token.hiddenFromPlayers || token.layer === 'gm'
+        outline: isSecretPiece(token)
           ? `2px dashed ${vttAlpha(VTT_COLORS.accent, OPACITY.solid)}`
           : 'none',
         outlineOffset: '-4px',

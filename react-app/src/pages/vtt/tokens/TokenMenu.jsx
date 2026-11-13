@@ -17,6 +17,7 @@ import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
+import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -47,7 +48,7 @@ export default function TokenMenu({
   // Read off the piece rather than kept in state: the layer is written
   // optimistically and rolled back if the database refuses, and a local copy
   // would keep showing the tick that never took.
-  const hiddenFromPlayers = Boolean(token.hiddenFromPlayers) || token.layer === 'gm';
+  const hiddenFromPlayers = isSecretPiece(token);
 
   const menuWidth = isMapObject ? 270 : 360;
 

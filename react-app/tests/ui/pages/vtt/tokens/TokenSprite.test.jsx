@@ -484,3 +484,19 @@ test('a name only the GM sees wears the dashed gold outline, a public one none',
   rerender(<TokenSprite token={{ id: 'chest', label: 'Chest', layer: 'tokens' }} size={64} />);
   expect(getComputedStyle(screen.getByText('Chest')).outline).not.toMatch(/dashed/);
 });
+
+// A secret piece is faded for the GM, except a GM-layer piece while the GM
+// works on the GM layer: there it is what is being edited.
+test('a GM-layer piece is faded until the GM works on the GM layer', () => {
+  const opacity = (token, props) => {
+    const { container, unmount } = render(<TokenSprite token={token} size={64} {...props} />);
+    const value = getComputedStyle(container.querySelector('[role="button"]')).opacity;
+    unmount();
+    return Number(value);
+  };
+  const gmPiece = { id: 'g', label: 'Chest', layer: 'gm', hiddenFromPlayers: true, iconKey: 'game:chest' };
+  const hiddenToken = { id: 'h', label: 'Spy', layer: 'tokens', hiddenFromPlayers: true };
+  expect(opacity(gmPiece)).toBeLessThan(1);
+  expect(opacity(gmPiece, { gmLayerActive: true })).toBe(1);
+  expect(opacity(hiddenToken, { gmLayerActive: true })).toBeLessThan(1);
+});

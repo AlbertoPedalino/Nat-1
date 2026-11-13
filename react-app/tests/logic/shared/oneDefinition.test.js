@@ -831,3 +831,20 @@ test('a card name on one line is a ScrollingName, never cut with an ellipsis', (
     /(noWrap|ONE_LINE_SX)[^\n]*(cardTitleSx|TEXT_STYLES\.cardName|BUILDER_TEXT\.cardTitle)|(cardTitleSx|TEXT_STYLES\.cardName|BUILDER_TEXT\.cardTitle)[^\n]*(noWrap|ONE_LINE_SX)/,
   ), []);
 });
+
+// Whether a piece is kept from the players (GM layer, or hidden on its own) is
+// asked of isSecretPiece (shared/vtt/scene/scene.js), never spelled out again.
+test("a piece's secrecy is read through isSecretPiece", () => {
+  assert.deepEqual(sourceLinesMatching(
+    /hiddenFromPlayers.*\.layer\s*[!=]==\s*'gm'|\.layer\s*[!=]==\s*'gm'.*hiddenFromPlayers/,
+    { allow: ['shared/vtt/scene/scene.js'] },
+  ), []);
+});
+
+// Work kept once per key and forgotten on failure goes through rememberPromise
+// (shared/rememberPromise.js), never another hand-made cache of promises.
+test('a promise cached by key is kept through rememberPromise', () => {
+  assert.deepEqual(sourceLinesMatching(/\.catch\(\(\)\s*=>\s*\w+\.delete\(|\w+\.delete\(\w+\);\s*throw /, {
+    allow: ['shared/rememberPromise.js'],
+  }), []);
+});

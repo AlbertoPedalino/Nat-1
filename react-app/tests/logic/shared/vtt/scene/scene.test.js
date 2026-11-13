@@ -13,6 +13,7 @@ import {
   canMarkToken,
   canMoveToken,
   gridLineColor,
+  isSecretPiece,
   isTokenVisibleToPlayers,
   isTokenInPlay,
   mapImageFolder,
@@ -333,4 +334,12 @@ test('removing a background hands the show to its neighbour, and the last one re
     backgrounds: [], backgroundPath: null, shownImage: 'map',
   });
   assert.equal(backgroundRemovalPatch(scene, 'missing'), null);
+});
+
+test('a piece is secret on the GM layer or when hidden on its own', () => {
+  assert.equal(isSecretPiece({ layer: 'gm' }), true);
+  assert.equal(isSecretPiece({ layer: 'tokens', hiddenFromPlayers: true }), true);
+  assert.equal(isSecretPiece({ layer: 'tokens' }), false);
+  assert.equal(isSecretPiece({ layer: 'map', hiddenFromPlayers: false }), false);
+  assert.equal(isSecretPiece(null), false);
 });

@@ -1,5 +1,6 @@
 import { adapterRegistry, installAdapters } from './registry.js';
 import { asArray } from '../shared/lists.js';
+import { rememberPromise } from '../shared/rememberPromise.js';
 
 const adapterModules = import.meta.glob('./{classes,feats,species,spells,items}/**/*.js');
 const loadedPaths = new Set();
@@ -44,15 +45,7 @@ async function loadPaths(paths, context) {
   const entries = [];
   uniquePaths.forEach((path) => {
     if (loadedPaths.has(path)) return;
-    let promise = inFlightPathPromises.get(path);
-    if (!promise) {
-      promise = adapterModules[path]().catch((error) => {
-        inFlightPathPromises.delete(path);
-        throw error;
-      });
-      inFlightPathPromises.set(path, promise);
-    }
-    entries.push({ path, promise });
+    entries.push({ path, promise: rememberPromise(inFlightPathPromises, path, adapterModules[path]) });
   });
   if (!entries.length) return [];
   const modules = await Promise.all(entries.map((entry) => entry.promise));

@@ -22,6 +22,7 @@ import {
 import { isDying } from '../../../shared/character/combat/mortality.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -32,6 +33,9 @@ export default function TokenSprite({
   size,
   hex = false,
   dimmed,
+  // The GM is working on the GM layer: its pieces are what is being edited,
+  // so they stand at full strength there instead of faded as secrets.
+  gmLayerActive = false,
   staged,
   interactive,
   movable,
@@ -52,6 +56,9 @@ export default function TokenSprite({
   // the piece is, not its editing layer: token-maker portraits remain tokens
   // even when the GM happens to create one while arranging the map layer.
   const isMapObject = Boolean(token.iconKey);
+  // A secret is faded, so the GM sees what the table does not. Not a GM-layer
+  // piece while the GM works on the GM layer: there it is what is being edited.
+  const fadedAsSecret = token.layer === 'gm' ? !gmLayerActive : isSecretPiece(token);
   // An uploaded picture gets the same corner handles as an icon: it is placed at
   // the size it should cover, and that size is never right on the first drop.
   const hasHandles = isMapPiece(token);
@@ -133,7 +140,7 @@ export default function TokenSprite({
         // map tool owns the pointer so it truly falls through to the viewport.
         ...(!interactive ? { '&, & *': { pointerEvents: 'none !important' } } : null),
         cursor: movable ? 'grab' : 'default',
-        opacity: dimmed ? OPACITY.line : (token.hiddenFromPlayers || token.layer === 'gm' || staged ? OPACITY.strong : 1),
+        opacity: dimmed ? OPACITY.line : (fadedAsSecret || staged ? OPACITY.strong : 1),
         filter: staged ? 'grayscale(0.7)' : 'none',
         // Above its neighbours while hovered so the expanded conditions are not
         // covered by the next piece along.

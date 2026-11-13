@@ -13,6 +13,7 @@
 import { combatantLabel } from './encounterImport.js';
 import { parseSourceRef } from './encounterSync.js';
 import { DEAD_CONDITION_KEY, normalizeConditions } from '../../character/combat/conditions.js';
+import { isSecretPiece } from '../scene/scene.js';
 
 function wholeNumber(value, fallback) {
   const number = Number(value);
@@ -60,7 +61,7 @@ export function turnEntriesFromTokens(tokens) {
       dead: isTokenDead(token),
       tokenId: token.id,
       onBoard: true,
-      hiddenFromPlayers: Boolean(token.hiddenFromPlayers || token.layer === 'gm'),
+      hiddenFromPlayers: isSecretPiece(token),
     });
   }
   return [...bySlot.values()].sort((a, b) => a.order - b.order);
@@ -109,7 +110,7 @@ export function turnEntriesFromFight(fightRow, tokens, turns) {
         : Boolean(combatant?.isDead),
       tokenId: token?.id || null,
       onBoard: Boolean(token),
-      hiddenFromPlayers: !token || Boolean(token.hiddenFromPlayers || token.layer === 'gm'),
+      hiddenFromPlayers: !token || isSecretPiece(token),
     };
   });
 }

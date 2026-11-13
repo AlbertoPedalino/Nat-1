@@ -135,13 +135,15 @@ export function isTokenInPlay(token, playArea) {
     && x < playArea.x + playArea.w
     && y < playArea.y + playArea.h;
 }
+// Kept from the players: a piece or drawing on the GM layer, or hidden on its
+// own. The one test of it: the map, the initiative strip, the menus and what is
+// written to the database all ask here.
+export function isSecretPiece(piece) {
+  return Boolean(piece?.hiddenFromPlayers) || piece?.layer === 'gm';
+}
+
 export function isTokenVisibleToPlayers(token, playArea) {
-  return Boolean(
-    token
-    && token.layer !== 'gm'
-    && !token.hiddenFromPlayers
-    && isTokenInPlay(token, playArea),
-  );
+  return Boolean(token && !isSecretPiece(token) && isTokenInPlay(token, playArea));
 }
 
 export function normalizeLayer(layer) {
@@ -283,7 +285,7 @@ export function toToken(row) {
     layer: normalizeLayer(row.layer),
     // Visibility is independent from the editing layer. Legacy GM-layer rows
     // remain private even when they predate the dedicated column.
-    hiddenFromPlayers: Boolean(row.hidden_from_players) || row.layer === 'gm',
+    hiddenFromPlayers: isSecretPiece({ hiddenFromPlayers: row.hidden_from_players, layer: row.layer }),
     x: numberOr(row.x, 0),
     y: numberOr(row.y, 0),
     w: clamp(numberOr(row.w, 1), 0.1, MAX_SPAN),
@@ -363,7 +365,7 @@ export function canMoveToken(token, {
   if (!token) return false;
   if (activeLayer && token.layer !== activeLayer) return false;
   if (isGm) return true;
-  if (token.layer === 'gm' || token.hiddenFromPlayers) return false;
+  if (isSecretPiece(token)) return false;
   // Their own character's piece, or a marker they put down themselves.
   if (token.characterId) return ownedCharacterIds.includes(token.characterId);
   return Boolean(userId) && token.createdBy === userId;
@@ -380,7 +382,7 @@ export function canMoveToken(token, {
 export function canMarkToken(token, { isGm = false, ownedCharacterIds = [] } = {}) {
   if (!token) return false;
   if (isGm) return true;
-  if (token.layer === 'gm' || token.hiddenFromPlayers) return false;
+  if (isSecretPiece(token)) return false;
   if (token.characterId) return ownedCharacterIds.includes(token.characterId);
   return true;
 }

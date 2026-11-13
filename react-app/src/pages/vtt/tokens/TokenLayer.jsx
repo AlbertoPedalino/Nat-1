@@ -109,6 +109,7 @@ const TokenNode = memo(function TokenNode({
         size="100%"
         hex={isHexGrid(grid)}
         dimmed={!onActiveLayer}
+        gmLayerActive={activeLayer === 'gm'}
         staged={staged}
         interactive={interactive}
         movable={movable}

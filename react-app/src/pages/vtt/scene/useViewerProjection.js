@@ -5,6 +5,7 @@ import { resolveTokens } from '../../../shared/vtt/session/liveScene.js';
 import { projectPlayerTokens } from '../../../shared/vtt/session/spectator.js';
 import { isPrivateRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { fade } from './sceneEditorStyles.js';
+import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
 
 // What this viewer may see of the board. The GM gets everything, with the
 // layers they are not editing faded; a projector and the GM's player preview
@@ -32,7 +33,7 @@ export function useViewerProjection({
   // the moment you switch tools.
   const visibleDrawings = useMemo(() => (
     spectator || gmPlayerPreview
-      ? drawings.filter((drawing) => drawing.layer !== 'gm' && !drawing.hiddenFromPlayers)
+      ? drawings.filter((drawing) => !isSecretPiece(drawing))
       : role.isGm
       ? drawings.map((drawing) => (
         drawing.layer === activeLayer ? drawing : { ...drawing, color: fade(drawing.color) }

@@ -1,7 +1,7 @@
 import { requireClient } from '../supabaseClient.js';
 import { normalizeConditions } from '../../character/combat/conditions.js';
 import { normalizeEffects } from '../../character/combat/combatEffects.js';
-import { normalizeLayer, toToken, toTokenPatch } from '../../vtt/scene/scene.js';
+import { isSecretPiece, normalizeLayer, toToken, toTokenPatch } from '../../vtt/scene/scene.js';
 import { deleteMapImage } from './vttMapImages.js';
 
 // The pieces on a scene (map_tokens) and their GM-only side (map_token_secrets:
@@ -59,7 +59,7 @@ export async function createToken(sceneId, token = {}) {
   const row = {
     scene_id: sceneId,
     layer: normalizeLayer(token.layer),
-    hidden_from_players: token.hiddenFromPlayers === true || token.layer === 'gm',
+    hidden_from_players: isSecretPiece(token),
     character_id: token.characterId || null,
     ...publicPatch,
   };
