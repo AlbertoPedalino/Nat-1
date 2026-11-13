@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Box, Button, Tooltip, Typography } from '@mui/material';
-import { AlertTriangle, Archive, Check, Trash2 } from 'lucide-react';
+import { AlertTriangle, Archive, Check, Pencil, Trash2 } from 'lucide-react';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
@@ -150,6 +150,11 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <CountStepper value={itemQty(item)} label={`${item.name} quantity`} onStep={(delta) => actions.qty(index, delta)} />
+            {item.custom && actions.editCustom ? (
+              <TipIconButton title="Edit" size="small" ariaLabel={`Edit ${item.name}`} onClick={() => actions.editCustom(index)} sx={stepButtonSx(20)}>
+                <Pencil size={ICON_SIZES.xs} />
+              </TipIconButton>
+            ) : null}
             <TipIconButton title="Remove" size="small" ariaLabel={`Remove ${item.name}`} onClick={() => actions.remove(index)} sx={stepButtonSx(20, { danger: true })}>
               <Trash2 size={ICON_SIZES.xs} />
             </TipIconButton>

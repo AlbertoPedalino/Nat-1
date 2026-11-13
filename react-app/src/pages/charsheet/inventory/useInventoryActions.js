@@ -15,6 +15,7 @@ import {
   setInventoryItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
 import { isBodyArmor, isShield } from '../../../shared/character/inventory/itemKinds.js';
+import { withCustomItemEdited } from '../../../shared/character/inventory/customItem.js';
 
 function normalizeStoredItem(item) {
   const {
@@ -70,6 +71,14 @@ export function useInventoryActions({
     const qtyToAdd = Math.max(1, Number(count) || 1);
     updateInv(addInventoryEntries(current, [{ ...item, qty: qtyToAdd }], itemsDb, normalizeStoredItem));
   }, [itemsDb, updateInv]);
+
+  // A made-up item changed in CustomItemDialog: the item replaced, where it
+  // is and how many kept. Only a made-up item is edited this way.
+  const editCustomItem = useCallback((index, record) => {
+    const current = invRef.current || [];
+    if (!current[index]?.custom) return;
+    updateInv(current.map((item, idx) => (idx === index ? withCustomItemEdited(item, record) : item)));
+  }, [updateInv]);
 
   const adjustQty = useCallback((index, delta) => {
     updateInv(stepInventoryQty(invRef.current, index, delta));
@@ -196,5 +205,5 @@ export function useInventoryActions({
     consumeTome,
   }), [adjustQty, adjustCharges, removeItem, toggleEquipped, equipToSlot, toggleCarried, toggleFlag, toggleAttuned, setAbilityChoice, writeScroll, consumeTome]);
 
-  return { addItem, rowActions };
+  return { addItem, editCustomItem, rowActions };
 }

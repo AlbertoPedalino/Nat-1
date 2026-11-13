@@ -12,7 +12,7 @@ import { ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
 // Disambiguation is by source field (item.type vs item.property).
-const ITEM_TYPE_LABELS = {
+export const ITEM_TYPE_LABELS = {
   M: 'Melee Weapon',
   R: 'Ranged Weapon',
   LA: 'Light Armor',
@@ -43,6 +43,8 @@ const ITEM_TYPE_LABELS = {
   EM: 'Eldritch Machine',
   TAH: 'Tack & Harness',
   $: 'Treasure',
+  $G: 'Gemstone',
+  $A: 'Art Object',
   WEAPON: 'Weapon',
   ARMOR: 'Armor',
 };
