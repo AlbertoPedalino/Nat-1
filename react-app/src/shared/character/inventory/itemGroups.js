@@ -1,4 +1,5 @@
 import { isMagicItem } from './itemRarity.js';
+import { isItemCarried } from './weight.js';
 import { ANY_ARMOR_CODES, ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
 // The filter-chip taxonomy for item lists: which shelf an item sits on, the
 // chip set itself, and the test a chip applies. Shared so the builder and the
@@ -27,7 +28,6 @@ export function isItemEquipped(item) {
 }
 
 const ALL_ITEMS_CHIP = Object.freeze({ key: 'all', label: 'All' });
-const EQUIPPED_CHIP = Object.freeze({ key: 'equipped', label: 'Equipped' });
 
 // Chip set for a list of items you can only browse (an item database).
 export const ITEM_GROUP_CHIPS = Object.freeze([
@@ -38,12 +38,21 @@ export const ITEM_GROUP_CHIPS = Object.freeze([
   { key: 'magic', label: 'Magic' },
 ].map(Object.freeze));
 
-// Chip set for a list of items you own. "Equipped" is meaningless against a
-// database, so it only exists here.
-export const OWNED_ITEM_CHIPS = Object.freeze([...ITEM_GROUP_CHIPS, EQUIPPED_CHIP]);
-
 export function matchesItemGroupChip(item, chipKey) {
   if (!chipKey || chipKey === ALL_ITEMS_CHIP.key) return true;
-  if (chipKey === EQUIPPED_CHIP.key) return isItemEquipped(item);
   return itemGroupKey(item) === chipKey;
+}
+
+// What an owned item's state is, filtered beside its shelf rather than
+// instead of it (equipped weapons, attuned rings): any number of these can be
+// on, and an item must be in every one. Meaningless against a database, so
+// only lists of owned items show them.
+export const ITEM_STATE_CHIPS = Object.freeze([
+  { key: 'equipped', label: 'Equipped', test: isItemEquipped },
+  { key: 'attuned', label: 'Attuned', test: (item) => Boolean(item?.attuned) },
+  { key: 'stashed', label: 'Stashed', test: (item) => !isItemCarried(item) },
+].map(Object.freeze));
+
+export function matchesItemStates(item, states) {
+  return (states || []).every((key) => ITEM_STATE_CHIPS.find((chip) => chip.key === key)?.test(item) ?? true);
 }

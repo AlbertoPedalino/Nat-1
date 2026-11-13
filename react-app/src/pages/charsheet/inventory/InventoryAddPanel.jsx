@@ -2,7 +2,7 @@ import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { ItemAddRow } from '../../../shared/character/inventory/ItemReference.jsx';
+import { ItemAddRow, itemListWellSx } from '../../../shared/character/inventory/ItemReference.jsx';
 import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
@@ -41,7 +41,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   const { visible, listProps } = page;
 
   return (
-    <Box {...listProps} sx={{ ...SURFACES.inset, maxHeight: 320, overflowY: 'auto', mb: 0.75, p: 0.25, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+    <Box {...listProps} sx={{ ...itemListWellSx(320), mb: 0.75 }}>
       {visible.map((item) => (
         <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}

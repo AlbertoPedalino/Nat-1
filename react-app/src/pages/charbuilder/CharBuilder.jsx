@@ -28,12 +28,12 @@ import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 import { panelFrameSx, panelTitleBarSx } from '../../shared/ui/PanelHeader.jsx';
 import TagChip from '../../shared/ui/TagChip.jsx';
 
+// A step's tab: its number and its name. No picture: at a tab's size the
+// drawings read as specks; the step's own heading carries it.
 function StepLabel({ step, index }) {
-  const Icon = step.icon;
   return (
     <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
       <TagChip label={index + 1} />
-      <Icon size={ICON_SIZES.sm} />
       <span>{step.label}</span>
     </Stack>
   );

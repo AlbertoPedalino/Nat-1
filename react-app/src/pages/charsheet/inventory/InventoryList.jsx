@@ -10,7 +10,7 @@ import { itemQty } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { hasActiveItemFilters } from '../../../shared/character/inventory/itemFilters.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { ITEM_GROUP_CHIPS, ITEM_GROUP_KEYS, OWNED_ITEM_CHIPS, itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
+import { ITEM_GROUP_CHIPS, ITEM_GROUP_KEYS, itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
 import { byItemName } from '../../../shared/character/inventory/itemSearch.js';
 import ItemGroupFilter, { ITEM_GROUP_ICONS } from '../../../shared/character/inventory/ItemGroupFilter.jsx';
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
@@ -83,12 +83,13 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
   const [inventorySearch, setInventorySearch] = useState('');
   const deferredInventorySearch = useDeferredValue(inventorySearch);
   const [inventoryFilter, setInventoryFilter] = useState('all');
+  const [inventoryStates, setInventoryStates] = useState([]);
 
   // Owned items, each beside its inventory index, narrowed as on every item
   // list (useItemListQuery).
   const resolvedInv = useMemo(() => inv.map((item, index) => ({ item, index, type: itemType(item) })), [inv]);
   const { results: visibleInventory, filterList: inventoryList, resetKey: inventoryResetKey } = useItemListQuery(resolvedInv, {
-    chip: inventoryFilter, query: deferredInventorySearch, getItem: entryItem,
+    chip: inventoryFilter, states: inventoryStates, query: deferredInventorySearch, getItem: entryItem,
   });
   // Flattened in display order (group by group, alphabetical inside each) so a
   // page boundary falls where the reader expects, then regrouped for rendering.
@@ -101,6 +102,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
   const totalItems = useMemo(() => inv.reduce((sum, item) => sum + itemQty(item), 0), [inv]);
   const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + itemQty(entry.item), 0), [visibleInventory]);
   const inventoryFiltered = inventoryFilter !== 'all'
+    || inventoryStates.length > 0
     || deferredInventorySearch.trim().length > 0
     || hasActiveItemFilters(inventoryList.filters);
 
@@ -122,7 +124,7 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
         sx={{ mb: 0.5 }}
       />
 
-      <ItemGroupFilter value={inventoryFilter} onChange={setInventoryFilter} chips={OWNED_ITEM_CHIPS} />
+      <ItemGroupFilter value={inventoryFilter} onChange={setInventoryFilter} states={inventoryStates} onStatesChange={setInventoryStates} />
 
       <ItemFilterPanel {...inventoryList.panelProps} sx={{ mb: 0.5 }} />
 

@@ -1,11 +1,10 @@
 import { memo } from 'react';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { AlertTriangle, Archive, Check, Trash2 } from 'lucide-react';
-import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
-import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
+import { ItemCardTitle, ItemReferenceBody, itemCardSurfaceSx } from '../../../shared/character/inventory/ItemReference.jsx';
 import {
   attunementRequirementText,
   getAttunementEligibility,
@@ -19,14 +18,12 @@ import {
 import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/inventory/itemFlags.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
-import { rarityTone } from '../../../shared/character/inventory/itemRarity.js';
-import ToneBar from '../../../shared/ui/ToneBar.jsx';
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
 import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
-import { cardToneSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
@@ -76,9 +73,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
   // Everything about an item wears the items' bordeaux (ITEM_ATTUNEMENT):
   // equipped, its slot, attuned.
   const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? ITEM_ATTUNEMENT : (!carried ? UI_COLORS.outline : UI_COLORS.edge));
-  // A magic item's card is washed in its rarity's colour; equipped still
-  // shows on its edge.
-  const rarity = rarityTone(item);
+  // A magic item's card is washed in its rarity's colour (itemCardSurfaceSx);
+  // equipped still shows on its edge.
 
   return (
     <ExpandableCard
@@ -97,15 +93,10 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...(rarity ? cardToneSx(rarity) : item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.25, py: 0.75, ...itemCardSurfaceSx(item, item.equipped ? tintedSurfaceSx(ITEM_ATTUNEMENT, { amount: OPACITY.tint, base: UI_COLORS.surfaceHeader }) : (!carried ? tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }) : { bgcolor: UI_COLORS.surfaceHeader })), opacity: carried ? 1 : OPACITY.veil }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-              {/* A magic item's rarity, marked as an action's category is. */}
-              <ToneBar tone={rarity} />
-              <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: rarity || 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
-            </Box>
+            <ItemCardTitle item={item} name={scrollCardName(item, itemCardName(item))} />
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
               <Typography sx={{ fontSize: FONT_SIZES.xxs, color: UI_COLORS.textMuted, mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>

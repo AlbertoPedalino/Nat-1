@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { matchesItemGroupChip } from './itemGroups.js';
+import { matchesItemGroupChip, matchesItemStates } from './itemGroups.js';
 import { itemMatchesSearch } from './itemSearch.js';
 import { itemMatchesFilters } from './itemFilters.js';
 import { useItemFilters } from './useItemFilters.js';
 
 const identity = (entry) => entry;
+const NO_STATES = Object.freeze([]);
 
 // One list of items narrowed the same way on every screen (the sheet's add
 // panel and inventory, the builder's two lists): by the group chip and the
@@ -17,14 +18,15 @@ const identity = (entry) => entry;
 // state when a reducer keeps it ([filters, setFilters]); `compare` orders the
 // results. `resetKey` changes with the *query*, not the array, so a list
 // pages back to the top on a new search but not on every quantity tick.
+// `states` are the owned-item states that must all hold (ITEM_STATE_CHIPS).
 export function useItemListQuery(entries, {
-  chip = 'all', query = '', getItem = identity, filtersState, compare = null,
+  chip = 'all', states = NO_STATES, query = '', getItem = identity, filtersState, compare = null,
 } = {}) {
   const q = String(query || '').trim();
   const pool = useMemo(() => (entries || []).filter((entry) => {
     const item = getItem(entry);
-    return matchesItemGroupChip(item, chip) && itemMatchesSearch(item, q);
-  }), [entries, chip, q, getItem]);
+    return matchesItemGroupChip(item, chip) && matchesItemStates(item, states) && itemMatchesSearch(item, q);
+  }), [entries, chip, states, q, getItem]);
   const poolItems = useMemo(() => (getItem === identity ? pool : pool.map(getItem)), [pool, getItem]);
   const filterList = useItemFilters(poolItems, filtersState);
   const results = useMemo(() => {
@@ -34,6 +36,6 @@ export function useItemListQuery(entries, {
   return {
     results,
     filterList,
-    resetKey: `${q}|${chip}|${filterList.key}`,
+    resetKey: `${q}|${chip}|${states.join(',')}|${filterList.key}`,
   };
 }

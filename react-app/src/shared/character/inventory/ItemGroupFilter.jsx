@@ -1,21 +1,30 @@
 import { Box } from '@mui/material';
-import { Backpack, Check, Shield, Sparkles, Swords } from 'lucide-react';
-import { ITEM_GROUP_CHIPS } from './itemGroups.js';
+import { Archive, Backpack, Check, Gem, Shield, Sparkles, Swords } from 'lucide-react';
+import { ITEM_GROUP_CHIPS, ITEM_STATE_CHIPS } from './itemGroups.js';
 import FilterToggles from '../../ui/FilterToggles.jsx';
 
-// The group chips over an item list (All, Weapons, Armor, Gear, Magic, and
-// Equipped for owned items), the same on the sheet and in the builder: the
-// shared chip taxonomy (itemGroups.js) with an icon each.
-export const ITEM_GROUP_ICONS = Object.freeze({ weapon: Swords, armor: Shield, gear: Backpack, magic: Sparkles, equipped: Check });
+// The chips over an item list, the same on the sheet and in the builder: the
+// shelf (All, Weapons, Armor, Gear, Magic: one at a time) and, for items you
+// own, their states beside it (Equipped, Attuned, Stashed: any of them, all
+// must hold). The shared taxonomy (itemGroups.js) with an icon each.
+export const ITEM_GROUP_ICONS = Object.freeze({
+  weapon: Swords, armor: Shield, gear: Backpack, magic: Sparkles, equipped: Check, attuned: Gem, stashed: Archive,
+});
 
 const withIcons = (chips) => chips.map((chip) => ({ ...chip, icon: ITEM_GROUP_ICONS[chip.key] || null }));
 
-// `chips` is ITEM_GROUP_CHIPS for an item database (no "Equipped": nothing
-// there is owned) or OWNED_ITEM_CHIPS for an inventory.
-export default function ItemGroupFilter({ value, onChange, chips = ITEM_GROUP_CHIPS, sx }) {
+// `states` (the keys on) with `onStatesChange(list)` adds the owned-item
+// states, after a gap; without them it is the shelf alone (an item database).
+export default function ItemGroupFilter({ value, onChange, states = null, onStatesChange, sx }) {
+  const toggleState = (key) => onStatesChange(states.includes(key) ? states.filter((on) => on !== key) : [...states, key]);
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5, ...sx }}>
-      <FilterToggles options={withIcons(chips)} value={value} onChange={onChange} />
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 0.5, mb: 0.5, ...sx }}>
+      <FilterToggles options={withIcons(ITEM_GROUP_CHIPS)} value={value} onChange={onChange} />
+      {states ? (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, ml: { sm: 1 } }}>
+          <FilterToggles options={withIcons(ITEM_STATE_CHIPS)} isOn={(key) => states.includes(key)} onChange={toggleState} />
+        </Box>
+      ) : null}
     </Box>
   );
 }

@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import {
   ITEM_GROUP_CHIPS,
   ITEM_GROUP_KEYS,
-  OWNED_ITEM_CHIPS,
+  ITEM_STATE_CHIPS,
   isItemEquipped,
   itemGroupKey,
   matchesItemGroupChip,
+  matchesItemStates,
 } from '../../../../../src/shared/character/inventory/itemGroups.js';
 
 test('weapons and armor are classified by type code', () => {
@@ -62,27 +63,34 @@ test('the "all" chip matches everything, including junk keys', () => {
   assert.equal(matchesItemGroupChip(sword, undefined), true);
 });
 
-test('group chips delegate to the classifier, the equipped chip does not', () => {
+test('the shelf chips classify; the owned states filter beside them, all at once', () => {
   const looseSword = { type: 'M' };
   const wornArmor = { type: 'HA', equipped: true };
+  const attunedRing = { type: 'RG', rarity: 'rare', attuned: true, carried: false };
 
   assert.equal(matchesItemGroupChip(looseSword, 'weapon'), true);
   assert.equal(matchesItemGroupChip(looseSword, 'armor'), false);
-  assert.equal(matchesItemGroupChip(looseSword, 'equipped'), false);
-  // Equipped ignores the shelf: worn armor matches both its group and equipped.
+  // Equipped armor: its shelf and its state, each answered on its own.
   assert.equal(matchesItemGroupChip(wornArmor, 'armor'), true);
-  assert.equal(matchesItemGroupChip(wornArmor, 'equipped'), true);
+  assert.equal(matchesItemStates(wornArmor, ['equipped']), true);
+  assert.equal(matchesItemStates(looseSword, ['equipped']), false);
+  // Several states: every one must hold.
+  assert.equal(matchesItemStates(attunedRing, ['attuned', 'stashed']), true);
+  assert.equal(matchesItemStates(attunedRing, ['attuned', 'equipped']), false);
+  assert.equal(matchesItemStates(looseSword, []), true);
 });
 
-test('every chip key is answerable by the matcher', () => {
+test('every chip key is answerable by its matcher', () => {
   const item = { type: 'M', equipped: true, rarity: 'rare' };
-  OWNED_ITEM_CHIPS.forEach((chip) => {
+  ITEM_GROUP_CHIPS.forEach((chip) => {
     assert.equal(typeof matchesItemGroupChip(item, chip.key), 'boolean', `${chip.key} unhandled`);
+  });
+  ITEM_STATE_CHIPS.forEach((chip) => {
+    assert.equal(typeof matchesItemStates(item, [chip.key]), 'boolean', `${chip.key} unhandled`);
   });
 });
 
-test('only the owned chip set offers Equipped', () => {
-  assert.equal(ITEM_GROUP_CHIPS.some((chip) => chip.key === 'equipped'), false);
-  assert.equal(OWNED_ITEM_CHIPS.some((chip) => chip.key === 'equipped'), true);
-  assert.deepEqual(OWNED_ITEM_CHIPS.slice(0, ITEM_GROUP_CHIPS.length), [...ITEM_GROUP_CHIPS]);
+test('the shelf has no owned state in it', () => {
+  const stateKeys = new Set(ITEM_STATE_CHIPS.map((chip) => chip.key));
+  assert.equal(ITEM_GROUP_CHIPS.some((chip) => stateKeys.has(chip.key)), false);
 });

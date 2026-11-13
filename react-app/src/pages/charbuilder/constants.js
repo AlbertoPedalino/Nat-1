@@ -1,15 +1,17 @@
-import { Backpack, ClipboardList, Dumbbell, Feather, Sparkles, Sword } from 'lucide-react';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 export const PB_COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
 
+// The builder's steps, each drawn as its panels are (GAME_ICONS), so a
+// step's tab and the panels under it carry the same picture.
 export const STEPS = [
-  { id: 'class', label: 'Class', icon: Sword },
-  { id: 'species', label: 'Species', icon: Sparkles },
-  { id: 'background', label: 'Background', icon: Feather },
-  { id: 'scores', label: 'Ability Scores', icon: Dumbbell },
-  { id: 'equipment', label: 'Equipment', icon: Backpack },
-  { id: 'sheet', label: 'Sheet', icon: ClipboardList },
+  { id: 'class', label: 'Class', icon: GAME_ICONS.classes },
+  { id: 'species', label: 'Species', icon: GAME_ICONS.species },
+  { id: 'background', label: 'Background', icon: GAME_ICONS.background },
+  { id: 'scores', label: 'Ability Scores', icon: GAME_ICONS.abilityScores },
+  { id: 'equipment', label: 'Equipment', icon: GAME_ICONS.equipment },
+  { id: 'sheet', label: 'Sheet', icon: GAME_ICONS.sheet },
 ];
 
 // Stand-ins listed until the real class, species, background and feat data

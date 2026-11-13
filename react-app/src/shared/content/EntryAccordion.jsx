@@ -8,9 +8,11 @@ import { ICON_SIZES } from '../ui/iconSizes.js';
 // level chip) visible, body on expand. `tone` sets the left border (falls back
 // to the theme divider); `titleColor` themes the title; `dense` is the compact
 // scale used by the preview pane. The body is `children` when provided, else the
-// default `EntryBlocks` render of `entries`. Shared by the subclass/species
-// detail panels and the preview pane so the row look stays in one place.
-export function EntryAccordion({ title, entries, tone, titleColor = 'text.primary', leading = null, dense = false, children }) {
+// default `EntryBlocks` render of `entries`; `trailing` sits at the end of the
+// title row (a source, a level). A purely descriptive card, unlike the cards
+// of actions and spells: shared by the subclass/species detail panels, the
+// preview pane and the sheet's Features tab, so the row look stays in one place.
+export function EntryAccordion({ title, entries, tone, titleColor = 'text.primary', leading = null, trailing = null, dense = false, children }) {
   const minHeight = dense ? 32 : 36;
   const summaryPx = dense ? 1 : 1.25;
   const contentMy = dense ? 0.5 : 0.6;
@@ -39,11 +41,12 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
           '& .MuiAccordionSummary-content.Mui-expanded': { my: contentMy },
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, flex: 1 }}>
           {leading}
-          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, color: titleColor }}>
+          <Typography variant="body2" noWrap sx={{ fontWeight: FONT_WEIGHTS.bold, minWidth: 0, flex: 1, color: titleColor }}>
             {title}
           </Typography>
+          {trailing}
         </Stack>
       </AccordionSummary>
       <AccordionDetails sx={{ px: summaryPx, pt: 0, pb: 1 }}>

@@ -8,6 +8,8 @@ import { compareText } from '../../lists.js';
 import { withinTypedRange } from '../../numbers.js';
 import { itemWeight } from './weight.js';
 import { copperToGp } from './currency.js';
+import { RARITY_OPTIONS, rarityLabel } from './itemRarity.js';
+import { requiresAttunement } from './itemAttunement.js';
 
 // Single source of truth for the advanced item filters. The empty state, the
 // active-value count, the dropdown options, the match test and the panel rows
@@ -40,12 +42,32 @@ function compareDamageDice(a, b) {
   return compareText(a, b);
 }
 
+// Rarities in the books' order (Common … Artifact), not alphabetical.
+const RARITY_ORDER = RARITY_OPTIONS.map(({ label }) => label);
+function compareRarity(a, b) {
+  return RARITY_ORDER.indexOf(a) - RARITY_ORDER.indexOf(b);
+}
+
 export const ITEM_FILTER_FIELDS = Object.freeze([
   {
     kind: 'select',
     key: 'type',
     label: 'Type',
     valuesOf: (item) => [decodeItemTypeLabel(item)],
+  },
+  {
+    kind: 'select',
+    key: 'rarity',
+    label: 'Rarity',
+    // A mundane item has none, so it never matches a chosen rarity.
+    valuesOf: (item) => [rarityLabel(item)],
+    compare: compareRarity,
+  },
+  {
+    kind: 'select',
+    key: 'attunement',
+    label: 'Attunement',
+    valuesOf: (item) => [requiresAttunement(item) ? 'Requires Attunement' : 'No Attunement'],
   },
   {
     kind: 'select',
