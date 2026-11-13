@@ -975,3 +975,17 @@ test('an icon button that is only an X is a CloseButton', () => {
 test("an embedded sheet takes the phone's layout through sheetResponsive", () => {
   assert.deepEqual(sourceLinesMatching(/embedded \? [^:]+ : \{ (xs|sm|md):/), []);
 });
+
+// Hover looks apply only where there is a hover: the app's Emotion cache
+// (shared/ui/hoverOnlyWithHover.js, provided in main.jsx) writes every hover
+// rule under `@media (hover: hover)`, so a tap on a phone never leaves the
+// thing underneath lit. No component writes that query by hand, and the app
+// keeps the one cache.
+test('hover is gated once, by the app style cache', () => {
+  assert.deepEqual(sourceLinesMatching(/hover: ?hover/, {
+    allow: ['shared/ui/hoverOnlyWithHover.js'],
+  }), []);
+  assert.deepEqual(sourceLinesMatching(/createCache\(|<CacheProvider/, {
+    allow: ['shared/ui/hoverOnlyWithHover.js', 'main.jsx'],
+  }), []);
+});
