@@ -7,7 +7,7 @@ import { makeId } from '../../../shared/ids.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { toggleSx } from '../../../shared/ui/pressable.js';
+import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -17,21 +17,6 @@ function normalizePages(raw) {
   }
   if (Array.isArray(raw) && raw.length) return raw.map((p) => ({ id: p.id || makeId('page'), name: p.name || 'Untitled', content: p.content || '' }));
   return [{ id: 'page_1', name: 'General', content: '' }];
-}
-
-function PageTab({ page, active, onClick }) {
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        ...toggleSx(active),
-        px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: FONT_SIZES.lg, ...TEXT_STYLES.figure,
-        whiteSpace: 'nowrap', minWidth: 0,
-      }}
-    >
-      {page.name}
-    </Box>
-  );
 }
 
 export default function NotesTab({ sheet }) {
@@ -85,9 +70,13 @@ export default function NotesTab({ sheet }) {
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 0.5, mb: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-        {pages.map((page, i) => (
-          <PageTab key={page.id} page={page} active={i === activeIdx} onClick={() => setActiveIdx(i)} />
-        ))}
+        {/* The pages are one choice among a few: the shared key bar. */}
+        <ChoiceToggle
+          wrap
+          options={pages.map((page, i) => ({ value: i, label: page.name }))}
+          value={activeIdx}
+          onChange={setActiveIdx}
+        />
         <IconButton size="small" onClick={addPage} sx={{ color: 'primary.main', p: 0.25 }}>
           <Plus size={ICON_SIZES.sm} />
         </IconButton>
@@ -105,12 +94,12 @@ export default function NotesTab({ sheet }) {
               if (e.key === 'Escape') setEditingName(null);
             }}
             sx={{
-              '& .MuiInputBase-root': { fontSize: FONT_SIZES.xl, ...TEXT_STYLES.figure },
+              '& .MuiInputBase-root': { fontSize: FONT_SIZES.xl, ...TEXT_STYLES.heading },
               '& fieldset': { borderColor: 'primary.main' },
             }}
           />
         ) : (
-          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>
+          <Typography sx={{ ...TEXT_STYLES.heading, fontSize: FONT_SIZES.xl, color: 'text.primary' }}>
             {activePage.name}
           </Typography>
         )}

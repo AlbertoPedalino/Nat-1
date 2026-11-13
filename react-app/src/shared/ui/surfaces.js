@@ -1,4 +1,4 @@
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 import { STICKER_PAPER } from './stickerPaper.js';
@@ -52,13 +52,9 @@ export function tintedSurfaceSx(tone, { amount = OPACITY.tint, base = 'backgroun
   return { bgcolor: base, backgroundImage: washImage(tone, amount) };
 }
 
-// The wash alone, as a background image: laid over whatever background the
-// element already has (a lit button half, a toggle under the cursor), so a
-// solid fill stays solid. tintedSurfaceSx when the element needs its base too.
-export function washImage(tone, amount = OPACITY.tint) {
-  const wash = uiAlpha(tone, amount);
-  return `linear-gradient(${wash}, ${wash})`;
-}
+// washImage (the wash alone, as a background image) lives with the palette
+// in colors.js, so the colour helpers can use it without importing surfaces.
+export { washImage };
 
 // A callout in a tone, set apart from the dialog or list it sits in: a
 // concluded negotiation, a rolled fumble, a condition's rules card. The 2px

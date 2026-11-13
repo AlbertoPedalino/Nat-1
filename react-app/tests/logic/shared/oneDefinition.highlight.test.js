@@ -49,6 +49,6 @@ test('a lit surface is a wash over a solid base, not a translucent fill', () => 
 // of one colour (a wash variable or a translucent colour twice) is washImage.
 test('a tone wash over a fill is washImage', () => {
   assert.deepEqual(sourceFilesMatching(/linear-gradient\(\$\{([\w.]+|(?:ui|vtt)?[aA]lpha\([^)]*\))\}, \$\{\1\}\)/, {
-    allow: ['shared/ui/surfaces.js'],
+    allow: ['shared/ui/colors.js'],
   }), []);
 });

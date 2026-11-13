@@ -132,6 +132,14 @@ export function uiAlpha(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+// The wash alone, as a background image: laid over whatever background the
+// element already has (a lit button half, a toggle under the cursor), so a
+// solid fill stays solid. tintedSurfaceSx when the element needs its base too.
+export function washImage(tone, amount = OPACITY.tint) {
+  const wash = uiAlpha(tone, amount);
+  return `linear-gradient(${wash}, ${wash})`;
+}
+
 // A colour part way from one palette colour to another, 0 being `from` and 1
 // being `to`: how a die shades its faces between two greens.
 export function uiMix(from, to, amount) {

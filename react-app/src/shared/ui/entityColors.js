@@ -1,7 +1,6 @@
 import { alpha } from '@mui/material';
-import { UI_COLORS, OPACITY } from './colors.js';
+import { UI_COLORS, OPACITY, washImage } from './colors.js';
 import { pressableSx } from './pressable.js';
-import { washImage } from './surfaces.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
