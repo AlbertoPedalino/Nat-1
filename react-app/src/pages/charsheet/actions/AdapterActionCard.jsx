@@ -31,6 +31,7 @@ import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import CardSection from '../../../shared/ui/CardSection.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
+import ToneBar from '../../../shared/ui/ToneBar.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
 // pips and any choice it asks for.
@@ -88,9 +89,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
       disabled={!hasActionDetails}
       summary={({ toggle, disabled, open }) => (
           <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, cursor: disabled ? 'default' : 'pointer' }}>
-            {barCat && CAT_COLORS[barCat] && (
-              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: OPACITY.solid }} />
-            )}
+            <ToneBar tone={barCat ? CAT_COLORS[barCat] : null} />
 
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>

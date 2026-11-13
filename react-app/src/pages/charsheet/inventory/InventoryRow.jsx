@@ -20,6 +20,7 @@ import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/invento
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
 import { rarityTone } from '../../../shared/character/inventory/itemRarity.js';
+import ToneBar from '../../../shared/ui/ToneBar.jsx';
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
 import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
@@ -95,6 +96,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              {/* A magic item's rarity, marked as an action's category is. */}
+              <ToneBar tone={rarityTone(item)} />
               <ItemNameIcon item={item} />
               <Typography noWrap sx={{ fontSize: FONT_SIZES.xxl, color: rarityTone(item) || 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
             </Box>
