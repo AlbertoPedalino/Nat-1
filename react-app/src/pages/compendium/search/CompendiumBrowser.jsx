@@ -10,7 +10,6 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
-import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { COMPENDIUM_KIND_COLORS } from '../../../shared/ui/entityColors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
@@ -101,7 +100,6 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
         ) : (
           <EmptyLine inList>Nothing found.</EmptyLine>
         )}
-        <ShowMoreButton page={page} />
       </>
     );
   }

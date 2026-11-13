@@ -9,7 +9,7 @@ export default function MonsterList() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
 
   return (
-    <Panel icon={Skull} title="Monsters">
+    <Panel icon={Skull} title="Monsters" fill>
       <MonsterBrowser
         monsterDb={monsterDb}
         filters={state.filters}
@@ -18,6 +18,7 @@ export default function MonsterList() {
         onSelect={(monster) => dispatch({ type: 'selectStatblock', payload: { monster } })}
         onPick={(monster) => dispatch({ type: 'addMonster', monster })}
         pickLabel="Add to encounter"
+        fill
       />
     </Panel>
   );

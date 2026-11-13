@@ -19,7 +19,6 @@ import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
-import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
@@ -167,7 +166,6 @@ export default function EquipmentStep({ state, dispatch }) {
             {addPage.visible.map((item) => (
               <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
             ))}
-            <ShowMoreButton page={addPage} sx={{ py: 1 }} />
           </Box>
 
           <Divider />
@@ -195,7 +193,6 @@ export default function EquipmentStep({ state, dispatch }) {
             {character.inventory.length && !currentInventory.length ? (
               <EmptyLine inList>No matches.</EmptyLine>
             ) : null}
-            <ShowMoreButton page={currentPage} sx={{ py: 1 }} />
           </Box>
         </Stack>
       </BuilderPanel>

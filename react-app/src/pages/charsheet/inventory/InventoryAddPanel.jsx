@@ -11,7 +11,6 @@ import { compareItemsBySearch } from '../../../shared/character/inventory/itemSe
 import { inventorySectionSx } from './inventoryControls.jsx';
 import { COMPACT_INPUT_SX } from '../../../shared/ui/controlHeights.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { SURFACES, scrollWellSx } from '../../../shared/ui/surfaces.js';
@@ -44,7 +43,6 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
       {visible.map((item) => (
         <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
-      <ShowMoreButton page={page} />
       {!items.length && (
         itemsDbCount ? <EmptyLine inList>No items found.</EmptyLine> : <LoadingLine label="Loading items…" sx={{ px: 1, py: 1.25 }} />
       )}

@@ -16,7 +16,6 @@ import ItemGroupFilter, { ITEM_GROUP_ICONS } from '../../../shared/character/inv
 import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
 import { inventorySectionSx } from './inventoryControls.jsx';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
-import ShowMoreButton from '../../../shared/ui/ShowMoreButton.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { isArmorOrShield } from '../../../shared/character/inventory/itemKinds.js';
@@ -31,8 +30,8 @@ const GROUPS = ITEM_GROUP_KEYS.map((key) => ({ key, label: GROUP_LABELS[key], ic
 const entryItem = (entry) => entry.item;
 
 // The owned inventory is a different scale from the item database — dozens of
-// rows, not thousands — so a small page keeps the first paint light and
-// "Show more" rarely appears.
+// rows, not thousands — so a small page keeps the first paint light and the
+// next one rarely needs to load.
 const INVENTORY_PAGE = 50;
 
 const inventoryListSx = {
@@ -155,11 +154,6 @@ export default function InventoryList({ inv, character: C, itemFlagDefs, attunem
             </Box>
           );
         })}
-        {inventoryPage.remaining > 0 ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ShowMoreButton page={inventoryPage} />
-          </Box>
-        ) : null}
         {!inv.length && <EmptyLine inList>Inventory empty.</EmptyLine>}
         {inv.length > 0 && !visibleInventory.length && (
           <EmptyLine inList>No inventory items match this search or filter.</EmptyLine>

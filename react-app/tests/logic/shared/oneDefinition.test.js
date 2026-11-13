@@ -1000,3 +1000,10 @@ test('a disabled button takes the one unpressable look', () => {
     allow: ['shared/ui/pressable.js'],
   }), []);
 });
+
+// A paged list (usePagedList) lives in a scroller and loads more as it is
+// scrolled, filling a scroller taller than its rows by itself: there is no
+// "Show more" button, the scroller is the way to more.
+test('a paged list grows by scrolling, never by a Show more button', () => {
+  assert.deepEqual(sourceLinesMatching(/Show more|showMore/), []);
+});

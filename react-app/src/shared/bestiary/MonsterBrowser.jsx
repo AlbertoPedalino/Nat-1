@@ -8,7 +8,6 @@ import MonsterToken from './MonsterToken.jsx';
 import { formatNumber } from '../ui/numberFormat.js';
 import { crKey, crXP } from './challengeRating.js';
 import { usePagedList } from '../ui/usePagedList.js';
-import ShowMoreButton from '../ui/ShowMoreButton.jsx';
 import { LoadingLine } from '../ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../ui/iconSizes.js';
 import EmptyLine from '../ui/EmptyLine.jsx';
@@ -28,6 +27,8 @@ const PAGE_SIZE = 50;
 // chosen creature on the scene. Both get the same filters, the same paging and
 // the same rows — which is the point of it living here rather than being typed
 // out twice. `onToggleSource` is optional: without it there is no source bar.
+// `fill` (inside a `fill` Panel) lets the list take the panel's height on a
+// wide screen, however tall the panel's row is, the old cap as its least.
 export default function MonsterBrowser({
   monsterDb,
   filters,
@@ -37,6 +38,7 @@ export default function MonsterBrowser({
   onPick,
   onPointerDragStart,
   pickLabel = 'Add',
+  fill = false,
   listSx,
 }) {
   const filtered = useMemo(() => filterMonsters(monsterDb.monsters, filters), [monsterDb.monsters, filters]);
@@ -55,7 +57,7 @@ export default function MonsterBrowser({
   const allSourcesActive = !filters.sources?.length;
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={fill ? FILL_SX : null}>
       {onToggleSource ? (
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
           <FilterToggles
@@ -97,7 +99,7 @@ export default function MonsterBrowser({
         {formatNumber(filtered.length)} monsters from allowed 2024 sources
       </Caption>
 
-      <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }} {...page.listProps}>
+      <Stack spacing={0.75} sx={{ ...defaultListSx, ...(fill ? fillListSx : null), ...listSx }} {...page.listProps}>
         {page.visible.length ? page.visible.map((monster) => (
           // The open area is a div that acts as a button: it holds the
           // creature's token, which is not phrasing content.
@@ -127,14 +129,25 @@ export default function MonsterBrowser({
         )}
       </Stack>
 
-      <ShowMoreButton page={page} />
     </Stack>
   );
 }
 
+const LIST_LEAST_HEIGHT = 'calc(100vh - 350px)';
+
 const defaultListSx = {
-  maxHeight: { xs: 380, lg: 'calc(100vh - 350px)' },
+  maxHeight: { xs: 380, lg: LIST_LEAST_HEIGHT },
   overflow: 'auto',
   pr: 0.5,
+};
+
+const FILL_SX = { flex: 1, minHeight: 0 };
+
+// Sized by the panel, not by its rows: no basis of its own, so the rows never
+// make the panel taller.
+const fillListSx = {
+  flex: { lg: '1 1 0' },
+  minHeight: { lg: LIST_LEAST_HEIGHT },
+  maxHeight: { xs: 380, lg: 'none' },
 };
 
