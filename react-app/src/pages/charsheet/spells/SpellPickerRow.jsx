@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import { SourceBadge } from './SpellEntryParts.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import {
-  SpellMiniTags,
   SpellReferenceBody,
   SpellRowLabel,
   SpellSelectButton,
@@ -42,11 +41,8 @@ export function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted
                 ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
                 : <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
             ) : null}
+            control={!locked ? <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" /> : null}
           />
-          <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-          {!locked ? (
-            <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
-          ) : null}
         </Box>
       )}
     />

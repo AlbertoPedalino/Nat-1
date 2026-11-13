@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Box, List, ListItemButton } from '@mui/material';
 import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
-import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
+import {
+  SpellReferenceBody,
+  SpellRowLabel,
+  SpellSelectButton,
+} from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
@@ -101,7 +105,6 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                   onClick={toggle}
                 >
                   <SpellRowLabel spell={spell} selected={active} showIcon={false} />
-                  <SpellMiniTags spell={spell} sx={{ ml: 1 }} />
                 </ListItemButton>
               );
             }
@@ -113,9 +116,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                 details={<SpellReferenceBody spell={spell} />}
                 summary={({ open, toggle: toggleOpen }) => (
                   <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
-                    <SpellRowLabel spell={spell} selected={active} />
-                    <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-                    <SpellSelectButton selected={active} disabled={full} onToggle={toggle} />
+                    <SpellRowLabel spell={spell} selected={active} control={<SpellSelectButton selected={active} disabled={full} onToggle={toggle} />} />
                   </ListItemButton>
                 )}
               />

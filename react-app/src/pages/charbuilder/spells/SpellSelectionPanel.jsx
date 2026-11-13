@@ -4,7 +4,11 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import { hasSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
-import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
+import {
+  SpellReferenceBody,
+  SpellRowLabel,
+  SpellSelectButton,
+} from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -178,11 +182,8 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind
             spell={spell}
             selected={selected}
             source={autoSelected ? <MiniBadge label={autoLabel} color={ENTITY_COLORS[autoKind] || ENTITY_COLORS.class} /> : null}
+            control={autoSelected ? null : <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />}
           />
-          <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-          {autoSelected ? null : (
-            <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
-          )}
         </ListItemButton>
       )}
     />

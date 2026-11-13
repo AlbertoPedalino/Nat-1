@@ -65,20 +65,23 @@ export function SpellMiniTags({ spell, sx }) {
 
 // Icon + name cluster shared by every spell row. Callers place concentration
 // and ritual tags in their trailing-controls area.
-// A spell's name in a picker row (the builder's lists, the sheet's picker and
-// the wizard's spellbook). `source` is where the spell comes from (a class's
-// or feat's chip, AUTO): a line of its own under the name, at its left, so a
-// long name keeps its room and every row's controls line up on the right.
-export function SpellRowLabel({ spell, selected = false, showIcon = true, source = null, nameSx, sx }) {
+// A spell in a picker row (the builder's lists, the sheet's picker and the
+// wizard's spellbook), in two lines: its name with its `control` (Add/Remove)
+// at the right on the first; where it comes from (`source`: a class's or
+// feat's chip, AUTO) at the left and its Concentration/Ritual tags at the
+// right on the second. One layout, so every picker row lines up the same.
+export function SpellRowLabel({ spell, selected = false, showIcon = true, source = null, control = null, nameSx, sx }) {
   return (
-    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.25, ...sx }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, maxWidth: '100%' }}>
+    <Box sx={{ flex: 1, minWidth: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', columnGap: 1, rowGap: 0.75, ...sx }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
         {showIcon ? <SpellNameIcon spell={spell} /> : null}
         <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular, color: 'text.primary', ...nameSx }}>
           {spell.name}
         </Typography>
       </Box>
-      {source ? <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>{source}</Box> : null}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>{control}</Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>{source}</Box>
+      <SpellMiniTags spell={spell} sx={{ justifySelf: 'end' }} />
     </Box>
   );
 }
