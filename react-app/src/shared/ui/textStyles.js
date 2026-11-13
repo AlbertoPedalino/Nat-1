@@ -45,6 +45,10 @@ export const TEXT_STYLES = Object.freeze({
   heading: Object.freeze({
     fontFamily: UI_FONTS.heading,
     fontWeight: FONT_WEIGHTS.bold,
+    // The blackletter's lower case is short (x-height 0.45 of the size) and
+    // reads small beside the body text: drawn a fifth larger (raised to
+    // 0.55) wherever a heading stands, the local sizes untouched.
+    fontSizeAdjust: 'ex-height 0.55',
     // A thinner outline than the shout's: the blackletter's fine strokes
     // would fill in under 2px.
     ...inkLettering(1.5, 2),

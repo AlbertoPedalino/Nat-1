@@ -6,9 +6,10 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { ABILITIES, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { COLUMN_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -58,7 +59,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                   score and one for the modifier the check rolls. */}
               <StatTile
                 tone={advArg === false ? UI_COLORS.warning : PANEL_TONES.abilityScores}
-                label={ABILITY_ABBREVIATIONS[s]}
+                // A tile's name is in the heading's blackletter, which does not read
+                // in capitals: Str, not STR.
+                label={capitalize(s)}
                 clickable
                 bodySx={{ alignItems: 'stretch' }}
                 value={(

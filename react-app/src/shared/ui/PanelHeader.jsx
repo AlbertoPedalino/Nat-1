@@ -56,8 +56,9 @@ function ribbonSx(notch, px) {
 }
 
 const PANEL_RIBBON_SX = ribbonSx(10, 2.25);
-// A stat tile's narrow bar: a shallower notch, so its name keeps the room.
-const TILE_RIBBON_SX = ribbonSx(6, 1);
+// A stat tile's narrow bar: a shallow notch and slim ends, so its name
+// (Armor Class, Inspiration) keeps the room.
+const TILE_RIBBON_SX = ribbonSx(4, 0.625);
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
@@ -114,6 +115,10 @@ export const panelTitleSx = {
   fontSize: FONT_SIZES.body,
   color: 'primary.main',
 };
+
+// A stat tile's name: the panel's title a step smaller, the tile being narrow
+// (Prof. Bonus, Inspiration, Armor Class).
+export const tileTitleSx = { ...panelTitleSx, fontSize: FONT_SIZES.xxl };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
 // thicker ink frame and its solid shadow. Boxes inside it keep the thinner
