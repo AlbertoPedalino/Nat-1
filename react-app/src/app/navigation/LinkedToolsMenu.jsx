@@ -202,7 +202,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
   }, 'Campaign settings updated.');
 
   return <>
-    <TopBarButton icon={Network} label="LINKS" ariaLabel="Linked tools" active={Boolean(groupId)} onClick={handleOpen} />
+    <TopBarButton icon={Network} label="Links" ariaLabel="Linked tools" active={Boolean(groupId)} onClick={handleOpen} />
     <SheetDialog
       open={open}
       onClose={() => !working && setOpen(false)}

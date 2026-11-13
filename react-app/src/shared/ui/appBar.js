@@ -1,4 +1,4 @@
-import { FONT_SIZES } from './fonts.js';
+import { CONTROL_FONT_SIZES } from './fonts.js';
 import { iconOnlyOnPhoneButtonSx } from './iconOnlyOnPhone.js';
 import { TEXT_STYLES } from './textStyles.js';
 
@@ -9,8 +9,8 @@ export const APP_TOP_BAR_HEIGHT = '48px';
 // The lettering of the bar's buttons, and the buttons themselves: every page's
 // own button in the bar (Builder, Links, Import…) looks like Home and Back.
 export const appTopBarFontSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xs,
+  ...TEXT_STYLES.label,
+  fontSize: CONTROL_FONT_SIZES.normal,
   whiteSpace: 'nowrap',
 };
 

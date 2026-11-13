@@ -1,4 +1,4 @@
-import { FONT_SIZES } from './fonts.js';
+import { CONTROL_FONT_SIZES } from './fonts.js';
 import { UI_COLORS, OPACITY } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { toggleSx } from './pressable.js';
@@ -11,8 +11,7 @@ export const actionButtonTextSx = {
   flex: 1,
   whiteSpace: 'nowrap',
   ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.xs,
-  
+  fontSize: CONTROL_FONT_SIZES.normal,
 };
 
 // A compact action button in one colour: its label in it, the inked edge every
@@ -36,7 +35,17 @@ export function goldToggleSx(active) {
     py: 0.5,
     borderRadius: 1,
     ...TEXT_STYLES.label,
-    fontSize: FONT_SIZES.xxs,
+    fontSize: CONTROL_FONT_SIZES.small,
     whiteSpace: 'nowrap',
   };
 }
+
+// A button that carries content rather than a label: an option with a line
+// of description under its name, a vertical tab with its summary, a button
+// that shows a chosen value (the atmosphere, "+1h"). It keeps the words as
+// written instead of the controls' spaced capitals; the only place a
+// button's lettering is turned back (guarded).
+export const CONTENT_BUTTON_SX = Object.freeze({
+  textTransform: 'none',
+  letterSpacing: 0,
+});

@@ -6,6 +6,7 @@ import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { focusRingSx } from '../../ui/interactive.js';
 import { tintedSurfaceSx } from '../../ui/surfaces.js';
+import { CONTENT_BUTTON_SX } from '../../ui/actionButton.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
 // population, tier, mount, season, weather, dungeon and quest options): a
@@ -74,7 +75,8 @@ function optionSx(tone, selected, dense) {
     px: 0.75,
     fontSize: dense ? FONT_SIZES.sm : FONT_SIZES.md,
     lineHeight: LINE_HEIGHTS.tight,
-    textTransform: 'none',
+    // A name over its line of description: content, not a label.
+    ...CONTENT_BUTTON_SX,
     borderColor: selected ? tone.color : (tone.dim || 'divider'),
     color: selected ? tone.color : (tone.dim || 'text.secondary'),
     // Flat while not chosen; chosen or under the cursor, its tone washed over

@@ -10,11 +10,11 @@ const character = {
   extraClasses: [],
 };
 
-test('a read-only sheet shows its READ ONLY badge', () => {
+test('a read-only sheet shows its Read only badge', () => {
   render(
     <MemoryRouter>
       <SheetHeader C={character} sheet={{ xpStored: 0 }} embedded readOnly />
     </MemoryRouter>,
   );
-  expect(screen.getByText('READ ONLY')).toBeInTheDocument();
+  expect(screen.getByText('Read only')).toBeInTheDocument();
 });

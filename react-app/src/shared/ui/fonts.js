@@ -41,6 +41,13 @@ export const FONT_SIZES = Object.freeze({
   hero: '2rem',
 });
 
+// The two sizes of a control's label (buttons, tabs, keys, clickable chips):
+// `normal` everywhere, `small` in a dense row of filters or tags.
+export const CONTROL_FONT_SIZES = Object.freeze({
+  normal: FONT_SIZES.sm,
+  small: FONT_SIZES.xxs,
+});
+
 // Letter spacing of spaced-out text (uppercase labels and captions), in
 // steps like the type scale. Ordinary text keeps the font's own spacing.
 export const LETTER_SPACINGS = Object.freeze({

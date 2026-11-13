@@ -12,8 +12,9 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
 import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 import { failureMessage } from '../../ui/busyAction.js';
-import { TEXT_STYLES, ONE_LINE_SX } from '../../ui/textStyles.js';
+import { ONE_LINE_SX } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { appTopBarFontSx } from '../../ui/appBar.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -24,11 +25,8 @@ function resolveActiveCharId() {
   return (fromUrl && fromUrl !== 'new') ? fromUrl : null;
 }
 
-const loginBtnSx = {
-  ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xs,
-  
-};
+// Lettered like every button in the app's top bar.
+const loginBtnSx = appTopBarFontSx;
 
 // The account name is shown on every screen size; a long one is cut short
 // (the menu it opens shows it in full).
@@ -88,7 +86,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
       <Tooltip title="Online features not configured">
         <Box component="span" sx={{ display: 'inline-flex' }}>
           <Button size="small" variant="outlined" disabled startIcon={<LogIn size={ICON_SIZES.sm} />} sx={{ ...loginBtnSx, ...buttonSx }}>
-            LOGIN
+            Log in
           </Button>
         </Box>
       </Tooltip>
@@ -112,7 +110,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
       >
         {status === 'authed'
           ? <Box component="span" sx={usernameLabelSx}>{username || 'ACCOUNT'}</Box>
-          : 'LOGIN'}
+          : 'Log in'}
         {dot ? <Box component="span" sx={{ ml: 0.5, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>
 

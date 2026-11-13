@@ -191,7 +191,6 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         verticalAlign: 'baseline',
         fontSize: FONT_SIZES.xxs,
         lineHeight: LINE_HEIGHTS.normal,
-        textTransform: 'none',
         color: available ? UI_COLORS.successText : UI_COLORS.dangerMuted,
         borderColor: available ? uiAlpha(UI_COLORS.success, OPACITY.strong) : uiAlpha(UI_COLORS.dangerMuted, OPACITY.strong),
         // Washed over the outlined button's own raised surface, so it stays solid.

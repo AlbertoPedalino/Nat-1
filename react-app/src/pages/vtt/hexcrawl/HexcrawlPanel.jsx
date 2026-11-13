@@ -242,7 +242,6 @@ const linkButtonSx = {
   px: 0.75,
   minWidth: 0,
   fontSize: FONT_SIZES.sm,
-  textTransform: 'none',
 };
 
 const lastCardSx = {
@@ -268,5 +267,4 @@ const lastButtonSx = {
   px: 0.75,
   minWidth: 0,
   fontSize: FONT_SIZES.sm,
-  textTransform: 'none',
 };

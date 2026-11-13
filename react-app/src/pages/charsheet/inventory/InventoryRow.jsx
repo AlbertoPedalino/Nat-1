@@ -46,7 +46,6 @@ const itemStateChipBaseSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
   lineHeight: LINE_HEIGHTS.relaxed,
-  textTransform: 'none',
 };
 
 // Provenance tags ([custom] + crafted badges) on their own row beneath the item

@@ -1,5 +1,5 @@
 import { createTheme, lighten } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../shared/ui/fonts.js';
+import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, CONTROL_FONT_SIZES } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
@@ -144,10 +144,12 @@ export const theme = createTheme({
       ...TEXT_STYLES.heading,
       fontSize: FONT_SIZES.title,
     },
+    // Everything clicked (buttons, toggle keys, tabs, clickable chips) is
+    // lettered one way: the display face's spaced capitals (TEXT_STYLES.label).
+    // A button that carries content rather than a label takes
+    // CONTENT_BUTTON_SX (shared/ui/actionButton.js).
     button: {
-      textTransform: 'none',
-      letterSpacing: 0,
-      fontWeight: FONT_WEIGHTS.bold,
+      ...TEXT_STYLES.label,
     },
   },
   components: {
@@ -184,8 +186,10 @@ export const theme = createTheme({
         disableElevation: true,
       },
       styleOverrides: {
-        sizeSmall: { fontSize: FONT_SIZES.xl },
-        sizeMedium: { fontSize: FONT_SIZES.xxl },
+        // A control's label has two sizes: CONTROL_FONT_SIZES.normal on every
+        // button, tab and key, .small on a row of filters or tags.
+        sizeSmall: { fontSize: CONTROL_FONT_SIZES.normal },
+        sizeMedium: { fontSize: CONTROL_FONT_SIZES.normal },
         sizeLarge: { fontSize: FONT_SIZES.body },
         // An outlined button is the raised button too, on the raised surface:
         // the ink edge and the press, its text in its colour.
@@ -286,8 +290,8 @@ export const theme = createTheme({
           minHeight: 0,
           minWidth: 0,
           padding: '6px 10px',
-          ...TEXT_STYLES.title,
-          fontSize: FONT_SIZES.xs,
+          ...TEXT_STYLES.label,
+          fontSize: CONTROL_FONT_SIZES.normal,
           lineHeight: LINE_HEIGHTS.tight,
         },
       },
@@ -307,7 +311,7 @@ export const theme = createTheme({
       // the flat tint below. As variants these weigh what the chip's base
       // style does, so a chip's own sx (a toggled condition's colour) wins.
       variants: [
-        { props: ({ ownerState }) => ownerState.clickable, style: pressableSx(UI_COLORS.surfaceRaised) },
+        { props: ({ ownerState }) => ownerState.clickable, style: { ...pressableSx(UI_COLORS.surfaceRaised), ...TEXT_STYLES.label } },
         { props: ({ ownerState }) => ownerState.clickable && ownerState.color === 'primary', style: pressableSx(UI_COLORS.accent) },
         { props: ({ ownerState }) => ownerState.clickable && ownerState.color === 'secondary', style: pressableSx(UI_COLORS.secondary) },
       ],

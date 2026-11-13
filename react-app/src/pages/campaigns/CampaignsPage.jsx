@@ -252,7 +252,7 @@ export default function CampaignsPage() {
                             leading={<Box component={ScrollText} size={16} aria-hidden sx={characterIconSx(canEditChar)} />}
                             title={ch.name || ch.id}
                             badge={!canEditChar ? (
-                              <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
+                              <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="Read only" tone={UI_COLORS.infoText} />
                             ) : null}
                             subtitle={`${ch.owner_username || '—'}${mine ? ' · you' : ''}`}
                             actions={mine ? (

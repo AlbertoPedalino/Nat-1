@@ -24,7 +24,6 @@ const KEY_SX = Object.freeze({
   ...TEXT_STYLES.title,
   minHeight: 0,
   py: 0.5,
-  textTransform: 'none',
   gap: 0.5,
 });
 const SIZES = Object.freeze({

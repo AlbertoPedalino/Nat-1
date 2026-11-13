@@ -28,7 +28,7 @@ export default function AppTopBar({
       {home || backTo || start ? (
         <Box sx={leftActionsSx}>
           {home ? (
-            <TopBarButton component={RouterLink} to="/" icon={Home} label="HOME" ariaLabel="Home" />
+            <TopBarButton component={RouterLink} to="/" icon={Home} label="Home" ariaLabel="Home" />
           ) : null}
           {backTo ? (
             <TopBarButton

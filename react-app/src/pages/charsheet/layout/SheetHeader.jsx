@@ -151,7 +151,7 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               <CharacterName name={C.name} sx={{ fontSize: embedded ? FONT_SIZES.xxl : { xs: FONT_SIZES.xxl, md: FONT_SIZES.lead } }} />
               {readOnly && (
-                <TagChip icon={<Eye size={ICON_SIZES.xxs} />} label="READ ONLY" tone={UI_COLORS.infoText} />
+                <TagChip icon={<Eye size={ICON_SIZES.xxs} />} label="Read only" tone={UI_COLORS.infoText} />
               )}
             </Box>
             <Typography variant="body2" sx={{ ...ONE_LINE_SX, color: 'text.secondary' }}>

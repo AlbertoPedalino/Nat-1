@@ -10,6 +10,7 @@ import { FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
 import SelectField from '../../ui/SelectField.jsx';
+import { CONTENT_BUTTON_SX } from '../../ui/actionButton.js';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -191,4 +192,5 @@ const dateRowSx = {
 
 const errorSx = { color: 'error.main', fontSize: FONT_SIZES.md, mt: 0.5 };
 
-export const quickButtonSx = { minWidth: 0, px: 1, fontSize: FONT_SIZES.md, textTransform: 'none' };
+// An amount of time ("+8h"): a value, written as it reads.
+export const quickButtonSx = { minWidth: 0, px: 1, fontSize: FONT_SIZES.md, ...CONTENT_BUTTON_SX };

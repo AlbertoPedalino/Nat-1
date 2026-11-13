@@ -1,5 +1,5 @@
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { CONTROL_FONT_SIZES, FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
@@ -65,12 +65,12 @@ export const addButtonSx = {
 };
 
 export const inlineButtonSx = {
-  fontSize: FONT_SIZES.xs,
+  // A roller in a card's row: the controls' small label.
+  fontSize: CONTROL_FONT_SIZES.small,
   minWidth: 0,
   py: 0.25,
   px: 0.75,
   lineHeight: LINE_HEIGHTS.snug,
   borderRadius: 1,
-  ...TEXT_STYLES.title,
 };
 

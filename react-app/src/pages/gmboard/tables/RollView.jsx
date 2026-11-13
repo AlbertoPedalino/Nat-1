@@ -107,7 +107,6 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
             startIcon={<CornerDownRight size={ICON_SIZES.xs} />}
             aria-label={`Then roll ${TABLE_LABEL[id]}`}
             onClick={() => onRoll(id)}
-            sx={followUpSx}
           >
             {TABLE_LABEL[id]}
           </Button>
@@ -273,9 +272,6 @@ const diceSx = {
 };
 
 
-const followUpSx = {
-  textTransform: 'none',
-};
 
 const historySx = boardInsetSx;
 

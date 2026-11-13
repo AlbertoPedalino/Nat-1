@@ -8,7 +8,7 @@ import { asArray } from '../lists.js';
 import { washImage } from './surfaces.js';
 
 // The comic sticker chip: a fact that stands on its own and is only read (a
-// count, a difficulty, a resistance, "Live", "READ ONLY"), drawn with the ink
+// count, a difficulty, a resistance, "Live", "Read only"), drawn with the ink
 // edge, flat as everything only read. `tone` tints it and writes its label;
 // `filled` paints it solid in its tone (the stronger fact: an immunity, a
 // full count); no tone leaves it a neutral sticker. A chip that is clicked is
