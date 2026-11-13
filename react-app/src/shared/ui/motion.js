@@ -6,3 +6,12 @@ export const DURATIONS = Object.freeze({
   normal: 160,
   slow: 220,
 });
+
+// A gem of a counter (GemPip) relit or spent, and the sparkles a relit one
+// throws (each one a little after the last).
+export const GEM_MOTION = Object.freeze({
+  relit: 340,
+  spent: 280,
+  spark: 520,
+  sparkStagger: 40,
+});

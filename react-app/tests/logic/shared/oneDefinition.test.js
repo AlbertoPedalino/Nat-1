@@ -1072,3 +1072,11 @@ test('an encounter builder panel is an encounterPanel', () => {
 test('a search box is a SearchField or a DraftSearchField', () => {
   assert.deepEqual(sourceFilesMatching(/SelectionSearch/), []);
 });
+
+// Every counter spent and recovered one at a time (spell and pact slots, a
+// feature's uses, free casts, hit dice) is a row of GemPips: the cut, colours
+// and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.
+test('a spendable counter is a GemPip', () => {
+  assert.deepEqual(sourceFilesMatching(/PipButton/), []);
+  assert.deepEqual(sourceFilesMatching(/GEM_TONES\s*=|GEM_SIZES\s*=/, { allow: ['shared/ui/GemPip.jsx'] }), []);
+});

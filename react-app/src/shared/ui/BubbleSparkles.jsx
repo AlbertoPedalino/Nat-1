@@ -9,8 +9,9 @@ import { UI_COLORS } from './colors.js';
 // positioned.
 const LIFE_MS = 4800;
 
-// A four-pointed sparkle in a 24-unit box.
-const SPARKLE_PATH = 'M12 1C13 8 16 11 23 12C16 13 13 16 12 23C11 16 8 13 1 12C8 11 11 8 12 1Z';
+// A four-pointed sparkle in a 24-unit box: every sparkle of the app (a
+// natural 20's bubble, a gem relit: GemPip).
+export const SPARKLE_PATH = 'M12 1C13 8 16 11 23 12C16 13 13 16 12 23C11 16 8 13 1 12C8 11 11 8 12 1Z';
 
 // Where each sparkle stands round the bubble (`left`, `top` as % of it, the
 // sparkle centred there), its size, colour and how long after the first it

@@ -17,7 +17,7 @@ import { RichInline, RichText } from '../../../shared/content/RichText.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
-import PipButton from '../../../shared/ui/PipButton.jsx';
+import GemPip from '../../../shared/ui/GemPip.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPropertyTable.jsx';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
@@ -191,21 +191,18 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
           ) : (
+            // The uses as gems (GemPip): the lit ones first.
             Array.from({ length: safeMax }, (_, i) => {
-              const available = i >= safeMax - resCur;
+              const available = i < resCur;
               return (
-                <PipButton
+                <GemPip
                   key={i}
-                  size={10}
-                  round
+                  kind="uses"
+                  size="sm"
+                  available={available}
                   title={available ? 'Available' : 'Used'}
                   aria-label={`${action.name}: ${available ? 'spend use' : 'recover use'}`}
                   onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, available ? -1 : 1); }}
-                  sx={{
-                    border: '1.5px solid',
-                    bgcolor: available ? 'transparent' : UI_COLORS.accentText,
-                    borderColor: available ? uiAlpha(UI_COLORS.accent, OPACITY.line) : UI_COLORS.accentText,
-                  }}
                 />
               );
             })

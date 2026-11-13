@@ -2,9 +2,9 @@ import { Box, Typography } from '@mui/material';
 import { levelHeaderSx, panelSurfaceSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import GemPip from '../../../shared/ui/GemPip.jsx';
 
 export function SpellSection({ title, children }) {
   return (
@@ -16,7 +16,10 @@ export function SpellSection({ title, children }) {
 }
 
 export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) {
-  const hasRegular = (slots.regular || []).some(Boolean);
+  // A level shows when it has slots of its own or temporary ones (Font of
+  // Magic, Wild Resurgence, a transmuted magic item).
+  const createdAt = (lv) => Number((created || {})[lv] || 0);
+  const hasRegular = (slots.regular || []).some((total, idx) => total || createdAt(idx + 1));
   const hasPact = slots.pact && slots.pact.count > 0;
   if (!hasRegular && !hasPact) return null;
   return (
@@ -27,8 +30,8 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.5 }}>
             {slots.regular.map((total, idx) => {
               const lv = idx + 1;
-              const createdCount = Number((created || {})[lv] || 0);
-              return total ? <SlotGroup key={lv} level={lv} total={total} used={getRegularSlotUsed(used, lv)} created={createdCount} onToggle={onToggle} readOnly={readOnly} /> : null;
+              const createdCount = createdAt(lv);
+              return total || createdCount ? <SlotGroup key={lv} level={lv} total={total} used={getRegularSlotUsed(used, lv)} created={createdCount} onToggle={onToggle} readOnly={readOnly} /> : null;
             })}
           </Box>
         </>
@@ -51,49 +54,42 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
   );
 }
 
+// A level's slots as gems (GemPip): the lit ones first, the spent settings
+// after. A lit gem spends one slot, a setting recovers one (toggleSlot takes
+// the index that does it). Each temporary slot (created) is one more gem, in
+// its own colour, after them; using one spends it (they last until a Long Rest).
 function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle, readOnly = false }) {
-  const dotCursor = readOnly ? 'default' : 'pointer';
-  const dotHover = readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.accentText } };
+  const toggle = (index) => (readOnly ? undefined : () => onToggle(level, total, index, created, kind));
+  const name = kind === 'pact' ? 'Pact slot' : `Level ${level} slot`;
   return (
     <Box sx={{ minWidth: 42 }}>
-      <Box sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxs, color: 'text.secondary', textAlign: 'center', mb: 0.5 }}>{level}</Box>
+      {/* The level in the figures' face: a number, read at a glance. */}
+      <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary', textAlign: 'center', lineHeight: LINE_HEIGHTS.none, mb: 0.5 }}>{level}</Box>
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
-        {Array.from({ length: total }, (_, index) => (
-          <Box
-            key={index}
-            onClick={readOnly ? undefined : () => onToggle(level, total, index, created, kind)}
-            sx={{
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
-              border: '1.5px solid',
-              borderColor: index < used ? UI_COLORS.info : uiAlpha(UI_COLORS.textSecondary, OPACITY.line),
-              bgcolor: index < used ? UI_COLORS.info : 'transparent',
-              cursor: dotCursor,
-              ...dotHover,
-            }}
+        {Array.from({ length: total }, (_, position) => {
+          const available = position < total - used;
+          return (
+            <GemPip
+              key={position}
+              kind={kind === 'pact' ? 'pact' : 'slot'}
+              available={available}
+              aria-label={`${name}: ${available ? 'spend' : 'recover'}`}
+              title={available ? 'Available' : 'Used'}
+              onClick={toggle(available ? used : used - 1)}
+            />
+          );
+        })}
+        {Array.from({ length: created }, (_, index) => (
+          <GemPip
+            key={`temporary-${index}`}
+            kind="temporary"
+            available
+            aria-label={`${name}: use a temporary slot`}
+            title="Temporary slot, until a Long Rest"
+            onClick={toggle(total)}
           />
         ))}
-        {created > 0 ? (
-          <Box
-            onClick={readOnly ? undefined : () => onToggle(level, total, total, created, kind)}
-            sx={{
-              width: 14, height: 14, borderRadius: '50%', cursor: dotCursor,
-              border: '1.5px dashed', borderColor: UI_COLORS.success,
-              // Washed over the panel's paper, so the dot stays solid.
-              ...tintedSurfaceSx(UI_COLORS.success),
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              ...dotHover,
-            }}
-            title={`Temporary slot${created > 1 ? 's' : ''}: ${created}`}
-          />
-        ) : null}
       </Box>
-      {created > 0 ? (
-        <Box sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xxxs, color: UI_COLORS.success, textAlign: 'center', mt: 0.25 }}>
-          +{created}
-        </Box>
-      ) : null}
     </Box>
   );
 }

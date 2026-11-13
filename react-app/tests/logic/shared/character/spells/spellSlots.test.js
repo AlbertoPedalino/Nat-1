@@ -8,6 +8,7 @@ import {
   getAvailablePactSlots,
   getPactSlotUsedKey,
   recoverPactSlots,
+  lowestAvailableSlotLevel,
 } from '../../../../../src/shared/character/spells/spellSlots.js';
 
 test('Pact Magic slots are counted and consumed from their separate pool', () => {
@@ -71,4 +72,11 @@ test('a created slot is added, then spent before the regular slots of its level'
   assert.deepEqual(sheet.spellSlotUsed, {});
   assert.equal(consumeSlot([2], sheet, 1, onUpdateSheet), true);
   assert.deepEqual(sheet.spellSlotUsed, { 1: 1 });
+});
+
+test('a level with only temporary slots is a slot to spend', () => {
+  const regular = [2, 0, 0];
+  const sheet = { spellSlotUsed: { 1: 2 }, createdSpellSlots: { 2: 1 } };
+  assert.deepEqual(availableRegularSlotLevels(regular, sheet).map((entry) => entry.level), [2]);
+  assert.equal(lowestAvailableSlotLevel(regular, sheet), 2);
 });

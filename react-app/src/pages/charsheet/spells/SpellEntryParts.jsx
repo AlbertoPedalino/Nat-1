@@ -1,8 +1,8 @@
 import { Box, Tooltip, Typography } from '@mui/material';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
-import PipButton from '../../../shared/ui/PipButton.jsx';
+import GemPip from '../../../shared/ui/GemPip.jsx';
 import { RICH_TEXT_ACCENT } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -46,22 +46,18 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
                 {fc.label}
               </Typography>
               <Box sx={{ display: 'inline-flex', gap: 0.5, alignItems: 'center' }}>
+                {/* The free casts as gems (GemPip): the lit ones first. */}
                 {Array.from({ length: max }).map((_, i) => {
-                  const isUsed = i < used;
+                  const available = i < max - used;
                   return (
-                    <PipButton
-                      key={`${fc.id}-dot-${i}`}
-                      size={10}
-                      round
-                      title={isUsed ? 'Free cast used' : 'Free cast available'}
-                      aria-label={`${fc.label}: ${isUsed ? 'free cast used' : 'free cast available'}`}
+                    <GemPip
+                      key={`${fc.id}-gem-${i}`}
+                      kind="uses"
+                      size="sm"
+                      available={available}
+                      title={available ? 'Free cast available' : 'Free cast used'}
+                      aria-label={`${fc.label}: ${available ? 'free cast available' : 'free cast used'}`}
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
-                      sx={{
-                        border: '1.5px solid',
-                        borderColor: isUsed ? UI_COLORS.accentText : uiAlpha(UI_COLORS.accent, OPACITY.line),
-                        bgcolor: isUsed ? UI_COLORS.accent : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.accentText } : undefined,
-                      }}
                     />
                   );
                 })}

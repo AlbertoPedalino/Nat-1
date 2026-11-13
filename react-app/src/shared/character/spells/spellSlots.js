@@ -63,13 +63,14 @@ export function addCreatedSlot(sheet, level, onUpdateSheet, onUpdateCharacter) {
   persistCreatedSlots(next, onUpdateSheet, onUpdateCharacter);
 }
 
-// Every regular spell-slot level with a slot left (created slots included), for
-// features that let the player pick which slot to spend.
+// Every regular spell-slot level with a slot left (created slots included, a
+// level with only created ones too), for features that let the player pick
+// which slot to spend.
 export function availableRegularSlotLevels(regularSlots, sheet) {
   const created = sheet?.createdSpellSlots || {};
   const levels = [];
   for (let level = 1; level <= regularSlots.length; level++) {
-    if (!Number(regularSlots[level - 1] || 0)) continue;
+    if (!Number(regularSlots[level - 1] || 0) && !Number(created[level] || 0)) continue;
     const available = getAvailableRegularSlots(regularSlots, sheet, level);
     if (available > 0) levels.push({ level, available, hasCreated: Number(created[level] || 0) > 0 });
   }
@@ -83,8 +84,9 @@ export function lowestAvailableSlotLevel(regularSlots, sheet) {
   const created = sheet?.createdSpellSlots || {};
   for (let lv = 1; lv <= regularSlots.length; lv++) {
     const total = Number(regularSlots[lv - 1] || 0);
-    if (!total) continue;
-    if (total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0) > 0) return lv;
+    const extra = Number(created[lv] || 0);
+    if (!total && !extra) continue;
+    if (total - getRegularSlotUsed(used, lv) + extra > 0) return lv;
   }
   return 0;
 }
