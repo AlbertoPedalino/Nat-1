@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { ArrowLeft, ArrowRight, RotateCcw, Swords, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCcw, X } from 'lucide-react';
 import { isFightResumable } from '../../../shared/encounter/library.js';
 import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
@@ -11,6 +11,7 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default encounterPanel({ state: ['activeFightId', 'combat', 'fights', 'library'], context: ['dispatch'] }, CombatViewView);
 
@@ -37,7 +38,7 @@ function CombatViewView({ state, dispatch }) {
   if (!combat?.combatants?.length) {
     return (
       <StatePanel
-        icon={Swords}
+        icon={GAME_ICONS.encounter}
         title="No active encounter"
         action={<Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>}
       >
@@ -63,7 +64,7 @@ function CombatViewView({ state, dispatch }) {
     <>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1fr) minmax(340px,0.8fr)' }, gap: 2 }}>
         <Stack spacing={2}>
-          <Panel icon={Swords} title={`Round ${combat.round}`}>
+          <Panel icon={GAME_ICONS.encounter} title={`Round ${combat.round}`}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
               <Typography sx={{ color: 'text.secondary' }}>
                 Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>

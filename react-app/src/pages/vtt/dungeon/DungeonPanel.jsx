@@ -2,9 +2,7 @@ import { useState } from 'react';
 import {
   Box, Button, CircularProgress, Stack, TextField, Typography, useTheme,
 } from '@mui/material';
-import {
-  Coins, Dices, Flame, Leaf, Swords, Trash2, Users,
-} from 'lucide-react';
+import { Trash2, Users } from 'lucide-react';
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
@@ -20,6 +18,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The dungeon this map is being played as.
 //
@@ -79,7 +78,7 @@ export default function DungeonPanel({
         <Button
           size="small"
           variant="contained"
-          startIcon={busy ? <CircularProgress size={13} /> : <Dices size={ICON_SIZES.sm} />}
+          startIcon={busy ? <CircularProgress size={13} /> : <GAME_ICONS.roll size={ICON_SIZES.sm} />}
           disabled={busy || !isValidRoomCount(roomCount)}
           onClick={() => onRoll({
             roomCount,
@@ -128,7 +127,7 @@ export default function DungeonPanel({
 
             {!isNothingFound(keyRoom.loot?.data) ? (
               <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                <Coins size={ICON_SIZES.xs} color={theme.palette.gmboard.result.loot} />
+                <GAME_ICONS.loot size={ICON_SIZES.xs} color={theme.palette.gmboard.result.loot} />
                 <Typography sx={lineSx}>{lootLabel(keyRoom.loot.data, keyRoom.lootDc)}</Typography>
               </Stack>
             ) : null}
@@ -237,7 +236,7 @@ function SlotLine({ slot, tones }) {
   if (extra.kind === 'enc') {
     return (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Swords size={ICON_SIZES.xs} color={tones.result.encounter} />
+        <GAME_ICONS.encounter size={ICON_SIZES.xs} color={tones.result.encounter} />
         <Typography sx={lineSx}>
           {[extra.data.diff, encounterDetail(extra.data)].filter(Boolean).join(' · ')}
         </Typography>
@@ -247,7 +246,7 @@ function SlotLine({ slot, tones }) {
   if (extra.kind === 'trap') {
     return (
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Flame size={ICON_SIZES.xs} color={tones.result.trap} />
+        <GAME_ICONS.trap size={ICON_SIZES.xs} color={tones.result.trap} />
         <Typography sx={lineSx}>
           {trapLabel(extra.data)}
         </Typography>
@@ -256,7 +255,7 @@ function SlotLine({ slot, tones }) {
   }
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-      <Leaf size={ICON_SIZES.xs} color={tones.result.none} />
+      <GAME_ICONS.environment size={ICON_SIZES.xs} color={tones.result.none} />
       <Typography sx={lineSx}>
         {slot.type}{extra.data?.severity ? ` · ${extra.data.severity}` : ''}
       </Typography>

@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Divider } from '@mui/material';
-import { ScrollText } from 'lucide-react';
 import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
@@ -11,6 +10,7 @@ import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import SidePanel from '../../../shared/ui/SidePanel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default encounterPanel({ state: ['selectedStatblock', 'combat', 'view'], context: ['dispatch'] }, StatBlockDialogView);
 
@@ -102,7 +102,7 @@ function StatBlockBodyView({ monster, allowAdd = false, state, dispatch, monster
 // The panel before anything is selected (or after a monster is gone).
 function EmptyStatBlock() {
   return (
-    <StatePanel icon={ScrollText} title="Statblock" sx={sidePlacementSx}>
+    <StatePanel icon={GAME_ICONS.statBlock} title="Statblock" sx={sidePlacementSx}>
       Click a monster or player combatant to inspect it here.
     </StatePanel>
   );

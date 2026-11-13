@@ -1,7 +1,5 @@
 import { Button, Stack, Typography } from '@mui/material';
-import {
-  Maximize2, Minimize2, ScrollText, Settings2, Trash2, X,
-} from 'lucide-react';
+import { Maximize2, Minimize2, Settings2, Trash2, X } from 'lucide-react';
 import { mapIconButtonSx, mapPanelButtonSx } from './battleMapSurface.js';
 import {
   cornerButtonsSx,
@@ -13,6 +11,7 @@ import {
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { CloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Buttons that sit on the map. Each is marked `data-viewport-control`, so the
 // map does not take their clicks for the start of a pan.
@@ -56,7 +55,7 @@ export function CornerButtons({
         <Button
           size="small"
           variant={sheetOpen ? 'contained' : 'outlined'}
-          startIcon={<ScrollText size={ICON_SIZES.sm} />}
+          startIcon={<GAME_ICONS.characterSheet size={ICON_SIZES.sm} />}
           aria-label={sheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
           onClick={() => onSheetOpenChange(!sheetOpen)}
           sx={fullscreenSheetButtonSx}

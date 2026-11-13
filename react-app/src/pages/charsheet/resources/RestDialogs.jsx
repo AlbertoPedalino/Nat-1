@@ -1,5 +1,4 @@
 import { Button, Stack, Typography } from '@mui/material';
-import { Hourglass, Moon } from 'lucide-react';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import HitDiceSpendControl from './HitDiceSpendControl.jsx';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
@@ -7,6 +6,7 @@ import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/
 import { clamp } from '../../../shared/numbers.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The Short Rest dialog (Hit Dice to spend, per pool) and the Long Rest
 // confirmation. `rest` is the state and handlers from useRests.
@@ -22,7 +22,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         open={rest.shortRestOpen}
         onClose={rest.closeShortRest}
         title="Short Rest"
-        icon={<Hourglass size={ICON_SIZES.xl} />}
+        icon={<GAME_ICONS.shortRest size={ICON_SIZES.xl} />}
         actions={(
           <>
             <CancelButton onClick={rest.closeShortRest} />
@@ -61,7 +61,7 @@ export default function RestDialogs({ C, sheet, rest }) {
         open={rest.longRestOpen}
         onClose={rest.closeLongRest}
         title="Take a Long Rest?"
-        icon={<Moon size={ICON_SIZES.xl} />}
+        icon={<GAME_ICONS.longRest size={ICON_SIZES.xl} />}
         actions={(
           <>
             <CancelButton onClick={rest.closeLongRest} />

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Stack, TextField, useTheme } from '@mui/material';
-import { Castle } from 'lucide-react';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import RoomCard from './RoomCard.jsx';
@@ -11,6 +10,7 @@ import BoardPanel from '../ui/BoardPanel.jsx';
 import { boardCardGridSx } from '../../../shared/gmboard/ui/surfaces.js';
 import GenerateActions from '../ui/GenerateActions.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -44,7 +44,7 @@ export default function DungeonView() {
 
   return (
     <Stack spacing={2}>
-      <BoardPanel icon={Castle} title="Dungeon Explorer">
+      <BoardPanel icon={GAME_ICONS.dungeon} title="Dungeon Explorer">
         <TextField
           label="Room count (1–40)"
           size="small"
@@ -79,7 +79,7 @@ export default function DungeonView() {
           {dungeon.rooms.map((room) => <RoomCard key={room.id} room={room} />)}
         </Box>
       ) : (
-        <StatePanel icon={Castle} title="No dungeon yet">
+        <StatePanel icon={GAME_ICONS.dungeon} title="No dungeon yet">
           Set a room count, population mode and tier, then press Generate.
         </StatePanel>
       )}

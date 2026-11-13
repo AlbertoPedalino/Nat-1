@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@mui/material';
-import { PawPrint } from 'lucide-react';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import {
@@ -21,6 +20,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import DetailPanel, { DetailNote, detailStatus } from '../layout/DetailPanel.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -116,7 +116,7 @@ export default function SummonedCreaturePanel({
 
   const hasFixedChoice = Boolean(choiceMatch);
   return (
-    <DetailPanel icon={PawPrint} titleNode={<BeastTitle name={creature.name} source={creature.source} />}>
+    <DetailPanel icon={GAME_ICONS.beast} titleNode={<BeastTitle name={creature.name} source={creature.source} />}>
       {versions.length > 1 ? (
         <CreatureOptionRow label="Form">
           <ChoiceToggle

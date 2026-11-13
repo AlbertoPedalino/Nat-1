@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { Dices, Skull } from 'lucide-react';
 import SheetDialog, { DialogSection, ResetButton } from '../../../shared/ui/SheetDialog.jsx';
 import {
   buildFumbleFormula,
@@ -20,6 +19,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import DiceCountPicker from '../../../shared/character/dice/DiceCountPicker.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default encounterPanel({ state: ['fumbleTables'], context: ['dispatch', 'roll'] }, CriticalFumblesDialogView);
 
@@ -98,7 +98,7 @@ function CriticalFumblesDialogView({ open, onClose, state, dispatch, roll }) {
       open={open}
       onClose={handleClose}
       title="Critical Fumbles"
-      icon={<Skull size={ICON_SIZES.xl} />}
+      icon={<GAME_ICONS.criticalFailure size={ICON_SIZES.xl} />}
       showClose
       maxWidth="md"
       phoneFullScreen
@@ -106,7 +106,7 @@ function CriticalFumblesDialogView({ open, onClose, state, dispatch, roll }) {
       actions={(
         <>
           <ResetButton onClick={handleReset} />
-          <Button onClick={handleRoll} variant="contained" size="small" startIcon={<Dices size={ICON_SIZES.sm} />}>
+          <Button onClick={handleRoll} variant="contained" size="small" startIcon={<GAME_ICONS.roll size={ICON_SIZES.sm} />}>
             Roll Fumble
           </Button>
         </>

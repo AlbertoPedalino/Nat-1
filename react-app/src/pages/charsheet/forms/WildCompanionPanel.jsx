@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Stack } from '@mui/material';
-import { Sparkles } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -28,6 +27,7 @@ import { filterByBooks } from '../../../shared/content/booksView.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { useCostMode } from './useCostMode.js';
 import CostModeToggle from './CostModeToggle.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -84,7 +84,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     const hp = getWildCompanionHp(character);
     return (
       <DetailPanel
-        icon={Sparkles}
+        icon={GAME_ICONS.beast}
         title="Familiar —"
         titleNode={<BeastTitle name={b.name} source={b.source} />}
         aside={(
@@ -116,7 +116,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   }
 
   return (
-    <DetailPanel icon={Sparkles} title="Summon Familiar — CR 0 Beast">
+    <DetailPanel icon={GAME_ICONS.beast} title="Summon Familiar — CR 0 Beast">
       <CostModeToggle costMode={costMode} useLabel="Wild Shape" sx={{ mb: 0.5 }} />
       <SearchField
         value={query}

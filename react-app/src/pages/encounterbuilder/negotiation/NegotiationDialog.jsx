@@ -1,5 +1,5 @@
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { Check, Handshake, Skull, Sparkles, X } from 'lucide-react';
+import { Check, Handshake, X } from 'lucide-react';
 import SheetDialog, { DialogSection, ResetButton } from '../../../shared/ui/SheetDialog.jsx';
 import {
   getNpcAttitude,
@@ -20,12 +20,13 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { SURFACES, calloutSx, meterTrackSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
   { id: 'failed', Icon: X, color: 'warning' },
-  { id: 'criticalSuccess', Icon: Sparkles, color: 'primary' },
-  { id: 'criticalFailure', Icon: Skull, color: 'error' },
+  { id: 'criticalSuccess', Icon: GAME_ICONS.criticalSuccess, color: 'primary' },
+  { id: 'criticalFailure', Icon: GAME_ICONS.criticalFailure, color: 'error' },
 ]);
 
 export default encounterPanel({ state: ['negotiation'], context: ['dispatch'] }, NegotiationDialogView);

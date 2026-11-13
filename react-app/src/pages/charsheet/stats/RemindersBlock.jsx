@@ -1,5 +1,4 @@
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
@@ -14,7 +13,7 @@ export default function RemindersBlock({ sheet, actions }) {
       <ReminderEditor
         effects={sheet.activeEffects}
         disabled={Boolean(actions.readOnly)}
-        fontSize={FONT_SIZES.xxs}
+        density="panel"
         onAdd={actions.add}
         onRemove={actions.remove}
       />

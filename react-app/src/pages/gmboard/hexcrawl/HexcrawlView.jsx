@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material';
-import { FastForward, Footprints, Hexagon } from 'lucide-react';
+import { FastForward, Hexagon } from 'lucide-react';
 import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import ClockBar from '../session/ClockBar.jsx';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
@@ -19,6 +19,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -92,7 +93,7 @@ export default function HexcrawlView() {
         <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
           <Button
             variant="contained"
-            startIcon={<Footprints size={ICON_SIZES.sm} />}
+            startIcon={<GAME_ICONS.travel size={ICON_SIZES.sm} />}
             disabled={!canProceed}
             onClick={proceed}
           >

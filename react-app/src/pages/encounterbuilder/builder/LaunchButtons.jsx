@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Box, Button, Tooltip } from '@mui/material';
-import { SlidersHorizontal, Swords } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Launch, and beside it the launch with initiative advantage or disadvantage
 // (the dialog it opens): the builder's Encounter panel and every library card
@@ -15,7 +16,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 // the initiative dialog.
 export function LaunchButton({ size = 'medium', ...props }) {
   return (
-    <Button variant="contained" size={size} startIcon={<Swords size={size === 'small' ? ICON_SIZES.sm : ICON_SIZES.md} />} {...props}>
+    <Button variant="contained" size={size} startIcon={<GAME_ICONS.encounter size={size === 'small' ? ICON_SIZES.sm : ICON_SIZES.md} />} {...props}>
       Launch
     </Button>
   );

@@ -1,9 +1,9 @@
 import { useTheme } from '@mui/material';
-import { Coins, ScrollText, Swords } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import { boardTone, eventVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
 import { diceText, encounterDetail, lootDetail } from '../../../shared/gmboard/resultText.js';
 import { ResultCard, ResultLine, ResultSlot } from '../ui/ResultCard.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function QuestCard({ quest }) {
   const theme = useTheme();
@@ -15,7 +15,7 @@ export default function QuestCard({ quest }) {
 
   return (
     <ResultCard
-      icon={ScrollText}
+      icon={GAME_ICONS.quest}
       title={`QUEST ${quest.index}`}
       header={<ResultBadge tone={eventTone} icon={EventIcon}>{quest.event.name}</ResultBadge>}
     >
@@ -23,7 +23,7 @@ export default function QuestCard({ quest }) {
       {quest.encounter ? (
         <ResultSlot
           tone={encounterTone}
-          icon={Swords}
+          icon={GAME_ICONS.encounter}
           label="Encounter"
           badges={(
             <ResultBadge tone={boardTone(theme.palette, 'difficulty', quest.encounter.data.diff)}>
@@ -37,7 +37,7 @@ export default function QuestCard({ quest }) {
       ) : null}
       <ResultSlot
         tone={rewardTone}
-        icon={Coins}
+        icon={GAME_ICONS.loot}
         label="Reward"
         badges={(
           <>

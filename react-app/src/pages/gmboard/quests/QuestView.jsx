@@ -1,5 +1,4 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { Dices, ScrollText } from 'lucide-react';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import QuestCard from './QuestCard.jsx';
@@ -14,6 +13,7 @@ import GenerateActions from '../ui/GenerateActions.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -25,7 +25,7 @@ function QuestCountHeader({ questSet }) {
   return (
     <Box sx={{ ...headerSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Dices size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
+        <GAME_ICONS.roll size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
         <Typography sx={headerLabelSx}>Quest Count</Typography>
       </Stack>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
@@ -63,7 +63,7 @@ export default function QuestView() {
 
   return (
     <Stack spacing={2}>
-      <BoardPanel icon={ScrollText} title="Quest Generator">
+      <BoardPanel icon={GAME_ICONS.quest} title="Quest Generator">
         <SelectorGroup
           label="Scope"
           options={qPopContract.options}

@@ -1,21 +1,5 @@
 import { useState } from 'react';
 import { Box, Stack, ToggleButton, Typography } from '@mui/material';
-import {
-  Ban,
-  Cloud,
-  CloudFog,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  Coins,
-  Flame,
-  House,
-  Snowflake,
-  SunMedium,
-  ThermometerSun,
-  Trees,
-  Wind,
-} from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { ATMOSPHERE_PRESETS } from '../../../shared/vtt/scene/atmosphere.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -24,26 +8,10 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
+import { ATMOSPHERE_ICONS, FALLBACK_ATMOSPHERE_ICON } from '../../../shared/ui/gameIcons.js';
 
 // The searchable grid of atmosphere presets, opened from the scene panel's
 // Light & weather section.
-
-export const ATMOSPHERE_ICONS = Object.freeze({
-  none: Ban,
-  rain: CloudRain,
-  storm: CloudLightning,
-  wind: Wind,
-  fog: CloudFog,
-  snow: Snowflake,
-  blizzard: CloudSnow,
-  sandstorm: Cloud,
-  fire: Flame,
-  heatwave: ThermometerSun,
-  sunrays: SunMedium,
-  swamp: Trees,
-  haunted: House,
-  goldvault: Coins,
-});
 
 export const atmospherePresetsByType = new Map(
   ATMOSPHERE_PRESETS.map((preset) => [preset.value, preset]),
@@ -51,7 +19,7 @@ export const atmospherePresetsByType = new Map(
 
 function AtmosphereOption({ type, selected, onSelect }) {
   const preset = atmospherePresetsByType.get(type);
-  const Icon = ATMOSPHERE_ICONS[type] || Cloud;
+  const Icon = ATMOSPHERE_ICONS[type] || FALLBACK_ATMOSPHERE_ICON;
   return (
     <ToggleButton
       value={type}

@@ -1,9 +1,10 @@
 import { Button, Stack } from '@mui/material';
-import { PanelRightClose, ScrollText } from 'lucide-react';
+import { PanelRightClose } from 'lucide-react';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import SheetCharacterSelect from '../sheets/SheetCharacterSelect.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -27,7 +28,7 @@ export default function BattleMapViewSwitch({
       <Button
         size="small"
         variant={showingSheet ? 'contained' : 'outlined'}
-        startIcon={showingSheet ? <PanelRightClose size={ICON_SIZES.sm} /> : <ScrollText size={ICON_SIZES.sm} />}
+        startIcon={showingSheet ? <PanelRightClose size={ICON_SIZES.sm} /> : <GAME_ICONS.characterSheet size={ICON_SIZES.sm} />}
         disabled={!hasSheets}
         title={hasSheets ? undefined : 'No character sheet is available to you.'}
         aria-label={showingSheet ? 'Hide character sheet' : 'Show character sheet'}

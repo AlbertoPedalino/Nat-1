@@ -1,5 +1,4 @@
 import { Alert, Box, Button, Grid, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { Dice5 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
@@ -49,7 +48,7 @@ export default function ScoresStep({ state, dispatch }) {
 
         {character.scoreMethod === 'dice' ? (
           <Stack direction="row" spacing={1}>
-            <Button startIcon={<Dice5 size={ICON_SIZES.md} />} onClick={() => dispatch({ type: 'dice/roll' })}>
+            <Button startIcon={<GAME_ICONS.roll size={ICON_SIZES.md} />} onClick={() => dispatch({ type: 'dice/roll' })}>
               Roll Stats
             </Button>
             <ChoiceToggle

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
-import { HeartPulse, Sparkles, Skull } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
@@ -118,7 +117,7 @@ export default function HPBlock({
 
         {dead && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.25, py: 0.25, border: 2, borderColor: UI_COLORS.dangerStrong, borderRadius: 1, ...tintedSurfaceSx(UI_COLORS.dangerStrong) }}>
-            <Skull size={ICON_SIZES.xs} style={{ color: UI_COLORS.dangerStrong }} />
+            <GAME_ICONS.dead size={ICON_SIZES.xs} style={{ color: UI_COLORS.dangerStrong }} />
             <Typography sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerStrong }}>
               {exhausted ? `Dead — Exhaustion ${EXHAUSTION_MAX}` : 'Dead'}
             </Typography>
@@ -160,7 +159,7 @@ export default function HPBlock({
         {/* Temp HP */}
         <Box sx={rowSx}>
           <Box sx={chipSx}>
-            <Sparkles size={ICON_SIZES.xxs} /> TEMP
+            <GAME_ICONS.tempHp size={ICON_SIZES.xxs} /> TEMP
             {editing === 'temp' ? (
               editField({ width: 40, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
             ) : (
@@ -187,7 +186,7 @@ export default function HPBlock({
         {/* Max HP modifier */}
         <Box sx={rowSx}>
           <Box sx={chipSx}>
-            <HeartPulse size={ICON_SIZES.xxs} /> MAX MOD
+            <GAME_ICONS.maxHp size={ICON_SIZES.xxs} /> MAX MOD
             {editing === 'mod' ? (
               editField({ width: 44, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
             ) : (

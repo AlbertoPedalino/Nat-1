@@ -1,4 +1,4 @@
-import { Cloud, DoorOpen, Pencil, Pointer, Ruler, Shapes, Users } from 'lucide-react';
+import { Cloud, Pencil, Pointer, Ruler, Shapes, Users } from 'lucide-react';
 import { gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import DungeonPanel from '../dungeon/DungeonPanel.jsx';
 import PlayerPanel from '../session/PlayerPanel.jsx';
@@ -7,6 +7,7 @@ import MapObjectsPanel from '../objects/MapObjectsPanel.jsx';
 import { FogPanel, LaserPanel } from './ScenePanels.jsx';
 import { MeasurePanel } from './MeasurePanel.jsx';
 import { DrawPanel } from './DrawPanel.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Which rail group a paint mode belongs to, so the rail lights the right one.
 export function paintToolGroup(mode) {
@@ -234,7 +235,7 @@ export function buildToolGroups({
     {
       id: 'dungeon',
       label: 'Dungeon',
-      icon: DoorOpen,
+      icon: GAME_ICONS.door,
       content: (
         <DungeonPanel
           dungeonKey={dungeon.key}

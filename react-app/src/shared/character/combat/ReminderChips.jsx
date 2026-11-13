@@ -1,7 +1,6 @@
 import { useState, useSyncExternalStore } from 'react';
 import { Box, Button, Chip, TextField } from '@mui/material';
-import { alpha } from '@mui/material/styles';
-import { Plus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   MAX_EFFECTS,
   MAX_EFFECT_TEXT,
@@ -16,9 +15,9 @@ import {
   suggestReminders,
 } from './reminderHistory.js';
 import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
-import { OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
+import { markerDensitySx, markerOfferedSx, markerOnSx } from './markerChipStyles.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -26,11 +25,16 @@ import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 // does for conditions).
 //
 // The light blue is the reminder colour everywhere, the piece on the map
-// included — which is why the chips do not reuse the conditions accent.
+// included — which is why the chips do not reuse the conditions accent. Their
+// look is the marker's (markerChipStyles.js), as the conditions': a reminder on
+// the creature tinted blue, one offered from the history a plain button.
+
+export const REMINDER_ACCENT = UI_COLORS.info;
 
 // A creature's reminders by name, each removable, and the field that adds one.
 // `effects` is the list; the caller owns the writes.
-export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, fontSize = FONT_SIZES.xs }) {
+// `density` sizes the chips for their surface.
+export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, density }) {
   const reminders = normalizeEffects(effects);
   return (
     <Box sx={editorSx}>
@@ -40,38 +44,25 @@ export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, fon
             <ReminderChip
               key={effectId(effect)}
               effect={effect}
-              fontSize={fontSize}
+              density={density}
               onRemove={disabled ? undefined : () => onRemove(effectId(effect))}
             />
           ))}
         </Box>
       ) : null}
-      {disabled ? null : <ReminderField effects={reminders} onAdd={onAdd} />}
+      {disabled ? null : <ReminderField effects={reminders} onAdd={onAdd} density={density} />}
     </Box>
   );
 }
 
-// `fontSize` is the one thing the surfaces size differently.
-export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
+export function ReminderChip({ effect, onRemove, density }) {
   return (
     <Chip
       size="small"
       label={effect.text}
       onDelete={onRemove}
       deleteIcon={<X size={ICON_SIZES.xs} aria-label={`Remove ${effect.text}`} />}
-      sx={(theme) => {
-        const accent = theme.palette.info.main;
-        return {
-          height: CONTROL_HEIGHTS.sm,
-          fontSize,
-          maxWidth: '100%',
-          color: accent,
-          border: 2,
-          borderColor: accent,
-          bgcolor: alpha(accent, OPACITY.fill),
-          '& .MuiChip-deleteIcon': { color: accent, '&:hover': { color: accent } },
-        };
-      }}
+      sx={[markerOnSx(REMINDER_ACCENT), markerDensitySx(density)]}
     />
   );
 }
@@ -83,7 +74,7 @@ export function ReminderChip({ effect, onRemove, fontSize = FONT_SIZES.xs }) {
 // Reminders added before on this device (reminderHistory.js) sit under the
 // field as one-tap chips, narrowed by what is typed and minus those already on
 // the creature; their × forgets the entry, for typos.
-export function ReminderField({ effects, onAdd }) {
+export function ReminderField({ effects, onAdd, density }) {
   const [text, setText] = useState('');
   const history = useSyncExternalStore(subscribeReminderHistory, getReminderHistory, getReminderHistory);
   const active = normalizeEffects(effects);
@@ -124,6 +115,7 @@ export function ReminderField({ effects, onAdd }) {
               key={entry}
               text={entry}
               disabled={full}
+              density={density}
               onPick={() => add(entry)}
               onForget={() => forgetStoredReminder(entry)}
             />
@@ -134,41 +126,19 @@ export function ReminderField({ effects, onAdd }) {
   );
 }
 
-// Offered, not on the creature: neutral grey, dashed and led by a +, so it never
-// reads as a reminder in force. The reminder blue is kept for what is on the
-// creature and only comes up under the cursor, as an off condition chip does.
-function RecentReminderChip({ text, disabled, onPick, onForget }) {
+// Offered, not on the creature: drawn as an off condition is, so only what is
+// on the creature is blue.
+function RecentReminderChip({ text, disabled, density, onPick, onForget }) {
   return (
     <Chip
       size="small"
-      variant="outlined"
       label={text}
       disabled={disabled}
       onClick={onPick}
       onDelete={onForget}
       aria-label={`Add ${text}`}
-      icon={<Plus size={ICON_SIZES.xxs} aria-hidden />}
       deleteIcon={<X size={ICON_SIZES.xxs} aria-label={`Forget ${text}`} />}
-      sx={(theme) => {
-        const accent = theme.palette.info.main;
-        const muted = theme.palette.text.secondary;
-        return {
-          height: CONTROL_HEIGHTS.xs,
-          fontSize: FONT_SIZES.xxs,
-          maxWidth: '100%',
-          color: muted,
-          borderStyle: 'dashed',
-          borderColor: alpha(muted, OPACITY.edge),
-          bgcolor: 'transparent',
-          '& .MuiChip-icon': { color: muted, ml: 0.5, mr: -0.25 },
-          '& .MuiChip-deleteIcon': { color: alpha(muted, OPACITY.strong), '&:hover': { color: muted } },
-          '&:hover': {
-            color: accent,
-            borderColor: accent,
-            '& .MuiChip-icon': { color: accent },
-          },
-        };
-      }}
+      sx={[markerOfferedSx(REMINDER_ACCENT), markerDensitySx(density)]}
     />
   );
 }

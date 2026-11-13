@@ -2,8 +2,6 @@ import { Box } from '@mui/material';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import { ConditionToggleGrid } from '../../../shared/character/combat/ConditionChips.jsx';
 import MapSectionTitle from '../map/MapSectionTitle.jsx';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // The piece menu's side-by-side Conditions and Reminders columns.
 export default function TokenMarkers({
@@ -18,7 +16,7 @@ export default function TokenMarkers({
           onToggle={onConditionClick}
           disabled={!canMark}
           sx={chipsSx}
-          chipSx={compactChipSx}
+          density="menu"
         />
       </Box>
 
@@ -29,6 +27,7 @@ export default function TokenMarkers({
         <ReminderEditor
           effects={effects}
           disabled={!canSetEffects}
+          density="menu"
           onAdd={onAddReminder}
           onRemove={onRemoveReminder}
         />
@@ -66,9 +65,4 @@ const chipsSx = {
   gap: 0.25,
   maxHeight: 150,
   overflowY: 'auto',
-};
-
-const compactChipSx = {
-  height: CONTROL_HEIGHTS.sm,
-  '& .MuiChip-label': { px: 0.5, fontSize: FONT_SIZES.xxs, lineHeight: LINE_HEIGHTS.none },
 };

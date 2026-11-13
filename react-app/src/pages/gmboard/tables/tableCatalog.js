@@ -1,14 +1,9 @@
-import {
-  AlertTriangle, CloudRain, Coins, Flame, Leaf, Map, Swords,
-} from 'lucide-react';
 import { BOARD_TABLES } from '../../../shared/gmboard/tables.js';
 import { TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
+import { TABLE_ICONS } from '../../../shared/ui/gameIcons.js';
 
-// What the page shows of each board table (BOARD_TABLES): its icon, and the
-// columns its editor offers.
-export const TABLE_ICONS = Object.freeze({
-  weather: CloudRain, event: Map, loot: Coins, compl: AlertTriangle, encounter: Swords, trap: Flame, env: Leaf,
-});
+// What the page shows of each board table (BOARD_TABLES): its icon
+// (TABLE_ICONS, gameIcons.js), and the columns its editor offers.
 
 const ROLL = { field: 'r', label: 'Roll', editable: false };
 const TABLE_COLUMNS = Object.freeze({

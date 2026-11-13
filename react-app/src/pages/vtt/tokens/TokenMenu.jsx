@@ -3,7 +3,7 @@ import {
   Divider,
   TextField,
 } from '@mui/material';
-import { ScrollText, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { coarsePointer } from '../map/menuPlacement.js';
 import { battleMapCompactFieldSx } from '../map/battleMapSurface.js';
@@ -18,6 +18,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -54,8 +55,8 @@ export default function TokenMenu({
 
   // The bottom row's actions, each shown only when this user may use it.
   const actions = [
-    onSheet ? { label: 'Sheet', icon: ScrollText, onClick: () => onSheet(token) } : null,
-    onStatBlock ? { label: 'Stat block', icon: ScrollText, onClick: () => onStatBlock(token) } : null,
+    onSheet ? { label: 'Sheet', icon: GAME_ICONS.characterSheet, onClick: () => onSheet(token) } : null,
+    onStatBlock ? { label: 'Stat block', icon: GAME_ICONS.statBlock, onClick: () => onStatBlock(token) } : null,
     // A player may take back what they put down — their own piece or a
     // marker they dropped — and the delete policy says the same.
     canRemove ? { label: 'Remove', icon: Trash2, color: 'error', onClick: () => onDelete(token) } : null,

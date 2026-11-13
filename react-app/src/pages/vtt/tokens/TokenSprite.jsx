@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Tooltip } from '@mui/material';
-import { RotateCw, Skull } from 'lucide-react';
+import { RotateCw } from 'lucide-react';
 import { DEAD_CONDITION_KEY } from '../../../shared/character/combat/conditions.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
@@ -23,6 +23,7 @@ import { isDying } from '../../../shared/character/combat/mortality.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -176,7 +177,7 @@ export default function TokenSprite({
 
           {dead ? (
             <Box aria-label="Dead" title="Dead" sx={deadBadgeSx}>
-              <Skull size="64%" strokeWidth={2.4} />
+              <GAME_ICONS.dead size="64%" strokeWidth={2.4} />
             </Box>
           ) : null}
 

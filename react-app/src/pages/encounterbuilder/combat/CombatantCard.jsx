@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Avatar, Box, Button, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { ExternalLink, HeartPulse, Shield, Sparkles } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
 import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
@@ -26,6 +26,7 @@ import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import CornerCloseButton from '../../../shared/ui/CornerCloseButton.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default function CombatantCard({ combatant, active }) {
   const dispatch = useEncounterDispatch();
@@ -128,7 +129,7 @@ export default function CombatantCard({ combatant, active }) {
                   was noise competing with the one stat read every turn. */}
               <Tooltip title="Armor Class">
                 <Box sx={acBadgeSx}>
-                  <Shield size={ICON_SIZES.xs} />
+                  <GAME_ICONS.armor size={ICON_SIZES.xs} />
                   <Box component="span" sx={acLabelSx}>AC</Box>
                   <Box component="span" sx={acValueSx}>{combatant.ac}</Box>
                 </Box>
@@ -196,10 +197,10 @@ export default function CombatantCard({ combatant, active }) {
                   tone="quiet"
                 />
                 {!hpDetailsOpen && tempHp !== 0 ? (
-                  <HpFlag Icon={Sparkles} title={`Temp HP: ${tempHp}`} text={tempHp} />
+                  <HpFlag Icon={GAME_ICONS.tempHp} title={`Temp HP: ${tempHp}`} text={tempHp} />
                 ) : null}
                 {!hpDetailsOpen && maxHpBonus !== 0 ? (
-                  <HpFlag Icon={HeartPulse} title={`Max HP modifier: ${maxHpBonusText}`} text={maxHpBonusText} />
+                  <HpFlag Icon={GAME_ICONS.maxHp} title={`Max HP modifier: ${maxHpBonusText}`} text={maxHpBonusText} />
                 ) : null}
               </Box>
 

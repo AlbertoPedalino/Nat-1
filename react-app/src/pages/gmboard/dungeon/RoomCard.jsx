@@ -1,5 +1,5 @@
 import { Stack, Typography, useTheme } from '@mui/material';
-import { Castle, Coins, Lock, ShieldCheck } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import { boardTone, complicationVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
 import { diceText, encounterDetail, lootDetail } from '../../../shared/gmboard/resultText.js';
@@ -8,6 +8,7 @@ import { ResultCard, ResultLine, ResultSlot } from '../ui/ResultCard.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function SlotBlock({ slot }) {
   const theme = useTheme();
@@ -42,13 +43,13 @@ export default function RoomCard({ room }) {
 
   return (
     <ResultCard
-      icon={Castle}
+      icon={GAME_ICONS.dungeon}
       title={`ROOM ${room.index}`}
       header={(
         <>
           <ResultBadge tone={theme.palette.text.secondary}>{room.popLabel} · {room.thr} {room.thr > 1 ? 'rolls' : 'roll'}</ResultBadge>
           {isSafe ? (
-            <ResultBadge tone={theme.palette.gmboard.result.safe} icon={ShieldCheck}>Safe room</ResultBadge>
+            <ResultBadge tone={theme.palette.gmboard.result.safe} icon={GAME_ICONS.safe}>Safe room</ResultBadge>
           ) : null}
         </>
       )}
@@ -56,7 +57,7 @@ export default function RoomCard({ room }) {
       {room.slots.map((slot) => <SlotBlock key={slot.n} slot={slot} />)}
       <ResultSlot
         tone={lootTone}
-        icon={Coins}
+        icon={GAME_ICONS.loot}
         label="Loot"
         badges={<ResultBadge tone={lootTone}>{room.loot.data.type}</ResultBadge>}
         dice={diceText(room.loot)}

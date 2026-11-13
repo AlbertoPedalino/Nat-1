@@ -1,11 +1,11 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { CornerDownRight, Dices, History, Trash2 } from 'lucide-react';
+import { CornerDownRight, History, Trash2 } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import { boardTone, complicationVisual, eventVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
 import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
-import { TABLE_ICONS } from './tableCatalog.js';
+import { TABLE_ICONS } from '../../../shared/ui/gameIcons.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
@@ -18,6 +18,7 @@ import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -93,7 +94,7 @@ function TableCard({ table, roll, latest, tier, onRoll }) {
         <Button
           size="small"
           variant="contained"
-          startIcon={<Dices size={ICON_SIZES.sm} />}
+          startIcon={<GAME_ICONS.roll size={ICON_SIZES.sm} />}
           aria-label={`Roll ${table.label}`}
           onClick={() => onRoll(table.id)}
         >
@@ -143,7 +144,7 @@ export default function RollView() {
 
   return (
     <Stack spacing={2}>
-      <BoardPanel icon={Dices} title="Table Roller">
+      <BoardPanel icon={GAME_ICONS.roll} title="Table Roller">
         <TierSelector
           label="Tier — Encounter and Trap"
           value={rollTier}

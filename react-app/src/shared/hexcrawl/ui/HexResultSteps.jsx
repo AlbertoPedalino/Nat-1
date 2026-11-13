@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
+import { Eye, Lock, Map, CloudRain } from 'lucide-react';
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { weatherTone } from '../../gmboard/weather.js';
@@ -9,6 +9,7 @@ import { microLabelSx } from '../../ui/PanelHeader.jsx';
 import { boardInsetSx } from '../../gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
@@ -34,13 +35,13 @@ function renderStep(step, index, tones, last) {
       );
     case 'popRoll':
       return (
-        <StepRow key={index} icon={Dice5} iconColor={tones.dim} label="Population Roll" last={last}>
+        <StepRow key={index} icon={GAME_ICONS.roll} iconColor={tones.dim} label="Population Roll" last={last}>
           d6={step.d6} vs threshold {step.threshold} — {step.triggered ? 'event triggered' : 'no event'}
         </StepRow>
       );
     case 'none':
       return (
-        <StepRow key={index} icon={Leaf} iconColor={tones.result.none} label="Result" last={last}>
+        <StepRow key={index} icon={GAME_ICONS.environment} iconColor={tones.result.none} label="Result" last={last}>
           No event this leg.
         </StepRow>
       );
@@ -52,7 +53,7 @@ function renderStep(step, index, tones, last) {
       );
     case 'encounter':
       return (
-        <StepRow key={index} icon={Swords} iconColor={tones.result.encounter} label={step.label} last={last}>
+        <StepRow key={index} icon={GAME_ICONS.encounter} iconColor={tones.result.encounter} label={step.label} last={last}>
           (d20+d20={step.sum}): <ResultBadge tone={tones.of('difficulty', step.data.diff)}>{step.data.diff}</ResultBadge>{' '}
           {encounterDetail(step.data)}
         </StepRow>
@@ -60,7 +61,7 @@ function renderStep(step, index, tones, last) {
     case 'loot':
     case 'campLoot':
       return (
-        <StepRow key={index} icon={Coins} iconColor={tones.result.loot} label="Loot" last={last}>
+        <StepRow key={index} icon={GAME_ICONS.loot} iconColor={tones.result.loot} label="Loot" last={last}>
           (d8+d12={step.sum}): <ResultBadge tone={tones.of('rarity', step.data.rarity)}>{step.data.type}</ResultBadge>{' '}
           {lootDetail(step.data)}
         </StepRow>
@@ -80,7 +81,7 @@ function renderStep(step, index, tones, last) {
       );
     case 'trap':
       return (
-        <StepRow key={index} icon={Flame} iconColor={tones.result.trap} label="Trap" last={last}>
+        <StepRow key={index} icon={GAME_ICONS.trap} iconColor={tones.result.trap} label="Trap" last={last}>
           (d8+d12={step.sum}): <strong>{step.data.type}</strong> Level {step.data.lv} · DC {step.data.dc} (detect & disarm) · {step.data.damage}
           {step.disadvantage ? ' — Weather Disadvantage' : ''}
         </StepRow>

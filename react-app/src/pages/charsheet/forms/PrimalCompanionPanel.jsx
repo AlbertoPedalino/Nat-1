@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getSpellSlots } from '../../../shared/character/spells/spellcasting.js';
@@ -38,6 +37,7 @@ import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import DetailPanel, { DetailNote, detailStatus } from '../layout/DetailPanel.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -108,7 +108,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
 
   return (
     <DetailPanel
-      icon={PawPrint}
+      icon={GAME_ICONS.beast}
       titleNode={<BeastTitle name={creature.name} source={creature.source} />}
       meta={`Ranger ${rangerLevel}`}
     >

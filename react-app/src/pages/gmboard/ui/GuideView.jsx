@@ -1,8 +1,9 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
+import { Map, Table as TableIcon } from 'lucide-react';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -60,7 +61,7 @@ export default function GuideView() {
           the DC both to detect it and to disarm it. Every other event is a raw 1d8+1d12 DC to interact.</GuideRow>
       </GuideCard>
 
-      <GuideCard title="Dungeon Explorer — Full Flow" icon={Castle}>
+      <GuideCard title="Dungeon Explorer — Full Flow" icon={GAME_ICONS.dungeon}>
         <GuideRow>Set the room count (1–40), population mode, and tier, then press <strong>Generate</strong>.
           All rooms are resolved at once and stored as-is — reopening the board never rerolls them.</GuideRow>
         <GuideRow>Population mode sets complication rolls per room: Random rolls 1–3 per room; Unexplored is
@@ -73,7 +74,7 @@ export default function GuideView() {
           rolls a second 1d8+1d12 for the recovery DC.</GuideRow>
       </GuideCard>
 
-      <GuideCard title="Quest Generator — Full Flow" icon={ScrollText}>
+      <GuideCard title="Quest Generator — Full Flow" icon={GAME_ICONS.quest}>
         <GuideRow>Pick a scope (Random/Small/Medium/Large) and tier, then press <strong>Generate</strong>.
           Scope sets how many d8s are rolled to determine quest count: Random rolls 1–3 dice, Small rolls 1,
           Medium rolls 2, Large rolls 3 — the count is the highest die result.</GuideRow>
@@ -82,7 +83,7 @@ export default function GuideView() {
           if that roll finds nothing, a minimum reward is rerolled at a fixed result of 15 instead.</GuideRow>
       </GuideCard>
 
-      <GuideCard title="Table Roller" icon={Dices}>
+      <GuideCard title="Table Roller" icon={GAME_ICONS.roll}>
         <GuideRow>The <strong>Roll</strong> tab rolls once on a single table: Event and Encounter use 2d20;
           Loot, Trap, Complication and Environment use 1d8+1d12. The tier applies to Encounter and Trap.</GuideRow>
         <GuideRow>Where a result calls for a check, its DC (1d8+1d12) is rolled with it and shown on the

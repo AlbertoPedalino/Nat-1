@@ -1,9 +1,7 @@
 import {
   Box, Button, Stack, Typography, useTheme,
 } from '@mui/material';
-import {
-  CalendarDays, Compass, Dices, Footprints, Rabbit, Swords,
-} from 'lucide-react';
+import { CalendarDays, Compass } from 'lucide-react';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
@@ -31,6 +29,7 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import { hexLabel } from './hexLabel.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -110,7 +109,7 @@ function NextHexLine({ terrain, clock, mountSpeed }) {
     return <Caption component="p">Next hex: pick a terrain to see how long it takes.</Caption>;
   }
   const travel = travelTime(option.hours, clock?.weather, clock?.intensity, mountSpeed);
-  const Icon = TERRAIN_ICONS[option.id] || Footprints;
+  const Icon = TERRAIN_ICONS[option.id] || GAME_ICONS.travel;
   const timed = clock && Number.isFinite(clock.min) && clock.day && clock.month && clock.year;
   const arrival = timed ? advanceMinutes(clock, travel.hours) : null;
   const nextDay = arrival
@@ -161,13 +160,13 @@ function SetupSummary({ season, defaults, mountSpeed, tones }) {
         missing={!population}
       />
       <SettingChip
-        icon={Swords}
+        icon={GAME_ICONS.tier}
         label={tier ? `${tier.shortLabel} · ${tier.shortLevels}` : 'No tier'}
         missing={!tier}
         tone={tierTone?.color}
       />
       <SettingChip
-        icon={mountSpeed === 1 ? Footprints : Rabbit}
+        icon={mountSpeed === 1 ? GAME_ICONS.travel : GAME_ICONS.mount}
         label={mount ? mount.label : `×${mountSpeed} mount`}
       />
     </Box>
@@ -185,7 +184,7 @@ function SettingChip({ icon: Icon, label, missing = false, tone = null }) {
 // opened the panel an hour later, still has to know where everyone is.
 function LastHexCard({ last, onOpenResult }) {
   const terrain = terrainOption(last.hex?.terrain);
-  const TerrainIcon = terrain ? TERRAIN_ICONS[terrain.id] : Footprints;
+  const TerrainIcon = terrain ? TERRAIN_ICONS[terrain.id] : GAME_ICONS.travel;
 
   return (
     <Box sx={lastCardSx}>
@@ -212,7 +211,7 @@ function LastHexCard({ last, onOpenResult }) {
             </Typography>
           ) : null}
           {onOpenResult ? (
-            <Button size="small" sx={lastButtonSx} startIcon={<Dices size={ICON_SIZES.xs} />} onClick={onOpenResult}>
+            <Button size="small" sx={lastButtonSx} startIcon={<GAME_ICONS.roll size={ICON_SIZES.xs} />} onClick={onOpenResult}>
               See the rolls
             </Button>
           ) : null}

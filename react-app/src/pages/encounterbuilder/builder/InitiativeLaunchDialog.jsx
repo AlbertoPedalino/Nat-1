@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Stack } from '@mui/material';
-import { Swords } from 'lucide-react';
 import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
 import SheetDialog, { CancelButton, DialogSection } from '../../../shared/ui/SheetDialog.jsx';
@@ -10,6 +9,7 @@ import { LaunchButton } from './LaunchButtons.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it
 // (surprise, a ruling), one row per creature — the second of three goblins can
@@ -46,7 +46,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
       open
       onClose={onClose}
       title="Initiative at launch"
-      icon={<Swords size={ICON_SIZES.sm} />}
+      icon={<GAME_ICONS.encounter size={ICON_SIZES.sm} />}
       showClose
       actions={(
         <>

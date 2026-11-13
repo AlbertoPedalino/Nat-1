@@ -1,7 +1,8 @@
 import { Box } from '@mui/material';
-import { Archive, Backpack, Check, Gem, Shield, Sparkles, Swords } from 'lucide-react';
+import { Archive, Check } from 'lucide-react';
 import { ITEM_GROUP_CHIPS, ITEM_STATE_CHIPS } from './itemGroups.js';
 import FilterToggles from '../../ui/FilterToggles.jsx';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // The chips over an item list, the same on the sheet and in the builder: the
 // shelf (All, Weapons, Armor, Gear, Magic: several at once, All for every
@@ -9,7 +10,7 @@ import FilterToggles from '../../ui/FilterToggles.jsx';
 // own, their states beside it (Equipped, Attuned, Stashed: any of them, all
 // must hold). The shared taxonomy (itemGroups.js) with an icon each.
 export const ITEM_GROUP_ICONS = Object.freeze({
-  weapon: Swords, armor: Shield, gear: Backpack, magic: Sparkles, equipped: Check, attuned: Gem, stashed: Archive,
+  weapon: GAME_ICONS.weapons, armor: GAME_ICONS.armor, gear: GAME_ICONS.gear, magic: GAME_ICONS.magic, equipped: Check, attuned: GAME_ICONS.attuned, stashed: Archive,
 });
 
 const withIcons = (chips) => chips.map((chip) => ({ ...chip, icon: ITEM_GROUP_ICONS[chip.key] || null }));

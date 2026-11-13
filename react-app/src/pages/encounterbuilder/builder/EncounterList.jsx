@@ -1,6 +1,6 @@
 import { Autocomplete, Button, Stack, TextField, Typography } from '@mui/material';
 import { useMemo } from 'react';
-import { Save, Swords, Trash2 } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../../../shared/encounter/library.js';
@@ -18,6 +18,7 @@ import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import ClearButton from '../../../shared/ui/ClearButton.jsx';
 import { useDraftText } from '../../../shared/ui/useDraftText.js';
 import { draftLibraryEntry } from '../state/libraryState.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default encounterPanel({ state: ['encounter', 'encounterName', 'encounterQuest', 'currentEncounterId', 'library', 'party', 'players'], context: ['dispatch'] }, EncounterListView);
 
@@ -66,7 +67,7 @@ function EncounterListView({ state, dispatch }) {
 
   return (
     <Panel
-      icon={Swords}
+      icon={GAME_ICONS.encounter}
       title="Encounter"
       // Clear starts the panel over without saving: a composition dropped, or a
       // loaded encounter left as it is in the Library.

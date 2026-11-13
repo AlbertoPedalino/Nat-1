@@ -1,22 +1,23 @@
-import { Coins, Compass, Flame, Leaf, Minus, Swords, Tent } from 'lucide-react';
+import { Compass, Minus } from 'lucide-react';
 import { eventKind } from '../tables.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // How a rolled result looks wherever it is shown (dungeon room, quest, Roll
 // tab, hexcrawl step): an icon and a tone, the tone being a key of the theme's
 // `palette.gmboard.result`.
 const EVENT_VISUALS = Object.freeze({
-  encounter: { icon: Swords, tone: 'encounter' },
-  loot: { icon: Coins, tone: 'loot' },
-  camp: { icon: Tent, tone: 'camp' },
-  trap: { icon: Flame, tone: 'trap' },
+  encounter: { icon: GAME_ICONS.encounter, tone: 'encounter' },
+  loot: { icon: GAME_ICONS.loot, tone: 'loot' },
+  camp: { icon: GAME_ICONS.camp, tone: 'camp' },
+  trap: { icon: GAME_ICONS.trap, tone: 'trap' },
   nothing: { icon: Minus, tone: 'none' },
   other: { icon: Compass, tone: 'trigger' },
 });
 
 const COMPLICATION_VISUALS = Object.freeze({
-  Encounter: { icon: Swords, tone: 'encounter' },
-  'Environment Damage': { icon: Flame, tone: 'trap' },
-  Environment: { icon: Leaf, tone: 'environment' },
+  Encounter: { icon: GAME_ICONS.encounter, tone: 'encounter' },
+  'Environment Damage': { icon: GAME_ICONS.trap, tone: 'trap' },
+  Environment: { icon: GAME_ICONS.environment, tone: 'environment' },
   None: { icon: Minus, tone: 'none' },
 });
 

@@ -1,8 +1,8 @@
 import { Box, TextField, Typography } from '@mui/material';
-import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/boardOptions.js';
 import SelectorGroup from '../../gmboard/ui/SelectorGroup.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
@@ -27,7 +27,7 @@ export default function MountSelector({
           options={MOUNT_OPTIONS}
           getLabel={(option) => `×${option.speed}`}
           getSub={(option) => option.label}
-          getIcon={(option) => (option.speed === 1 ? Footprints : Rabbit)}
+          getIcon={(option) => (option.speed === 1 ? GAME_ICONS.travel : GAME_ICONS.mount)}
           value={preset?.id ?? null}
           onChange={(option) => onChange(option.speed)}
           dense={dense}

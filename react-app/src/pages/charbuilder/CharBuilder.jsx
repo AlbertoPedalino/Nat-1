@@ -1,6 +1,6 @@
 import { useMemo, useReducer } from 'react';
 import { Box, Button, Divider, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import AppPage from '../../app/navigation/AppPage.jsx';
 import PageHeader from '../../shared/ui/PageHeader.jsx';
 import ImportSheetFab from './layout/ImportSheetFab.jsx';
@@ -27,6 +27,7 @@ import { BUILDER_TEXT } from './layout/builderText.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 import { panelFrameSx, panelTitleBarSx } from '../../shared/ui/PanelHeader.jsx';
 import TagChip from '../../shared/ui/TagChip.jsx';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 // A step's tab: its number and its name. No picture: at a tab's size the
 // drawings read as specks; the step's own heading carries it.
@@ -98,7 +99,7 @@ export default function CharBuilder() {
       topBar={{ home: true, cloudMenuProps: { canUploadDraft: importDraft && cloudActive, onUploadDraft: handleUploadToCloud } }}
     >
       <PageHeader
-        icon={Wand2}
+        icon={GAME_ICONS.characterBuilder}
         title="Character Builder"
         subtitle="D&D 5e 2024"
         actions={<ImportSheetFab onNotify={notify} onFile={handleImportSheetFile} />}

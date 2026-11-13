@@ -21,9 +21,6 @@ const TRANSLUCENT_FILL_ALLOWED = {
   // base would not match them all).
   'shared/ui/TagChip.jsx': 'tag tint on a solid surface',
   'shared/ui/entityColors.js': "chipTintStyle, the theme's chip tint",
-  'shared/character/combat/ConditionChips.jsx': 'condition pills and toggle chips',
-  'shared/character/combat/ReminderChips.jsx': 'reminder chips',
-  'pages/charsheet/stats/ConditionsBlock.jsx': 'the exhaustion pill, drawn as a condition pill',
   // A dialog's content and action bar, on the dialog's own solid paper.
   'shared/ui/SheetDialog.jsx': "the body over the dialog's solid paper",
   // The battle map's overlays: what is drawn over the board itself, where the

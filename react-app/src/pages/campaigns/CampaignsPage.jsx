@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { Cloud, Flag, Users, ScrollText, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
+import { Cloud, Flag, Users, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -44,6 +44,7 @@ import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
 import AddButton from '../../shared/ui/AddButton.jsx';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -251,7 +252,7 @@ export default function CampaignsPage() {
                             surface="card"
                             wrap
                             onClick={() => openCampaignChar(ch, c)}
-                            leading={<Box component={ScrollText} size={16} aria-hidden sx={characterIconSx(canEditChar)} />}
+                            leading={<Box component={GAME_ICONS.characterSheet} size={16} aria-hidden sx={characterIconSx(canEditChar)} />}
                             title={ch.name || ch.id}
                             badge={!canEditChar ? (
                               <TagChip component="span" icon={<Eye size={ICON_SIZES.xxs} />} label="Read only" tone={UI_COLORS.infoText} />

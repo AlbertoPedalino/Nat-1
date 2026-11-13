@@ -1,15 +1,14 @@
-import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
+import { Box, Chip, Tooltip, Typography } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
-import { asArray } from '../../lists.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { inkShadow } from '../../ui/shadows.js';
 import { BARE_BUTTON_SX } from '../../ui/interactive.js';
 import { calloutSx } from '../../ui/surfaces.js';
+import { markerDensitySx, markerOfferedSx, markerOnHoverSx, markerOnSx } from './markerChipStyles.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -17,7 +16,7 @@ import { calloutSx } from '../../ui/surfaces.js';
 // the same thing — so they render the same components rather than two copies
 // that drift apart.
 //
-// Only sizing differs between them, passed as `sx` / `fontSize`.
+// Only sizing differs between them, passed as `density` / `fontSize`.
 
 // The conditions accent, matching the theme's warning tone.
 export const CONDITION_ACCENT = UI_COLORS.warning;
@@ -25,8 +24,9 @@ const CONDITION_BODY = UI_COLORS.textSecondary;
 
 // Body click expands the rules text; the X removes the condition. The chevron
 // advertises the expand affordance and rotates when open, so the two actions on
-// one pill stay tellable apart.
-export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, readOnlyReason, sx }) {
+// one pill stay tellable apart. Its look is the marker's (markerChipStyles.js);
+// `density` sizes it for its surface.
+export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, readOnlyReason, density }) {
   const chip = (
     <Chip
       size="small"
@@ -44,17 +44,12 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
       onClick={hasDesc ? onToggle : undefined}
       onDelete={onRemove}
       deleteIcon={onRemove ? <X size={ICON_SIZES.xs} /> : undefined}
-      sx={{
-        cursor: hasDesc ? 'pointer' : 'default',
-        color: CONDITION_ACCENT,
-        borderColor: CONDITION_ACCENT,
-        bgcolor: alpha(CONDITION_ACCENT, isOpen ? OPACITY.line : OPACITY.fill),
-        // Open: its solid shadow in its colour, as a selected thing anywhere.
-        boxShadow: isOpen ? inkShadow(CONDITION_ACCENT, 2) : 'none',
-        '&:hover': hasDesc ? { bgcolor: alpha(CONDITION_ACCENT, OPACITY.shade) } : undefined,
-        ...(readOnlyReason ? { opacity: OPACITY.heavy } : null),
-        ...sx,
-      }}
+      sx={[
+        markerOnSx(CONDITION_ACCENT, { open: isOpen }),
+        hasDesc ? markerOnHoverSx(CONDITION_ACCENT) : { cursor: 'default' },
+        readOnlyReason ? { opacity: OPACITY.heavy } : null,
+        markerDensitySx(density),
+      ]}
     />
   );
   return readOnlyReason ? <Tooltip title={readOnlyReason}>{chip}</Tooltip> : chip;
@@ -110,10 +105,11 @@ const cardCloseSx = {
 
 // The grid a condition is switched on and off from, the same on the sheet, in
 // the encounter builder and in the map's piece menu: one chip per condition,
-// an active one in the conditions accent. `sx` lays the grid out and `chipSx`
-// sizes the chips for their surface.
+// an active one drawn as the marker it is, an inactive one offered
+// (markerChipStyles.js). `sx` lays the grid out and `density` sizes the chips
+// for their surface.
 export function ConditionToggleGrid({
-  conditions = ASSIGNABLE_CONDITIONS, active, onToggle, disabled = false, sx, chipSx,
+  conditions = ASSIGNABLE_CONDITIONS, active, onToggle, disabled = false, sx, density,
 }) {
   return (
     <Box sx={sx}>
@@ -124,14 +120,12 @@ export function ConditionToggleGrid({
             key={condition.key}
             size="small"
             label={condition.label}
-            variant={isOn ? 'filled' : 'outlined'}
             disabled={disabled}
             onClick={disabled ? undefined : () => onToggle(condition.key)}
             sx={[
               toggleChipSx,
-              isOn ? { color: CONDITION_ACCENT, borderColor: CONDITION_ACCENT, bgcolor: alpha(CONDITION_ACCENT, OPACITY.fill) } : null,
-              { '&:hover': { borderColor: CONDITION_ACCENT } },
-              ...asArray(chipSx),
+              isOn ? markerOnSx(CONDITION_ACCENT) : markerOfferedSx(CONDITION_ACCENT),
+              markerDensitySx(density),
             ]}
           />
         );

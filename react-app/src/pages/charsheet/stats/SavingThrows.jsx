@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
-import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { hasSaveProficiency, getSaveBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { getConcentrationBonus, getD20FloorReminders } from '../../../shared/character/sheet/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
@@ -125,7 +125,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ ...CARD_PART_RULE_SX, px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: 0.75 }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Dice5 size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
+              <GAME_ICONS.minimumRoll size={ICON_SIZES.xs} style={{ color: UI_COLORS.accentMuted, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentMuted, fontWeight: FONT_WEIGHTS.bold, flexShrink: 0 }}>
@@ -145,7 +145,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           ))}
           {concentrationBonus > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Sparkles size={ICON_SIZES.xs} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
+              <GAME_ICONS.magic size={ICON_SIZES.xs} style={{ color: UI_COLORS.secondary, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography component="span" sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.secondary, fontWeight: FONT_WEIGHTS.bold, flexShrink: 0 }}>

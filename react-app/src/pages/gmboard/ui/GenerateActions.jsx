@@ -1,7 +1,8 @@
 import { Button, Divider, Stack } from '@mui/material';
-import { Dices, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The end of a generator's panel (Dungeon, Quest): a rule, then Generate and
 // Clear. Clear asks first (`clearMessage`) and is off while there is nothing
@@ -16,7 +17,7 @@ export default function GenerateActions({
     <>
       <Divider />
       <Stack direction="row" spacing={1}>
-        <Button variant="contained" startIcon={<Dices size={ICON_SIZES.sm} />} disabled={!canGenerate} onClick={onGenerate}>
+        <Button variant="contained" startIcon={<GAME_ICONS.roll size={ICON_SIZES.sm} />} disabled={!canGenerate} onClick={onGenerate}>
           Generate
         </Button>
         <Button variant="outlined" color="error" startIcon={<Trash2 size={ICON_SIZES.sm} />} disabled={!hasResult} onClick={clear}>

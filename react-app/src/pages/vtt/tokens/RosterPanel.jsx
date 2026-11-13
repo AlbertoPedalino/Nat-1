@@ -1,5 +1,4 @@
 import { Box, Button, Stack } from '@mui/material';
-import { Skull, Swords } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
 import PiecePreview from './PiecePreview.jsx';
@@ -8,6 +7,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import RosterCharacterList from './RosterCharacterList.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -71,7 +71,7 @@ export default function RosterPanel({
         <Button
           size="small"
           variant="outlined"
-          startIcon={<Skull size={ICON_SIZES.sm} />}
+          startIcon={<GAME_ICONS.monster size={ICON_SIZES.sm} />}
           disabled={placementDisabled || busy}
           onClick={onPlaceMonster}
         >
@@ -80,7 +80,7 @@ export default function RosterPanel({
         <Button
           size="small"
           variant="outlined"
-          startIcon={<Swords size={ICON_SIZES.sm} />}
+          startIcon={<GAME_ICONS.encounter size={ICON_SIZES.sm} />}
           disabled={placementDisabled || busy}
           onClick={onImportEncounter}
         >

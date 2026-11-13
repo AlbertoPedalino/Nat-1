@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { Dices } from 'lucide-react';
 import { DICE_LIMITS } from './dice.js';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { signed, withModifier } from '../../ui/numberFormat.js';
@@ -11,6 +10,7 @@ import { ICON_SIZES } from '../../ui/iconSizes.js';
 import Caption from '../../ui/Caption.jsx';
 import CountStepper from '../../ui/CountStepper.jsx';
 import DiceCountPicker from './DiceCountPicker.jsx';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -64,7 +64,7 @@ export default function CustomRollDialog({
       open={open}
       onClose={handleClose}
       title="Custom Roll"
-      icon={<Dices size={ICON_SIZES.xl} />}
+      icon={<GAME_ICONS.roll size={ICON_SIZES.xl} />}
       actions={(
         <>
           <Button onClick={reset} variant="text" size="small" sx={{ color: 'text.secondary', mr: 'auto' }}>Reset</Button>

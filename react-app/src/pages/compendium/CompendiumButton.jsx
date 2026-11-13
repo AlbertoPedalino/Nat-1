@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
-import { BookOpen } from 'lucide-react';
 import TopBarButton from '../../shared/ui/TopBarButton.jsx';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 // Loaded on first opening: the button is in every top bar, and most pages
 // never open the compendium.
@@ -12,7 +12,7 @@ export default function CompendiumButton() {
   return (
     <>
       <TopBarButton
-        icon={BookOpen}
+        icon={GAME_ICONS.reference}
         label="Compendium"
         active={open}
         aria-pressed={open}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, alpha } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ChevronDown, ListChecks } from 'lucide-react';
 import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
@@ -9,15 +9,14 @@ import {
   ConditionPill,
   ConditionToggleGrid,
 } from '../../../shared/character/combat/ConditionChips.jsx';
+import { MARKER_DENSITY, markerOnSx } from '../../../shared/character/combat/markerChipStyles.js';
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
-import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
@@ -25,10 +24,6 @@ import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 const DEAD_ACCENT = UI_COLORS.dangerStrong;
-
-// The sheet's pills sit in a panel rather than an initiative row, so they run
-// smaller than the encounter's.
-const pillSx = { fontSize: FONT_SIZES.xxxs };
 
 // Exhaustion is graded 1–6: a stepper pill instead of a plain toggle. − at level
 // 1 removes it (level 0), so it is never disabled; + caps at 6 (death, shown
@@ -38,7 +33,7 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
   const dead = level >= EXHAUSTION_MAX;
   const accent = dead ? DEAD_ACCENT : COND_ACCENT;
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, height: CONTROL_HEIGHTS.sm, px: 0.5, border: 2, borderColor: accent, borderRadius: 999, bgcolor: alpha(accent, isOpen ? OPACITY.line : OPACITY.fill), boxShadow: isOpen ? inkShadow(accent, 2) : 'none' }}>
+    <Box sx={[exhaustionFrameSx, markerOnSx(accent, { open: isOpen }), { height: MARKER_DENSITY.panel.height }]}>
       <CountStepper
         size={14}
         tone={accent}
@@ -48,7 +43,7 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
         sx={{ gap: 0.25 }}
         value={(
           <Typography component="span" onClick={hasDesc ? onToggle : undefined}
-            sx={{ fontSize: FONT_SIZES.xxxs, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+            sx={{ fontSize: MARKER_DENSITY.panel.fontSize, fontWeight: FONT_WEIGHTS.bold, color: accent, px: 0.25, userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
             {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
           </Typography>
         )}
@@ -60,6 +55,9 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
     </Box>
   );
 }
+
+// Drawn as a condition pill (the marker look), a stepper inside it.
+const exhaustionFrameSx = { display: 'inline-flex', alignItems: 'center', gap: 0.25, px: 0.5, borderRadius: 999 };
 
 export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaustion, conditionEntries }) {
   const [open, setOpen] = useState(false);
@@ -90,7 +88,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 isOpen={cards.isOpen(c.key)}
                 onToggle={() => cards.toggleCard(c.key)}
                 onRemove={() => onToggle(c.key)}
-                sx={pillSx}
+                density="panel"
               />
             )
           ))}
@@ -119,7 +117,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                 active={sheet.activeConditions}
                 onToggle={onToggle}
                 sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(108px,1fr))', gap: 0.25, mt: 0.5 }}
-                chipSx={{ fontSize: FONT_SIZES.xxxs }}
+                density="panel"
               />
               {active.length > 0 && (
                 <ClearButton onClick={onClear} sx={{ mt: 0.5 }}>Clear all</ClearButton>

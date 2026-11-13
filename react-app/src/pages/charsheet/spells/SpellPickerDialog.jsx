@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS, WIZARD_MODES } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
@@ -32,6 +31,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The sheet's Add / Remove Spell dialog: one caster class at a time, a spell
 // level, and the spells it may pick (spellPickerPool) — or, for a Wizard,
@@ -109,7 +109,7 @@ export function SpellPickerDialog({
       onClose={onClose}
       maxWidth="md"
       title="Spells"
-      icon={<Sparkles size={ICON_SIZES.xl} />}
+      icon={<GAME_ICONS.magic size={ICON_SIZES.xl} />}
       showClose
       topPad={2}
       headerRight={(

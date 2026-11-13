@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import { Cross, User } from 'lucide-react';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
+import { GAME_ICONS } from '../../ui/gameIcons.js';
 
 // The two sides of a coin: a head, and a cross.
 //
@@ -13,7 +13,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
 // the size a die is actually shown — an icon at its default hairline weight
 // disappears on a 40px disc in motion.
 export default function CoinFace({ kind, size }) {
-  const Face = kind === 'tails' ? Cross : User;
+  const Face = kind === 'tails' ? GAME_ICONS.coinTails : GAME_ICONS.coinHeads;
   return (
     <Box sx={{ ...faceSx, width: size, height: size }}>
       <Face size={size} strokeWidth={2.4} />

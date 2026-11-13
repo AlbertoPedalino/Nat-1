@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import { Map, Castle, ScrollText, Dices, Table, BookOpen } from 'lucide-react';
+import { Map, Table } from 'lucide-react';
 import ToolPageShell from '../../app/navigation/ToolPageShell.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
@@ -12,14 +12,15 @@ import TablesView from './tables/TablesView.jsx';
 import GuideView from './ui/GuideView.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
+import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 
 const TABS = [
   { value: 'hex', label: 'Hexcrawl', Icon: Map },
-  { value: 'dungeon', label: 'Dungeon', Icon: Castle },
-  { value: 'quest', label: 'Quest', Icon: ScrollText },
-  { value: 'roll', label: 'Roll', Icon: Dices },
+  { value: 'dungeon', label: 'Dungeon', Icon: GAME_ICONS.dungeon },
+  { value: 'quest', label: 'Quest', Icon: GAME_ICONS.quest },
+  { value: 'roll', label: 'Roll', Icon: GAME_ICONS.roll },
   { value: 'editor', label: 'Tables', Icon: Table },
-  { value: 'guide', label: 'Guide', Icon: BookOpen },
+  { value: 'guide', label: 'Guide', Icon: GAME_ICONS.reference },
 ];
 
 export default function GmBoardPage() {

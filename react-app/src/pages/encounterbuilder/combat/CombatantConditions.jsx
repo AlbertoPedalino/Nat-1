@@ -14,7 +14,6 @@ import { useOpenConditionCards } from '../../../shared/character/combat/useOpenC
 import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 
 // Conditions on a combatant. Active ones are always visible so a GM can scan the
 // initiative list and see who is prone without opening anything; the grid to
@@ -26,8 +25,6 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 // toggle would let a GM strip the condition and leave the level behind.
 
 // Denser than the sheet's: these sit inside an initiative row, not a panel.
-const pillSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
-
 export default function CombatantConditions({ combatant }) {
   const dispatch = useEncounterDispatch();
   const conditionEntries = useConditionEntries();
@@ -54,7 +51,6 @@ export default function CombatantConditions({ combatant }) {
           onToggle={() => cards.toggleCard(key)}
           onRemove={key === EXHAUSTION_KEY ? undefined : () => toggle(key)}
           readOnlyReason={key === EXHAUSTION_KEY ? 'Exhaustion is graded — set it on the character sheet' : null}
-          sx={pillSx}
         />
       ))}
       belowRow={openCards.length > 0 ? (
@@ -71,12 +67,10 @@ export default function CombatantConditions({ combatant }) {
         </Box>
       ) : null}
     >
-      <ConditionToggleGrid active={active} onToggle={toggle} sx={gridSx} chipSx={gridChipSx} />
+      <ConditionToggleGrid active={active} onToggle={toggle} sx={gridSx} />
     </MarkerRow>
   );
 }
-
-const gridChipSx = { height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xs };
 
 const cardStackSx = { display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 };
 

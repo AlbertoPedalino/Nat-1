@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Button, Stack } from '@mui/material';
-import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { beastSummary, findBeast, parseBeastRef } from '../../../shared/character/forms/beasts.js';
 import { BeastTitle, BeastStatBlock, BeastPickerRow, dismissButtonSx } from './BeastStatBlock.jsx';
@@ -17,6 +16,7 @@ import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils
 import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import { tempHpAfter } from '../../../shared/character/combat/vitals.js';
 import { filterByBooks } from '../../../shared/content/booksView.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -79,7 +79,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     const b = active.beast;
     return (
       <DetailPanel
-        icon={PawPrint}
+        icon={GAME_ICONS.beast}
         title="Transformed —"
         titleNode={<BeastTitle name={b.name} source={b.source} />}
         aside={(
@@ -99,7 +99,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   }
 
   return (
-    <DetailPanel icon={PawPrint} title="Known Beast Forms">
+    <DetailPanel icon={GAME_ICONS.beast} title="Known Beast Forms">
       {!forms.length && !extraForms.length ? (
         <DetailNote sx={{ mt: 0 }}>
           No forms chosen yet — pick beasts in the character builder (Class Choices → Wild Shape).

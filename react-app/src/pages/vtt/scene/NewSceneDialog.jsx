@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Button, CircularProgress, LinearProgress, Link, Stack, Typography } from '@mui/material';
-import {
-  ArrowLeft, Castle, Columns2, Home, Landmark, Layers, Map as MapIcon, Mountain, Trees, Upload,
-} from 'lucide-react';
+import { ArrowLeft, Columns2, Layers, Map as MapIcon, Upload } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
@@ -18,15 +16,7 @@ import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
-
-const GENERATOR_ICONS = {
-  dungeon: Castle,
-  cave: Mountain,
-  dwelling: Home,
-  village: Trees,
-  city: Landmark,
-  realm: MapIcon,
-};
+import { FALLBACK_SCENE_GENERATOR_ICON, SCENE_GENERATOR_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // Starting a scene: empty, or from a generated map.
 //
@@ -91,7 +81,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
     }
   };
 
-  const Icon = generator ? GENERATOR_ICONS[generator.id] || MapIcon : null;
+  const Icon = generator ? SCENE_GENERATOR_ICONS[generator.id] || FALLBACK_SCENE_GENERATOR_ICON : null;
 
   return (
     <SheetDialog
@@ -124,7 +114,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
           <Typography sx={sectionSx}>Or generate one</Typography>
           <Box sx={gridSx}>
             {GENERATORS.map((option) => {
-              const OptionIcon = GENERATOR_ICONS[option.id] || MapIcon;
+              const OptionIcon = SCENE_GENERATOR_ICONS[option.id] || FALLBACK_SCENE_GENERATOR_ICON;
               return (
                 <Box
                   key={option.id}

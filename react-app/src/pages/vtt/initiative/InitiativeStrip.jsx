@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Button, CircularProgress, ListItemText, MenuItem, Stack, Typography } from '@mui/material';
-import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -15,6 +15,7 @@ import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -118,7 +119,7 @@ export default function InitiativeStrip({
               {busy ? <CircularProgress size={14} /> : <ChevronRight size={ICON_SIZES.md} />}
             </TipIconButton>
             <TipIconButton title="Which fight this scene shows" size="small" ariaLabel="Choose the fight shown" onClick={(event) => setMenuAnchor(event.currentTarget)} sx={turnArrowSx}>
-              <Swords size={ICON_SIZES.sm} />
+              <GAME_ICONS.encounter size={ICON_SIZES.sm} />
             </TipIconButton>
           </>
         ) : null}
@@ -146,7 +147,7 @@ export function InitiativeButton({ choices = [], onChoose }) {
       <Button
         size="small"
         variant="outlined"
-        startIcon={<Swords size={ICON_SIZES.sm} />}
+        startIcon={<GAME_ICONS.encounter size={ICON_SIZES.sm} />}
         onClick={(event) => setAnchor(event.currentTarget)}
       >
         Initiative

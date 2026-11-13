@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { Library as LibraryIcon, RotateCcw, ScrollText, Trash2, Upload } from 'lucide-react';
+import { Library as LibraryIcon, RotateCcw, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -20,6 +20,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 export default encounterPanel({ state: ['fights', 'library', 'players'], context: ['dispatch', 'monsterDb'] }, LibraryViewView);
 
@@ -53,7 +54,7 @@ function LibraryViewView({ state, dispatch, monsterDb }) {
         groups.map((group) => (
           <Stack key={group.quest ? `quest:${group.quest}` : 'unassigned'} spacing={1}>
             <Typography variant="h2" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <ScrollText size={ICON_SIZES.md} />
+              <GAME_ICONS.quest size={ICON_SIZES.md} />
               {group.quest || 'Unassigned'}
               <Caption component="span">
                 {group.items.length}
@@ -103,7 +104,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           <TagChip label={`Lv ${enc.partyLevel} · ${enc.partyCount} PC`} />
           {enc.quest ? (
             <TagChip
-              icon={<ScrollText size={ICON_SIZES.xs} />}
+              icon={<GAME_ICONS.quest size={ICON_SIZES.xs} />}
               label={enc.quest}
             />
           ) : null}

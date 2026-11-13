@@ -1073,6 +1073,22 @@ test('a search box is a SearchField or a DraftSearchField', () => {
   assert.deepEqual(sourceFilesMatching(/SelectionSearch/), []);
 });
 
+// Every icon of the game's world (a weapon, a skull, a scroll, a castle, a
+// die, a rest…) is a role of GAME_ICONS (shared/ui/gameIcons.js), named by
+// what it stands for: a new look for the whole app is that one file. Plain
+// interface icons (close, add, edit, chevrons) stay where they are used.
+const WORLD_LUCIDE_ICONS = [
+  'Swords', 'Sword', 'Skull', 'Shield', 'ShieldCheck', 'ShieldX', 'ShieldQuestion', 'ShieldPlus', 'ShieldHalf',
+  'ShieldAlert', 'Sparkles', 'ScrollText', 'Scroll', 'Castle', 'Flame', 'Gem', 'BookOpen', 'Backpack', 'HeartPulse',
+  'Dices', 'Dice5', 'Moon', 'Sun', 'Coins', 'PawPrint', 'Footprints', 'Leaf', 'Tent', 'Wand2', 'Rabbit',
+  'DoorOpen', 'Hourglass', 'Crosshair',
+];
+test('an icon of the game world is a GAME_ICONS role', () => {
+  const world = new RegExp(`import \\{[^}]*\\b(${WORLD_LUCIDE_ICONS.join('|')})\\b[^}]*\\} from 'lucide-react'`);
+  assert.deepEqual(sourceFilesMatching(world, { allow: ['shared/ui/gameIcons.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/from 'react-icons\/gi'/, { allow: ['shared/ui/gameIcons.js'] }), []);
+});
+
 // Every counter spent and recovered one at a time (spell and pact slots, a
 // feature's uses, free casts, hit dice) is a row of GemPips: the cut, colours
 // and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.
