@@ -14,6 +14,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -337,6 +338,6 @@ const hiddenBadgeSx = {
 
 // The strip's turn arrows.
 const turnArrowSx = {
+  ...mapIconButtonSx,
   flexShrink: 0,
-  color: 'gmboard.vtt.accent',
 };

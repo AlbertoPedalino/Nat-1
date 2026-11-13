@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Box, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { Check } from 'lucide-react';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -21,6 +21,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
+import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
 // items ("Bag of Holding") with generic "buckets" (e.g. "Common magic item…").
@@ -66,15 +67,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
             />
             {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
           </ListItemButton>
-          <IconButton
-            size="small"
-            disabled={expandDisabled}
-            aria-label={open ? `Collapse ${name}` : `Expand ${name}`}
-            onClick={toggle}
-            sx={{ borderRadius: 0, px: 1, color: 'text.secondary' }}
-          >
-            {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
-          </IconButton>
+          <RowExpandButton open={open} onToggle={toggle} label={name} disabled={expandDisabled} />
         </Stack>
       )}
     />

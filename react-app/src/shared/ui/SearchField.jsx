@@ -1,6 +1,7 @@
 import { IconButton, InputAdornment, TextField } from '@mui/material';
 import { Search, X } from 'lucide-react';
 import { COMPACT_INPUT_SX } from './controlHeights.js';
+import { PART_ICON_BUTTON_SX } from './pressable.js';
 
 // Single source of truth for every search bar in the app: leading magnifier,
 // trailing clear "X" (shown only when there is text), and — crucially — the
@@ -68,6 +69,7 @@ export default function SearchField({
               size="small"
               edge="end"
               aria-label="Clear search"
+              sx={PART_ICON_BUTTON_SX}
               onClick={(event) => {
                 if (stopPropagation) event.stopPropagation();
                 onChange('');

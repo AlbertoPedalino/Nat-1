@@ -1,8 +1,8 @@
-import { Button, IconButton, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import {
   Maximize2, Minimize2, ScrollText, Settings2, Trash2, X,
 } from 'lucide-react';
-import { mapIconButtonSx } from './battleMapSurface.js';
+import { mapIconButtonSx, mapPanelButtonSx } from './battleMapSurface.js';
 import {
   cornerButtonsSx,
   fullscreenBtnSx,
@@ -37,9 +37,9 @@ export function SelectionToolbar({
       >
         Delete
       </Button>
-      <IconButton size="small" aria-label="Clear selection" onClick={onClear}>
+      <TipIconButton title="Clear selection" size="small" onClick={onClear} sx={mapPanelButtonSx}>
         <X size={ICON_SIZES.sm} />
-      </IconButton>
+      </TipIconButton>
     </Stack>
   );
 }

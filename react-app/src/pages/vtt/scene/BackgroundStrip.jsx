@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, ButtonBase, CircularProgress, IconButton, Stack } from '@mui/material';
+import { Box, Button, ButtonBase, CircularProgress, Stack } from '@mui/material';
 import {
   ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ImagePlus, Images, Trash2,
 } from 'lucide-react';
@@ -15,6 +15,7 @@ import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -85,9 +86,9 @@ export default function BackgroundStrip({
       sx={rootSx}
     >
       {backgrounds.length > 1 ? (
-        <IconButton size="small" aria-label="Previous background" disabled={busy} onClick={() => step(-1)} sx={arrowSx}>
+        <TipIconButton title="Previous background" size="small" disabled={busy} onClick={() => step(-1)} sx={arrowSx}>
           <ChevronLeft size={ICON_SIZES.md} />
-        </IconButton>
+        </TipIconButton>
       ) : null}
 
       <Stack direction="row" spacing={0.75} sx={trackSx}>
@@ -105,10 +106,10 @@ export default function BackgroundStrip({
                 <Thumbnail path={path} />
                 <Box component="span" sx={numberSx}>{position + 1}</Box>
               </ButtonBase>
-              <IconButton
+              <TipIconButton
                 size="small"
                 className="bg-remove"
-                aria-label={armed === path ? `Confirm removing background ${position + 1}` : `Remove background ${position + 1}`}
+                ariaLabel={armed === path ? `Confirm removing background ${position + 1}` : `Remove background ${position + 1}`}
                 title={armed === path ? 'Click again to delete this background' : 'Remove this background'}
                 disabled={busy}
                 onClick={() => {
@@ -122,7 +123,7 @@ export default function BackgroundStrip({
                 sx={removeSx(armed === path)}
               >
                 <Trash2 size={ICON_SIZES.xs} />
-              </IconButton>
+              </TipIconButton>
             </Box>
           );
         })}
@@ -139,14 +140,14 @@ export default function BackgroundStrip({
       </Stack>
 
       {backgrounds.length > 1 ? (
-        <IconButton size="small" aria-label="Next background" disabled={busy} onClick={() => step(1)} sx={arrowSx}>
+        <TipIconButton title="Next background" size="small" disabled={busy} onClick={() => step(1)} sx={arrowSx}>
           <ChevronRight size={ICON_SIZES.md} />
-        </IconButton>
+        </TipIconButton>
       ) : null}
 
-      <IconButton size="small" aria-label="Hide the backgrounds" title="Fold the slider" onClick={toggleCollapsed} sx={arrowSx}>
+      <TipIconButton title="Fold the slider" ariaLabel="Hide the backgrounds" size="small" onClick={toggleCollapsed} sx={arrowSx}>
         <ChevronDown size={ICON_SIZES.md} />
-      </IconButton>
+      </TipIconButton>
 
       <Box
         component="input"
@@ -246,6 +247,7 @@ const numberSx = {
 };
 
 const removeSx = (armed) => ({
+  ...mapIconButtonSx,
   position: 'absolute',
   top: 2,
   right: 2,
@@ -279,7 +281,7 @@ const collapsedSx = {
 };
 
 const arrowSx = {
+  ...mapIconButtonSx,
   flexShrink: 0,
-  color: VTT_COLORS.accent,
   '&.Mui-disabled': { color: vttAlpha(VTT_COLORS.accent, OPACITY.line) },
 };

@@ -18,6 +18,7 @@ import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { PART_ICON_BUTTON_SX } from '../../../shared/ui/pressable.js';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -298,7 +299,9 @@ const toolbarSx = {
   mb: -0.5,
 };
 
+// A grip, part of the card it drags: flat.
 const handleSx = {
+  ...PART_ICON_BUTTON_SX,
   cursor: 'grab',
   touchAction: 'none',
   '&:active': { cursor: 'grabbing' },

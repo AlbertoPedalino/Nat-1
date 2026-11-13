@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
-import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { Box, Button, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
@@ -23,6 +23,7 @@ import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -92,14 +93,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
             )}
           </ListItemButton>
           {!caretDisabled ? (
-            <IconButton
-              size="small"
-              aria-label={open ? `Collapse ${cls.name}` : `Expand ${cls.name}`}
-              onClick={toggle}
-              sx={{ borderRadius: 0, px: 1, color: 'text.secondary', alignSelf: 'stretch' }}
-            >
-              {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
-            </IconButton>
+            <RowExpandButton open={open} onToggle={toggle} label={cls.name} />
           ) : null}
         </Stack>
       )}

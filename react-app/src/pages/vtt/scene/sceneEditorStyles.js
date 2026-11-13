@@ -7,6 +7,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
 
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -63,16 +64,12 @@ export const scenePresenterActionsSx = {
 // A footnote on the title rather than a control of its own: small, riding the
 // top of the text, and only fully lit once it is pointed at.
 export const sceneRenameButtonSx = {
-  width: 18,
-  height: 18,
+  ...mapIconButtonSx,
+  width: 22,
+  height: 22,
   p: 0,
   alignSelf: 'flex-start',
   mt: -0.25,
-  color: vttAlpha(VTT_COLORS.white, OPACITY.edge),
-  '&:hover': {
-    color: 'gmboard.vtt.accent',
-    bgcolor: 'gmboard.vtt.accentWash',
-  },
 };
 
 export const sceneViewSwitchSx = {

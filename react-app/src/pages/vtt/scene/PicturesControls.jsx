@@ -5,6 +5,7 @@ import MapSectionTitle from '../map/MapSectionTitle.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { mapDangerButtonSx } from '../map/battleMapSurface.js';
 
 // The scene panel's Pictures section: which picture is on show, the battlemap,
 // the backgrounds, and images placed on the map as pieces.
@@ -38,7 +39,7 @@ export function PicturesControls({
           {scene.imagePath ? 'Replace map' : 'Upload map'}
         </Button>
         {scene.imagePath ? (
-          <TipIconButton title="Remove battlemap" size="small" danger disabled={busy} onClick={onRemoveMap}>
+          <TipIconButton title="Remove battlemap" size="small" disabled={busy} onClick={onRemoveMap} sx={mapDangerButtonSx}>
             <Trash2 size={ICON_SIZES.sm} />
           </TipIconButton>
         ) : null}
@@ -56,7 +57,7 @@ export function PicturesControls({
           {scene.backgroundPath ? 'Add another background' : 'Upload background'}
         </Button>
         {scene.backgroundPath ? (
-          <TipIconButton title="Remove the background on show" size="small" danger disabled={busy} ariaLabel="Remove background" onClick={() => onRemoveBackground()}>
+          <TipIconButton title="Remove the background on show" size="small" disabled={busy} ariaLabel="Remove background" onClick={() => onRemoveBackground()} sx={mapDangerButtonSx}>
             <Trash2 size={ICON_SIZES.sm} />
           </TipIconButton>
         ) : null}

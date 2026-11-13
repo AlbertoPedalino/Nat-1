@@ -1,14 +1,12 @@
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
-import { X } from 'lucide-react';
+import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { panelTitleBarSx, panelTitleSx } from './PanelHeader.jsx';
 import { UI_SHADOWS } from './shadows.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
-import { ICON_SIZES } from './iconSizes.js';
 import { CARD_PART_RULE_SX } from './interactive.js';
-import CornerCloseButton from './CornerCloseButton.jsx';
+import CornerCloseButton, { CloseButton } from './CornerCloseButton.jsx';
 import Caption from './Caption.jsx';
 import { useIsPhone } from './useIsPhone.js';
 import { MAP_PAPER_SX } from './mapPaper.js';
@@ -145,7 +143,7 @@ export default function SheetDialog({
   const isPhone = useIsPhone();
   const look = SURFACE_LOOKS[surface] || SURFACE_LOOKS.sheet;
   const right = showClose
-    ? <>{headerRight}<IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }}><X size={ICON_SIZES.md} /></IconButton></>
+    ? <>{headerRight}<CloseButton onClose={onClose} /></>
     : headerRight;
   return (
     <Dialog

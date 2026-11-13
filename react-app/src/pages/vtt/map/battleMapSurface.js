@@ -11,9 +11,12 @@ import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
 
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen, the
 // corner toggles, the folded background strip): one raised control.
+// Round, the board's own controls' shape (every other icon button is the
+// theme's rounded square).
 export const mapIconButtonSx = {
   ...SURFACES.mapControl,
   ...PRESSABLE_EDGE_SX,
+  borderRadius: '50%',
   color: VTT_COLORS.accent,
   // Its own solid surface under the cursor too (an icon button's hover would
   // otherwise lay a see-through wash over the board).
@@ -41,12 +44,18 @@ export const mapPanelTitleSx = {
   color: 'primary.main',
 };
 
-// The small icon buttons in a panel's title row (settings, close): quiet until
-// the cursor is on them.
+// The small icon buttons in a panel's title row (settings, close): the map's
+// round control, a size down.
 export const mapPanelButtonSx = {
-  color: VTT_COLORS.textSecondary,
+  ...mapIconButtonSx,
   p: 0.5,
-  '&:hover': { color: 'primary.main' },
+};
+
+// A map panel's remove (a picture, a token's image): the panel button in the
+// map's danger red.
+export const mapDangerButtonSx = {
+  ...mapPanelButtonSx,
+  color: VTT_COLORS.danger,
 };
 
 // The compact text field of the map's menus.

@@ -1,12 +1,11 @@
 import { useCallback } from 'react';
 import { LAYERS } from '../../shared/ui/layers.js';
-import { Box, IconButton, Portal } from '@mui/material';
-import { X } from 'lucide-react';
+import { Box, Portal } from '@mui/material';
 import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 import { activePortalContainer } from '../../shared/ui/portalContainer.js';
 import { CompendiumFrame } from './CompendiumHome.jsx';
 import { useCompendium } from './data/loadCompendium.js';
-import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -30,9 +29,7 @@ function OpenPanel({ onClose }) {
           autoFocus
           sx={{ height: '100%' }}
           action={(
-            <IconButton size="small" aria-label="Close the compendium" onClick={onClose}>
-              <X size={ICON_SIZES.md} />
-            </IconButton>
+            <CloseButton onClose={onClose} label="Close the compendium" />
           )}
         />
       </Box>

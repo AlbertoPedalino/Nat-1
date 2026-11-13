@@ -52,26 +52,56 @@ export function pressableSx(fill) {
   };
 }
 
-// The small square button of a −/+ stepper (hit points, XP, a quantity): the
-// raised, drawn button on the raised surface, its icon in `tone`, red under
-// the cursor when `danger`. Every stepper in the app takes it.
-export function stepButtonSx(size = 20, { tone = null, danger = false } = {}) {
+// Every icon button (rename, delete, close, a stepper's −/+): the raised,
+// drawn button on the raised surface, its icon quiet until the cursor lights
+// it in the accent. Raised because it is pressed, like every button. The
+// theme gives it to every IconButton (`radius` in px there; a multiple of the
+// theme radius in sx), so a screen never draws its own; a remove (`danger`,
+// TipIconButton's) keeps its red. In plain CSS names, so it works in both.
+export function iconButtonLook(radius = 1) {
   return {
     ...PRESSABLE_EDGE_SX,
+    borderRadius: radius,
+    backgroundColor: UI_COLORS.surfaceRaised,
+    color: UI_COLORS.textSecondary,
+    '&:hover': {
+      ...PRESSABLE_EDGE_SX['&:hover'],
+      backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.08),
+      color: UI_COLORS.accent,
+    },
+    '&.Mui-disabled': { opacity: OPACITY.edge, boxShadow: 'none' },
+  };
+}
+
+// An icon button that is part of something else, not a button of its own:
+// the clear X inside a search field, the 5etools link beside a name, a key
+// inside a raised bar (the dice pill), a drag or resize grip. Flat: what it
+// sits in is the thing pressed. The only icon buttons without the raised look.
+export const PART_ICON_BUTTON_SX = Object.freeze({
+  border: 'none',
+  boxShadow: 'none',
+  backgroundColor: 'transparent',
+  '&:hover': { boxShadow: 'none', transform: 'none', backgroundColor: 'transparent' },
+  '&:active': { boxShadow: 'none', transform: 'none' },
+});
+
+// The small square button of a −/+ stepper (hit points, XP, a quantity): the
+// icon button sized to `size`, its icon in `tone`, red under the cursor when
+// `danger`. Every stepper in the app takes it.
+export function stepButtonSx(size = 20, { tone = null, danger = false } = {}) {
+  const look = iconButtonLook(1);
+  return {
+    ...look,
     width: size,
     height: size,
     minWidth: 0,
     p: 0,
     flex: '0 0 auto',
-    borderRadius: 1,
-    backgroundColor: UI_COLORS.surfaceRaised,
     color: tone || 'text.secondary',
     '&:hover': {
-      ...PRESSABLE_EDGE_SX['&:hover'],
-      backgroundColor: lighten(UI_COLORS.surfaceRaised, 0.08),
+      ...look['&:hover'],
       color: danger ? UI_COLORS.danger : (tone || UI_COLORS.accent),
     },
-    '&.Mui-disabled': { opacity: OPACITY.edge, boxShadow: 'none' },
   };
 }
 

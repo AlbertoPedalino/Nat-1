@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Box, TextField, Tooltip, Typography } from '@mui/material';
-import { X } from 'lucide-react';
 import { CUSTOM_CURRENCY_TONE, normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
 import { UI_COLORS, uiAlpha, OPACITY } from '../../ui/colors.js';
-import { currencyVariant, HOVER_SUBTRACT } from './currencyVariants.js';
+import { currencyVariant } from './currencyVariants.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { ONE_LINE_SX } from '../../ui/textStyles.js';
-import TipIconButton from '../../ui/TipIconButton.jsx';
 import CountStepper from '../../ui/CountStepper.jsx';
+import CornerCloseButton from '../../ui/CornerCloseButton.jsx';
 
 export function CurrencyCoinBox({
   coin,
@@ -109,17 +108,7 @@ export function CurrencyCoinBox({
               }}
             />
           </Tooltip>
-          <TipIconButton title="Remove currency" size="small" onClick={() => onRemove?.()} sx={{
-                position: 'absolute',
-                top: 1,
-                right: 1,
-                p: 0.25,
-                color: 'text.secondary',
-                '&:hover': { color: HOVER_SUBTRACT },
-                zIndex: 1,
-              }}>
-            <X size={v.stepper.icon} />
-          </TipIconButton>
+          <CornerCloseButton onClose={() => onRemove?.()} label="Remove currency" danger iconSize={v.stepper.icon} sx={{ top: 1, right: 1, p: 0.25 }} />
           <TextField
             value={coin.label}
             onChange={(event) => onLabelChange?.(event.target.value)}

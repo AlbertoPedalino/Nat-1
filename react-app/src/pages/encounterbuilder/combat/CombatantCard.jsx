@@ -71,7 +71,7 @@ export default function CombatantCard({ combatant, active }) {
       })}
     >
       {/* A tighter corner than a panel's: the card's own padding is small. */}
-      <CornerCloseButton onClose={remove} label="Remove combatant" tooltip="Remove" danger sx={{ top: 4, right: 4 }} />
+      <CornerCloseButton onClose={remove} label="Remove combatant" danger sx={{ top: 4, right: 4 }} />
       <Box sx={rowSx}>
         {/* Identity cluster: initiative + token + name + AC */}
         <Box sx={identityClusterSx}>

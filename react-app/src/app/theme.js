@@ -7,7 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS, uiAlpha, OPACITY } from '../shared/ui/colors.js';
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
-import { KEY_BAR_SX, PRESSABLE_EDGE_SX, pressableSx } from '../shared/ui/pressable.js';
+import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
 import { RARITY_COLORS } from '../shared/character/inventory/itemRarity.js';
 
@@ -238,6 +238,18 @@ export const theme = createTheme({
       variants: [
         { props: { color: 'error' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.danger, color: UI_COLORS.edge } } },
         { props: { color: 'success' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.success, color: UI_COLORS.edge } } },
+      ],
+    },
+    // Every icon button stands raised (iconButtonLook): pressed, like every
+    // button. A remove keeps its red, a primary one its accent; one that is
+    // part of something else lies flat by its own sx (pressable.js).
+    MuiIconButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({ ...iconButtonLook(theme.shape.borderRadius), padding: theme.spacing(0.5) }),
+      },
+      variants: [
+        { props: { color: 'error' }, style: { color: UI_COLORS.danger, '&:hover': { color: UI_COLORS.danger } } },
+        { props: { color: 'primary' }, style: { color: UI_COLORS.accentText, '&:hover': { color: UI_COLORS.accent } } },
       ],
     },
     // A chosen row (lists, menus): an accent wash with a bar on its left edge.

@@ -1,27 +1,29 @@
-import { IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import TipIconButton from './TipIconButton.jsx';
 import { ICON_SIZES } from './iconSizes.js';
 import { asArray } from '../lists.js';
 
-// The X in the top-right corner of a box that carries its own header (a
-// title-less SheetDialog, a side panel, a stat block, a combatant's card):
-// small, quiet, over the content. `label` is its name for a screen reader
-// ("Close statblock"); `tooltip` also shows a tip over it. `danger` is the X
-// that removes rather than closes (a combatant), red under the cursor. The box
-// it sits in is `position: relative`; `sx` is for placement only (a tighter
-// corner on a dense card).
-const CORNER_SX = Object.freeze({ position: 'absolute', top: 8, right: 8, zIndex: 1, color: 'text.secondary' });
+// The X that closes what it sits on (a dialog's title bar, a toast, a side
+// panel, a floating sheet): the icon button every box closes with, named by
+// its tooltip. `label` is that name ("Close the compendium"); `danger` is the
+// X that removes rather than closes (a combatant), red under the cursor. `sx`
+// places it (a map surface takes mapIconButtonSx through it).
 const DANGER_SX = Object.freeze({ '&:hover': { color: 'error.main' } });
 
-export default function CornerCloseButton({ onClose, label = 'Close', tooltip, danger = false, sx }) {
-  const buttonProps = {
-    size: 'small',
-    color: danger ? 'error' : 'default',
-    onClick: onClose,
-    sx: [CORNER_SX, danger ? DANGER_SX : null, ...asArray(sx)],
-  };
-  const icon = <X size={ICON_SIZES.md} />;
-  if (tooltip) return <TipIconButton title={tooltip} ariaLabel={label} {...buttonProps}>{icon}</TipIconButton>;
-  return <IconButton aria-label={label} {...buttonProps}>{icon}</IconButton>;
+export function CloseButton({ onClose, label = 'Close', danger = false, iconSize = ICON_SIZES.md, sx }) {
+  return (
+    <TipIconButton title={label} size="small" onClick={onClose} sx={[danger ? DANGER_SX : null, ...asArray(sx)]}>
+      <X size={iconSize} />
+    </TipIconButton>
+  );
+}
+
+// The same X in the top-right corner of a box that carries its own header (a
+// title-less SheetDialog, a side panel, a stat block, a combatant's card, the
+// dice toast), over the content. The box it sits in is `position: relative`;
+// `sx` is for placement only (a tighter corner on a dense card).
+const CORNER_SX = Object.freeze({ position: 'absolute', top: 8, right: 8, zIndex: 1 });
+
+export default function CornerCloseButton({ onClose, label = 'Close', danger = false, iconSize, sx }) {
+  return <CloseButton onClose={onClose} label={label} danger={danger} iconSize={iconSize} sx={[CORNER_SX, ...asArray(sx)]} />;
 }

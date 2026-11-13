@@ -2,15 +2,12 @@ import { useCallback, useState } from 'react';
 import { CircularProgress, ListItemIcon, MenuItem, Typography } from '@mui/material';
 import { Layers, Radio } from 'lucide-react';
 import { listScenes } from '../../../shared/cloud/api/vttScenes.js';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import MapMenu from '../map/MapMenu.jsx';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -78,19 +75,12 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
 }
 
 // Matches the other square controls in the scene topbar.
+// The map's round control, as every button on the board.
 const buttonSx = {
+  ...mapIconButtonSx,
   width: 30,
   height: 30,
   flexShrink: 0,
-  color: vttAlpha(VTT_COLORS.white, OPACITY.heavy),
-  border: INK_EDGE,
-  borderRadius: 1,
-  '&:hover': {
-    color: VTT_COLORS.accent,
-    borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
-    // Washed over the top bar's own header tone, so the button stays solid.
-    ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.soft, base: UI_COLORS.surfaceHeader }),
-  },
 };
 
 const noticeSx = {

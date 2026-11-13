@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { LAYERS } from '../../ui/layers.js';
-import { Box, Typography, IconButton } from '@mui/material';
-import { X } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
+import CornerCloseButton from '../../ui/CornerCloseButton.jsx';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
 import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
@@ -58,9 +58,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
       {layout.isCrit ? <BubbleSparkles key={seed} /> : null}
       {layout.isFail ? <BubbleDizzy key={seed} /> : null}
-      <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary', zIndex: 3 }}>
-        <X size={ICON_SIZES.sm} />
-      </IconButton>
+      <CornerCloseButton onClose={onClose} iconSize={ICON_SIZES.sm} sx={{ top: 6, zIndex: 3 }} />
 
       <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
         {layout.label}

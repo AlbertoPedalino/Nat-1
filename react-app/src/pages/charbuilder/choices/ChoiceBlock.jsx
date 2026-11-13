@@ -1,5 +1,5 @@
-import { Box, IconButton, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Box, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
+import { Check } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
@@ -19,6 +19,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -211,14 +212,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                       {active ? <Check size={ICON_SIZES.md} color="currentColor" /> : null}
                     </ListItemButton>
                     {desc ? (
-                      <IconButton
-                        size="small"
-                        aria-label={open ? 'Collapse description' : 'Expand description'}
-                        onClick={toggle}
-                        sx={{ borderRadius: 0, color: 'text.secondary' }}
-                      >
-                        {open ? <ChevronUp size={ICON_SIZES.md} /> : <ChevronDown size={ICON_SIZES.md} />}
-                      </IconButton>
+                      <RowExpandButton open={open} onToggle={toggle} label="description" />
                     ) : null}
                   </Stack>
                 )}

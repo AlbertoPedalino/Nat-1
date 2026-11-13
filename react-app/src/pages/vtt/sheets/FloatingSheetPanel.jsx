@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { LAYERS } from '../../../shared/ui/layers.js';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react';
+import { Box, Stack, Typography } from '@mui/material';
+import { GripHorizontal, MoveDiagonal2 } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   MAX_SHEET_HEIGHT_RATIO,
@@ -21,9 +21,13 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { CloseButton } from '../../../shared/ui/CornerCloseButton.jsx';
+import { mapIconButtonSx } from '../map/battleMapSurface.js';
+import { PART_ICON_BUTTON_SX } from '../../../shared/ui/pressable.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import SheetCharacterSelect from './SheetCharacterSelect.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -270,14 +274,12 @@ export default function FloatingSheetPanel({
         <Box sx={{ flex: 1 }} />
         {/* Native, so its list opens inside a fullscreen map too. */}
         <SheetCharacterSelect native choices={choices} selectedId={selectedId} onChange={onSelectionChange} />
-        <IconButton size="small" aria-label="Close floating sheet" onClick={onClose} sx={closeSx}>
-          <X size={ICON_SIZES.sm} />
-        </IconButton>
+        <CloseButton onClose={onClose} label="Close floating sheet" iconSize={ICON_SIZES.sm} sx={mapIconButtonSx} />
       </Stack>
       <Box sx={contentSx}>{children}</Box>
-      <IconButton
+      <TipIconButton
+        title="Resize floating sheet"
         size="small"
-        aria-label="Resize floating sheet"
         onPointerDown={beginResize}
         onPointerMove={moveResize}
         onPointerUp={endResize}
@@ -285,7 +287,7 @@ export default function FloatingSheetPanel({
         sx={resizeHandleSx}
       >
         <MoveDiagonal2 size={ICON_SIZES.sm} />
-      </IconButton>
+      </TipIconButton>
     </Box>
   );
 }
@@ -333,10 +335,6 @@ const titleSx = {
   
 };
 
-const closeSx = {
-  color: VTT_COLORS.textSecondary,
-  '&:hover': { color: VTT_COLORS.accentHighlight, bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft) },
-};
 
 const contentSx = {
   minWidth: 0,
@@ -352,7 +350,10 @@ const contentSx = {
   },
 };
 
+// A grip, part of the panel it resizes: flat (PART_ICON_BUTTON_SX), on its
+// own translucent tab.
 const resizeHandleSx = {
+  ...PART_ICON_BUTTON_SX,
   position: 'absolute',
   right: 1,
   bottom: 1,

@@ -795,7 +795,7 @@ test('a count stepper is the CountStepper', () => {
 // pieces (panelBarSx and a screentone) is one a restyle of the bar never
 // reaches. The app's top bar is a bar of its own, not a panel's.
 test("a panel's title bar is panelTitleBarSx", () => {
-  assert.deepEqual(sourceFilesMatching(/panelBarSx/, {
+  assert.deepEqual(sourceFilesMatching(/\bpanelBarSx\b/, {
     allow: ['shared/ui/PanelHeader.jsx', 'app/navigation/AppTopBar.jsx'],
   }), []);
 });
@@ -873,4 +873,37 @@ test('an expandable row to pick is a PickableRow', () => {
       'pages/charbuilder/progression/ClassPanel.jsx',
     ],
   }).filter((file) => readSource(file).includes('ExpandableCard')), []);
+});
+
+// Every icon button is raised (the theme's iconButtonLook) and names itself:
+// it is a TipIconButton, or a piece built on one (CloseButton /
+// CornerCloseButton, RowExpandButton). A bare IconButton is left only where
+// the control carries its own name and recipe: the −/+ of the steppers
+// (stepButtonSx) and the clear X inside the search field.
+test('an icon button is a TipIconButton', () => {
+  assert.deepEqual(sourceFilesMatching(/<IconButton\b/, {
+    allow: [
+      'shared/ui/TipIconButton.jsx',
+      'shared/ui/CountStepper.jsx',
+      'shared/character/combat/HpStepper.jsx',
+      'shared/character/progression/XpDeltaControl.jsx',
+      'shared/ui/SearchField.jsx',
+    ],
+  }), []);
+});
+
+// An icon button lies flat only where it is part of something else
+// (PART_ICON_BUTTON_SX): the search field's clear X, the 5etools link beside a
+// name, the keys of the dice pill, the grips that drag or resize.
+test('a flat icon button is part of something else', () => {
+  assert.deepEqual(sourceFilesMatching(/PART_ICON_BUTTON_SX/, {
+    allow: [
+      'shared/ui/pressable.js',
+      'shared/ui/SearchField.jsx',
+      'shared/content/FiveEToolsLink.jsx',
+      'shared/character/dice/DiceControl.jsx',
+      'pages/dmscreen/notes/NoteCard.jsx',
+      'pages/vtt/sheets/FloatingSheetPanel.jsx',
+    ],
+  }), []);
 });

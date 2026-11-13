@@ -8,7 +8,7 @@ import { SURFACES, washImage } from '../../ui/surfaces.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { KEY_BAR_SX } from '../../ui/pressable.js';
+import { KEY_BAR_SX, PART_ICON_BUTTON_SX } from '../../ui/pressable.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
@@ -89,7 +89,8 @@ const iconGroupSx = {
   overflow: 'hidden',
 };
 
-const iconSegmentSx = { borderRadius: 0, px: 1 };
+// A key of the dice pill: the pill is the raised button, its keys lie in it.
+const iconSegmentSx = { ...PART_ICON_BUTTON_SX, borderRadius: 0, px: 1 };
 
 // The rule between the two halves, on the log half itself: a rule set from the
 // group would lose to the buttons' own `border: 0`.

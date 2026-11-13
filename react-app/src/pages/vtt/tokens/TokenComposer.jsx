@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Box, Button, IconButton, Stack, TextField, Typography,
-} from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { ImagePlus, Plus, X } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
@@ -13,6 +11,8 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
+import { mapDangerButtonSx } from '../map/battleMapSurface.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // A loose piece built by hand: a name, a colour and a picture. Drag the preview
 // onto the map to put it exactly, or press Place to drop it in view. The GM and
@@ -115,9 +115,9 @@ export default function TokenComposer({
               />
             </Button>
             {image ? (
-              <IconButton size="small" aria-label="Remove token image" onClick={() => setImage(null)}>
+              <TipIconButton title="Remove token image" size="small" onClick={() => setImage(null)} sx={mapDangerButtonSx}>
                 <X size={ICON_SIZES.sm} />
-              </IconButton>
+              </TipIconButton>
             ) : null}
             <Button
               size="small"

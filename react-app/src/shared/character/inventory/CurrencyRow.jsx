@@ -5,7 +5,6 @@ import { CurrencyCoinBox } from './CurrencyCoinBox.jsx';
 import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
 import { useIsPhone } from '../../ui/useIsPhone.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { DURATIONS } from '../../ui/motion.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -15,13 +14,8 @@ import TipIconButton from '../../ui/TipIconButton.jsx';
 // enabled (builder). Applies to coins and custom entries alike.
 function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder' }) {
   const v = currencyVariant(mode);
-  const btnSx = {
-    p: 0.25,
-    borderRadius: 0,
-    color: 'text.secondary',
-    '&.Mui-disabled': { opacity: OPACITY.line },
-    '&:hover': { color: 'text.primary' },
-  };
+  // The raised icon button (the theme's), a step smaller to fit the coin.
+  const btnSx = { p: 0.25 };
   return (
     <Box
       sx={{
