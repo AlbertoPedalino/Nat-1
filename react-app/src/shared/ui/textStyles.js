@@ -24,6 +24,11 @@ export const TEXT_STYLES = Object.freeze({
   figure: Object.freeze({
     fontFamily: UI_FONTS.shout,
     fontWeight: FONT_WEIGHTS.regular,
+    // Germania's numerals are as tall as Rubik's were but a third narrower,
+    // so at the same size they read small: drawn a third larger (their cap
+    // height 0.68 of the size, raised to 0.92) wherever a figure stands, the
+    // local sizes untouched.
+    fontSizeAdjust: 'cap-height 0.92',
     ...inkLettering(2, 2),
   }),
   // The voice: what happens in the moment, shouted in comic lettering (a
