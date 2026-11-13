@@ -28,6 +28,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import SheetCharacterSelect from './SheetCharacterSelect.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -79,14 +80,11 @@ export default function FloatingSheetPanel({
     if (!panel || !frame) return;
     // `right` has to go: the panel is anchored to the right edge by default, and
     // leaving it set fights the left the drag worked out.
-    panel.style.right = 'auto';
-    panel.style.left = `${frame.left}px`;
-    panel.style.top = `${frame.top}px`;
+    writeLiveStyle(panel, { right: 'auto', left: frame.left, top: frame.top });
     // A frame with no size is a panel that was only ever moved. Writing pixels
     // here would replace the responsive default with a fixed width for good.
     if (frame.width !== null && frame.height !== null) {
-      panel.style.width = `${frame.width}px`;
-      panel.style.height = `${frame.height}px`;
+      writeLiveStyle(panel, { width: frame.width, height: frame.height });
     }
   };
 
@@ -185,9 +183,7 @@ export default function FloatingSheetPanel({
     // whether the queued style write has run.
     placementRef.current = { ...placementRef.current, left: Math.round(left), top: Math.round(top) };
     scheduleStyle(() => {
-      panel.style.right = 'auto';
-      panel.style.left = `${left}px`;
-      panel.style.top = `${top}px`;
+      writeLiveStyle(panel, { right: 'auto', left, top });
     });
   };
 
@@ -241,8 +237,7 @@ export default function FloatingSheetPanel({
       height: Math.round(height),
     };
     scheduleStyle(() => {
-      panel.style.width = `${Math.round(width)}px`;
-      panel.style.height = `${Math.round(height)}px`;
+      writeLiveStyle(panel, { width: Math.round(width), height: Math.round(height) });
     });
   };
 

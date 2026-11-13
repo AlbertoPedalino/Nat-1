@@ -14,6 +14,7 @@ import {
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
+import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 export default function BattleMapSheetResizeHandle({ containerRef, value, onCommit }) {
   const pointerRef = useRef(null);
@@ -22,7 +23,7 @@ export default function BattleMapSheetResizeHandle({ containerRef, value, onComm
 
   const applyPreview = (next) => {
     previewRef.current = next;
-    containerRef.current?.style.setProperty('--sheet-grid-columns', sheetGridColumns(next));
+    writeLiveStyle(containerRef.current, { '--sheet-grid-columns': sheetGridColumns(next) });
   };
 
   const schedulePreview = (next) => {

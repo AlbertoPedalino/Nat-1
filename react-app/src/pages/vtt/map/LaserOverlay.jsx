@@ -6,6 +6,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
 // Reaching each target in exactly that interval keeps the motion continuous —
@@ -161,7 +162,7 @@ function LaserDot({ dotRef, label = null, local = false }) {
 function placeLaser(node, point, grid, view) {
   if (!node) return;
   if (!point) {
-    node.style.display = 'none';
+    writeLiveStyle(node, { display: 'none' });
     return;
   }
 
@@ -169,12 +170,14 @@ function placeLaser(node, point, grid, view) {
   const at = projectLaser(point, grid, view);
   const radius = Math.max(4, cell * view.zoom * 0.12);
   const diameter = radius * 4.4;
-  node.style.display = 'block';
-  node.style.width = `${diameter}px`;
-  node.style.height = `${diameter}px`;
-  node.style.setProperty('--laser-core-size', `${radius * 0.9}px`);
-  node.style.setProperty('--laser-label-gap', `${radius * 0.2}px`);
-  node.style.transform = `translate3d(${at.x - diameter / 2}px, ${at.y - diameter / 2}px, 0)`;
+  writeLiveStyle(node, {
+    display: 'block',
+    width: diameter,
+    height: diameter,
+    '--laser-core-size': radius * 0.9,
+    '--laser-label-gap': radius * 0.2,
+    transform: `translate3d(${at.x - diameter / 2}px, ${at.y - diameter / 2}px, 0)`,
+  });
 }
 
 const overlaySx = {

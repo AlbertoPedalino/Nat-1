@@ -923,7 +923,7 @@ test('panel layers are switched only through usePanelsWithoutLayers', () => {
 
 // A place that moves every frame (a dragged piece, the board under a pan, a
 // brush under the pointer) is written onto its element through useLiveStyle
-// (shared/ui/liveStyle.js) or a direct `.style` write, never into sx: each sx
+// or writeLiveStyle (shared/ui/liveStyle.js), never into sx: each sx
 // value is a new CSS rule, and inserting one restyles the whole page.
 // stickerLayout.js builds an SVG string at build time, not an element.
 test('a place that moves every frame is written through useLiveStyle', () => {
@@ -933,9 +933,18 @@ test('a place that moves every frame is written through useLiveStyle', () => {
     lines.forEach((line, index) => {
       if (!/translate(3d)?\(\$\{/.test(line)) return;
       if (/\.style\.|^\s*const \w+ = `/.test(line)) return;
-      if (lines.slice(Math.max(0, index - 4), index + 1).join('\n').includes('useLiveStyle(')) return;
+      if (/useLiveStyle\(|writeLiveStyle\(/.test(lines.slice(Math.max(0, index - 8), index + 1).join('\n'))) return;
       offenders.push(`${file}:${index + 1}`);
     });
   }
   assert.deepEqual(offenders, []);
+});
+
+// An element's style is written outside sx only through shared/ui/liveStyle.js
+// (writeLiveStyle, useLiveStyle, useRootStyle): one way to turn numbers into
+// pixels, clear a value, set a custom property, and put the page root back.
+test('an element style is written only through liveStyle.js', () => {
+  assert.deepEqual(sourceLinesMatching(/\.style\.[A-Za-z]+\s*=[^=]|\.style\.(setProperty|removeProperty)\(|\.style\[[^\]]+\]\s*=[^=]/, {
+    allow: ['shared/ui/liveStyle.js'],
+  }), []);
 });

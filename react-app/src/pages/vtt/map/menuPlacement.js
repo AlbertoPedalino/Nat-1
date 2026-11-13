@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
 import { clamp } from '../../../shared/numbers.js';
+import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // Where a piece's or a mark's menu opens, and what it does when a field in it
 // is typed into.
@@ -41,8 +42,7 @@ export function useMenuPlacement(anchor) {
     const left = clamp(anchor.x, EDGE, width - paper.offsetWidth - EDGE);
     const top = clamp(anchor.y, EDGE, height - paper.offsetHeight - EDGE);
     baseTopRef.current = top;
-    paper.style.left = `${Math.round(left)}px`;
-    paper.style.top = `${Math.round(top)}px`;
+    writeLiveStyle(paper, { left: Math.round(left), top: Math.round(top) });
   }, [anchor]);
 
   const viewport = globalThis.visualViewport;
@@ -60,7 +60,7 @@ export function useMenuPlacement(anchor) {
     }
     if (lift === liftRef.current) return;
     liftRef.current = lift;
-    paper.style.top = `${Math.round(baseTopRef.current - lift)}px`;
+    writeLiveStyle(paper, { top: Math.round(baseTopRef.current - lift) });
   };
   const followsKeyboard = touch && Boolean(anchor);
   useEventListener(viewport, 'resize', keepFieldInView, { enabled: followsKeyboard });

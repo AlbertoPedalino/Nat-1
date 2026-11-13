@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
@@ -8,6 +7,7 @@ import { ICON_SIZES } from './iconSizes.js';
 import { UI_SHADOWS } from './shadows.js';
 import { SEAL_RADIUS } from './radius.js';
 import { svgPicture } from './svgPicture.js';
+import { useRootStyle } from './liveStyle.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -145,15 +145,7 @@ export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.xxl}, 
 const PANEL_LAYER_VAR = '--gb-panel-layer';
 
 export function usePanelsWithoutLayers() {
-  useEffect(() => {
-    const root = document.documentElement;
-    const previous = root.style.getPropertyValue(PANEL_LAYER_VAR);
-    root.style.setProperty(PANEL_LAYER_VAR, 'auto');
-    return () => {
-      if (previous) root.style.setProperty(PANEL_LAYER_VAR, previous);
-      else root.style.removeProperty(PANEL_LAYER_VAR);
-    };
-  }, []);
+  useRootStyle({ [PANEL_LAYER_VAR]: 'auto' });
 }
 
 export const panelFrameSx = {

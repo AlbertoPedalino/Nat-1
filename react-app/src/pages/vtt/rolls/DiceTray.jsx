@@ -14,6 +14,7 @@ import {
 } from '../../../shared/vtt/rolls/dicePhysics.js';
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
 // extra animation frame guarantees that the browser has painted the last
@@ -138,27 +139,31 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
       const body = bodyRefs.current[index];
       const solid = solidRefs.current[index];
       const shadow = shadowRefs.current[index];
-      if (body) {
-        body.style.transform = `translate3d(${die.x}px, ${die.y - die.z * LIFT}px, 0)`
-          + ` scale(${(1 + die.z * GROWTH).toFixed(3)})`;
-      }
+      writeLiveStyle(body, {
+        transform: `translate3d(${die.x}px, ${die.y - die.z * LIFT}px, 0) scale(${(1 + die.z * GROWTH).toFixed(3)})`,
+      });
       if (solid) {
         if (solid.dataset.d100Orb === 'true') {
           // A real 3D matrix would turn a single circular plane edge-on. Keep
           // the sphere round and move its oversized faceted texture instead.
           const [w, qx, qy, qz] = die.q;
           const turn = Math.atan2(2 * (w * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz));
-          solid.style.transform = `translate3d(${(qx * 10).toFixed(2)}px, ${(qy * 10).toFixed(2)}px, 0) rotate(${turn.toFixed(4)}rad)`;
+          writeLiveStyle(solid, { transform: `translate3d(${(qx * 10).toFixed(2)}px, ${(qy * 10).toFixed(2)}px, 0) rotate(${turn.toFixed(4)}rad)` });
         } else {
-          solid.style.transform = `matrix3d(${orientationMatrix(die.q).join(',')})`;
+          writeLiveStyle(solid, { transform: `matrix3d(${orientationMatrix(die.q).join(',')})` });
         }
       }
       if (shadow) {
         // The shadow stays on the table while the die is above it: smaller and
         // fainter the higher the die, which is what says "this is falling".
         const height = Math.min(1, die.z / 260);
-        shadow.style.opacity = `${(0.62 - 0.5 * height).toFixed(2)}`;
-        shadow.style.transform = `translate(${die.z * LIFT}px, 0) scale(${(1 - 0.45 * height).toFixed(3)})`;
+        // Physics, not a tone of the interface: how dark the shadow falls
+        // under a die this high.
+        const shade = (0.62 - 0.5 * height).toFixed(2);
+        writeLiveStyle(shadow, {
+          opacity: shade,
+          transform: `translate(${die.z * LIFT}px, 0) scale(${(1 - 0.45 * height).toFixed(3)})`,
+        });
       }
     });
   };

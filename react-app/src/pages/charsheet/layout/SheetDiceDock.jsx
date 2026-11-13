@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -6,6 +5,7 @@ import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import { useStoreValue } from '../../../shared/valueStore.js';
+import { useRootStyle } from '../../../shared/ui/liveStyle.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
 // bottom of the sheet, so a roll never needs a scroll back to the top.
@@ -33,13 +33,7 @@ export default function SheetDiceDock({
   // the dock on the bottom edge stretches with it. The sheet's own page turns
   // that effect off while it is open; an embedded sheet's panel does the same
   // for itself (FloatingSheetPanel).
-  useEffect(() => {
-    if (embedded) return undefined;
-    const root = document.documentElement;
-    const previous = root.style.overscrollBehaviorY;
-    root.style.overscrollBehaviorY = 'none';
-    return () => { root.style.overscrollBehaviorY = previous; };
-  }, [embedded]);
+  useRootStyle({ overscrollBehaviorY: 'none' }, { enabled: !embedded });
 
   return (
     <Box sx={embedded ? embeddedDockSx : pageDockSx}>
