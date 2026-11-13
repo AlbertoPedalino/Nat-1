@@ -12,11 +12,12 @@ import { PRESSABLE_EDGE_SX } from '../../../shared/ui/pressable.js';
 // The round icon buttons on the map (Rolls, the tools toggle, fullscreen, the
 // corner toggles, the folded background strip): one raised control.
 // Round, the board's own controls' shape (every other icon button is the
-// theme's rounded square).
+// theme's rounded square): a circle on a square button, a pill on a wider one
+// (the dice pill, the folded backgrounds strip) — never an ellipse.
 export const mapIconButtonSx = {
   ...SURFACES.mapControl,
   ...PRESSABLE_EDGE_SX,
-  borderRadius: '50%',
+  borderRadius: 999,
   color: VTT_COLORS.accent,
   // Its own solid surface under the cursor too (an icon button's hover would
   // otherwise lay a see-through wash over the board).
