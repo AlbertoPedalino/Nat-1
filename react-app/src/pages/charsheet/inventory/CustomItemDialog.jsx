@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
 import SheetDialog, { CancelButton, DialogSection } from '../../../shared/ui/SheetDialog.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import NumberField from '../../../shared/ui/NumberField.jsx';
+import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import Caption from '../../../shared/ui/Caption.jsx';
 import { RARITY_OPTIONS } from '../../../shared/character/inventory/itemRarity.js';
 import {
   CUSTOM_ITEM_KINDS, VALUE_UNITS, customItemDraft, customItemRecord, isCustomItemDraftReady,
@@ -31,7 +34,7 @@ export default function CustomItemDialog({ open, item = null, onClose, onSave })
   const ready = isCustomItemDraftReady(draft);
   const save = () => {
     if (!ready) return;
-    onSave(customItemRecord(draft, item), Math.max(1, Math.floor(Number(draft.qty) || 1)));
+    onSave(customItemRecord(draft, item), draft.qty);
     onClose();
   };
 
@@ -73,15 +76,15 @@ export default function CustomItemDialog({ open, item = null, onClose, onSave })
                 sx={growSx}
               />
               {item ? null : (
-                <TextField
-                  size="small"
-                  label="Quantity"
-                  type="number"
-                  value={draft.qty}
-                  onChange={typed('qty')}
-                  slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                  sx={numberSx}
-                />
+                <Box sx={quantitySx}>
+                  <Caption>Quantity</Caption>
+                  <CountStepper
+                    value={draft.qty}
+                    label="quantity"
+                    canDecrease={draft.qty > 1}
+                    onStep={(delta) => set('qty')(Math.max(1, draft.qty + delta))}
+                  />
+                </Box>
               )}
             </Box>
           </Stack>
@@ -89,22 +92,8 @@ export default function CustomItemDialog({ open, item = null, onClose, onSave })
 
         <DialogSection title="Weight & value" hint="Weight in pounds; the price in any coin.">
           <Box sx={[rowSx, { mt: 1 }]}>
-            <TextField
-              size="small"
-              label="Weight (lb)"
-              value={draft.weight}
-              onChange={typed('weight')}
-              slotProps={{ htmlInput: { inputMode: 'decimal' } }}
-              sx={numberSx}
-            />
-            <TextField
-              size="small"
-              label="Value"
-              value={draft.value}
-              onChange={typed('value')}
-              slotProps={{ htmlInput: { inputMode: 'decimal' } }}
-              sx={numberSx}
-            />
+            <NumberField label="Weight" unit="lb" value={draft.weight} onChange={set('weight')} sx={numberSx} />
+            <NumberField label="Value" value={draft.value} onChange={set('value')} sx={numberSx} />
             <SelectField label="Coin" value={draft.unit} onChange={set('unit')} options={UNIT_OPTIONS} fullWidth={false} sx={unitSx} />
           </Box>
         </DialogSection>
@@ -129,4 +118,5 @@ export default function CustomItemDialog({ open, item = null, onClose, onSave })
 const rowSx = { display: 'flex', flexWrap: 'wrap', gap: 1.25 };
 const growSx = { flex: '1 1 160px' };
 const numberSx = { flex: '0 1 120px', minWidth: 90 };
+const quantitySx = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.25 };
 const unitSx = { flex: '0 0 auto', minWidth: 80 };

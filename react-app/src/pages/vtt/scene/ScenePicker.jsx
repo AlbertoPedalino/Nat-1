@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
-import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
+import { Box, Stack, Typography } from '@mui/material';
+import { Map, Pencil, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
   clearLiveScene,
@@ -28,6 +28,7 @@ import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -168,15 +169,12 @@ export default function ScenePicker({
             title={campaign.name}
             bodySx={{ p: 1.5 }}
             action={(
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<Plus size={ICON_SIZES.sm} />}
+              <AddButton main
                 disabled={busy}
                 onClick={() => setCreatingFor(campaign.id)}
               >
                 New scene
-              </Button>
+              </AddButton>
             )}
           >
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.25 }}>

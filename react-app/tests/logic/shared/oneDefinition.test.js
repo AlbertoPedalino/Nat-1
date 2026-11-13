@@ -1031,3 +1031,22 @@ test('every filter takes several choices at once', () => {
   assert.deepEqual(sourceLinesMatching(/<FilterToggles[^>]*\svalue=/), []);
   assert.deepEqual(sourceLinesMatching(/kind: 'multiSelect'/), []);
 });
+
+// A button that adds or creates something is an AddButton (shared/ui): the +
+// and its label, filled for a screen's own action (`main`), outlined
+// otherwise. A number typed by hand is a NumberField (comma or point, the
+// decimal keypad, its unit after it): the range filters, a weight, a price.
+test('an add button is an AddButton and a typed number a NumberField', () => {
+  assert.deepEqual(sourceLinesMatching(/startIcon=\{<Plus/, { allow: ['shared/ui/AddButton.jsx'] }), []);
+  assert.deepEqual(sourceLinesMatching(/inputMode: 'decimal'/, { allow: ['shared/ui/NumberField.jsx'] }), []);
+});
+
+// Every list of items (the sheet's Add Item and Inventory, the builder's Add
+// items and Current inventory) is an ItemBrowser inside an ItemListSection:
+// one search, the shelves and states, the filters, the count and the scrolling
+// well. No screen assembles them by hand.
+test('an item list is an ItemBrowser', () => {
+  assert.deepEqual(sourceLinesMatching(/useItemListQuery\(/, {
+    allow: ['shared/character/inventory/ItemBrowser.jsx', 'shared/character/inventory/useItemListQuery.js'],
+  }), []);
+});

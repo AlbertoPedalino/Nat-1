@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Box, Stack, TextField, Typography } from '@mui/material';
 import { Plus, Search } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
@@ -9,6 +9,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { panelBodySx } from '../../../shared/ui/PanelHeader.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 // Adding to a fight under way: a monster from the bestiary or a quick
 // combatant typed by hand. A panel like the round's above it, folded away
@@ -57,9 +58,9 @@ export default function Reinforcements() {
               <TextField size="small" label="AC" type="number" value={manual.ac} onChange={(event) => setManual((prev) => ({ ...prev, ac: event.target.value }))} />
             </Stack>
             <TextField size="small" label="Init Mod" type="number" value={manual.initMod} onChange={(event) => setManual((prev) => ({ ...prev, initMod: event.target.value }))} />
-            <Button variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addManual}>
+            <AddButton main size="medium" onClick={addManual}>
               Add
-            </Button>
+            </AddButton>
           </Stack>
         </Box>
       </CollapsibleBody>

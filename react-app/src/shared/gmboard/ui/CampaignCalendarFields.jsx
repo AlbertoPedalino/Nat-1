@@ -10,6 +10,7 @@ import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
 import SelectField from '../../ui/SelectField.jsx';
+import NumberField from '../../ui/NumberField.jsx';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -161,14 +162,12 @@ function AdvanceForm({ disabled, onAdvance }) {
             +{amount}h
           </Button>
         ))}
-        <TextField
-          size="small"
+        <NumberField
           label="Hours"
           value={hours}
-          onChange={(event) => setHours(event.target.value)}
+          onChange={setHours}
           onKeyDown={(event) => { if (event.key === 'Enter') advance(hours); }}
           disabled={disabled}
-          slotProps={{ htmlInput: { inputMode: 'decimal' } }}
           sx={{ width: 80 }}
         />
         <TipIconButton title="Advance by these hours" size="small" ariaLabel="Advance the clock" disabled={disabled || !valid} onClick={() => advance(hours)}>

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Divider } from '@mui/material';
-import { Plus, ScrollText } from 'lucide-react';
+import { Box, Divider } from '@mui/material';
+import { ScrollText } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
@@ -10,7 +10,7 @@ import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBl
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import SidePanel from '../../../shared/ui/SidePanel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 export default function StatBlockDialog() {
   const { state, dispatch } = useEncounterBuilder();
@@ -81,16 +81,14 @@ function StatBlockBody({ monster, allowAdd = false }) {
         onRoll={handleRoll}
       >
         {allowAdd && state.selectedStatblock?.combatantId == null ? (
-          <Button
-            variant="contained"
-            startIcon={<Plus size={ICON_SIZES.md} />}
+          <AddButton main size="medium"
             onClick={() => {
               dispatch({ type: 'addMonster', monster });
               dispatch({ type: 'closeStatblock' });
             }}
           >
             Add to Encounter
-          </Button>
+          </AddButton>
         ) : null}
       </StatBlockSheet>
       {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}

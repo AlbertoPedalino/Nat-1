@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
-import { Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
@@ -24,6 +24,7 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -158,14 +159,12 @@ export default function ClassPanel({ state, character, dispatch }) {
               Remove
             </Button>
           ) : null}
-          <Button
-            size="small"
-            startIcon={<Plus size={ICON_SIZES.md} />}
+          <AddButton
             disabled={!canAddMulticlass}
             onClick={() => dispatch({ type: 'multiclass/add' })}
           >
             Multiclass
-          </Button>
+          </AddButton>
         </Stack>
       }
     >

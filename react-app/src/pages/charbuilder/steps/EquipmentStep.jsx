@@ -1,31 +1,24 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Divider, Stack, Typography } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Box, Stack } from '@mui/material';
+import { Package, Plus, Trash2 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
-import { ENTRY_BODY_SX, ENTRY_CARD_SX, ENTRY_ROW_PADDING, entryCardWellSx } from '../../../shared/ui/entryCard.js';
+import { ENTRY_BODY_SX, ENTRY_CARD_SX, ENTRY_ROW_PADDING } from '../../../shared/ui/entryCard.js';
 import {
   ItemAddRow, ItemCardTitle, ItemReferenceBody, itemCardSurfaceSx,
 } from '../../../shared/character/inventory/ItemReference.jsx';
-import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
-import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
-import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
+import ItemBrowser, { ItemListSection } from '../../../shared/character/inventory/ItemBrowser.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { stepButtonSx } from '../../../shared/ui/pressable.js';
 import { formatPounds, itemQty, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
-import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { BUILDER_TEXT } from '../layout/builderText.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
-import SelectionSearch from '../choices/SelectionSearch.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -79,46 +72,27 @@ const entryItem = (entry) => entry.item;
 
 export default function EquipmentStep({ state, dispatch }) {
   // The current inventory's state filters (Equipped, Attuned, Stashed).
-  const [currentStates, setCurrentStates] = useState([]);
+  const currentStates = useState([]);
   const { character, search, inventoryFilter, currentInventoryFilter } = state;
-  const [localQuery, setLocalQuery] = useDebouncedSearch(
+  const addSearch = useDebouncedSearch(
     search.inventory,
     (value) => dispatch({ type: 'search/set', scope: 'inventory', value }),
   );
-  const deferredQuery = useDeferredValue(localQuery);
-  const query = deferredQuery.toLowerCase();
-
-  // The item database, narrowed and ordered as on every item list
-  // (useItemListQuery, compareItemsBySearch). Its advanced filters live in the
-  // reducer, like the chips and the search boxes, so leaving the step and
-  // coming back keeps the whole query.
-  const compare = useMemo(() => compareItemsBySearch(query), [query]);
-  const { results: sortedItems, filterList: addList, resetKey: addResetKey } = useItemListQuery(state.data.items, {
-    chip: inventoryFilter,
-    query,
-    compare,
-    filtersState: [state.inventoryFilters, (filters) => dispatch({ type: 'inventory/filters', filters })],
-  });
-  const addPage = usePagedList(sortedItems, { pageSize: ADD_LIST_PAGE, resetKey: addResetKey });
-
-  const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
-  const totalWeight = totalCarriedWeight(character.inventory, character.currency);
-
-  // Search + filter over the carried items. Keep each row's original index so
-  // dispatch actions (remove/qty) still target the right inventory entry.
-  const [currentQuery, setCurrentQuery] = useDebouncedSearch(
+  const currentSearch = useDebouncedSearch(
     search.currentInventory,
     (value) => dispatch({ type: 'search/set', scope: 'currentInventory', value }),
   );
+  const totalWeight = totalCarriedWeight(character.inventory, character.currency);
+  // Owned rows keep their inventory index, so remove and quantity still target
+  // the right entry.
   const currentEntries = useMemo(() => character.inventory.map((item, index) => ({ item, index })), [character.inventory]);
-  const { results: currentInventory, filterList: currentList, resetKey: currentResetKey } = useItemListQuery(currentEntries, {
-    chip: currentInventoryFilter,
-    states: currentStates,
-    query: currentQuery,
-    getItem: entryItem,
-    filtersState: [state.currentInventoryFilters, (filters) => dispatch({ type: 'inventory/current-filters', filters })],
-  });
-  const currentPage = usePagedList(currentInventory, { pageSize: CURRENT_LIST_PAGE, resetKey: currentResetKey });
+
+  const renderAddRows = useCallback((visible) => visible.map((item) => (
+    <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={(it, qty) => dispatch({ type: 'inventory/add', item: { ...it, qty } })} />
+  )), [dispatch]);
+  const renderCurrentRows = useCallback((visible) => visible.map(({ item, index }) => (
+    <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
+  )), [dispatch]);
 
   return (
     <Stack spacing={2}>
@@ -146,54 +120,30 @@ export default function EquipmentStep({ state, dispatch }) {
 
       <BuilderPanel id="panel-inventory" tone={PANEL_TONES.items} title="Inventory" icon={GAME_ICONS.inventory} note={`${formatPounds(totalWeight)} carried`}>
         <Stack spacing={1.5}>
-          <SelectionSearch
-            value={localQuery}
-            onChange={setLocalQuery}
-            placeholder="Search items"
-          />
-          <ItemGroupFilter
-            value={inventoryFilter}
-            onChange={(key) => dispatch({ type: 'inventory/filter', filter: key })}
-          />
-
-          <ItemFilterPanel {...addList.panelProps} />
-
-          <Typography sx={BUILDER_TEXT.hint}>
-            {sortedItems.length} of {state.data.items.length} items
-          </Typography>
-
-          <Box {...addPage.listProps} sx={scrollWellSx(430)}>
-            {addPage.visible.map((item) => (
-              <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
-            ))}
-          </Box>
-
-          <Divider />
-          <Typography sx={BUILDER_TEXT.sectionHeader}>Current Inventory</Typography>
-          {character.inventory.length ? (
-            <>
-              <SelectionSearch
-                value={currentQuery}
-                onChange={setCurrentQuery}
-                placeholder="Search current inventory"
-              />
-              <ItemGroupFilter
-                states={currentStates}
-                onStatesChange={setCurrentStates}
-                value={currentInventoryFilter}
-                onChange={(filter) => dispatch({ type: 'inventory/current-filter', filter })}
-              />
-              <ItemFilterPanel {...currentList.panelProps} />
-            </>
-          ) : null}
-          <Box {...currentPage.listProps} sx={entryCardWellSx(430)}>
-            {currentPage.visible.map(({ item, index }) => (
-              <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
-            ))}
-            {character.inventory.length && !currentInventory.length ? (
-              <EmptyLine inList>No matches.</EmptyLine>
-            ) : null}
-          </Box>
+          <ItemListSection icon={Plus} title="Add items">
+            <ItemBrowser
+              entries={state.data.items}
+              search={addSearch}
+              chips={[inventoryFilter, (filter) => dispatch({ type: 'inventory/filter', filter })]}
+              filtersState={[state.inventoryFilters, (filters) => dispatch({ type: 'inventory/filters', filters })]}
+              order="search"
+              pageSize={ADD_LIST_PAGE}
+              renderRows={renderAddRows}
+            />
+          </ItemListSection>
+          <ItemListSection icon={Package} title="Current inventory">
+            <ItemBrowser
+              entries={currentEntries}
+              getItem={entryItem}
+              search={currentSearch}
+              chips={[currentInventoryFilter, (filter) => dispatch({ type: 'inventory/current-filter', filter })]}
+              states={currentStates}
+              filtersState={[state.currentInventoryFilters, (filters) => dispatch({ type: 'inventory/current-filters', filters })]}
+              pageSize={CURRENT_LIST_PAGE}
+              renderRows={renderCurrentRows}
+              empty={<EmptyLine inList>No items yet.</EmptyLine>}
+            />
+          </ItemListSection>
         </Stack>
       </BuilderPanel>
     </Stack>

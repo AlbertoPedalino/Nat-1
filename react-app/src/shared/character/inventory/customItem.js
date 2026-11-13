@@ -48,7 +48,7 @@ export function customItemDraft(item = null) {
     name: item?.name || '',
     kind: CUSTOM_KIND_CODES.includes(kind) ? kind : DEFAULT_KIND,
     rarity: item?.rarity && item.rarity !== 'none' ? item.rarity : 'none',
-    qty: '1',
+    qty: 1,
     weight: item?.weight ? String(item.weight) : '',
     ...valueInUnit(item?.value),
     description: descriptionOf(item),

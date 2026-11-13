@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { Cloud, Flag, Users, Plus, ScrollText, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
+import { Cloud, Flag, Users, ScrollText, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -43,6 +43,7 @@ import SelectField from '../../shared/ui/SelectField.jsx';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
+import AddButton from '../../shared/ui/AddButton.jsx';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -174,7 +175,7 @@ export default function CampaignsPage() {
               <Typography component="h2" sx={sectionTitleSx}>Create a campaign</Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <TextField size="small" label="Campaign name" value={newName} onChange={(e) => setNewName(e.target.value)} fullWidth />
-                <Button variant="contained" size="small" startIcon={<Plus size={ICON_SIZES.sm} />} onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</Button>
+                <AddButton main onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</AddButton>
               </Stack>
             </Box>
             <Box component="section" sx={setupPanelSx}>

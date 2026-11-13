@@ -57,7 +57,7 @@ test('equipment lists value, weight and attributes, and filters by typed ranges'
   expect(sword).toHaveTextContent('1d8 slashing');
   expect(sword).toHaveTextContent('Weapons');
 
-  fireEvent.change(screen.getByRole('spinbutton', { name: 'Weight minimum' }), { target: { value: '4' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Weight minimum' }), { target: { value: '4' } });
   expect(screen.getByText('1 items')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Rope/ })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }));

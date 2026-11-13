@@ -1,6 +1,6 @@
 import { Autocomplete, Button, Stack, TextField, Typography } from '@mui/material';
 import { useMemo } from 'react';
-import { Plus, Save, Swords, Trash2 } from 'lucide-react';
+import { Save, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../../../shared/encounter/library.js';
@@ -15,6 +15,7 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -40,14 +41,11 @@ export default function EncounterList() {
       icon={Swords}
       title="Encounter"
       action={(
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<Plus size={ICON_SIZES.sm} />}
+        <AddButton
           onClick={() => dispatch({ type: 'newEncounter' })}
         >
           New Encounter
-        </Button>
+        </AddButton>
       )}
     >
       <Stack spacing={2}>

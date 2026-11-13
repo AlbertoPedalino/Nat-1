@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Button, Stack, Typography } from '@mui/material';
-import { Network, Plus, Unlink } from 'lucide-react';
+import { Network, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
 import { setCampaignDungeonEncounter, setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
@@ -27,6 +27,7 @@ import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 import Caption from '../../shared/ui/Caption.jsx';
 import TipIconButton from '../../shared/ui/TipIconButton.jsx';
 import EntityRow from '../../shared/ui/EntityRow.jsx';
+import AddButton from '../../shared/ui/AddButton.jsx';
 
 const TOOL_UI = {
   gmboard: TOOL_CATALOG.gmboard,
@@ -279,7 +280,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               if (value.startsWith('new:')) handleCreate(value.slice(4));
               else handleLink(candidates.find((row) => rowKey(row) === value));
               setAdding(false);
-            }} /> :<Button startIcon={<Plus size={ICON_SIZES.md} />} variant="outlined" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</Button>}
+            }} /> :<AddButton size="medium" disabled={disabled} onClick={() => setAdding(true)}>Add tool or campaign</AddButton>}
         </Stack>}
     </SheetDialog>
   </>;

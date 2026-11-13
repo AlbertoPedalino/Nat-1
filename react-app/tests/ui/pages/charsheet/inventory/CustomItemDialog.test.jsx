@@ -10,10 +10,10 @@ describe('CustomItemDialog', () => {
     expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
 
     await userEvent.type(screen.getByLabelText('Name'), 'Moonstone');
-    await userEvent.type(screen.getByLabelText('Weight (lb)'), '0.5');
+    await userEvent.type(screen.getByLabelText('Weight'), '0,5');
     await userEvent.type(screen.getByLabelText('Value'), '50');
-    await userEvent.clear(screen.getByLabelText('Quantity'));
-    await userEvent.type(screen.getByLabelText('Quantity'), '3');
+    await userEvent.click(screen.getByRole('button', { name: 'Increase quantity' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Increase quantity' }));
     await userEvent.type(screen.getByPlaceholderText(/What it is/), 'Glows faintly.');
     await userEvent.click(screen.getByRole('button', { name: 'Add' }));
 
@@ -28,7 +28,7 @@ describe('CustomItemDialog', () => {
     render(<CustomItemDialog open item={item} onClose={() => {}} onSave={onSave} />);
     expect(screen.getByLabelText('Name')).toHaveValue('Silk');
     expect(screen.getByLabelText('Value')).toHaveValue('5');
-    expect(screen.queryByLabelText('Quantity')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Increase quantity' })).not.toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText('Name'), ' Bolt');
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));

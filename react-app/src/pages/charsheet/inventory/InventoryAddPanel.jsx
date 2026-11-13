@@ -1,101 +1,63 @@
-import { memo, useDeferredValue, useMemo, useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { useCallback, useState } from 'react';
+import { Box } from '@mui/material';
 import { Plus } from 'lucide-react';
-import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ItemAddRow } from '../../../shared/character/inventory/ItemReference.jsx';
-import ItemGroupFilter from '../../../shared/character/inventory/ItemGroupFilter.jsx';
-import { useItemListQuery } from '../../../shared/character/inventory/useItemListQuery.js';
-import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { compareItemsBySearch } from '../../../shared/character/inventory/itemSearch.js';
-import { inventorySectionSx } from './inventoryControls.jsx';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
+import ItemBrowser, { ItemListSection } from '../../../shared/character/inventory/ItemBrowser.jsx';
 import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
-import { scrollWellSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
-import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import CardSection from '../../../shared/ui/CardSection.jsx';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
-// The result list renders in pages instead of hard-capping: a broad filter can
-// legitimately match most of the item DB (~2500 entries once magic variants are
-// expanded, so most searches overflow any fixed cap), and truncating
-// made it look like the filter had only searched the first alphabetical slice.
-// 120 rows a page: the old hard cap rendered that many at once, so the DOM cost
-// is known to be fine, and it takes fewer scrolls to cross a ~2500-item DB.
+// The item database renders in pages instead of hard-capping: a broad filter
+// can legitimately match most of it (~2500 entries once magic variants are
+// expanded), and truncating made it look like the filter had only searched the
+// first alphabetical slice. 120 rows a page: the old hard cap rendered that
+// many at once, so the DOM cost is known to be fine.
 const SEARCH_PAGE = 120;
 
-const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem, resetKey }) {
-  const page = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
-  const { visible, listProps } = page;
-
-  return (
-    <Box {...listProps} sx={{ ...scrollWellSx(320), mb: 0.75 }}>
-      {visible.map((item) => (
-        <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
-      ))}
-      {!items.length && (
-        itemsDbCount ? <EmptyLine inList>No items found.</EmptyLine> : <LoadingLine label="Loading items…" sx={{ px: 1, py: 1.25 }} />
-      )}
-    </Box>
-  );
-});
-
-// The "Add Item" section: a search over the 2024 item database, and the way
-// to make up an item of your own (`onCreateCustom` opens CustomItemDialog). Its search and filters are its own, so narrowing them never hides
-// rows of the inventory list below. It stays mounted while collapsed, keeping
-// what was typed.
+// The "Add Item" section: the item database (ItemBrowser, as every item list)
+// and the way to make up an item of your own (`onCreateCustom` opens
+// CustomItemDialog). Its search and filters are its own, so narrowing them
+// never hides rows of the inventory list below. It stays mounted while
+// collapsed, keeping what was typed.
 export default function InventoryAddPanel({ itemsDb, onAddItem, onCreateCustom }) {
-  const [search, setSearch] = useState('');
-  const deferredSearch = useDeferredValue(search);
-  const [filter, setFilter] = useState([]);
-  const [addPanelOpen, setAddPanelOpen] = useState(false);
-
-  // Database items, narrowed and ordered as on every item list
-  // (useItemListQuery); the order is relevance to the search.
-  const query = deferredSearch.trim();
-  const compare = useMemo(() => compareItemsBySearch(query), [query]);
-  const { results: searchResults, filterList: addList, resetKey: searchResetKey } = useItemListQuery(itemsDb, { chip: filter, query, compare });
+  const search = useState('');
+  const chips = useState([]);
+  const [open, setOpen] = useState(false);
+  const renderRows = useCallback((visible) => visible.map((item) => (
+    <ItemAddRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
+  )), [onAddItem]);
 
   return (
-    <Box sx={inventorySectionSx}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: addPanelOpen ? 0.75 : 0 }}>
-        <DisclosureButton
-          open={addPanelOpen}
-          onToggle={() => setAddPanelOpen((prev) => !prev)}
-          icon={addPanelOpen ? null : <Plus size={ICON_SIZES.xs} />}
-          label={addPanelOpen ? 'Close' : 'Add Item'}
-        />
-      </Box>
-
-      <CollapsibleBody open={addPanelOpen}>
-        <Box sx={{ pt: 0.75, ...CARD_PART_RULE_SX }}>
-          <SearchField
-            placeholder="Search 2024 items by name, source, type, property..."
-            value={search}
-            onChange={setSearch}
-            density="compact"
-            sx={{ mb: 0.5 }}
+    <ItemListSection
+      sx={{ mb: 1 }}
+      head={(
+        <Box>
+          <DisclosureButton
+            open={open}
+            onToggle={() => setOpen((prev) => !prev)}
+            icon={open ? null : <Plus size={ICON_SIZES.xs} />}
+            label={open ? 'Close' : 'Add Item'}
           />
-
-          <ItemGroupFilter value={filter} onChange={setFilter} />
-
-          <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.5 }} />
-
-          <Typography sx={{ ...TEXT_STYLES.note, fontSize: FONT_SIZES.sm, mb: 0.25 }}>
-            {deferredSearch !== search
-              ? 'Updating results...'
-              : `${searchResults.length} of ${itemsDb.length} items`}
-          </Typography>
-          <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={onAddItem} resetKey={searchResetKey} />
-
-          <Button size="small" startIcon={<Plus size={ICON_SIZES.xs} />} onClick={onCreateCustom} sx={{ mt: 0.75 }}>
-            Custom item
-          </Button>
         </Box>
+      )}
+    >
+      <CollapsibleBody open={open}>
+        <CardSection>
+          <ItemBrowser
+            entries={itemsDb}
+            search={search}
+            chips={chips}
+            order="search"
+            pageSize={SEARCH_PAGE}
+            renderRows={renderRows}
+            empty={<LoadingLine label="Loading items…" sx={{ px: 1, py: 1.25 }} />}
+          />
+          <AddButton onClick={onCreateCustom} sx={{ mt: 0.75 }}>Custom item</AddButton>
+        </CardSection>
       </CollapsibleBody>
-    </Box>
+    </ItemListSection>
   );
 }

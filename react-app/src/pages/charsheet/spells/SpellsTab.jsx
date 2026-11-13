@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Alert, Button, Typography } from '@mui/material';
-import { Plus } from 'lucide-react';
+import { Box, Alert, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
@@ -12,7 +11,7 @@ import { SPELL_ACTION_FILTERS, buildSpellInfo, expandSpellInfoBySlots, getSpellA
 import { SpellPickerDialog } from './SpellPickerDialog.jsx';
 import { getSpellAbility } from './spellAbility.js';
 import { canManageSpells, getSpellSlots, getSpellLimits } from '../../../shared/character/spells/spellcasting.js';
-import { addButtonSx, panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
+import { panelRootSx, panelToolbarSx } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
 import { SlotPanel, SpellSection } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -28,11 +27,11 @@ import { useSpellSlotState } from './useSpellSlotState.js';
 import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { chosenToggles, toggleKeeps } from '../../../shared/ui/toggleChoices.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
 import StatTile from '../stats/StatTile.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
@@ -148,9 +147,9 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>
-          <Button variant="contained" onClick={() => setPickerOpen(true)} startIcon={<Plus size={ICON_SIZES.sm} />} sx={addButtonSx}>
+          <AddButton main size="medium" onClick={() => setPickerOpen(true)}>
             Add / Remove Spell
-          </Button>
+          </AddButton>
         </Box>
       ) : null}
 

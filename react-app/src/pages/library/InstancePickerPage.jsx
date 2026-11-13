@@ -1,6 +1,4 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button } from '@mui/material';
-import { Plus } from 'lucide-react';
 import AppPage from '../../app/navigation/AppPage.jsx';
 import NotFoundPage from '../notfound/NotFoundPage.jsx';
 import { createInstance } from '../../shared/instances/instanceStore.js';
@@ -10,7 +8,7 @@ import { resolveTool } from './logic/tools.js';
 import CharacterPicker from './CharacterPicker.jsx';
 import SectionPicker from './SectionPicker.jsx';
 import * as s from './styles.js';
-import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
+import AddButton from '../../shared/ui/AddButton.jsx';
 
 export default function InstancePickerPage() {
   const { tool } = useParams();
@@ -42,9 +40,9 @@ export default function InstancePickerPage() {
         iconColor={meta.color}
         title={meta.label}
         actions={(
-          <Button {...newButtonProps} variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} sx={s.newBtnSx}>
+          <AddButton main size="medium" {...newButtonProps} sx={s.newBtnSx}>
             New {meta.label}
-          </Button>
+          </AddButton>
         )}
       />
 

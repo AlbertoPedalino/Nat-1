@@ -1,5 +1,4 @@
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { sheetSectionHeaderSx } from '../../../shared/ui/PanelHeader.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 export const panelRootSx = {
@@ -29,9 +28,4 @@ export const levelHeaderSx = {
 
 // The tab's own action (Add / Remove Spell): the theme's filled button,
 // raised like every button, in the tab's lettering.
-export const addButtonSx = {
-  fontSize: FONT_SIZES.md,
-  px: 1.75,
-  py: 0.75,
-};
 

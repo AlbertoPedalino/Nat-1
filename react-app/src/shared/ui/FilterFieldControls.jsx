@@ -67,7 +67,6 @@ export default function FilterFieldControls({
             <RangeInputs
               label={field.label}
               unit={field.unit}
-              step={field.step}
               min={filters[minKey]}
               max={filters[maxKey]}
               onMin={(value) => onChange(minKey, value)}

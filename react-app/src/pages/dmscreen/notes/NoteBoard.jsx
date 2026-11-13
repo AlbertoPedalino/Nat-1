@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Button } from '@mui/material';
-import { Plus, Search, SearchX, StickyNote } from 'lucide-react';
+import { Search, SearchX, StickyNote } from 'lucide-react';
 import { useDmScreen } from '../state/DmScreenContext.jsx';
 import { BOARD_COLUMNS, GRID_GAP, ROW_UNIT } from './layout.js';
 import { describeNotePosition, moveNote as moveNoteInList } from './notes.js';
@@ -8,10 +8,10 @@ import { nextAnnouncement } from './announce.js';
 import { filterNotes, queryTokens } from '../search/search.js';
 import { useNoteDragReorder } from '../drag/useNoteDragReorder.js';
 import NoteCard from './NoteCard.jsx';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
+import AddButton from '../../../shared/ui/AddButton.jsx';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -91,16 +91,16 @@ export default function NoteBoard() {
         <Caption role="status" aria-live="polite">
           {partial ? `${visibleNotes.length} of ${notes.length} notes` : ''}
         </Caption>
-        <Button variant="contained" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>
+        <AddButton main size="medium" onClick={addNewNote}>
           Add note
-        </Button>
+        </AddButton>
       </Box>
 
       {notes.length === 0 ? (
         <StatePanel
           icon={StickyNote}
           title="Build your quick-reference screen"
-          action={<Button variant="outlined" startIcon={<Plus size={ICON_SIZES.md} />} onClick={addNewNote}>Add first note</Button>}
+          action={<AddButton size="medium" onClick={addNewNote}>Add first note</AddButton>}
         >
           Keep house rules, NPC names, session hooks, loot, and reminders close during play.
         </StatePanel>
