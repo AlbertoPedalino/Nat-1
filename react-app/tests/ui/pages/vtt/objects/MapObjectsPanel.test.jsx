@@ -2,15 +2,16 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { iconNames } from 'lucide-react/dynamic';
 import { vi } from 'vitest';
 import MapObjectsPanel from '../../../../../src/pages/vtt/objects/MapObjectsPanel.jsx';
+import { MAP_OBJECT_DRAWINGS } from '../../../../../src/shared/ui/gameIcons.js';
 
-test('the objects panel searches and paginates the complete Lucide catalog', () => {
+test('the objects panel searches and paginates the game drawings and the complete Lucide catalog', () => {
   const onPlace = vi.fn();
   render(<MapObjectsPanel layer="gm" onPlace={onPlace} />);
 
-  expect(screen.getByText(new RegExp(`^${new Set(iconNames).size} icons`))).toBeInTheDocument();
+  expect(screen.getByText(new RegExp(`^${Object.keys(MAP_OBJECT_DRAWINGS).length + new Set(iconNames).size} icons`))).toBeInTheDocument();
   expect(screen.getByRole('navigation')).toBeInTheDocument();
 
-  fireEvent.change(screen.getByRole('searchbox', { name: 'Search Lucide icons' }), {
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Search icons' }), {
     target: { value: 'zodiac virgo' },
   });
   const colorInput = screen.getByLabelText('Object color');
@@ -29,6 +30,14 @@ test('the objects panel searches and paginates the complete Lucide catalog', () 
     strokeWidth: 3.2,
     layer: 'gm',
   }));
+});
+
+test("a game drawing is placed under its game: key", () => {
+  const onPlace = vi.fn();
+  render(<MapObjectsPanel layer="tokens" onPlace={onPlace} />);
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Search icons' }), { target: { value: 'treasure map' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Place Treasure Map' }));
+  expect(onPlace).toHaveBeenCalledWith(expect.objectContaining({ key: 'game:treasure-map', label: 'Treasure Map' }));
 });
 
 test('an object starts pointer placement with a mouse', () => {

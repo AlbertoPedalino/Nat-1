@@ -2,12 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isMapPiece, mapObjectLabel, normalizeMapObjectKey, normalizeMapObjectStroke } from '../../../../../src/shared/vtt/map/mapObjects.js';
 
-test('only a Lucide catalog name survives normalization', () => {
+test('only a catalog name survives normalization', () => {
   assert.equal(normalizeMapObjectKey('door-open'), 'door-open');
   assert.equal(normalizeMapObjectKey(' DOOR-OPEN '), 'door-open');
   assert.equal(normalizeMapObjectKey('<svg onload=alert(1)>'), null);
   assert.equal(normalizeMapObjectKey('a'.repeat(81)), null);
   assert.equal(mapObjectLabel('door-open'), 'Door Open');
+});
+
+test("a game drawing is kept as game:<name> and labelled by its name", () => {
+  assert.equal(normalizeMapObjectKey('game:treasure-map'), 'game:treasure-map');
+  assert.equal(normalizeMapObjectKey('game:<svg>'), null);
+  assert.equal(normalizeMapObjectKey('other:chest'), null);
+  assert.equal(mapObjectLabel('game:treasure-map'), 'Treasure Map');
 });
 
 test('the stroke width stays inside the slider it came from', () => {

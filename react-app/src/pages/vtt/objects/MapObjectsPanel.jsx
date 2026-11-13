@@ -5,12 +5,14 @@ import { iconNames } from 'lucide-react/dynamic';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   DEFAULT_MAP_OBJECT_STROKE,
+  GAME_DRAWING_PREFIX,
   MAX_MAP_OBJECT_STROKE,
   MIN_MAP_OBJECT_STROKE,
   mapObjectLabel,
 } from '../../../shared/vtt/map/mapObjects.js';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
+import { MAP_OBJECT_DRAWINGS } from '../../../shared/ui/gameIcons.js';
 import { compareText } from '../../../shared/lists.js';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -26,6 +28,7 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import LabeledSlider from '../../../shared/ui/LabeledSlider.jsx';
 
 const PAGE_SIZE = 32;
+const GAME_DRAWING_KEYS = Object.keys(MAP_OBJECT_DRAWINGS).sort(compareText).map((name) => `${GAME_DRAWING_PREFIX}${name}`);
 const DEFAULT_COLOR = VTT_COLORS.accent;
 
 export default function MapObjectsPanel({
@@ -37,9 +40,11 @@ export default function MapObjectsPanel({
   const [strokeWidth, setStrokeWidth] = useState(DEFAULT_MAP_OBJECT_STROKE);
   const filtered = useMemo(() => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return [...new Set(iconNames)]
-      .filter((name) => words.every((word) => name.includes(word)))
-      .sort(compareText);
+    const matches = (name) => words.every((word) => name.includes(word));
+    // The game drawings first (the app's own look), then Lucide's icons.
+    const drawings = GAME_DRAWING_KEYS.filter(matches);
+    const icons = [...new Set(iconNames)].filter(matches).sort(compareText);
+    return [...drawings, ...icons];
   }, [query]);
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -76,8 +81,8 @@ export default function MapObjectsPanel({
         <SearchField
           value={query}
           onChange={setQuery}
-          placeholder="Search Lucide icons…"
-          ariaLabel="Search Lucide icons"
+          placeholder="Search icons…"
+          ariaLabel="Search icons"
           sx={{ flex: 1, minWidth: 0 }}
         />
         <ColorField
@@ -130,7 +135,7 @@ export default function MapObjectsPanel({
             );
           })}
         </Box>
-      ) : <EmptyLine>No Lucide icon matches this search.</EmptyLine>}
+      ) : <EmptyLine>No icon matches this search.</EmptyLine>}
 
       {pageCount > 1 ? (
         <Pagination
