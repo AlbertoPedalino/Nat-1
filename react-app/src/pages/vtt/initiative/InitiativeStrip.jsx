@@ -16,6 +16,7 @@ import { BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { centerInScroller } from '../../../shared/ui/scrollReveal.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -42,17 +43,10 @@ export default function InitiativeStrip({
   const activeRef = useRef(null);
   const activeKey = entries.find((entry) => entry.active)?.key || null;
 
-  // The one acting stays in view on a long order. The list scrolls by itself:
-  // scrollIntoView would also move every scrollable box around it — the map
-  // jumped to follow the piece on every turn.
+  // The one acting stays in view on a long order, gliding there as the turn
+  // passes. Only the strip scrolls (centerInScroller): the map around it stays.
   useEffect(() => {
-    const list = listRef.current;
-    const item = activeRef.current;
-    if (!list || !item || list.scrollWidth <= list.clientWidth) return;
-    const offset = item.getBoundingClientRect().left - list.getBoundingClientRect().left;
-    const left = list.scrollLeft + offset - (list.clientWidth - item.offsetWidth) / 2;
-    if (typeof list.scrollTo === 'function') list.scrollTo({ left, behavior: 'smooth' });
-    else list.scrollLeft = left;
+    centerInScroller(listRef.current, activeRef.current, { axis: 'x', smooth: true });
   }, [activeKey]);
 
   if (!entries.length) return null;

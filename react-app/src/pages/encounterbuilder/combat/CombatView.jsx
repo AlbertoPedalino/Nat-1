@@ -12,6 +12,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { centerInScroller } from '../../../shared/ui/scrollReveal.js';
 
 export default encounterPanel({ state: ['activeFightId', 'combat', 'fights', 'library'], context: ['dispatch'] }, CombatViewView);
 
@@ -24,15 +25,10 @@ function CombatViewView({ state, dispatch }) {
 
   // Keep the active combatant roughly centered in the scrollable roster as turns
   // advance, so its card never hides behind the scroll edges. Scoped to the list
-  // container (not the page) so the turn controls above it stay put.
+  // container (not the page) so the turn controls above it stay put; it glides,
+  // since the eye follows the turn (centerInScroller).
   useEffect(() => {
-    const container = listRef.current;
-    const active = activeRef.current;
-    if (!container || !active) return;
-    const top = active.offsetTop - (container.clientHeight - active.clientHeight) / 2;
-    // Honor the OS "reduce motion" setting: jump instantly instead of animating.
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    container.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? 'auto' : 'smooth' });
+    centerInScroller(listRef.current, activeRef.current, { smooth: true });
   }, [currentTurn, round]);
 
   if (!combat?.combatants?.length) {
@@ -108,9 +104,6 @@ function CombatViewView({ state, dispatch }) {
 }
 
 const combatantListSx = {
-  // position:relative so the active card's offsetTop is measured against this
-  // container, which the centering scroll math in the effect above relies on.
-  position: 'relative',
   maxHeight: { xs: '60vh', lg: 'calc(100vh - 240px)' },
   overflowY: 'auto',
   // Room for the scrollbar so it never overlaps a card's active-turn border.

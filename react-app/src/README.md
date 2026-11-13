@@ -24,7 +24,8 @@ something else), `CloseButton` / `CornerCloseButton` (every X), `RowExpandButton
 row's chevron),
 `DisclosureButton` + `CollapsibleBody` / `ExpandableCard` (what opens and closes),
 `ScrollingName` (a card name on one line), `ScrollWell` (a list that scrolls, opened on
-its chosen row), `SearchField` / `DraftSearchField` (every search, "Search <what>…"), `PickableRow` + `entryCard.js` (an
+its chosen row), `centerInScroller` (`scrollReveal.js`: the current item of a scrolling
+list or strip kept in the middle, only that box scrolling), `SearchField` / `DraftSearchField` (every search, "Search <what>…"), `PickableRow` + `entryCard.js` (an
 action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
 `Panel` / `SidePanel` / `PageHeader` (`usePanelsWithoutLayers` for a page over a moving

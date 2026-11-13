@@ -101,6 +101,18 @@ test('a scrolling list is a ScrollWell', () => {
   assert.deepEqual(sourceLinesMatching(handScrolled).filter((hit) => /^pages\/(charbuilder|charsheet)\//.test(hit)), []);
 });
 
+// The current one of a scrolling list (a ScrollWell's choice, the turn in the
+// encounter's roster and the map's initiative strip, the background on show)
+// is brought to the middle by centerInScroller alone: only that box scrolls.
+// scrollIntoView moved every box around it, the map included.
+test('a list keeps its current item in view through centerInScroller', () => {
+  assert.deepEqual(sourceLinesMatching(/\(\s*\w+\.client(Height|Width) - /, { allow: ['shared/ui/scrollReveal.js'] }), []);
+  assert.deepEqual(sourceLinesMatching(/scrollIntoView\(/, {
+    // A result just rolled, shown inside its own dialog: no list to keep.
+    allow: ['pages/encounterbuilder/rolls/CriticalFumblesDialog.jsx'],
+  }), []);
+});
+
 // A creature's markers sit in one frame, MarkerManager (pills in view, the
 // surface that adds more, the clear): the sheet's panels and an encounter
 // combatant's lines alike. Reminders always come as a ReminderEditor (the

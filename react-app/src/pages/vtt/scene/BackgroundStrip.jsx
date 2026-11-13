@@ -16,6 +16,7 @@ import { DURATIONS } from '../../../shared/ui/motion.js';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import { centerInScroller } from '../../../shared/ui/scrollReveal.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -33,6 +34,7 @@ export default function BackgroundStrip({
 }) {
   const fileRef = useRef(null);
   const selectedRef = useRef(null);
+  const trackRef = useRef(null);
   // Removing deletes the uploaded file, so it takes a second click on the
   // same thumbnail's bin.
   const [armed, setArmed] = useState(null);
@@ -48,8 +50,11 @@ export default function BackgroundStrip({
     onSelect(backgrounds[(from + delta + backgrounds.length) % backgrounds.length]);
   };
 
+  // The background on show stays in the middle of the strip, gliding there as
+  // the GM steps through them. Only the strip scrolls (centerInScroller), never
+  // the map behind it.
   useEffect(() => {
-    selectedRef.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    centerInScroller(trackRef.current, selectedRef.current, { axis: 'x', smooth: true });
   }, [selected]);
 
   useEffect(() => {
@@ -91,7 +96,7 @@ export default function BackgroundStrip({
         </TipIconButton>
       ) : null}
 
-      <Stack direction="row" spacing={0.75} sx={trackSx}>
+      <Stack ref={trackRef} direction="row" spacing={0.75} sx={trackSx}>
         {backgrounds.map((path, position) => {
           const isSelected = path === selected;
           return (
