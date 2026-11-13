@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
+import { monsterFilterDefaults } from '../../../shared/bestiary/filters.js';
 import { monsterToToken } from '../../../shared/vtt/tokens/encounterImport.js';
 import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import PlacementDialog from './PlacementDialog.jsx';
@@ -13,7 +14,6 @@ import GmLayerSwitch from './GmLayerSwitch.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 
-const EMPTY_FILTERS = { search: '', cr: '', type: '', sources: [] };
 
 // The encounter builder's own bestiary panel, in a dialog. Same filters, same
 // rows — it is the same component, wired to local state instead of that page's
@@ -22,7 +22,7 @@ export default function MonsterPickerDialog({
   open, busy, placing = false, onClose, onPlace, onPlacementDragStart, onPlacementDragEnd,
 }) {
   const monsterDb = useMonsterDb();
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [filters, setFilters] = useState(monsterFilterDefaults);
   const [count, setCount] = useState(1);
   const [hidden, setHidden] = useState(false);
 

@@ -55,7 +55,9 @@ parts share (`compendiumStyles.js`). `search/`: `compendiumIndex.js` (pure index
 and `CompendiumBrowser.jsx` (search, kind toggles, paged results, entry). `catalogs/`: one
 definition per catalog (`spellCatalog.js`, `monsterCatalog.js`, `itemCatalog.js`: what it
 lists, its filter fields — select, yes/no, typed min–max range — and sorts), run by
-`catalogFilter.js` and drawn by the generic `Catalog.jsx` (react-window list), with the columns
+`catalogFilter.js` (fields engine in `shared/content/filterFields.js`, controls in
+`shared/ui/FilterFieldControls.jsx`; the monster fields are the bestiary's
+`MONSTER_FILTER_FIELDS`) and drawn by the generic `Catalog.jsx` (react-window list), with the columns
 and the tab list in `catalogColumns.jsx`. `detail/`: `CompendiumDetail.jsx`. `books/`:
 `books.js` + `BookLinks.jsx`. `data/`: `loadCompendium.js` (every kind once per tab through the
 existing loaders, `useCompendium`) and `itemPictures.js`.

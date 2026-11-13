@@ -1,26 +1,22 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import {
-  Box, Button, Stack, Typography,
-} from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { List } from 'react-window';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import RangeInputs from '../../../shared/ui/RangeInputs.jsx';
+import FilterFieldControls from '../../../shared/ui/FilterFieldControls.jsx';
 import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import CompendiumDetail from '../detail/CompendiumDetail.jsx';
 import LoadStatus, { isLoadPending } from '../../../shared/ui/LoadStatus.jsx';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { rangeFilterKeys } from '../../../shared/character/inventory/itemFilters.js';
 import {
-  YES_NO_OPTIONS, anyValue, catalogDefaults, catalogEntries, fieldOptions, runCatalog, sourceOptions,
+  catalogDefaults, catalogEntries, runCatalog, sourceOptions,
 } from './catalogFilter.js';
 import { entryNameSx, fillColumnSx, filterBarSx } from '../compendiumStyles.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX, BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
-import SelectField from '../../../shared/ui/SelectField.jsx';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -77,58 +73,24 @@ export default function Catalog({
     );
   }
 
-  const selects = [
-    ...definition.fields.filter((field) => field.kind !== 'range').map((field) => ({
-      key: field.key,
-      label: field.label,
-      any: anyValue(field),
-      options: field.kind === 'yesNo' ? YES_NO_OPTIONS : fieldOptions(field, entries),
-    })),
-    { key: 'source', label: 'Source', any: 'all', options: sourceOptions(entries) },
-    { key: 'sort', label: 'Sort by', options: definition.sorts },
-  ];
-  const ranges = definition.fields.filter((field) => field.kind === 'range');
   const template = columns.map((column) => column.width).join(' ');
 
   return (
     <Box sx={fillColumnSx}>
       <Stack spacing={1} sx={filterBarSx}>
         <SearchField value={filters.search} onChange={set('search')} placeholder={`Search ${label}…`} ariaLabel={`Search ${label}`} />
-        <Box sx={controlsSx}>
-          {selects.map((control) => (
-            <SelectField
-              key={control.key}
-              label={control.label}
-              value={filters[control.key]}
-              onChange={set(control.key)}
-              emptyOption={control.any ? { label: 'Any' } : undefined}
-              emptyValue={control.any || undefined}
-              options={control.options.map((option) => ({ value: option.key, label: option.label }))}
-              fullWidth={false}
-              sx={controlSx}
-            />
-          ))}
-          {ranges.map((field) => {
-            const [minKey, maxKey] = rangeFilterKeys(field);
-            return (
-              <Box key={field.key} role="group" aria-label={field.label} sx={rangeSx}>
-                <Typography component="span" sx={captionLabelSx}>{field.label}</Typography>
-                <RangeInputs
-                  label={field.label}
-                  unit={field.unit}
-                  step={field.step}
-                  min={filters[minKey]}
-                  max={filters[maxKey]}
-                  onMin={set(minKey)}
-                  onMax={set(maxKey)}
-                />
-              </Box>
-            );
-          })}
-          {changed ? (
-            <Button size="small" onClick={() => setFilters(defaults)}>Reset filters</Button>
-          ) : null}
-        </Box>
+        <FilterFieldControls
+          fields={definition.fields}
+          filters={filters}
+          onChange={(key, value) => set(key)(value)}
+          entries={entries}
+          extra={[
+            { key: 'source', label: 'Source', any: 'all', options: sourceOptions(entries) },
+            { key: 'sort', label: 'Sort by', options: definition.sorts },
+          ]}
+          changed={changed}
+          onReset={() => setFilters(defaults)}
+        />
         <Caption>{results.length} {label}</Caption>
       </Stack>
       {!narrow ? (
@@ -190,12 +152,6 @@ function CatalogRow({
     </Box>
   );
 }
-
-const controlsSx = { display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' };
-
-const controlSx = { minWidth: 130, flex: { xs: '1 1 130px', md: '0 0 auto' } };
-
-const rangeSx = { display: 'flex', alignItems: 'center', gap: 0.75 };
 
 const headerRowSx = {
   display: 'grid',

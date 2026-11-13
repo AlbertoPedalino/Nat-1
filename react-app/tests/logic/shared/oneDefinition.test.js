@@ -1007,3 +1007,17 @@ test('a disabled button takes the one unpressable look', () => {
 test('a paged list grows by scrolling, never by a Show more button', () => {
   assert.deepEqual(sourceLinesMatching(/Show more|showMore/), []);
 });
+
+// A list's filters are described once (shared/content/filterFields.js) and
+// drawn by one component (shared/ui/FilterFieldControls.jsx): the compendium's
+// catalogs and the bestiary browser alike. A creature's filters are
+// MONSTER_FILTER_FIELDS (shared/bestiary/filters.js), the compendium's monster
+// catalog included.
+test("a list's filters are described once and drawn by FilterFieldControls", () => {
+  assert.deepEqual(sourceLinesMatching(/anyValue\(|YES_NO_OPTIONS/, {
+    allow: ['shared/content/filterFields.js', 'shared/ui/FilterFieldControls.jsx'],
+  }), []);
+  assert.deepEqual(sourceLinesMatching(/key: 'crFrom'|key: 'crTo'/, {
+    allow: ['shared/bestiary/filters.js'],
+  }), []);
+});

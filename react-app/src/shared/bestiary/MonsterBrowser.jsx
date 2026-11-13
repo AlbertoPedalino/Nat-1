@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { Stack } from '@mui/material';
 import { Plus } from 'lucide-react';
-import { CR_OPTIONS, CREATURE_TYPE_OPTIONS } from './bestiaryConstants.js';
-import { filterMonsters } from './filters.js';
+import { MONSTER_FILTER_FIELDS, filterMonsters, monsterFilterDefaults } from './filters.js';
 import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { formatNumber } from '../ui/numberFormat.js';
@@ -18,15 +17,18 @@ import TipIconButton from '../ui/TipIconButton.jsx';
 import EntityRow from '../ui/EntityRow.jsx';
 import SearchField from '../ui/SearchField.jsx';
 import FilterToggles from '../ui/FilterToggles.jsx';
-import SelectField from '../ui/SelectField.jsx';
+import FilterFieldControls from '../ui/FilterFieldControls.jsx';
 
 const PAGE_SIZE = 50;
+const FILTER_DEFAULTS = monsterFilterDefaults();
 
 // The bestiary browser, with no idea who is asking. The encounter builder wires
 // it to its reducer; the battle map wires it to local state and drops the
 // chosen creature on the scene. Both get the same filters, the same paging and
 // the same rows — which is the point of it living here rather than being typed
-// out twice. `onToggleSource` is optional: without it there is no source bar.
+// out twice. `filters` starts from monsterFilterDefaults() and its fields are
+// MONSTER_FILTER_FIELDS, the compendium's monster filters too.
+// `onToggleSource` is optional: without it there is no source bar.
 // `fill` (inside a `fill` Panel) lets the list take the panel's height on a
 // wide screen, however tall the panel's row is, the old cap as its least.
 export default function MonsterBrowser({
@@ -55,6 +57,9 @@ export default function MonsterBrowser({
   }
 
   const allSourcesActive = !filters.sources?.length;
+  const changedKeys = Object.keys(FILTER_DEFAULTS).filter((key) => (
+    key === 'sources' ? !allSourcesActive : (filters[key] || FILTER_DEFAULTS[key]) !== FILTER_DEFAULTS[key]
+  ));
 
   return (
     <Stack spacing={2} sx={fill ? FILL_SX : null}>
@@ -68,30 +73,19 @@ export default function MonsterBrowser({
         </Stack>
       ) : null}
 
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
+      <Stack spacing={1.25}>
         <SearchField
           value={filters.search}
           onChange={(value) => onFilterChange('search', value)}
           placeholder="Search monsters…"
           ariaLabel="Search monsters"
         />
-        <SelectField
-          label="CR"
-          value={filters.cr}
-          onChange={(value) => onFilterChange('cr', value)}
-          emptyOption={{ label: 'All CR' }}
-          options={CR_OPTIONS.map(({ key, label }) => ({ value: key, label }))}
-          fullWidth={false}
-          sx={{ minWidth: 130 }}
-        />
-        <SelectField
-          label="Type"
-          value={filters.type}
-          onChange={(value) => onFilterChange('type', value)}
-          emptyOption={{ label: 'All types' }}
-          options={CREATURE_TYPE_OPTIONS.map(({ key, label }) => ({ value: key, label }))}
-          fullWidth={false}
-          sx={{ minWidth: 170 }}
+        <FilterFieldControls
+          fields={MONSTER_FILTER_FIELDS}
+          filters={filters}
+          onChange={onFilterChange}
+          changed={changedKeys.length > 0}
+          onReset={() => changedKeys.forEach((key) => onFilterChange(key, FILTER_DEFAULTS[key]))}
         />
       </Stack>
 

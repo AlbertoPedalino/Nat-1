@@ -25,6 +25,7 @@ import { absorbMonsterVitals } from '../../../shared/encounter/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
 import { makeId } from '../../../shared/ids.js';
+import { monsterFilterDefaults } from '../../../shared/bestiary/filters.js';
 import {
   DEFAULT_PARTY, MAX_PARTY_LEVEL, createDefaultPlayers, setPartyCount, updatePlayer, removePlayer, importCampaignPlayers,
 } from './partyState.js';
@@ -36,8 +37,8 @@ import { absorbExternal, deleteLibraryEncounter, assignEncounterQuest, deleteFig
 export function createInitialState() {
   return {
     view: 'builder',
-    filters: { search: '', cr: '', type: '', sources: [] },
-    quickFilters: { search: '', cr: '', type: '' },
+    filters: monsterFilterDefaults(),
+    quickFilters: monsterFilterDefaults(),
     party: { ...DEFAULT_PARTY },
     players: createDefaultPlayers(),
     encounter: [],
