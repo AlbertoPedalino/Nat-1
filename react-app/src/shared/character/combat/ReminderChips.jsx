@@ -19,6 +19,7 @@ import { UI_COLORS } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { markerDensitySx, markerSuggestedSx } from './markerChipStyles.js';
 import MarkerChip from './MarkerChip.jsx';
+import MarkerManager from './MarkerManager.jsx';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -32,27 +33,30 @@ import MarkerChip from './MarkerChip.jsx';
 
 export const REMINDER_ACCENT = UI_COLORS.info;
 
-// A creature's reminders by name, each removable, and the field that adds one.
-// `effects` is the list; the caller owns the writes.
-// `density` sizes the chips for their surface.
-export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, density }) {
+// A creature's reminders by name, each removable, and the field that adds one,
+// in the markers' frame (MarkerManager): the sheet's panel, the encounter
+// combatant's line, the map's piece menu. `effects` is the list; the caller
+// owns the writes. `density` sizes the chips for their surface; the field stays
+// open (one tap to add) unless the caller passes `collapse`. Anything else
+// (`inline`, `label`, `onClear`, `collapse`) is the frame's.
+export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, density, collapse = false, ...frame }) {
   const reminders = normalizeEffects(effects);
   return (
-    <Box sx={editorSx}>
-      {reminders.length ? (
-        <Box sx={chipsSx}>
-          {reminders.map((effect) => (
-            <ReminderChip
-              key={effectId(effect)}
-              effect={effect}
-              density={density}
-              onRemove={disabled ? undefined : () => onRemove(effectId(effect))}
-            />
-          ))}
-        </Box>
-      ) : null}
+    <MarkerManager
+      {...frame}
+      collapse={collapse}
+      count={reminders.length}
+      pills={reminders.map((effect) => (
+        <ReminderChip
+          key={effectId(effect)}
+          effect={effect}
+          density={density}
+          onRemove={disabled ? undefined : () => onRemove(effectId(effect))}
+        />
+      ))}
+    >
       {disabled ? null : <ReminderField effects={reminders} onAdd={onAdd} density={density} />}
-    </Box>
+    </MarkerManager>
   );
 }
 

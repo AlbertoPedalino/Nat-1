@@ -23,7 +23,8 @@ stands raised from the theme, `PART_ICON_BUTTON_SX` only for an icon that is par
 something else), `CloseButton` / `CornerCloseButton` (every X), `RowExpandButton` (a
 row's chevron),
 `DisclosureButton` + `CollapsibleBody` / `ExpandableCard` (what opens and closes),
-`ScrollingName` (a card name on one line), `PickableRow` + `entryCard.js` (an
+`ScrollingName` (a card name on one line), `ScrollWell` (a list that scrolls, opened on
+its chosen row), `SearchField` / `DraftSearchField` (every search, "Search <what>…"), `PickableRow` + `entryCard.js` (an
 action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
 `Panel` / `SidePanel` / `PageHeader` (`usePanelsWithoutLayers` for a page over a moving

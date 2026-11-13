@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sourceFilesMatching } from '../sourceScan.js';
+import { readSource, sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
 
 // Looks and jobs drawn by one shared component each (disclosures, card
 // sections, side panels, corner close buttons, callouts, meters, dialog
@@ -95,4 +95,21 @@ test('a scrolling list is a ScrollWell', () => {
   assert.deepEqual(sourceFilesMatching(/\bscrollWellSx\(/, {
     allow: ['shared/ui/surfaces.js', 'shared/ui/ScrollWell.jsx', 'shared/ui/entryCard.js'],
   }), []);
+  // Nor a bare box capped and scrolled on the spot, in the builder and the
+  // sheet: the list would scroll with neither the well nor its chosen row.
+  const handScrolled = /maxHeight: [^,}]+, overflow(Y)?: 'auto'/;
+  assert.deepEqual(sourceLinesMatching(handScrolled).filter((hit) => /^pages\/(charbuilder|charsheet)\//.test(hit)), []);
+});
+
+// A creature's markers sit in one frame, MarkerManager (pills in view, the
+// surface that adds more, the clear): the sheet's panels and an encounter
+// combatant's lines alike. Reminders always come as a ReminderEditor (the
+// frame with its chips and field), and the condition grid only inside the
+// frame — or as the map piece menu's own column, where every condition is a
+// switch in view and there is nothing to frame.
+test('a marker frame is MarkerManager', () => {
+  assert.deepEqual(sourceFilesMatching(/<ReminderField\b/, { allow: ['shared/character/combat/ReminderChips.jsx'] }), []);
+  const grids = sourceFilesMatching(/<ConditionToggleGrid\b/, { allow: ['pages/vtt/tokens/TokenMarkers.jsx'] });
+  assert.deepEqual(grids.filter((file) => !/<MarkerManager\b/.test(readSource(file))), []);
+  assert.deepEqual(sourceFilesMatching(/\bfunction MarkerRow\b|MarkerRow\.jsx/), []);
 });

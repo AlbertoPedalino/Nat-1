@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Stack } from '@mui/material';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
@@ -129,22 +130,24 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
       {!familiars.length ? (
         <DetailNote sx={{ mt: 0 }}>Loading beasts…</DetailNote>
       ) : (
-        <Stack spacing={0.5} sx={{ maxHeight: 260, overflow: 'auto' }}>
-          {visible.map((beast) => (
-            <BeastPickerRow
-              key={`${beast.name}|${beast.source}`}
-              beast={beast}
-              name={beast.name}
-              source={beast.source}
-              summary={beastSummary(beast)}
-              actionLabel="Summon"
-              onAction={() => summon(beast)}
-              actionDisabled={!canSummon}
-              typeLabel="Fey"
-            />
-          ))}
-          {!visible.length ? <EmptyLine>No matches.</EmptyLine> : null}
-        </Stack>
+        <ScrollWell maxHeight={260} sx={{ p: 0.5 }}>
+          <Stack spacing={0.5}>
+            {visible.map((beast) => (
+              <BeastPickerRow
+                key={`${beast.name}|${beast.source}`}
+                beast={beast}
+                name={beast.name}
+                source={beast.source}
+                summary={beastSummary(beast)}
+                actionLabel="Summon"
+                onAction={() => summon(beast)}
+                actionDisabled={!canSummon}
+                typeLabel="Fey"
+              />
+            ))}
+            {!visible.length ? <EmptyLine>No matches.</EmptyLine> : null}
+          </Stack>
+        </ScrollWell>
       )}
       <DetailNote warn={!canSummon}>
         {!canSummon

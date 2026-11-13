@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
+import ScrollWell from '../../../shared/ui/ScrollWell.jsx';
 import { fixedSubclassShortName } from '../../../shared/content/catalogs/classScope.js';
 import { isBookAllowed } from '../../../shared/content/sourcePriority.js';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -71,7 +72,7 @@ export default function SubclassPanel({ character, dispatch }) {
           helperText={fixed ? 'The subclass of this hero class is fixed.' : null}
         />
         {subclassShortName ? (
-          <Box sx={{ maxHeight: 450, overflowY: 'auto', overflowX: 'hidden', minWidth: 0 }}>
+          <ScrollWell maxHeight={450} sx={{ p: 0.5, overflowX: 'hidden', minWidth: 0 }}>
             <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               {subclassFeatures.map((feature) => (
                 <SubclassFeatureRow key={`${feature.name}-${feature.level}`} feature={feature} />
@@ -80,7 +81,7 @@ export default function SubclassPanel({ character, dispatch }) {
                 <EmptyLine>No subclass features loaded for this subclass.</EmptyLine>
               ) : null}
             </Stack>
-          </Box>
+          </ScrollWell>
         ) : null}
       </Stack>
     </BuilderPanel>

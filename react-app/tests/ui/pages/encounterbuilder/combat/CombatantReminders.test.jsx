@@ -74,10 +74,10 @@ describe('CombatantReminders', () => {
 
   test('Clear only appears once there is something to clear', async () => {
     renderReminders();
-    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear all reminders' })).toBeNull();
 
     renderReminders([reminder('Bless')]);
-    await userEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Clear all reminders' }));
     expect(dispatch).toHaveBeenCalledWith({ type: 'clearCombatantEffects', id: 7 });
   });
 });

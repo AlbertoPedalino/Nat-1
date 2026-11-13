@@ -1,10 +1,9 @@
-import { effectId, normalizeEffects } from '../../../shared/character/combat/combatEffects.js';
-import { ReminderChip, ReminderField } from '../../../shared/character/combat/ReminderChips.jsx';
+import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
-import MarkerRow from './MarkerRow.jsx';
 
 // Reminders on a combatant ("Bardic Inspiration", "Guidance"), sharing the
-// MarkerRow frame with the conditions row directly above: chips always visible
+// MarkerManager frame with the conditions row directly above (and with the
+// sheet's panels): chips always visible
 // so the initiative list can be scanned, the field that adds one behind a
 // disclosure.
 //
@@ -19,25 +18,15 @@ import MarkerRow from './MarkerRow.jsx';
 
 export default function CombatantReminders({ combatant }) {
   const dispatch = useEncounterDispatch();
-  const active = normalizeEffects(combatant.activeEffects);
-
   return (
-    <MarkerRow
+    <ReminderEditor
+      inline
+      collapse
       label="Reminders"
-      count={active.length}
+      effects={combatant.activeEffects}
       onClear={() => dispatch({ type: 'clearCombatantEffects', id: combatant.id })}
-      pills={active.map((effect) => (
-        <ReminderChip
-          key={effectId(effect)}
-          effect={effect}
-          onRemove={() => dispatch({ type: 'removeCombatantEffect', id: combatant.id, effectId: effectId(effect) })}
-        />
-      ))}
-    >
-      <ReminderField
-        effects={active}
-        onAdd={(text) => dispatch({ type: 'addCombatantEffect', id: combatant.id, payload: { text } })}
-      />
-    </MarkerRow>
+      onRemove={(effectId) => dispatch({ type: 'removeCombatantEffect', id: combatant.id, effectId })}
+      onAdd={(text) => dispatch({ type: 'addCombatantEffect', id: combatant.id, payload: { text } })}
+    />
   );
 }

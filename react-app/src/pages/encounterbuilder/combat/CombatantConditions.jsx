@@ -12,13 +12,14 @@ import {
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { useOpenConditionCards } from '../../../shared/character/combat/useOpenConditionCards.js';
 import { useEncounterDispatch } from '../state/EncounterBuilderContext.jsx';
-import MarkerRow from './MarkerRow.jsx';
+import MarkerManager from '../../../shared/character/combat/MarkerManager.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 
 // Conditions on a combatant. Active ones are always visible so a GM can scan the
 // initiative list and see who is prone without opening anything; the grid to
-// assign them hides behind a disclosure. MarkerRow owns that frame, shared with
-// the reminders row directly below so the two cannot drift apart.
+// assign them hides behind a disclosure. MarkerManager owns that frame, shared
+// with the reminders row directly below and the sheet's panels so they cannot
+// drift apart.
 //
 // Exhaustion is shown but not editable here: it is graded 0-6 and that level
 // lives on the character sheet, which this surface does not sync. Offering a
@@ -36,7 +37,8 @@ export default function CombatantConditions({ combatant }) {
   const openCards = cards.openKeys;
 
   return (
-    <MarkerRow
+    <MarkerManager
+      inline
       label="Conditions"
       // Exhaustion is excluded from the count and from Clear because this
       // surface cannot set or drop it; it is still shown as a pill.
@@ -53,7 +55,7 @@ export default function CombatantConditions({ combatant }) {
           readOnlyReason={key === EXHAUSTION_KEY ? 'Exhaustion is graded — set it on the character sheet' : null}
         />
       ))}
-      belowRow={openCards.length > 0 ? (
+      below={openCards.length > 0 ? (
         <Box sx={cardStackSx}>
           {openCards.map((key) => (
             <ConditionCard
@@ -68,7 +70,7 @@ export default function CombatantConditions({ combatant }) {
       ) : null}
     >
       <ConditionToggleGrid active={active} onToggle={toggle} sx={gridSx} />
-    </MarkerRow>
+    </MarkerManager>
   );
 }
 
