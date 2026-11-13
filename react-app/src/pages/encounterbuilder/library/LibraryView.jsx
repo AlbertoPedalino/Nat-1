@@ -1,5 +1,5 @@
 import { Autocomplete, Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { Library as LibraryIcon, Play, RotateCcw, ScrollText, Trash2, Upload } from 'lucide-react';
+import { Library as LibraryIcon, RotateCcw, ScrollText, Trash2, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -8,7 +8,7 @@ import {
 import { normalizeEncounterQuest } from '../state/storage.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import InitiativeLaunchButton from '../builder/InitiativeLaunchButton.jsx';
+import LaunchButtons from '../builder/LaunchButtons.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
@@ -137,16 +137,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         >
           Load
         </Button>
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<Play size={ICON_SIZES.sm} />}
-          onClick={() => dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters })}
-          disabled={missingMonster}
-        >
-          Launch
-        </Button>
-        <InitiativeLaunchButton
+        <LaunchButtons
           size="small"
           encounter={enc.encounter}
           players={players}

@@ -1,8 +1,47 @@
-import { normalizeEncounterQuest } from './storage.js';
+import { makeSavedEncounter, normalizeEncounterQuest } from './storage.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
+import { freeId } from '../../../shared/encounter/fightRecord.js';
 
 // The encounter builder's saved encounters and fights: deleting, quest
 // assignment, and merging what another tab or the battle map wrote.
+
+// The composer (the builder's Encounter panel) is where an encounter is put
+// together: a new one, or a library one loaded to be changed. Saving it,
+// updating it or launching it hands it to the library and empties the
+// composer, ready for the next one; the library card is where it lives on
+// (Load, Launch, Resume).
+const EMPTY_COMPOSER = Object.freeze({
+  encounter: [], encounterName: '', encounterQuest: null, currentEncounterId: null,
+});
+
+// The composer emptied, or set to `composer` (fields of EMPTY_COMPOSER).
+export function clearComposer(state, composer = {}) {
+  return { ...state, ...EMPTY_COMPOSER, ...composer, selectedStatblock: null };
+}
+
+// The composer's encounter as a library card: the loaded one updated, or a new
+// one with an id of its own. None for an empty composer.
+export function draftLibraryEntry(state) {
+  if (!state.encounter?.length) return null;
+  const existing = state.library.find((entry) => entry.id === state.currentEncounterId) || null;
+  const entry = makeSavedEncounter(state.encounterName, state.encounter, state.party, state.encounterQuest, existing);
+  if (!existing) entry.id = freeId(entry.id, state.library);
+  return entry;
+}
+
+// A card into the library (first in the list) and the composer emptied.
+// Saving over an encounter is the GM choosing that version: a fight of the old
+// one is superseded and goes, row and all (useCloudFights deletes what leaves
+// this list). The fight being run is left to finish.
+export function saveEntryToLibrary(state, entry) {
+  return clearComposer({
+    ...state,
+    library: [entry, ...state.library.filter((card) => card.id !== entry.id)],
+    fights: state.fights.filter((fight) => (
+      fight.encounterId !== entry.id || fight.id === state.activeFightId
+    )),
+  });
+}
 
 // Fights and saved encounters written into this instance's storage by something
 // other than this tab: the battle map sending a dungeon room, or the map writing

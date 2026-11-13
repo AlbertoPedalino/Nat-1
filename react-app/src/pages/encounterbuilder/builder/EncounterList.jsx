@@ -7,7 +7,7 @@ import { listQuestNames } from '../../../shared/encounter/library.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
-import InitiativeLaunchButton from './InitiativeLaunchButton.jsx';
+import LaunchButtons from './LaunchButtons.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Panel from '../../../shared/ui/Panel.jsx';
@@ -25,7 +25,7 @@ export default function EncounterList() {
   const editingExisting = state.library.some((entry) => entry.id === state.currentEncounterId);
 
   const handleSave = () => {
-    const entry = saveEncounterToLibrary(state.encounterName);
+    const entry = saveEncounterToLibrary();
     if (entry) notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
   };
 
@@ -103,23 +103,13 @@ export default function EncounterList() {
         {/* Two rows: Launch keeps its initiative options beside it, and the
             panel is too narrow for three controls side by side. */}
         <Stack spacing={1}>
-          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'stretch' }}>
-            <Button
-              variant="contained"
-              startIcon={<Swords size={ICON_SIZES.md} />}
-              onClick={() => handleLaunch()}
-              disabled={cannotLaunch}
-              sx={{ flex: 1, minWidth: 0 }}
-            >
-              Launch
-            </Button>
-            <InitiativeLaunchButton
-              encounter={state.encounter}
-              players={state.players}
-              disabled={cannotLaunch}
-              onLaunch={handleLaunch}
-            />
-          </Stack>
+          <LaunchButtons
+            grow
+            encounter={state.encounter}
+            players={state.players}
+            disabled={cannotLaunch}
+            onLaunch={handleLaunch}
+          />
           <Button
             variant="outlined"
             startIcon={<Save size={ICON_SIZES.md} />}
@@ -131,7 +121,9 @@ export default function EncounterList() {
           </Button>
         </Stack>
         <Caption>
-          Launch saves a new encounter in Library and starts combat.
+          {editingExisting
+            ? 'Update and Launch save your changes to this Library encounter; Launch also starts combat. Either clears this panel for the next one.'
+            : 'Save and Launch put the encounter in the Library; Launch also starts combat. Either clears this panel for the next one.'}
         </Caption>
       </Stack>
     </Panel>

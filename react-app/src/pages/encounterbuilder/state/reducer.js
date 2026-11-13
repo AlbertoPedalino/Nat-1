@@ -32,7 +32,9 @@ import {
 import {
   launchCombat, withCombat, closeCombat, syncCombatantVitals, absorbFightVitals, absorbActiveFightTurn,
 } from './combatState.js';
-import { absorbExternal, deleteLibraryEncounter, assignEncounterQuest, deleteFight } from './libraryState.js';
+import {
+  absorbExternal, assignEncounterQuest, clearComposer, deleteFight, deleteLibraryEncounter, draftLibraryEntry, saveEntryToLibrary,
+} from './libraryState.js';
 
 export function createInitialState() {
   return {
@@ -69,7 +71,7 @@ export function encounterReducer(state, action) {
 function reduceEncounterState(state, action) {
   switch (action.type) {
     case 'hydrateStorage':
-      return hydrateState(state, action.payload, action.monsters);
+      return hydrateState(state, action.payload, action.monsters, action.opening !== false);
     case 'setView':
       return { ...state, view: action.view, selectedStatblock: null };
     case 'setFilter':
@@ -85,15 +87,7 @@ function reduceEncounterState(state, action) {
     case 'removeEncounterItem':
       return { ...state, encounter: state.encounter.filter((item) => item.id !== action.id) };
     case 'newEncounter':
-      return {
-        ...state,
-        view: 'builder',
-        encounter: [],
-        encounterName: '',
-        encounterQuest: null,
-        currentEncounterId: null,
-        selectedStatblock: null,
-      };
+      return { ...clearComposer(state), view: 'builder' };
     case 'setEncounterName':
       return { ...state, encounterName: action.value };
     case 'setEncounterQuest':
@@ -108,20 +102,12 @@ function reduceEncounterState(state, action) {
       return removePlayer(state, action.index);
     case 'importCampaignPlayers':
       return importCampaignPlayers(state, action.players);
-    case 'saveEncounterToLibrary':
-      return {
-        ...state,
-        library: [action.entry, ...state.library.filter((entry) => entry.id !== action.entry.id)],
-        // Saving over an encounter is the GM choosing that version: a fight of the
-        // old one is superseded and goes, row and all (useCloudFights deletes what
-        // leaves this list). The fight being run is left to finish.
-        fights: state.fights.filter((fight) => (
-          fight.encounterId !== action.entry.id || fight.id === state.activeFightId
-        )),
-        currentEncounterId: action.entry.id,
-        encounterName: action.entry.name,
-        encounterQuest: action.entry.quest || null,
-      };
+    case 'saveEncounterToLibrary': {
+      // Save to Library and Update in Library: the composer's card (or the one
+      // the caller built from it), then an empty composer.
+      const entry = action.entry || draftLibraryEntry(state);
+      return entry ? saveEntryToLibrary(state, entry) : state;
+    }
     case 'assignEncounterQuest':
       return assignEncounterQuest(state, action.id, action.quest);
     case 'deleteLibraryEncounter':
@@ -137,24 +123,16 @@ function reduceEncounterState(state, action) {
         encounterName: action.entry?.name || '',
         encounterQuest: action.entry?.quest || null,
       };
-    case 'launchCurrentEncounter':
-      return launchCombat(
-        state,
-        state.encounter,
-        null,
-        state.encounterName,
-        state.encounterQuest,
-        action.initiative,
-      );
+    case 'launchCurrentEncounter': {
+      // Launch from the composer: saved (new) or updated (loaded) like Save,
+      // then started; the composer is emptied, the card launched.
+      const entry = draftLibraryEntry(state);
+      if (!entry) return state;
+      return launchCombat(saveEntryToLibrary(state, entry), state.encounter, entry, action.initiative);
+    }
     case 'launchLibraryEncounter':
-      return launchCombat(
-        state,
-        hydrateEncounterItems(action.entry?.encounter, action.monsters),
-        action.entry?.id || null,
-        action.entry?.name,
-        action.entry?.quest,
-        action.initiative,
-      );
+      if (!action.entry) return state;
+      return launchCombat(state, hydrateEncounterItems(action.entry.encounter, action.monsters), action.entry, action.initiative);
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
     case 'syncExternalFight': {
@@ -279,32 +257,42 @@ function reduceEncounterState(state, action) {
   }
 }
 
-function hydrateState(state, payload, monsters) {
+// Reading the stored instance. On `opening` the page opens on the builder,
+// never inside a fight (a fight is resumed or launched from its library card:
+// closing the page closed it), with an empty composer unless it holds work not
+// saved yet (an encounter already in the library is loaded again from its
+// card). Reloading a cloud revision mid-session keeps the fight and the
+// composer as they were.
+function hydrateState(state, payload, monsters, opening) {
   const partyData = payload?.partyData;
   const draftData = payload?.draftData;
   const fightsData = payload?.fightsData || { activeFightId: null, items: [] };
-  const activeFight = fightsData.activeFightId
+  const library = dedupeLibraryById(Array.isArray(payload?.library) ? payload.library : state.library);
+  const activeFight = !opening && fightsData.activeFightId
     ? fightsData.items.find((fight) => fight.id === fightsData.activeFightId)
     : null;
-  return {
+  const draftSaved = library.some((entry) => entry.id === draftData?.currentEncounterId);
+  const composer = draftData && (!opening || !draftSaved) ? {
+    encounter: draftData.encounter || state.encounter,
+    encounterName: draftData.encounterName || '',
+    encounterQuest: draftData.encounterQuest || null,
+    currentEncounterId: opening ? null : draftData.currentEncounterId || null,
+  } : {};
+  return clearComposer({
     ...state,
     party: partyData?.party || state.party,
     players: Array.isArray(partyData?.players) && partyData.players.length ? partyData.players : state.players,
-    encounter: draftData?.encounter || state.encounter,
-    encounterName: draftData?.encounterName || '',
-    encounterQuest: draftData?.encounterQuest || null,
-    currentEncounterId: draftData?.currentEncounterId || null,
-    library: dedupeLibraryById(Array.isArray(payload?.library) ? payload.library : state.library),
+    library,
     // Storage may already hold the duplicates written before they were merged
     // on the way in, so they are collapsed here too rather than being read back
     // for the rest of the instance's life.
     fights: dedupeFightsByEncounter(fightsData.items, fightsData.activeFightId),
-    activeFightId: fightsData.activeFightId || null,
-    combat: activeFight ? restoreFight(activeFight, monsters) : state.combat,
-    view: activeFight ? 'combat' : state.view,
+    activeFightId: activeFight ? activeFight.id : null,
+    combat: activeFight ? restoreFight(activeFight, monsters) : null,
+    view: activeFight ? 'combat' : 'builder',
     fumbleTables: normalizeFumbleTables(payload?.fumbleTables),
     negotiation: normalizeNegotiation(payload?.negotiation),
-  };
+  }, composer);
 }
 
 function updateFumbleCategory(state, categoryId, updater) {

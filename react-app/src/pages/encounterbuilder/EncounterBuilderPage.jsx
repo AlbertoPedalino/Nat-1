@@ -24,7 +24,9 @@ export default function EncounterBuilderPage() {
   if (!tool.ready) return <CloudInstanceLoading label="encounter" />;
 
   return (
-    <EncounterBuilderProvider key={`${tool.id}:${tool.revision}`} instanceId={tool.id}>
+    // Revision 0 is the page being opened; a later one is this page reloading
+    // what the cloud brought, which must not take the GM out of a fight.
+    <EncounterBuilderProvider key={`${tool.id}:${tool.revision}`} instanceId={tool.id} opening={tool.revision === 0}>
       <EncounterBuilderShell tool={tool} />
     </EncounterBuilderProvider>
   );

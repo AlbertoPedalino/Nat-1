@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readSource, sourceFilesMatching } from '../sourceScan.js';
+import { readSource, sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
 
 // The pieces every page is made of, each drawn in one place: the page frame,
 // its header, the top bar's buttons, a list's rows, a row's remove button.
@@ -83,9 +83,14 @@ test('a button that removes something is a TipIconButton marked danger', () => {
   }), []);
 });
 
-test('the launch with initiative options is the InitiativeLaunchButton', () => {
+// Launch and its initiative options are one pair, LaunchButtons, in the
+// builder's Encounter panel and on every library card.
+test('a launch is LaunchButtons', () => {
   assert.deepEqual(sourceFilesMatching(/InitiativeLaunchDialog\.jsx'/, {
-    allow: ['pages/encounterbuilder/builder/InitiativeLaunchButton.jsx'],
+    allow: ['pages/encounterbuilder/builder/LaunchButtons.jsx'],
+  }), []);
+  assert.deepEqual(sourceLinesMatching(/>\s*Launch\s*</, {
+    allow: ['pages/encounterbuilder/builder/LaunchButtons.jsx'],
   }), []);
 });
 

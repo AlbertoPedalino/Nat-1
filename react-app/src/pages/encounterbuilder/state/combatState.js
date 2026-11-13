@@ -1,7 +1,6 @@
 import { absorbFightTurn, buildCombat, autoFightName } from '../../../shared/encounter/combat.js';
 import { freeId, makeFightEntry } from '../../../shared/encounter/fightRecord.js';
 import { applySheetVitals } from '../../../shared/encounter/combatantVitals.js';
-import { makeSavedEncounter } from './storage.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { absorbMonsterVitals } from '../../../shared/encounter/fightVitals.js';
 
@@ -46,31 +45,16 @@ export function absorbActiveFightTurn(state, fightId, fight) {
   return combat === state.combat ? state : withCombat(state, combat);
 }
 
-// Every launch is backed by a library encounter, so its card always exposes the
-// full Load/Launch/Resume/Delete actions. Builder launches always pass a null
-// id to save a new snapshot; Library launches restart the selected saved entry.
-// `initiative`: the optional per-creature advantage/disadvantage chosen in the
-// launch panel (initiativeRoster keys); a plain Launch passes none.
-export function launchCombat(state, encounter, encounterId, name, quest = null, initiative = {}) {
-  let library = state.library;
-  let id = encounterId || null;
-  if (id == null && encounter.length) {
-    const entry = makeSavedEncounter(name, encounter, state.party, quest);
-    entry.id = freeId(entry.id, library);
-    library = [entry, ...library];
-    id = entry.id;
-  }
-  const combat = buildCombat(encounter, state.players, id, Math.random, { initiative: initiative || {} });
+// Every launch is of a library card (`entry`: the composer's just saved, or one
+// launched from the Library), so the fight can always be resumed from there.
+// The composer is left as it is. `initiative`: the optional per-creature
+// advantage/disadvantage chosen in the launch panel (initiativeRoster keys); a
+// plain Launch passes none.
+export function launchCombat(state, encounter, entry, initiative = {}) {
+  const combat = buildCombat(encounter, state.players, entry.id, Math.random, { initiative: initiative || {} });
   combat.fightId = freeId(combat.fightId, state.fights);
-  combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);
-  return withCombat({
-    ...state,
-    library,
-    encounter,
-    currentEncounterId: id,
-    encounterName: name || library.find((entry) => entry.id === id)?.name || '',
-    encounterQuest: quest || library.find((entry) => entry.id === id)?.quest || null,
-  }, combat, { view: 'combat' });
+  combat.name = entry.name || autoFightName(combat.combatants);
+  return withCombat(state, combat, { view: 'combat' });
 }
 
 export function withCombat(state, combat, patch = {}) {

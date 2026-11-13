@@ -91,7 +91,12 @@ test('editing a loaded encounter updates its identity and keeps its resumable fi
   assert.equal(updated.partyLevel, 8);
   assert.equal(updated.totalXp, 450);
   assert.deepEqual(updated.encounter.map((item) => item.name), ['Ogre']);
-  assert.equal(state.encounterName, updated.name);
+  // Updated in the library, the composer is emptied for the next encounter.
+  assert.equal(state.library[0].name, 'Ogre ambush');
+  assert.equal(state.encounterName, '');
+  assert.equal(state.encounterQuest, null);
+  assert.deepEqual(state.encounter, []);
+  assert.equal(state.currentEncounterId, null);
   assert.equal(state.library[1], other);
   // The fight of the old version is superseded by the save, not kept beside it.
   assert.deepEqual(state.fights, []);
@@ -140,7 +145,7 @@ test('an encounter keeps its selected quest when saved and loaded', () => {
 
   state = encounterReducer(state, { type: 'saveEncounterToLibrary', entry });
   assert.equal(state.library[0].quest, quest);
-  assert.equal(state.encounterQuest, quest);
+  assert.equal(state.encounterQuest, null);
 
   state = encounterReducer(state, { type: 'loadLibraryEncounter', entry, monsters: [] });
   assert.equal(state.encounterQuest, quest);
@@ -865,27 +870,91 @@ test('a fight is only reachable through the library card of its encounter', () =
 // "Builder" button, so it must leave the fight recoverable rather than drop it.
 test('each builder launch saves a separate encounter and fight even within the same millisecond', (t) => {
   t.mock.method(Date, 'now', () => 12345);
-  let state = encounterReducer(createInitialState(), {
-    type: 'addMonster', monster: { name: 'Goblin', source: 'MM', cr: '1/4' },
-  });
+  const goblin = { name: 'Goblin', source: 'MM', cr: '1/4' };
+  let state = encounterReducer(createInitialState(), { type: 'addMonster', monster: goblin });
   state = encounterReducer(state, { type: 'setEncounterName', value: 'Road ambush' });
   state = encounterReducer(state, { type: 'setEncounterQuest', quest: 'Old Road' });
   const first = encounterReducer(state, { type: 'launchCurrentEncounter' });
   assert.equal(first.library.length, 1);
   assert.equal(first.library[0].quest, 'Old Road');
-  state = encounterReducer(first, { type: 'setView', view: 'builder' });
-  state = encounterReducer(state, { type: 'changeMonsterQty', id: state.encounter[0].id, delta: 1 });
+  assert.equal(first.combat.encounterId, first.library[0].id);
+  // Launched, the composer is empty for the next encounter.
+  assert.deepEqual(first.encounter, []);
+  assert.equal(first.encounterName, '');
+  state = encounterReducer(first, { type: 'closeCombat' });
+  state = encounterReducer(state, { type: 'addMonster', monster: goblin });
+  state = encounterReducer(state, { type: 'addMonster', monster: goblin });
   const second = encounterReducer(state, { type: 'launchCurrentEncounter' });
   assert.equal(second.library.length, 2);
   assert.equal(second.fights.length, 2);
-  assert.notEqual(second.currentEncounterId, first.currentEncounterId);
+  assert.notEqual(second.library[0].id, first.library[0].id);
   assert.notEqual(second.activeFightId, first.activeFightId);
   assert.equal(second.library[0].encounter[0].qty, 2);
-  assert.equal(second.library[0].name, 'Road ambush');
-  assert.equal(second.library[0].quest, 'Old Road');
   assert.deepEqual(second.library[1], first.library[0]);
-  assert.deepEqual(second.fights[1], first.fights[0]);
   assert.equal(second.combat.encounterId, second.library[0].id);
+});
+
+test('launching a loaded encounter updates its card, never a copy', () => {
+  const goblin = { name: 'Goblin', source: 'MM', cr: '1/4' };
+  const entry = { id: 7, name: 'Ambush', encounter: [{ id: 'goblin', name: 'Goblin', source: 'MM', qty: 1 }] };
+  let state = encounterReducer({ ...createInitialState(), library: [entry] }, {
+    type: 'loadLibraryEncounter', entry, monsters: [goblin],
+  });
+  state = encounterReducer(state, { type: 'changeMonsterQty', id: 'goblin', delta: 2 });
+  state = encounterReducer(state, { type: 'launchCurrentEncounter' });
+  assert.equal(state.library.length, 1);
+  assert.equal(state.library[0].id, 7);
+  assert.equal(state.library[0].encounter[0].qty, 3);
+  assert.equal(state.combat.encounterId, 7);
+  assert.deepEqual(state.encounter, []);
+  assert.equal(state.currentEncounterId, null);
+});
+
+test('saving empties the composer; a library launch leaves it alone', () => {
+  const goblin = { name: 'Goblin', source: 'MM', cr: '1/4' };
+  let state = encounterReducer(createInitialState(), { type: 'addMonster', monster: goblin });
+  state = encounterReducer(state, { type: 'setEncounterName', value: 'Camp' });
+  state = encounterReducer(state, { type: 'saveEncounterToLibrary' });
+  assert.equal(state.library[0].name, 'Camp');
+  assert.deepEqual(state.encounter, []);
+  assert.equal(state.encounterName, '');
+  state = encounterReducer(state, { type: 'addMonster', monster: goblin });
+  state = encounterReducer(state, { type: 'launchLibraryEncounter', entry: state.library[0], monsters: [goblin] });
+  assert.equal(state.view, 'combat');
+  assert.equal(state.encounter.length, 1);
+  assert.equal(state.library.length, 1);
+});
+
+test('opening the page opens on the builder with the fight closed; a cloud reload keeps it', () => {
+  const card = { id: 7, name: 'Wolves', encounter: [] };
+  const fight = { id: 9, encounterId: 7, fight: { round: 2, combatants: [] } };
+  const payload = {
+    library: [card],
+    fightsData: { activeFightId: 9, items: [fight] },
+    draftData: { encounter: [{ id: 'x', name: 'Wolf', qty: 1 }], encounterName: 'Wolves', currentEncounterId: 7 },
+  };
+  const opened = encounterReducer(createInitialState(), { type: 'hydrateStorage', payload, monsters: [], opening: true });
+  assert.equal(opened.view, 'builder');
+  assert.equal(opened.combat, null);
+  assert.equal(opened.activeFightId, null);
+  assert.deepEqual(opened.fights.map((f) => f.id), [9]);
+  // The composer held a library encounter: it is loaded again from its card.
+  assert.deepEqual(opened.encounter, []);
+  assert.equal(opened.currentEncounterId, null);
+
+  const unsaved = encounterReducer(createInitialState(), {
+    type: 'hydrateStorage',
+    payload: { ...payload, draftData: { ...payload.draftData, currentEncounterId: null } },
+    monsters: [],
+    opening: true,
+  });
+  assert.equal(unsaved.encounter.length, 1);
+  assert.equal(unsaved.encounterName, 'Wolves');
+
+  const reloaded = encounterReducer(createInitialState(), { type: 'hydrateStorage', payload, monsters: [], opening: false });
+  assert.equal(reloaded.view, 'combat');
+  assert.equal(reloaded.activeFightId, 9);
+  assert.equal(reloaded.currentEncounterId, 7);
 });
 
 test('launching directly from Library still restarts its saved encounter', () => {

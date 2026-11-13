@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
-import { makeSavedEncounter } from './storage.js';
+import { draftLibraryEntry } from './libraryState.js';
 import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
@@ -15,7 +15,7 @@ import { encounterRollActor } from '../rolls/rollActor.js';
 
 const EncounterBuilderContext = createContext(null);
 
-export function EncounterBuilderProvider({ instanceId, children }) {
+export function EncounterBuilderProvider({ instanceId, opening = true, children }) {
   const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
   // Enemy vitals go to their fight row; a linked player's to their sheet;
   // everything else straight to the reducer.
@@ -39,6 +39,7 @@ export function EncounterBuilderProvider({ instanceId, children }) {
   const { shareRoll } = rollSync;
   useEncounterPersistence({
     instanceId,
+    opening,
     monsters: monsterDb.monsters,
     monsterStatus: monsterDb.status,
     state,
@@ -92,13 +93,13 @@ export function EncounterBuilderProvider({ instanceId, children }) {
     return { ...annotated, actor };
   }, [getRollActor, shareRoll]);
 
-  const saveEncounterToLibrary = useCallback((name) => {
-    if (!state.encounter.length) return null;
-    const existing = state.library.find((entry) => entry.id === state.currentEncounterId);
-    const entry = makeSavedEncounter(name, state.encounter, state.party, state.encounterQuest, existing);
-    dispatch({ type: 'saveEncounterToLibrary', entry });
+  // Save / Update in Library: the composer's card (draftLibraryEntry), handed
+  // back so the caller can name it in its notice.
+  const saveEncounterToLibrary = useCallback(() => {
+    const entry = draftLibraryEntry(state);
+    if (entry) dispatch({ type: 'saveEncounterToLibrary', entry });
     return entry;
-  }, [state.currentEncounterId, state.encounter, state.encounterQuest, state.library, state.party]);
+  }, [state, dispatch]);
 
   const value = useMemo(() => ({
     state,
