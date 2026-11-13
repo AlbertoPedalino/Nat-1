@@ -11,15 +11,15 @@ const open = () => renderHook(() => useSheetRolls({ C: { name: 'Elara' }, sheet:
 test('a gameplay notice shows in the toast but is not a roll: no log, nothing sent to the table', () => {
   const { result } = open();
   act(() => result.current.showNotice('Long Rest', 'Fully restored!'));
-  expect(result.current.diceToast).toMatchObject({ label: 'Long Rest', detail: 'Fully restored!', notice: true });
-  expect(result.current.rollLog).toEqual([]);
+  expect(result.current.toastStore.get()).toMatchObject({ label: 'Long Rest', detail: 'Fully restored!', notice: true });
+  expect(result.current.logStore.get()).toEqual([]);
   expect(channel.publish).not.toHaveBeenCalled();
 });
 
 test('a roll is logged and sent to the table as public', () => {
   const { result } = open();
   act(() => result.current.showDiceToast('Arcana Check', 'd20 + 2', 14, [{ v: 12, faces: 20 }]));
-  expect(result.current.rollLog).toHaveLength(1);
+  expect(result.current.logStore.get()).toHaveLength(1);
   expect(channel.publish).toHaveBeenCalledWith(expect.objectContaining({ label: 'Arcana Check' }), { visibility: 'public' });
 });
 

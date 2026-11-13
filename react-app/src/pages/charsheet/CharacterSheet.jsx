@@ -15,7 +15,7 @@ import RightTop from './stats/RightTop.jsx';
 import TabsPanel from './layout/TabsPanel.jsx';
 import RestDialogs from './resources/RestDialogs.jsx';
 import { useRests } from './resources/useRests.js';
-import DiceToast from '../../shared/character/dice/DiceToast.jsx';
+import SheetDiceToast from './layout/SheetDiceToast.jsx';
 import SheetDiceDock from './layout/SheetDiceDock.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
@@ -85,7 +85,7 @@ export default function CharacterSheet({
   const [sheet, setSheet] = useState(null);
   const [charId, setCharId] = useState(null);
   const {
-    diceToast, setDiceToast, rollLog, setRollLog, showDiceToast, showNotice, rollCustom, rollD20, rollSave, rollSkill,
+    toastStore, logStore, showDiceToast, showNotice, rollCustom, rollD20, rollSave, rollSkill,
   } = useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast });
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
@@ -154,7 +154,7 @@ export default function CharacterSheet({
       topBar={{ home: true, start: readOnly ? null : <BuilderButton C={C} charId={charId} /> }}
       after={(
         <>
-          {diceToast && (showOwnRollToast || diceToast.notice) ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+          <SheetDiceToast toastStore={toastStore} showOwnRollToast={showOwnRollToast} />
           <RestDialogs C={C} sheet={sheet} rest={rest} />
         </>
       )}
@@ -223,7 +223,7 @@ export default function CharacterSheet({
           </Stack>
         </Box>
       </Box>
-      <SheetDiceDock embedded={embedded} rollLog={rollLog} onRoll={rollCustom} onClearLog={() => setRollLog([])} />
+      <SheetDiceDock embedded={embedded} logStore={logStore} onRoll={rollCustom} />
     </AppPage>
     </SheetActionsProvider>
     </ProficiencySetsProvider>

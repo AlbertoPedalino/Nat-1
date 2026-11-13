@@ -5,6 +5,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { SHEET_COLUMN_PX, sheetColumnSx } from './layout.js';
 import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
+import { useStoreValue } from '../../../shared/valueStore.js';
 
 // The sheet's dice, always at hand: the shared DiceControl floating at the
 // bottom of the sheet, so a roll never needs a scroll back to the top.
@@ -21,9 +22,12 @@ import { useIsPhone } from '../../../shared/ui/useIsPhone.js';
 // panel, so nothing is left under it. Only the pill takes clicks; the band
 // around it lets them through.
 export default function SheetDiceDock({
-  embedded, rollLog, onRoll, onClearLog,
+  embedded, logStore, onRoll,
 }) {
   const phone = useIsPhone();
+  // Read here, from its store (useSheetRolls): a roll redraws the dock, not the
+  // sheet.
+  const rollLog = useStoreValue(logStore);
 
   // Chrome on Android stretches the page when a scroll runs into its end, and
   // the dock on the bottom edge stretches with it. The sheet's own page turns
@@ -42,7 +46,7 @@ export default function SheetDiceDock({
       <DiceControl
         log={rollLog}
         onRoll={onRoll}
-        onClear={onClearLog}
+        onClear={() => logStore.set([])}
         variant={phone ? 'icon' : 'text'}
         emptyText="No rolls yet. Make an ability check, save, or attack to see it here."
         placement="up"

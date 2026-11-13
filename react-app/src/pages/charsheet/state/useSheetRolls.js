@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createValueStore } from '../../../shared/valueStore.js';
 import {
   buildD20Meta,
   formatD20Detail,
@@ -17,12 +18,21 @@ import { makeId } from '../../../shared/ids.js';
 // Every roll and notice on the sheet: the dice toast, the roll log (this sheet's
 // rolls plus the campaign's), publishing to the campaign, and the D20 executor
 // used by saves, checks, skills, attacks and initiative.
+//
+// The toast and the log are stores (valueStore.js), not the sheet's state: a
+// roll — this player's or anyone's in the campaign — redraws the toast and the
+// dice dock that read them (SheetDiceToast, SheetDiceDock), not the whole
+// sheet.
 export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
-  const [diceToast, setDiceToast] = useState(null);
+  const [{ toastStore, logStore }] = useState(() => ({
+    toastStore: createValueStore(null),
+    logStore: createValueStore([]),
+  }));
+  const setDiceToast = toastStore.set;
   const campaignId = useCharacterCampaign(charId);
   // Rolls are shared with the campaign, not with a scene: this sheet has no idea
   // which map is up and does not need to learn.
-  const [rollLog, setRollLog] = useState([]);
+  const setRollLog = logStore.set;
   const receiveRoll = useCallback((entry) => {
     if (normalizeRoll(entry)?.visibility === 'gm') return;
     setRollLog((current) => addRoll(current, entry));
@@ -97,10 +107,8 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
   }, [rollD20]);
 
   return {
-    diceToast,
-    setDiceToast,
-    rollLog,
-    setRollLog,
+    toastStore,
+    logStore,
     showDiceToast,
     showNotice,
     rollCustom,
