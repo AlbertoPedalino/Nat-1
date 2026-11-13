@@ -27,7 +27,9 @@ export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) 
       {hasRegular ? (
         <>
           <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accent, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.fill) }}>Spell Slots</Typography>
-          <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.5 }}>
+          {/* Groups sit well apart (gems within a group are 4px apart), so
+              where one level's gems end and the next begin reads at a glance. */}
+          <Box sx={{ display: 'flex', columnGap: 3, rowGap: 1.5, flexWrap: 'wrap', mt: 0.5 }}>
             {slots.regular.map((total, idx) => {
               const lv = idx + 1;
               const createdCount = createdAt(lv);
