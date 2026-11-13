@@ -58,18 +58,14 @@ function collectEntryOptions(entry, fixed, categories) {
   });
 }
 
-export function backgroundFeatOptions(background) {
-  if (!background) return { fixed: [], categories: [] };
-  if (background.feat) {
-    const parsed = parseFeatReference(background.feat);
-    return { fixed: parsed ? [parsed] : [], categories: [] };
-  }
-
+// The feats a 5etools `feats` list grants, for a background or a species
+// alike: the named ones (`fixed`, as { name, classHint }) and the categories
+// a feat is chosen from (`categories`: "O", "G"…). `{ anyFromCategory }` and
+// `{ choose }` are choices, never a feat's name.
+export function featGrantOptions(feats) {
   const fixed = [];
   const categories = [];
-  const entries = Array.isArray(background.feats)
-    ? background.feats
-    : (background.feats ? [background.feats] : []);
+  const entries = Array.isArray(feats) ? feats : (feats ? [feats] : []);
   entries.forEach((entry) => collectEntryOptions(entry, fixed, categories));
 
   const seen = new Set();
@@ -82,6 +78,15 @@ export function backgroundFeatOptions(background) {
     }),
     categories: [...new Set(categories)],
   };
+}
+
+export function backgroundFeatOptions(background) {
+  if (!background) return { fixed: [], categories: [] };
+  if (background.feat) {
+    const parsed = parseFeatReference(background.feat);
+    return { fixed: parsed ? [parsed] : [], categories: [] };
+  }
+  return featGrantOptions(background.feats);
 }
 
 export function backgroundOriginFeat(background) {

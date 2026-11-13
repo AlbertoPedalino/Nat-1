@@ -32,3 +32,12 @@ test('fighting styles, boons, species and background feats are all owned, once e
   assert.equal(hasOwnedFeat(character, 'two-weapon fighting'), true);
   assert.equal(hasOwnedFeat(character, 'Dual Wielder'), false);
 });
+
+test("a species' feat choice is a choice, never a feat named after it", () => {
+  // Human (XPHB): Versatile offers an origin feat from a category.
+  const character = {
+    choices: { species_origin_feat: 'Alert|XPHB' },
+    speciesSnapshot: { feats: [{ anyFromCategory: { category: ['O'], count: 1 } }] },
+  };
+  assert.deepEqual(ownedFeatNames(character), ['Alert']);
+});

@@ -4,9 +4,9 @@ import { adapterRegistry } from '../../../adapters/registry.js';
 import {
   backgroundGuaranteedFeatNames,
   backgroundOriginFeat as normalizeBackgroundOriginFeat,
+  featGrantOptions,
 } from './backgroundFeatOptions.js';
-import { matchKey, stripSource } from '../../content/nameKeys.js';
-import { titleCase } from '../../ui/textCase.js';
+import { matchKey } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
@@ -71,20 +71,12 @@ function fromBackground(character) {
   return origin?.fixed ? [origin.fixed] : [];
 }
 
+// The feats a species names outright, read as a background's are: a choice
+// it offers ({ anyFromCategory }, Human's Versatile) is a choice, picked in
+// the builder, never a feat called "AnyFromCategory".
 function fromSpecies(character) {
   const species = character?.speciesObj || character?.speciesSnapshot;
-  const feats = Array.isArray(species?.feats) ? species.feats : [];
-  const out = [];
-  feats.forEach((entry) => {
-    if (typeof entry === 'string') { out.push(entry); return; }
-    if (!entry || typeof entry !== 'object') return;
-    Object.keys(entry)
-      .filter((key) => key !== 'choose' && entry[key])
-      .map((key) => stripSource(String(key).split(';')[0]))
-      .filter(Boolean)
-      .forEach((raw) => out.push(titleCase(raw)));
-  });
-  return out;
+  return featGrantOptions(species?.feats).fixed.map((entry) => entry.name);
 }
 
 const FEAT_SOURCES = [fromChoices, fromBackground, fromSpecies];
