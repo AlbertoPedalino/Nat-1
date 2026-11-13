@@ -15,18 +15,6 @@ export const SHEET_GRID_ITEM_SX = {
   minWidth: 0,
 };
 
-// The sheet's panels that stay put while a card opens or closes in the tab
-// panel (the scores and HP, the left column, the skills, the panels over the
-// tabs), each drawn on a layer of its own from md up. A card's height
-// animation repaints the page in strips as wide as the window, panels that do
-// not move included: on a desktop, two of every three frames were dropped.
-// On their own layers their drawing is kept, and the animation runs at the
-// screen's rate (measured 24ms a frame -> 13.6ms on a 1920px window). A phone
-// stacks the panels in one column and was already smooth.
-export const STILL_PANEL_LAYER_SX = Object.freeze({
-  willChange: { md: 'transform' },
-});
-
 export const SHEET_GRID = {
   gridTemplateColumns: { xs: '1fr', md: '200px 210px 1fr' },
   gridTemplateAreas: {

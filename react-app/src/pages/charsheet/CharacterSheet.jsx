@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX, STILL_PANEL_LAYER_SX, sheetColumnSx } from './layout/layout.js';
+import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX, sheetColumnSx } from './layout/layout.js';
 import SheetHeader from './layout/SheetHeader.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
 import HPBlock from './resources/HPBlock.jsx';
@@ -165,7 +165,7 @@ export default function CharacterSheet({
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
-        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.75} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' }, ...STILL_PANEL_LAYER_SX }}>
+        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.75} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
           <HPBlock sheet={sheet} fillWidth={embedded}
             onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
             onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
@@ -193,7 +193,6 @@ export default function CharacterSheet({
             gap: embedded ? undefined : { md: '0.55rem' },
             gridArea: embedded ? undefined : { md: SHEET_AREAS.leftCol },
             ...SHEET_GRID_ITEM_SX,
-            ...STILL_PANEL_LAYER_SX,
           }}>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
               <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
@@ -208,19 +207,17 @@ export default function CharacterSheet({
               <Proficiencies C={C} />
             </Box>
           </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, ...STILL_PANEL_LAYER_SX, gridArea: SHEET_AREAS.skills }}>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.skills }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
           <Stack spacing={0.5} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
-            <Box sx={STILL_PANEL_LAYER_SX}>
-              <RightTop C={C} sheet={sheet} embedded={embedded} onRoll={rollD20}
-                onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
-                effectActions={readOnly ? readOnlyEffectActions : effectActions}
-                onSetExhaustion={readOnly ? noop : setExhaustion}
-                conditionEntries={conditionEntries}
-                onToggleInspiration={readOnly ? noop : toggleInspiration}
-                resources={resources} setResources={readOnly ? noop : saveResourcesState} onShowToast={showDiceToast} />
-            </Box>
+            <RightTop C={C} sheet={sheet} embedded={embedded} onRoll={rollD20}
+              onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
+              effectActions={readOnly ? readOnlyEffectActions : effectActions}
+              onSetExhaustion={readOnly ? noop : setExhaustion}
+              conditionEntries={conditionEntries}
+              onToggleInspiration={readOnly ? noop : toggleInspiration}
+              resources={resources} setResources={readOnly ? noop : saveResourcesState} onShowToast={showDiceToast} />
             <TabsPanel C={C} sheet={sheet}
               resources={resources} freeCastUses={freeCastUses} />
           </Stack>
