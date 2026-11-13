@@ -27,7 +27,6 @@ import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { pressableSx, stepButtonSx, toggleSx } from '../../../shared/ui/pressable.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { CARD_PART_RULE_SX, CARD_SX } from '../../../shared/ui/interactive.js';
@@ -41,7 +40,6 @@ const itemStateChipBaseSx = {
   px: 1,
   py: 0.25,
   borderRadius: 0.375,
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xxs,
   lineHeight: LINE_HEIGHTS.relaxed,
 };
@@ -202,7 +200,6 @@ function SlotBtn({ active, onClick, label }) {
         ...toggleSx(active, ITEM_ATTUNEMENT),
         minWidth: 24, height: CONTROL_HEIGHTS.md, px: 0.5,
         borderRadius: 0.375,
-        ...TEXT_STYLES.title,
         fontSize: FONT_SIZES.xxxs,
       }}
     >

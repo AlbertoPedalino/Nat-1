@@ -1,7 +1,6 @@
 import { Button, Stack } from '@mui/material';
 import { PanelRightClose, ScrollText } from 'lucide-react';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import SheetCharacterSelect from '../sheets/SheetCharacterSelect.jsx';
@@ -50,7 +49,6 @@ const rootSx = {
 const buttonSx = {
   minWidth: 92,
   height: CONTROL_HEIGHTS.xl,
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
   
 };

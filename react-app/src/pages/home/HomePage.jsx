@@ -219,6 +219,5 @@ const clearDataWrapSx = {
 };
 
 const clearDataButtonSx = {
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
 };

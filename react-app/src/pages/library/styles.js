@@ -6,7 +6,6 @@ import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 // PageHeader and its rows EntityRow (through InstanceRow).
 
 export const newBtnSx = {
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
 };
 

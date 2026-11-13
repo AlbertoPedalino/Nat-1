@@ -9,13 +9,16 @@ export const TEXT_STYLES = Object.freeze({
   // Small capitals over a section, a column, a tag: "SAVING THROWS".
   label: Object.freeze({
     fontFamily: UI_FONTS.display,
+    // Its own size, not the body text's adjustment (theme.js).
+    fontSizeAdjust: 'none',
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: LETTER_SPACINGS.sm,
     textTransform: 'uppercase',
   }),
-  // A name or heading set in the display face: a card title, a panel name.
+  // A name set off from the text around it (an entry's name, a row's title):
+  // the rulebook's bold small capitals, as a card's name.
   title: Object.freeze({
-    fontFamily: UI_FONTS.display,
+    fontFamily: UI_FONTS.cardName,
     fontWeight: FONT_WEIGHTS.bold,
   }),
   // A number or short value: HP, AC, an ability score, a skill's modifier, a
@@ -35,6 +38,7 @@ export const TEXT_STYLES = Object.freeze({
   // roll's name and total, NATURAL 20!, a toast's Done!/Oops!). Always inked: an ink outline and its solid shadow.
   shout: Object.freeze({
     fontFamily: UI_FONTS.shout,
+    fontSizeAdjust: 'none',
     fontWeight: FONT_WEIGHTS.regular,
     letterSpacing: LETTER_SPACINGS.md,
     ...inkLettering(2, 2),
@@ -57,6 +61,7 @@ export const TEXT_STYLES = Object.freeze({
   // face, the app's own sign, outlined in ink, its solid shadow set well off.
   cover: Object.freeze({
     fontFamily: UI_FONTS.heading,
+    fontSizeAdjust: 'none',
     // The blackletter's heaviest cut: a title, not a heading.
     fontWeight: FONT_WEIGHTS.black,
     letterSpacing: LETTER_SPACINGS.sm,

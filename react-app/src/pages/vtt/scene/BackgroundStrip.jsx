@@ -275,7 +275,6 @@ const collapsedSx = {
   ...mapIconButtonSx,
   height: CONTROL_HEIGHTS.xl,
   px: 1.25,
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
 };
 

@@ -330,7 +330,6 @@ export const dismissButtonSx = {
   px: 0.75,
   py: 0.25,
   fontSize: FONT_SIZES.xxs,
-  ...TEXT_STYLES.title,
   border: 2,
   borderRadius: 1,
   ...actionButtonToneSx(UI_COLORS.dangerMuted),

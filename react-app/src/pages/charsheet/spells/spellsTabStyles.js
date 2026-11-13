@@ -58,7 +58,6 @@ export const spellBodySx = {
 // The tab's own action (Add / Remove Spell): the theme's filled button,
 // raised like every button, in the tab's lettering.
 export const addButtonSx = {
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
   px: 1.75,
   py: 0.75,

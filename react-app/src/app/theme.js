@@ -149,6 +149,14 @@ export const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
+          // The rulebook face's figures stand on the line (it draws old-style
+          // ones by default), and line up in columns.
+          fontVariantNumeric: 'lining-nums tabular-nums',
+          // Alegreya, the face of the interface's text, draws its lower case
+          // short (x-height 0.46 of the size): everything inherits it raised
+          // to 0.52, a little larger than the sans it replaced. The roles in
+          // other faces set their own (TEXT_STYLES), so only Alegreya grows.
+          fontSizeAdjust: 'ex-height 0.52',
           backgroundColor: UI_COLORS.page,
           backgroundImage: SURFACES.page.backgroundImage,
           backgroundSize: SURFACES.page.backgroundSize,

@@ -3,14 +3,16 @@
 // interface its voice; longer flavour text uses `prose`; formulas and code use
 // `mono`.
 export const UI_FONTS = Object.freeze({
-  display: '"Rubik", "Nunito Sans", system-ui, sans-serif',
+  display: '"Rubik", system-ui, sans-serif',
   // Descriptive text read as a rulebook's: a feature's or spell's
   // description, a toast's message, a quiet note.
   prose: '"Alegreya", Georgia, serif',
   // The name on a card (an action, a spell, an item, a feature): the
   // rulebook's small capitals.
   cardName: '"Alegreya SC", "Alegreya", Georgia, serif',
-  body: '"Nunito Sans", system-ui, sans-serif',
+  // The text of the interface (row names, lists, fields), in the rulebook's
+  // face like the descriptions.
+  body: '"Alegreya", Georgia, serif',
   // Comic lettering with a fantasy cut (a narrow, heavy face with blackletter
   // serifs): the voice, what happens in the moment (a roll, NATURAL 20!, a
   // toast) and the numeral on the home page's die.
@@ -63,7 +65,7 @@ export const LETTER_SPACINGS = Object.freeze({
   xxl: '0.12em',
 });
 
-// Font weights. Rubik and Nunito Sans draw regular to heavy; `black` is the
+// Font weights. Rubik and Alegreya draw regular to heavy; `black` is the
 // heading face's heaviest cut, for the app's name on the home cover.
 export const FONT_WEIGHTS = Object.freeze({
   regular: 400,

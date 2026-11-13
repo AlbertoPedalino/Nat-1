@@ -164,7 +164,6 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
             sx={{
               cursor: isActive || canToggleOn ? 'pointer' : 'not-allowed',
               fontSize: FONT_SIZES.xxs,
-              ...TEXT_STYLES.title,
               ...statusStyle,
               '&:hover': { borderColor: (isActive || canToggleOn) ? statusTone : statusStyle.borderColor },
             }}
@@ -183,7 +182,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
+                sx={{ fontSize: FONT_SIZES.xs, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>

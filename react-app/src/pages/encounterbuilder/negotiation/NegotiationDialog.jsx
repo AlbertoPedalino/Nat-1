@@ -200,7 +200,6 @@ const attitudeButtonSx = {
   flexDirection: { xs: 'row', sm: 'column' },
   justifyContent: 'center',
   gap: { xs: 1, sm: 0.25 },
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.sm,
   '& small': {
     fontFamily: UI_FONTS.mono,

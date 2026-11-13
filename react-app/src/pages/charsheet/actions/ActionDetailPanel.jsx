@@ -132,7 +132,6 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               size="small"
               variant="outlined"
               onClick={doRoll}
-              sx={{ fontSize: FONT_SIZES.xs, ...TEXT_STYLES.title }}
             >
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>

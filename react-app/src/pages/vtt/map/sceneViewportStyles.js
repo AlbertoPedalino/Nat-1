@@ -143,7 +143,6 @@ export const fullscreenSheetButtonSx = {
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
   bgcolor: VTT_COLORS.surface,
-  ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.xs,
   '&:hover': { bgcolor: VTT_COLORS.surfaceRaised },
 };

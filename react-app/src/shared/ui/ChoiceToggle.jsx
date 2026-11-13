@@ -1,6 +1,5 @@
 import { Box, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { FONT_SIZES } from './fonts.js';
-import { TEXT_STYLES } from './textStyles.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { SURFACES } from './surfaces.js';
 import { VTT_COLORS } from '../vtt/colors.js';
@@ -21,7 +20,6 @@ import { VTT_COLORS } from '../vtt/colors.js';
 // their list and `onChange(list, toggled)` names the one pressed. A row of
 // filters is FilterToggles instead.
 const KEY_SX = Object.freeze({
-  ...TEXT_STYLES.title,
   minHeight: 0,
   py: 0.5,
   gap: 0.5,
