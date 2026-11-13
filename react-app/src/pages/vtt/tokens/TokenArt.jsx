@@ -11,6 +11,7 @@ import {
 } from './tokenSpriteStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { isSecretPiece } from '../../../shared/vtt/scene/scene.js';
+import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 // What a piece looks like: its object glyph, artwork, class icon or initials,
 // inside the ring that says whose it is.
@@ -40,6 +41,9 @@ export default function TokenArt({
     return showArtwork ? 0 : 2;
   };
 
+  // A piece's turn moves every frame of a rotation: written onto the element
+  // that turns (useLiveStyle), not into sx.
+  const turnRef = useLiveStyle({ transform: `rotate(${Number(token.rotation) || 0}deg)` });
   return (
     <Box
       sx={{
@@ -78,15 +82,12 @@ export default function TokenArt({
       }}
     >
       {isMapObject ? (
-        <Box sx={{
-          ...mapObjectSx,
-          color: token.color || VTT_COLORS.accent,
-          transform: `rotate(${Number(token.rotation) || 0}deg)`,
-        }}>
+        <Box ref={turnRef} sx={{ ...mapObjectSx, color: token.color || VTT_COLORS.accent }}>
           <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
         </Box>
       ) : showArtwork ? (
         <Box
+          ref={hasHandles ? turnRef : undefined}
           component="img"
           src={token.imageUrl}
           alt=""
@@ -101,7 +102,6 @@ export default function TokenArt({
             // a picture dropped on the token layer is scenery too. A
             // creature's art is cropped into its circle instead.
             objectFit: isScenery || hasHandles ? 'fill' : 'cover',
-            transform: hasHandles ? `rotate(${Number(token.rotation) || 0}deg)` : 'none',
             pointerEvents: 'none',
           }}
         />

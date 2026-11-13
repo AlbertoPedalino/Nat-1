@@ -925,13 +925,20 @@ test('panel layers are switched only through usePanelsWithoutLayers', () => {
 // brush under the pointer) is written onto its element through useLiveStyle
 // or writeLiveStyle (shared/ui/liveStyle.js), never into sx: each sx
 // value is a new CSS rule, and inserting one restyles the whole page.
-// stickerLayout.js builds an SVG string at build time, not an element.
+// Any transform built from a value (translate, rotate, scale, matrix) counts:
+// a piece turned with its handle moves every frame too. Left out, as they only
+// hold values fixed once: stickerLayout.js (an SVG string built at build
+// time), bubble.js (a bubble's fixed tilt, a sparkle's turn picked once) and
+// polyhedra.js (a die's face geometry).
 test('a place that moves every frame is written through useLiveStyle', () => {
+  const dynamicTransform = /(translate|translate3d|rotate|scale|matrix3d)\(\$\{/;
   const offenders = [];
-  for (const file of sourceFilesMatching(/translate(3d)?\(\$\{/, { allow: ['shared/ui/stickerLayout.js'] })) {
+  for (const file of sourceFilesMatching(dynamicTransform, {
+    allow: ['shared/ui/stickerLayout.js', 'shared/ui/bubble.js', 'shared/character/dice/polyhedra.js'],
+  })) {
     const lines = readSource(file).split('\n');
     lines.forEach((line, index) => {
-      if (!/translate(3d)?\(\$\{/.test(line)) return;
+      if (!dynamicTransform.test(line)) return;
       if (/\.style\.|^\s*const \w+ = `/.test(line)) return;
       if (/useLiveStyle\(|writeLiveStyle\(/.test(lines.slice(Math.max(0, index - 8), index + 1).join('\n'))) return;
       offenders.push(`${file}:${index + 1}`);
