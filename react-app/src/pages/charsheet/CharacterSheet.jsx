@@ -117,7 +117,7 @@ export default function CharacterSheet({
   } = useSheetVitals({ sheet, setSheet, persist, showDiceToast, showNotice });
 
   const readOnlyEffectActions = useMemo(() => ({
-    add: noopEffect, remove: noopEffect, readOnly: true,
+    add: noopEffect, remove: noopEffect, clear: noopEffect, readOnly: true,
   }), []);
 
   const noop = useCallback(() => {}, []);

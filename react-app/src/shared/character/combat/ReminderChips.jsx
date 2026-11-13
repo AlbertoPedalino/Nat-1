@@ -17,7 +17,8 @@ import {
 import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
 import { UI_COLORS } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { markerDensitySx, markerOfferedSx, markerOnSx } from './markerChipStyles.js';
+import { markerDensitySx, markerSuggestedSx } from './markerChipStyles.js';
+import MarkerChip from './MarkerChip.jsx';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -57,12 +58,12 @@ export function ReminderEditor({ effects, onAdd, onRemove, disabled = false, den
 
 export function ReminderChip({ effect, onRemove, density }) {
   return (
-    <Chip
-      size="small"
+    <MarkerChip
       label={effect.text}
-      onDelete={onRemove}
-      deleteIcon={<X size={ICON_SIZES.xs} aria-label={`Remove ${effect.text}`} />}
-      sx={[markerOnSx(REMINDER_ACCENT), markerDensitySx(density)]}
+      accent={REMINDER_ACCENT}
+      onRemove={onRemove}
+      removeLabel={`Remove ${effect.text}`}
+      density={density}
     />
   );
 }
@@ -126,8 +127,8 @@ export function ReminderField({ effects, onAdd, density }) {
   );
 }
 
-// Offered, not on the creature: drawn as an off condition is, so only what is
-// on the creature is blue.
+// Offered, not on the creature: the marker ghost (markerSuggestedSx), one tap
+// to add yet quieter than the reminders in force.
 function RecentReminderChip({ text, disabled, density, onPick, onForget }) {
   return (
     <Chip
@@ -138,7 +139,7 @@ function RecentReminderChip({ text, disabled, density, onPick, onForget }) {
       onDelete={onForget}
       aria-label={`Add ${text}`}
       deleteIcon={<X size={ICON_SIZES.xxs} aria-label={`Forget ${text}`} />}
-      sx={[markerOfferedSx(REMINDER_ACCENT), markerDensitySx(density)]}
+      sx={[markerSuggestedSx(REMINDER_ACCENT), markerDensitySx(density)]}
     />
   );
 }

@@ -1,14 +1,15 @@
 import { Box, Chip, Tooltip, Typography } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
-import { UI_COLORS, OPACITY } from '../../ui/colors.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { ASSIGNABLE_CONDITIONS } from './conditions.js';
 import { FONT_SIZES } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { BARE_BUTTON_SX } from '../../ui/interactive.js';
 import { calloutSx } from '../../ui/surfaces.js';
-import { markerDensitySx, markerOfferedSx, markerOnHoverSx, markerOnSx } from './markerChipStyles.js';
+import { markerDensitySx, markerOfferedSx, markerOnSx } from './markerChipStyles.js';
+import MarkerChip from './MarkerChip.jsx';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -28,9 +29,10 @@ const CONDITION_BODY = UI_COLORS.textSecondary;
 // `density` sizes it for its surface.
 export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, readOnlyReason, density }) {
   const chip = (
-    <Chip
-      size="small"
+    <MarkerChip
       label={label}
+      accent={CONDITION_ACCENT}
+      open={isOpen}
       icon={hasDesc ? (
         <ChevronDown
           size={ICON_SIZES.xxs}
@@ -42,14 +44,10 @@ export function ConditionPill({ label, hasDesc, isOpen, onToggle, onRemove, read
         />
       ) : undefined}
       onClick={hasDesc ? onToggle : undefined}
-      onDelete={onRemove}
-      deleteIcon={onRemove ? <X size={ICON_SIZES.xs} /> : undefined}
-      sx={[
-        markerOnSx(CONDITION_ACCENT, { open: isOpen }),
-        hasDesc ? markerOnHoverSx(CONDITION_ACCENT) : { cursor: 'default' },
-        readOnlyReason ? { opacity: OPACITY.heavy } : null,
-        markerDensitySx(density),
-      ]}
+      onRemove={onRemove}
+      removeLabel={`Remove ${label}`}
+      dimmed={Boolean(readOnlyReason)}
+      density={density}
     />
   );
   return readOnlyReason ? <Tooltip title={readOnlyReason}>{chip}</Tooltip> : chip;

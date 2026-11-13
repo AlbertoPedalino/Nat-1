@@ -91,6 +91,7 @@ export function useSheetVitals({ sheet, setSheet, persist, showDiceToast, showNo
   const effectActions = useMemo(() => ({
     add: (text) => commit({ type: 'addCombatantEffect', payload: { text } }),
     remove: (id) => commit({ type: 'removeCombatantEffect', effectId: id }),
+    clear: () => commit({ type: 'clearCombatantEffects' }),
   }), [commit]);
 
   const toggleInspiration = useCallback(() => {

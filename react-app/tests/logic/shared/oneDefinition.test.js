@@ -683,9 +683,15 @@ test('floating surfaces are drawn by the theme', () => {
   assert.deepEqual(sourceLinesMatching(localPaper).filter((hit) => !hit.startsWith('pages/vtt/')), []);
 });
 
+// The tint is laid only by the chips that own a look: the theme's, TagChip,
+// MiniBadge and the creature markers' recipe (markerChipStyles.js, drawn by
+// MarkerChip, ConditionChips and ReminderChips).
 test("a row's tag is a MiniBadge, never a hand-tinted Chip", () => {
   assert.deepEqual(sourceFilesMatching(/\bchipTintStyle\(/, {
-    allow: ['app/theme.js', 'shared/ui/entityColors.js', 'shared/ui/TagChip.jsx', 'shared/ui/MiniBadge.jsx'],
+    allow: [
+      'app/theme.js', 'shared/ui/entityColors.js', 'shared/ui/TagChip.jsx', 'shared/ui/MiniBadge.jsx',
+      'shared/character/combat/markerChipStyles.js',
+    ],
   }), []);
 });
 
