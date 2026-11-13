@@ -61,13 +61,14 @@ function QuantityAdder({ onAdd, max = 999, sx }) {
 // The head of every item card (the inventory, the list to add from): a magic
 // item's rarity as its bar and its name's colour, then its 5etools link icon
 // and its name (`name`, when the card names it otherwise: a scroll's spell).
-// One head, so an item reads the same wherever it is listed.
+// One head, so an item reads the same wherever it is listed. An entry with
+// no item data behind it (`item` missing) is its name alone.
 export function ItemCardTitle({ item, name = item?.name }) {
   const tone = rarityTone(item);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
       <ToneBar tone={tone} />
-      <ItemNameIcon item={item} />
+      {item ? <ItemNameIcon item={item} /> : null}
       <ScrollingName sx={{ ...cardTitleSx, color: tone || 'text.primary' }}>{name}</ScrollingName>
     </Box>
   );

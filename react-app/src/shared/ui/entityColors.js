@@ -36,7 +36,7 @@ export const RICH_TEXT_ACCENT = '#b7d36b';
 // tab's cast-time chip, so a given action type looks identical everywhere.
 export const ACTION_COLORS = {
   action: '#22c7e0',   // vivid electric cyan (kept clear of the muted subclass teal)
-  bonus: '#6f8fd8',    // steel blue
+  bonus: '#8fd14f',    // lime green: told apart from the action's cyan at a glance (user, 2026-11-13)
   reaction: '#c46fd9', // orchid purple
   special: '#9aa5b1',  // neutral slate: no-action / triggered features ("Other")
 };

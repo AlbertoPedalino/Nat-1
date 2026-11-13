@@ -20,7 +20,8 @@ each recurring job (guarded by `tests/logic/shared/oneDefinition*.test.js`):
 `ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
 labelled stops), `TipIconButton` (an icon button, `danger` for one that removes),
 `DisclosureButton` + `CollapsibleBody` / `ExpandableCard` (what opens and closes),
-`ScrollingName` (a card name on one line),
+`ScrollingName` (a card name on one line), `PickableRow` + `entryCard.js` (an
+action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
 `Panel` / `SidePanel` / `PageHeader`, `CornerCloseButton`, and the recipes in
 `interactive.js` (`focusRingSx` with an optional `tone`, `LIST_ROW_SX`,

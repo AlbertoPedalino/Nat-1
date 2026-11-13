@@ -2,8 +2,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import PickableRow from '../../../shared/ui/PickableRow.jsx';
-import ScrollingName from '../../../shared/ui/ScrollingName.jsx';
-import { cardTitleSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ItemCardTitle, ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
 import { addCraftedItem, removeOneCrafted, craftedCount, craftedCountFor } from '../../../shared/character/inventory/craftedItemState.js';
 import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
@@ -208,9 +206,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               selected={count > 0}
               details={dbItem ? <ItemReferenceBody item={dbItem} /> : null}
             >
-              {dbItem
-                ? <ItemCardTitle item={dbItem} name={label} />
-                : <ScrollingName sx={{ ...cardTitleSx, flex: 1 }}>{label}</ScrollingName>}
+              <ItemCardTitle item={dbItem} name={label} />
               {unavailable ? (
                 <Typography sx={{ fontSize: FONT_SIZES.xxs, color: 'text.secondary' }}>Unavailable</Typography>
               ) : null}
