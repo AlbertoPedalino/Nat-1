@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Paper, Tabs, Tab } from '@mui/material';
 import ActionsTab from '../actions/ActionsTab.jsx';
 import SpellsTab from '../spells/SpellsTab.jsx';
@@ -10,7 +11,10 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 const TABS = ['Actions', 'Spells', 'Inventory', 'Features', 'Notes'];
 
-export default function TabsPanel({ C, sheet, tab, setTab, resources, freeCastUses }) {
+// The tab shown is the panel's own state, not the sheet's: switching tabs
+// redraws this panel alone, not every panel of the sheet around it.
+export default function TabsPanel({ C, sheet, resources, freeCastUses }) {
+  const [tab, setTab] = useState(0);
   const handleChange = (_, v) => setTab(v);
 
   return (

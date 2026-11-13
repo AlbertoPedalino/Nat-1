@@ -84,7 +84,6 @@ export default function CharacterSheet({
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [charId, setCharId] = useState(null);
-  const [tab, setTab] = useState(0);
   const {
     diceToast, setDiceToast, rollLog, setRollLog, showDiceToast, showNotice, rollCustom, rollD20, rollSave, rollSkill,
   } = useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast });
@@ -219,7 +218,7 @@ export default function CharacterSheet({
               conditionEntries={conditionEntries}
               onToggleInspiration={readOnly ? noop : toggleInspiration}
               resources={resources} setResources={readOnly ? noop : saveResourcesState} onShowToast={showDiceToast} />
-            <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab}
+            <TabsPanel C={C} sheet={sheet}
               resources={resources} freeCastUses={freeCastUses} />
           </Stack>
         </Box>
