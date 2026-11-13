@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
-import { draftLibraryEntry } from './libraryState.js';
 import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
@@ -93,14 +92,6 @@ export function EncounterBuilderProvider({ instanceId, opening = true, children 
     return { ...annotated, actor };
   }, [getRollActor, shareRoll]);
 
-  // Save / Update in Library: the composer's card (draftLibraryEntry), handed
-  // back so the caller can name it in its notice.
-  const saveEncounterToLibrary = useCallback(() => {
-    const entry = draftLibraryEntry(state);
-    if (entry) dispatch({ type: 'saveEncounterToLibrary', entry });
-    return entry;
-  }, [state, dispatch]);
-
   const value = useMemo(() => ({
     state,
     dispatch,
@@ -109,9 +100,8 @@ export function EncounterBuilderProvider({ instanceId, opening = true, children 
     characterDigests,
     rollSync,
     instanceId,
-    saveEncounterToLibrary,
     roll,
-  }), [campaignPlayers, characterDigests, rollSync, instanceId, monsterDb, roll, saveEncounterToLibrary, state, dispatch]);
+  }), [campaignPlayers, characterDigests, rollSync, instanceId, monsterDb, roll, state, dispatch]);
 
   return (
     <EncounterBuilderContext.Provider value={value}>

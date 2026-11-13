@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Box, Stack } from '@mui/material';
 import { Package, Plus, Trash2 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -13,7 +13,7 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { stepButtonSx } from '../../../shared/ui/pressable.js';
 import { formatPounds, itemQty, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
-import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
+import { useDraftText } from '../../../shared/ui/useDraftText.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
@@ -25,20 +25,6 @@ import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 // the first alphabetical slice.
 const ADD_LIST_PAGE = 120;
 const CURRENT_LIST_PAGE = 50;
-
-// Search text lives in the reducer so it survives leaving the step, but every
-// dispatch re-runs the whole builder reducer — so mirror it locally to keep
-// typing instant and commit on a pause.
-function useDebouncedSearch(value, commit) {
-  const [local, setLocal] = useState(value || '');
-  useEffect(() => { setLocal(value || ''); }, [value]);
-  const commitLater = useDebouncedCallback(commit, 200);
-  const change = useCallback((next) => {
-    setLocal(next);
-    commitLater(next);
-  }, [commitLater]);
-  return [local, change];
-}
 
 // Current-inventory row: tap the name to expand the item reference; keep the
 // quantity controls and full-row remove action on the right.
@@ -74,11 +60,13 @@ export default function EquipmentStep({ state, dispatch }) {
   // The current inventory's state filters (Equipped, Attuned, Stashed).
   const currentStates = useState([]);
   const { character, search, inventoryFilter, currentInventoryFilter } = state;
-  const addSearch = useDebouncedSearch(
+  // Search text lives in the reducer so it survives leaving the step; the
+  // fields follow the typing and commit on a pause (useDraftText).
+  const addSearch = useDraftText(
     search.inventory,
     (value) => dispatch({ type: 'search/set', scope: 'inventory', value }),
   );
-  const currentSearch = useDebouncedSearch(
+  const currentSearch = useDraftText(
     search.currentInventory,
     (value) => dispatch({ type: 'search/set', scope: 'currentInventory', value }),
   );

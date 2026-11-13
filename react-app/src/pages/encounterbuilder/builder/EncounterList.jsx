@@ -16,26 +16,50 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import ClearButton from '../../../shared/ui/ClearButton.jsx';
+import { useDraftText } from '../../../shared/ui/useDraftText.js';
+import { draftLibraryEntry } from '../state/libraryState.js';
 
 export default function EncounterList() {
-  const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
+  const { state, dispatch } = useEncounterBuilder();
   const { notify } = useToast();
   const difficulty = calculateDifficulty(state.encounter, state.party);
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
   const editingExisting = state.library.some((entry) => entry.id === state.currentEncounterId);
+  // Typed here, handed to the page's reducer after a pause or on leaving the
+  // field: a keystroke never redraws the whole builder.
+  const [name, setName, flushName] = useDraftText(
+    state.encounterName,
+    (value) => dispatch({ type: 'setEncounterName', value }),
+  );
+  const [quest, setQuest, flushQuest] = useDraftText(
+    state.encounterQuest || '',
+    (value) => dispatch({ type: 'setEncounterQuest', quest: value }),
+  );
   const hasComposition = Boolean(
     state.encounter.length || state.encounterName || state.encounterQuest || state.currentEncounterId != null,
   );
 
+  // What is still being typed goes to the reducer first (flush), so the save
+  // or launch that follows reads it; a pending commit could otherwise land on
+  // the panel after it was emptied.
+  const flushTyping = () => {
+    flushName();
+    flushQuest();
+  };
+
   const handleSave = () => {
-    const entry = saveEncounterToLibrary();
-    if (entry) notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
+    const entry = draftLibraryEntry({ ...state, encounterName: name, encounterQuest: quest });
+    if (!entry) return;
+    flushTyping();
+    dispatch({ type: 'saveEncounterToLibrary', entry });
+    notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
   };
 
   const cannotLaunch = !state.encounter.length || state.encounter.some((item) => !item.monsterData);
 
   const handleLaunch = (initiative) => {
     if (!state.encounter.length) return;
+    flushTyping();
     dispatch({ type: 'launchCurrentEncounter', initiative });
   };
 
@@ -54,8 +78,9 @@ export default function EncounterList() {
         <TextField
           size="small"
           label="Library name"
-          value={state.encounterName}
-          onChange={(event) => dispatch({ type: 'setEncounterName', value: event.target.value })}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          onBlur={flushName}
           placeholder="Optional"
         />
         <Autocomplete
@@ -63,9 +88,10 @@ export default function EncounterList() {
           size="small"
           options={questOptions}
           value={state.encounterQuest || null}
-          inputValue={state.encounterQuest || ''}
-          onChange={(_, value) => dispatch({ type: 'setEncounterQuest', quest: value || '' })}
-          onInputChange={(_, value) => dispatch({ type: 'setEncounterQuest', quest: value })}
+          inputValue={quest}
+          onChange={(_, value) => { setQuest(value || ''); flushQuest(); }}
+          onInputChange={(_, value) => setQuest(value)}
+          onBlur={flushQuest}
           renderInput={(params) => (
             <TextField
               {...params}

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Stack } from '@mui/material';
 import { Plus } from 'lucide-react';
 import {
@@ -18,6 +18,7 @@ import { DRAG_SOURCE_SX } from '../ui/interactive.js';
 import TipIconButton from '../ui/TipIconButton.jsx';
 import EntityRow from '../ui/EntityRow.jsx';
 import SearchField from '../ui/SearchField.jsx';
+import { useDraftText } from '../ui/useDraftText.js';
 import FilterToggles from '../ui/FilterToggles.jsx';
 import FilterFieldControls from '../ui/FilterFieldControls.jsx';
 
@@ -32,7 +33,9 @@ const PAGE_SIZE = 50;
 // `onToggleSource` is optional: without it there is no source bar.
 // `fill` (inside a `fill` Panel) lets the list take the panel's height on a
 // wide screen, however tall the panel's row is, the old cap as its least.
-export default function MonsterBrowser({
+// Memoized: a page whose state changes for other reasons (a name typed, the
+// party edited) does not redraw its rows; callers pass stable callbacks.
+export default memo(function MonsterBrowser({
   monsterDb,
   filters,
   onFilterChange,
@@ -44,6 +47,9 @@ export default function MonsterBrowser({
   fill = false,
   listSx,
 }) {
+  // The search box follows the typing; the filters (and the list) follow it
+  // after a pause.
+  const [search, setSearch, flushSearch] = useDraftText(filters.search, (value) => onFilterChange('search', value));
   const filtered = useMemo(() => filterMonsters(monsterDb.monsters, filters), [monsterDb.monsters, filters]);
   const page = usePagedList(filtered, { pageSize: PAGE_SIZE, resetKey: filters });
 
@@ -73,8 +79,9 @@ export default function MonsterBrowser({
 
       <Stack spacing={1.25}>
         <SearchField
-          value={filters.search}
-          onChange={(value) => onFilterChange('search', value)}
+          value={search}
+          onChange={setSearch}
+          onBlur={flushSearch}
           placeholder="Search monsters…"
           ariaLabel="Search monsters"
         />
@@ -123,7 +130,7 @@ export default function MonsterBrowser({
 
     </Stack>
   );
-}
+});
 
 const LIST_LEAST_HEIGHT = 'calc(100vh - 350px)';
 

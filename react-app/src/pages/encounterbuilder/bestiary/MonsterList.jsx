@@ -1,22 +1,28 @@
+import { useCallback } from 'react';
 import { Skull } from 'lucide-react';
 import Panel from '../../../shared/ui/Panel.jsx';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
 // Thin wrapper: the browser itself is shared with the battle map, and only the
-// wiring to this page's reducer lives here.
+// wiring to this page's reducer lives here. Its callbacks are stable, so the
+// (memoized) browser is not redrawn when the rest of the page changes.
 export default function MonsterList() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
+  const onFilterChange = useCallback((key, value) => dispatch({ type: 'setFilter', key, value }), [dispatch]);
+  const onToggleSource = useCallback((source) => dispatch({ type: 'toggleSource', source }), [dispatch]);
+  const onSelect = useCallback((monster) => dispatch({ type: 'selectStatblock', payload: { monster } }), [dispatch]);
+  const onPick = useCallback((monster) => dispatch({ type: 'addMonster', monster }), [dispatch]);
 
   return (
     <Panel icon={Skull} title="Monsters" fill>
       <MonsterBrowser
         monsterDb={monsterDb}
         filters={state.filters}
-        onFilterChange={(key, value) => dispatch({ type: 'setFilter', key, value })}
-        onToggleSource={(source) => dispatch({ type: 'toggleSource', source })}
-        onSelect={(monster) => dispatch({ type: 'selectStatblock', payload: { monster } })}
-        onPick={(monster) => dispatch({ type: 'addMonster', monster })}
+        onFilterChange={onFilterChange}
+        onToggleSource={onToggleSource}
+        onSelect={onSelect}
+        onPick={onPick}
         pickLabel="Add to encounter"
         fill
       />
