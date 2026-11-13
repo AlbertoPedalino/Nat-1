@@ -5,6 +5,7 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { UI_SHADOWS } from './shadows.js';
+import { SEAL_RADIUS } from './radius.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -79,12 +80,13 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
   };
 }
 
-// The icon's badge in a panel bar: the tone filled, edged in ink, its game
-// drawing large enough to read (PANEL_BADGE_ICON).
-export const PANEL_BADGE_ICON = ICON_SIZES.xxl;
-// The badge's outer size: its icon, 2px of padding and 2px of edge a side. A
-// bar without a badge (a stat tile's) holds this height to line up with one.
-export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 8;
+// The icon's badge in a panel bar: a wax seal in the tone, edged in ink, its
+// game drawing large enough to read (PANEL_BADGE_ICON).
+export const PANEL_BADGE_ICON = ICON_SIZES.xl;
+// The badge's outer size: its icon, 4px of padding (the seal is round: the
+// drawing keeps clear of its edge) and 2px of edge a side. A bar without a
+// badge (a stat tile's) holds this height to line up with one.
+export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 12;
 
 // The room round a panel bar's badge, the same for every bar (a PanelHeader,
 // the sheet's tab bar).
@@ -95,12 +97,14 @@ export function panelBadgeSx(tone = 'primary.main') {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    p: 0.25,
-    borderRadius: 1,
+    p: 0.5,
+    borderRadius: SEAL_RADIUS,
     bgcolor: tone,
     color: UI_COLORS.edge,
     border: 2,
     borderColor: UI_COLORS.edge,
+    // The seal's solid ink shadow, as under every drawn box.
+    boxShadow: UI_SHADOWS.box,
     flexShrink: 0,
   };
 }

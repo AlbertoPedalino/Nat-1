@@ -79,7 +79,7 @@ export default function HomePage() {
       <Box sx={gridSx}>
         {TOOLS.map((tool) => (
           <Box key={tool.path} component={Link} to={tool.path} sx={getCardSx(tool.color)}>
-            <Box sx={{ ...panelBadgeSx(tool.color), p: 0.75, borderRadius: 1.5 }}>
+            <Box sx={{ ...panelBadgeSx(tool.color), p: 0.75 }}>
               <tool.icon size={ICON_SIZES.hero} strokeWidth={1.75} />
             </Box>
             <Typography className="card-label" sx={cardLabelSx}>{tool.label}</Typography>

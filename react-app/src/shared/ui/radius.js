@@ -3,3 +3,7 @@
 // numeric borderRadius, so they follow theme.shape.borderRadius.
 export const cornerRadius = (topLeft, topRight, bottomRight, bottomLeft) => (theme) =>
   [topLeft, topRight, bottomRight, bottomLeft].map((m) => `${m * theme.shape.borderRadius}px`).join(' ');
+
+// A wax seal's edge: round, but not perfectly, as if pressed by hand. The
+// badge an icon stands on (a panel's, a tool's on the home page) takes it.
+export const SEAL_RADIUS = '46% 54% 48% 52% / 55% 45% 55% 45%';
