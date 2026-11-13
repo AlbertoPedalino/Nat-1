@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Box, IconButton, TextField, Typography } from '@mui/material';
-import { Plus, Minus, PencilLine, Check } from 'lucide-react';
+import { Box, TextField, Typography } from '@mui/material';
+import { Plus, Pencil, Trash2, Check } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { UI_FONTS, FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { makeId } from '../../../shared/ids.js';
@@ -8,6 +8,7 @@ import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -77,9 +78,9 @@ export default function NotesTab({ sheet }) {
           value={activeIdx}
           onChange={setActiveIdx}
         />
-        <IconButton size="small" onClick={addPage} sx={{ color: 'primary.main', p: 0.25 }}>
+        <TipIconButton title="Add page" size="small" onClick={addPage}>
           <Plus size={ICON_SIZES.sm} />
-        </IconButton>
+        </TipIconButton>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.75 }}>
@@ -103,13 +104,17 @@ export default function NotesTab({ sheet }) {
             {activePage.name}
           </Typography>
         )}
-        <IconButton size="small" onClick={() => setEditingName(editingName === activeIdx ? null : activeIdx)} sx={{ color: 'text.secondary', p: 0.25 }}>
-          {editingName === activeIdx ? <Check size={ICON_SIZES.xs} /> : <PencilLine size={ICON_SIZES.xs} />}
-        </IconButton>
+        <TipIconButton
+          title={editingName === activeIdx ? 'Done' : 'Rename page'}
+          size="small"
+          onClick={() => setEditingName(editingName === activeIdx ? null : activeIdx)}
+        >
+          {editingName === activeIdx ? <Check size={ICON_SIZES.sm} /> : <Pencil size={ICON_SIZES.sm} />}
+        </TipIconButton>
         {pages.length > 1 && (
-          <IconButton size="small" onClick={() => deletePage(activeIdx)} sx={{ color: 'error.main', p: 0.25, ml: 'auto' }}>
-            <Minus size={ICON_SIZES.sm} />
-          </IconButton>
+          <TipIconButton title="Delete page" danger size="small" onClick={() => deletePage(activeIdx)} sx={{ ml: 'auto' }}>
+            <Trash2 size={ICON_SIZES.sm} />
+          </TipIconButton>
         )}
       </Box>
 
