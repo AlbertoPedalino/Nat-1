@@ -6,8 +6,8 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 - Data repo: `https://github.com/5etools-mirror-3/5etools-src/tree/main/data`.
 - Encounter image assets currently use mirror-2; Skeleton fallback uses mirror-3 XMM token URL.
-- Allowed sources: `XPHB`, `XMM`, `XDMG`, `FRAIF`, `FRHOF`, `EFA`, `RWH`.
-- Raw mappings: `FRAIF -> FRAiF`, `FRHOF -> FRHoF`, `RWH -> RHW`.
+- Allowed sources: `XPHB`, `XMM`, `XDMG`, `FRAIF`, `FRHOF`, `EFA`, `RWH`, `AU`, `AUD`, `WOW`. In code the one list of 2024 books is `CORE_2024_SOURCE_PRIORITY` (`shared/content/sourcePriority.js`, raw codes; a new manual goes there, every content whitelist derives from it) and the bestiary's is `PROJECT_ALLOWED_SOURCES` (`shared/bestiary/bestiaryConstants.js`); keep this line in step with them.
+- Raw mappings: `FRAIF -> FRAiF`, `FRHOF -> FRHoF`, `RWH -> RHW`, `WOW -> WoW`.
 - Reject legacy, unofficial, homebrew, and non-whitelisted sources unless explicitly mapped.
 - Prefer minimal scoped changes. Do not commit `.agent-loop` artifacts unless requested.
 
