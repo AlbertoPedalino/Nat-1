@@ -14,7 +14,7 @@ export default function GmRollsShownSwitch({ campaignId, sx }) {
   }
   return (
     <ToggleRow
-      label={shown ? 'Players see creature rolls' : 'Only the GM sees creature rolls'}
+      label={shown ? 'Players see creature and custom rolls' : 'Only the GM sees creature and custom rolls'}
       checked={shown}
       onChange={setShown}
       sx={sx}

@@ -4,11 +4,11 @@ import { readGmRollsShown } from '../../../../../src/shared/cloud/sync/rollVisib
 
 beforeEach(() => localStorage.clear());
 
-test('says who sees creature rolls, and two switches of a campaign stay in step', () => {
+test('says who sees creature and custom rolls, and two switches of a campaign stay in step', () => {
   render(<><GmRollsShownSwitch campaignId="c1" /><GmRollsShownSwitch campaignId="c1" /></>);
-  expect(screen.getAllByText('Only the GM sees creature rolls')).toHaveLength(2);
+  expect(screen.getAllByText('Only the GM sees creature and custom rolls')).toHaveLength(2);
   fireEvent.click(screen.getAllByRole('switch')[0]);
-  expect(screen.getAllByText('Players see creature rolls')).toHaveLength(2);
+  expect(screen.getAllByText('Players see creature and custom rolls')).toHaveLength(2);
   expect(readGmRollsShown('c1')).toBe(true);
   expect(readGmRollsShown('c2')).toBe(false);
 });
