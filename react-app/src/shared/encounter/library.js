@@ -1,4 +1,5 @@
 import { compareText } from '../lists.js';
+import { groupField } from '../content/filterFields.js';
 // A fight is reachable only through the library card of the encounter it was
 // launched from: `mergeLibrary` walks encounters and attaches their fight, so a
 // fight with no `encounterId` (launched from a draft that was never saved) has
@@ -36,10 +37,25 @@ export function mergeLibrary(encounters, fights) {
     .sort((a, b) => b.sortKey - a.sortKey);
 }
 
-export function listQuestNames(encounters) {
+// The quest names of a list of encounters, once each, in text order.
+// `questOf` reads one's quest (an encounter's own, by default).
+export function listQuestNames(encounters, questOf = (entry) => entry?.quest) {
   return [...new Set(
-    (encounters || []).map((entry) => String(entry?.quest || '').trim()).filter(Boolean),
+    (encounters || []).map((entry) => String(questOf(entry) || '').trim()).filter(Boolean),
   )].sort(compareText);
+}
+
+// A list's quest filter (filterFields' groupField): each quest its encounters
+// are in, and the ones in none. `questOf` reads a record's quest.
+export function questFilterField(questOf) {
+  const questKeyOf = (record) => String(questOf(record) || '').trim();
+  return groupField({
+    key: 'quest',
+    label: 'Quest',
+    groups: (entries) => listQuestNames(entries, questKeyOf).map((quest) => ({ key: quest, label: quest })),
+    noneLabel: 'No quest',
+    groupsOf: questKeyOf,
+  });
 }
 
 export function groupLibraryByQuest(items) {

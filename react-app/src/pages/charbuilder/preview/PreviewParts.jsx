@@ -7,7 +7,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
-import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR, PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
@@ -18,7 +18,12 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 // metadata and feature accordions.
 
 
-export const PROFICIENCY_TONE = UI_COLORS.accentText;
+// The preview's own colours, kept apart from the class panels' gold under
+// them: the character (the name, Defense) in the sheet's Armor Class steel,
+// what they are trained in (Proficiencies, Weapon Masteries) in the sheet's
+// Skills green.
+export const CHARACTER_TONE = PANEL_TONES.armorClass;
+export const TRAINING_TONE = PANEL_TONES.skills;
 
 // A preview section: the sheet's panel (PanelHeader over the body), its
 // `subtitle` the first line of the body.
@@ -60,7 +65,7 @@ export function InlineMetadata({ items }) {
   );
 }
 
-export function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item) => item, getLabel = (item) => item }) {
+export function PreviewChipList({ items, tone = TRAINING_TONE, getKey = (item) => item, getLabel = (item) => item }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
       {items.map((item) => (

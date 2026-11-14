@@ -8,7 +8,7 @@ import { fillColumnSx } from './compendiumStyles.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import { INK_EDGE } from '../../shared/ui/shadows.js';
 import Panel from '../../shared/ui/Panel.jsx';
-import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
+import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 
 const TABS = [
   { key: 'search', label: 'Search' },
@@ -73,7 +73,8 @@ const hiddenSx = { display: 'none' };
 export function CompendiumFrame({ compendium, layout, autoFocus = false, action = null, sx }) {
   return (
     <Panel
-      icon={GAME_ICONS.compendium}
+      icon={TOOL_CATALOG.compendium.icon}
+      tone={TOOL_CATALOG.compendium.color}
       title="Compendium"
       action={action}
       sx={{ display: 'flex', flexDirection: 'column', ...sx }}

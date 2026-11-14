@@ -10,7 +10,7 @@ import {
   GiHourglass, GiKey, GiLantern, GiMoon, GiMoonBats, GiOpenBook, GiPineTree, GiPlainDagger, GiPocketBow,
   GiPotionBall, GiRing, GiSevenPointedStar, GiShardSword, GiShinyApple, GiSnake, GiStoneTower, GiSwordsPower,
   GiThrownSpear, GiTorch, GiTowerFlag, GiTrident, GiVisoredHelm, GiWarhammer, GiWarlockEye, GiWaterDrop,
-  GiWhiteTower, GiWolfHead, GiMushroomGills,
+  GiWhiteTower, GiWolfHead, GiMushroomGills, GiAnvilImpact, GiCompass, GiCampfire, GiBattleGear,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Axe, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -77,16 +77,9 @@ export const GAME_ICONS = Object.freeze({
   sheet: GiScrollQuill,
   preview: GiCrystalBall,
 
-  // The battle map.
-  scenes: GiTreasureMap,
-
-  // The compendium.
-  compendium: GiBookCover,
-
   // Small stroke icons of the game's world, by what they stand for.
   // Tools and their sections.
   characterSheet: ScrollText,
-  characterBuilder: Wand2,
   encounter: Swords,
   build: BookOpen,
   reference: BookOpen,
@@ -129,6 +122,21 @@ export const GAME_ICONS = Object.freeze({
   travel: Footprints,
   mount: Rabbit,
   tier: Swords,
+});
+
+// The app's tools, each by its own drawing: the home's cards, the tool's page
+// header, its picker, the Links menu (TOOL_CATALOG). Drawn large, so game
+// drawings; a small button that opens a tool (the sheet beside the map, the
+// compendium in the bar) keeps its stroke role above.
+export const TOOL_ICONS = Object.freeze({
+  characters: GiBattleGear,
+  builder: GiAnvilImpact,
+  campaigns: GiCampfire,
+  gmboard: GiCompass,
+  dmscreen: GiScrollQuill,
+  vtt: GiTreasureMap,
+  encounters: GiCrossedSwords,
+  compendium: GiBookCover,
 });
 
 // The icon vocabularies of one feature each, kept here with the roles so the

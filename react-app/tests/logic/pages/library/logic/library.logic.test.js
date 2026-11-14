@@ -23,7 +23,7 @@ const { REGISTRY_META } = await import('../../../../../src/shared/storage/localS
 const { SECTION_REGISTRY } = await import('../../../../../src/shared/instances/sectionRegistry.js');
 const { resolveTool, LIBRARY_TOOLS } = await import('../../../../../src/pages/library/logic/tools.js');
 const { mergeCharacterRows, canDeleteRow, deletePlanFor, loadCharacterRows } = await import('../../../../../src/pages/library/logic/characterRows.js');
-const { mergeInstanceRows, loadInstanceRows, sectionDeletePlan, shouldPullCloudCopy } = await import('../../../../../src/pages/library/logic/instanceRows.js');
+const { sectionDeletePlan, shouldPullCloudCopy } = await import('../../../../../src/pages/library/logic/instanceRows.js');
 
 test('resolveTool resolves every supported tool slug to a valid table entry', () => {
   for (const slug of ['characters', 'gmboard', 'encounters', 'dmscreen']) {
@@ -141,32 +141,10 @@ test('freshness pulls only when valid cloud metadata is strictly newer', () => {
   assert.equal(shouldPullCloudCopy(local, { updated_at: 'invalid' }), false);
 });
 
-test('section picker merge covers local-only, cloud-only, and collision with cloud winning', () => {
-  const rows = mergeInstanceRows(
-    [
-      { id: 'cloud', name: 'Cloud only', updated_at: '2026-01-01T00:00:00Z' },
-      { id: 'both', name: 'Cloud wins', updated_at: '2026-01-02T00:00:00Z' },
-    ],
-    [
-      { id: 'local', name: 'Local only', updatedAt: 1 },
-      { id: 'both', name: 'Local loses', updatedAt: 2 },
-    ],
-  );
-  assert.equal(rows.length, 3);
-  assert.equal(rows.find((row) => row.id === 'local').origin, 'local');
-  assert.equal(rows.find((row) => row.id === 'cloud').origin, 'cloud');
-  assert.equal(rows.find((row) => row.id === 'both').name, 'Cloud wins');
-  assert.equal(rows.filter((row) => row.id === 'both').length, 1);
-});
-
-test('failing section cloud list keeps full local list and returns notice', async () => {
-  const local = [{ id: 'one', updatedAt: 1 }, { id: 'two', updatedAt: 2 }];
-  const result = await loadInstanceRows({
-    listLocal: () => local,
-    listCloud: async () => { throw new Error('offline'); },
-  });
-  assert.deepEqual(result.rows.map((row) => row.id).sort(), ['one', 'two']);
-  assert.equal(result.error, 'Could not load cloud saves: offline.');
+test('mergeCharacterRows keeps the campaign a cloud sheet was added to', () => {
+  const rows = mergeCharacterRows([{ id: 'c1', name: 'C', campaign_id: 'camp' }], [{ id: 'l1', name: 'L', updatedAt: 1 }]);
+  assert.equal(rows.find((row) => row.id === 'c1').campaignId, 'camp');
+  assert.equal(rows.find((row) => row.id === 'l1').campaignId, null);
 });
 
 test('section delete plan never sends local-only deletion to cloud', () => {

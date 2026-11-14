@@ -1,64 +1,8 @@
-import { failureMessage } from '../../../shared/ui/busyAction.js';
-
 export function shouldPullCloudCopy(localUpdatedAt, cloudMeta) {
   if (!cloudMeta?.updated_at) return false;
   const cloudUpdatedAt = Date.parse(cloudMeta.updated_at);
   const localTime = Number(localUpdatedAt) || 0;
   return Number.isFinite(cloudUpdatedAt) && cloudUpdatedAt > localTime;
-}
-
-export function mergeInstanceRows(cloudRows = [], localEntries = []) {
-  const localById = new Map(localEntries.filter((entry) => entry?.id).map((entry) => [entry.id, entry]));
-  const rows = [];
-  const seen = new Set();
-
-  for (const cloud of cloudRows) {
-    if (!cloud?.id || seen.has(cloud.id)) continue;
-    const local = localById.get(cloud.id);
-    rows.push({
-      id: cloud.id,
-      name: cloud.name || local?.name || cloud.id,
-      updatedAt: Date.parse(cloud.updated_at) || local?.updatedAt || 0,
-      localUpdatedAt: local?.updatedAt || 0,
-      linkGroupId: local?.linkGroupPending || cloud.link_group_id === undefined
-        ? (local?.linkGroupId ?? null) : cloud.link_group_id,
-      origin: 'cloud',
-      hasLocal: Boolean(local),
-      owner: cloud.owner ?? null,
-      ownerUsername: cloud.owner_username || null,
-    });
-    seen.add(cloud.id);
-  }
-
-  for (const local of localEntries) {
-    if (!local?.id || seen.has(local.id)) continue;
-    rows.push({
-      id: local.id,
-      name: local.name || local.id,
-      updatedAt: local.updatedAt || 0,
-      localUpdatedAt: local.updatedAt || 0,
-      linkGroupId: local.linkGroupId || null,
-      origin: 'local',
-      hasLocal: true,
-      owner: null,
-      ownerUsername: null,
-    });
-  }
-
-  rows.sort((left, right) => right.updatedAt - left.updatedAt);
-  return rows;
-}
-
-export async function loadInstanceRows({ listCloud, listLocal, errorMessage = 'Could not load cloud saves.' }) {
-  const localEntries = (await listLocal()) || [];
-  let cloudRows = [];
-  let error = null;
-  try {
-    cloudRows = (await listCloud()) || [];
-  } catch (cause) {
-    error = failureMessage(errorMessage, cause);
-  }
-  return { rows: mergeInstanceRows(cloudRows, localEntries), error };
 }
 
 export function sectionDeletePlan(row) {

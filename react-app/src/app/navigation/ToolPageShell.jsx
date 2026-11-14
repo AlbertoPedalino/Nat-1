@@ -33,8 +33,7 @@ export default function ToolPageShell({
       <Stack spacing={2}>
         <InstanceConflictBanner tool={tool} />
         <PageHeader
-          icon={catalog?.icon}
-          iconColor={catalog?.color}
+          tool={catalog}
           title={title}
           subtitle={`Instance ${tool.id}`}
           actions={actions}

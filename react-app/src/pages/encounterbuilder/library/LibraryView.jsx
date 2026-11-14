@@ -3,8 +3,10 @@ import { Library as LibraryIcon, RotateCcw, Trash2, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
-  groupLibraryByQuest, listQuestNames, mergeLibrary, toTime,
+  groupLibraryByQuest, listQuestNames, mergeLibrary, questFilterField, toTime,
 } from '../../../shared/encounter/library.js';
+import ListFilterBar from '../../../shared/ui/ListFilterBar.jsx';
+import { useListFilter } from '../../../shared/ui/useListFilter.js';
 import { normalizeEncounterQuest } from '../state/storage.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
@@ -22,12 +24,18 @@ import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
+// A saved encounter is found by its name, its quest or a creature in it, and
+// filtered by quest.
+const itemText = (item) => [item.enc.name, item.enc.quest, ...(item.enc.encounter || []).map((monster) => monster.name)];
+const QUEST_FIELDS = [questFilterField((item) => item.enc.quest)];
+
 export default encounterPanel({ state: ['fights', 'library', 'players'], context: ['dispatch', 'monsterDb'] }, LibraryViewView);
 
 function LibraryViewView({ state, dispatch, monsterDb }) {
   const { notify } = useToast();
-  const items = mergeLibrary(state.library, state.fights);
-  const groups = groupLibraryByQuest(items);
+  const items = useMemo(() => mergeLibrary(state.library, state.fights), [state.library, state.fights]);
+  const filter = useListFilter(items, { getText: itemText, fields: QUEST_FIELDS });
+  const groups = groupLibraryByQuest(filter.visible);
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
 
   const clearAll = () => {
@@ -50,6 +58,7 @@ function LibraryViewView({ state, dispatch, monsterDb }) {
       >
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>
       </Panel>
+      {items.length ? <ListFilterBar filter={filter} what="encounters" sx={{ mb: 0 }} /> : null}
       {items.length ? (
         groups.map((group) => (
           <Stack key={group.quest ? `quest:${group.quest}` : 'unassigned'} spacing={1}>

@@ -36,8 +36,7 @@ export default function InstancePickerPage() {
   return (
     <AppPage topBar={{ home: true }} maxWidth={640}>
       <PageHeader
-        icon={meta.icon}
-        iconColor={meta.color}
+        tool={meta}
         title={meta.label}
         actions={(
           <AddButton main size="medium" {...newButtonProps} sx={s.newBtnSx}>

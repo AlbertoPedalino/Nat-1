@@ -1108,6 +1108,32 @@ test('an icon of the game world is a GAME_ICONS role', () => {
   assert.deepEqual(sourceFilesMatching(/from 'react-icons\/gi'/, { allow: ['shared/ui/gameIcons.js'] }), []);
 });
 
+// A tool's mark (the home's card, its page header, its picker, the Links
+// menu) is its TOOL_ICONS drawing in its TOOL_CATALOG colour: the catalog
+// takes no icon of its own, and a page header is given the tool, never an
+// icon or a colour, so it always matches the tool's card.
+test('a tool icon is a TOOL_ICONS drawing', () => {
+  assert.deepEqual(sourceFilesMatching(/from 'lucide-react'/).filter((file) => file.endsWith('toolCatalog.js')), []);
+  assert.deepEqual(sourceFilesMatching(/<PageHeader(?:[^>]|=>)*\b(icon|iconColor)=/), []);
+});
+
+// Every list of saved things (the library of each tool, the campaigns, the
+// battle map's tables and scenes, the encounter library and the map's
+// encounter import) is searched, and filtered by group (a campaign, a quest:
+// filterFields' groupField), through the one ListFilterBar and useListFilter
+// (shared/ui), never a search and a filter of its own.
+test("a main page's list takes the ListFilterBar", () => {
+  const lists = [
+    'pages/library/SectionPicker.jsx', 'pages/library/CharacterPicker.jsx', 'pages/campaigns/CampaignsPage.jsx',
+    'pages/vtt/session/CampaignTablePicker.jsx', 'pages/vtt/scene/ScenePicker.jsx',
+    'pages/encounterbuilder/library/LibraryView.jsx', 'pages/vtt/tokens/EncounterImportDialog.jsx',
+  ];
+  const withBar = new Set(sourceFilesMatching(/<ListFilterBar\b/));
+  assert.deepEqual(lists.filter((file) => !withBar.has(file)), []);
+  assert.deepEqual(sourceFilesMatching(/\buseListFilter\(/, { allow: ['shared/ui/useListFilter.js'] })
+    .filter((file) => !withBar.has(file) && !file.endsWith('useLibraryFilter.js')), []);
+});
+
 // Every counter spent and recovered one at a time (spell and pact slots, a
 // feature's uses, free casts, hit dice) is a row of GemPips: the cut, colours
 // and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.

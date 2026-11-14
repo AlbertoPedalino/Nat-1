@@ -14,7 +14,8 @@ in one folder.
 | `shared/` | Reusable UI, domain rules, storage, and cloud services; see [shared modules](shared/README.md) |
 | `adapters/` | D&D rule adapters, grouped by class, species, feat, spell, or item |
 
-`app/navigation/` contains the app top bar and linked-tool menu. Generic inputs
+`app/navigation/` contains the app top bar, the linked-tool menu and `toolCatalog.js`
+(each tool's name, colour and icon — the icons are `TOOL_ICONS` in `shared/ui/gameIcons.js`). Generic inputs
 such as `ColorField` and `InfoHint` belong to `shared/ui/`, with the one piece for
 each recurring job (guarded by `tests/logic/shared/oneDefinition*.test.js`):
 `ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
@@ -28,8 +29,9 @@ its chosen row), `centerInScroller` (`scrollReveal.js`: the current item of a sc
 list or strip kept in the middle, only that box scrolling), `SearchField` / `DraftSearchField` (every search, "Search <what>…"), `PickableRow` + `entryCard.js` (an
 action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
-`Panel` / `SidePanel` / `PageHeader` (`usePanelsWithoutLayers` for a page over a moving
-board), `liveStyle.js` (whatever moves every frame: `useLiveStyle`, `writeLiveStyle`,
+`Panel` / `SidePanel` / `PageHeader` (given the page's `tool`, a `TOOL_CATALOG` entry, so its
+mark matches the home's card; `usePanelsWithoutLayers` for a page over a moving board),
+`ListFilterBar` + `useListFilter` (every main page's list: a search and its filters), `liveStyle.js` (whatever moves every frame: `useLiveStyle`, `writeLiveStyle`,
 `useRootStyle`; never sx), `CornerCloseButton`, and the recipes in
 `interactive.js` (`focusRingSx` with an optional `tone`, `LIST_ROW_SX`,
 `CARD_PART_RULE_SX`, `readoutSx`). The weather card is `WeatherCard` in
@@ -43,7 +45,7 @@ and `logic/` trees.
 
 | Page | Subfolders and responsibility |
 | --- | --- |
-| `vtt/` | `scene/`: editing, selection, creation, and image stitching; `map/`: viewport, grids, fog, drawing, and laser; `tokens/`: roster, token interaction, and encounter import; `objects/`: map objects; `atmosphere/`: overlay and shaders; `sheets/`: floating sheets; `rolls/`: dice and roll feed; `initiative/`: turn-order strip and the scene's shown fight; `session/`: access and campaign selection; `dungeon/` and `hexcrawl/`: linked exploration panels |
+| `vtt/` | `scene/`: editing, selection (`ScenePicker`: one campaign's scenes, the second step), creation, and image stitching; `map/`: viewport, grids, fog, drawing, and laser; `tokens/`: roster, token interaction, and encounter import; `objects/`: map objects; `atmosphere/`: overlay and shaders; `sheets/`: floating sheets; `rolls/`: dice and roll feed; `initiative/`: turn-order strip and the scene's shown fight; `session/`: access and campaign selection (`CampaignTablePicker`: every table, the first step — one you run opens its scenes, one you play at joins it); `dungeon/` and `hexcrawl/`: linked exploration panels |
 | `charsheet/` | `actions/`, `spells/`, `inventory/`, and `forms/`: respective tabs and controls; `resources/`: HP, hit dice, and rests; `stats/`: scores, saves, skills, movement, and senses; `proficiency/`: proficiency rules and context; `details/`: background, features, and notes; `layout/`: header and tab layout; `layout/layout.js`: the sheet grid and column, and `sheetResponsive` / `sheetGridSx` (an embedded sheet takes the phone's layout); `state/`: derived sheet state, effects, action context, and the sheet's hooks (`useSheetCloudSave`: content save and conflicts; `useSheetRolls`: dice, toast, roll log; `useSheetVitals`: HP, death saves, conditions; `sheetLoad.js`: opening a character) |
 | `charbuilder/` | `choices/`: selection controls and feat prerequisites; `progression/`: classes, levels, XP, and calculations; `spells/`: spell selection and slots; `preview/`: preview UI and model; `data/`: reference-data loading and item variants; `state/`: reducer (`state.js`, with `classHandlers.js`, `stateHandlers.js`, `choiceCleanup.js`, `equipmentChoices.js`, `initialState.js`), persistence (`persistence.js`, `sheetImport.js`, `proficiencyPersistence.js`), and export; `layout/`: builder panels; `steps/`: wizard steps |
 | `encounterbuilder/` | `bestiary/`: monster browsing, stat blocks, and data; `builder/`: party setup and difficulty; `combat/`: combatants, effects, and reinforcements; `rolls/`: rolls, sharing, and fumbles; `campaign/`: campaign players and sheet synchronization; `library/`: saved fights; `negotiation/`: negotiation dialog and rules; `sync/`: cloud/external fight and map synchronization; `state/`: context, reducer (with `partyState.js`, `combatState.js`, `libraryState.js`), persistence, and constants |

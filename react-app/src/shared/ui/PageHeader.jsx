@@ -4,18 +4,18 @@ import { TEXT_STYLES } from './textStyles.js';
 import { asArray } from '../lists.js';
 
 // The header a page opens on, under the app's top bar (Campaigns, a tool's
-// saved list, a saved tool): its icon (a lucide component) in `iconColor`,
-// its title as the page's one h1, an optional `subtitle` under the title (a
+// saved list, a saved tool): the mark of its `tool` (a TOOL_CATALOG entry:
+// its icon in its colour, as on the home's card), its title as the page's one h1, an optional `subtitle` under the title (a
 // saved tool's id) and its `actions` (New, the tool's own buttons) at the
 // end, wrapping under the title where the line is too short for them.
 // Every page header is drawn here, so a restyle reaches them all; `sx` is
 // for placement only.
 export default function PageHeader({
-  icon, iconColor = 'primary.main', title, subtitle = null, actions = null, sx,
+  tool, title, subtitle = null, actions = null, sx,
 }) {
   return (
     <Box sx={[headerSx, ...asArray(sx)]}>
-      {icon ? <Box component={icon} size={PAGE_ICON_SIZE} strokeWidth={1.5} aria-hidden sx={{ color: iconColor, flexShrink: 0 }} /> : null}
+      {tool ? <Box component={tool.icon} aria-hidden sx={{ ...pageIconSx, color: tool.color }} /> : null}
       <Box sx={titleBlockSx}>
         <Typography component="h1" sx={titleSx}>{title}</Typography>
         {subtitle ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>{subtitle}</Typography> : null}
@@ -25,8 +25,13 @@ export default function PageHeader({
   );
 }
 
-// The page icon is a heading's size, larger than any icon of the UI scale.
-const PAGE_ICON_SIZE = 30;
+// The page icon stands beside the title larger than the title's letters: a
+// game drawing is detailed, and at a heading's size its shape is lost.
+const pageIconSx = {
+  width: { xs: 44, md: 56 },
+  height: { xs: 44, md: 56 },
+  flexShrink: 0,
+};
 
 const headerSx = {
   display: 'flex',

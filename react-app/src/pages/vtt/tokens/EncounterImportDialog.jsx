@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Stack, Typography } from '@mui/material';
 import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
-import { compareText } from '../../../shared/lists.js';
 import PlacementDialog from './PlacementDialog.jsx';
 import GmLayerSwitch from './GmLayerSwitch.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 import { useEncounterSaves } from './useEncounterSaves.js';
-import {
-  ANY_QUEST, NO_QUEST, buildImportEntries, entriesInQuest, questValue,
-} from './encounterImportEntries.js';
+import { buildImportEntries } from './encounterImportEntries.js';
+import { questFilterField } from '../../../shared/encounter/library.js';
+import ListFilterBar from '../../../shared/ui/ListFilterBar.jsx';
+import { useListFilter } from '../../../shared/ui/useListFilter.js';
 import EncounterSaveSelect from './EncounterSaveSelect.jsx';
 import EncounterGroupCard from './EncounterGroupCard.jsx';
 import { noticeSx } from './encounterImportStyles.js';
@@ -20,32 +20,29 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 
+// An encounter is found by its name or its quest, and filtered by quest.
+const entryText = (entry) => [entry.name, entry.quest];
+const QUEST_FIELDS = [questFilterField((entry) => entry.quest)];
+
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud (see useEncounterSaves for how the two are reconciled).
 export default function EncounterImportDialog({
   open, onClose, onImport, busy, placing = false, onPlacementDragStart, onPlacementDragEnd,
 }) {
   const monsterDb = useMonsterDb();
-  const [questKey, setQuestKey] = useState(ANY_QUEST);
   const [entryKey, setEntryKey] = useState('');
   const [hidden, setHidden] = useState(false);
   const {
     instances, instanceId, pickInstance, listNotice, listing, fetching, fetchNotice, fights, library,
   } = useEncounterSaves(open);
 
-  // The filter belongs to the save being looked at, not to the dialog: keeping a
-  // quest from the previous instance would hide everything in this one.
-  useEffect(() => { setQuestKey(ANY_QUEST); }, [instanceId]);
-
   const entries = useMemo(() => buildImportEntries(fights, library), [fights, library]);
 
-  const quests = useMemo(
-    () => [...new Set(entries.map((entry) => entry.quest).filter(Boolean))]
-      .sort(compareText),
-    [entries],
-  );
-  const unquested = entries.some((entry) => !entry.quest);
-  const visible = useMemo(() => entriesInQuest(entries, questKey), [entries, questKey]);
+  // The search and the quest filter belong to the save being looked at, not
+  // to the dialog: a quest kept from the previous save would hide everything
+  // in this one.
+  const filter = useListFilter(entries, { getText: entryText, fields: QUEST_FIELDS, resetKey: instanceId });
+  const { visible } = filter;
 
   // The quest chosen decides what there is to pick from, so the encounter is
   // read off the list rather than held beside it: a choice the filter no longer
@@ -125,19 +122,7 @@ export default function EncounterImportDialog({
             />
             {fetchNotice ? <Typography sx={noticeSx}>{fetchNotice}</Typography> : null}
 
-            {quests.length ? (
-              <SelectField
-                label="Quest"
-                value={questKey}
-                onChange={setQuestKey}
-                emptyOption={{ label: 'All quests' }}
-                emptyValue={ANY_QUEST}
-                options={[
-                  ...quests.map((quest) => ({ value: questValue(quest), label: quest })),
-                  ...(unquested ? [{ value: NO_QUEST, label: 'No quest' }] : []),
-                ]}
-              />
-            ) : null}
+            {entries.length ? <ListFilterBar filter={filter} what="encounters" sx={{ mb: 0 }} /> : null}
 
             <SelectField
               label="Encounter"
@@ -147,7 +132,7 @@ export default function EncounterImportDialog({
               helperText={visible.length
                 ? null
                 : fetching ? 'Waiting for the cloud copy…' : (entries.length
-                  ? 'No encounter in this quest.'
+                  ? null
                   : 'This save has no encounter to import yet.')}
               options={visible.map((entry) => ({ value: entry.key, label: entry.name }))}
             />

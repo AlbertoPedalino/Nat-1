@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Box, Card, CardContent, Divider, Grid, Stack, Typography } from '@mui/material';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
 import {
@@ -8,7 +8,7 @@ import {
 } from '../../../shared/character/combat/ac.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
-import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS as SOURCE_COLOR, PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
@@ -19,7 +19,7 @@ import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { collectPreviewProficiencies, collectPreviewFeats } from './previewData.js';
 import {
-  PROFICIENCY_TONE, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
+  CHARACTER_TONE, TRAINING_TONE, PreviewSection, InlineMetadata, PreviewChipList, PreviewEntryText, FeatureAccordion, EntryAccordions, hasDescriptionEntries,
 } from './PreviewParts.jsx';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import CharacterName from '../../../shared/character/profile/CharacterName.jsx';
@@ -39,21 +39,30 @@ const PANEL_SX = {
   minWidth: 0,
 };
 
+// Every class the character has, with its levels when there is more than one
+// ("Fighter 2 / Bard 2"), so a multiclass reads in full.
+function classLine(character) {
+  const classes = classEntities(character);
+  if (classes.length < 2) return classes[0]?.className;
+  return classes.map(({ className, level }) => `${className} ${level}`).join(' / ');
+}
+
 function PreviewHeader({ character, hp }) {
   const subtitle = [
     `Lv ${character.level || 1}`,
     character.speciesName,
-    character.className,
+    classLine(character),
   ].filter(Boolean).join(' ');
+  // Hit points in the sheet's Hit Points green.
   const metadata = [
     { key: 'identity', value: subtitle || 'No class selected' },
-    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.heavy } },
+    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: PANEL_TONES.hitPoints, fontWeight: FONT_WEIGHTS.heavy } },
   ];
 
   return (
-    <PreviewSection icon={GAME_ICONS.preview} title="Preview">
+    <PreviewSection icon={GAME_ICONS.preview} title="Preview" tone={CHARACTER_TONE}>
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-        <CharacterName name={character.name} sx={BUILDER_TEXT.characterName} />
+        <CharacterName name={character.name} sx={{ ...BUILDER_TEXT.characterName, color: CHARACTER_TONE }} />
         <InlineMetadata items={metadata} />
       </Stack>
     </PreviewSection>
@@ -110,7 +119,7 @@ function AcFormulasSection({ character }) {
   // The armor the character starts wearing blocks the formulas that need none.
   const hasArmor = !!getEquippedArmor(character, character.inventory || []);
   return (
-    <PreviewSection icon={GAME_ICONS.armorClass} title="Defense" subtitle="Armor Class formulas">
+    <PreviewSection icon={GAME_ICONS.armorClass} title="Defense" subtitle="Armor Class formulas" tone={CHARACTER_TONE}>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {formulas.map((f) => {
           const val = computeAcFormulaValue(character, f);
@@ -135,11 +144,11 @@ function AcFormulasSection({ character }) {
 function ProficiencySection({ sections }) {
   if (!sections.length) return null;
   return (
-    <PreviewSection icon={GAME_ICONS.proficiencies} title="Proficiencies" subtitle="Skills, equipment, languages" tone={PROFICIENCY_TONE}>
+    <PreviewSection icon={GAME_ICONS.proficiencies} title="Proficiencies" subtitle="Skills, equipment, languages" tone={TRAINING_TONE}>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
-            <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: PROFICIENCY_TONE }}>
+            <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: TRAINING_TONE }}>
               {section.title}
             </Typography>
             <PreviewChipList
@@ -156,7 +165,7 @@ function ProficiencySection({ sections }) {
 function WeaponMasterySection({ items }) {
   if (!items.length) return null;
   return (
-    <PreviewSection icon={GAME_ICONS.weaponMasteries} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
+    <PreviewSection icon={GAME_ICONS.weaponMasteries} title="Weapon Masteries" tone={TRAINING_TONE}>
       <PreviewChipList
         items={items}
         getKey={(item) => `${item.weaponName}-${item.mastery || 'none'}`}

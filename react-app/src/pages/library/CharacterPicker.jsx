@@ -16,6 +16,8 @@ import { loadCharacterRows, canDeleteRow, deletePlanFor } from './logic/characte
 import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import InstanceRow from './components/InstanceRow.jsx';
+import ListFilterBar from '../../shared/ui/ListFilterBar.jsx';
+import { useLibraryFilter } from './logic/useLibraryFilter.js';
 import * as s from './styles.js';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
@@ -47,6 +49,7 @@ export default function CharacterPicker() {
   // (owner-only) and again once isGm resolves true. The token guard makes
   // sure the earlier, narrower result can't clobber the later full list.
   const reqRef = useRef(0);
+  const filter = useLibraryFilter('characters', rows);
 
   const refresh = useCallback(async () => {
     const token = ++reqRef.current;
@@ -144,29 +147,32 @@ export default function CharacterPicker() {
             : 'No sheets yet. Create a character while logged in and it shows up here.'}
         </StatePanel>
       ) : (
-        <Box sx={s.listSx}>
-          {rows.map((row) => {
-            const rowCanDelete = canDeleteRow(row, { myId, isGm });
-            // Renaming a cloud-backed row would only touch the local copy;
-            // the next refresh re-merges and the cloud name wins, silently
-            // reverting it. No cloud rename in scope, so only local-only
-            // rows expose rename.
-            const rowCanRename = row.origin === 'local';
-            return (
-              <InstanceRow
-                key={row.id}
-                name={row.name}
-                updatedAtLabel={formatUpdatedAt(row.updatedAt)}
-                badge={{ kind: row.origin, label: row.origin === 'cloud' ? 'Cloud' : 'Local' }}
-                subtitle={isGm && row.origin === 'cloud' ? (row.ownerUsername || '—') : null}
-                opening={openingId === row.id}
-                onOpen={() => handleOpen(row)}
-                onRename={rowCanRename ? () => handleRename(row) : null}
-                onDelete={rowCanDelete ? () => handleDelete(row) : null}
-                extraAction={row.origin === 'cloud' ? { icon: Save, label: 'Save / Export', onClick: () => setDialogRow(row) } : null}
-              />
-            );
-          })}
+        <Box>
+          <ListFilterBar filter={filter} what="sheets" />
+          <Box sx={s.listSx}>
+            {filter.visible.map((row) => {
+              const rowCanDelete = canDeleteRow(row, { myId, isGm });
+              // Renaming a cloud-backed row would only touch the local copy;
+              // the next refresh re-merges and the cloud name wins, silently
+              // reverting it. No cloud rename in scope, so only local-only
+              // rows expose rename.
+              const rowCanRename = row.origin === 'local';
+              return (
+                <InstanceRow
+                  key={row.id}
+                  name={row.name}
+                  updatedAtLabel={formatUpdatedAt(row.updatedAt)}
+                  badge={{ kind: row.origin, label: row.origin === 'cloud' ? 'Cloud' : 'Local' }}
+                  subtitle={isGm && row.origin === 'cloud' ? (row.ownerUsername || '—') : null}
+                  opening={openingId === row.id}
+                  onOpen={() => handleOpen(row)}
+                  onRename={rowCanRename ? () => handleRename(row) : null}
+                  onDelete={rowCanDelete ? () => handleDelete(row) : null}
+                  extraAction={row.origin === 'cloud' ? { icon: Save, label: 'Save / Export', onClick: () => setDialogRow(row) } : null}
+                />
+              );
+            })}
+          </Box>
         </Box>
       )}
 

@@ -1,4 +1,4 @@
-import { loadInstanceRows, mergeInstanceRows } from './instanceRows.js';
+import { failureMessage } from '../../../shared/ui/busyAction.js';
 
 // Pure merge/delete-routing logic for the characters picker. No React, no
 // network — inputs are plain arrays/objects so this is unit-testable in
@@ -8,7 +8,45 @@ import { loadInstanceRows, mergeInstanceRows } from './instanceRows.js';
 // renders as one row: the cloud copy wins name + updatedAt, but we remember
 // that a local copy also exists (needed for rename + delete cleanup).
 export function mergeCharacterRows(cloudRows = [], localEntries = []) {
-  return mergeInstanceRows(cloudRows, localEntries);
+  const localById = new Map(localEntries.filter((entry) => entry?.id).map((entry) => [entry.id, entry]));
+  const rows = [];
+  const seen = new Set();
+
+  for (const cloud of cloudRows) {
+    if (!cloud?.id || seen.has(cloud.id)) continue;
+    const local = localById.get(cloud.id);
+    rows.push({
+      id: cloud.id,
+      name: cloud.name || local?.name || cloud.id,
+      updatedAt: Date.parse(cloud.updated_at) || local?.updatedAt || 0,
+      localUpdatedAt: local?.updatedAt || 0,
+      // The campaign the character was added to.
+      campaignId: cloud.campaign_id ?? null,
+      origin: 'cloud',
+      hasLocal: Boolean(local),
+      owner: cloud.owner ?? null,
+      ownerUsername: cloud.owner_username || null,
+    });
+    seen.add(cloud.id);
+  }
+
+  for (const local of localEntries) {
+    if (!local?.id || seen.has(local.id)) continue;
+    rows.push({
+      id: local.id,
+      name: local.name || local.id,
+      updatedAt: local.updatedAt || 0,
+      localUpdatedAt: local.updatedAt || 0,
+      campaignId: null,
+      origin: 'local',
+      hasLocal: true,
+      owner: null,
+      ownerUsername: null,
+    });
+  }
+
+  rows.sort((left, right) => right.updatedAt - left.updatedAt);
+  return rows;
 }
 
 // A non-GM may only ever act on their own rows; a GM may act on any row.
@@ -54,5 +92,13 @@ export function deletePlanFor(row, { myId, isGm }) {
 // Loads + merges rows. A failing cloud call never throws and never hides the
 // local list: it just yields the local-only rows plus a non-blocking error.
 export async function loadCharacterRows({ listCloud, listLocal }) {
-  return loadInstanceRows({ listCloud, listLocal, errorMessage: 'Could not load cloud sheets.' });
+  const localEntries = (await listLocal()) || [];
+  let cloudRows = [];
+  let error = null;
+  try {
+    cloudRows = (await listCloud()) || [];
+  } catch (cause) {
+    error = failureMessage('Could not load cloud sheets.', cause);
+  }
+  return { rows: mergeCharacterRows(cloudRows, localEntries), error };
 }

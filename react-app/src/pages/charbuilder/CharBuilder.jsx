@@ -27,7 +27,7 @@ import { BUILDER_TEXT } from './layout/builderText.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
 import { panelFrameSx, panelTitleBarSx } from '../../shared/ui/PanelHeader.jsx';
 import TagChip from '../../shared/ui/TagChip.jsx';
-import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
+import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 
 // A step's tab: its number and its name. No picture: at a tab's size the
 // drawings read as specks; the step's own heading carries it.
@@ -99,9 +99,9 @@ export default function CharBuilder() {
       topBar={{ home: true, cloudMenuProps: { canUploadDraft: importDraft && cloudActive, onUploadDraft: handleUploadToCloud } }}
     >
       <PageHeader
-        icon={GAME_ICONS.characterBuilder}
+        tool={TOOL_CATALOG.builder}
         title="Character Builder"
-        subtitle="D&D 5e 2024"
+        subtitle="D&D 5.5e"
         actions={<ImportSheetFab onNotify={notify} onFile={handleImportSheetFile} />}
         sx={{ mb: 1 }}
       />

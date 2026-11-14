@@ -6,8 +6,8 @@ import { listLiveCampaignIds } from '../../cloud/api/vttScenes.js';
 import { watchRevisions } from '../../cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../cloud/sync/syncKeys.js';
 
-// Which of these campaigns have a map up, kept current: the "Join a table"
-// list shows Live the moment a GM puts a scene on, without a reload. The
+// Which of these campaigns have a map up, kept current: the battle map's
+// tables list shows Live the moment a GM puts a scene on, without a reload. The
 // same model as useLiveSession, for several campaigns at once: one read, then
 // `campaign_live_scenes` through Realtime, and a re-read when the sync digest
 // says a row moved that Realtime may have missed (sleep, network, a hidden tab).

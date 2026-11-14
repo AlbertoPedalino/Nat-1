@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { Map, Pencil, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
@@ -15,49 +15,49 @@ import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { promptText } from '../../../shared/ui/promptText.js';
 import { failureMessage, runBusy } from '../../../shared/ui/busyAction.js';
-import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import Panel from '../../../shared/ui/Panel.jsx';
-import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { CARD_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
+import PageHeader from '../../../shared/ui/PageHeader.jsx';
+import ListFilterBar from '../../../shared/ui/ListFilterBar.jsx';
+import { useListFilter } from '../../../shared/ui/useListFilter.js';
+import { TOOL_CATALOG } from '../../../app/navigation/toolCatalog.js';
+import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
-import Caption from '../../../shared/ui/Caption.jsx';
-import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
 
-// Scenes belong to a campaign, so the picker is grouped by campaign rather than
-// being a flat list like the local tools' Library.
+const sceneText = (scene) => scene.name;
+
+// The battle map's second step, for a campaign the user runs (`campaign`:
+// { id, name, members }): its scenes, searched by name, and New scene. Scenes
+// belong to a campaign, so the GM picks the campaign first (CampaignTablePicker).
 export default function ScenePicker({
-  campaigns = [], loadingCampaigns = false, campaignError = null, onOpen,
+  campaign = null, campaignError = null, onOpen,
 }) {
   const { notify } = useToast();
-  const [scenesByCampaign, setScenesByCampaign] = useState({});
+  const campaignId = campaign?.id || '';
+  const [scenes, setScenes] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  // Which campaign is having a scene made for it, or null. New scene is a
-  // choice now — empty board, or one generated — so it opens a dialog rather
-  // than making the empty one on the spot.
-  const [creatingFor, setCreatingFor] = useState(null);
+  // Whether a scene is being made. New scene is a choice — empty board, or one
+  // generated — so it opens a dialog rather than making the empty one on the
+  // spot.
+  const [creating, setCreating] = useState(false);
+  const filter = useListFilter(scenes, { getText: sceneText });
 
-  const refresh = useCallback(async (ids) => {
-    if (!ids.length) return;
+  const refresh = useCallback(async () => {
+    if (!campaignId) return;
     try {
-      const entries = await Promise.all(ids.map(async (id) => [id, await listScenes(id)]));
-      setScenesByCampaign(Object.fromEntries(entries));
+      setScenes(await listScenes(campaignId));
       setError('');
     } catch (cause) {
       setError(failureMessage('Could not load the scenes.', cause));
     }
-  }, []);
+  }, [campaignId]);
 
-  useEffect(() => {
-    refresh(campaigns.map((campaign) => campaign.id));
-  }, [campaigns, refresh]);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const handleCreate = async (campaignId) => {
     return runBusy({ setBusy, notify }, async () => {
@@ -96,7 +96,7 @@ export default function ScenePicker({
       onProgress?.(index + 1);
     }
 
-    await refresh(campaigns.map((campaign) => campaign.id));
+    await refresh();
     if (failed.length) {
       notify('warning', `Could not import ${failed.join(', ')}.${reason ? ` ${reason}` : ''}`);
     }
@@ -116,7 +116,7 @@ export default function ScenePicker({
     try {
       if (scene.isLive) await clearLiveScene(scene.campaignId);
       else await setLiveScene(scene.id);
-      await refresh(campaigns.map((campaign) => campaign.id));
+      await refresh();
       notify('success', scene.isLive ? 'Players see nothing now.' : `Players are now on "${scene.name}".`);
     } catch (cause) {
       notify('error', failureMessage('Could not change the live scene.', cause));
@@ -128,7 +128,7 @@ export default function ScenePicker({
     if (!next || next === scene.name) return;
     try {
       await updateScene(scene.id, { name: next });
-      await refresh(campaigns.map((campaign) => campaign.id));
+      await refresh();
     } catch (cause) {
       notify('error', failureMessage('Could not rename the scene.', cause));
     }
@@ -138,7 +138,7 @@ export default function ScenePicker({
     if (!confirmAction(`Delete "${scene.name}"? Its tokens and fog go with it.`)) return;
     try {
       const { cleanupError } = await deleteScene(scene.id, scene.campaignId);
-      await refresh(campaigns.map((campaign) => campaign.id));
+      await refresh();
       if (cleanupError) notify('warning', 'Scene deleted, but some uploaded images could not be cleaned up.');
       else notify('success', `Deleted "${scene.name}".`);
     } catch (cause) {
@@ -146,55 +146,50 @@ export default function ScenePicker({
     }
   };
 
-  if (loadingCampaigns) return <LoadingLine centered label="Loading campaigns…" />;
+  // The campaigns failed to load: say so, not that this one is not the user's.
+  if (!campaign && campaignError) return <ErrorLine>{campaignError}</ErrorLine>;
+
+  if (!campaign) {
+    return (
+      <StatePanel title="Not a campaign you run">
+        Scenes are made by the campaign's GM. Pick one of your tables from the Battle Map.
+      </StatePanel>
+    );
+  }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={1.5}>
+      <PageHeader
+        tool={TOOL_CATALOG.vtt}
+        title={campaign.name}
+        subtitle={`${campaign.members.length} character${campaign.members.length === 1 ? '' : 's'} in the campaign`}
+        actions={(
+          <AddButton main disabled={busy} onClick={() => setCreating(true)}>
+            New scene
+          </AddButton>
+        )}
+        sx={{ mb: 0 }}
+      />
+
       {campaignError || error ? (
         <ErrorLine>{campaignError || error}</ErrorLine>
       ) : null}
 
-      {!campaigns.length ? (
-        <StatePanel title="No campaign to map">
-          Maps belong to a campaign you run. Create one from the Campaigns page first.
-        </StatePanel>
-      ) : null}
-
-      {campaigns.map((campaign) => {
-        const scenes = scenesByCampaign[campaign.id] || [];
-        return (
-          <Panel
-            key={campaign.id}
-            icon={GAME_ICONS.scenes}
-            title={campaign.name}
-            bodySx={{ p: 1.5 }}
-            action={(
-              <AddButton main
-                disabled={busy}
-                onClick={() => setCreatingFor(campaign.id)}
-              >
-                New scene
-              </AddButton>
-            )}
-          >
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.25 }}>
-              {campaign.members.length} character{campaign.members.length === 1 ? '' : 's'} in the campaign
-            </Typography>
-
-            {scenes.length ? (
-              <Stack spacing={0.75}>
-                {scenes.map((scene) => (
-                  <Box key={scene.id} sx={rowSx}>
-                    <Box component="button" type="button" onClick={() => onOpen(scene.id)} sx={rowButtonSx}>
-                      <Map size={ICON_SIZES.md} />
-                      <Typography sx={ONE_LINE_SX}>
-                        {scene.name}
-                      </Typography>
-                      {scene.isLive ? <TagChip tone={UI_COLORS.accent} label="Live" /> : null}
-                      {!scene.imagePath ? (
-                        <Caption>no map yet</Caption>
-                      ) : null}
-                    </Box>
+      {scenes.length ? (
+        <Box>
+          <ListFilterBar filter={filter} what="scenes" />
+          <Stack spacing={0.75}>
+            {filter.visible.map((scene) => (
+              <EntityRow
+                key={scene.id}
+                surface="card"
+                onClick={() => onOpen(scene.id)}
+                leading={<Map size={ICON_SIZES.md} />}
+                title={scene.name}
+                badge={scene.isLive ? <TagChip component="span" tone={UI_COLORS.accent} label="Live" /> : null}
+                meta={scene.imagePath ? null : 'no map yet'}
+                actions={(
+                  <>
                     <TipIconButton title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'} size="small" color={scene.isLive ? 'primary' : 'default'} onClick={() => handleLive(scene)}>
                       {scene.isLive ? <Radio size={ICON_SIZES.sm} /> : <RadioTower size={ICON_SIZES.sm} />}
                     </TipIconButton>
@@ -202,44 +197,23 @@ export default function ScenePicker({
                     <TipIconButton title="Delete" size="small" danger onClick={() => handleDelete(scene)}>
                       <Trash2 size={ICON_SIZES.sm} />
                     </TipIconButton>
-                  </Box>
-                ))}
-              </Stack>
-            ) : (
-              <EmptyLine>No scenes yet.</EmptyLine>
-            )}
-          </Panel>
-        );
-      })}
+                  </>
+                )}
+              />
+            ))}
+          </Stack>
+        </Box>
+      ) : (
+        <StatePanel title="No scenes yet">Make the first one with New scene.</StatePanel>
+      )}
 
       <NewSceneDialog
-        open={Boolean(creatingFor)}
-        campaignId={creatingFor}
-        onClose={() => setCreatingFor(null)}
-        onCreate={(campaignId) => { setCreatingFor(null); handleCreate(campaignId); }}
+        open={creating}
+        campaignId={campaignId}
+        onClose={() => setCreating(false)}
+        onCreate={(id) => { setCreating(false); handleCreate(id); }}
         onImport={handleImport}
       />
     </Stack>
   );
 }
-
-
-
-// A scene: the drawn card, lit under the cursor.
-const rowSx = {
-  ...CARD_SX,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0.5,
-  p: 0.75,
-};
-
-const rowButtonSx = {
-  ...BARE_BUTTON_SX,
-  flex: 1,
-  minWidth: 0,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  p: 0.5,
-};

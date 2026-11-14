@@ -140,9 +140,11 @@ test('the quest narrows the encounters on offer', async () => {
   await user.click(screen.getByRole('combobox', { name: 'Quest' }));
   const quests = within(screen.getByRole('listbox')).getAllByRole('option');
   expect(quests.map((option) => option.textContent))
-    .toEqual(['All quests', 'Debts Unpaid', 'The Long Winter', 'No quest']);
+    .toEqual(['Debts Unpaid', 'The Long Winter', 'No quest']);
 
+  // The quest filter takes several quests at once, as every filter does.
   await user.click(screen.getByRole('option', { name: 'The Long Winter' }));
+  await user.keyboard('{Escape}');
   expect(screen.getByRole('combobox', { name: 'Encounter' })).toHaveTextContent('Wolves');
 
   const options = within(await openEncounterMenu(user)).getAllByRole('option');
@@ -157,9 +159,19 @@ test('the encounters with no quest have an option of their own', async () => {
 
   await user.click(screen.getByRole('combobox', { name: 'Quest' }));
   await user.click(screen.getByRole('option', { name: 'No quest' }));
+  await user.keyboard('{Escape}');
 
   const options = within(await openEncounterMenu(user)).getAllByRole('option');
   expect(options.map((option) => option.textContent)).toEqual(['Loose ends']);
+});
+
+test('the encounters are searched by name or quest', async () => {
+  const user = userEvent.setup();
+  render(<EncounterImportDialog {...props} />);
+
+  await user.type(screen.getByRole('searchbox', { name: 'Search encounters' }), 'debts');
+  const options = within(await openEncounterMenu(user)).getAllByRole('option');
+  expect(options.map((option) => option.textContent)).toEqual(['Bandits']);
 });
 
 // A save with nothing in it: no quest filter to show, and a reason rather than

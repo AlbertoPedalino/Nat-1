@@ -4,7 +4,8 @@ import { withinTypedRange } from '../numbers.js';
 // A list's filters, each described once: its default, its test, its count and
 // its control (FilterFieldControls) all come from that description. Every
 // filtered list of the app goes through here: the compendium's catalogs, the
-// bestiary browser, the sheet's and the builder's item lists.
+// bestiary browser, the sheet's and the builder's item lists, and the main
+// pages' lists (useListFilter: the library's campaign filter).
 //
 //   select — { kind: 'select', key, label, options, valueOf(record, entry) }
 //            Several choices at once: the value is a list (empty: any), and a
@@ -57,6 +58,48 @@ export function chosenValues(field, filters) {
 
 export function fieldOptions(field, entries) {
   return (typeof field.options === 'function' ? field.options(entries || []) : field.options) || [];
+}
+
+// The choice of a group field for the records in no group. It starts with a
+// space, which a group's key (an id, a trimmed name) never does: a quest
+// named "none" is still a quest.
+export const NO_GROUP = ' none';
+
+// A filter by the groups a record is in (its campaigns, its quest): a select
+// field (several choices, any kept) offering each group, and `noneLabel` for
+// the records in none while the list has some. `groups(entries)` is the list's
+// groups ([{ key, label }]), `groupsOf(record)` the keys of a record's. With
+// no group to offer it offers nothing, and its control is left out.
+export function groupField({ key, label, groups, noneLabel, groupsOf }) {
+  const own = (record) => asArray(groupsOf(record)).filter(Boolean);
+  return {
+    kind: 'select',
+    key,
+    label,
+    options: (entries = []) => {
+      const list = groups(entries);
+      if (!list.length) return [];
+      return entries.some((entry) => !own(entry).length) ? [...list, { key: NO_GROUP, label: noneLabel }] : list;
+    },
+    match: (record, chosen) => (chosen === NO_GROUP ? !own(record).length : own(record).includes(chosen)),
+  };
+}
+
+// The chosen filters, less what the fields no longer offer (a campaign the
+// user left, every campaign once they sign out): a list is never narrowed by
+// a choice its control does not show. Range fields are kept as typed.
+export function offeredFilters(fields, filters, entries) {
+  const out = { ...filters };
+  fields.forEach((field) => {
+    if (field.kind !== 'select') return;
+    const offered = new Set(fieldOptions(field, entries).map((option) => option.key));
+    if (isSingleChoice(field)) {
+      if (!offered.has(out[field.key])) out[field.key] = anyValue(field);
+    } else {
+      out[field.key] = asArray(out[field.key]).filter((value) => offered.has(value));
+    }
+  });
+  return out;
 }
 
 // A field's options from what a list holds: every value its records carry,

@@ -9,7 +9,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { Cloud, Flag, Users, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
+import { Cloud, Users, Copy, LogIn, LogOut, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/auth/AuthDialog.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
@@ -40,11 +40,14 @@ import TagChip from '../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
+import ListFilterBar from '../../shared/ui/ListFilterBar.jsx';
+import { useListFilter } from '../../shared/ui/useListFilter.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
 import AddButton from '../../shared/ui/AddButton.jsx';
 import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
+import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -61,6 +64,9 @@ export default function CampaignsPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const { notify } = useToast();
   const pageState = resolveCampaignsPageState({ cloudEnabled, status });
+  // A campaign is found by its name or by a character in it.
+  const campaignText = useCallback((c) => [c.name, ...(charsByCampaign[c.id] || []).map((ch) => ch.name)], [charsByCampaign]);
+  const filter = useListFilter(campaigns, { getText: campaignText });
 
   const load = useCallback(async () => {
     if (status !== 'authed') return;
@@ -149,7 +155,7 @@ export default function CampaignsPage() {
       sx={{ overflowX: 'hidden' }}
       after={<AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />}
     >
-      <PageHeader icon={Flag} title="Campaigns" />
+      <PageHeader tool={TOOL_CATALOG.campaigns} title="Campaigns" />
 
       {pageState === 'unconfigured' ? (
         <StatePanel icon={Cloud} title="Online features not configured.">
@@ -193,8 +199,9 @@ export default function CampaignsPage() {
             <StatePanel title="No campaigns yet">Create one or join with a code.</StatePanel>
           ) : null}
 
+          {campaigns.length ? <ListFilterBar filter={filter} what="campaigns" /> : null}
           <Stack spacing={2}>
-            {campaigns.map((c) => {
+            {filter.visible.map((c) => {
               const isCampaignGm = c.gm === myId;
               const chars = charsByCampaign[c.id] || [];
               const members = membersByCampaign[c.id] || [];

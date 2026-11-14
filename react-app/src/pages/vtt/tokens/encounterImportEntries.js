@@ -1,12 +1,5 @@
 import { dedupeFightsByEncounter, isFightSuperseded, mergeLibrary } from '../../../shared/encounter/library.js';
 
-// The two options that are not a quest. A quest of its own goes in prefixed,
-// so one actually named "all" or "none" is still a quest and not the option
-// above it.
-export const ANY_QUEST = 'all';
-export const NO_QUEST = 'none';
-export const questValue = (quest) => `q:${quest}`;
-
 // What there is to import is the library, not the fights: an encounter that
 // was saved but never launched is still an encounter the GM wants on the
 // board, and it is launched on the way out. Each card carries at most one
@@ -43,9 +36,4 @@ export function buildImportEntries(fights, library) {
       card: fight.encounter || null,
     }));
   return [...cards, ...orphans];
-}
-
-export function entriesInQuest(entries, questKey) {
-  return entries.filter((entry) => questKey === ANY_QUEST
-    || (questKey === NO_QUEST ? !entry.quest : questKey === questValue(entry.quest)));
 }

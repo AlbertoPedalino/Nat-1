@@ -76,6 +76,9 @@ export const UI_COLORS = Object.freeze({
   // Spellcasting.
   spell: '#c38cff',
 
+  // Books and written rules (the Compendium's mark): a page's warm ivory.
+  reference: '#e8d9b5',
+
   // The default token colour of a player character.
   pcToken: '#5c8fe0',
 

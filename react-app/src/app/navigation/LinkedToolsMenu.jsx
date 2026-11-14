@@ -7,6 +7,7 @@ import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
 import { setCampaignDungeonEncounter, setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
 import { linkHexcrawlBoardCampaign, setCampaignHexcrawlBoard } from '../../shared/cloud/api/hexcrawl.js';
 import { makeLinkGroupId, normalizeLinkGroupId } from '../../shared/instances/linkGroupId.js';
+import { campaignLinks, toolInCampaign } from '../../shared/campaign/toolCampaigns.js';
 import { resolveGroupMerge, setLocalInstanceLink } from '../../shared/instances/instanceLinks.js';
 import { createInstance } from '../../shared/instances/instanceStore.js';
 import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../../shared/instances/instanceSync.js';
@@ -64,9 +65,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     const campaigns = results[SECTION_KEYS.length];
     if (campaigns.status === 'fulfilled') {
       merged.push(...campaigns.value.filter((row) => row.gm === user?.id).map((row) => ({
-        id: row.id, name: row.name, sectionKey: 'campaign', origin: 'cloud',
-        linkGroupId: normalizeLinkGroupId(row.link_group_id), hexcrawlBoardId: row.hexcrawl_board_id,
-        dungeonEncounterId: row.dungeon_encounter_id,
+        ...campaignLinks(row), sectionKey: 'campaign', origin: 'cloud',
       })));
     }
     let failure = results.some((result) => result.status === 'rejected' || result.value?.error)
@@ -223,7 +222,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               const Icon = TOOL_UI[row.sectionKey].icon;
               const clockCampaigns = rows.filter((campaign) => campaign.sectionKey === 'campaign' && campaign.hexcrawlBoardId === row.id);
               const campaignBoards = row.sectionKey === 'campaign' ? rows.filter((tool) => (
-                tool.sectionKey === 'gmboard' && (tool.id === row.hexcrawlBoardId || (row.linkGroupId && tool.linkGroupId === row.linkGroupId))
+                tool.sectionKey === 'gmboard' && toolInCampaign('gmboard', tool, row)
               )) : [];
               const dungeonBuilders = row.sectionKey === 'campaign' ? rows.filter((tool) => (
                 tool.sectionKey === 'encounters' && row.linkGroupId && tool.linkGroupId === row.linkGroupId

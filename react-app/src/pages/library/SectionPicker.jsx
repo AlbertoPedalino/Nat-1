@@ -10,6 +10,8 @@ import {
   renameCloudInstance,
 } from '../../shared/instances/instanceSync.js';
 import InstanceRow from './components/InstanceRow.jsx';
+import ListFilterBar from '../../shared/ui/ListFilterBar.jsx';
+import { useLibraryFilter } from './logic/useLibraryFilter.js';
 import { sectionDeletePlan } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import * as s from './styles.js';
@@ -32,6 +34,7 @@ export default function SectionPicker({ meta }) {
   const [error, setError] = useState('');
   const { notify } = useToast();
   const requestRef = useRef(0);
+  const filter = useLibraryFilter(meta.sectionKey, rows);
 
   const refresh = useCallback(async () => {
     const token = ++requestRef.current;
@@ -80,18 +83,21 @@ export default function SectionPicker({ meta }) {
       {!loading && !rows.length ? (
         <StatePanel sx={s.emptyStateSx}>No saved {meta.label.toLowerCase()} sessions yet.</StatePanel>
       ) : (
-        <Box sx={s.listSx}>
-          {rows.map((row) => (
-            <InstanceRow
-              key={row.id}
-              name={row.name}
-              updatedAtLabel={formatUpdatedAt(row.updatedAt)}
-              badge={{ kind: row.origin, label: row.origin === 'cloud' ? 'Cloud' : 'Local' }}
-              onOpen={() => navigate(meta.route(row.id))}
-              onRename={() => handleRename(row)}
-              onDelete={() => handleDelete(row)}
-            />
-          ))}
+        <Box>
+          <ListFilterBar filter={filter} what="saves" />
+          <Box sx={s.listSx}>
+            {filter.visible.map((row) => (
+              <InstanceRow
+                key={row.id}
+                name={row.name}
+                updatedAtLabel={formatUpdatedAt(row.updatedAt)}
+                badge={{ kind: row.origin, label: row.origin === 'cloud' ? 'Cloud' : 'Local' }}
+                onOpen={() => navigate(meta.route(row.id))}
+                onRename={() => handleRename(row)}
+                onDelete={() => handleDelete(row)}
+              />
+            ))}
+          </Box>
         </Box>
       )}
     </>

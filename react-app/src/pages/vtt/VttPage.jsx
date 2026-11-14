@@ -14,7 +14,9 @@ import { VTT_COLORS, vttAlpha } from '../../shared/vtt/colors.js';
 import { spectatorRoute } from '../../shared/vtt/session/spectator.js';
 import { createProjectorLink } from '../../shared/vtt/session/projectorLink.js';
 import CampaignLinksMenu from './session/CampaignLinksMenu.jsx';
-import CampaignSessionPicker from './session/CampaignSessionPicker.jsx';
+import CampaignTablePicker from './session/CampaignTablePicker.jsx';
+import PageHeader from '../../shared/ui/PageHeader.jsx';
+import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import SceneEditor from './scene/SceneEditor.jsx';
 import ScenePicker from './scene/ScenePicker.jsx';
 import SessionGate from './session/SessionGate.jsx';
@@ -44,6 +46,8 @@ export default function VttPage() {
   const params = new URLSearchParams(location.search);
   const requestedScene = params.get('scene') || '';
   const joinedCampaign = params.get('campaign') || '';
+  // A campaign the user runs, opened on its scenes (the second step).
+  const scenesOf = params.get('scenes') || '';
   const spectator = spectatorRoute(location.search);
   const spectatorRequested = spectator.requested;
   // Owned by the VTT page rather than a scene editor, so navigating between
@@ -61,7 +65,6 @@ export default function VttPage() {
     error: campaignError,
     loading: loadingCampaigns,
   } = useGmCampaigns({ mapRows: async (rows) => toCampaignMembers(rows) });
-  const runsCampaigns = campaigns.length > 0;
 
   const { scene: liveScene, loading: loadingSession } = useLiveSession({
     campaignId: joinedCampaign,
@@ -156,9 +159,15 @@ export default function VttPage() {
     };
   }, [spectatorRequested, spectatorSource]);
 
-  const openScene = useCallback((id) => {
-    navigate(id ? `/vtt?scene=${encodeURIComponent(id)}` : '/vtt');
+  const openScenes = useCallback((campaignId) => {
+    navigate(campaignId ? `/vtt?scenes=${encodeURIComponent(campaignId)}` : '/vtt');
   }, [navigate]);
+
+  // No scene to go to (the open one was deleted): back to its campaign's scenes.
+  const openScene = useCallback((id) => {
+    if (id) navigate(`/vtt?scene=${encodeURIComponent(id)}`);
+    else openScenes(scene?.campaignId || '');
+  }, [navigate, openScenes, scene?.campaignId]);
 
   const joinCampaign = useCallback((id) => {
     navigate(`/vtt?campaign=${encodeURIComponent(id)}`);
@@ -178,21 +187,30 @@ export default function VttPage() {
   const busy = spectator.requested
     ? (!scene && sessionBusy)
     : sessionBusy || loadingCampaigns;
-  const atRoot = !requestedScene && !joinedCampaign;
+  const atRoot = !requestedScene && !joinedCampaign && !scenesOf;
 
   // With a scene open the page stops being a document and becomes a screen: it
   // takes exactly the window's height and hands what is left to the map, so the
   // board reaches the bottom edge whatever is stacked above it. At the root it
-  // is a list of scenes and tables again, and lists scroll.
+  // is a list again (the tables, or a campaign's scenes), and lists scroll.
   const mapMode = Boolean(!gate && !busy && scene && !spectator.requested);
 
   // The campaign this window is looking at, but only when the signed-in user is
   // the one running it: the top bar's LINKS button manages that table's tools,
   // and a player at the table has none of them.
   const ownCampaignId = useMemo(() => {
-    const id = scene?.campaignId || joinedCampaign || '';
+    const id = scene?.campaignId || joinedCampaign || scenesOf || '';
     return campaigns.some((campaign) => campaign.id === id) ? id : '';
-  }, [campaigns, joinedCampaign, scene]);
+  }, [campaigns, joinedCampaign, scenesOf, scene]);
+
+  // Back climbs one step: from a scene to its campaign's scenes, from those
+  // (or a table joined as a player) to the tables, from the tables to Campaigns.
+  const sceneCampaignId = requestedScene ? scene?.campaignId || '' : '';
+  const backLink = atRoot
+    ? { backTo: '/campaigns', backLabel: 'Campaigns' }
+    : sceneCampaignId && ownCampaignId === sceneCampaignId
+      ? { backTo: `/vtt?scenes=${encodeURIComponent(sceneCampaignId)}`, backLabel: 'Scenes' }
+      : { backTo: '/vtt', backLabel: 'Tables' };
 
   // The projector is the map alone on a black screen. A GM or a player gets
   // the app's page, a screen in map mode (`fill`, the column's cap lifted:
@@ -207,8 +225,7 @@ export default function VttPage() {
       sx: mapMode && { overflow: 'hidden' },
       topBar: mapFullscreen ? false : {
         home: true,
-        backTo: atRoot ? '/campaigns' : '/vtt',
-        backLabel: atRoot ? 'Campaigns' : 'Tables',
+        ...backLink,
         children: ownCampaignId ? <CampaignLinksMenu campaignId={ownCampaignId} /> : null,
       },
     };
@@ -221,25 +238,22 @@ export default function VttPage() {
         <ErrorLine sx={{ mb: 1 }}>{error}</ErrorLine>
       ) : null}
 
-      {/* At the root a GM manages their scenes; everyone also sees the tables
-          they play at, because running one campaign does not stop you being a
-          player in another. */}
+      {/* First the table, then (for one the user runs) its scenes. */}
       {!gate && !busy && atRoot ? (
         <Box sx={s.rootStackSx}>
-          {runsCampaigns ? (
-            <ScenePicker
-              campaigns={campaigns}
-              loadingCampaigns={loadingCampaigns}
-              campaignError={campaignError}
-              onOpen={openScene}
-            />
-          ) : null}
-          <CampaignSessionPicker
-            campaigns={allCampaigns}
-            onJoin={joinCampaign}
-            showEmpty={!runsCampaigns}
-          />
+          <PageHeader tool={TOOL_CATALOG.vtt} title={TOOL_CATALOG.vtt.label} sx={{ mb: 0 }} />
+          {/* A failed load is said as such, not as "no campaign yet". */}
+          {campaignError
+            ? <ErrorLine>{campaignError}</ErrorLine>
+            : <CampaignTablePicker campaigns={allCampaigns} onRun={openScenes} onJoin={joinCampaign} />}
         </Box>
+      ) : null}
+      {!gate && !busy && scenesOf && !requestedScene ? (
+        <ScenePicker
+          campaign={campaigns.find((campaign) => campaign.id === scenesOf) || null}
+          campaignError={campaignError}
+          onOpen={openScene}
+        />
       ) : null}
 
       {!gate && !busy && joinedCampaign && !scene && !error ? (
