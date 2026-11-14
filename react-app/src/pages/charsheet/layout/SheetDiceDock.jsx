@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import DiceControl from '../../../shared/character/dice/DiceControl.jsx';
-import { sheetColumnSx } from './layout.js';
 import { useStoreValue } from '../../../shared/valueStore.js';
 import { useRootStyle } from '../../../shared/ui/liveStyle.js';
 
@@ -8,7 +7,8 @@ import { useRootStyle } from '../../../shared/ui/liveStyle.js';
 // Roll and Log written beside the icons from a tablet up) floating in the
 // bottom-right corner of the sheet on every screen, so a roll never needs a
 // scroll back to the top. Small enough to cover little, bright enough to be
-// found without looking for it. It sits as far from the side as from the
+// found without looking for it. It sits in the corner of the window (or of
+// the panel an embedded sheet sits in), as far from the side as from the
 // bottom (DOCK_INSET).
 //
 // Sticky to the sheet, not fixed to the window: it rides the bottom edge of
@@ -30,7 +30,7 @@ export default function SheetDiceDock({
   useRootStyle({ overscrollBehaviorY: 'none' }, { enabled: !embedded });
 
   return (
-    <Box sx={embedded ? dockSx : pageDockSx}>
+    <Box sx={dockSx}>
       <DiceControl
         log={rollLog}
         onRoll={onRoll}
@@ -43,14 +43,18 @@ export default function SheetDiceDock({
 }
 
 // The pill's distance from the bottom and from the right: the same on both,
-// so it reads as placed rather than pushed there.
-const DOCK_INSET = { xs: '24px', md: '40px' };
-const inset = (size, edge) => `calc(${DOCK_INSET[size]} + env(safe-area-inset-${edge}, 0px))`;
+// so it reads as placed rather than pushed there, and the same on every
+// screen, so on a desktop or a landscape tablet it sits in the window's corner
+// rather than floating in from it.
+const DOCK_INSET = '24px';
+const inset = (edge) => `calc(${DOCK_INSET} + env(safe-area-inset-${edge}, 0px))`;
 
 // The band sits on the bottom edge and carries the space under the pill
 // itself. Being the last thing in the sheet, its place while scrolling and its
 // place at the end are the same: nothing jumps, and at the end it has its own
-// room below the last panel. Bottom right, on every screen.
+// room below the last panel. It spans the whole width of what holds the sheet
+// (the window on its own page, not the sheet's centred column; the panel when
+// embedded), so the pill is in the bottom-right corner on every screen.
 const dockSx = {
   position: 'sticky',
   bottom: 0,
@@ -58,16 +62,8 @@ const dockSx = {
   display: 'flex',
   justifyContent: 'flex-end',
   pt: 1.5,
-  pb: { xs: inset('xs', 'bottom'), md: inset('md', 'bottom') },
-  pr: { xs: inset('xs', 'right'), md: inset('md', 'right') },
+  pb: inset('bottom'),
+  pr: inset('right'),
   pointerEvents: 'none',
   '& > *': { pointerEvents: 'auto' },
-};
-
-// On its own page: in the sheet's column, so the pill stays by the sheet's
-// right edge on a wide screen.
-const pageDockSx = {
-  ...dockSx,
-  ...sheetColumnSx(false),
-  pr: { xs: inset('xs', 'right'), md: inset('md', 'right') },
 };
