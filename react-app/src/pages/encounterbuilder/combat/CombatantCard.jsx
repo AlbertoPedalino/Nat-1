@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Box, Button, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Avatar, Box, Button, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { ExternalLink } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../../../shared/character/profile/characterRoutes.js';
@@ -10,14 +10,13 @@ import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { hpToneColor } from '../../../shared/character/combat/vitals.js';
-import { HP_TONE_COLORS } from '../../../shared/ui/colors.js';
+import HitPointBars from '../../../shared/character/combat/HitPointBars.jsx';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import {
   nameSpanSx, rowSx, identityClusterSx, avatarBaseSx, nameButtonSx,
   sheetLinkButtonSx, acBadgeSx, acLabelSx, acValueSx, conditionsRowSx, effectsRowSx, hpSummaryRowSx,
   hpFlagSx, hpDetailsSx, hpPanelRowSx, hpValueRowSx, hpFieldSx, hpMaxSx,
-  hpBarSx, cardSx, hpRowSx, buildActiveSx, deadSx,
+  cardSx, hpRowSx, buildActiveSx, deadSx,
 } from './combatantCardStyles.js';
 import { atDeathsDoor } from '../../../shared/character/combat/mortality.js';
 import { FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
@@ -38,7 +37,6 @@ export default function CombatantCard({ combatant, active }) {
   // as a flag next to the HP fields so nothing goes silently missing.
   const [hpDetailsOpen, setHpDetailsOpen] = useState(false);
   const isMonster = combatant.type === 'monster';
-  const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
   const isDown = atDeathsDoor({ player: !isMonster, hp: combatant.hpCurrent }) && Boolean(combatant.deathSaves);
   const tempHp = Number(combatant.tempHP) || 0;
   const maxHpBonus = Number(combatant.maxHPBonus) || 0;
@@ -244,11 +242,9 @@ export default function CombatantCard({ combatant, active }) {
                 </Box>
               </CollapsibleBody>
 
-              <LinearProgress
-                variant="determinate"
-                value={hpPct}
-                sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpToneColor(hpPct, 100, HP_TONE_COLORS) } }}
-              />
+              {combatant.hpMax ? (
+                <HitPointBars current={combatant.hpCurrent} max={combatant.hpMax} temp={tempHp} />
+              ) : null}
             </>
           )}
         </Box>

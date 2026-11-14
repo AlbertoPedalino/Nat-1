@@ -31,11 +31,28 @@ action, spell or item card: owned = raised card, pickable = ruled row),
 `CardSection` (a ruled part of a card, `dense` in a packed block), `TagChip`,
 `Panel` / `SidePanel` / `PageHeader` (given the page's `tool`, a `TOOL_CATALOG` entry, so its
 mark matches the home's card; `usePanelsWithoutLayers` for a page over a moving board),
-`ListFilterBar` + `useListFilter` (every main page's list: a search and its filters), `liveStyle.js` (whatever moves every frame: `useLiveStyle`, `writeLiveStyle`,
+`ListFilterBar` + `useListFilter` (every main page's list: a search and its filters),
+`SegmentedMeter` (a meter strip on `meterTrackSx`: share and tone through `useLiveStyle`, never a
+rule per value; every hit point bar is `shared/character/combat/HitPointBars.jsx` over it, guarded), `liveStyle.js` (whatever moves every frame: `useLiveStyle`, `writeLiveStyle`,
 `useRootStyle`; never sx), `CornerCloseButton`, and the recipes in
 `interactive.js` (`focusRingSx` with an optional `tone`, `LIST_ROW_SX`,
 `CARD_PART_RULE_SX`, `readoutSx`). The weather card is `WeatherCard` in
 `shared/gmboard/ui/WeatherSummary.jsx`.
+
+## The look
+
+A new theme is a change to these files only; every component reads its look
+from them and holds none of its own (guarded by the oneDefinition tests):
+
+| File (`shared/ui/`) | What it decides |
+| --- | --- |
+| `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palette: interface roles, the colour of each kind of thing, the map's tones (derived from the interface's) |
+| `fonts.js`, `textStyles.js` | the faces, the type scale, each text role |
+| `shadows.js`, `surfaces.js` | the ink: edges, solid shadows, surfaces, the meter track |
+| `shapes.js` | every cut shape: a panel bar's ribbon, the seal, the ability crest, the bookmark tab, the gems' cuts, a meter's segments, a roll's bursts |
+| `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes |
+| `motion.js` | how long things move |
+| `app/theme.js` | how MUI's own components take the above (tabs, scrollbars, chips, fields) |
 
 ## Page features
 

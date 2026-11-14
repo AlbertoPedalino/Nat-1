@@ -5,21 +5,15 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
+import SegmentedMeter from '../../../shared/ui/SegmentedMeter.jsx';
+import { METER_SEGMENTS } from '../../../shared/ui/shapes.js';
 
 // The bar and its figure, side by side between the stepper's buttons.
 const barRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 
-const trackSx = {
-  position: 'relative', flex: 1, height: 10,
-  bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1,
-  border: '2px solid', borderColor: UI_COLORS.edge,
-  overflow: 'hidden', minWidth: 60, cursor: 'pointer', touchAction: 'none',
-};
-
-const fillSx = (pct) => ({
-  position: 'absolute', top: 0, left: 0, height: '100%',
-  width: `${pct}%`, bgcolor: UI_COLORS.accentText, borderRadius: 1, pointerEvents: 'none',
-});
+// The bar is the app's meter (SegmentedMeter), dragged to set: its share
+// follows the finger without a style rule per value.
+const trackSx = { flex: 1, minWidth: 60, cursor: 'pointer', touchAction: 'none' };
 
 const labelSx = {
   fontSize: FONT_SIZES.sm, ...TEXT_STYLES.figure, color: UI_COLORS.accentText, minWidth: 36, textAlign: 'center',
@@ -59,8 +53,6 @@ export default function ResourceBar({ value, max, onChange }) {
     document.addEventListener('touchend', onEnd);
   }, [applyFromPosition]);
 
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-
   // The stepper's − and + flank the bar: one control, so a resource is changed
   // the same way as any other count.
   return (
@@ -72,9 +64,16 @@ export default function ResourceBar({ value, max, onChange }) {
       onStep={onChange}
       value={(
         <Box sx={barRowSx}>
-          <Box onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} sx={trackSx}>
-            <Box sx={fillSx(pct)} />
-          </Box>
+          <SegmentedMeter
+            ratio={max > 0 ? value / max : 0}
+            tone={UI_COLORS.accentText}
+            segments={METER_SEGMENTS.smooth}
+            title="Uses"
+            valueText={`${value} of ${max} uses`}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            sx={trackSx}
+          />
           <Typography sx={labelSx}>{value}/{max}</Typography>
         </Box>
       )}

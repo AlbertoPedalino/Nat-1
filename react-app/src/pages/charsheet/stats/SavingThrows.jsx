@@ -24,6 +24,7 @@ import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { ROLL_FIGURE_MARK_STYLE, ROLL_FIGURE_SX, ROLL_ROW_SX } from '../../../shared/ui/pressable.js';
+import { TrainingGem } from '../../../shared/ui/GemPip.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -93,7 +94,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ ...ROLL_ROW_SX, px: 0.75, mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: UI_COLORS.edge, bgcolor: prof ? 'primary.main' : 'transparent' }} />
+              <TrainingGem training={prof ? 'prof' : 'none'} />
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
               </Typography>

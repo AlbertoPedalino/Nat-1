@@ -65,6 +65,7 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
                 // A tile's name is in the heading's blackletter, which does not read
                 // in capitals: Str, not STR.
                 label={capitalize(s)}
+                crest
                 clickable
                 bodySx={{ alignItems: 'stretch' }}
                 value={(

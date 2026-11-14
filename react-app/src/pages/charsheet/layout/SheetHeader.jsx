@@ -20,6 +20,8 @@ import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import SegmentedMeter from '../../../shared/ui/SegmentedMeter.jsx';
+import { METER_SEGMENTS } from '../../../shared/ui/shapes.js';
 
 // The character's own header, the band the sheet opens on under the app's top
 // bar (AppPage): portrait, name, class line, XP and the rests. Page content,
@@ -106,7 +108,7 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
             }}
             onClick={readOnly ? undefined : (event) => setBadgeAnchor(event.currentTarget)}
           >
-            <Icon size={ICON_SIZES.xxl} />
+            <Icon size={ICON_SIZES.display} />
           </PortraitBadge>
 
           {/* The badge used to open the colour picker straight away. It now asks
@@ -178,9 +180,14 @@ export default function SheetHeader({ C, sheet, charId, readOnly = false, embedd
                 {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
               </Typography>
             </Box>
-            <Box sx={{ ...SURFACES.inset, width: '100%', height: 8, overflow: 'hidden' }}>
-              <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
-            </Box>
+            <SegmentedMeter
+              ratio={Math.min(100, xpProgress) / 100}
+              tone={UI_COLORS.accent}
+              segments={METER_SEGMENTS.smooth}
+              title="Experience"
+              valueText={isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} of ${formatNumber(nextXp)} XP`}
+              sx={{ width: '100%', height: 10 }}
+            />
             {!readOnly && (
               <XpDeltaControl
                 currentXp={currentXp}

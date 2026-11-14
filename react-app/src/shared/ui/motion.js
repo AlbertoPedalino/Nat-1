@@ -7,6 +7,13 @@ export const DURATIONS = Object.freeze({
   slow: 220,
 });
 
+// A hit point bar's lost stretch (SegmentedMeter): held pale for a beat,
+// then drained.
+export const METER_MOTION = Object.freeze({
+  hold: 450,
+  drain: 500,
+});
+
 // A gem of a counter (GemPip) relit or spent, and the sparkles a relit one
 // throws (each one a little after the last).
 export const GEM_MOTION = Object.freeze({

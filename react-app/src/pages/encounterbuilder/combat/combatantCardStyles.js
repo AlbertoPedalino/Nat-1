@@ -2,7 +2,7 @@ import { cornerRadius } from '../../../shared/ui/radius.js';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
-import { SURFACES, meterTrackSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkShadow } from '../../../shared/ui/shadows.js';
@@ -110,11 +110,6 @@ export const hpValueRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 export const hpFieldSx = { width: 72, flex: '0 0 auto' };
 
 export const hpMaxSx = { whiteSpace: 'nowrap', fontSize: FONT_SIZES.xl };
-
-export const hpBarSx = {
-  width: '100%',
-  ...meterTrackSx(5),
-};
 
 // A combatant: the drawn card (SURFACES.card); the one whose turn it is is
 // edged in the accent and casts its solid shadow in it, as a toast does.

@@ -1,6 +1,8 @@
 import { Box } from '@mui/material';
-import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import { VTT_HP_TONE_COLORS } from '../../../shared/vtt/colors.js';
+import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import HitPointBars from '../../../shared/character/combat/HitPointBars.jsx';
+import { METER_SEGMENTS } from '../../../shared/ui/shapes.js';
+import { VTT_COLORS, VTT_HP_TONE_COLORS } from '../../../shared/vtt/colors.js';
 import {
   stackInsideSx,
   stackBelowSx,
@@ -11,15 +13,12 @@ import {
   deathSuccessSx,
   deathFailureSx,
   deathDividerSx,
-  hpFillSx,
   hpTextSx,
   tempBarSx,
-  tempFillSx,
   tempTextSx,
   plateSx,
   secretPlateSx,
 } from './tokenSpriteStyles.js';
-import { clamp } from '../../../shared/numbers.js';
 
 // Bars and plate stack under the art. The numbers ride inside the bar rather
 // than beside it: one strip to read instead of two things to line up, and it
@@ -36,8 +35,6 @@ export default function TokenVitalsStack({
   onDeathSaveChange,
 }) {
   const { success: deathSuccesses, fail: deathFailures } = normalizeDeathSaves(token.deathSaves);
-  const ratio = hasHp ? clamp(current / token.hpMax, 0, 1) : 0;
-  const tempRatio = hasHp ? clamp((token.tempHp || 0) / token.hpMax, 0, 1) : 0;
 
   return (
     <Box sx={hasHandles ? stackBelowSx : stackInsideSx}>
@@ -105,21 +102,22 @@ export default function TokenVitalsStack({
           </Box>
         </Box>
       ) : hasHp ? (
-        <Box sx={{ ...hpBarSx, width: hex ? '72%' : '88%' }} title={`${current} / ${token.hpMax}`}>
-          <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpToneColor(ratio, 1, VTT_HP_TONE_COLORS) }} />
-          <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
-        </Box>
-      ) : null}
-
-      {/* Its own bar, under the real one: temporary hit points sit on top of
-          the maximum, so folding them into the same strip would show a
-          character healthier than they can be. Scaled against max HP just to
-          give the cushion a size — it has no maximum of its own. */}
-      {hasHp && !showDeathSaves && token.tempHp > 0 ? (
-        <Box sx={{ ...tempBarSx, width: hex ? '60%' : '72%' }} title={`${token.tempHp} temporary hit points`}>
-          <Box sx={{ ...tempFillSx, width: `${tempRatio * 100}%` }} />
-          <Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>
-        </Box>
+        // Its temporary hit points in a bar of their own under the real one
+        // (HitPointBars), each with its figures inside.
+        <HitPointBars
+          bare
+          current={current}
+          max={token.hpMax}
+          temp={token.tempHp || 0}
+          tones={VTT_HP_TONE_COLORS}
+          tempTone={VTT_COLORS.tempHp}
+          // Fewer, longer segments than a sheet's: the bar is a few pixels tall.
+          segments={METER_SEGMENTS.piece}
+          hpSx={[hpBarSx, { width: hex ? '72%' : '88%' }]}
+          tempSx={[tempBarSx, { width: hex ? '60%' : '72%' }]}
+          hpFigures={<Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>}
+          tempFigures={<Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>}
+        />
       ) : null}
     </Box>
   );

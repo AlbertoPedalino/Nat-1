@@ -96,6 +96,9 @@ export const HP_TONE_COLORS = Object.freeze({
   healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerStrong,
 });
 
+// Temporary hit points: their bar and their figure.
+export const TEMP_HP_TONE = UI_COLORS.info;
+
 // The app's logo (the d20 on the home cover and in public/favicon.svg): its
 // greens from lit to shaded faces and its numeral's cream. Brand art, kept
 // apart from the interface roles so a restyle never recolours the logo.

@@ -11,14 +11,15 @@ import {
   GiPotionBall, GiRing, GiSevenPointedStar, GiShardSword, GiShinyApple, GiSnake, GiStoneTower, GiSwordsPower,
   GiThrownSpear, GiTorch, GiTowerFlag, GiTrident, GiVisoredHelm, GiWarhammer, GiWarlockEye, GiWaterDrop,
   GiWhiteTower, GiWolfHead, GiMushroomGills, GiAnvilImpact, GiCompass, GiCampfire, GiBattleGear,
+  GiGearHammer, GiLyre, GiHolySymbol, GiOakLeaf, GiTemplarShield, GiCloakDagger, GiFireball, GiPointyHat, GiCharacter,
+  GiCrownedSkull, GiHornedSkull, GiDragonHead, GiHuntingHorn, GiCrystalWand, GiSunPriest, GiTotemHead, GiCrossedAxes,
 } from 'react-icons/gi';
 import {
-  AlertTriangle, ArrowBigUp, Axe, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
-  CloudSnow, CloudSun, Coins, Compass, Cross, Crosshair, Dice5, Dices, DoorOpen, Dumbbell, Eye, Feather, Flame,
-  Flower2, Footprints, Gem, Hammer, HeartPulse, History, Home, House, Landmark, Leaf, LeafyGreen, Map, Moon,
-  Mountain, Music, PawPrint, Rabbit, Route, ScrollText, Shield, ShieldAlert, ShieldCheck, ShieldHalf, ShieldPlus,
-  ShieldQuestion, ShieldX, Skull, Snowflake, Sparkles, Sun, SunMedium, Sword, Swords, Tent, ThermometerSun,
-  Trees, User, Wand2, Wheat, Wind,
+  AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
+  CloudSnow, CloudSun, Coins, Compass, Cross, Crosshair, Dice5, Dices, DoorOpen, Flame, Flower2, Footprints,
+  Gem, HeartPulse, History, Home, House, Landmark, Leaf, LeafyGreen, Map, Moon, Mountain, PawPrint, Rabbit,
+  Route, ScrollText, Shield, ShieldAlert, ShieldCheck, ShieldHalf, ShieldPlus, ShieldQuestion, ShieldX, Skull,
+  Snowflake, Sparkles, Sun, SunMedium, Sword, Swords, Tent, ThermometerSun, Trees, User, Wheat, Wind,
 } from 'lucide-react';
 
 // The interface's game icons, by what they stand for: one place picks the
@@ -142,23 +143,35 @@ export const TOOL_ICONS = Object.freeze({
 // The icon vocabularies of one feature each, kept here with the roles so the
 // whole look is this file.
 
-// A character's class mark (classIcon.js), and the mark of no known class.
+// A character's class mark (classIcon.js), and the mark of no known class:
+// game drawings with a plain silhouette, read on a piece and on a portrait's
+// seal, each one no other role uses.
 export const CLASS_ICONS = Object.freeze({
-  artificer: Hammer,
-  barbarian: Axe,
-  bard: Music,
-  cleric: Cross,
-  druid: Feather,
-  fighter: Sword,
-  monk: Dumbbell,
-  paladin: Shield,
-  ranger: Compass,
-  rogue: Eye,
-  sorcerer: Sparkles,
-  warlock: Flame,
-  wizard: BookOpen,
+  artificer: GiGearHammer,
+  barbarian: GiBattleAxe,
+  bard: GiLyre,
+  cleric: GiHolySymbol,
+  druid: GiOakLeaf,
+  fighter: GiBroadsword,
+  monk: GiFist,
+  paladin: GiTemplarShield,
+  ranger: GiBowArrow,
+  rogue: GiCloakDagger,
+  sorcerer: GiFireball,
+  warlock: GiWarlockEye,
+  wizard: GiPointyHat,
+  // The World of Warcraft book's own classes (its Druid, Monk, Paladin, Rogue
+  // and Warlock share the base classes' names, and their marks).
+  'death knight': GiCrownedSkull,
+  'demon hunter': GiHornedSkull,
+  evoker: GiDragonHead,
+  hunter: GiHuntingHorn,
+  mage: GiCrystalWand,
+  priest: GiSunPriest,
+  shaman: GiTotemHead,
+  warrior: GiCrossedAxes,
 });
-export const FALLBACK_CLASS_ICON = Wand2;
+export const FALLBACK_CLASS_ICON = GiCharacter;
 
 // The hexcrawl's seasons, weather, terrains and populations (hexIcons.js).
 export const SEASON_ICONS = Object.freeze({

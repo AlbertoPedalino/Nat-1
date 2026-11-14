@@ -25,7 +25,7 @@ import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { builderDataForBooks } from '../../shared/content/booksView.js';
 import { BUILDER_TEXT } from './layout/builderText.js';
 import { useIsPhone } from '../../shared/ui/useIsPhone.js';
-import { panelFrameSx, panelTitleBarSx } from '../../shared/ui/PanelHeader.jsx';
+import { panelFrameSx, panelTabBarSx } from '../../shared/ui/PanelHeader.jsx';
 import TagChip from '../../shared/ui/TagChip.jsx';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 
@@ -117,7 +117,7 @@ export default function CharBuilder() {
         <Box sx={{ minWidth: 0 }}>
           {/* The steps' bar: a panel's bar, as the sheet's tab bar. */}
           <Paper variant="outlined" sx={{ ...panelFrameSx, mb: 1 }}>
-            <Box sx={{ ...panelTitleBarSx(UI_COLORS.accent), py: 0, borderBottom: 0 }}>
+            <Box sx={panelTabBarSx(UI_COLORS.accent)}>
               <Tabs
                 sx={{ flex: 1, minWidth: 0 }}
                 value={state.tab}

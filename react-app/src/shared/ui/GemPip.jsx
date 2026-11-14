@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, darken, lighten } from '@mui/material';
 import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
-import { PANEL_TONES } from './entityColors.js';
+import { PANEL_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
 import { DURATIONS, GEM_MOTION } from './motion.js';
 import { SPARKLE_PATH } from './BubbleSparkles.jsx';
+import { GEM_CUTS } from './shapes.js';
 
 // Every counter of the sheet that is spent and recovered one at a time — a
 // spell slot, a pact slot, a feature's uses, a free cast, a hit die — is a
@@ -14,8 +15,10 @@ import { SPARKLE_PATH } from './BubbleSparkles.jsx';
 // shadow under it every pressable thing has. A gem relit pops with a few
 // sparkles; one spent sinks with a wobble (none for reduced motion).
 //
-// The cut, the colours and the sizes live here only (GEM_CUT, GEM_TONES,
-// GEM_SIZES): a new look for every counter is a change to this file.
+// The colours and the sizes live here only (GEM_TONES, GEM_SIZES), the cuts
+// in shapes.js (GEM_CUTS): a new look for every gem is a change to those two
+// files. A skill's or a save's training mark is a gem of its own cut, still
+// (TrainingGem).
 //
 // - `available`: lit (there to spend) or an empty setting (spent).
 // - `kind`: what it counts, which sets its colour (GEM_TONES).
@@ -24,13 +27,8 @@ import { SPARKLE_PATH } from './BubbleSparkles.jsx';
 // - `onClick` makes it a button; without one it only shows.
 // Other props (aria-label, title, disabled…) go to the element.
 
-// The cut, in a 100-unit box: a pointy-top hexagon, its table (the flat top
-// facet) set up and left so the facets round it catch the light unevenly.
-const GEM_CUT = Object.freeze({
-  outer: hexagon(50, 46, 44, 45),
-  inner: hexagon(47, 43, 23, 23.5),
-  shadowDrop: 6,
-});
+// The cuts are shapes.js's (GEM_CUTS): a counter's hexagon, a training mark's
+// four-sided diamond. Drawn here from them.
 
 export const GEM_TONES = Object.freeze({
   slot: UI_COLORS.info,
@@ -44,29 +42,42 @@ export const GEM_TONES = Object.freeze({
 // card's row.
 export const GEM_SIZES = Object.freeze({ md: 26, sm: 22 });
 
-function hexagon(cx, cy, rx, ry) {
-  return Array.from({ length: 6 }, (_, i) => {
-    const angle = -Math.PI / 2 + (i * Math.PI) / 3;
+// A regular cut of `sides`, its first point at the top.
+function polygon(sides, cx, cy, rx, ry) {
+  return Array.from({ length: sides }, (_, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / sides;
     return [cx + rx * Math.cos(angle), cy + ry * Math.sin(angle)];
   });
 }
 
 const points = (list) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 
-// Light from the top left: a facet facing it is lit, one facing away is in
-// shade, the others keep the gem's own colour.
-const FACETS = GEM_CUT.outer.map((from, i) => {
-  const to = GEM_CUT.outer[(i + 1) % 6];
-  const shape = points([from, to, GEM_CUT.inner[(i + 1) % 6], GEM_CUT.inner[i]]);
-  const mx = (from[0] + to[0]) / 2 - 50;
-  const my = (from[1] + to[1]) / 2 - 46;
-  const facing = (mx * -0.6 + my * -0.8) / Math.hypot(mx, my);
-  return { shape, shade: facing > 0.35 ? 'light' : facing < -0.35 ? 'dark' : 'base' };
-});
-const OUTER = points(GEM_CUT.outer);
-const INNER = points(GEM_CUT.inner);
-const SHADOW = points(GEM_CUT.outer.map(([x, y]) => [x, y + GEM_CUT.shadowDrop]));
-const SETTING_RIM = points(GEM_CUT.outer.map(([x, y]) => [50 + (x - 50) * 0.78, 46 + (y - 46) * 0.78 + 3]));
+// A cut's drawing worked out once (GEM_CUTS: sides, outline and table as
+// centre and radii, the shadow's drop): its outline, table, facets, shadow
+// and empty setting. Light from the top left: a facet facing it is lit, one facing
+// away is in shade, the others keep the gem's own colour.
+function gemCut({ sides, outer: outerAt, inner: innerAt, shadowDrop }) {
+  const outer = polygon(sides, ...outerAt);
+  const inner = polygon(sides, ...innerAt);
+  const facets = outer.map((from, i) => {
+    const to = outer[(i + 1) % sides];
+    const shape = points([from, to, inner[(i + 1) % sides], inner[i]]);
+    const mx = (from[0] + to[0]) / 2 - 50;
+    const my = (from[1] + to[1]) / 2 - 46;
+    const facing = (mx * -0.6 + my * -0.8) / Math.hypot(mx, my);
+    return { shape, shade: facing > 0.35 ? 'light' : facing < -0.35 ? 'dark' : 'base' };
+  });
+  return Object.freeze({
+    facets,
+    outer: points(outer),
+    inner: points(inner),
+    shadow: points(outer.map(([x, y]) => [x, y + shadowDrop])),
+    settingRim: points(outer.map(([x, y]) => [50 + (x - 50) * 0.78, 46 + (y - 46) * 0.78 + 3])),
+  });
+}
+
+const COUNTER_CUT = gemCut(GEM_CUTS.counter);
+const TRAINING_CUT = gemCut(GEM_CUTS.training);
 
 // A tone's flat shades, worked out once.
 const shadesCache = new Map();
@@ -110,30 +121,8 @@ export default function GemPip({
         sx={[svgSx, motion.state ? MOTION_SX[motion.state] : null]}
         onAnimationEnd={motion.done}
       >
-        {available ? (
-          <>
-            <polygon points={SHADOW} fill={UI_COLORS.edge} />
-            {FACETS.map((facet) => (
-              <polygon key={facet.shape} points={facet.shape} fill={shades[facet.shade]} {...FACET_LINE} />
-            ))}
-            <polygon points={INNER} fill={shades.table} {...FACET_LINE} />
-            <path d="M34 30 l12 -7 l3 5 l-12 7 z" fill={UI_COLORS.white} />
-            <circle cx="62" cy="25" r="3.4" fill={UI_COLORS.white} opacity={0.85} />
-          </>
-        ) : (
-          <>
-            <polygon points={OUTER} fill={UI_COLORS.surfaceSunken} />
-            <polygon points={SETTING_RIM} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />
-          </>
-        )}
-        <polygon
-          points={OUTER}
-          fill="none"
-          stroke={selected ? UI_COLORS.accent : UI_COLORS.edge}
-          strokeWidth={selected ? outline + 0.6 : outline}
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
+        {available ? <LitGem cut={COUNTER_CUT} shades={shades} /> : <GemSetting cut={COUNTER_CUT} shades={shades} />}
+        <GemOutline cut={COUNTER_CUT} selected={selected} width={outline} />
       </Box>
       {motion.state === 'relit' ? SPARKS.map(([dx, dy], index) => (
         <Box
@@ -148,6 +137,70 @@ export default function GemPip({
       )) : null}
     </Box>
   );
+}
+
+// A training mark (a skill's or a save's proficiency): a gem of the four-sided
+// cut, small and still, as it is read and never spent: an empty setting
+// untrained, half lit for half proficiency, lit in its tone when proficient
+// or expert (TRAINING_TONES). `training`: 'none', 'half', 'prof' or 'exp'.
+export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx }) {
+  const shades = shadesOf(TRAINING_TONES[training] || TRAINING_TONES.prof);
+  return (
+    <Box component="svg" viewBox="0 0 100 100" aria-hidden sx={[trainingGemSx(size), sx]}>
+      {training === 'prof' || training === 'exp'
+        ? <LitGem cut={TRAINING_CUT} shades={shades} />
+        : <GemSetting cut={TRAINING_CUT} shades={shades} />}
+      {training === 'half' ? <Box component="g" sx={HALF_LIT_SX}><LitGem cut={TRAINING_CUT} shades={shades} /></Box> : null}
+      <GemOutline cut={TRAINING_CUT} width={1.6} />
+    </Box>
+  );
+}
+
+export const TRAINING_GEM_SIZE = 14;
+
+// A gem's drawing, for either cut: lit (facets, table, glint and its solid
+// shadow), its empty setting, its outline.
+function LitGem({ cut, shades }) {
+  return (
+    <>
+      <polygon points={cut.shadow} fill={UI_COLORS.edge} />
+      {cut.facets.map((facet) => (
+        <polygon key={facet.shape} points={facet.shape} fill={shades[facet.shade]} {...FACET_LINE} />
+      ))}
+      <polygon points={cut.inner} fill={shades.table} {...FACET_LINE} />
+      <path d="M34 30 l12 -7 l3 5 l-12 7 z" fill={UI_COLORS.white} />
+      <circle cx="62" cy="25" r="3.4" fill={UI_COLORS.white} opacity={0.85} />
+    </>
+  );
+}
+
+function GemSetting({ cut, shades }) {
+  return (
+    <>
+      <polygon points={cut.outer} fill={UI_COLORS.surfaceSunken} />
+      <polygon points={cut.settingRim} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />
+    </>
+  );
+}
+
+function GemOutline({ cut, selected = false, width }) {
+  return (
+    <polygon
+      points={cut.outer}
+      fill="none"
+      stroke={selected ? UI_COLORS.accent : UI_COLORS.edge}
+      strokeWidth={selected ? width + 0.6 : width}
+      strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"
+    />
+  );
+}
+
+// Half proficiency: the gem's left half lit, over its setting.
+const HALF_LIT_SX = { clipPath: 'inset(0 50% 0 0)' };
+
+function trainingGemSx(size) {
+  return { width: size, height: size, display: 'block', flexShrink: 0, overflow: 'visible' };
 }
 
 // 'relit' or 'spent' for the one animation after `available` changes (never

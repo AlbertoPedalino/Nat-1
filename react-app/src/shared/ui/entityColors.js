@@ -1,5 +1,5 @@
 import { alpha } from '@mui/material';
-import { UI_COLORS, OPACITY, washImage } from './colors.js';
+import { UI_COLORS, OPACITY, TEMP_HP_TONE, washImage } from './colors.js';
 import { pressableSx } from './pressable.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
@@ -100,7 +100,8 @@ export const ROLL_TONES = {
   damage: '#ff6b35',
   heal: '#58b879',
   utility: '#4d95d6',
-  tempHp: '#3e8e5a',
+  // The temporary hit points' own colour, as on their bar.
+  tempHp: TEMP_HP_TONE,
 };
 
 // The colour of each sheet panel (its badge, title and screentone), by what it
@@ -128,7 +129,7 @@ export const PANEL_TONES = Object.freeze({
   inspiration: UI_COLORS.spell,
 });
 
-// A skill's training dot: half and full proficiency in the accent, expertise
+// A skill's or a save's training gem (TrainingGem): half and full proficiency in the accent, expertise
 // in a colour well apart from it (a lime next to the sunflower read as one).
 export const TRAINING_TONES = Object.freeze({
   half: UI_COLORS.accent,

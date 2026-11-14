@@ -9,6 +9,14 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
   return `${offset}px ${offset}px 0 ${color}`;
 }
 
+// The same solid shadow under a shape cut out of its box (a crest, a
+// pennant), where a box-shadow would stay square: a drop-shadow filter, which
+// follows the cut. A filter is a layer of its own, so only for a handful of
+// shapes on a screen, never for a list.
+export function inkCutShadow(offset = 3, color = UI_COLORS.edge) {
+  return `drop-shadow(${offset}px ${offset}px 0 ${color})`;
+}
+
 // The ink edge: the 2px black line round every drawn box and control. A frame
 // that is not a whole surface (a pill, a stepper, a tile) takes this.
 export const INK_EDGE = `2px solid ${UI_COLORS.edge}`;

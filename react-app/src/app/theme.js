@@ -9,6 +9,9 @@ import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
+import { INK_EDGE } from '../shared/ui/shadows.js';
+import { DURATIONS } from '../shared/ui/motion.js';
+import { BOOKMARK_TAB } from '../shared/ui/shapes.js';
 import { RARITY_COLORS } from '../shared/character/inventory/itemRarity.js';
 
 // A chosen row, on `base`: the surface it lies on (the paper of a list, the
@@ -161,6 +164,16 @@ export const theme = createTheme({
           backgroundImage: SURFACES.page.backgroundImage,
           backgroundSize: SURFACES.page.backgroundSize,
         },
+        // Every scrollbar of the app drawn in its own ink: a gold thumb edged
+        // in ink on a sunken track, not the system's grey. The colours are
+        // inherited from the root (the standard properties, Chrome and
+        // Firefox); the thin width is set on every scroller; WebKit (Safari)
+        // takes its own pseudo-elements.
+        html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}` },
+        '*': { scrollbarWidth: 'thin' },
+        '*::-webkit-scrollbar': { width: 12, height: 12 },
+        '*::-webkit-scrollbar-track, *::-webkit-scrollbar-corner': { backgroundColor: UI_COLORS.surfaceSunken },
+        '*::-webkit-scrollbar-thumb': { backgroundColor: UI_COLORS.accent, border: INK_EDGE, borderRadius: 8 },
       },
     },
     MuiModal: {
@@ -286,11 +299,22 @@ export const theme = createTheme({
         arrow: { color: UI_COLORS.surfaceRaised },
       },
     },
+    // Every tab bar is a notebook's bookmarks (BOOKMARK_TAB, shapes.js): each
+    // tab a raised tab edged in ink, standing on the bar's ruled line; the
+    // open one taller, in gold, instead of an underline.
     MuiTabs: {
       styleOverrides: {
         root: {
           minHeight: 0,
+          borderBottom: INK_EDGE,
         },
+        flexContainer: {
+          gap: BOOKMARK_TAB.gap,
+          alignItems: 'flex-end',
+          paddingLeft: 4,
+          paddingRight: 4,
+        },
+        indicator: { display: 'none' },
         scrollButtons: {
           width: 28,
           minHeight: 0,
@@ -302,10 +326,24 @@ export const theme = createTheme({
         root: {
           minHeight: 0,
           minWidth: 0,
-          padding: '6px 10px',
+          padding: '6px 12px 7px',
+          marginTop: BOOKMARK_TAB.rise,
           ...TEXT_STYLES.label,
           fontSize: CONTROL_FONT_SIZES.normal,
           lineHeight: LINE_HEIGHTS.tight,
+          color: UI_COLORS.textSecondary,
+          backgroundColor: UI_COLORS.surfaceRaised,
+          border: INK_EDGE,
+          borderBottom: 0,
+          borderRadius: BOOKMARK_TAB.radius,
+          transition: ['color', 'background-color', 'padding', 'margin'].map((name) => `${name} ${DURATIONS.fast}ms ease`).join(', '),
+          '&:hover': { color: UI_COLORS.textPrimary },
+          '&.Mui-selected': {
+            color: UI_COLORS.onAccent,
+            backgroundColor: UI_COLORS.accent,
+            marginTop: 0,
+            paddingTop: 6 + BOOKMARK_TAB.rise,
+          },
         },
       },
     },

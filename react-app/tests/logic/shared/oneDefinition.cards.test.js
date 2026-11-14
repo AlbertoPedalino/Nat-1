@@ -52,8 +52,8 @@ test('a side panel is the SidePanel', () => {
   }), []);
 });
 
-// A light tile is SURFACES.wash and a meter's empty track is meterTrackSx:
-// their white washes are written only in surfaces.js.
+// A light tile is SURFACES.wash: its white wash is written only in
+// surfaces.js, as a meter's empty track (meterTrackSx) is.
 test('the wash and the meter track are drawn only by surfaces.js', () => {
   assert.deepEqual(sourceFilesMatching(/uiAlpha\(UI_COLORS\.white, OPACITY\.(faint|soft)\)/, { allow: ['shared/ui/surfaces.js'] }), []);
 });

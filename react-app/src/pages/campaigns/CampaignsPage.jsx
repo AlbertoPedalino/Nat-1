@@ -37,7 +37,8 @@ import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import TagChip from '../../shared/ui/TagChip.jsx';
-import { UI_COLORS } from '../../shared/ui/colors.js';
+import { HP_TONE_COLORS, UI_COLORS } from '../../shared/ui/colors.js';
+import { hpToneColor } from '../../shared/character/combat/vitals.js';
 import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import ListFilterBar from '../../shared/ui/ListFilterBar.jsx';
@@ -271,7 +272,7 @@ export default function CampaignsPage() {
                           >
                             {s ? (
                               <Box component="span" sx={statsRowSx}>
-                                <Box component="span" sx={statSx}>HP <Box component="b" sx={hpStatSx}>{s.currentHP}</Box>/{s.maxHP}</Box>
+                                <Box component="span" sx={statSx}>HP <Box component="b" sx={{ color: hpToneColor(s.currentHP, s.maxHP, HP_TONE_COLORS) }}>{s.currentHP}</Box>/{s.maxHP}</Box>
                                 <Box component="span" sx={statSx}>AC <Box component="b" sx={acStatSx}>{s.ac}</Box></Box>
                                 <Box component="span" sx={statSx}>PP <Box component="b" sx={ppStatSx}>{s.passivePerception}</Box></Box>
                                 <Box component="span" sx={statSx}>Init <Box component="b" sx={initStatSx}>{signed(s.initiative)}</Box></Box>
@@ -321,7 +322,6 @@ const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboa
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.5 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
-const hpStatSx = { color: 'error.main' };
 const acStatSx = { color: 'primary.main' };
 const ppStatSx = { color: 'success.main' };
 const initStatSx = { color: 'gmboard.badge.cloud' };

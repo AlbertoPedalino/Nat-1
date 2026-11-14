@@ -1,6 +1,6 @@
 import { clamp } from '../numbers.js';
 import { darken, rgbToHex } from '@mui/material';
-import { UI_COLORS } from '../ui/colors.js';
+import { HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS } from '../ui/colors.js';
 import { DAMAGE_TYPE_COLORS } from '../ui/entityColors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
@@ -32,12 +32,12 @@ export const VTT_COLORS = Object.freeze({
   // tiles, and the darker vitals tones that stay legible over any map.
   viewport: '#0b0a09',
   stitchBackground: UI_COLORS.surfaceSunken,
-  // The interface's vitals tones, a step darker so bars stay legible over
-  // any map while following the palette.
-  hpHealthy: rgbToHex(darken(UI_COLORS.success, 0.2)),
-  hpWounded: rgbToHex(darken(UI_COLORS.warning, 0.1)),
-  hpCritical: rgbToHex(darken(UI_COLORS.danger, 0.2)),
-  tempHp: rgbToHex(darken(UI_COLORS.info, 0.2)),
+  // The interface's vitals tones (HP_TONE_COLORS, TEMP_HP_TONE), a step
+  // darker so bars stay legible over any map while following the sheet's.
+  hpHealthy: rgbToHex(darken(HP_TONE_COLORS.healthy, 0.2)),
+  hpWounded: rgbToHex(darken(HP_TONE_COLORS.wounded, 0.1)),
+  hpCritical: rgbToHex(darken(HP_TONE_COLORS.critical, 0.2)),
+  tempHp: rgbToHex(darken(TEMP_HP_TONE, 0.2)),
   tempHpText: '#dff0fb',
   deathText: '#f7e9dc',
   neutralMark: '#e2dac6',

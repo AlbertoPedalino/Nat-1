@@ -1134,6 +1134,36 @@ test("a main page's list takes the ListFilterBar", () => {
     .filter((file) => !withBar.has(file) && !file.endsWith('useLibraryFilter.js')), []);
 });
 
+// Every hit point bar (the sheet, a combatant, a companion, a piece on the
+// map) is HitPointBars over SegmentedMeter (shared/): its tone, its cushion
+// and its look are decided once. A bar of its own — a progress bar or a
+// width share next to the hit point tone — is not one.
+// A bar whose share changes (hit points, XP, a resource, the carried weight)
+// is a SegmentedMeter: its share rides on the element (useLiveStyle), one
+// style rule for every bar. A share written as a width in sx mints a rule per
+// value, and a bar dragged with the finger mints one per pixel.
+test('a share drawn as a width is a SegmentedMeter', () => {
+  assert.deepEqual(sourceLinesMatching(/width: `\$\{[^`]*\}%`/), []);
+});
+
+test('a hit point bar is HitPointBars', () => {
+  assert.deepEqual(sourceFilesMatching(/LinearProgress[\s\S]*hpToneColor|hpToneColor[\s\S]*LinearProgress/), []);
+  assert.deepEqual(sourceFilesMatching(/hitPointShares\(/, {
+    allow: ['shared/character/combat/vitals.js', 'shared/character/combat/HitPointBars.jsx'],
+  }), []);
+});
+
+// The look's cut shapes (a ribbon's notch, a seal, a crest, a bookmark tab,
+// a gem's cut, a meter's segments, a roll's burst) are shapes.js's: a new
+// theme recuts them there. A cut written in a component (a clip-path polygon
+// of its own, the seal's radius, a burst's spikes) is not one.
+test("the look's shapes live in shapes.js", () => {
+  assert.deepEqual(sourceFilesMatching(/clipPath: ['`]polygon\(/, { allow: ['shared/ui/shapes.js', 'shared/character/dice/polyhedra.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/46% 54% 48% 52%/, { allow: ['shared/ui/shapes.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/\b(spikes|arms|valleys): \[\[/, { allow: ['shared/ui/shapes.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/\bpolygon\(\s*[46],/, { allow: ['shared/ui/shapes.js'] }), []);
+});
+
 // Every counter spent and recovered one at a time (spell and pact slots, a
 // feature's uses, free casts, hit dice) is a row of GemPips: the cut, colours
 // and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.

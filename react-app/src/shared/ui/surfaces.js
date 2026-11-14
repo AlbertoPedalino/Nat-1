@@ -70,11 +70,14 @@ export function calloutSx(tone) {
   return { border: 2, borderColor: tone, borderRadius: 1, ...tintedSurfaceSx(tone, { amount: OPACITY.soft }) };
 }
 
-// The empty track of a meter (a combatant's HP bar, the encounter's XP bar, a
-// negotiation's pips), `height` tall; the filled part is drawn over it in the
-// meter's own colour.
+// The empty track of a meter (a hit point or XP bar, the encounter's
+// difficulty, a negotiation's pips), `height` tall: sunken and edged in ink,
+// solid so it reads the same over the paper and over a map; the filled part is
+// drawn over it in the meter's own colour.
 export function meterTrackSx(height) {
-  return { height, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.white, OPACITY.soft) };
+  return {
+    height, border: INK_EDGE, borderRadius: 1, bgcolor: UI_COLORS.surfaceSunken, boxSizing: 'border-box',
+  };
 }
 
 export const SURFACES = Object.freeze({

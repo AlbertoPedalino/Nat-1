@@ -5,7 +5,7 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { UI_SHADOWS } from './shadows.js';
-import { SEAL_RADIUS } from './radius.js';
+import { RIBBON, SEAL_RADIUS, ribbonClip } from './shapes.js';
 import { svgPicture } from './svgPicture.js';
 import { useRootStyle } from './liveStyle.js';
 
@@ -24,8 +24,8 @@ export const panelBarSx = {
   borderColor: UI_COLORS.edge,
 };
 
-// A panel's bar cut as a ribbon: each end notched in a swallowtail `notch`
-// px deep, the notch inked like every edge, all inside the bar's own box (an
+// A panel's bar cut as a ribbon (RIBBON, shapes.js): each end notched in a
+// swallowtail `notch` px deep, the notch inked like every edge, all inside the bar's own box (an
 // ornament poking out of a panel is cut by its frame and grows scrollbars).
 // Spread after the bar's padding: it widens the ends (`px`, theme units) to
 // clear the notch.
@@ -51,16 +51,14 @@ function ribbonSx(notch, px) {
   return {
     position: 'relative',
     px,
-    clipPath: `polygon(0 0, 100% 0, calc(100% - ${notch}px) 50%, 100% 100%, 0 100%, ${notch}px 50%)`,
+    clipPath: ribbonClip(notch),
     '&::before': notchInk('left', notch),
     '&::after': notchInk('right', notch),
   };
 }
 
-const PANEL_RIBBON_SX = ribbonSx(10, 2.25);
-// A stat tile's narrow bar: a shallow notch and slim ends, so its name
-// (Armor Class, Inspiration) keeps the room.
-const TILE_RIBBON_SX = ribbonSx(4, 0.625);
+const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel.notch, RIBBON.panel.px);
+const TILE_RIBBON_SX = ribbonSx(RIBBON.tile.notch, RIBBON.tile.px);
 
 // A panel bar's screentone: fine diagonal hatching in the panel's own colour,
 // so each kind of panel carries its texture. `tone` is a palette colour (hex).
@@ -81,6 +79,13 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
     ...(tile ? TILE_RIBBON_SX : PANEL_RIBBON_SX),
     backgroundImage: panelScreentone(tone),
   };
+}
+
+// A panel bar that holds the panel's tabs (the sheet's tabs, the builder's
+// steps): the tabs' ruled line is the bar's bottom edge, so the bar keeps no
+// padding nor border of its own under them.
+export function panelTabBarSx(tone = UI_COLORS.accent) {
+  return { ...panelTitleBarSx(tone), py: 0, borderBottom: 0, alignItems: 'flex-end' };
 }
 
 // The icon's badge in a panel bar: a wax seal in the tone, edged in ink, its

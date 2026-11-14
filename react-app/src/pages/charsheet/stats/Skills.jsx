@@ -14,30 +14,11 @@ import { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { PANEL_TONES, TRAINING_TONES } from '../../../shared/ui/entityColors.js';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { TrainingGem } from '../../../shared/ui/GemPip.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { ROLL_FIGURE_MARK_STYLE, ROLL_FIGURE_SX, ROLL_ROW_SX } from '../../../shared/ui/pressable.js';
-
-function SkillProficiencyDot({ training }) {
-  const dotColor = TRAINING_TONES[training] || 'divider';
-
-  return (
-    <Box
-      sx={{
-        width: 9,
-        height: 9,
-        borderRadius: '50%',
-        border: 1,
-        borderColor: dotColor,
-        bgcolor: training === 'prof' || training === 'exp' ? dotColor : 'transparent',
-        background: training === 'half'
-          ? `linear-gradient(90deg, ${TRAINING_TONES.half} 50%, transparent 50%)`
-          : undefined,
-      }}
-    />
-  );
-}
 
 // Skill advantage from two domains: sheet effects (class/subclass/species/feat,
 // already gated by minLevel/condition/requiredChoice/requiredItemFlag) and
@@ -105,7 +86,7 @@ export default function Skills({ C, sheet, onRoll }) {
             onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
             sx={{ ...ROLL_ROW_SX, px: 0.75, mb: 0.5, display: 'grid', gridTemplateColumns: '6px 30px minmax(0, 1fr) auto', gap: 0.5, mx: 0.5, py: 0.5, alignItems: 'center' }}>
             <Box />
-            <SkillProficiencyDot training={training} />
+            <TrainingGem training={training} />
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
               {sk.name}
             </Typography>

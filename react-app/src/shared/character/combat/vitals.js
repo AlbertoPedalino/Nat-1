@@ -201,3 +201,15 @@ export function hpTone(current, max) {
 export function hpToneColor(current, max, tones) {
   return tones[hpTone(current, max)];
 }
+
+// How much of a hit point bar each part fills (0–1): the Hit Points out of the
+// maximum, and the temporary ones against the maximum too, only to give the
+// cushion a size (it has no maximum of its own).
+export function hitPointShares(current, max, temp = 0) {
+  const top = Number(max) > 0 ? Number(max) : 0;
+  if (!top) return { hp: 0, temp: 0 };
+  return {
+    hp: clamp((Number(current) || 0) / top, 0, 1),
+    temp: clamp((Number(temp) || 0) / top, 0, 1),
+  };
+}

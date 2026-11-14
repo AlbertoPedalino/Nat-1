@@ -128,19 +128,11 @@ export const inlineRemindersSx = {
   pointerEvents: 'none',
 };
 
-const barBaseSx = {
-  position: 'relative',
-  borderRadius: 3,
-  bgcolor: vttAlpha(VTT_COLORS.black, OPACITY.heavy),
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
-  overflow: 'hidden',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  boxSizing: 'border-box',
-};
+// A piece's hit point bars (HitPointBars): sized to the cell, their ink edge
+// thinned to suit a strip a few pixels tall.
+const barSizeSx = { borderWidth: 'clamp(1px, 2cqmin, 2px)', borderRadius: 3 };
 
-export const hpBarSx = { ...barBaseSx, height: 'clamp(6px, 14cqmin, 16px)' };
+export const hpBarSx = { ...barSizeSx, height: 'clamp(6px, 14cqmin, 16px)' };
 
 export const deathTrackSx = {
   height: 'clamp(7px, 15cqmin, 18px)',
@@ -183,14 +175,6 @@ export const deathFailureSx = {
 
 export const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.line) };
 
-export const hpFillSx = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  height: '100%',
-  transition: `width ${DURATIONS.fast}ms linear`,
-};
-
 const textBaseSx = {
   position: 'relative',
   fontSize: 'clamp(6px, 11cqmin, 12px)',
@@ -204,16 +188,7 @@ const textBaseSx = {
 
 export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.text };
 
-export const tempBarSx = { ...barBaseSx, height: 'clamp(5px, 10cqmin, 12px)' };
-
-export const tempFillSx = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  height: '100%',
-  bgcolor: VTT_COLORS.tempHp,
-  transition: `width ${DURATIONS.fast}ms linear`,
-};
+export const tempBarSx = { ...barSizeSx, height: 'clamp(5px, 10cqmin, 12px)' };
 
 export const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)' };
 
@@ -260,8 +235,10 @@ export const badgeSx = {
 
 // A character's piece is a cut-out laid on the map: inked round its own ring,
 // its solid shadow under it, both in fractions of the piece so a zoomed-out
-// board keeps them in proportion.
-const PIECE_INK = { outline: 'clamp(1px, 2cqmin, 2px)', drop: 'clamp(1px, 3cqmin, 3px)' };
+// board keeps them in proportion. Thick enough to stand off any map, as a
+// figure on a table does. A creature's piece is left as its art was drawn: a
+// bestiary token has its own frame, and an ink edge round it spoils it.
+const PIECE_INK = { outline: 'clamp(1px, 3cqmin, 3px)', drop: 'clamp(2px, 5cqmin, 5px)' };
 export const characterPieceSx = { boxShadow: inkPieceShadow(PIECE_INK) };
 
 // A thin white ring keeps the colour apart from the art and from the map; the

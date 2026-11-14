@@ -2,6 +2,7 @@ import { UI_COLORS, uiMix } from './colors.js';
 import { inkShadow } from './shadows.js';
 import { DURATIONS } from './motion.js';
 import { svgPicture } from './svgPicture.js';
+import { BURSTS } from './shapes.js';
 
 // The comic speech bubble: every toast and roll bubble is one. A thick ink
 // edge, a solid offset shadow — in ink, or in the moment's colour (the accent
@@ -66,12 +67,10 @@ const xy = ([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`;
 const radians = (degrees) => (degrees * Math.PI) / 180;
 const polygon = (corners) => `M${corners.map(xy).join('L')}Z`;
 
-// The natural 20: wider than tall, sharp spikes of a few lengths, each leaning
-// a little ([angle, reach, lean] in degrees and units), valleys of a few depths.
-const KAPOW_WIDTH = 130;
-const KAPOW_SQUASH = 0.78;
-const KAPOW_SPIKES = [[-90, 64, 4], [-62, 52, -3], [-38, 62, 5], [-14, 50, 0], [8, 60, -4], [32, 54, 3], [58, 63, 6], [84, 50, -2], [108, 61, 4], [134, 53, -5], [158, 64, 3], [182, 51, 0], [206, 62, -4], [232, 52, 4]];
-const KAPOW_VALLEYS = [37, 40, 36, 39, 38, 35, 40, 37, 39, 36, 38, 40, 36, 39];
+// The two shapes are shapes.js's (BURSTS); drawn here from them.
+const { width: KAPOW_WIDTH, squash: KAPOW_SQUASH, spikes: KAPOW_SPIKES, valleys: KAPOW_VALLEYS } = BURSTS.kapow;
+const { arms: CRASH_ARMS, kinks: CRASH_KINKS, middle: CRASH_MIDDLE } = BURSTS.crash;
+
 const KAPOW_PATH = (() => {
   const at = (reach, angle) => [KAPOW_WIDTH / 2 + reach * Math.cos(radians(angle)), 50 + reach * KAPOW_SQUASH * Math.sin(radians(angle))];
   return polygon(KAPOW_SPIKES.flatMap(([angle, reach, lean], index) => {
@@ -80,11 +79,6 @@ const KAPOW_PATH = (() => {
   }));
 })();
 
-// The natural 1: six arms of different reach ([angle, reach]), each kinked
-// along its trailing edge, round a full middle the number sits inside.
-const CRASH_ARMS = [[-85, 48], [-20, 42], [40, 47], [110, 40], [170, 48], [235, 43]];
-const CRASH_KINKS = [[0.74, 8], [0.84, 13]];
-const CRASH_MIDDLE = 33;
 const CRASH_PATH = (() => {
   const at = (reach, angle) => [50 + reach * Math.cos(radians(angle)), 50 + reach * Math.sin(radians(angle))];
   return polygon(CRASH_ARMS.flatMap(([angle, reach], index) => {

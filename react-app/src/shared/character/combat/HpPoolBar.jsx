@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
+import HitPointBars from './HitPointBars.jsx';
 import { HP_TONE_COLORS, UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { hpToneColor } from './vitals.js';
@@ -12,31 +13,35 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 // persisted step `amount` (+ its setter), and an `onDelta(signed)` handler that
 // clamps and saves. `stateLabel` shows next to the readout once HP hits 0.
 // The readout sits on the left and the stepper on the right edge, so the bar
-// fills the panel's width instead of leaving it empty on the right.
+// fills the panel's width instead of leaving it empty on the right; the hit
+// point bar (HitPointBars) runs under both.
 export default function HpPoolBar({
   current, max, onDelta, amount, onAmount,
   plusLabel, minusLabel, stateLabel,
 }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
-        <Typography component="span" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mr: 0.5 }}>HP</Typography>
-        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.title, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: LINE_HEIGHTS.none }}>{current}</Typography>
-        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
-        <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>{max}</Typography>
-        {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerMuted, ml: 0.5 }}>{stateLabel}</Typography> : null}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
+          <Typography component="span" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', mr: 0.5 }}>HP</Typography>
+          <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.title, color: hpToneColor(current, max, HP_TONE_COLORS), lineHeight: LINE_HEIGHTS.none }}>{current}</Typography>
+          <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>/</Typography>
+          <Typography component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary' }}>{max}</Typography>
+          {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: FONT_SIZES.xs, color: UI_COLORS.dangerMuted, ml: 0.5 }}>{stateLabel}</Typography> : null}
+        </Box>
+        <HpStepper
+          variant="sheet"
+          amount={amount}
+          onAmount={onAmount}
+          onPlus={(n) => onDelta(n)}
+          onMinus={(n) => onDelta(-n)}
+          plusColor={UI_COLORS.success}
+          minusColor={UI_COLORS.danger}
+          plusLabel={plusLabel}
+          minusLabel={minusLabel}
+        />
       </Box>
-      <HpStepper
-        variant="sheet"
-        amount={amount}
-        onAmount={onAmount}
-        onPlus={(n) => onDelta(n)}
-        onMinus={(n) => onDelta(-n)}
-        plusColor={UI_COLORS.success}
-        minusColor={UI_COLORS.danger}
-        plusLabel={plusLabel}
-        minusLabel={minusLabel}
-      />
+      <HitPointBars current={current} max={max} />
     </Box>
   );
 }

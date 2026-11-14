@@ -12,9 +12,11 @@ import {
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { tileSx } from '../../../shared/ui/interactive.js';
 import { formatCopper } from '../../../shared/character/inventory/currency.js';
+import SegmentedMeter from '../../../shared/ui/SegmentedMeter.jsx';
+import { METER_SEGMENTS } from '../../../shared/ui/shapes.js';
 
 // A total read at the top of the inventory, flat: its name, then its figure.
 // Past its limit (over capacity, more attuned items than allowed) it turns
@@ -56,9 +58,14 @@ export default function InventoryStats({ inv, currency, character: C, attunement
       <StatPill label="Value" value={formatCopper(totalCopper) || '0 gp'} />
       <StatPill label="Attuned" value={`${attunedCount} / ${attunementLimit}`} over={attunedCount > attunementLimit} />
       {/* How full the pack is; the Weight pill above says by how much. */}
-      <Box sx={{ ...SURFACES.wash, width: '100%', height: 6, mt: 0.25, overflow: 'hidden' }}>
-        <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? UI_COLORS.danger : UI_COLORS.success }} />
-      </Box>
+      <SegmentedMeter
+        ratio={carryPct / 100}
+        tone={overloaded ? UI_COLORS.danger : UI_COLORS.success}
+        segments={METER_SEGMENTS.smooth}
+        title="Carried weight"
+        valueText={`${formatWeight(totalWeight)} of ${formatPounds(maxCarry)}`}
+        sx={{ width: '100%', height: 8, mt: 0.25 }}
+      />
     </Box>
   );
 }

@@ -1,21 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
+import HitPointBars from '../../../shared/character/combat/HitPointBars.jsx';
 import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 import { hpToneColor, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { atDeathsDoor, clickedDeathSaveCount, resolveMortality } from '../../../shared/character/combat/mortality.js';
 import { EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-import { HP_TONE_COLORS, UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
+import { HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
+import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
-import { readoutSx } from '../../../shared/ui/interactive.js';
 import CardSection from '../../../shared/ui/CardSection.jsx';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
@@ -24,18 +24,29 @@ import CardSection from '../../../shared/ui/CardSection.jsx';
 const FILL_CONTENT_WIDTH = 'min(100%, clamp(260px, 90%, 680px))';
 const FILL_COLUMN_GAP = 'clamp(0.4rem, 12%, 5rem)';
 
-// The name of a value in the block (TEMP, MAX MOD): read, so flat; the value
-// in it is what you click to type a new one.
-const chipSx = {
-  ...readoutSx(),
+// A line of the block under the Hit Points (Temp, Max mod): its icon and
+// name, quiet, then its figure at the line's end, by the stepper. A line of
+// the panel, not a field of its own, so no frame; the figure is what you
+// click to type a new one.
+// A line's figure: the same figures as the Hit Points, a size under them, so
+// it reads at a glance.
+const lineFigureSx = {
+  ...TEXT_STYLES.figure,
+  fontSize: FONT_SIZES.xxl,
+  lineHeight: LINE_HEIGHTS.none,
+  ml: 'auto',
+  cursor: 'pointer',
+  '&:hover': { opacity: OPACITY.heavy },
+};
+
+const lineLabelSx = {
   color: 'text.secondary',
   ...TEXT_STYLES.title,
-  fontSize: FONT_SIZES.xxs,
-  display: 'inline-flex',
+  fontSize: FONT_SIZES.xs,
+  display: 'flex',
   alignItems: 'center',
   gap: 0.5,
-  px: 0.5,
-  py: 0.25,
+  minWidth: 0,
   whiteSpace: 'nowrap',
 };
 
@@ -156,17 +167,20 @@ export default function HPBlock({
           />
         </Box>
 
+        {/* The bars: how hurt at a glance, the cushion under it. */}
+        <HitPointBars current={sheet.currentHP} max={sheet.maxHP} temp={sheet.tempHP} hpSx={{ height: 14 }} sx={{ mt: 0.75, mb: 0.25 }} />
+
         {/* Temp HP */}
         <Box sx={rowSx}>
-          <Box sx={chipSx}>
+          <Box sx={lineLabelSx}>
             <GAME_ICONS.tempHp size={ICON_SIZES.xxs} /> TEMP
             {editing === 'temp' ? (
-              editField({ width: 40, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
+              editField({ width: 48, ml: 'auto' }, { fontSize: FONT_SIZES.xxl, color: TEMP_HP_TONE })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('temp', sheet.tempHP)}
-                sx={{ color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
+                sx={{ ...lineFigureSx, color: TEMP_HP_TONE }}
               >
                 {sheet.tempHP}
               </Box>
@@ -185,15 +199,15 @@ export default function HPBlock({
 
         {/* Max HP modifier */}
         <Box sx={rowSx}>
-          <Box sx={chipSx}>
+          <Box sx={lineLabelSx}>
             <GAME_ICONS.maxHp size={ICON_SIZES.xxs} /> MAX MOD
             {editing === 'mod' ? (
-              editField({ width: 44, ml: 'auto' }, { fontSize: FONT_SIZES.md, color: UI_COLORS.accentText })
+              editField({ width: 52, ml: 'auto' }, { fontSize: FONT_SIZES.xxl, color: UI_COLORS.accentText })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('mod', sheet.maxHPBonus)}
-                sx={{ color: UI_COLORS.accentText, fontWeight: FONT_WEIGHTS.bold, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: OPACITY.heavy } }}
+                sx={{ ...lineFigureSx, color: UI_COLORS.accentText }}
               >
                 {signed(sheet.maxHPBonus)}
               </Box>
