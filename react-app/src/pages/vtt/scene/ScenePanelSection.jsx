@@ -12,7 +12,7 @@ import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 
 // The building block of the GM's scene panel (MapPanel): a collapsible section
-// with a one-line summary. The labels inside it are MapSectionTitle.
+// with a one-line summary. The labels inside it are SectionTitle.
 
 // One question about the scene behind one header. Closed, the header still
 // answers it in a line ("Squares · 70 px · shown"), so the panel reads as an

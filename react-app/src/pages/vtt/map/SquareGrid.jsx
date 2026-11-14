@@ -1,6 +1,7 @@
 import { memo, useId, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
+import { mapLayerSx } from './sceneViewportStyles.js';
 
 // CSS repeating backgrounds quantise the tile size and its position separately.
 // At fractional zooms that makes the mesh slip by a pixel while tokens, which
@@ -50,7 +51,7 @@ function SquareGrid({
       component="svg"
       aria-hidden
       data-square-grid
-      sx={{ width: width, height: height, position: 'absolute', inset: 0, pointerEvents: 'none' }}
+      sx={mapLayerSx}
     >
       {clipRect ? (
         <defs>

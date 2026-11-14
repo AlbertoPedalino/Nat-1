@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { CalendarDays, Hexagon, Palette, Settings } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
@@ -9,9 +9,8 @@ import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
-import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -49,7 +48,7 @@ export default function HexcrawlSettingsDialog({
 
       <Box sx={columnsSx}>
         <Stack spacing={2} sx={sectionCardSx}>
-          <MapSectionTitle icon={CalendarDays}>Calendar</MapSectionTitle>
+          <SectionTitle icon={CalendarDays}>Calendar</SectionTitle>
           {sky ? (
             <CampaignCalendarFields
               clock={sky}
@@ -64,7 +63,7 @@ export default function HexcrawlSettingsDialog({
         </Stack>
 
         <Stack spacing={2} sx={sectionCardSx}>
-          <MapSectionTitle icon={Hexagon}>A hex is, unless it says otherwise</MapSectionTitle>
+          <SectionTitle icon={Hexagon}>A hex is, unless it says otherwise</SectionTitle>
           <SelectorGroup
             label="Terrain"
             options={TERRAIN_OPTIONS}
@@ -112,8 +111,8 @@ export default function HexcrawlSettingsDialog({
           read it too. */}
       {onHexColorChange ? (
         <Box sx={[sectionCardSx, { mt: 2 }]}>
-          <MapSectionTitle icon={Palette} sx={{ mb: 1.25 }}>Map</MapSectionTitle>
-          <Typography sx={groupLabelSx}>Explored hex colour</Typography>
+          <SectionTitle icon={Palette} sx={{ mb: 1.25 }}>Map</SectionTitle>
+          <SectionTitle sx={{ mb: 0.5 }}>Explored hex colour</SectionTitle>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
             {/* Deferred, as the grid's own colour is: a controlled colour
                 input re-renders on every move inside the picker and snaps
@@ -151,5 +150,4 @@ const sectionCardSx = {
   bgcolor: 'gmboard.vtt.inset',
 };
 
-const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 

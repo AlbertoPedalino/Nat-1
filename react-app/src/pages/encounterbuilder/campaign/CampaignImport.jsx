@@ -62,7 +62,7 @@ function CampaignImportView({ state, campaignPlayers, dispatch }) {
                 onChange={setSelectedId}
                 options={campaignPlayers.campaigns.map((campaign) => ({
                   value: campaign.id,
-                  label: `${campaign.name} (${campaign.players.length})`,
+                  label: `${campaign.name} · ${campaign.players.length} player${campaign.players.length === 1 ? '' : 's'}`,
                 }))}
               />
               <Button

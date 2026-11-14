@@ -5,6 +5,7 @@ import { TEXT_STYLES } from './textStyles.js';
 import { FONT_SIZES } from './fonts.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { asArray } from '../lists.js';
+import CountSeal from './CountSeal.jsx';
 
 // The labelled button that opens and closes what sits under it (a combatant's
 // HP modifiers or marker rows, the item filters, a panel that folds away): its
@@ -12,8 +13,8 @@ import { asArray } from '../lists.js';
 // and the label says what it hides, so a bare chevron never stands alone. The
 // body it opens is a CollapsibleBody; the caller keeps `open`.
 //
-// `count` is added to the label as "(n)" when there is one. `tone` is its
-// look: 'toggle' (the raised gold toggle, lit while open — or while `lit`, a
+// `count` sits on its seal after the label (CountSeal) when there is one.
+// `tone` is its look: 'toggle' (the raised gold toggle, lit while open — or while `lit`, a
 // filter that is set) or 'quiet' (a small text line inside a dense card).
 // `icon` leads the label when the button names its kind (the filters' sliders);
 // the chevron then follows it; a caller that names the open state by its
@@ -48,7 +49,8 @@ export default function DisclosureButton({
       endIcon={icon ? chevron : undefined}
       sx={[look, ICON_GAP_SX, ...asArray(sx)]}
     >
-      {count ? `${label} (${count})` : label}
+      {label}
+      <CountSeal count={count} sx={{ ml: 0.75 }} />
     </Button>
   );
 }

@@ -10,7 +10,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { atmosphereFor } from '../../../shared/vtt/scene/atmosphere.js';
 import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/imageFilters.js';
 import { numberSx } from './panelStyles.js';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { AtmospherePicker, atmospherePresetsByType } from './AtmospherePicker.jsx';
 import { ATMOSPHERE_ICONS } from '../../../shared/ui/gameIcons.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
@@ -62,9 +62,9 @@ function ImageLightSection({ scene, onImageFilterChange }) {
 
   return (
     <Stack spacing={0.5}>
-      <MapSectionTitle hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night.">
+      <SectionTitle hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night.">
         {showingBackground ? 'Light on this background' : 'Light on the battlemap'}
-      </MapSectionTitle>
+      </SectionTitle>
       <SelectField
         ariaLabel="Light filter"
         value={filter.type}
@@ -111,9 +111,9 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
 
   return (
     <Stack spacing={0.75}>
-      <MapSectionTitle hint="A procedural weather layer over the picture on show. Every picture keeps its own, so the battlemap can be under a storm while a background stays dry. It is rendered locally as a continuous field, so denser rain or fog does not create more particles.">
+      <SectionTitle hint="A procedural weather layer over the picture on show. Every picture keeps its own, so the battlemap can be under a storm while a background stays dry. It is rendered locally as a continuous field, so denser rain or fog does not create more particles.">
         {showingBackground ? 'Atmosphere on this background' : 'Atmosphere on the battlemap'}
-      </MapSectionTitle>
+      </SectionTitle>
       <Button
         fullWidth
         size="small"
@@ -167,7 +167,7 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
       )}
       {atmosphere.type === 'none' ? null : (
         <Stack spacing={0.5}>
-          <MapSectionTitle hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view.">Wind</MapSectionTitle>
+          <SectionTitle hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view.">Wind</SectionTitle>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <TextField
               size="small"

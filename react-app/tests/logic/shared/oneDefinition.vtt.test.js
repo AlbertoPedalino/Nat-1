@@ -79,9 +79,9 @@ test('a round map button is mapIconButtonSx', () => {
   assert.deepEqual(onMap(sourceFilesMatching(/bgcolor: mapIconButtonSx\.bgcolor|border: mapIconButtonSx\.border/)), []);
 });
 
-// A section heading on the map is MapSectionTitle: the scene panel's labels,
-// the piece menu's sections, the hexcrawl's.
-test('a section heading on the map is MapSectionTitle', () => {
+// A section heading on the map is SectionTitle (shared/ui): the scene panel's
+// labels, the piece menu's sections, the hexcrawl's.
+test('a section heading on the map is SectionTitle', () => {
   assert.deepEqual(onMap(sourceFilesMatching(/\bSectionLabel\b|tokenMenuStyles|sectionTitleSx\b(?![^\n]*\{\s*$)/, {
     allow: ['pages/vtt/scene/ScenePanelSection.jsx'],
   })), []);

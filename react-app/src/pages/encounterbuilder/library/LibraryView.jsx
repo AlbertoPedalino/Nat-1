@@ -22,6 +22,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import CountSeal from '../../../shared/ui/CountSeal.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // A saved encounter is found by its name, its quest or a creature in it, and
@@ -65,9 +66,7 @@ function LibraryViewView({ state, dispatch, monsterDb }) {
             <Typography variant="h2" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <GAME_ICONS.quest size={ICON_SIZES.md} />
               {group.quest || 'Unassigned'}
-              <Caption component="span">
-                {group.items.length}
-              </Caption>
+              <CountSeal count={group.items.length} />
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,minmax(0,1fr))', xl: 'repeat(3,minmax(0,1fr))' }, gap: 2 }}>
               {group.items.map((item) => (

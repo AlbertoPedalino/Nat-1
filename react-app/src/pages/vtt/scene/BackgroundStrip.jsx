@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, ButtonBase, CircularProgress, Stack } from '@mui/material';
+import { Box, Button, ButtonBase, Stack } from '@mui/material';
 import {
   ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ImagePlus, Images, Trash2,
 } from 'lucide-react';
@@ -17,6 +17,7 @@ import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { centerInScroller } from '../../../shared/ui/scrollReveal.js';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -140,7 +141,7 @@ export default function BackgroundStrip({
           onClick={() => fileRef.current?.click()}
           sx={addSx}
         >
-          {busy ? <CircularProgress size={16} /> : <ImagePlus size={ICON_SIZES.lg} />}
+          {busy ? <BusyDie size={16} /> : <ImagePlus size={ICON_SIZES.lg} />}
         </ButtonBase>
       </Stack>
 

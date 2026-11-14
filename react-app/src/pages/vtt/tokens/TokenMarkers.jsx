@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import { ConditionToggleGrid } from '../../../shared/character/combat/ConditionChips.jsx';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 
 // The piece menu's side-by-side Conditions and Reminders columns.
 export default function TokenMarkers({
@@ -10,7 +10,7 @@ export default function TokenMarkers({
   return (
     <Box sx={markerGridSx}>
       <Box sx={markerSectionSx}>
-        <MapSectionTitle>Conditions</MapSectionTitle>
+        <SectionTitle>Conditions</SectionTitle>
         <ConditionToggleGrid
           active={conditions}
           onToggle={onConditionClick}
@@ -23,7 +23,7 @@ export default function TokenMarkers({
       {/* Reminders ("Bardic Inspiration", "Guidance"): written by name above
           the piece for the whole table, as on the sheet. */}
       <Box sx={{ ...markerSectionSx, ...reminderSectionSx }}>
-        <MapSectionTitle>Reminders</MapSectionTitle>
+        <SectionTitle>Reminders</SectionTitle>
         <ReminderEditor
           effects={effects}
           disabled={!canSetEffects}

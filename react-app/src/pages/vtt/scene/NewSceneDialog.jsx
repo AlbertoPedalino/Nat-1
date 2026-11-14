@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, Button, CircularProgress, LinearProgress, Link, Stack, Typography } from '@mui/material';
+import { Box, Button, LinearProgress, Link, Stack, Typography } from '@mui/material';
 import { ArrowLeft, Columns2, Layers, Map as MapIcon, Upload } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
@@ -8,15 +8,16 @@ import {
 import { stitchImages } from './stitch.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
-import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CARD_SX } from '../../../shared/ui/interactive.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import { FALLBACK_SCENE_GENERATOR_ICON, SCENE_GENERATOR_ICONS } from '../../../shared/ui/gameIcons.js';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { CARD_SX } from '../../../shared/ui/interactive.js';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 // Starting a scene: empty, or from a generated map.
 //
@@ -111,7 +112,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             </Typography>
           </Box>
 
-          <Typography sx={sectionSx}>Or generate one</Typography>
+          <SectionTitle>Or generate one</SectionTitle>
           <Box sx={gridSx}>
             {GENERATORS.map((option) => {
               const OptionIcon = SCENE_GENERATOR_ICONS[option.id] || FALLBACK_SCENE_GENERATOR_ICON;
@@ -179,7 +180,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             </Link>
             {progress ? (
               <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-                <CircularProgress size={14} />
+                <BusyDie size={14} />
                 <Typography sx={stepsSx}>
                   {/* Clamped: the last file reports itself done, and "3 of 2"
                       is a progress line that has stopped making sense. */}
@@ -250,7 +251,6 @@ const sceneOptionTitleSx = {
 
 const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };
 
-const sectionSx = captionLabelSx;
 
 const creditSx = { fontSize: FONT_SIZES.md, color: 'text.secondary' };
 

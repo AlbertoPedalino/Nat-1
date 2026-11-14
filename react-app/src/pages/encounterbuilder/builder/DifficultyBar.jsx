@@ -16,7 +16,7 @@ export default function DifficultyBar({ encounter, party }) {
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total XP</Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography sx={{ fontWeight: FONT_WEIGHTS.bold }}>{formatNumber(difficulty.totalXp)} XP</Typography>
-          <TagChip label={difficulty.label} tone={difficulty.color} filled />
+          <TagChip label={difficulty.label} tone={difficulty.color} />
         </Stack>
       </Stack>
       <LinearProgress

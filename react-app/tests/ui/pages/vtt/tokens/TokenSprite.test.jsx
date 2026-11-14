@@ -346,7 +346,7 @@ test('token and condition hover changes are reported to the presenter', () => {
 // A reminder is there to be read at a glance, so the first one is written
 // inside the cell without hovering, with a count of the rest; hovering writes
 // the rest out above the piece. Never folded into the numbered badge.
-test('reminders are written on the token, in full on hover, and are not counted in the badge', () => {
+test('reminders past two are counted, open on hover, and are not counted in the badge', () => {
   const { container } = render(
     <TokenSprite
       token={{
@@ -358,6 +358,7 @@ test('reminders are written on the token, in full on hover, and are not counted 
         effects: [
           { key: 'custom', text: 'Bardic Inspiration' },
           { key: 'custom', text: 'Guidance' },
+          { key: 'custom', text: 'Bless' },
         ],
       }}
       size={64}
@@ -366,20 +367,40 @@ test('reminders are written on the token, in full on hover, and are not counted 
     />,
   );
 
+  // Two reminders are written in the cell; only the third is counted.
   const inline = container.querySelector('[data-token-reminders]');
   expect(inline).toHaveTextContent('Bardic Inspiration');
+  expect(inline).toHaveTextContent('Guidance');
   expect(inline).toHaveTextContent('+1');
-  expect(screen.queryByText('Guidance')).not.toBeInTheDocument();
-  // Prone only; the two reminders are not marks.
+  expect(screen.queryByText('Bless')).not.toBeInTheDocument();
+  // Prone only; the reminders are not marks.
   expect(screen.getByText('1')).toBeInTheDocument();
   expect(screen.queryByText('Prone')).not.toBeInTheDocument();
 
   fireEvent.pointerEnter(screen.getByRole('button', { name: 'Aria' }));
   expect(screen.getByText('Prone')).toBeInTheDocument();
-  expect(screen.getByText('Guidance')).toBeInTheDocument();
-  // The first reminder stays put in the cell; only the rest open above.
+  expect(screen.getByText('Bless')).toBeInTheDocument();
+  // The reminders written in the cell stay put; only the rest open above.
   expect(screen.getAllByText('Bardic Inspiration')).toHaveLength(1);
-  expect(inline).toHaveTextContent('Bardic Inspiration');
+  expect(screen.getAllByText('Guidance')).toHaveLength(1);
+});
+
+test('two reminders are both written in the cell, with no count', () => {
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'hero-3', label: 'Cora', layer: 'tokens', conditions: [],
+        effects: [{ key: 'custom', text: 'Bless' }, { key: 'custom', text: 'Guidance' }],
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+  const inline = container.querySelector('[data-token-reminders]');
+  expect(inline).toHaveTextContent('Bless');
+  expect(inline).toHaveTextContent('Guidance');
+  expect(inline).not.toHaveTextContent('+');
 });
 
 test('a token with only reminders wears no badge', () => {

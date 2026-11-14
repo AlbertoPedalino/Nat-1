@@ -15,6 +15,7 @@ import {
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { clippedMapLayerSx } from '../map/sceneViewportStyles.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
 // extra animation frame guarantees that the browser has painted the last
@@ -303,13 +304,10 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
 }
 
 const rootSx = {
-  position: 'absolute',
-  inset: 0,
+  ...clippedMapLayerSx,
   // Above the fullscreen character sheet (layer 10): a shared roll must stay
   // visible even when the sheet covers the point where the dice land.
   zIndex: LAYERS.mapTray,
-  pointerEvents: 'none',
-  overflow: 'hidden',
 };
 
 const anchorSx = {

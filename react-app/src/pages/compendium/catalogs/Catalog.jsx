@@ -13,10 +13,11 @@ import {
   catalogDefaults, catalogEntries, catalogFields, catalogFiltering, runCatalog,
 } from './catalogFilter.js';
 import { entryNameSx, fillColumnSx, filterBarSx } from '../compendiumStyles.js';
-import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { LIST_ROW_RULE_SX, BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { TABLE_HEAD_ROW_SX } from '../../../shared/ui/ruleText.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -130,7 +131,9 @@ function CatalogRow({
       type="button"
       style={style}
       onClick={() => onOpen(entry)}
-      sx={[rowSx, narrow ? narrowRowSx : { gridTemplateColumns: template }]}
+      // Every other row striped (SURFACES.stripe): by its index, as the list
+      // only draws the rows on show.
+      sx={[rowSx, index % 2 ? SURFACES.stripe : null, narrow ? narrowRowSx : { gridTemplateColumns: template }]}
     >
       {narrow ? (
         <>
@@ -150,12 +153,13 @@ function CatalogRow({
   );
 }
 
+// The columns' titles: the head row of every table (ruleText.js).
 const headerRowSx = {
+  ...TABLE_HEAD_ROW_SX,
   display: 'grid',
   gap: 1.5,
   px: 2,
   py: 0.75,
-  borderBottom: INK_EDGE,
   flexShrink: 0,
 };
 

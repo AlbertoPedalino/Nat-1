@@ -73,7 +73,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
         {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.danger }}>NATURAL 1</Typography>}
 
         {layout.modeChip && (
-          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} filled={layout.modeChip.filled} sx={{ mb: 0.25 }} />
+          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
         )}
 
         <DiceRow

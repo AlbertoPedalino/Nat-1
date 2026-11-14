@@ -647,7 +647,7 @@ test('the press is drawn only by the pressable recipes', () => {
 });
 
 test('the screentone and the halftone are drawn in one place each', () => {
-  assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/PanelHeader.jsx'] }), []);
+  assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/colors.js'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);
 });
 
@@ -953,6 +953,21 @@ test('a place that moves every frame is written through useLiveStyle', () => {
   assert.deepEqual(offenders, []);
 });
 
+// A layer over the whole battle map (grid, play area, drawings, fog, weather,
+// laser, dice) is mapLayerSx or clippedMapLayerSx (pages/vtt/map/
+// sceneViewportStyles.js): the map's own box, never a size measured in pixels.
+// The grids took the measured viewport into sx, one CSS rule per size, and
+// dragging the divider between map and sheet restyled the whole page every
+// frame. geometry.js only does the arithmetic of a viewport, no styles.
+test('a layer over the whole map is mapLayerSx', () => {
+  assert.deepEqual(sourceFilesMatching(/inset: 0,(?:\s*\n[^\n]*){0,4}?\s*width: '100%',\s*\n\s*height: '100%'/, {
+    allow: ['pages/vtt/map/sceneViewportStyles.js'],
+  }), []);
+  assert.deepEqual(sourceLinesMatching(/\b(width|height): (width|height|viewportSize\.(width|height))\b/, {
+    allow: ['shared/vtt/map/geometry.js'],
+  }), []);
+});
+
 // An element's style is written outside sx only through shared/ui/liveStyle.js
 // (writeLiveStyle, useLiveStyle, useRootStyle): one way to turn numbers into
 // pixels, clear a value, set a custom property, and put the page root back.
@@ -1144,6 +1159,26 @@ test("a main page's list takes the ListFilterBar", () => {
 // value, and a bar dragged with the finger mints one per pixel.
 test('a share drawn as a width is a SegmentedMeter', () => {
   assert.deepEqual(sourceLinesMatching(/width: `\$\{[^`]*\}%`/), []);
+});
+
+// How many there are, beside a title or a label, is a CountSeal (shared/ui):
+// its figure on a seal, read aloud as "(n)". A count written into the text,
+// "Manage (3)" or "(12)", is not one.
+test('a count beside a label is a CountSeal', () => {
+  assert.deepEqual(sourceLinesMatching(/\(\$\{[\w.]*(count|length|size)\}\)|>\(\{[\w.]*(count|length|size)\}\)</, {
+    allow: ['shared/ui/CountSeal.jsx'],
+  }), []);
+});
+
+// Something on the way is the logo's turning die (BusyDie), never MUI's
+// spinning ring. A heading over a group of controls or facts is SectionTitle
+// (the diamond, the words, the rule), never a caption label restyled on the
+// spot. A rule's list, boxed text and table are set by ruleText.js in both
+// renderers (EntryBlocks, EntryRenderer).
+test('a busy mark is BusyDie and a group heading is SectionTitle', () => {
+  assert.deepEqual(sourceFilesMatching(/CircularProgress/), []);
+  assert.deepEqual(sourceLinesMatching(/(groupLabel|sectionTitle|historyTitle)Sx = .*captionLabelSx/), []);
+  assert.deepEqual(sourceLinesMatching(/'&::marker'/), []);
 });
 
 test('a hit point bar is HitPointBars', () => {

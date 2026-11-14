@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { createTheme, lighten } from '@mui/material';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, CONTROL_FONT_SIZES } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
@@ -9,23 +10,44 @@ import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
-import { INK_EDGE } from '../shared/ui/shadows.js';
-import { DURATIONS } from '../shared/ui/motion.js';
-import { BOOKMARK_TAB } from '../shared/ui/shapes.js';
+import { focusRingSx } from '../shared/ui/interactive.js';
+import { INK_EDGE, inkShadow } from '../shared/ui/shadows.js';
+import { DIALOG_MOTION, DURATIONS } from '../shared/ui/motion.js';
+import {
+  BOOKMARK_MARK, BOOKMARK_TAB, SEAL_RADIUS, SLIDER_THUMB, SWITCH,
+} from '../shared/ui/shapes.js';
+import { CheckMark, SealMark } from '../shared/ui/ChoiceMarks.jsx';
 import { RARITY_COLORS } from '../shared/character/inventory/itemRarity.js';
 
 // A chosen row, on `base`: the surface it lies on (the paper of a list, the
 // raised surface of a menu). The accent is a wash over that base, not in
 // place of it (surfaces.js tintedSurfaceSx), and under the cursor the same
-// wash a step stronger. CSS names: the theme's overrides do not read `bgcolor`.
-function selectedRowSx(base) {
+// wash a step stronger; on its left edge the gold bookmark (BOOKMARK_MARK)
+// that marks the open tab and the menu item under the pointer, one sign for
+// "this one". `markOnHover` shows the bookmark under the pointer too (a
+// menu's items). CSS names: the theme's overrides do not read `bgcolor`.
+function selectedRowSx(base, { markOnHover = false } = {}) {
+  const mark = { width: BOOKMARK_MARK.width };
   return {
+    position: 'relative',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      top: BOOKMARK_MARK.inset,
+      bottom: BOOKMARK_MARK.inset,
+      width: 0,
+      borderRadius: BOOKMARK_MARK.radius,
+      backgroundColor: UI_COLORS.accent,
+      transition: `width ${DURATIONS.fast}ms ease`,
+    },
+    ...(markOnHover ? { '&:hover::before, &.Mui-focusVisible::before': mark } : null),
     '&.Mui-selected': {
       color: UI_COLORS.textPrimary,
       backgroundColor: base,
       backgroundImage: washImage(UI_COLORS.accent, OPACITY.shade),
-      boxShadow: `inset 3px 0 0 ${UI_COLORS.accent}`,
     },
+    '&.Mui-selected::before': mark,
     '&.Mui-selected:hover': {
       backgroundColor: base,
       backgroundImage: washImage(UI_COLORS.accent, OPACITY.line),
@@ -169,7 +191,10 @@ export const theme = createTheme({
         // inherited from the root (the standard properties, Chrome and
         // Firefox); the thin width is set on every scroller; WebKit (Safari)
         // takes its own pseudo-elements.
-        html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}` },
+        // Selected text in gold with the ink on it, and the caret of every
+        // field in gold, instead of the system's blue.
+        html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}`, caretColor: UI_COLORS.accent },
+        '::selection': { backgroundColor: UI_COLORS.accent, color: UI_COLORS.edge },
         '*': { scrollbarWidth: 'thin' },
         '*::-webkit-scrollbar': { width: 12, height: 12 },
         '*::-webkit-scrollbar-track, *::-webkit-scrollbar-corner': { backgroundColor: UI_COLORS.surfaceSunken },
@@ -254,6 +279,11 @@ export const theme = createTheme({
         { props: { color: 'warning' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.warning, color: UI_COLORS.edge } } },
       ],
     },
+    // Every button, link and control MUI draws takes the app's keyboard focus
+    // (focusRingSx: the gold ring).
+    MuiButtonBase: {
+      styleOverrides: { root: focusRingSx() },
+    },
     // Every icon button stands raised (iconButtonLook): pressed, like every
     // button. A remove keeps its red, a primary one its accent; one that is
     // part of something else lies flat by its own sx (pressable.js).
@@ -272,10 +302,40 @@ export const theme = createTheme({
         root: selectedRowSx(UI_COLORS.surface),
       },
     },
-    // A menu item lies on the floating surface of its menu (SURFACES.floating).
+    // A menu item lies on the floating surface of its menu (SURFACES.floating);
+    // the one under the pointer shows the bookmark too.
     MuiMenuItem: {
       styleOverrides: {
-        root: selectedRowSx(UI_COLORS.surfaceRaised),
+        root: selectedRowSx(UI_COLORS.surfaceRaised, { markOnHover: true }),
+      },
+    },
+    // Every checkbox and radio drawn in ink (ChoiceMarks): a box, or a seal,
+    // gold once chosen.
+    MuiCheckbox: {
+      defaultProps: {
+        icon: createElement(CheckMark),
+        checkedIcon: createElement(CheckMark, { checked: true }),
+        disableRipple: true,
+      },
+    },
+    MuiRadio: {
+      defaultProps: {
+        icon: createElement(SealMark),
+        checkedIcon: createElement(SealMark, { checked: true }),
+        disableRipple: true,
+      },
+    },
+    // A link in the text: an underline drawn in gold, thick and set off from
+    // the letters, thicker under the pointer.
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: UI_COLORS.accentText,
+          textDecorationColor: UI_COLORS.accent,
+          textDecorationThickness: 2,
+          textUnderlineOffset: 3,
+          '&:hover': { color: UI_COLORS.accent, textDecorationThickness: 3 },
+        },
       },
     },
     MuiOutlinedInput: {
@@ -283,9 +343,16 @@ export const theme = createTheme({
         notchedOutline: { borderColor: UI_COLORS.edge, borderWidth: 2 },
         root: {
           backgroundColor: UI_COLORS.surfaceHeader,
+          transition: `box-shadow ${DURATIONS.fast}ms ease`,
           '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
             borderColor: UI_COLORS.textSecondary,
           },
+          // The field being written in: edged in gold with its solid shadow,
+          // so where the caret is reads at a glance.
+          '&.Mui-focused:not(.Mui-error)': { boxShadow: inkShadow(UI_COLORS.edge, 3) },
+          '&.Mui-focused:not(.Mui-error) .MuiOutlinedInput-notchedOutline': { borderColor: UI_COLORS.accent, borderWidth: 2 },
+          // An example of what to write is quieter than what is written.
+          '& input::placeholder, & textarea::placeholder': { fontStyle: TEXT_STYLES.note.fontStyle },
         },
       },
     },
@@ -344,6 +411,81 @@ export const theme = createTheme({
             marginTop: 0,
             paddingTop: 6 + BOOKMARK_TAB.rise,
           },
+        },
+      },
+    },
+    // Every on/off switch (ToggleRow) drawn in ink (SWITCH, shapes.js): a
+    // sunken track that turns gold when on, a thumb edged in ink with its
+    // solid shadow, sliding over with a little spring. Both sizes alike.
+    MuiSwitch: {
+      styleOverrides: {
+        root: {
+          width: SWITCH.width,
+          height: SWITCH.height,
+          padding: 0,
+          overflow: 'visible',
+          '&.MuiSwitch-sizeSmall': { width: SWITCH.width, height: SWITCH.height, padding: 0 },
+        },
+        switchBase: {
+          padding: SWITCH.inset,
+          color: UI_COLORS.textSecondary,
+          transition: `transform ${DURATIONS.slow}ms cubic-bezier(.3, 1.6, .5, 1)`,
+          '.MuiSwitch-sizeSmall &': { padding: SWITCH.inset },
+          '&.Mui-checked': {
+            transform: `translateX(${SWITCH.width - SWITCH.thumb - SWITCH.inset * 2}px)`,
+            color: UI_COLORS.accentHighlight,
+            '& + .MuiSwitch-track': { backgroundColor: UI_COLORS.accent, opacity: 1 },
+          },
+          '&.Mui-disabled + .MuiSwitch-track': { opacity: OPACITY.edge },
+        },
+        thumb: {
+          width: SWITCH.thumb,
+          height: SWITCH.thumb,
+          boxSizing: 'border-box',
+          border: INK_EDGE,
+          boxShadow: inkShadow(UI_COLORS.edge, 2),
+          '.MuiSwitch-sizeSmall &': { width: SWITCH.thumb, height: SWITCH.thumb },
+        },
+        track: {
+          boxSizing: 'border-box',
+          borderRadius: SWITCH.height / 2,
+          border: INK_EDGE,
+          backgroundColor: UI_COLORS.surfaceSunken,
+          opacity: 1,
+        },
+      },
+    },
+    // Every slider (LabeledSlider): an ink track filled in gold, its thumb a
+    // wax seal (SLIDER_THUMB, SEAL_RADIUS) with its solid shadow.
+    MuiSlider: {
+      styleOverrides: {
+        root: { color: UI_COLORS.accent },
+        rail: { backgroundColor: UI_COLORS.surfaceSunken, opacity: 1, border: INK_EDGE, boxSizing: 'content-box' },
+        track: { border: INK_EDGE, boxSizing: 'content-box' },
+        thumb: {
+          width: SLIDER_THUMB.size,
+          height: SLIDER_THUMB.size,
+          borderRadius: SEAL_RADIUS,
+          backgroundColor: UI_COLORS.accent,
+          border: INK_EDGE,
+          boxShadow: inkShadow(UI_COLORS.edge, 2),
+          '&:hover, &.Mui-focusVisible, &.Mui-active': {
+            boxShadow: `${inkShadow(UI_COLORS.edge, 2)}, 0 0 0 6px ${uiAlpha(UI_COLORS.accent, OPACITY.fill)}`,
+          },
+          '&::before': { boxShadow: 'none' },
+        },
+      },
+    },
+    // A dialog pops open, a little past its size and back, as a toast lands.
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          animation: `gbDialogPop ${DIALOG_MOTION.pop}ms cubic-bezier(.3, 1.6, .5, 1)`,
+          '@keyframes gbDialogPop': {
+            '0%': { transform: 'scale(0.86)' },
+            '100%': { transform: 'scale(1)' },
+          },
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
         },
       },
     },

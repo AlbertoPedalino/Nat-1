@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
-import { Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
 import { LoadingLine } from '../../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { TOOL_ICONS } from '../../../shared/ui/gameIcons.js';
-import TagChip from '../../../shared/ui/TagChip.jsx';
+import TagChip, { LiveTag } from '../../../shared/ui/TagChip.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
@@ -54,9 +53,7 @@ export default function CampaignTablePicker({ campaigns = [], onRun, onJoin }) {
             leading={<TOOL_ICONS.campaigns size={ICON_SIZES.md} />}
             title={table.name}
             badge={table.runs ? <TagChip component="span" label="GM" tone={UI_COLORS.accent} /> : null}
-            meta={live.has(table.id) ? (
-              <TagChip component="span" tone={UI_COLORS.success} icon={<Radio size={ICON_SIZES.xs} />} label="Live" />
-            ) : 'no map up'}
+            meta={live.has(table.id) ? <LiveTag component="span" /> : 'no map up'}
           />
         ))}
       </Stack>

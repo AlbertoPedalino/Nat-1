@@ -1,7 +1,7 @@
 import { getContrastRatio, lighten } from '@mui/material';
-import { UI_COLORS, OPACITY } from './colors.js';
+import { UI_COLORS, OPACITY, panelScreentone } from './colors.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
-import { DURATIONS } from './motion.js';
+import { DURATIONS, ICON_MOTION } from './motion.js';
 import { LINE_HEIGHTS } from './fonts.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
@@ -42,10 +42,17 @@ export function inkOn(fill) {
 
 // A button that cannot be pressed now (a core book always in use, an action
 // not available yet): it keeps its fill and its ink, so it reads as before,
-// lies flat — no shadow, nothing to press — and is quieter. MUI's own
-// disabled grey would write its label in a pale grey over the fill (white on
-// gold). The one disabled look of every raised button and icon button.
-export const UNPRESSABLE_SX = Object.freeze({ boxShadow: 'none', opacity: OPACITY.strong });
+// lies flat — no shadow, nothing to press — under the comic screentone (the
+// panel bars' own, panelScreentone), a little quieter: "switched off", still
+// legible. MUI's
+// own disabled grey would write its label in a pale grey over the fill
+// (white on gold). The one disabled look of every raised button and icon
+// button.
+export const UNPRESSABLE_SX = Object.freeze({
+  boxShadow: 'none',
+  backgroundImage: panelScreentone(UI_COLORS.edge),
+  opacity: OPACITY.heavy,
+});
 
 // A raised button filled with `fill`, its label in the ink that reads on it.
 export function pressableSx(fill) {
@@ -83,9 +90,21 @@ export function iconButtonLook(radius = 1, { surface = UI_COLORS.surfaceRaised, 
       backgroundColor: solidHover ? surface : lighten(surface, 0.08),
       color: tone || UI_COLORS.accent,
     },
+    // Its icon answers the pointer with a little twitch, as a thing touched.
+    '&:hover svg, &.Mui-focusVisible svg': ICON_TWITCH_SX,
     '&.Mui-disabled': { ...UNPRESSABLE_SX, color: tone || UI_COLORS.textSecondary },
   };
 }
+
+const ICON_TWITCH_SX = Object.freeze({
+  animation: `gbIconTwitch ${ICON_MOTION.twitch}ms ease`,
+  '@keyframes gbIconTwitch': {
+    '25%': { rotate: '-14deg' },
+    '60%': { rotate: '10deg' },
+    '100%': { rotate: '0deg' },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+});
 
 // An icon button that is part of something else, not a button of its own:
 // the clear X inside a search field, the 5etools link beside a name, a key

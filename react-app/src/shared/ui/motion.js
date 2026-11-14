@@ -7,6 +7,16 @@ export const DURATIONS = Object.freeze({
   slow: 220,
 });
 
+// The "working" die (BusyDie): one turn.
+export const BUSY_MOTION = Object.freeze({ turn: 900 });
+
+// An icon button's icon twitching under the pointer (iconButtonLook).
+export const ICON_MOTION = Object.freeze({ twitch: 400 });
+
+// A dialog popping open (the theme's MuiDialog), a little past its size and
+// back, as a toast lands.
+export const DIALOG_MOTION = Object.freeze({ pop: 260 });
+
 // A hit point bar's lost stretch (SegmentedMeter): held pale for a beat,
 // then drained.
 export const METER_MOTION = Object.freeze({

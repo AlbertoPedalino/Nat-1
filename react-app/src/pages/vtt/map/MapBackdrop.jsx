@@ -5,7 +5,7 @@ import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import HexGrid from './HexGrid.jsx';
 import SquareGrid from './SquareGrid.jsx';
 import { playAreaBox, hexPlayAreaPolygon } from './viewportGeometry.js';
-import { playAreaSvgSx, placeholderSx, playAreaStrokeProps } from './sceneViewportStyles.js';
+import { clippedMapLayerSx, placeholderSx, playAreaStrokeProps } from './sceneViewportStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 
@@ -128,7 +128,7 @@ export default function MapBackdrop({
           component="svg"
           aria-hidden
           data-play-area={hexPlayAreaMatchesMap ? 'hex-map' : 'hex-custom'}
-          sx={[{ width: '100%', height: '100%' }, playAreaSvgSx]}
+          sx={clippedMapLayerSx}
         >
           {hexPlayAreaMatchesMap ? (
             <rect

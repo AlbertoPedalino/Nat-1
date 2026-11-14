@@ -1,4 +1,3 @@
-import { CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -6,6 +5,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 // Shared row for every instance picker: generic tool lists render it with a
 // plain `to` link, the characters picker renders it with an async `onOpen`
@@ -24,7 +24,7 @@ export default function InstanceRow({
         <TagChip component="span" label={badge.label} tone={badge.kind === 'cloud' ? UI_COLORS.infoText : UI_COLORS.textSecondary} />
       ) : null}
       subtitle={subtitle}
-      meta={opening ? <CircularProgress size={12} sx={{ color: UI_COLORS.accent }} /> : updatedAtLabel}
+      meta={opening ? <BusyDie size={12} /> : updatedAtLabel}
       actions={hasActions ? (
         <>
           {extraAction ? (

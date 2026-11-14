@@ -14,8 +14,8 @@ import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
 // a mode is shown or chosen (the launch's initiative keys take `color`, the
 // palette name of `tone`).
 export const ROLL_MODE_CHIP = {
-  advantage: { label: 'ADV', tone: UI_COLORS.success, color: 'success', filled: true },
-  disadvantage: { label: 'DIS', tone: UI_COLORS.warning, color: 'warning', filled: true },
+  advantage: { label: 'ADV', tone: UI_COLORS.success, color: 'success' },
+  disadvantage: { label: 'DIS', tone: UI_COLORS.warning, color: 'warning' },
 };
 
 export function rollDieColor(value, faces) {

@@ -1,17 +1,21 @@
-import { Alert, CircularProgress, Stack, Typography } from '@mui/material';
+import { Alert, Stack, Typography } from '@mui/material';
+import BusyDie, { BUSY_SIZES } from './BusyDie.jsx';
+import { FONT_SIZES } from './fonts.js';
+import { TEXT_STYLES } from './textStyles.js';
 
-// The one "loading" look: a small spinner with what is on the way. In a row,
-// or `centered` in the space a whole panel or page would take.
+// The one "loading" look: the app's turning icon (BusyDie) with what is on the
+// way, both large enough to find at a glance. In a row, or `centered` in the
+// space a whole panel or page would take.
 export function LoadingLine({ label = 'Loading…', centered = false, sx }) {
   return (
     <Stack
       role="status"
       direction={centered ? 'column' : 'row'}
-      spacing={centered ? 1.5 : 1}
+      spacing={centered ? 2 : 1.25}
       sx={[centered ? centeredSx : rowSx, sx]}
     >
-      <CircularProgress size={centered ? 24 : 16} />
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>{label}</Typography>
+      <BusyDie size={centered ? BUSY_SIZES.area : BUSY_SIZES.line} />
+      <Typography sx={centered ? centeredLabelSx : labelSx}>{label}</Typography>
     </Stack>
   );
 }
@@ -36,4 +40,6 @@ export function isLoadPending(status) {
 }
 
 const rowSx = { alignItems: 'center' };
+const labelSx = { ...TEXT_STYLES.title, fontSize: FONT_SIZES.body, color: 'text.primary' };
+const centeredLabelSx = { ...labelSx, fontSize: FONT_SIZES.title };
 const centeredSx = { alignItems: 'center', justifyContent: 'center', py: 4 };

@@ -7,6 +7,7 @@ import { clamp } from '../../../shared/numbers.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { clippedMapLayerSx, mapLayerSx } from './sceneViewportStyles.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
 // Reaching each target in exactly that interval keeps the motion continuous —
@@ -180,20 +181,10 @@ function placeLaser(node, point, grid, view) {
   });
 }
 
-const overlaySx = {
-  position: 'absolute',
-  inset: 0,
-  zIndex: 4,
-  overflow: 'hidden',
-  pointerEvents: 'none',
-};
+const overlaySx = { ...clippedMapLayerSx, zIndex: 4 };
 
 const trailSx = {
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  pointerEvents: 'none',
+  ...mapLayerSx,
   filter: `drop-shadow(0 0 3px ${vttAlpha(VTT_COLORS.laser, OPACITY.strong)})`,
 };
 

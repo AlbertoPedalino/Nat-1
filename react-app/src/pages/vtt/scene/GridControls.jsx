@@ -3,7 +3,7 @@ import { Grid3x3, Hexagon } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import { numberSx } from './panelStyles.js';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
@@ -39,7 +39,7 @@ export function GridControls({ grid, onGridChange }) {
         ]}
       />
 
-      <MapSectionTitle hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it.">Alignment</MapSectionTitle>
+      <SectionTitle hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it.">Alignment</SectionTitle>
       <Stack direction="row" spacing={0.75}>
         <TextField
           label="Cell"
@@ -70,7 +70,7 @@ export function GridControls({ grid, onGridChange }) {
       {/* How the lines look: a printed battlemap already has squares of its
           own, and gold over a snowfield is not the same read as gold over a
           cave. */}
-      <MapSectionTitle hint="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through.">Lines</MapSectionTitle>
+      <SectionTitle hint="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through.">Lines</SectionTitle>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <ColorField
           value={grid.color || DEFAULT_GRID.color}

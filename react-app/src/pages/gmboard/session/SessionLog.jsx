@@ -17,7 +17,7 @@ export default function SessionLog() {
     <BoardPanel
       icon={History}
       title="Session Log"
-      titleAdornment={entries.length ? <Typography sx={countSx}>({entries.length})</Typography> : null}
+      count={entries.length}
       spacing={1}
       actions={(
         <Button
@@ -42,11 +42,6 @@ export default function SessionLog() {
     </BoardPanel>
   );
 }
-
-const countSx = {
-  fontSize: FONT_SIZES.md,
-  color: 'text.secondary',
-};
 
 const logBoxSx = {
   maxHeight: '260px',

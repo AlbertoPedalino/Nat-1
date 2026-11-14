@@ -1,12 +1,35 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { DURATIONS } from '../../../shared/ui/motion.js';
 import { inkPieceShadow } from '../../../shared/ui/shadows.js';
+import { chipSolidStyle } from '../../../shared/ui/entityColors.js';
+import { SEAL_RADIUS } from '../../../shared/ui/shapes.js';
+import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 
 // Styles of a piece on the battle map: the cell layout (art, name plate, HP or
 // death-save bars, reminders), handles, badges, condition pills and tooltips.
+
+// How much a piece shows, by how large its cell is drawn on screen (px
+// across), in three steps:
+//   - close (`inside` and over): everything inside its cell;
+//   - further (`outside` to `inside`): everything still shown, but out of the
+//     cell — the reminders over it, the name, the hit point bars and their
+//     figures under it — so the art keeps its whole square and stays on the
+//     grid, and every word stays readable;
+//   - far (under `outside`): the piece and its name alone, to find it.
+// What a step leaves out is a hover or a tap away (the marks open above the
+// piece). Read by a container query on the piece's own cell (the sprite is
+// the container), so nothing is measured or drawn again while zooming.
+const TOKEN_DETAIL = Object.freeze({ inside: 48, outside: 24 });
+
+function below(px, sx) {
+  return { [`@container (max-width: ${px - 0.02}px)`]: sx };
+}
+
+function hiddenBelow(px) {
+  return below(px, { display: 'none' });
+}
 
 export const initialsSx = {
   fontSize: 'clamp(8px, 24cqmin, 18px)',
@@ -103,8 +126,17 @@ export const stackInsideSx = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: 0.25,
+  gap: '1.5cqmin',
   pointerEvents: 'none',
+  // A small cell gives its art the whole square: name and bar hang under it.
+  ...below(TOKEN_DETAIL.inside, {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    mt: 0.125,
+    gap: 0.125,
+  }),
 };
 
 // An object's label hangs under it, centred however wide the name is.
@@ -124,15 +156,33 @@ export const inlineRemindersSx = {
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
-  gap: 0.25,
+  gap: '1.5cqmin',
   pointerEvents: 'none',
+  // A small cell gives its art the whole square: the reminders stand over it,
+  // as wide as their words need, centred on the piece.
+  ...below(TOKEN_DETAIL.inside, {
+    position: 'absolute',
+    bottom: '100%',
+    left: '50%',
+    width: 'max-content',
+    transform: 'translateX(-50%)',
+    gap: 0.25,
+    mb: 0.125,
+  }),
+  ...hiddenBelow(TOKEN_DETAIL.outside),
 };
 
 // A piece's hit point bars (HitPointBars): sized to the cell, their ink edge
 // thinned to suit a strip a few pixels tall.
 const barSizeSx = { borderWidth: 'clamp(1px, 2cqmin, 2px)', borderRadius: 3 };
 
-export const hpBarSx = { ...barSizeSx, height: 'clamp(6px, 14cqmin, 16px)' };
+export const hpBarSx = {
+  ...barSizeSx,
+  height: 'clamp(6px, 14cqmin, 16px)',
+  // Under a small cell: a bar wide and tall enough for its figures.
+  ...below(TOKEN_DETAIL.inside, { width: 44, height: 10 }),
+  ...hiddenBelow(TOKEN_DETAIL.outside),
+};
 
 export const deathTrackSx = {
   height: 'clamp(7px, 15cqmin, 18px)',
@@ -144,6 +194,7 @@ export const deathTrackSx = {
   alignItems: 'center',
   gap: 'clamp(1px, 3cqmin, 4px)',
   boxSizing: 'border-box',
+  ...hiddenBelow(TOKEN_DETAIL.outside),
 };
 
 export const deathDotsSx = { display: 'flex', alignItems: 'center', gap: 'clamp(1px, 2.5cqmin, 3px)' };
@@ -186,11 +237,16 @@ const textBaseSx = {
   textShadow: `0 1px 2px ${vttAlpha(VTT_COLORS.black, OPACITY.solid)}`,
 };
 
-export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.text };
+export const hpTextSx = { ...textBaseSx, color: VTT_COLORS.text, ...below(TOKEN_DETAIL.inside, { fontSize: FONT_SIZES.xxxs }) };
 
-export const tempBarSx = { ...barSizeSx, height: 'clamp(5px, 10cqmin, 12px)' };
+export const tempBarSx = {
+  ...barSizeSx,
+  height: 'clamp(5px, 10cqmin, 12px)',
+  ...below(TOKEN_DETAIL.inside, { width: 36, height: 8 }),
+  ...hiddenBelow(TOKEN_DETAIL.outside),
+};
 
-export const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)' };
+export const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)', ...below(TOKEN_DETAIL.inside, { fontSize: FONT_SIZES.micro }) };
 
 export const plateSx = {
   ...ONE_LINE_SX,
@@ -204,6 +260,9 @@ export const plateSx = {
   fontSize: 'clamp(5px, 12cqmin, 11px)',
   lineHeight: LINE_HEIGHTS.snug,
   boxSizing: 'border-box',
+  // Under a small cell the name is written whole, wider than the cell, at the
+  // smallest size that still reads, so the piece can be found.
+  ...below(TOKEN_DETAIL.inside, { maxWidth: 'none', width: 'max-content', fontSize: FONT_SIZES.xxs }),
 };
 
 export const secretPlateSx = {
@@ -211,26 +270,43 @@ export const secretPlateSx = {
   outlineOffset: '-1px',
 };
 
-// On the corner of the art, only just past its edge, so it reads as attached
-// to the piece without reaching into the next cell.
+// Every mark on a piece is the app's one solid chip (chipSolidStyle, as
+// every TagChip): a condition orange, a reminder blue (as on the sheet and in
+// the piece's menu). A mark's name is a rounded plate; a count of them is the
+// same chip on the seal's edge (SEAL_RADIUS), as every count of the app
+// (CountSeal). On the map the edge is a thin line, the chip a few pixels tall.
+const MARK_TONES = Object.freeze({ condition: VTT_COLORS.warning, reminder: UI_COLORS.info });
+
+function markChipSx(kind) {
+  return {
+    ...chipSolidStyle(MARK_TONES[kind]),
+    borderWidth: 1,
+    borderStyle: 'solid',
+    fontWeight: FONT_WEIGHTS.heavy,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+  };
+}
+
+function markCountSx(kind) {
+  return { ...markChipSx(kind), borderRadius: SEAL_RADIUS, textAlign: 'center' };
+}
+
+// The count of conditions on the corner of the art, only just past its edge,
+// so it reads as attached to the piece without reaching into the next cell.
 export const badgeSx = {
+  ...markCountSx('condition'),
   position: 'absolute',
   top: '-2px',
   right: '-2px',
   minWidth: 'clamp(10px, 22cqmin, 16px)',
   height: 'clamp(10px, 22cqmin, 16px)',
   px: 0.25,
-  borderRadius: 1,
-  bgcolor: VTT_COLORS.warning,
-  color: VTT_COLORS.surface,
   fontSize: 'clamp(6px, 14cqmin, 10px)',
-  fontWeight: FONT_WEIGHTS.heavy,
-  lineHeight: 'clamp(10px, 22cqmin, 16px)',
-  boxSizing: 'border-box',
-  textAlign: 'center',
-  whiteSpace: 'nowrap',
+  lineHeight: 'clamp(8px, 18cqmin, 14px)',
   pointerEvents: 'none',
   transition: `all ${DURATIONS.fast}ms ease`,
+  ...hiddenBelow(TOKEN_DETAIL.outside),
 };
 
 // A character's piece is a cut-out laid on the map: inked round its own ring,
@@ -315,21 +391,15 @@ export const remindersSx = {
   gap: 0.25,
 };
 
-// The light blue of the reminder chips on the sheet and in the token menu, so
-// the same thing is the same colour everywhere. On a dark plate rather than a
-// tint, because it has to stay legible over any map.
+// A reminder's chip (markChipSx): filled, so it stays legible over any map.
 export const reminderSx = {
+  ...markChipSx('reminder'),
   ...ONE_LINE_SX,
   maxWidth: 170,
   px: 0.5,
   py: 0.25,
   borderRadius: 1.25,
-  bgcolor: vttAlpha(VTT_COLORS.surface, OPACITY.veil),
-  color: 'info.main',
-  border: '1px solid',
-  borderColor: 'info.main',
   fontSize: FONT_SIZES.md,
-  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: LINE_HEIGHTS.normal,
 };
 
@@ -341,20 +411,31 @@ export const reminderInlineSx = {
   py: 0,
   fontSize: 'clamp(6px, 11cqmin, 12px)',
   lineHeight: LINE_HEIGHTS.snug,
+  // Over a small cell: the smallest size that still reads, written whole.
+  ...below(TOKEN_DETAIL.inside, { fontSize: FONT_SIZES.xxs, maxWidth: 'none' }),
 };
 
+// The count of the reminders the cell has no room for ("+2"): the reminder's
+// chip on the seal's edge, as the conditions' count is.
+export const reminderCountSx = {
+  ...markCountSx('reminder'),
+  flexShrink: 0,
+  px: 'clamp(2px, 3cqmin, 5px)',
+  fontSize: 'clamp(6px, 11cqmin, 12px)',
+  lineHeight: LINE_HEIGHTS.snug,
+  // Over a small cell: the smallest size that still reads, written whole.
+  ...below(TOKEN_DETAIL.inside, { fontSize: FONT_SIZES.xxs, maxWidth: 'none' }),
+};
+
+// A condition's chip (markChipSx), opened above the piece.
 export const pillSx = {
+  ...markChipSx('condition'),
   px: 0.5,
   py: 0.25,
   borderRadius: 1.25,
   fontSize: FONT_SIZES.lg,
-  fontWeight: FONT_WEIGHTS.bold,
   lineHeight: LINE_HEIGHTS.normal,
-  whiteSpace: 'nowrap',
-  border: `1px solid ${vttAlpha(VTT_COLORS.black, OPACITY.strong)}`,
 };
-
-export const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.surface };
 
 export const conditionTooltipSx = {
   maxWidth: 360,

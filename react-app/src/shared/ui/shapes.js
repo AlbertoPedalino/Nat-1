@@ -1,12 +1,16 @@
 // The interface's cut shapes, every one in this file: a panel bar's ribbon,
 // the wax seal an icon stands on, the ability scores' crest, a tab's bookmark,
-// the gems' cuts, the segments of a meter and the bursts behind a roll that
-// shouts. With the palette (colors.js, entityColors.js), the type (fonts.js,
+// the gems' cuts, the segments of a meter, the bursts behind a roll that
+// shouts, a switch, a slider's thumb, the ornament on a card's rule, the
+// bookmark that marks a chosen row, the focus ring, the marks of a checkbox
+// and a radio and the die on a dice formula. With
+// the palette (colors.js, entityColors.js), the type (fonts.js,
 // textStyles.js), the ink (shadows.js) and the drawings (gameIcons.js) this
 // is the whole look: a new theme recuts its shapes here, and every panel,
 // tile, tab, gem, bar and burst follows. The components that draw them
-// (PanelHeader, StatTile, GemPip, SegmentedMeter, bubble.js, the theme's tabs)
-// hold no shape of their own (guarded).
+// (PanelHeader, StatTile, GemPip, SegmentedMeter, bubble.js, CountSeal,
+// CardSection, the theme's tabs, switches and sliders) hold no shape of their
+// own (guarded).
 
 // A panel bar's ribbon: each end notched in a swallowtail `notch` px deep,
 // the ends widened by `px` (theme units) to clear it. A stat tile's is
@@ -81,3 +85,36 @@ export const BURSTS = Object.freeze({
     middle: 33,
   }),
 });
+
+// An on/off switch (every ToggleRow): a rounded track `width` by `height` px,
+// a round thumb `thumb` px across set `inset` px inside it, sliding across.
+export const SWITCH = Object.freeze({ width: 46, height: 28, thumb: 18, inset: 5 });
+
+// A slider's thumb (every LabeledSlider): a wax seal `size` px across, the
+// seal's own edge (SEAL_RADIUS).
+export const SLIDER_THUMB = Object.freeze({ size: 18 });
+
+// The ornament set on the middle of a card's rule (CardSection): a small
+// diamond, as a printed rulebook sets a fleuron between its parts. `path` is
+// drawn in a `size` px box.
+export const ORNAMENT = Object.freeze({ path: 'M6 0 L12 6 L6 12 L0 6 Z', size: 12 });
+
+// The bookmark on the left edge of a chosen row and of a menu item under the
+// pointer, as a tab's: `width` px, `inset` px from the row's top and foot.
+export const BOOKMARK_MARK = Object.freeze({ width: 5, inset: 4, radius: '0 4px 4px 0' });
+
+// A sheet of paper laid on the interface (SURFACES.paper): its corners cut
+// unevenly as a torn-out page's, in theme radius units (top left, top right,
+// bottom right, bottom left).
+export const PAPER = Object.freeze({ corners: [0.75, 1.75, 0.75, 1.75] });
+
+// The keyboard's focus: a gold ring `width` px round what has it, set `gap` px
+// off, with the ink shadow widened round it.
+export const FOCUS_RING = Object.freeze({ width: 3, gap: 2 });
+
+// A checkbox's box and a radio's seal (ChoiceMarks): `size` px across.
+export const CHOICE_MARK = Object.freeze({ size: 20 });
+
+// The die drawn before a dice formula in the text ("8d6"): a hexagon, `path`
+// in a `size` px box.
+export const DIE_GLYPH = Object.freeze({ path: 'M6 0.5 L11.5 3.5 L11.5 8.5 L6 11.5 L0.5 8.5 L0.5 3.5 Z', size: 12 });

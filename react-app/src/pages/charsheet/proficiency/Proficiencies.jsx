@@ -7,6 +7,7 @@ import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 
 export default function Proficiencies({ C }) {
   const profSets = useProficiencySets();
@@ -19,9 +20,7 @@ export default function Proficiencies({ C }) {
         )}
         {sections.map(sec => (
           <Box key={sec.title} sx={{ mb: '0.7rem' }}>
-            <Typography sx={{ ...sectionLabelSx, color: 'text.secondary', mb: 0.25 }}>
-              {sec.title}
-            </Typography>
+            <SectionTitle sx={{ mb: 0.25 }}>{sec.title}</SectionTitle>
             <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal }}>
               {sec.items.join(', ')}
             </Typography>

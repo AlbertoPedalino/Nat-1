@@ -1,6 +1,7 @@
 import { UI_COLORS } from './colors.js';
 import { SURFACES } from './surfaces.js';
 import { DURATIONS } from './motion.js';
+import { FOCUS_RING } from './shapes.js';
 
 // The two shapes a thing you can open or click takes inside a panel, each
 // with one look and one hover, so the same kind of thing answers the cursor
@@ -41,12 +42,15 @@ export const LIST_ROW_SX = Object.freeze({
 // (a catalog's virtual list, a scrolling table), where an outer ring would be
 // cut. `tone` colours it for a thing that wears a tone of its own (a selector
 // option in its tone, the battle map's brighter accent); the accent otherwise.
+// The keyboard's focus (FOCUS_RING, shapes.js): a gold ring set off round
+// what has it, thick enough to find from across the screen; `inset` draws it
+// inside, for a row in a list that clips its edges.
 export function focusRingSx({ inset = false, tone = 'primary.main' } = {}) {
   return {
     '&:focus-visible': {
-      outline: '2px solid',
+      outline: `${FOCUS_RING.width}px solid`,
       outlineColor: tone,
-      outlineOffset: inset ? -2 : 2,
+      outlineOffset: inset ? -FOCUS_RING.width : FOCUS_RING.gap,
     },
   };
 }

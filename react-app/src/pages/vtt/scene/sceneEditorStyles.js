@@ -1,5 +1,5 @@
 import { SURFACES, washImage } from '../../../shared/ui/surfaces.js';
-import { panelScreentone } from '../../../shared/ui/PanelHeader.jsx';
+import { panelScreentone } from '../../../shared/ui/colors.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor, OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';

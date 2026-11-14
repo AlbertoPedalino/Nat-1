@@ -6,7 +6,7 @@ import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import TokenArt from './TokenArt.jsx';
 import TokenVitalsStack from './TokenVitalsStack.jsx';
-import { TokenExpandedMarks, TokenReminderLine } from './TokenSpriteMarks.jsx';
+import { TokenExpandedMarks, TokenReminderLine, splitReminders } from './TokenSpriteMarks.jsx';
 import { useArtworkRetry } from './useArtworkRetry.js';
 import { useTokenMarksGesture } from './useTokenMarksGesture.js';
 import {
@@ -73,10 +73,11 @@ export default function TokenSprite({
   const reminders = token.effects || [];
   const marks = visibleConditions.length;
   // Hovering or tapping opens what the cell has no room for: the condition
-  // pills and the reminders after the first. The first one stays where it is
-  // written, so nothing on the piece moves under the pointer. Objects have no
+  // pills and the reminders the line has no room for (splitReminders). The
+  // ones written in the cell stay where they are, so nothing on the piece
+  // moves under the pointer. Objects have no
   // reminder line of their own, so theirs all open above.
-  const moreReminders = hasHandles ? reminders : reminders.slice(1);
+  const moreReminders = hasHandles ? reminders : splitReminders(reminders).rest;
   const expandable = marks > 0 || moreReminders.length > 0;
 
   const {

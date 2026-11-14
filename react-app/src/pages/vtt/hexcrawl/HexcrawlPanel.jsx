@@ -27,7 +27,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { hexLabel } from './hexLabel.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
@@ -188,7 +188,7 @@ function LastHexCard({ last, onOpenResult }) {
 
   return (
     <Box sx={lastCardSx}>
-      <MapSectionTitle sx={{ mb: 0.5 }}>Last hex visited</MapSectionTitle>
+      <SectionTitle sx={{ mb: 0.5 }}>Last hex visited</SectionTitle>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
         <Box sx={{ pt: 0.25 }}><TerrainIcon size={ICON_SIZES.md} color={VTT_COLORS.accent} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>

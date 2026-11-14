@@ -8,22 +8,36 @@ import {
   reminderSx,
   inlineRemindersSx,
   reminderInlineSx,
+  reminderCountSx,
 } from './tokenSpriteStyles.js';
 
-// The first reminder written inside a creature's cell, plus a count of the rest.
+// How many reminders are written inside a creature's cell, side by side; the
+// rest are counted ("+2") and open above the piece on hover or tap.
+const INLINE_REMINDERS = 2;
+
+// The reminders written in the cell and the ones left for the count: the one
+// rule for the line and for what opens above the piece.
+export function splitReminders(reminders) {
+  return { shown: reminders.slice(0, INLINE_REMINDERS), rest: reminders.slice(INLINE_REMINDERS) };
+}
+
+// The first reminders written inside a creature's cell, plus a count of the rest.
 export function TokenReminderLine({ reminders }) {
+  const { shown, rest } = splitReminders(reminders);
   return (
     <Box data-token-reminders sx={inlineRemindersSx}>
-      <Box component="span" title={reminders[0].text} sx={reminderInlineSx}>
-        {reminders[0].text}
-      </Box>
-      {reminders.length > 1 ? (
+      {shown.map((effect) => (
+        <Box key={effectId(effect)} component="span" title={effect.text} sx={reminderInlineSx}>
+          {effect.text}
+        </Box>
+      ))}
+      {rest.length ? (
         <Box
           component="span"
-          title={reminders.slice(1).map((effect) => effect.text).join(', ')}
-          sx={{ ...reminderInlineSx, flexShrink: 0 }}
+          title={rest.map((effect) => effect.text).join(', ')}
+          sx={reminderCountSx}
         >
-          +{reminders.length - 1}
+          +{rest.length}
         </Box>
       ) : null}
     </Box>

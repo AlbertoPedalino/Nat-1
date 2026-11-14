@@ -3,8 +3,11 @@ import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
-import { LIST_ROW_RULE_SX } from '../../shared/ui/interactive.js';
+import {
+  RULE_INSET_SX, RULE_INSET_TITLE_SX, RULE_LIST_SX, RULE_TABLE_SX,
+} from '../ui/ruleText.js';
 import { TEXT_STYLES } from '../ui/textStyles.js';
+import { LIST_ROW_RULE_SX } from '../../shared/ui/interactive.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -24,7 +27,9 @@ function groupBlocks(blocks) {
   return grouped;
 }
 
-// Shared renderer for 5etools entry blocks. Colors and text size are
+// Shared renderer for 5etools entry blocks, set as every rule's text is
+// (ruleText.js: a list's diamonds, a boxed text's paper, a table's head and
+// stripes). Colors and text size are
 // parametrized (defaults preserve the original spell/feature look) so callers
 // that need a distinct tone — e.g. condition cards with accent effect names —
 // reuse this single renderer instead of forking a parallel one.
@@ -35,7 +40,6 @@ export function EntryBlocks({
   emptyText = 'No description.',
   headingColor = RICH_TEXT_ACCENT,
   bodyColor = 'text.secondary',
-  markerColor = RICH_TEXT_ACCENT,
   strongColor = RICH_TEXT_ACCENT,
   fontSize,
   headingFontSize = fontSize,
@@ -58,11 +62,19 @@ export function EntryBlocks({
             </Typography>
           );
         }
+        if (block.kind === 'inset') {
+          return (
+            <Box key={`in-${index}`} sx={RULE_INSET_SX}>
+              {block.title ? <Typography sx={RULE_INSET_TITLE_SX}>{block.title}</Typography> : null}
+              <EntryBlocks blocks={block.blocks} spacing={spacing} emptyText={null} headingColor="inherit" bodyColor="inherit" strongColor="inherit" fontSize={fontSize} />
+            </Box>
+          );
+        }
         if (block.kind === 'listGroup') {
           return (
-            <Box key={`lg-${index}`} component="ul" sx={{ m: 0, pl: 2.25, color: bodyColor }}>
+            <Box key={`lg-${index}`} component="ul" sx={[RULE_LIST_SX, { color: bodyColor }]}>
               {block.items.map((item, itemIndex) => (
-                <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: LINE_HEIGHTS.normal, fontSize, ...(markerColor ? { '&::marker': { color: markerColor } } : null) }}>
+                <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: LINE_HEIGHTS.normal, fontSize }}>
                   {item.tokens?.length ? <RichInline tokens={item.tokens} keyPrefix={`li-${index}-${itemIndex}`} strongColor={strongColor} /> : item.text}
                 </Typography>
               ))}
@@ -77,7 +89,7 @@ export function EntryBlocks({
                   {block.caption}
                 </Typography>
               ) : null}
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: fontSize || FONT_SIZES.md }}>
+              <Box component="table" sx={[RULE_TABLE_SX, { width: '100%', borderCollapse: 'collapse', fontSize: fontSize || FONT_SIZES.md }]}>
                 {block.headers?.length ? (
                   <Box component="thead">
                     <Box component="tr">

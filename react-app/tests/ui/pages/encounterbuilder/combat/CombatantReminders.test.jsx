@@ -25,7 +25,7 @@ describe('CombatantReminders', () => {
 
     expect(screen.getByText('Bardic Inspiration')).toBeInTheDocument();
     expect(screen.getByText('Guidance')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Reminders \(2\)/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Reminders$/ })).toBeInTheDocument();
   });
 
   test('removing a chip targets that reminder and not the whole list', async () => {

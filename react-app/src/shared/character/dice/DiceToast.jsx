@@ -75,7 +75,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.modeChip && (
-        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} filled={layout.modeChip.filled} sx={{ mb: 0.25 }} />
+        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
       )}
 
       <DiceRow

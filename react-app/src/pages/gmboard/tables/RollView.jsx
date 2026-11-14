@@ -5,20 +5,19 @@ import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import { boardTone, complicationVisual, eventVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
 import { diceText } from '../../../shared/gmboard/resultText.js';
 import { ROLL_TABLES, describeRoll, followUpTables, summarizeStats } from './rollTable.js';
-import { TABLE_ICONS } from '../../../shared/ui/gameIcons.js';
+import { TABLE_ICONS, GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { ResultCard, ResultSlot, resultDetailSx } from '../ui/ResultCard.jsx';
-import { captionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import { boardCardGridSx, boardInsetSx } from '../../../shared/gmboard/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import Caption from '../../../shared/ui/Caption.jsx';
-import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
+import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -171,7 +170,7 @@ export default function RollView() {
       <Box sx={{ ...historySx, bgcolor: theme.palette.gmboard.panelOverlay }}>
         <Stack direction="row" spacing={1} sx={wrapRowSx}>
           <History size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
-          <Typography sx={historyTitleSx}>Roll History</Typography>
+          <SectionTitle>Roll History</SectionTitle>
           <Typography sx={historyNoteSx}>Kept until this page is reloaded.</Typography>
           <Button
             size="small"
@@ -276,7 +275,6 @@ const diceSx = {
 
 const historySx = boardInsetSx;
 
-const historyTitleSx = captionLabelSx;
 
 const historyNoteSx = {
   fontSize: FONT_SIZES.sm,

@@ -18,7 +18,7 @@ import CollapsibleBody from '../../ui/CollapsibleBody.jsx';
 // `pills` are the markers on the creature (MarkerChip), `below` what opens
 // under them (a condition's rules card), `children` the surface that adds
 // more: behind a toggle named `label` ("Manage" in a panel that is already
-// titled, the kind's name on a card that is not) with `count` beside it, or
+// titled, the kind's name on a card that is not), or
 // with `collapse={false}` always in view — for a small one (the reminder
 // field) used in one tap, where hiding it would only add clicks.
 //
@@ -39,7 +39,6 @@ export default function MarkerManager({
       onToggle={() => setOpen(!open)}
       icon={<ListChecks size={ICON_SIZES.xs} />}
       label={label}
-      count={count}
     />
   ) : null;
 

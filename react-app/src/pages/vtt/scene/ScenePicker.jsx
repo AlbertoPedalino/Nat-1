@@ -21,8 +21,7 @@ import ListFilterBar from '../../../shared/ui/ListFilterBar.jsx';
 import { useListFilter } from '../../../shared/ui/useListFilter.js';
 import { TOOL_CATALOG } from '../../../app/navigation/toolCatalog.js';
 import EntityRow from '../../../shared/ui/EntityRow.jsx';
-import TagChip from '../../../shared/ui/TagChip.jsx';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { LiveTag } from '../../../shared/ui/TagChip.jsx';
 import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
@@ -186,7 +185,7 @@ export default function ScenePicker({
                 onClick={() => onOpen(scene.id)}
                 leading={<Map size={ICON_SIZES.md} />}
                 title={scene.name}
-                badge={scene.isLive ? <TagChip component="span" tone={UI_COLORS.accent} label="Live" /> : null}
+                badge={scene.isLive ? <LiveTag component="span" /> : null}
                 meta={scene.imagePath ? null : 'no map yet'}
                 actions={(
                   <>

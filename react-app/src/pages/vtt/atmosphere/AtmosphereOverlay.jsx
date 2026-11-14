@@ -5,6 +5,7 @@ import { ATMOSPHERE_VERTEX_SHADER } from './shaders/common.js';
 import { atmosphereFallbackSx } from './shaders/fallback.js';
 import { getAtmosphereFragmentShader } from './shaders/index.js';
 import { releaseContext, runWebglLoop, useContextRecovery } from './webglCanvas.js';
+import { mapLayerSx } from '../map/sceneViewportStyles.js';
 
 // The renderer owns one low-resolution fullscreen triangle. Each atmosphere keeps
 // its own fragment shader module, so changing one effect cannot alter another.
@@ -220,11 +221,7 @@ const ATMOSPHERE_BLEND_MODES = Object.freeze({
 });
 
 const overlaySx = {
-  position: 'absolute',
-  inset: 0,
+  ...mapLayerSx,
   // SceneViewport mounts this after public fog and before the map tools.
   zIndex: 4,
-  width: '100%',
-  height: '100%',
-  pointerEvents: 'none',
 };

@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { tokenizeInlineMarkup } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../ui/fonts.js';
+import { ROLL_TOKEN_SX } from '../ui/rollToken.js';
 
 function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {
   return tokens.map((token, index) => {
@@ -11,6 +12,9 @@ function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {
     }
     if (token.type === 'strong') {
       return <Box key={key} component="strong" sx={{ fontWeight: FONT_WEIGHTS.bold, color: strongColor || 'text.primary' }}>{token.text}</Box>;
+    }
+    if (token.type === 'dice') {
+      return <Box key={key} component="span" sx={ROLL_TOKEN_SX}>{token.text}</Box>;
     }
     if (token.type === 'ref') {
       return <Box key={key} component="span" sx={{ color: refColor }}>{token.text}</Box>;

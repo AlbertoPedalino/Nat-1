@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Button, Divider, ListItemIcon, ListItemText, MenuItem, Stack, Tooltip,
+  Box, Button, Divider, ListItemIcon, ListItemText, MenuItem, Stack, Tooltip,
 } from '@mui/material';
 import {
   ChevronDown, Lock, LockOpen, MonitorOff, MonitorPlay, Radio, RadioTower,
@@ -66,7 +66,7 @@ export default function LiveControls({
           Live
           {/* The projector is a second screen nobody in the room can miss, but
               the GM's bar should still say it is attached. */}
-          {projectorAttached ? <MonitorPlay size={ICON_SIZES.xs} aria-hidden /> : null}
+          {projectorAttached ? <Box component={MonitorPlay} size={ICON_SIZES.xs} aria-hidden sx={{ ml: 0.75 }} /> : null}
         </Button>
       </Tooltip>
       <Tooltip

@@ -8,7 +8,7 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { coarsePointer } from '../map/menuPlacement.js';
 import { battleMapCompactFieldSx } from '../map/battleMapSurface.js';
 import MapMenu, { HiddenFromPlayersToggle, MenuFooterActions } from '../map/MapMenu.jsx';
-import MapSectionTitle from '../map/MapSectionTitle.jsx';
+import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { useTokenMenuState } from './useTokenMenuState.js';
 import TokenHpRow from './TokenHpRow.jsx';
 import DeathSaveControls from './DeathSaveControls.jsx';
@@ -122,7 +122,7 @@ export default function TokenMenu({
 
       {isMapObject ? (
         <Box sx={objectStyleSx}>
-          <MapSectionTitle>Object color</MapSectionTitle>
+          <SectionTitle>Object color</SectionTitle>
           <ColorField
             key={`${token.id}-color`}
             label="Object color"

@@ -4,6 +4,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { hexHeight, hexRowStep, hexWidth } from '../../../shared/vtt/map/hexGeometry.js';
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { mapLayerSx } from './sceneViewportStyles.js';
 
 // The hex overlay.
 //
@@ -166,12 +167,7 @@ function HexGrid({
     <Box
       component="svg"
       aria-hidden
-      sx={{ width: width, height: height,
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        opacity,
-      }}
+      sx={[mapLayerSx, { opacity }]}
     >
       {mesh || clipRect || clipPolygon ? (
         <defs>

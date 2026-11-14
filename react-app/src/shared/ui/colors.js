@@ -79,6 +79,12 @@ export const UI_COLORS = Object.freeze({
   // Books and written rules (the Compendium's mark): a page's warm ivory.
   reference: '#e8d9b5',
 
+  // Paper laid on the interface (a rulebook's boxed text, a missing picture's
+  // sheet): the ivory, its shaded foot and the brown ink written on it.
+  paper: '#e8d9b5',
+  paperShade: '#d9c79c',
+  onPaper: '#3a2a12',
+
   // The default token colour of a player character.
   pcToken: '#5c8fe0',
 
@@ -165,4 +171,13 @@ function hexChannels(hex) {
 export function normalizeHexColor(value, fallback = null) {
   const color = typeof value === 'string' ? value.trim() : '';
   return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : fallback;
+}
+
+// The comic screentone: fine diagonal hatching in a colour — a panel bar's
+// texture in the panel's own, a disabled button's (pressable.js), a table's
+// head (ruleText.js). Here with the palette, as washImage, so any recipe can
+// use it without importing the surfaces. `tone` is a palette colour (hex).
+export function panelScreentone(tone = UI_COLORS.accent) {
+  const ink = String(tone).startsWith('#') ? tone : UI_COLORS.accent;
+  return `repeating-linear-gradient(-45deg, ${uiAlpha(ink, OPACITY.soft)} 0 2px, transparent 2px 7px)`;
 }

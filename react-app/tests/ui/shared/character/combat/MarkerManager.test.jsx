@@ -7,11 +7,12 @@ import MarkerManager, { MarkerClearAction } from '../../../../../src/shared/char
 // Reminders panels and an encounter combatant's two marker lines. These are
 // the rules that keep them reading as two kinds of the same thing.
 describe('MarkerManager', () => {
-  test('the toggle carries the count and hides the surface until opened', async () => {
+  // The markers are on show beside it, so the toggle names its kind and no count.
+  test('the toggle is named by its kind alone and hides the surface until opened', async () => {
     render(<MarkerManager label="Reminders" count={2}><div>panel</div></MarkerManager>);
 
     expect(screen.queryByText('panel')).toBeNull();
-    const toggle = screen.getByRole('button', { name: /Reminders \(2\)/ });
+    const toggle = screen.getByRole('button', { name: /^Reminders$/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
     await userEvent.click(toggle);
@@ -19,7 +20,7 @@ describe('MarkerManager', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('a count of zero leaves the label bare rather than showing (0)', () => {
+  test('with nothing on, the label is the same bare one', () => {
     render(<MarkerManager label="Conditions" count={0}><div /></MarkerManager>);
     expect(screen.getByRole('button', { name: /Conditions$/ })).toBeInTheDocument();
   });

@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { UI_COLORS, panelScreentone } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
@@ -59,13 +59,6 @@ function ribbonSx(notch, px) {
 
 const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel.notch, RIBBON.panel.px);
 const TILE_RIBBON_SX = ribbonSx(RIBBON.tile.notch, RIBBON.tile.px);
-
-// A panel bar's screentone: fine diagonal hatching in the panel's own colour,
-// so each kind of panel carries its texture. `tone` is a palette colour (hex).
-export function panelScreentone(tone = UI_COLORS.accent) {
-  const ink = String(tone).startsWith('#') ? tone : UI_COLORS.accent;
-  return `repeating-linear-gradient(-45deg, ${uiAlpha(ink, OPACITY.soft)} 0 2px, transparent 2px 7px)`;
-}
 
 // The title bar of every panel, whole: the bar, its padding, its ribbon cut
 // and its screentone in `tone`. PanelHeader, a stat tile (`tile`: a

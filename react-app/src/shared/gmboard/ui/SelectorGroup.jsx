@@ -1,11 +1,11 @@
 import { useId } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
-import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { CONTROL_FONT_SIZES, FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { focusRingSx } from '../../ui/interactive.js';
 import { tintedSurfaceSx } from '../../ui/surfaces.js';
+import SectionTitle from '../../ui/SectionTitle.jsx';
+import { focusRingSx } from '../../ui/interactive.js';
 import { BUTTON_DESCRIPTION_SX } from '../../ui/actionButton.js';
 
 // The one choice row of the GM Board and the map's hexcrawl (terrain,
@@ -35,7 +35,7 @@ export default function SelectorGroup({
 
   return (
     <Box>
-      {label ? <Typography id={labelId} sx={groupLabelSx}>{label}</Typography> : null}
+      {label ? <SectionTitle id={labelId} sx={{ mb: 0.5 }}>{label}</SectionTitle> : null}
       <Box role="group" aria-labelledby={label ? labelId : undefined} aria-label={label ? undefined : 'options'} sx={groupRowSx}>
         {options.map((option) => {
           const id = getId(option);
@@ -85,7 +85,6 @@ function optionSx(tone, selected, dense) {
   };
 }
 
-const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 
 const groupRowSx = {
   display: 'flex',

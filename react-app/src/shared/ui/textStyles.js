@@ -34,6 +34,14 @@ export const TEXT_STYLES = Object.freeze({
     fontSizeAdjust: 'cap-height 0.92',
     ...inkLettering(2, 2),
   }),
+  // A tag's words on its solid chip (TagChip): the figure's face, without its
+  // ink — the ink on the chip's tone is the lettering, and an outline and a
+  // shadow in that same ink would read as a second, offset copy of the words.
+  tag: Object.freeze({
+    fontFamily: UI_FONTS.shout,
+    fontWeight: FONT_WEIGHTS.regular,
+    fontSizeAdjust: 'cap-height 0.92',
+  }),
   // The voice: what happens in the moment, shouted in comic lettering (a
   // roll's name and total, NATURAL 20!, a toast's Done!/Oops!). Always inked: an ink outline and its solid shadow.
   shout: Object.freeze({

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  Box, Button, CircularProgress, Stack, TextField, Typography, useTheme,
-} from '@mui/material';
+import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { Trash2, Users } from 'lucide-react';
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
@@ -19,6 +17,7 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 // The dungeon this map is being played as.
 //
@@ -78,7 +77,7 @@ export default function DungeonPanel({
         <Button
           size="small"
           variant="contained"
-          startIcon={busy ? <CircularProgress size={13} /> : <GAME_ICONS.roll size={ICON_SIZES.sm} />}
+          startIcon={busy ? <BusyDie size={13} /> : <GAME_ICONS.roll size={ICON_SIZES.sm} />}
           disabled={busy || !isValidRoomCount(roomCount)}
           onClick={() => onRoll({
             roomCount,

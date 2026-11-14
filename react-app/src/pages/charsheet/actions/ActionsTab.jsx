@@ -30,6 +30,7 @@ import FilterToggles from '../../../shared/ui/FilterToggles.jsx';
 import { toggleKeeps } from '../../../shared/ui/toggleChoices.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
+import { TABLE_HEAD_ROW_SX } from '../../../shared/ui/ruleText.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
@@ -163,7 +164,7 @@ export default function ActionsTab({ C, sheet, resources }) {
           <Typography sx={levelHeaderSx}>Attacks</Typography>
           <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: FONT_SIZES.lg }}>
             <Box component="thead">
-              <Box component="tr" sx={{ '& th': { ...sectionLabelSx, color: 'text.secondary', ...LIST_ROW_RULE_SX, p: '4px 6px', textAlign: 'left' } }}>
+              <Box component="tr" sx={{ ...TABLE_HEAD_ROW_SX, '& th': { ...sectionLabelSx, color: 'text.secondary', p: '4px 6px', textAlign: 'left' } }}>
                 <Box component="th">Name</Box>
                 <Box component="th">Hit</Box>
                 <Box component="th">Damage</Box>

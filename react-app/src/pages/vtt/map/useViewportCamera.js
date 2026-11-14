@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useLayoutEffect, useMemo, useState,
+  startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useState,
 } from 'react';
 import {
   DEFAULT_VIEW,
@@ -72,7 +72,15 @@ export function useViewportCamera({
     };
     measure();
     if (typeof ResizeObserver !== 'function') return undefined;
-    const observer = new ResizeObserver(measure);
+    // Later changes of size come as a transition. The whole board renders from
+    // this size (the grids, the pieces kept in view, the camera told to the
+    // table), and a resize comes every frame while the divider between map and
+    // sheet is dragged: rendered at once, it held each frame for that render.
+    // As a transition React renders it between frames and drops the ones a
+    // newer size overtakes. The picture and the pieces stay put meanwhile (they
+    // hang on the view, not on the size) and the overlay canvases repaint on
+    // their own (useRedrawOnResize).
+    const observer = new ResizeObserver(() => startTransition(measure));
     observer.observe(host);
     return () => observer.disconnect();
   }, [hostRef]);

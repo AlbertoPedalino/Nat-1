@@ -30,10 +30,8 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS, FONT_SIZES } from '../../shared/ui/fonts.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
-import { captionLabelSx } from '../../shared/ui/PanelHeader.jsx';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
 import StatePanel from '../../shared/ui/StatePanel.jsx';
-import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../shared/ui/controlHeights.js';
 import TagChip from '../../shared/ui/TagChip.jsx';
@@ -43,12 +41,14 @@ import EmptyLine from '../../shared/ui/EmptyLine.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import ListFilterBar from '../../shared/ui/ListFilterBar.jsx';
 import { useListFilter } from '../../shared/ui/useListFilter.js';
-import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
-import { focusRingSx } from '../../shared/ui/interactive.js';
 import { CloseButton } from '../../shared/ui/CornerCloseButton.jsx';
 import AddButton from '../../shared/ui/AddButton.jsx';
 import { GAME_ICONS } from '../../shared/ui/gameIcons.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
+import SectionTitle from '../../shared/ui/SectionTitle.jsx';
+import { SURFACES } from '../../shared/ui/surfaces.js';
+import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
+import { focusRingSx } from '../../shared/ui/interactive.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -180,14 +180,14 @@ export default function CampaignsPage() {
         <>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={setupStackSx}>
             <Box component="section" sx={setupPanelSx}>
-              <Typography component="h2" sx={sectionTitleSx}>Create a campaign</Typography>
+              <SectionTitle component="h2" sx={{ mb: 1 }}>Create a campaign</SectionTitle>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <TextField size="small" label="Campaign name" value={newName} onChange={(e) => setNewName(e.target.value)} fullWidth />
                 <AddButton main onClick={handleCreate} disabled={busy} sx={setupActionSx}>Create</AddButton>
               </Stack>
             </Box>
             <Box component="section" sx={setupPanelSx}>
-              <Typography component="h2" sx={sectionTitleSx}>Join with a code</Typography>
+              <SectionTitle component="h2" sx={{ mb: 1 }}>Join with a code</SectionTitle>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <TextField size="small" label="Invite code" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} fullWidth />
                 <Button variant="contained" size="small" startIcon={<Users size={ICON_SIZES.sm} />} onClick={handleJoin} disabled={busy} sx={setupActionSx}>Join</Button>
@@ -306,7 +306,6 @@ export default function CampaignsPage() {
 
 const setupStackSx = { mb: 2.5 };
 const setupPanelSx = { ...SURFACES.panel, flex: 1, minWidth: 0, p: 1.5 };
-const sectionTitleSx = { ...captionLabelSx, mb: 1 };
 const setupActionSx = { width: { xs: '100%', sm: 'auto' }, flexShrink: 0 };
 
 const campaignCardSx = { ...SURFACES.panel, p: { xs: 1.25, sm: 1.75 } };

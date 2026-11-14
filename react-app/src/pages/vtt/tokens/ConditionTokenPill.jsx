@@ -4,7 +4,6 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
   pillSx,
-  conditionPillSx,
   conditionTooltipSx,
   conditionTooltipBodySx,
   conditionTooltipTitleSx,
@@ -25,7 +24,7 @@ export default function ConditionTokenPill({ conditionKey, entries, tooltipOpen,
       onPointerLeave={() => onInspect?.(null)}
       onFocus={() => onInspect?.(conditionKey)}
       onBlur={() => onInspect?.(null)}
-      sx={{ ...pillSx, ...conditionPillSx }}
+      sx={pillSx}
     >
       {label}
     </Box>
@@ -50,7 +49,6 @@ export default function ConditionTokenPill({ conditionKey, entries, tooltipOpen,
             fontSize={FONT_SIZES.sm}
             headingColor={VTT_COLORS.accent}
             bodyColor={VTT_COLORS.text}
-            markerColor={VTT_COLORS.accent}
             strongColor={VTT_COLORS.accent}
             emptyText={null}
           />

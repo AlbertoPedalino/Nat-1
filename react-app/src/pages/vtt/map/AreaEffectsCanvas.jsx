@@ -5,6 +5,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { createProgram, shaderSeconds } from '../atmosphere/AtmosphereOverlay.jsx';
 import { releaseContext, runWebglLoop, useContextRecovery } from '../atmosphere/webglCanvas.js';
 import { AREA_FRAGMENT_SHADER, AREA_SHAPE_INDEX, AREA_VERTEX_SHADER } from './areaEffectShader.js';
+import { mapLayerSx } from './sceneViewportStyles.js';
 
 // The animated insides of the areas that carry an effect (fire, poison…). Its
 // own canvas, under the drawing canvas so outlines and labels stay on top, and
@@ -137,7 +138,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
   }, [drawings, grid, view]);
 
   if (!active || failed) return null;
-  return <Box component="canvas" key={generation} ref={canvasRef} aria-hidden data-area-effects sx={canvasSx} />;
+  return <Box component="canvas" key={generation} ref={canvasRef} aria-hidden data-area-effects sx={mapLayerSx} />;
 }
 
 // A stable per-area offset into the noise, so two fires side by side do not
@@ -147,11 +148,3 @@ function seedFor(id) {
   for (const char of String(id || '')) value = (value * 31 + char.charCodeAt(0)) % 9973;
   return value / 7.3;
 }
-
-const canvasSx = {
-  position: 'absolute',
-  inset: 0,
-  pointerEvents: 'none',
-  width: '100%',
-  height: '100%',
-};

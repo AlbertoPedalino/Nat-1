@@ -5,12 +5,12 @@ import SelectorGroup from './SelectorGroup.jsx';
 import { SELECTOR_CONTRACTS } from './selectorContracts.js';
 import { MONTH_NAMES, formatHM, validateStart } from '../campaignTime.js';
 import { SEASON_ICONS, WEATHER_ICONS } from '../../hexcrawl/hexIcons.js';
-import { captionLabelSx } from '../../ui/PanelHeader.jsx';
 import { CONTROL_FONT_SIZES, FONT_SIZES } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
 import SelectField from '../../ui/SelectField.jsx';
 import NumberField from '../../ui/NumberField.jsx';
+import SectionTitle from '../../ui/SectionTitle.jsx';
 
 // Everything about a campaign's calendar a GM sets by hand: the date and time
 // together, hours that pass off the map, the season and a forced weather. The
@@ -89,7 +89,7 @@ function DateTimeForm({ clock, disabled, onChange }) {
 
   return (
     <Box>
-      <Typography sx={groupLabelSx}>Date &amp; time</Typography>
+      <SectionTitle sx={{ mb: 0.5 }}>Date &amp; time</SectionTitle>
       <Box sx={dateRowSx}>
         <TextField
           size="small"
@@ -147,7 +147,7 @@ function AdvanceForm({ disabled, onAdvance }) {
 
   return (
     <Box>
-      <Typography sx={groupLabelSx}>Let time pass · the weather keeps rolling</Typography>
+      <SectionTitle sx={{ mb: 0.5 }}>Let time pass · the weather keeps rolling</SectionTitle>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.75 }}>
         {QUICK_HOURS.map((amount) => (
           <Button
@@ -178,7 +178,6 @@ function AdvanceForm({ disabled, onAdvance }) {
   );
 }
 
-const groupLabelSx = { ...captionLabelSx, mb: 0.5 };
 
 const dateRowSx = {
   display: 'grid',

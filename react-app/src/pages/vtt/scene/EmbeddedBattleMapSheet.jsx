@@ -1,6 +1,7 @@
 import { lazy, memo, Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { sheetLoadingSx } from './sceneEditorStyles.js';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
@@ -8,7 +9,7 @@ const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetVi
 // every campaign character, so the sheet opens no channel of its own.
 const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterId, digest, onRoll }) {
   return (
-    <Suspense fallback={<Box sx={sheetLoadingSx}><CircularProgress size={26} /></Box>}>
+    <Suspense fallback={<Box sx={sheetLoadingSx}><BusyDie size={26} /></Box>}>
       <CampaignSheetView
         sheetId={characterId}
         editable

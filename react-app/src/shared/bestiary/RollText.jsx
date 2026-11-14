@@ -2,9 +2,9 @@ import { Box } from '@mui/material';
 import RollModeArea from '../character/dice/RollModeArea.jsx';
 import { advArgFor } from '../character/dice/advantage.js';
 import { advTag, situationalNote, useStatRollSources } from './statRolls.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../ui/colors.js';
-import { BARE_BUTTON_SX } from '../ui/interactive.js';
-import { tintedSurfaceSx } from '../ui/surfaces.js';
+import { UI_COLORS } from '../ui/colors.js';
+import { pressableSx } from '../ui/pressable.js';
+import { BARE_BUTTON_SX, focusRingSx } from '../ui/interactive.js';
 
 // An inline roller in a stat block ("+5", "2d6 + 3", "Dex +4"). A d20 test
 // also takes a one-off advantage/disadvantage on right-click or long press,
@@ -41,15 +41,16 @@ function RollButton(props) {
   return <Box component="button" type="button" {...props} />;
 }
 
+// A roll in a stat block is a button like every other of the app
+// (pressableSx): raised on its ink edge and solid shadow, in the rolls' lime,
+// hopping under the pointer and pressed in when clicked; small, to sit in a
+// line of text.
 const rollableSx = {
   ...BARE_BUTTON_SX,
-  border: `2px solid ${uiAlpha(UI_COLORS.secondary, OPACITY.edge)}`,
-  // Washed over the stat block's paper, so the roller stays solid.
-  ...tintedSurfaceSx(UI_COLORS.secondary),
-  color: UI_COLORS.secondaryText,
-  borderRadius: 0.5,
-  px: '0.25rem',
+  ...pressableSx(UI_COLORS.secondary),
+  borderRadius: 0.75,
+  px: '0.3rem',
   py: 0,
-  mx: '0.1rem',
-  '&:hover': tintedSurfaceSx(UI_COLORS.secondary, { amount: OPACITY.shade }),
+  mx: '0.15rem',
+  ...focusRingSx(),
 };

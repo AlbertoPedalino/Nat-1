@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { CircularProgress, ListItemIcon, MenuItem, Typography } from '@mui/material';
+import { ListItemIcon, MenuItem, Typography } from '@mui/material';
 import { Layers, Radio } from 'lucide-react';
 import { listScenes } from '../../../shared/cloud/api/vttScenes.js';
 import MapMenu from '../map/MapMenu.jsx';
@@ -8,6 +8,7 @@ import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
+import BusyDie from '../../../shared/ui/BusyDie.jsx';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -51,7 +52,7 @@ export default function SceneSwitcher({ scene, onOpenScene }) {
       {/* The same glass as the bar this hangs from. */}
       <MapMenu id="scene-switcher-menu" anchorEl={anchor} onClose={close} minWidth={220} maxHeight={360}>
         {loading && !scenes.length ? (
-          <MenuItem disabled sx={noticeSx}><CircularProgress size={16} /></MenuItem>
+          <MenuItem disabled sx={noticeSx}><BusyDie size={16} /></MenuItem>
         ) : null}
         {error ? <MenuItem disabled sx={errorSx}>{error}</MenuItem> : null}
         {!loading && !error && !scenes.length ? (

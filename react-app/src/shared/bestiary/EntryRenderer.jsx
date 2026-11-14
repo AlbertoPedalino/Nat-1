@@ -1,8 +1,7 @@
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import InlineText from './InlineText.jsx';
-import { UI_COLORS, OPACITY } from '../ui/colors.js';
-import { tintedSurfaceSx } from '../ui/surfaces.js';
-import { TEXT_STYLES } from '../ui/textStyles.js';
+import { UI_COLORS } from '../ui/colors.js';
+import { RULE_INSET_SX, RULE_INSET_TITLE_SX, RULE_LIST_SX, RULE_TABLE_SX } from '../ui/ruleText.js';
 
 export default function EntryRenderer({ entries, onRoll }) {
   if (entries == null) return null;
@@ -24,7 +23,7 @@ export default function EntryRenderer({ entries, onRoll }) {
 
   if (entries.type === 'list') {
     return (
-      <Box component="ul" sx={{ my: 0.75, pl: 3 }}>
+      <Box component="ul" sx={[RULE_LIST_SX, { my: 0.75 }]}>
         {(entries.items || []).map((item, index) => (
           <li key={index}><EntryRenderer entries={item} onRoll={onRoll} /></li>
         ))}
@@ -42,7 +41,7 @@ export default function EntryRenderer({ entries, onRoll }) {
   }
   if (entries.type === 'table') {
     return (
-      <Table size="small" sx={{ my: 1, border: '1px solid', borderColor: UI_COLORS.edge }}>
+      <Table size="small" sx={[RULE_TABLE_SX, { my: 1, border: '1px solid', borderColor: UI_COLORS.edge }]}>
         {entries.caption ? <caption><InlineText value={entries.caption} onRoll={onRoll} /></caption> : null}
         {entries.colLabels ? (
           <TableHead>
@@ -65,9 +64,11 @@ export default function EntryRenderer({ entries, onRoll }) {
       </Table>
     );
   }
-  if (entries.type === 'insetReadaloud') {
+  // A boxed text (a read-aloud, a sidebar): the rulebook's paper (ruleText.js).
+  if (entries.type === 'insetReadaloud' || entries.type === 'inset') {
     return (
-      <Box sx={{ ...TEXT_STYLES.note, my: 1, p: 1, borderLeft: '3px solid', borderColor: 'primary.main', ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.soft }) }}>
+      <Box sx={[RULE_INSET_SX, { my: 1 }]}>
+        {entries.name ? <Typography sx={RULE_INSET_TITLE_SX}>{entries.name}</Typography> : null}
         <EntryRenderer entries={entries.entries} onRoll={onRoll} />
       </Box>
     );

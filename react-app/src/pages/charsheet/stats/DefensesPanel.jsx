@@ -6,8 +6,8 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
-// immunities are stickers in their damage type's hue, an immunity filled solid;
-// the rest are neutral stickers. Used by the character's header and by creature panels
+// immunities are chips in their damage type's hue (the label says which); the
+// rest are neutral stickers. Used by the character's header and by creature panels
 // (the Eldritch Cannon), so both read the same.
 export default function DefensesPanel({ items = [], emptyText = 'No resistances detected.', sx }) {
   return (
@@ -21,7 +21,6 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
             size="medium"
             label={`${d.kind} ${d.type}${d.source ? ` · ${d.source}` : ''}`}
             tone={tone}
-            filled={d.kind === 'Immune'}
             sx={{ m: 0.25 }}
           />
         );

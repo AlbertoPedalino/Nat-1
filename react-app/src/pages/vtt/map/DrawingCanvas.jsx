@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { useResizeTick } from './useResizeTick.js';
+import { useRedrawOnResize } from './useRedrawOnResize.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { CONE_SPREAD, areaGeometry, areaLabelAnchor, squareTurn } from '../../../shared/vtt/map/areas.js';
@@ -8,122 +8,127 @@ import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
+import { mapLayerSx } from './sceneViewportStyles.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
 export default function DrawingCanvas({ drawings, selectedId, live, measure, grid, view, onTop = false }) {
   const canvasRef = useRef(null);
-  // Redraw when the box changes: the canvas is measured in its own pixels.
-  const resizeTick = useResizeTick(canvasRef);
+  // Repainted when the box changes too: the canvas is measured in its own pixels.
+  const drawRef = useRef(null);
+  useRedrawOnResize(canvasRef, drawRef);
 
   // Layout effect, not effect: the map image moves by CSS transform, which the
   // browser applies in the same paint as this commit. Drawing in a plain effect
   // lands one frame later, so during a drag the fog trailed the map and let the
   // edge of the board show through.
   useLayoutEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const host = canvas.parentElement;
-    const width = host?.clientWidth || 0;
-    const height = host?.clientHeight || 0;
-    if (!width || !height) return;
+    const draw = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const host = canvas.parentElement;
+      const width = host?.clientWidth || 0;
+      const height = host?.clientHeight || 0;
+      if (!width || !height) return;
 
-    const ratio = window.devicePixelRatio || 1;
-    if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
-      canvas.width = width * ratio;
-      canvas.height = height * ratio;
-    }
+      const ratio = window.devicePixelRatio || 1;
+      if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+      }
 
-    const context = canvas.getContext('2d');
-    if (!context) return;
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.clearRect(0, 0, width, height);
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
-    const cell = cellSize(grid);
-    const toScreen = (point) => worldToScreen(
-      { x: point.x * cell + (grid.offsetX || 0), y: point.y * cell + (grid.offsetY || 0) },
-      view,
-    );
+      const cell = cellSize(grid);
+      const toScreen = (point) => worldToScreen(
+        { x: point.x * cell + (grid.offsetX || 0), y: point.y * cell + (grid.offsetY || 0) },
+        view,
+      );
 
-    const strokes = live?.points?.length ? [...(drawings || []), live] : (drawings || []);
-    for (const stroke of strokes) {
-      const points = stroke?.points || [];
-      if (!points.length) continue;
+      const strokes = live?.points?.length ? [...(drawings || []), live] : (drawings || []);
+      for (const stroke of strokes) {
+        const points = stroke?.points || [];
+        if (!points.length) continue;
 
-      // The one in hand, marked out by a halo under it rather than by an
-      // outline around it: a stroke has no outline to draw, and text would lose
-      // the dark edge that makes it readable over a busy map.
-      if (selectedId && stroke.id === selectedId) {
-        context.save();
-        context.shadowColor = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.solid);
-        context.shadowBlur = Math.max(6, cell * view.zoom * 0.25);
+        // The one in hand, marked out by a halo under it rather than by an
+        // outline around it: a stroke has no outline to draw, and text would lose
+        // the dark edge that makes it readable over a busy map.
+        if (selectedId && stroke.id === selectedId) {
+          context.save();
+          context.shadowColor = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.solid);
+          context.shadowBlur = Math.max(6, cell * view.zoom * 0.25);
+          drawStroke(context, stroke, points, toScreen, cell, view);
+          context.restore();
+        }
+
+        // Hidden from the players: still the GM's to see, but plainly not
+        // on the table.
+        context.globalAlpha = stroke.hiddenFromPlayers ? 0.45 : 1;
         drawStroke(context, stroke, points, toScreen, cell, view);
-        context.restore();
+        context.globalAlpha = 1;
       }
 
-      // Hidden from the players: still the GM's to see, but plainly not
-      // on the table.
-      context.globalAlpha = stroke.hiddenFromPlayers ? 0.45 : 1;
-      drawStroke(context, stroke, points, toScreen, cell, view);
-      context.globalAlpha = 1;
-    }
+      // The ruler above the marks: a template you are still dragging has to be
+      // readable over whatever it covers. The laser has its own animated overlay.
+      if (measure?.from && measure?.to) {
+        const from = toScreen(measure.from);
+        const to = toScreen(measure.to);
+        const reach = Math.hypot(to.x - from.x, to.y - from.y);
+        context.strokeStyle = VTT_COLORS.drawingGuide;
+        context.fillStyle = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.fill);
+        context.lineWidth = 2;
+        context.setLineDash([6, 4]);
 
-    // The ruler above the marks: a template you are still dragging has to be
-    // readable over whatever it covers. The laser has its own animated overlay.
-    if (measure?.from && measure?.to) {
-      const from = toScreen(measure.from);
-      const to = toScreen(measure.to);
-      const reach = Math.hypot(to.x - from.x, to.y - from.y);
-      context.strokeStyle = VTT_COLORS.drawingGuide;
-      context.fillStyle = vttAlpha(VTT_COLORS.drawingGuide, OPACITY.fill);
-      context.lineWidth = 2;
-      context.setLineDash([6, 4]);
+        context.beginPath();
+        if (measure.shape === 'radius') {
+          context.arc(from.x, from.y, reach, 0, Math.PI * 2);
+        } else if (measure.shape === 'square') {
+          // Centred on the origin, like a 5e cube placed on a square, with the
+          // pointer on the middle of a side: it turns as the pointer goes round.
+          context.save();
+          context.translate(from.x, from.y);
+          context.rotate(squareTurn(to.x - from.x, to.y - from.y));
+          context.rect(-reach, -reach, reach * 2, reach * 2);
+          context.restore();
+        } else if (measure.shape === 'cone') {
+          // 5e cones are as wide at the far end as they are long, which is a 53°
+          // spread — not the 60° people assume.
+          const angle = Math.atan2(to.y - from.y, to.x - from.x);
+          const spread = Math.atan(0.5);
+          context.moveTo(from.x, from.y);
+          context.lineTo(from.x + Math.cos(angle - spread) * reach, from.y + Math.sin(angle - spread) * reach);
+          context.lineTo(from.x + Math.cos(angle + spread) * reach, from.y + Math.sin(angle + spread) * reach);
+          context.closePath();
+        } else {
+          context.moveTo(from.x, from.y);
+          context.lineTo(to.x, to.y);
+        }
+        if (measure.shape !== 'line') context.fill();
+        context.stroke();
+        context.setLineDash([]);
 
-      context.beginPath();
-      if (measure.shape === 'radius') {
-        context.arc(from.x, from.y, reach, 0, Math.PI * 2);
-      } else if (measure.shape === 'square') {
-        // Centred on the origin, like a 5e cube placed on a square, with the
-        // pointer on the middle of a side: it turns as the pointer goes round.
-        context.save();
-        context.translate(from.x, from.y);
-        context.rotate(squareTurn(to.x - from.x, to.y - from.y));
-        context.rect(-reach, -reach, reach * 2, reach * 2);
-        context.restore();
-      } else if (measure.shape === 'cone') {
-        // 5e cones are as wide at the far end as they are long, which is a 53°
-        // spread — not the 60° people assume.
-        const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        const spread = Math.atan(0.5);
-        context.moveTo(from.x, from.y);
-        context.lineTo(from.x + Math.cos(angle - spread) * reach, from.y + Math.sin(angle - spread) * reach);
-        context.lineTo(from.x + Math.cos(angle + spread) * reach, from.y + Math.sin(angle + spread) * reach);
-        context.closePath();
-      } else {
-        context.moveTo(from.x, from.y);
-        context.lineTo(to.x, to.y);
+        if (measure.label) {
+          context.font = `700 13px ${UI_FONTS.display}`;
+          context.textAlign = 'center';
+          context.textBaseline = 'bottom';
+          context.lineWidth = 3;
+          context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.solid);
+          context.strokeText(measure.label, to.x, to.y - 8);
+          context.fillStyle = VTT_COLORS.drawingText;
+          context.fillText(measure.label, to.x, to.y - 8);
+        }
       }
-      if (measure.shape !== 'line') context.fill();
-      context.stroke();
-      context.setLineDash([]);
+    };
+    drawRef.current = draw;
+    draw();
+  }, [drawings, grid, live, measure, selectedId, view]);
 
-      if (measure.label) {
-        context.font = `700 13px ${UI_FONTS.display}`;
-        context.textAlign = 'center';
-        context.textBaseline = 'bottom';
-        context.lineWidth = 3;
-        context.strokeStyle = vttAlpha(VTT_COLORS.black, OPACITY.solid);
-        context.strokeText(measure.label, to.x, to.y - 8);
-        context.fillStyle = VTT_COLORS.drawingText;
-        context.fillText(measure.label, to.x, to.y - 8);
-      }
-    }
-
-  }, [drawings, grid, live, measure, selectedId, view, resizeTick]);
-
-  return <Box component="canvas" ref={canvasRef} aria-hidden sx={{ ...canvasSx, ...(onTop ? topSx : null) }} />;
+  return <Box component="canvas" ref={canvasRef} aria-hidden sx={{ ...mapLayerSx, ...(onTop ? topSx : null) }} />;
 }
 
 // Above the fog and above the pieces. A laser pointing at a creature standing in
@@ -263,11 +268,3 @@ function drawMapLabel(context, text, at, cellPixels, baseline) {
   context.fillStyle = VTT_COLORS.text;
   context.fillText(text, at.x, at.y);
 }
-
-const canvasSx = {
-  position: 'absolute',
-  inset: 0,
-  pointerEvents: 'none',
-  width: '100%',
-  height: '100%',
-};

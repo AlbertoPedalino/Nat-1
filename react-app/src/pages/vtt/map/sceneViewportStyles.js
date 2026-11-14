@@ -123,12 +123,23 @@ export const selectionCountSx = {
   whiteSpace: 'nowrap',
 };
 
-export const playAreaSvgSx = {
+// One layer over the whole map (the grids, the play area, the drawings, the
+// areas' effects, the fog, the weather): the map's own box, never a size
+// measured in pixels. A measured size in sx was a new CSS rule each time the
+// map changed size, and every rule restyles the whole page: dragging the
+// divider between map and sheet ran at a few frames a second (measured
+// 2026-11-14, a 100 ms frame).
+export const mapLayerSx = {
   position: 'absolute',
   inset: 0,
-  overflow: 'hidden',
+  width: '100%',
+  height: '100%',
   pointerEvents: 'none',
 };
+
+// The same, cutting off what is drawn past the map's edge (the play area, the
+// laser, the dice landing).
+export const clippedMapLayerSx = { ...mapLayerSx, overflow: 'hidden' };
 
 export const playAreaStrokeProps = {
   fill: 'none',

@@ -48,11 +48,12 @@ from them and holds none of its own (guarded by the oneDefinition tests):
 | --- | --- |
 | `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palette: interface roles, the colour of each kind of thing, the map's tones (derived from the interface's) |
 | `fonts.js`, `textStyles.js` | the faces, the type scale, each text role |
-| `shadows.js`, `surfaces.js` | the ink: edges, solid shadows, surfaces, the meter track |
-| `shapes.js` | every cut shape: a panel bar's ribbon, the seal, the ability crest, the bookmark tab, the gems' cuts, a meter's segments, a roll's bursts |
+| `shadows.js`, `surfaces.js` | the ink: edges, solid shadows, surfaces (paper, stripe), the meter track |
+| `shapes.js` | every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's bursts, a switch, a checkbox, the ornament, the focus ring, a formula's die |
+| `ornament.js`, `ruleText.js`, `rollToken.js` | the ornament drawn once (card rules, page and section titles, a rule's list); a rule's list, boxed text and table in both renderers; a dice formula in the rules' text |
 | `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes |
 | `motion.js` | how long things move |
-| `app/theme.js` | how MUI's own components take the above (tabs, scrollbars, chips, fields) |
+| `app/theme.js` | how MUI's own components take the above (tabs, switches, checkboxes and radios via `ChoiceMarks`, sliders, dialogs, links, menus and chosen rows, focused fields, the focus ring, scrollbars, text selection, chips) |
 
 ## Page features
 

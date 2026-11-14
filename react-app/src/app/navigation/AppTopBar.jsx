@@ -6,7 +6,8 @@ import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import TopBarButton from '../../shared/ui/TopBarButton.jsx';
 import { UI_COLORS } from '../../shared/ui/colors.js';
-import { panelBarSx, panelScreentone } from '../../shared/ui/PanelHeader.jsx';
+import { panelBarSx } from '../../shared/ui/PanelHeader.jsx';
+import { panelScreentone } from '../../shared/ui/colors.js';
 import { UI_SHADOWS } from '../../shared/ui/shadows.js';
 import { APP_TOP_BAR_HEIGHT } from '../../shared/ui/appBar.js';
 

@@ -2,6 +2,8 @@ import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 import { STICKER_PAPER } from './stickerPaper.js';
+import { cornerRadius } from './radius.js';
+import { PAPER } from './shapes.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
@@ -127,6 +129,21 @@ export const SURFACES = Object.freeze({
     borderColor: UI_COLORS.edge,
     borderRadius: 1,
   }),
+  // Paper laid on the interface: a rulebook's boxed text (a read-aloud, a
+  // sidebar), a picture that is missing. The ivory shading to its foot, the
+  // brown ink on it, edged in ink with its solid shadow, its corners cut
+  // unevenly as a torn-out page's (PAPER, shapes.js).
+  paper: Object.freeze({
+    backgroundColor: UI_COLORS.paper,
+    backgroundImage: `linear-gradient(${UI_COLORS.paper}, ${UI_COLORS.paperShade})`,
+    color: UI_COLORS.onPaper,
+    border: INK_EDGE,
+    borderRadius: cornerRadius(...PAPER.corners),
+    boxShadow: UI_SHADOWS.box,
+  }),
+  // Every other row of a long, dense list or table (a catalog, a rule's
+  // table): a faint wash, so the eye keeps its row across.
+  stripe: Object.freeze({ backgroundImage: washImage(UI_COLORS.white, OPACITY.faint) }),
   // The battle map's glass: every panel and dialog floating over the board.
   // No backdrop blur: the surface is 95% opaque, so a blur behind it cannot be
   // seen, and over a map where something always moves it is redone every

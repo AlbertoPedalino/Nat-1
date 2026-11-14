@@ -1,6 +1,7 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
+import BusyDie, { BUSY_SIZES } from './BusyDie.jsx';
 
 // A page's whole-area state instead of its content (not configured, signed
 // out, nothing on the table yet, restoring the session): an icon — or a
@@ -10,7 +11,7 @@ export default function StatePanel({
 }) {
   return (
     <Box role="status" sx={[panelSx, sx]}>
-      {loading ? <CircularProgress size={26} /> : null}
+      {loading ? <BusyDie size={BUSY_SIZES.area} /> : null}
       {!loading && Icon ? <Box component={Icon} size={28} aria-hidden sx={{ color: 'primary.main' }} /> : null}
       {title ? <Typography sx={titleSx}>{title}</Typography> : null}
       {children ? <Typography sx={messageSx}>{children}</Typography> : null}

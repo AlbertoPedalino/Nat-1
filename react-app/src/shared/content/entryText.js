@@ -2,9 +2,11 @@ import { asArray } from '../lists.js';
 import { REF_TAGS, scanMarkup, tagDisplayText, tagParts } from './inlineMarkup.js';
 import { stripMarkup } from './markupText.js';
 
-// Entry prose as tokens: text, em/strong runs and record references; every
-// other tag shows its display text (inlineMarkup.js), plain {braces} their
-// content.
+// Entry prose as tokens: text, em/strong runs, record references and dice
+// formulas; every other tag shows its display text (inlineMarkup.js), plain
+// {braces} their content.
+const DICE_TAGS = new Set(['dice', 'damage', 'scaledice', 'scaledamage']);
+
 function tokenizeInlineMarkup(raw) {
   const out = [];
   scanMarkup(raw).segments.forEach((segment) => {
@@ -17,6 +19,8 @@ function tokenizeInlineMarkup(raw) {
       out.push({ type: 'em', text: tagParts(arg)[0] });
     } else if (tag === 'b' || tag === 'bold') {
       out.push({ type: 'strong', text: tagParts(arg)[0] });
+    } else if (DICE_TAGS.has(tag)) {
+      out.push({ type: 'dice', text: tagDisplayText(tag, arg) });
     } else if (REF_TAGS.has(tag)) {
       const parts = tagParts(arg);
       out.push({ type: 'ref', refType: tag, text: tagDisplayText(tag, arg), target: parts[0], source: parts[1] || '' });
@@ -156,6 +160,13 @@ function walkEntries(node, out, depth = 0, listDepth = 0) {
     const tokens = nodeToTokens(node);
     const text = tokensToPlainText(tokens);
     if (text) out.push({ kind: 'listItem', text, tokens, depth: listDepth });
+    return;
+  }
+
+  // A boxed text (a read-aloud, a sidebar) keeps its box: its own blocks.
+  if (node.type === 'inset' || node.type === 'insetReadaloud') {
+    const blocks = entriesToTextBlocks(node.entries ?? node.entry);
+    if (blocks.length) out.push({ kind: 'inset', title: stripMarkup(node.name || ''), blocks });
     return;
   }
 
