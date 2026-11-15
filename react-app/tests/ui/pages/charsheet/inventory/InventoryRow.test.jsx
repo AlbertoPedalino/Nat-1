@@ -3,6 +3,8 @@ import { ThemeProvider } from '@mui/material';
 import { expect, test, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import InventoryRow from '../../../../../src/pages/charsheet/inventory/InventoryRow.jsx';
+import { rarityTone } from '../../../../../src/shared/character/inventory/itemRarity.js';
+import { textTone } from '../../../../../src/shared/ui/pressable.js';
 
 const PACT = { key: 'pactWeapon', label: 'Pact Weapon', activeLabel: 'Pact', types: ['M', 'R', 'WEAPON'], maxCount: 1 };
 const ARCANE = { key: 'arcaneArmor', label: 'Arcane Armor', activeLabel: 'Arcane', types: ['LA', 'MA', 'HA'], maxCount: 1 };
@@ -45,12 +47,16 @@ test('a stashed item offers no flag and no equip', () => {
   expect(screen.getByRole('button', { name: 'Carry' })).toBeInTheDocument();
 });
 
+// The name wears the rarity's colour as text reads it on the palette
+// (textTone: as it is on a dark one, deepened on a light one).
 test("a magic item's name and bar wear its rarity's colour; a mundane one neither", () => {
-  const { container, unmount } = renderRow({ name: 'Flame Tongue Longsword', type: 'M', rarity: 'rare', qty: 1 }, actions());
+  const flameTongue = { name: 'Flame Tongue Longsword', type: 'M', rarity: 'rare', qty: 1 };
+  const rareName = textTone(rarityTone(flameTongue));
+  const { container, unmount } = renderRow(flameTongue, actions());
   const name = screen.getByText('Flame Tongue Longsword');
-  expect(getComputedStyle(name).color).toBe('rgb(90, 169, 255)');
+  expect(getComputedStyle(name).color).toBe(rareName);
   expect(container.querySelector('[aria-hidden="true"][class*="MuiBox"]')).not.toBeNull();
   unmount();
   renderRow({ name: 'Rope', type: 'G', rarity: 'none', qty: 1 }, actions());
-  expect(getComputedStyle(screen.getByText('Rope')).color).not.toBe('rgb(90, 169, 255)');
+  expect(getComputedStyle(screen.getByText('Rope')).color).not.toBe(rareName);
 });
