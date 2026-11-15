@@ -1467,7 +1467,8 @@ export function paletteOf(paletteId) {
 // every palette.
 const FIXED_COLOR_KEYS = new Set(['black', 'white']);
 
-const colorVariableName = (key) => `--gb-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
+// The variable a role is written in on the page's root ('--gb-die-face').
+export const colorVariableName = (key) => `--gb-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
 const KEY_BY_VARIABLE = new Map(Object.keys(COMIC_DARK).map((key) => [colorVariableName(key).slice('--gb-'.length), key]));
 
 // The interface's colours by role, as the chosen palette's CSS variables.

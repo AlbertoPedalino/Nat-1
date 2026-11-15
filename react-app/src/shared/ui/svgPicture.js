@@ -21,5 +21,10 @@ export function svgStylePicture(key, draw) {
 }
 
 export function dataPicture(svg) {
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  return `url("${svgDataUrl(svg)}")`;
+}
+
+// An SVG as a data URL, for what takes an address (an <img>, a tab's icon).
+export function svgDataUrl(svg) {
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

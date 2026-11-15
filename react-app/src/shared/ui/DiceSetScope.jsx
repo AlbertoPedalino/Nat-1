@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { diceVariables, normalizeDice, resolveDice, sharedDice } from './diceSets.js';
 import { appDieSvg } from './appDie.js';
-import { dataPicture } from './svgPicture.js';
+import { svgDataUrl } from './svgPicture.js';
 import { linkStyleFonts } from './fonts.js';
 
 // Which dice the dice below are drawn as (diceSets.js: { style, colors }): the
@@ -39,6 +39,6 @@ export default function DiceSetScope({ dice, children }) {
 const ICONS = new Map();
 export function appDieIcon(colorId) {
   const { id, logo, edge } = resolveDice({ colors: colorId });
-  if (!ICONS.has(id)) ICONS.set(id, dataPicture(appDieSvg(logo, edge)).slice('url("'.length, -'")'.length));
+  if (!ICONS.has(id)) ICONS.set(id, svgDataUrl(appDieSvg(logo, edge)));
   return ICONS.get(id);
 }

@@ -12,7 +12,7 @@ import { DICE_COLORS, DICE_STYLES } from '../shared/ui/diceSets.js';
 // browser (index.html reads the same key before the app draws).
 export const THEME_CHOICE_KEY = 'gb:theme';
 
-export const SYSTEM_MODE = 'system';
+const SYSTEM_MODE = 'system';
 
 export const MODE_CHOICES = Object.freeze([
   Object.freeze({ id: SYSTEM_MODE, label: 'System' }),

@@ -1,4 +1,6 @@
-import { LOGO_COLORS, UI_COLORS, uiMix } from './colors.js';
+import {
+  BASE_PALETTE_ID, LOGO_COLORS, PALETTES, UI_COLORS, colorVariableName, uiMix,
+} from './colors.js';
 import { BASE_STYLE_ID, SHAPE_STYLES } from './shapes.js';
 import { fontStacks } from './fonts.js';
 
@@ -31,8 +33,13 @@ const colorSet = (id, label, { face, faceLit, number, edge, logo }) => Object.fr
   }),
 });
 
+const BASE_DICE = PALETTES[BASE_PALETTE_ID].colors;
+
 export const DICE_COLORS = Object.freeze({
-  comic: colorSet('comic', 'Emerald', { face: '#1d4a24', faceLit: '#4f8a4b', number: '#eef0d4', edge: '#0d0b09', logo: LOGO_COLORS }),
+  // The palettes' own dice (their die roles), and the logo's green.
+  comic: colorSet('comic', 'Emerald', {
+    face: BASE_DICE.dieFace, faceLit: BASE_DICE.dieFaceLit, number: BASE_DICE.onDie, edge: BASE_DICE.dieEdge, logo: LOGO_COLORS,
+  }),
   scifi: colorSet('scifi', 'Ice circuit', { face: '#0b2a4a', faceLit: '#1f6fb0', number: '#7ff6ff', edge: '#020814' }),
   gothic: colorSet('gothic', 'Bloodstone', { face: '#4a0d18', faceLit: '#8a1a2c', number: '#f3e6d0', edge: '#0a0306' }),
   war: colorSet('war', 'Olive drab', { face: '#3b4220', faceLit: '#6b7638', number: '#ece4c4', edge: '#0d0f06' }),
@@ -88,19 +95,16 @@ export function resolveDice(raw) {
   return { ...DICE_COLORS[colorId], style: DICE_STYLES[style] };
 }
 
-// The variable a palette role is written in (UI_COLORS' `var(--gb-…)`).
-const variableOf = (role) => UI_COLORS[role].slice('var('.length, -1);
-
 // Dice colours as the die roles' variables (UI_COLORS.dieFace…), over the
 // palette's: on the page's root for the viewer's dice, on a roll's dice for
 // its roller's (DiceSetScope).
 export function diceVariables(raw) {
   const { face, faceLit, number, edge } = resolveDice(raw);
   return {
-    [variableOf('dieFace')]: face,
-    [variableOf('dieFaceLit')]: faceLit,
-    [variableOf('onDie')]: number,
-    [variableOf('dieEdge')]: edge,
+    [colorVariableName('dieFace')]: face,
+    [colorVariableName('dieFaceLit')]: faceLit,
+    [colorVariableName('onDie')]: number,
+    [colorVariableName('dieEdge')]: edge,
   };
 }
 

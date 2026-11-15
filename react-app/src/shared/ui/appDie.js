@@ -2,7 +2,7 @@
 // NatOneDie, the browser tab's icon, the busy die), drawn in a 512 box. Its
 // corners, its outline, its faces in the shades of a dice set's logo ramp
 // (diceSets.js) lit from the top left, and the 1 it lands on.
-export const APP_DIE_POINTS = Object.freeze({
+const APP_DIE_POINTS = Object.freeze({
   Top: [256, 36], UR: [450, 148], LR: [450, 372], Bot: [256, 484], LL: [62, 372], UL: [62, 148],
   T: [256, 140], L: [150, 322], R: [362, 322],
 });

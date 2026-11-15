@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import { OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { APP_DIE_FACES, APP_DIE_OUTLINE, appDiePoints } from '../../shared/ui/appDie.js';
 import { useDiceSet } from '../../shared/ui/DiceSetScope.jsx';
-import { UI_FONTS } from '../../shared/ui/fonts.js';
 import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 
@@ -28,8 +27,8 @@ const AFTER_FLIP = '75.1%';
 const LANDED = 0.85;
 export const NAT_ONE_LANDED_MS = ROLL_MS * LANDED;
 
+// The numerals, lettered in the dice's own figures (diceSets.js) where drawn.
 const numeralSx = {
-  fontFamily: UI_FONTS.shout,
   stroke: INK,
   strokeWidth: 12,
   strokeLinejoin: 'round',
