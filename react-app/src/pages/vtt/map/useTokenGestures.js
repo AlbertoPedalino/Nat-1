@@ -4,11 +4,12 @@ import {
 } from '../../../shared/vtt/map/geometry.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import { LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
+import { roundToTenth } from '../../../shared/numbers.js';
 
 const DRAG_BROADCAST_MS = 40;
 // Spans are kept to a tenth of a square: fine enough for a door that is half a
 // cell deep, coarse enough that the number stays readable in the menu.
-const roundSpan = (span) => Math.max(0.5, Math.round(span * 10) / 10);
+const roundSpan = (span) => Math.max(0.5, roundToTenth(span));
 
 // A piece in hand: dragged (shown live to the other screens, written once on
 // drop), resized from its corner or rotated about its centre. With the

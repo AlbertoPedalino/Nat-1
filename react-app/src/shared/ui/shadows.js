@@ -106,6 +106,15 @@ export function inkLettering(width, offset, color = UI_COLORS.edge) {
   };
 }
 
+// Lettering printed plain: what inkLettering inks (a heading's outline and
+// shadow) taken off again, for letters set on a drawing of their own (a
+// panel's banner).
+export const PLAIN_LETTERING = Object.freeze({
+  WebkitTextStroke: 0,
+  textShadow: 'none',
+  [APPLE_WEBKIT_QUERY]: { filter: 'none' },
+});
+
 // An ink outline drawn round a silhouette (an icon drawn large, as the AC
 // shield) as a CSS filter, with the solid shadow under it in `shadow`.
 export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {

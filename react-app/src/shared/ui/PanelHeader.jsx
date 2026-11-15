@@ -1,13 +1,19 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS, panelScreentone } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
-import { TEXT_STYLES } from './textStyles.js';
+import { ONE_LINE_SX, TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
-import { INK_SOLID } from './shadows.js';
+import { INK_SOLID, PLAIN_LETTERING, inkLettering } from './shadows.js';
 import { RIBBON, SEAL_RADIUS } from './shapes.js';
 import { svgStylePicture } from './svgPicture.js';
-import { barEndInkSvg, flourishSvg, trimSvg } from './panelOrnaments.js';
+import { barEndInkSvg, flourishSvg } from './panelOrnaments.js';
+import { GRIP_ROOM } from './panelGrip.js';
+import PanelGrip from './PanelGrip.jsx';
+import { BANNER_HEIGHT, BANNER_INSET, bannerTitle } from './panelBanner.js';
+import PanelBanner from './PanelBanner.jsx';
+import { inkOn } from './pressable.js';
+import { useStyleShapes } from './themeIds.js';
 import { useRootStyle } from './liveStyle.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
@@ -67,12 +73,9 @@ function ribbonSx({ notch, pad, clip }) {
 }
 
 // A title's flourish, as the style draws it (shapes.js panel.flourish): a
-// line of stars, a vine, a tentacle at the bar's right end, a rivet at each
+// line of stars, a vine, a glitch at the bar's right end, a rivet at each
 // end; at no size where the style has none.
 const FLOURISH = svgStylePicture('panel-flourish', (shapes) => flourishSvg(shapes.panel.flourish.kind));
-// Its trim, repeated along the bar's foot (a tentacle's suckers); at no size
-// where the style has none.
-const TRIM = svgStylePicture('panel-trim', (shapes) => trimSvg(shapes.panel.flourish.trim));
 
 const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel);
 const TILE_RIBBON_SX = ribbonSx(RIBBON.tile);
@@ -93,10 +96,10 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
     // The flourish (twice: at one end or at each) over the screentone, or
     // none (shapes.js panel.hatch). A tile's narrow bar has no room for one.
     ...(tile ? { backgroundImage: panelScreentone(tone), backgroundSize: 'var(--gb-panel-bar-hatch)' } : {
-      backgroundImage: `${FLOURISH}, ${FLOURISH}, ${TRIM}, ${panelScreentone(tone)}`,
-      backgroundSize: 'var(--gb-panel-flourish-size), var(--gb-panel-flourish-size-2), var(--gb-panel-trim-size), var(--gb-panel-bar-hatch)',
-      backgroundPosition: 'var(--gb-panel-flourish-at), var(--gb-panel-flourish-at-2), left bottom, 0 0',
-      backgroundRepeat: 'no-repeat, no-repeat, repeat-x, repeat',
+      backgroundImage: `${FLOURISH}, ${FLOURISH}, ${panelScreentone(tone)}`,
+      backgroundSize: 'var(--gb-panel-flourish-size), var(--gb-panel-flourish-size-2), var(--gb-panel-bar-hatch)',
+      backgroundPosition: 'var(--gb-panel-flourish-at), var(--gb-panel-flourish-at-2), 0 0',
+      backgroundRepeat: 'no-repeat, no-repeat, repeat',
     }),
   };
 }
@@ -177,7 +180,12 @@ export const panelFrameSx = {
   // The style's frame (shapes.js panel.frame, frameWidth), scaled with its ink.
   border: `calc(var(--gb-panel-frame-width) * var(--gb-ink-line)) var(--gb-panel-frame-style) ${UI_COLORS.edge}`,
   boxShadow: 'var(--gb-panel-shadow)',
-  overflow: 'hidden',
+  // What is in it kept inside its frame; or let past it where the style grips
+  // the panel (shapes.js panel.grip), the drawing reaching over its edges.
+  // Either way the panel shrinks in a row or a column as a clipped one does.
+  overflow: 'var(--gb-panel-overflow)',
+  minWidth: 0,
+  minHeight: 0,
   willChange: { md: `var(${PANEL_LAYER_VAR}, transform)` },
 };
 
@@ -259,11 +267,65 @@ export const sectionLabelSx = {
 
 // `titleSx` resizes the title for a page whose panels are its main content (the
 // builder); the sheet keeps panelTitleSx as it is.
+// A bar the style grips (shapes.js panel.grip): the drawing over its top edge,
+// room kept for it over the title, the bar's ends uncut so it reaches past
+// them.
+// A bar something is drawn over or across: its ends uncut (no ribbon clip, no
+// ink along the cut), so the drawing reaches past them.
+const UNCUT_BAR_SX = {
+  clipPath: 'none',
+  '&::before, &::after': { display: 'none' },
+};
+
+const GRIPPED_BAR_SX = {
+  ...UNCUT_BAR_SX,
+  pt: `calc(${panelBarPadSx.py} + ${GRIP_ROOM}px)`,
+};
+
+// A bar the style draws as a banner (shapes.js panel.banner): the drawing in
+// place of the bar's paper, screentone, cut ends and rule, behind what the bar
+// holds (its own layer: the drawing goes under the badge and the title), what
+// it holds kept in from the banner's ends.
+const BANNER_BAR_SX = {
+  ...UNCUT_BAR_SX,
+  bgcolor: 'transparent',
+  backgroundImage: 'none',
+  borderBottom: 0,
+  isolation: 'isolate',
+  minHeight: BANNER_HEIGHT,
+  px: `${BANNER_INSET + 20}px`,
+  // Its title sized to the bar (bannerTitleSx).
+  containerType: 'inline-size',
+};
+
+// The title lettered as the banner letters it (panelBanner.js BANNER_TITLES):
+// the ink that reads on its drawing, or a colour of its own, printed plain
+// (an inked outline and shadow would blot dark letters on a light banner),
+// outlined in the drawing's colour where it is busy under the letters, or
+// inked as the comic letters light letters on a deep banner (inkLettering).
+// On one line, as a banner holds one: shrinking with a narrow bar (its
+// container) rather than wrapping out of the drawing, cut short only past
+// that.
+function bannerTitleSx({ on, color, halo, inked }, size) {
+  const lettering = (inked && inkLettering(2, 2)) || (halo && inkLettering(2, 0, UI_COLORS[halo])) || PLAIN_LETTERING;
+  return {
+    color: color ? UI_COLORS[color] : inkOn(UI_COLORS[on]),
+    ...lettering,
+    ...ONE_LINE_SX,
+    fontSize: `min(${size}, 9.5cqi)`,
+  };
+}
+
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
+  const { grip, banner } = useStyleShapes().panel;
+  const gripped = grip !== 'none';
+  const lettering = bannerTitle(banner);
   return (
-    <Box sx={panelTitleBarSx(tone)}>
+    <Box sx={[panelTitleBarSx(tone), lettering && BANNER_BAR_SX, gripped && GRIPPED_BAR_SX]}>
+      {lettering ? <PanelBanner kind={banner} room={gripped ? GRIP_ROOM : 0} /> : null}
+      {gripped ? <PanelGrip kind={grip} /> : null}
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
-      <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone }}>{title}</Typography>
+      <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>
       {children}
     </Box>
   );

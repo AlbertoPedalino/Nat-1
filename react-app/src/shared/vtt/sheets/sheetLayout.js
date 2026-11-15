@@ -1,5 +1,5 @@
 import { getStorageItem, setStorageItem } from '../../storage/storage.js';
-import { clamp } from '../../numbers.js';
+import { clamp, roundToTenth } from '../../numbers.js';
 
 export const DEFAULT_SHEET_SPLIT = 60;
 export const MIN_MAP_SPLIT = 35;
@@ -13,7 +13,7 @@ export function normalizeSheetSplit(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return DEFAULT_SHEET_SPLIT;
   const clamped = clamp(parsed, MIN_MAP_SPLIT, MAX_MAP_SPLIT);
-  return Math.round(clamped * 10) / 10;
+  return roundToTenth(clamped);
 }
 
 export function sheetSplitAtPointer(clientX, left, width) {

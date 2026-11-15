@@ -8,9 +8,10 @@ import { UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
 import { GEM_TONES } from '../../../../src/shared/ui/entityColors.js';
 
 // The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
-// cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style picks.
+// cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style
+// picks; so is a card's marker, with whatever lines, cap or pupil it draws.
 function shapeKeys(value, prefix = '') {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\./.test(prefix)) return [prefix];
+  if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\.|^marker$/.test(prefix)) return [prefix];
   return Object.entries(value).flatMap(([key, inner]) => shapeKeys(inner, prefix ? `${prefix}.${key}` : key));
 }
 
@@ -181,12 +182,16 @@ test('every style draws every icon role', async () => {
   });
 });
 
-test("every style lays a page, cuts its bar's ends and flourishes its titles with drawings that exist", async () => {
+test("every style lays a page, cuts its bar's ends, flourishes its titles, grips its panels and draws their banners with drawings that exist", async () => {
   const { FLOURISH_KINDS } = await import('../../../../src/shared/ui/panelOrnaments.js');
+  const { GRIP_KINDS } = await import('../../../../src/shared/ui/panelGrip.js');
+  const { BANNER_KINDS } = await import('../../../../src/shared/ui/panelBanner.js');
   const { PAGE_SCENE_KINDS } = await import('../../../../src/shared/ui/pageScenes.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
     assert.ok(['stickers', 'none', ...PAGE_SCENE_KINDS].includes(shapes.surface.paper), `${id} paper`);
     assert.ok(FLOURISH_KINDS.includes(shapes.panel.flourish.kind), `${id} flourish`);
+    assert.ok(GRIP_KINDS.includes(shapes.panel.grip), `${id} grip`);
+    assert.ok(BANNER_KINDS.includes(shapes.panel.banner), `${id} banner`);
     const points = shapes.ribbon.ends.split(' ').map((point) => point.split(',').map(Number));
     assert.ok(points.every(([x, y]) => x >= 0 && x <= 10 && y >= 0 && y <= 100), `${id} ends`);
     assert.deepEqual([points[0][1], points.at(-1)[1]], [0, 100], `${id} ends run top to foot`);
@@ -202,4 +207,16 @@ test('every painted scene ships its pictures', async () => {
   const { existsSync } = await import('node:fs');
   const { SCENE_PICTURES } = await import('../../../../src/shared/ui/pageScenes.js');
   SCENE_PICTURES.forEach((file) => assert.ok(existsSync(`public/scenes/${file}`), file));
+});
+
+test("every style marks a card's kind with a shape of its own, in the 12 by 30 box", () => {
+  const outlines = new Set();
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
+    const { marker } = shapes;
+    assert.match(marker.outline, /^M[\d.\s]/, `${id} marker`);
+    marker.outline.match(/-?\d+(\.\d+)?/g).map(Number).forEach((n) => assert.ok(n >= 0 && n <= 30, `${id} marker inside its box`));
+    if (marker.capFill) assert.ok(['accent', 'edge'].includes(marker.capFill), `${id} cap`);
+    outlines.add(marker.outline);
+  });
+  assert.equal(outlines.size, Object.keys(SHAPE_STYLES).length, 'no two styles share a marker');
 });

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { LAYERS } from '../../../shared/ui/layers.js';
 import { Box } from '@mui/material';
 import Die3D from '../../../shared/character/dice/Die3D.jsx';
@@ -16,6 +16,7 @@ import {
 import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { useElementSize } from '../../../shared/ui/useElementSize.js';
 import { clippedMapLayerSx } from '../map/sceneViewportStyles.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
@@ -38,7 +39,7 @@ const GROWTH = 0.0018;
 // underneath stays usable while dice are still rolling.
 export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   const hostRef = useRef(null);
-  const [table, setTable] = useState(null);
+  const table = useElementSize(hostRef);
   // When each throw was first seen here, on this machine's clock.
   //
   // A throw plays from that moment, not from when its component mounted:
@@ -49,16 +50,6 @@ export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   // with anybody else's.
   const startedAt = useRef(new Map());
 
-  useLayoutEffect(() => {
-    const host = hostRef.current;
-    if (!host) return undefined;
-    const measure = () => setTable({ width: host.clientWidth, height: host.clientHeight });
-    measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(host);
-    return () => observer.disconnect();
-  }, []);
 
   const live = throws || [];
   const now = Date.now();

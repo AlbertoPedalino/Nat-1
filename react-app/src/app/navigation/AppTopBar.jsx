@@ -61,9 +61,12 @@ const leftActionsSx = {
 };
 
 // Drawn like a panel's bar: the header tint, the accent's screentone and a
-// thick ink line under it, so every page opens on the same comic strip.
+// thick ink line under it, so every page opens on the same comic strip. Always
+// on the header tint, even where the style's panel bars are only a rule (no
+// paper): the page scrolls under it.
 const appTopBarSx = {
   ...panelBarSx,
+  bgcolor: UI_COLORS.surfaceHeader,
   backgroundImage: panelScreentone(UI_COLORS.accent),
   borderBottomWidth: 3,
   boxShadow: UI_SHADOWS.raised,

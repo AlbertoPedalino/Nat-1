@@ -20,6 +20,11 @@ export function clamp(value, min, max) {
   return Math.max(min, Math.min(Math.max(min, max), value));
 }
 
+// `value` to the nearest tenth.
+export function roundToTenth(value) {
+  return Math.round(value * 10) / 10;
+}
+
 // A whole number in range: rounded, then clamped. Anything that does not read
 // as a number gives `fallback` (min unless said otherwise).
 export function clampInt(value, min, max, fallback = min) {

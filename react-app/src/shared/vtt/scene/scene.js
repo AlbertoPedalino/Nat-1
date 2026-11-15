@@ -9,8 +9,7 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from '../map/mapObjec
 import { VTT_COLORS } from '../colors.js';
 import { normalizeImageAtmospheres } from './atmosphere.js';
 import { normalizeImageFilters } from './imageFilters.js';
-import { clamp } from '../../numbers.js';
-import { numberOr } from '../../numbers.js';
+import { clamp, numberOr, roundToTenth } from '../../numbers.js';
 import { normalizeHexColor, storedColor } from '../../ui/colors.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
@@ -82,7 +81,7 @@ export function normalizeGrid(grid) {
 export function normalizeMilesPerCell(value) {
   const miles = numberOr(value, 0);
   if (!(miles > 0)) return 0;
-  return clamp(Math.round(miles * 10) / 10, 0.1, 100);
+  return clamp(roundToTenth(miles), 0.1, 100);
 }
 
 // Also used when drawing, not only when saving: a number typed into the panel is

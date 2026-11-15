@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, clampInt } from '../../../src/shared/numbers.js';
+import { clamp, clampInt, roundToTenth } from '../../../src/shared/numbers.js';
 
 test('clamp holds a value in range; an inverted range gives its min', () => {
   assert.deepEqual([-5, 3, 12].map((v) => clamp(v, 0, 10)), [0, 3, 10]);
@@ -12,4 +12,10 @@ test('clampInt rounds, clamps, and falls back on what is not a number', () => {
   assert.deepEqual([2.4, 2.6, -3, 120, '7'].map((v) => clampInt(v, 0, 99)), [2, 3, 0, 99, 7]);
   assert.equal(clampInt('abc', 1, 20), 1);
   assert.equal(clampInt(undefined, 1, 20, 4), 4);
+});
+
+test('roundToTenth keeps one decimal', () => {
+  assert.equal(roundToTenth(1.26), 1.3);
+  assert.equal(roundToTenth(0.04), 0);
+  assert.equal(roundToTenth(2), 2);
 });

@@ -117,10 +117,17 @@ const COMIC = deepFreeze({
   // A slider's thumb (every LabeledSlider): a wax seal `size` px across, the
   // seal's own edge.
   sliderThumb: { size: 18 },
+  // The mark at the head of a card's name (ToneBar: an action's kind, an
+  // item's rarity), in a 12 by 30 box: its `outline` filled in the kind's
+  // colour; its lit and shaded faces (`light`, `shade`; a band down each side
+  // where it has none); ink `lines` cut in it, a `cap` in its `capFill` role
+  // (the ink where none), a `pupil`, a `glitch` slice shifted off it; a
+  // `glow` round it; drawn on the pixel grid where `crisp`.
   // The ornament set on the middle of a card's rule (CardSection): a small
   // diamond, as a printed rulebook sets a fleuron between its parts. `path`
   // is drawn in an ORNAMENT_BOX px box.
   ornament: { path: 'M6 0 L12 6 L6 12 L0 6 Z' },
+  marker: { outline: 'M6 1 L10.5 7 L10.5 23 L6 29 L1.5 23 L1.5 7 Z', light: 'M6 3 L5.5 26 L2.6 22.5 L2.6 7.5 Z', shade: 'M7.2 5 L9.4 8 L9.4 22 L7.2 25 Z' },
   // The bookmark on the left edge of a chosen row and of a menu item under the
   // pointer, as a tab's: `width` px, `inset` px from the row's top and foot.
   bookmarkMark: { width: 5, inset: 4, radius: '0 4px 4px 0' },
@@ -153,12 +160,15 @@ const COMIC = deepFreeze({
   // wax seal or 'bare', and how far it `float`s on a soft shadow (0: none,
   // the ink's solid shadow alone). Its title's `flourish`: an ornament drawn
   // on the bar (panelOrnaments.js: a line of stars, rivets, a vine, a
-  // tentacle's coiled tip) `width` by `height` px, at its `right` end or at
-  // both `ends`, 'none' for none; and its `trim`, a band repeated along the
-  // bar's foot (a tentacle's suckers), 'none' for none.
+  // glitch) `width` by `height` px, at its `right` end or at both `ends`,
+  // 'none' for none. What `grip`s it: a drawing over its top edge and down its
+  // side, cut to its size (panelGrip.js: the abyssal's tentacle), 'none' for
+  // none; a gripped panel lets it reach past its frame. Its title bar's
+  // `banner`: the bar drawn as a ribbon, a scroll, a plate… across its width
+  // with the title on it (panelBanner.js), 'none' for the bar as above.
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'ribbon',
   },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
@@ -225,6 +235,7 @@ const SCIFI = deepFreeze({
   switch: { width: 44, height: 22, thumb: 14, inset: 4 },
   sliderThumb: { size: 16 },
   ornament: { path: 'M3 0 L9 0 L12 6 L9 12 L3 12 L0 6 Z' },
+  marker: { outline: 'M6 1.5 C9 1.5 10 3 10 5 V25 C10 27 9 28.5 6 28.5 C3 28.5 2 27 2 25 V5 C2 3 3 1.5 6 1.5 Z', lines: 'M3.5 10 H8.5 M3.5 15 H8.5 M3.5 20 H8.5', glow: true },
   bookmarkMark: { width: 3, inset: 2, radius: '0' },
   paper: { corners: [0.5, 0.5, 0.5, 0.5] },
   focusRing: { width: 2, gap: 2 },
@@ -233,7 +244,7 @@ const SCIFI = deepFreeze({
   ink: { edge: 1, drop: 0, depth: 1.5, glow: 6, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'hud',
   },
   radius: 3,
   surface: {
@@ -305,7 +316,9 @@ const GOTHIC = deepFreeze({
     },
   },
   ornament: { path: 'M5 0 L7 0 L7 3 L10 3 L10 5 L7 5 L7 12 L5 12 L5 5 L2 5 L2 3 L5 3 Z' },
+  marker: { outline: 'M4 1 H8 L11 9 L8.2 29 H3.8 L1 9 Z', lines: 'M6 6 V14 M3.8 8.5 H8.2' },
   paper: { corners: [0.3, 2, 0.5, 1.5] },
+  panel: { ...COMIC.panel, banner: 'drape' },
   radius: 8,
   surface: {
     paper: 'graveyard',
@@ -393,6 +406,7 @@ const WAR = deepFreeze({
   switch: { width: 46, height: 26, thumb: 16, inset: 5 },
   sliderThumb: { size: 18 },
   ornament: { path: 'M6 0 L7.4 4.1 L11.7 4.1 L8.2 6.7 L9.5 10.8 L6 8.3 L2.5 10.8 L3.8 6.7 L0.3 4.1 L4.6 4.1 Z' },
+  marker: { outline: 'M6 1 C9 4.5 10 8 10 11 V28.5 H2 V11 C2 8 3 4.5 6 1 Z', lines: 'M2 11.5 H10 M2 25 H10', cap: 'M2 25 H10 V28.5 H2 Z' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
   paper: { corners: [0, 0.4, 0, 0.8] },
   focusRing: { width: 3, gap: 2 },
@@ -401,7 +415,7 @@ const WAR = deepFreeze({
   ink: { edge: 2, drop: 1, depth: 1.2, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'tape',
   },
   radius: 2,
   surface: {
@@ -472,12 +486,13 @@ const ASTRAL = deepFreeze({
     },
   },
   ornament: { path: 'M6 0 L7.2 4.8 L12 6 L7.2 7.2 L6 12 L4.8 7.2 L0 6 L4.8 4.8 Z' },
+  marker: { outline: 'M6 0.5 Q7 12.5 11.5 15 Q7 17.5 6 29.5 Q5 17.5 0.5 15 Q5 12.5 6 0.5 Z', glow: true },
   bookmarkMark: { width: 4, inset: 4, radius: '0 6px 6px 0' },
   paper: { corners: [1, 1, 1, 1] },
   ink: { edge: 2, drop: 0, depth: 1.2, glow: 4, lettering: 0 },
   panel: {
     bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1,
-    flourish: { kind: 'stars', width: 96, height: 16, at: 'right', trim: 'none' },
+    flourish: { kind: 'stars', width: 96, height: 16, at: 'right' }, grip: 'none', banner: 'moons',
   },
   radius: 12,
   surface: {
@@ -545,9 +560,10 @@ const PIRATE = deepFreeze({
   },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'scroll',
   },
   ornament: { path: 'M1 0 L6 4.5 L11 0 L12 1 L7.5 6 L12 11 L11 12 L6 7.5 L1 12 L0 11 L4.5 6 L0 1 Z' },
+  marker: { outline: 'M2 1 H10.5 V29 L6.2 23.5 L2 29 Z', lines: 'M2 1 V29' },
   paper: { corners: [1.5, 0.5, 2, 0.75] },
   radius: 6,
   surface: {
@@ -619,9 +635,10 @@ const STEAMPUNK = deepFreeze({
   ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
   panel: {
     bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1,
-    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends', trim: 'none' },
+    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends' }, grip: 'none', banner: 'undercity',
   },
   ornament: { path: 'M4.6 1.8 L4.8 0.1 L7.2 0.1 L7.4 1.8 L8.9 2.7 L10.5 2 L11.7 4.1 L10.3 5.1 L10.3 6.9 L11.7 7.9 L10.5 10 L8.9 9.3 L7.4 10.2 L7.2 11.9 L4.8 11.9 L4.6 10.2 L3.1 9.3 L1.5 10 L0.3 7.9 L1.7 6.9 L1.7 5.1 L0.3 4.1 L1.5 2 L3.1 2.7 Z' },
+  marker: { outline: 'M6 1 L11 6 V24 L6 29 L1 24 V6 Z', cap: 'M1 6 L6 1 L11 6 V8.5 H1 Z M1 21.5 H11 V24 L6 29 L1 24 Z', capFill: 'accent' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
   paper: { corners: [0.3, 0.3, 0.3, 0.3] },
   radius: 4,
@@ -690,12 +707,13 @@ const DWARVEN = deepFreeze({
     },
   },
   ornament: { path: 'M1 1 H11 V5 H7.5 V12 H4.5 V5 H1 Z' },
+  marker: { outline: 'M1 3 L6 1 L11 3 V22 L6 29 L1 22 Z', lines: 'M6 6 V20 M6 9 L9 7 M6 13 L3 11' },
   bookmarkMark: { width: 5, inset: 3, radius: '0' },
   paper: { corners: [0.5, 0.25, 0.5, 0.25] },
   ink: { edge: 3, drop: 1.2, depth: 1, glow: 0, lettering: 0 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'lintel',
   },
   radius: 3,
   surface: {
@@ -760,12 +778,13 @@ const FEY = deepFreeze({
     },
   },
   ornament: { path: 'M6 0 C10 3 10 8 6 12 C2 8 2 3 6 0 Z' },
+  marker: { outline: 'M6 1 C12 9 11.5 21 6 29 C0.5 21 0 9 6 1 Z', lines: 'M6 4 V26 M6 12 L8.5 9.5 M6 17 L3.5 14.5' },
   bookmarkMark: { width: 5, inset: 4, radius: '0 8px 8px 0' },
   paper: { corners: [2, 1, 2, 1] },
   ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'vine', width: 96, height: 22, at: 'right', trim: 'none' },
+    flourish: { kind: 'vine', width: 96, height: 22, at: 'right' }, grip: 'none', banner: 'leaf',
   },
   radius: 14,
   surface: {
@@ -778,9 +797,10 @@ const FEY = deepFreeze({
 });
 
 // The abyssal cut: what sleeps in the drowned city, as a 1920s expedition
-// finds it. Bars that are tentacles (tapering ends, a coiled tip, suckers
-// along their underside), shapeless seals, a warped slab for the crest, a
-// faint sickly glow, eyes and tentacles for the gems, slow and uneasy moves.
+// finds it. A tentacle gripping every panel (over its top edge, round its
+// corner and down its side), bars whose ends taper as one does, shapeless
+// seals, a warped slab for the crest, a faint sickly glow, eyes and tentacles
+// for the gems, slow and uneasy moves.
 const ABYSSAL = deepFreeze({
   ...COMIC,
   ribbon: {
@@ -834,11 +854,12 @@ const ABYSSAL = deepFreeze({
     },
   },
   ornament: { path: 'M0 6 C3 1 9 1 12 6 C9 11 3 11 0 6 Z' },
+  marker: { outline: 'M6 1 C11.5 10 11.5 20 6 29 C0.5 20 0.5 10 6 1 Z', pupil: 'M6 8 C7.3 12 7.3 18 6 22 C4.7 18 4.7 12 6 8 Z' },
   paper: { corners: [0.5, 2, 1, 1.5] },
   ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 1 },
   panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'tentacle', width: 86, height: 40, at: 'right', trim: 'suckers' },
+    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'tentacle', banner: 'plank',
   },
   radius: 6,
   surface: {
@@ -906,13 +927,14 @@ const PIXEL = deepFreeze({
     },
   },
   ornament: { path: 'M4 0 H8 V4 H12 V8 H8 V12 H4 V8 H0 V4 H4 Z' },
+  marker: { outline: 'M4 1 H8 V3 H10 V27 H8 V29 H4 V27 H2 V3 H4 Z', light: 'M4 3 H6 V9 H4 Z', shade: 'M8 17 H10 V27 H8 Z', crisp: true },
   bookmarkMark: { width: 4, inset: 0, radius: '0' },
   paper: { corners: [0, 0, 0, 0] },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
   ink: { edge: 3, drop: 1, depth: 1, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'marquee',
   },
   radius: 1,
   surface: {
@@ -979,13 +1001,14 @@ const CYBERPUNK = deepFreeze({
   },
   meterSegments: { bar: 16, piece: 8, smooth: 0 },
   ornament: { path: 'M0 2 L5 6 L0 10 H3 L8 6 L3 2 Z' },
+  marker: { outline: 'M4.5 1 H11.5 L7.5 29 H0.5 Z', glitch: 'M4.4 15 H12.6 L12.1 18.5 H3.9 Z' },
   bookmarkMark: { width: 4, inset: 2, radius: '0' },
   paper: { corners: [0, 1.5, 0, 1.5] },
   dieGlyph: { path: 'M3 0.5 H11.5 V9 L9 11.5 H0.5 V3 Z' },
   ink: { edge: 1.5, drop: 1, depth: 1, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'bare', float: 0,
-    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right', trim: 'none' },
+    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right' }, grip: 'none', banner: 'glitch',
   },
   radius: 2,
   surface: {
@@ -1050,16 +1073,12 @@ export function ribbonEndsClip(ends, notch) {
   return `polygon(${[left(points[0]), ...points.map(right), ...points.slice(1).reverse().map(left)].join(', ')})`;
 }
 
-// The tile a bar's trim repeats along its foot, px.
-export const TRIM_TILE = Object.freeze({ width: 18, height: 8 });
-
 // Where a panel title's flourish sits (shapes' panel.flourish), as the two
 // background layers the bar keeps for it (PanelHeader.jsx): one at its right
 // end, or one at each end; none drawn at no size.
-function flourishVariables({ kind, width, height, at, trim }) {
+function flourishVariables({ kind, width, height, at }) {
   const size = kind === 'none' ? '0 0' : `${width}px ${height}px`;
   return {
-    '--gb-panel-trim-size': trim === 'none' ? '0 0' : `${TRIM_TILE.width}px ${TRIM_TILE.height}px`,
     '--gb-panel-flourish-size': size,
     '--gb-panel-flourish-size-2': at === 'ends' ? size : '0 0',
     '--gb-panel-flourish-at': at === 'ends' ? 'left 4px center' : 'right 10px center',

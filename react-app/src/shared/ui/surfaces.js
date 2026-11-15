@@ -5,6 +5,7 @@ import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js'
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
 import { cornerRadius } from './radius.js';
 import { styleShapes } from './shapes.js';
+import { bannerReach } from './panelBanner.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
@@ -43,6 +44,7 @@ function pagePaper(paper, paletteId) {
 // were. A variable set to `initial` is unset: its recipe falls back to the
 // panel's tone.
 function panelVariables(panel, bare) {
+  const reaches = panel.grip !== 'none' || bannerReach(panel.banner) > 0;
   const float = (solid, fall, blur) => (panel.float ? `${solid}, ${panelFloatShadow(panel.float, fall, blur)}` : solid);
   return {
     // The bar: the header's paper, or none over a rule in the panel's tone.
@@ -54,6 +56,12 @@ function panelVariables(panel, bare) {
     '--gb-panel-badge-ink': bare ? 'initial' : UI_COLORS.onFill,
     '--gb-panel-badge-edge': bare ? 'none' : INK_EDGE,
     '--gb-panel-badge-shadow': bare ? 'none' : UI_SHADOWS.box,
+    // A main panel keeps what is in it inside its frame, unless the style
+    // draws past its edges (a grip, shapes.js panel.grip; a banner that
+    // reaches out, panelBanner.js bannerReach)…
+    '--gb-panel-overflow': reaches ? 'visible' : 'hidden',
+    // …and the page cuts that at the window's side (theme.js html).
+    '--gb-page-overflow-x': reaches ? 'clip' : 'visible',
     // The shadows of a main panel and of a framed box.
     '--gb-panel-shadow': float(UI_SHADOWS.panel, 6, 18),
     '--gb-panel-box-shadow': float(UI_SHADOWS.box, 3, 10),

@@ -239,6 +239,8 @@ function themeOptions(chosen, styleId) {
             // other faces set their own (TEXT_STYLES), so only Alegreya grows.
             fontSizeAdjust: FONT_FITS.body,
             backgroundColor: UI_COLORS.page,
+            // As the root (html, below): a gripping drawing cut at the side.
+            overflowX: 'var(--gb-page-overflow-x)',
             backgroundImage: SURFACES.page.backgroundImage,
             backgroundSize: SURFACES.page.backgroundSize,
             // The style's scene (pageScenes.js), still behind every screen.
@@ -251,7 +253,9 @@ function themeOptions(chosen, styleId) {
           // takes its own pseudo-elements.
           // Selected text in gold with the ink on it, and the caret of every
           // field in gold, instead of the system's blue.
-          html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}`, caretColor: UI_COLORS.accent },
+          // A drawing gripping a panel (surfaces.js) may reach past the
+          // window's side on a phone: cut there, never a sideways scroll.
+          html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}`, caretColor: UI_COLORS.accent, overflowX: 'var(--gb-page-overflow-x)' },
           '::selection': { backgroundColor: UI_COLORS.accent, color: UI_COLORS.onFill },
           '*': { scrollbarWidth: 'thin' },
           '*::-webkit-scrollbar': { width: 12, height: 12 },
