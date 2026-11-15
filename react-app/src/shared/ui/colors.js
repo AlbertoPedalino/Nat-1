@@ -1307,6 +1307,118 @@ const CARTRIDGE_LIGHT = Object.freeze({
   pcToken: '#1f50c0',
 });
 
+// The cyberpunk style's dark palette, overdrive: a megacity at night.
+// Black glass, electric yellow, cyan signs, hot red, magenta for an edge.
+const OVERDRIVE_DARK = Object.freeze({
+  ...COMIC_DARK,
+  accent: '#fcee0a',
+  accentText: '#fdf354',
+  accentHighlight: '#fef89d',
+  accentMuted: '#b0a707',
+  accentPlain: '#fcee0a',
+  onAccent: '#262402',
+  textPrimary: '#f2f6f0',
+  textSecondary: '#aeb3b0',
+  textMuted: '#8c9190',
+  textFaint: '#666b6b',
+  outline: '#54595a',
+  surfaceRaised: '#1b2024',
+  bubble: '#393e41',
+  surfaceHeader: '#161c20',
+  surface: '#10161a',
+  surfaceDeep: '#0e1316',
+  page: '#06090b',
+  surfaceSunken: '#050708',
+  surfaceDarkest: '#030506',
+  edge: '#030405',
+  onFill: '#030405',
+  pageDrawing: '#1b2024',
+  pageLine: '#030405',
+  ruleEmphasis: '#5ef0ff',
+  armor: '#9fb2c0',
+  dangerStrong: '#ff223e',
+  danger: '#ff2a4d',
+  dangerText: '#ff758b',
+  dangerMuted: '#df6175',
+  dangerDeep: '#99192e',
+  dangerSurface: '#290e14',
+  warning: '#ff8a00',
+  warningStrong: '#ff6d17',
+  warningText: '#ffb359',
+  penalty: '#ff8a00',
+  penaltyText: '#ffb359',
+  success: '#2cf28a',
+  successText: '#76f7b3',
+  secondary: '#ff3df2',
+  secondaryStrong: '#cc31c2',
+  secondaryText: '#ff77f6',
+  onSecondary: '#260924',
+  info: '#00e5ff',
+  infoText: '#59eeff',
+  spell: '#b06cff',
+  reference: '#e6f0ea',
+  paper: '#e8eadf',
+  paperShade: '#d5d7cd',
+  onPaper: '#111417',
+  pcToken: '#00e5ff',
+});
+
+// The cyberpunk style's light palette, daylight: a district by day, hazard
+// yellow over concrete, black and cyan ink.
+const DAYLIGHT_LIGHT = Object.freeze({
+  ...COMIC_DARK,
+  accent: '#f5d400',
+  accentText: '#766600',
+  accentHighlight: '#fcf2b2',
+  accentMuted: '#ac9400',
+  accentPlain: '#766600',
+  onAccent: '#252000',
+  textPrimary: '#111417',
+  textSecondary: '#4c4d4c',
+  textMuted: '#676965',
+  textFaint: '#a0a099',
+  outline: '#b2b2a9',
+  surfaceRaised: '#fbfaf4',
+  bubble: '#fdfcf8',
+  surfaceHeader: '#f6edac',
+  surface: '#f7f6e8',
+  surfaceDeep: '#f4f1cc',
+  page: '#e6dc4e',
+  surfaceSunken: '#efeaa3',
+  surfaceDarkest: '#d8cf49',
+  edge: '#0c0e10',
+  onFill: '#0c0e10',
+  pageDrawing: '#eee893',
+  pageLine: '#cfc646',
+  ruleEmphasis: '#006f8a',
+  armor: '#3c4b57',
+  dangerStrong: '#bd0026',
+  danger: '#c4002f',
+  dangerText: '#c4002f',
+  dangerMuted: '#941f3b',
+  dangerDeep: '#76001c',
+  dangerSurface: '#f4d1da',
+  warning: '#b35a00',
+  warningStrong: '#b83f0e',
+  warningText: '#a15100',
+  penalty: '#b35a00',
+  penaltyText: '#a15100',
+  success: '#0a7a45',
+  successText: '#0a7844',
+  secondary: '#b0009f',
+  secondaryStrong: '#8d007f',
+  secondaryText: '#b0009f',
+  onSecondary: '#1a0018',
+  info: '#006f8a',
+  infoText: '#006f8a',
+  spell: '#6a2ac0',
+  reference: '#1e2a30',
+  paper: '#ffffff',
+  paperShade: '#ebebeb',
+  onPaper: '#111417',
+  pcToken: '#006f8a',
+});
+
 // Every palette, with the MUI mode it is drawn in (which also sets how its
 // inked lettering is lettered, LETTERINGS). A style draws its dark and its
 // light mode in two of them (shapes.js SHAPE_STYLES `palettes`: comic in dark
@@ -1314,7 +1426,7 @@ const CARTRIDGE_LIGHT = Object.freeze({
 // dossier; gothic in dread and mist; astral in starlight and vellum; pirate
 // in deepSea and seaChart; steampunk in foundry and patent; dwarven in forge
 // and granite; fey in twilight and blossom; cosmic in abyss and asylum; pixel
-// in arcade and cartridge).
+// in arcade and cartridge; cyberpunk in overdrive and daylight).
 export const PALETTES = Object.freeze({
   dark: Object.freeze({ id: 'dark', mode: 'dark', colors: COMIC_DARK }),
   light: Object.freeze({ id: 'light', mode: 'light', colors: PARCHMENT_LIGHT }),
@@ -1338,6 +1450,8 @@ export const PALETTES = Object.freeze({
   asylum: Object.freeze({ id: 'asylum', mode: 'light', colors: ASYLUM_LIGHT }),
   arcade: Object.freeze({ id: 'arcade', mode: 'dark', colors: ARCADE_DARK }),
   cartridge: Object.freeze({ id: 'cartridge', mode: 'light', colors: CARTRIDGE_LIGHT }),
+  overdrive: Object.freeze({ id: 'overdrive', mode: 'dark', colors: OVERDRIVE_DARK }),
+  daylight: Object.freeze({ id: 'daylight', mode: 'light', colors: DAYLIGHT_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no

@@ -42,6 +42,11 @@ const FLOURISHES = Object.freeze({
     ...[0, 72, 144, 216, 288].map((turn) => `<circle cx="${(88 + 3.6 * Math.cos((turn * Math.PI) / 180)).toFixed(1)}" cy="${(12 + 3.6 * Math.sin((turn * Math.PI) / 180)).toFixed(1)}" r="2.6" fill="${UI_COLORS.accent}"/>`),
     `<circle cx="88" cy="12" r="1.6" fill="${UI_COLORS.warning}"/>`,
   ].join('')),
+  // Cyberpunk: a glitch, a signal's bars torn sideways.
+  glitch: () => svg(84, 14, [
+    ...[[0, 2, 30, 3, 'accent'], [34, 2, 8, 3, 'info'], [10, 7, 46, 2, 'info'], [60, 7, 6, 2, 'accent'], [22, 11, 18, 2, 'danger'], [70, 2, 14, 3, 'accent'], [46, 11, 30, 2, 'accent']]
+      .map(([x, y, w, h, role]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${UI_COLORS[role]}"/>`),
+  ].join('')),
   // Cosmic: a tentacle reaching in, its suckers along it.
   tentacle: () => svg(90, 22, [
     `<path d="M0 16 C20 16 30 6 50 10 C66 13 70 20 80 14 C86 10 84 4 78 6" stroke="${UI_COLORS.accent}" stroke-width="3" fill="none" stroke-linecap="round"/>`,

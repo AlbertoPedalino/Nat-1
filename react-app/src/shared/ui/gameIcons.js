@@ -47,6 +47,8 @@ import {
   GiTentacleStrike, GiTentaclesBarrier, GiTentaclesSkull, GiTesla, GiTeslaCoil, GiTeslaTurret, GiTopHat,
   GiTreehouse, GiTrophy, GiTrophyCup, GiUnicorn, GiValve, GiVineFlower, GiVortex, GiWatch, GiWizardFace,
   GiZeppelin,
+  GiCircuitry, GiCpu, GiCyberEye, GiCyborgFace, GiDatabase, GiDeliveryDrone, GiHolosphere, GiKatana,
+  GiLaserGun, GiLaserWarning, GiProcessor, GiRobotHelmet, GiServerRack,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -932,6 +934,36 @@ const PIXEL_TOOL_ICONS = Object.freeze({
   compendium: GiBookshelf,
 });
 
+// The cyberpunk style's icons: the sci-fi console's, the megacity where it
+// has a face of its own (cyber eyes, implants, katanas, servers).
+const CYBERPUNK_GAME_ICONS = Object.freeze({
+  ...SCIFI_GAME_ICONS,
+  abilityScores: GiCyborgFace,
+  senses: GiCyberEye,
+  skills: GiCircuitry,
+  proficiencies: GiProcessor,
+  inspiration: GiElectric,
+  actions: GiKatana,
+  classes: GiRobotHelmet,
+  spells: GiHolosphere,
+  spellSlots: GiCpu,
+  tempHp: GiSyringe,
+  monster: GiRobotGolem,
+  weapons: GiLaserGun,
+  trap: GiLaserWarning,
+  dungeon: GiServerRack,
+  sheet: GiDatabase,
+});
+
+const CYBERPUNK_TOOL_ICONS = Object.freeze({
+  ...SCIFI_TOOL_ICONS,
+  characters: GiCyborgFace,
+  builder: GiMechanicalArm,
+  gmboard: GiServerRack,
+  encounters: GiKatana,
+  vtt: GiDeliveryDrone,
+});
+
 // A role drawn in the chosen style's set: a component that takes the drawing
 // the style gives it (`icons`: { styleId: component }, the comic one when a
 // style has none), so a panel's badge or a roll button changes with the
@@ -969,26 +1001,29 @@ const COMIC_STYLE_SETS = Object.freeze({
   FALLBACK_SCENE_GENERATOR_ICON: COMIC_FALLBACK_SCENE_GENERATOR_ICON,
 });
 
+// The sci-fi style's sets, spread by the cyberpunk style.
+const SCIFI_STYLE_SETS = Object.freeze({
+  GAME_ICONS: SCIFI_GAME_ICONS,
+  TOOL_ICONS: SCIFI_TOOL_ICONS,
+  CLASS_ICONS: SCIFI_CLASS_ICONS,
+  SEASON_ICONS: SCIFI_SEASON_ICONS,
+  WEATHER_ICONS: SCIFI_WEATHER_ICONS,
+  TERRAIN_ICONS: SCIFI_TERRAIN_ICONS,
+  POPULATION_ICONS: SCIFI_POPULATION_ICONS,
+  ATMOSPHERE_ICONS: SCIFI_ATMOSPHERE_ICONS,
+  SCENE_GENERATOR_ICONS: SCIFI_SCENE_GENERATOR_ICONS,
+  TABLE_ICONS: SCIFI_TABLE_ICONS,
+  FALLBACK_CLASS_ICON: SCIFI_FALLBACK_CLASS_ICON,
+  FALLBACK_WEATHER_ICON: SCIFI_FALLBACK_WEATHER_ICON,
+  FALLBACK_ATMOSPHERE_ICON: SCIFI_FALLBACK_ATMOSPHERE_ICON,
+  FALLBACK_SCENE_GENERATOR_ICON: SCIFI_FALLBACK_SCENE_GENERATOR_ICON,
+});
+
 // Every style's icons, kind by kind: one entry per style. A style that keeps
 // the comic drawings for a kind spreads comic's and redraws only its own.
 const STYLE_ICONS = Object.freeze({
   comic: COMIC_STYLE_SETS,
-  scifi: Object.freeze({
-    GAME_ICONS: SCIFI_GAME_ICONS,
-    TOOL_ICONS: SCIFI_TOOL_ICONS,
-    CLASS_ICONS: SCIFI_CLASS_ICONS,
-    SEASON_ICONS: SCIFI_SEASON_ICONS,
-    WEATHER_ICONS: SCIFI_WEATHER_ICONS,
-    TERRAIN_ICONS: SCIFI_TERRAIN_ICONS,
-    POPULATION_ICONS: SCIFI_POPULATION_ICONS,
-    ATMOSPHERE_ICONS: SCIFI_ATMOSPHERE_ICONS,
-    SCENE_GENERATOR_ICONS: SCIFI_SCENE_GENERATOR_ICONS,
-    TABLE_ICONS: SCIFI_TABLE_ICONS,
-    FALLBACK_CLASS_ICON: SCIFI_FALLBACK_CLASS_ICON,
-    FALLBACK_WEATHER_ICON: SCIFI_FALLBACK_WEATHER_ICON,
-    FALLBACK_ATMOSPHERE_ICON: SCIFI_FALLBACK_ATMOSPHERE_ICON,
-    FALLBACK_SCENE_GENERATOR_ICON: SCIFI_FALLBACK_SCENE_GENERATOR_ICON,
-  }),
+  scifi: SCIFI_STYLE_SETS,
   gothic: Object.freeze({
     ...COMIC_STYLE_SETS,
     GAME_ICONS: GOTHIC_GAME_ICONS,
@@ -1033,6 +1068,11 @@ const STYLE_ICONS = Object.freeze({
     ...COMIC_STYLE_SETS,
     GAME_ICONS: PIXEL_GAME_ICONS,
     TOOL_ICONS: PIXEL_TOOL_ICONS,
+  }),
+  cyberpunk: Object.freeze({
+    ...SCIFI_STYLE_SETS,
+    GAME_ICONS: CYBERPUNK_GAME_ICONS,
+    TOOL_ICONS: CYBERPUNK_TOOL_ICONS,
   }),
 });
 

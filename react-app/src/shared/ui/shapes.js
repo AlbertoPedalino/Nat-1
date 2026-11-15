@@ -919,6 +919,79 @@ const PIXEL = deepFreeze({
   motion: { pace: 0.6, hop: 1 },
 });
 
+// The cyberpunk cut: a megacity's interface. The console's build cut harder:
+// bars and crests with their corners sliced off, data shards, energy bolts
+// and slanted marks for the gems, a glitch on the titles, scanlines, snappy
+// moves.
+const CYBERPUNK = deepFreeze({
+  ...SCIFI,
+  ribbon: {
+    panel: { notch: 10, pad: 18 },
+    tile: { notch: 5, pad: 7 },
+    ends: '0,0 0,55 10,100',
+  },
+  seal: { radius: '0 8px 0 8px' },
+  crest: {
+    // Two corners sliced off, as a cut plate of armour.
+    clip: 'polygon(0 0, 84% 0, 100% 22%, 100% 100%, 16% 100%, 0 78%)',
+    edge: 2,
+    foot: '0%',
+    side: '0%',
+  },
+  bookmarkTab: { radius: '0', rise: 3, gap: 2 },
+  // A counter is a data shard, a use an energy bolt, a training mark a slanted
+  // bar.
+  gemCuts: {
+    counter: {
+      outline: 'M24 6 H66 L80 20 V94 H24 Z',
+      shading: [
+        ['table', 'M32 14 H62 L72 24 V44 H32 Z'],
+        ['dark', 'M24 80 H80 V94 H24 Z'],
+      ],
+      glint: false,
+      centre: [52, 50],
+      shadowDrop: 4,
+    },
+    uses: {
+      outline: 'M58 2 L18 56 H44 L36 98 L82 40 H54 Z',
+      shading: [
+        ['light', 'M58 2 L18 56 H30 L52 18 Z'],
+        ['dark', 'M54 40 H82 L36 98 L44 72 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 4,
+    },
+    training: {
+      outline: 'M30 18 H96 L70 82 H4 Z',
+      shading: [
+        ['dark', 'M64 18 H96 L70 82 H38 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 4,
+    },
+  },
+  meterSegments: { bar: 16, piece: 8, smooth: 0 },
+  ornament: { path: 'M0 2 L5 6 L0 10 H3 L8 6 L3 2 Z' },
+  bookmarkMark: { width: 4, inset: 2, radius: '0' },
+  paper: { corners: [0, 1.5, 0, 1.5] },
+  dieGlyph: { path: 'M3 0.5 H11.5 V9 L9 11.5 H0.5 V3 Z' },
+  ink: { edge: 1.5, drop: 1, depth: 1, glow: 0, lettering: 1 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'bare', float: 0,
+    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right' },
+  },
+  radius: 2,
+  surface: {
+    paper: 'circuit',
+    halftone: { dot: 0.7, step: 4 },
+    screentone: { line: 1, gap: 3, angle: 0 },
+    rays: 0.5,
+  },
+  motion: { pace: 0.6, hop: 0.3 },
+});
+
 // The looks' styles the viewer can choose from (the "Style" of the account
 // menu's theme panel), each with the palette it is drawn in for each mode
 // (`palettes`: dark and light, ids of colors.js PALETTES).
@@ -934,6 +1007,7 @@ export const SHAPE_STYLES = Object.freeze({
   fey: Object.freeze({ id: 'fey', label: 'Feywild', palettes: Object.freeze({ dark: 'twilight', light: 'blossom' }), shapes: FEY }),
   cosmic: Object.freeze({ id: 'cosmic', label: 'Cosmic horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: COSMIC }),
   pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
+  cyberpunk: Object.freeze({ id: 'cyberpunk', label: 'Cyberpunk', palettes: Object.freeze({ dark: 'overdrive', light: 'daylight' }), shapes: CYBERPUNK }),
 });
 
 export const BASE_STYLE_ID = 'comic';

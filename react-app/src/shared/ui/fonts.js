@@ -161,6 +161,20 @@ const PIXEL_FONTS = Object.freeze({
   mono: '"VT323", ui-monospace, monospace',
 });
 
+// The cyberpunk faces: a megacity's signage. Tektur for the signs, Russo One
+// for the voice and the big figures (a glitched face made an 8 a smudge),
+// Chakra Petch for labels and names, Barlow for the text, IBM Plex Mono for
+// the mono.
+const CYBERPUNK_FONTS = Object.freeze({
+  display: '"Chakra Petch", system-ui, sans-serif',
+  prose: '"Barlow", system-ui, sans-serif',
+  cardName: '"Chakra Petch", system-ui, sans-serif',
+  body: '"Barlow", system-ui, sans-serif',
+  shout: '"Russo One", "Tektur", system-ui, sans-serif',
+  heading: '"Tektur", "Chakra Petch", system-ui, sans-serif',
+  mono: '"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
 // How large each lettering is drawn against its size (CSS font-size-adjust),
 // by role: the comic faces' own, which the sizes were chosen for. A style's
 // faces are fitted to them (FONT_STYLES `fits`, over these), so a size reads
@@ -236,6 +250,11 @@ export const FONT_STYLES = Object.freeze({
     stacks: PIXEL_FONTS,
     fits: Object.freeze({ body: 'ex-height 0.45', heading: 'ex-height 0.42', shout: 'cap-height 0.5', caps: 'cap-height 0.82', cover: 'ex-height 0.36' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap',
+  }),
+  cyberpunk: Object.freeze({
+    stacks: CYBERPUNK_FONTS,
+    fits: Object.freeze({ heading: 'ex-height 0.5', shout: 'cap-height 0.62', cover: 'ex-height 0.47' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Russo+One&family=Tektur:wght@500;700&display=swap',
   }),
 });
 

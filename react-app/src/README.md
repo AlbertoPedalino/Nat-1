@@ -59,13 +59,14 @@ logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
 every style shows as a card drawn in its own theme): the **style**
 (`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
 War horror; Arcane astral; Pirate seas; Steampunk; Dwarven forge; Feywild;
-Cosmic horror; Pixel retro) and the **mode** (System, Dark, Light). Each style
+Cosmic horror; Pixel retro; Cyberpunk) and the **mode** (System, Dark, Light). Each style
 draws each mode in a palette of its own (its `palettes`: comic in `dark` and
 `light`, the parchment; gothic in `dread` and `mist`; sci-fi in `neon` and
 `neonLight`; war in `trench` and `dossier`; astral in `starlight` and
 `vellum`; pirate in `deepSea` and `seaChart`; steampunk in `foundry` and
 `patent`; dwarven in `forge` and `granite`; fey in `twilight` and `blossom`;
-cosmic in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; every light
+cosmic in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; cyberpunk
+in `overdrive` and `daylight`; every light
 one tints its panel bars in its accent and lays a page of its own colour). A new style is data only: its palettes in
 `colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in
 `gameIcons.js` (a set may spread the comic one and redraw some roles) and,
@@ -130,7 +131,7 @@ figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels
 (`panel`: the title `bar` a filled strip or only a rule in the panel's tone,
 its `hatch`, a `frame` solid or double `frameWidth` wide, the icon on a seal
 or `bare`, a soft `float` shadow, the title's `flourish`: a line of stars,
-rivets, a vine, a tentacle, drawn in `panelOrnaments.js`), written as whole
+rivets, a vine, a tentacle, a glitch, drawn in `panelOrnaments.js`), written as whole
 values by `surfaceVariables` (`--gb-panel-*`), the comic's own where a style
 builds as the comic does, so its panels stay exactly as they were. Each bar's
 ends are cut its own way (`ribbon.ends`: the comic's swallowtail, a spear
