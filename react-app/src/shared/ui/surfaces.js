@@ -1,5 +1,6 @@
 import { UI_COLORS, uiAlpha, OPACITY, washImage, resolveColors } from './colors.js';
 import { pagePattern } from './pagePatterns.js';
+import { PAGE_SCENE_KINDS } from './pageScenes.js';
 import { dataPicture } from './svgPicture.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js';
@@ -29,10 +30,14 @@ export function surfaceVariables(paletteId, styleId) {
 
 // The page's drawings, as the style lays them (shapes.js surface.paper): the
 // comic's sticker paper (pictures painted per palette, stickerPaper.js), a
-// style's own tile (pagePatterns.js) painted in the palette's hexes, or none.
+// style's own tile (pagePatterns.js) painted in the palette's hexes, a scene
+// (pageScenes.js) or none.
 function pagePaper(paper, paletteId) {
   if (paper === 'stickers') return { '--gb-surface-paper': stickerPaperImage(paletteId), '--gb-surface-paper-size': STICKER_PAPER_SIZE };
   if (paper === 'none') return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
+  // A scene is laid once behind the whole app (theme.js): the page lets it
+  // through.
+  if (PAGE_SCENE_KINDS.includes(paper)) return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto', '--gb-surface-page-fill': 'transparent' };
   const { svg, width, height } = pagePattern(paper);
   return { '--gb-surface-paper': dataPicture(resolveColors(svg, paletteId)), '--gb-surface-paper-size': `${width}px ${height}px` };
 }
@@ -160,7 +165,8 @@ export const SURFACES = Object.freeze({
   // small all over it (stickerPaper.js) over a comic print's faint halftone
   // dots, as the style lays them (surfaceVariables).
   page: Object.freeze({
-    bgcolor: 'background.default',
+    // The page's colour, or none where the style lays a scene behind it.
+    bgcolor: (theme) => `var(--gb-surface-page-fill, ${theme.palette.background.default})`,
     backgroundImage: 'var(--gb-surface-paper), var(--gb-surface-halftone)',
     backgroundSize: 'var(--gb-surface-paper-size), var(--gb-surface-halftone-size)',
   }),

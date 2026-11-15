@@ -139,7 +139,10 @@ point, a folder tab, a scroll, a pixel stair; `ribbonEndsClip`, inked by
 `barEndInkSvg`), and each style cuts its own ability crest (`crest`, `side`
 keeping the figures inside). Each style lays its own page (`surface.paper`:
 the comic's sticker paper, or a tile from `pagePatterns.js`: tracery, camo,
-circuit, stars, waves, blueprint, stone, leaves, void, pixels). Every length in
+circuit, stars, waves, blueprint, stone, leaves, void, pixels; or a scene
+from `pageScenes.js`, a 1-bit picture recoloured per palette and laid once
+behind the whole app by the theme's `body::before`, the page letting it
+through: gothic's graveyard). Every length in
 `shadows.js` is the comic one times the style's share, and an ink line is
 never written by hand (guarded): `INK_EDGE` (the line in ink), `INK_SOLID`
 (width and style, colour set apart), `INK_WIDTH` (a width alone),

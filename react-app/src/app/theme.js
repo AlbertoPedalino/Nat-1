@@ -12,6 +12,8 @@ import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
+import { LINE_SHARE, PAGE_SCENE_KINDS, sceneSvg } from '../shared/ui/pageScenes.js';
+import { dataPicture } from '../shared/ui/svgPicture.js';
 import { focusRingSx } from '../shared/ui/interactive.js';
 import { INK_EDGE, inkShadow, INK_WIDTH } from '../shared/ui/shadows.js';
 import { DIALOG_MOTION, DURATIONS, motionTime } from '../shared/ui/motion.js';
@@ -65,6 +67,29 @@ function selectedRowSx(base, bookmark, { markOnHover = false } = {}) {
 export function buildTheme({ paletteId = BASE_PALETTE_ID, styleId = BASE_STYLE_ID } = {}) {
   const chosen = paletteOf(paletteId);
   return createTheme(themeOptions(chosen, styleId));
+}
+
+// A style's scene laid behind the whole app: fixed to the window, under
+// every page (which lets it through, SURFACES.page), in the palette's own
+// colours: its lines towards the lettering's colour on a dark palette,
+// towards the ink on a light one (pageScenes.js LINE_SHARE). Nothing for a
+// style without one.
+function sceneLayerSx(chosen, paper) {
+  if (!PAGE_SCENE_KINDS.includes(paper)) return null;
+  const { colors, mode } = chosen;
+  return {
+    '&::before': {
+      content: '""',
+      position: 'fixed',
+      inset: 0,
+      zIndex: -1,
+      pointerEvents: 'none',
+      backgroundImage: dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode])),
+      backgroundSize: 'cover',
+      backgroundPosition: 'center bottom',
+      backgroundRepeat: 'no-repeat',
+    },
+  };
 }
 
 function themeOptions(chosen, styleId) {
@@ -209,6 +234,8 @@ function themeOptions(chosen, styleId) {
             backgroundColor: UI_COLORS.page,
             backgroundImage: SURFACES.page.backgroundImage,
             backgroundSize: SURFACES.page.backgroundSize,
+            // The style's scene (pageScenes.js), still behind every screen.
+            ...sceneLayerSx(chosen, shapes.surface.paper),
           },
           // Every scrollbar of the app drawn in its own ink: a gold thumb edged
           // in ink on a sunken track, not the system's grey. The colours are

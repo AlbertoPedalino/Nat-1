@@ -184,8 +184,9 @@ test('every style draws every icon role', async () => {
 test("every style lays a page, cuts its bar's ends and flourishes its titles with drawings that exist", async () => {
   const { PAGE_PATTERN_KINDS } = await import('../../../../src/shared/ui/pagePatterns.js');
   const { FLOURISH_KINDS } = await import('../../../../src/shared/ui/panelOrnaments.js');
+  const { PAGE_SCENE_KINDS } = await import('../../../../src/shared/ui/pageScenes.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
-    assert.ok(['stickers', 'none', ...PAGE_PATTERN_KINDS].includes(shapes.surface.paper), `${id} paper`);
+    assert.ok(['stickers', 'none', ...PAGE_PATTERN_KINDS, ...PAGE_SCENE_KINDS].includes(shapes.surface.paper), `${id} paper`);
     assert.ok(FLOURISH_KINDS.includes(shapes.panel.flourish.kind), `${id} flourish`);
     const points = shapes.ribbon.ends.split(' ').map((point) => point.split(',').map(Number));
     assert.ok(points.every(([x, y]) => x >= 0 && x <= 10 && y >= 0 && y <= 100), `${id} ends`);

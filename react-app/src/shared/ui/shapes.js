@@ -163,7 +163,8 @@ const COMIC = deepFreeze({
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
   // ('stickers', the game's things as stickers: stickerPaper.js; a style's own
-  // tile, pagePatterns.js: 'tracery', 'stars', 'waves'…; 'none'); the
+  // tile, pagePatterns.js: 'stars', 'waves'…; a scene drawn behind every
+  // screen, pageScenes.js: 'graveyard'; 'none'); the
   // page's `halftone` dots (`dot` px across, every `step` px; null for none);
   // the `screentone` hatching of a panel's bar (`line` px of every `gap` px,
   // at `angle` degrees; a line of 0 for none); and how strongly a title's
@@ -306,7 +307,7 @@ const GOTHIC = deepFreeze({
   paper: { corners: [0.3, 2, 0.5, 1.5] },
   radius: 8,
   surface: {
-    paper: 'tracery',
+    paper: 'graveyard',
     halftone: { dot: 1, step: 7 },
     screentone: { line: 2, gap: 6, angle: -45 },
     rays: 0.8,
