@@ -121,3 +121,30 @@ test('a roller removed mid-press gives the page its selection back', () => {
   unmount();
   expect(selectionBlocked()).toBe(false);
 });
+
+// A phone sends its own context menu as a long press ends: the menu the hold
+// opened stays where the finger was rather than jumping to it.
+test("the phone's own context menu after a hold leaves the menu where it opened", () => {
+  vi.useFakeTimers();
+  try {
+    const { roller } = renderArea();
+    fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+    act(() => { vi.advanceTimersByTime(500); });
+    const menu = screen.getByRole('menu');
+    const placed = menu.closest('.MuiPopover-paper')?.style.top;
+    fireEvent.contextMenu(roller, { clientX: 300, clientY: 300 });
+    expect(screen.getByRole('menu').closest('.MuiPopover-paper')?.style.top).toBe(placed);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+// Holding a roller refuses selection as it starts, without restyling the whole
+// page on every tap (a stylesheet over every element made phones hitch).
+test('holding a roller adds no stylesheet to the page', () => {
+  const { roller } = renderArea();
+  const sheets = document.head.querySelectorAll('style').length;
+  fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+  expect(document.head.querySelectorAll('style').length).toBe(sheets);
+  fireEvent.touchEnd(roller);
+});

@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { useLongPress } from './useLongPress.js';
+import { useLongPress } from '../../../shared/ui/useLongPress.js';
 
 // A gesture taken over by another one (a long press opening a menu, a second
 // finger starting a pinch) ends here instead of just being dropped: a piece

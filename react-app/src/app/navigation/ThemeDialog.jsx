@@ -25,9 +25,10 @@ import { UI_COLORS } from '../../shared/ui/colors.js';
 // Look tab: the mode (System follows the device) and the look's style, every
 // style a card drawn in that style and in the palette it draws the current
 // mode in (its bar, its seal, its gems, its button), the chosen one lit. Its
-// Dice tab: the dice the viewer rolls with, what the table sees them roll —
-// their style (a theme's cut: figures and rim) and their colours apart, each
-// the look's own unless picked. A style added to SHAPE_STYLES shows here
+// Dice style and Dice colors tabs: the dice the viewer rolls with, what the
+// table sees them roll — their style (a theme's cut: figures and rim) and
+// their colours, a tab each so neither hides below the other, each the look's
+// own unless picked. A style added to SHAPE_STYLES shows here
 // without more.
 export default function ThemeDialog({ open, onClose }) {
   const { choice, mode, setChoice } = useThemeChoice();
@@ -46,9 +47,10 @@ export default function ThemeDialog({ open, onClose }) {
       maxWidth="sm"
       actions={<DoneButton onClick={onClose} />}
     >
-      <Tabs value={tab} onChange={(event, next) => setTab(next)} aria-label="Theme" sx={tabsSx}>
+      <Tabs value={tab} onChange={(event, next) => setTab(next)} aria-label="Theme" variant="fullWidth" sx={tabsSx}>
         <Tab value="look" label="Look" />
-        <Tab value="dice" label="Dice" />
+        <Tab value="diceStyle" label="Dice style" />
+        <Tab value="diceColors" label="Dice colors" />
       </Tabs>
       {tab === 'look' ? (
         <>
@@ -75,48 +77,49 @@ export default function ThemeDialog({ open, onClose }) {
             </Box>
           </DialogSection>
         </>
-      ) : (
-        <>
-          <DialogSection title="Dice style">
-            <Box role="radiogroup" aria-label="Dice style" sx={diceGridSx}>
+      ) : null}
+      {tab === 'diceStyle' ? (
+        <DialogSection title="Dice style">
+          <Box role="radiogroup" aria-label="Dice style" sx={diceGridSx}>
+            <DiceCard
+              dice={{ style: choice.style, colors: dice.colors }}
+              label="Match look"
+              chosen={choice.diceStyle === STYLE_DICE}
+              onChoose={() => setChoice({ diceStyle: STYLE_DICE })}
+            />
+            {Object.values(DICE_STYLES).map(({ id, label }) => (
               <DiceCard
-                dice={{ style: choice.style, colors: dice.colors }}
-                label="Match look"
-                chosen={choice.diceStyle === STYLE_DICE}
-                onChoose={() => setChoice({ diceStyle: STYLE_DICE })}
+                key={id}
+                dice={{ style: id, colors: dice.colors }}
+                label={label}
+                chosen={choice.diceStyle === id}
+                onChoose={() => setChoice({ diceStyle: id })}
               />
-              {Object.values(DICE_STYLES).map(({ id, label }) => (
-                <DiceCard
-                  key={id}
-                  dice={{ style: id, colors: dice.colors }}
-                  label={label}
-                  chosen={choice.diceStyle === id}
-                  onChoose={() => setChoice({ diceStyle: id })}
-                />
-              ))}
-            </Box>
-          </DialogSection>
-          <DialogSection title="Dice colors">
-            <Box role="radiogroup" aria-label="Dice colors" sx={diceGridSx}>
+            ))}
+          </Box>
+        </DialogSection>
+      ) : null}
+      {tab === 'diceColors' ? (
+        <DialogSection title="Dice colors">
+          <Box role="radiogroup" aria-label="Dice colors" sx={diceGridSx}>
+            <DiceCard
+              dice={{ style: dice.style, colors: choice.style }}
+              label="Match look"
+              chosen={choice.diceColors === STYLE_DICE}
+              onChoose={() => setChoice({ diceColors: STYLE_DICE })}
+            />
+            {Object.values(DICE_COLORS).map(({ id, label }) => (
               <DiceCard
-                dice={{ style: dice.style, colors: choice.style }}
-                label="Match look"
-                chosen={choice.diceColors === STYLE_DICE}
-                onChoose={() => setChoice({ diceColors: STYLE_DICE })}
+                key={id}
+                dice={{ style: dice.style, colors: id }}
+                label={label}
+                chosen={choice.diceColors === id}
+                onChoose={() => setChoice({ diceColors: id })}
               />
-              {Object.values(DICE_COLORS).map(({ id, label }) => (
-                <DiceCard
-                  key={id}
-                  dice={{ style: dice.style, colors: id }}
-                  label={label}
-                  chosen={choice.diceColors === id}
-                  onChoose={() => setChoice({ diceColors: id })}
-                />
-              ))}
-            </Box>
-          </DialogSection>
-        </>
-      )}
+            ))}
+          </Box>
+        </DialogSection>
+      ) : null}
     </SheetDialog>
   );
 }

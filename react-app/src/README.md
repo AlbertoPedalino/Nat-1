@@ -93,7 +93,7 @@ palette, so what is drawn on it takes the style's dark palette's colours
 (`shared/character/dice/dieColors.js`: `dieColor`, `diePicture`).
 
 The dice a player rolls with are theirs (`shared/ui/diceSets.js`, chosen in
-the theme panel's Dice tab, kept in `gb:theme` as `diceStyle` and
+the theme panel's Dice style and Dice colors tabs, kept in `gb:theme` as `diceStyle` and
 `diceColors`, each the look's own unless picked): a style's cut (`DICE_STYLES`:
 the figures' face, the rim's thickness) and a set of colours (`DICE_COLORS`:
 face, lit face, number, edge, and the logo's ramp). The viewer's are the die
