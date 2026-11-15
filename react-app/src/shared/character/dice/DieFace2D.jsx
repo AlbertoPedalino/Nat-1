@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { UI_COLORS, OPACITY } from '../../ui/colors.js';
 import { UI_FONTS, FONT_WEIGHTS } from '../../ui/fonts.js';
+import { dieColor } from './dieColors.js';
 
 // A result, not another roll: roll history uses a quiet, flat silhouette that
 // identifies the die and keeps the face that actually came up readable.
@@ -16,7 +17,7 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
       aria-label={label}
       data-die-face="2d"
       viewBox="0 0 40 40"
-      sx={{ width: size, height: size, display: 'block', flex: '0 0 auto', color, opacity: dimmed ? OPACITY.edge : 1 }}
+      sx={{ width: size, height: size, display: 'block', flex: '0 0 auto', color: dieColor(color), opacity: dimmed ? OPACITY.edge : 1 }}
     >
       {sides === 2 ? (
         <circle cx="20" cy="20" r="17" {...DIE_PAINT} />

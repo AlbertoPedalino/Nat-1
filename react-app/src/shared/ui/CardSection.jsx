@@ -5,6 +5,7 @@ import { CARD_PART_RULE_SX } from './interactive.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { asArray } from '../lists.js';
 import { ornamentOnRuleSx } from './ornament.js';
+import { textTone } from './pressable.js';
 
 // A part of an opened card under its own small title: the choice an action
 // asks for, the weapon a spell attacks through, a spell's upcast text, the
@@ -23,7 +24,7 @@ import { ornamentOnRuleSx } from './ornament.js';
 // cardSectionTitleSx is the same title for a block that keeps its own frame
 // (an artificer's tinker panels).
 export function cardSectionTitleSx(tone = UI_COLORS.accentText) {
-  return { ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: tone, mb: 0.25 };
+  return { ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: textTone(tone), mb: 0.25 };
 }
 
 // The ornament on the rule's middle (ornament.js). A dense part keeps the

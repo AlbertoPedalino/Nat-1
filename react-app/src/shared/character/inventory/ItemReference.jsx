@@ -14,6 +14,7 @@ import { cardToneSx } from '../../ui/surfaces.js';
 import { rarityTone } from './itemRarity.js';
 import { cardTitleSx } from '../../ui/PanelHeader.jsx';
 import ScrollingName from '../../ui/ScrollingName.jsx';
+import { textTone } from '../../ui/pressable.js';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
@@ -69,7 +70,7 @@ export function ItemCardTitle({ item, name = item?.name }) {
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
       <ToneBar tone={tone} />
       {item ? <ItemNameIcon item={item} /> : null}
-      <ScrollingName sx={{ ...cardTitleSx, color: tone || 'text.primary' }}>{name}</ScrollingName>
+      <ScrollingName sx={{ ...cardTitleSx, color: tone ? textTone(tone) : 'text.primary' }}>{name}</ScrollingName>
     </Box>
   );
 }

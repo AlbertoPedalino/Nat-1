@@ -7,7 +7,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, uiAlpha, uiMix } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 import { APPLE_WEBKIT_QUERY, inkTextShadow } from '../../ui/shadows.js';
-import { svgPicture } from '../../ui/svgPicture.js';
+import { dieColor, diePicture } from './dieColors.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -108,11 +108,11 @@ export default function Die3D({
                 // Only the face that landed carries the result's colour — red
                 // for a 1, gold for the top of the die — and the rest are
                 // scenery that must not shout "natural 20" at you.
-                color: index === landed && !dimmed ? color : OTHER_FACE_INK,
+                color: index === landed && !dimmed ? dieColor(color) : OTHER_FACE_INK,
               }}
             >
               {face.corners ? null : (
-                <Box sx={{ ...faceFillSx, borderRadius: face.borderRadius, bgcolor: faceTint(face, dimmed) }} />
+                <Box sx={{ ...faceFillSx, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, dimmed)) }} />
               )}
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
@@ -284,7 +284,7 @@ function facePicture(corners, tint) {
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">'
       + `<polygon points="${points(1, 0)}" fill="${UI_COLORS.dieEdge}"/>`
       + `<polygon points="${points(1 - (2 * FACE_INSET) / 100, FACE_INSET)}" fill="${tint}"/></svg>`;
-    picture = svgPicture(svg);
+    picture = diePicture(svg);
     FACE_PICTURES.set(key, picture);
   }
   return picture;

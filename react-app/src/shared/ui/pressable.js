@@ -1,5 +1,5 @@
 import { getContrastRatio } from '@mui/material';
-import { UI_COLORS, OPACITY, panelScreentone, uiLighten } from './colors.js';
+import { UI_COLORS, OPACITY, panelScreentone, paletteOf, uiLighten, uiMix } from './colors.js';
 import { themedValue } from './themedValues.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
 import { DURATIONS, ICON_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
@@ -35,15 +35,59 @@ export const PRESSABLE_EDGE_SX = Object.freeze({
 });
 
 // The ink that reads best on `fill`: the dark lettering (onFill) on a light fill, the
-// primary text on a dark one. Worked out in each palette's hexes (a contrast
-// reads no CSS variables) and given as a themed value, so it follows the
-// chosen palette (themedValues.js).
+// primary text on a dark one. A light palette's two are both dark, so there
+// the page's surface is a third, for a deep fill (a dark blue, a brown).
+// Worked out in each palette's hexes (a contrast reads no CSS variables) and
+// given as a themed value, so it follows the chosen palette (themedValues.js).
 export function inkOn(fill) {
-  return themedValue(`ink-on:${fill}`, (resolve) => (
-    getContrastRatio(resolve(fill), resolve(UI_COLORS.onFill)) >= getContrastRatio(resolve(fill), resolve(UI_COLORS.textPrimary))
-      ? UI_COLORS.onFill
-      : UI_COLORS.textPrimary
+  return themedValue(`ink-on:${fill}`, (resolve, { paletteId }) => readableInk(resolve, resolve(fill), paletteId));
+}
+
+function readableInk(resolve, fill, paletteId) {
+  const inks = paletteOf(paletteId).mode === 'light'
+    ? [UI_COLORS.onFill, UI_COLORS.textPrimary, UI_COLORS.surface]
+    : [UI_COLORS.onFill, UI_COLORS.textPrimary];
+  // The first of the best: on a tie the dark lettering, as before.
+  return inks.reduce((best, ink) => (
+    getContrastRatio(fill, resolve(ink)) > getContrastRatio(fill, resolve(best)) ? ink : best
   ));
+}
+
+// A colour of meaning written as text (a tag's words in its entity's colour,
+// a tinted chip's label): itself on a dark palette; on a light one, as deep
+// a shade of it as reads on the page's surfaces (contrast AA), as those
+// colours (ENTITY_COLORS, a monster's orange) are picked to read on the dark.
+const READABLE_TEXT = 4.5;
+export function textTone(color) {
+  // A theme path ('text.secondary') is MUI's to read, and already reads.
+  if (!color || /^[a-z]+\.[a-z]/i.test(color)) return color;
+  return themedValue(`text-tone:${color}`, (resolve, { paletteId }) => {
+    const own = resolve(color);
+    if (paletteOf(paletteId).mode !== 'light') return own;
+    const grounds = [resolve(UI_COLORS.surface), resolve(UI_COLORS.surfaceRaised)];
+    const reads = (tone) => grounds.every((ground) => getContrastRatio(tone, ground) >= READABLE_TEXT);
+    for (let shade = 0; shade <= 1; shade += 0.05) {
+      const tone = resolve(uiMix(own, UI_COLORS.textPrimary, shade));
+      if (reads(tone)) return tone;
+    }
+    return resolve(UI_COLORS.textPrimary);
+  });
+}
+
+// A sticker (a solid chip, a mark on a map piece) filled in `tone`, with the
+// ink that reads on it. On a dark palette the tone itself; on a light one a
+// pale wash of it over the surface (STICKER_WASH of the way to it), as the
+// tones a light palette reads as text (`<role>Text`) are deep, and a deep
+// sticker on the paper reads as a hole.
+const STICKER_WASH = 0.72;
+function stickerFillOf(resolve, tone, paletteId) {
+  return resolve(paletteOf(paletteId).mode === 'light' ? uiMix(tone, UI_COLORS.surface, STICKER_WASH) : tone);
+}
+export function stickerSx(tone) {
+  return {
+    backgroundColor: themedValue(`sticker-fill:${tone}`, (resolve, { paletteId }) => stickerFillOf(resolve, tone, paletteId)),
+    color: themedValue(`sticker-ink:${tone}`, (resolve, { paletteId }) => readableInk(resolve, stickerFillOf(resolve, tone, paletteId), paletteId)),
+  };
 }
 
 // A button that cannot be pressed now (a core book always in use, an action

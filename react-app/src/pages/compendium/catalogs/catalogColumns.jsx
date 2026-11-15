@@ -8,6 +8,7 @@ import { MONSTER_CATALOG, monsterStats } from './monsterCatalog.js';
 import { attunementRequirementText } from '../../../shared/character/inventory/itemAttunement.js';
 import { rarityLabel, rarityTone } from '../../../shared/character/inventory/itemRarity.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { textTone } from '../../../shared/ui/pressable.js';
 
 // The compendium's catalogs as tabs: each one's definition (what it lists and
 // how it filters, in its *Catalog.js) with the columns its rows show. A column
@@ -59,7 +60,7 @@ const MAGIC_COLUMNS = [
     render: (entry) => {
       // The name and its rarity lettered in the rarity's colour.
       const tone = rarityTone(entry.record);
-      return <NameCell entry={entry} tone={tone}>{secondLine(rarityLabel(entry.record), { color: tone || 'text.secondary' })}</NameCell>;
+      return <NameCell entry={entry} tone={tone}>{secondLine(rarityLabel(entry.record), { color: tone ? textTone(tone) : 'text.secondary' })}</NameCell>;
     },
   },
   { key: 'type', label: 'Type', width: '1fr', render: (entry) => MAGIC_TYPE_LABEL[magicItemType(entry.record)] },

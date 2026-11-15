@@ -3,7 +3,7 @@ import { Minus, Plus } from 'lucide-react';
 import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
-import { stepButtonSx } from './pressable.js';
+import { stepButtonSx, textTone } from './pressable.js';
 
 // A count with − and + beside it (an item's quantity, a party's size): every
 // stepper in the app. `onStep(delta)` gets −1 or +1; `label` names what is
@@ -29,7 +29,7 @@ export default function CountStepper({
       <Box
         sx={[
           countSx,
-          { minWidth: Math.round(size * 0.85), fontSize: size >= 20 ? FONT_SIZES.xl : FONT_SIZES.md, color: tone || UI_COLORS.accentText },
+          { minWidth: Math.round(size * 0.85), fontSize: size >= 20 ? FONT_SIZES.xl : FONT_SIZES.md, color: textTone(tone || UI_COLORS.accentText) },
           fullWidth && fullCountSx,
         ]}
       >

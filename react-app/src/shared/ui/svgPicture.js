@@ -20,6 +20,6 @@ export function svgStylePicture(key, draw) {
   return themedValue(`style-picture:${key}`, (resolve, { styleId }) => dataPicture(resolve(draw(styleShapes(styleId)))));
 }
 
-function dataPicture(svg) {
+export function dataPicture(svg) {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }

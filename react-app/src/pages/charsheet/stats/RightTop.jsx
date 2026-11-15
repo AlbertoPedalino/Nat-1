@@ -18,7 +18,7 @@ import { rollD20 } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { inkOn } from '../../../shared/ui/pressable.js';
+import { inkOn, textTone } from '../../../shared/ui/pressable.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { statValueSx } from '../../../shared/ui/PanelHeader.jsx';
@@ -149,7 +149,7 @@ function InitiativeFigure({ value, advantage, last }) {
       {mark ? <mark.Icon size={ICON_SIZES.sm} color={mark.color} style={{ position: 'absolute', top: 4, right: 4 }} /> : null}
       {last != null ? (
         <Typography sx={lastInitiativeSx}>
-          Last <Box component="span" sx={{ color: PANEL_TONES.initiative }}>{last}</Box>
+          Last <Box component="span" sx={{ color: textTone(PANEL_TONES.initiative) }}>{last}</Box>
         </Typography>
       ) : null}
     </>

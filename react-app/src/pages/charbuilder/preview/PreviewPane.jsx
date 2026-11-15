@@ -27,6 +27,7 @@ import { sheetBoxSx } from '../../../shared/ui/PanelHeader.jsx';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { textTone } from '../../../shared/ui/pressable.js';
 
 // The preview column: the sunken well its panels sit in, kept in view.
 const PANEL_SX = {
@@ -56,7 +57,7 @@ function PreviewHeader({ character, hp }) {
   // Hit points in the sheet's Hit Points green.
   const metadata = [
     { key: 'identity', value: subtitle || 'No class selected' },
-    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: PANEL_TONES.hitPoints, fontWeight: FONT_WEIGHTS.heavy } },
+    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: textTone(PANEL_TONES.hitPoints), fontWeight: FONT_WEIGHTS.heavy } },
   ];
 
   return (
@@ -148,7 +149,7 @@ function ProficiencySection({ sections }) {
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
-            <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: TRAINING_TONE }}>
+            <Typography sx={{ ...BUILDER_TEXT.groupLabel, color: textTone(TRAINING_TONE) }}>
               {section.title}
             </Typography>
             <PreviewChipList

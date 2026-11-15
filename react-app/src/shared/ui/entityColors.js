@@ -1,5 +1,5 @@
 import { UI_COLORS, OPACITY, TEMP_HP_TONE, uiAlpha, washImage } from './colors.js';
-import { inkOn, pressableSx } from './pressable.js';
+import { pressableSx, stickerSx, textTone } from './pressable.js';
 import { inkShadow } from './shadows.js';
 
 // Canonical color coding for game entity kinds, shared by builder and sheet.
@@ -197,18 +197,18 @@ export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPAC
     backgroundColor: UI_COLORS.surfaceRaised,
     backgroundImage: washImage(tone, bgAlpha),
     borderColor: uiAlpha(tone, borderAlpha),
-    color: text,
+    color: textTone(text),
   };
 }
 
 // A solid chip, the one mark of a fact on show (a tag, a condition or a
-// reminder on a piece, a count): filled in its tone, the ink that reads on it,
+// reminder on a piece, a count): a sticker in its tone (pressable.js
+// stickerSx: the tone, pale on a light palette) with the ink that reads on it,
 // an ink edge and a small solid shadow. TagChip and every mark on the map are
 // this one. CSS names, for sx and the theme alike.
 export function chipSolidStyle(tone) {
   return {
-    backgroundColor: tone,
-    color: inkOn(tone),
+    ...stickerSx(tone),
     borderColor: UI_COLORS.edge,
     boxShadow: inkShadow(UI_COLORS.edge, 1),
   };

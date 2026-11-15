@@ -18,6 +18,7 @@ import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import CardSection from '../../../shared/ui/CardSection.jsx';
 import { INK_SOLID } from '../../../shared/ui/shadows.js';
+import { textTone } from '../../../shared/ui/pressable.js';
 
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
@@ -176,12 +177,12 @@ export default function HPBlock({
           <Box sx={lineLabelSx}>
             <GAME_ICONS.tempHp size={ICON_SIZES.xxs} /> TEMP
             {editing === 'temp' ? (
-              editField({ width: 48, ml: 'auto' }, { fontSize: FONT_SIZES.xxl, color: TEMP_HP_TONE })
+              editField({ width: 48, ml: 'auto' }, { fontSize: FONT_SIZES.xxl, color: textTone(TEMP_HP_TONE) })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('temp', sheet.tempHP)}
-                sx={{ ...lineFigureSx, color: TEMP_HP_TONE }}
+                sx={{ ...lineFigureSx, color: textTone(TEMP_HP_TONE) }}
               >
                 {sheet.tempHP}
               </Box>

@@ -19,6 +19,7 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import { TABLE_HEAD_ROW_SX } from '../../../shared/ui/ruleText.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { textTone } from '../../../shared/ui/pressable.js';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -41,7 +42,7 @@ export function NameCell({
         </Box>
       ) : null}
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="body2" sx={tone ? { ...entryNameSx, color: tone } : entryNameSx}>{name}</Typography>
+        <Typography variant="body2" sx={tone ? { ...entryNameSx, color: textTone(tone) } : entryNameSx}>{name}</Typography>
         {children}
       </Box>
     </Stack>

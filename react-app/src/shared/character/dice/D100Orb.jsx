@@ -3,6 +3,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 import { inkEdge } from '../../ui/shadows.js';
+import { dieColor } from './dieColors.js';
 
 // A d100 is close enough to a sphere that drawing one hundred independently
 // composited CSS planes buys very little motion and costs a great deal. This
@@ -41,7 +42,7 @@ export default function D100Orb({
         data-visible={revealed ? 'true' : undefined}
         sx={{
           ...resultSx,
-          color,
+          color: dieColor(color),
           fontSize: `${Math.max(8, size * 0.24)}px`,
         }}
       >
