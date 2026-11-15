@@ -17,7 +17,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { ONE_LINE_SX, TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
@@ -98,7 +98,9 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               <Typography sx={{ ...TEXT_STYLES.title, fontSize: FONT_SIZES.xs, color: 'text.secondary', width: 28, flexShrink: 0 }}>
                 {ABILITY_ABBREVIATIONS[st]}
               </Typography>
-              <Typography sx={{ fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
+              {/* The name takes the room left and is cut short rather than
+                  push the figure: the figures stay in one column. */}
+              <Typography sx={{ ...ONE_LINE_SX, flex: 1, minWidth: 0, fontSize: FONT_SIZES.lg, color: 'text.secondary' }}>
                 {ABILITY_NAMES[st]}
               </Typography>
               {/* The advantage mark sits on the figure's corner, taking no room,

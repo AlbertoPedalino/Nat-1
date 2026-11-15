@@ -15,8 +15,11 @@ export const SHEET_GRID_ITEM_SX = {
   minWidth: 0,
 };
 
+// The left column holds the saves at its widest: a row (gem, abbreviation,
+// "Constitution", the figure and the save-context chevron) needs about 227px,
+// so its figures stay in one column.
 export const SHEET_GRID = {
-  gridTemplateColumns: { xs: '1fr', md: '200px 210px 1fr' },
+  gridTemplateColumns: { xs: '1fr', md: '232px 210px 1fr' },
   gridTemplateAreas: {
     xs: `
       "${SHEET_AREAS.saves}"

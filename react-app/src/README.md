@@ -66,10 +66,13 @@ AA (both tested in `tests/logic/shared/ui/paletteColors.test.js`). The default
 choice is Dark. On a light palette the accent itself is too pale to read as
 plain lettering: a label, a link or an icon in the accent with no ink round
 it is `accentLabel` (the accent itself on the dark palette), while inked
-lettering keeps the accent. Inked lettering (`inkLettering`) is outlined in
-the palette's `lettering` edge: the ink on the dark palette, the side away
-from the letters on the light one (dark letters stand clean on the paper,
-light ones are inked). The page's drawings take `pageDrawing` and `pageLine`.
+lettering keeps the accent. Inked lettering (`inkLettering`) is always
+outlined in the ink; the palette's `lettering` decides the rest: on the dark
+palette the letters keep their colour over their solid shadow, on the light
+one a dark neutral (the text's browns) is lifted to a light tone, a tone's
+colour is kept (a title matches its badge), and no shadow falls. The page's
+drawings take `pageDrawing` and `pageLine`; a rule's own marks (sub-headings,
+bold, references) `ruleEmphasis` (RICH_TEXT_ACCENT); the AC tile `armor`.
 
 A style is one entry of `SHAPE_STYLES` with the same keys as `comic` (guarded
 in `tests/logic/shared/ui/shapeStyles.test.js`). As with the palette, a shape

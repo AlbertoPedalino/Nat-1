@@ -58,6 +58,12 @@ const COMIC_DARK = Object.freeze({
   // more than seen.
   pageDrawing: '#2e2a26',
   pageLine: '#0d0b09',
+  // What a rule's text marks as its own (a sub-heading, a bold word, a
+  // reference, a card's rule section): apart from every entity, action and
+  // spell colour, so it never reads as one of their meanings.
+  ruleEmphasis: '#b7d36b',
+  // Armor Class: the sheet's AC tile and what wears its steel.
+  armor: '#a9b8c9',
   black: '#000000',
   white: '#ffffff',
 
@@ -144,6 +150,8 @@ const PARCHMENT_LIGHT = Object.freeze({
   edge: '#1e140c',
   pageDrawing: '#f2e5c8',
   pageLine: '#d2bd92',
+  ruleEmphasis: '#4a6614',
+  armor: '#4e6884',
   dangerStrong: '#d1183a',
   danger: '#c8203e',
   dangerText: '#9e1029',
@@ -173,10 +181,10 @@ const PARCHMENT_LIGHT = Object.freeze({
 
 // The palettes the viewer can choose from (the "Colours" of the account menu),
 // each with the MUI mode it is drawn in and how its inked lettering is
-// outlined (`lettering`, LETTERING_EDGE).
+// lettered (`lettering`, LETTERING_FILL).
 export const PALETTES = Object.freeze({
   dark: Object.freeze({ id: 'dark', label: 'Dark', mode: 'dark', lettering: 'ink', colors: COMIC_DARK }),
-  light: Object.freeze({ id: 'light', label: 'Light', mode: 'light', lettering: 'contrast', colors: PARCHMENT_LIGHT }),
+  light: Object.freeze({ id: 'light', label: 'Light', mode: 'light', lettering: 'lift', colors: PARCHMENT_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no
@@ -207,21 +215,28 @@ export function paletteVariables(paletteId) {
     ...Object.fromEntries(Object.entries(colors)
       .filter(([key]) => !FIXED_COLOR_KEYS.has(key))
       .map(([key, hex]) => [colorVariableName(key), hex])),
-    '--gb-lettering-edge': LETTERING_EDGES[lettering] || LETTERING_EDGES.ink,
+    '--gb-lettering-fill': (LETTERINGS[lettering] || LETTERINGS.ink).fill,
+    '--gb-lettering-drop': (LETTERINGS[lettering] || LETTERINGS.ink).drop,
   };
 }
 
-// The outline of inked lettering (shadows.js inkLettering): on a dark palette
-// the ink, as every edge (`ink`); on a light one the outline takes the side
-// away from the letters' own colour (`contrast`: light round dark letters,
-// dark round light ones, from the colour's lightness), as a dark letter in a
-// dark outline would read as a blot. Worked out where the letters are drawn,
-// as it reads their colour (currentColor).
-const LETTERING_EDGES = Object.freeze({
-  ink: 'var(--gb-edge)',
-  contrast: 'oklch(from currentColor clamp(0, (0.6 - l) * 1000, 1) 0 0)',
+// How inked lettering (shadows.js inkLettering) is lettered, always outlined
+// in the ink. On a dark palette (`ink`) the letters keep their own colour and
+// drop their solid shadow. On a light one (`lift`) a dark neutral (the text's
+// browns: lightness under 0.6, chroma under 0.045) is lifted to a light tone
+// of itself, as dark letters in a dark outline read as a blot, while a
+// colour of a tone keeps itself, so a title matches its badge and buttons;
+// and no solid shadow falls under it, which on the paper only thickened the
+// letters. The fill is worked out where the letters are drawn, as it reads
+// their colour (currentColor).
+const LETTERINGS = Object.freeze({
+  ink: Object.freeze({ fill: 'currentColor', drop: '1' }),
+  lift: Object.freeze({
+    fill: 'oklch(from currentColor calc(l + clamp(0, (0.6 - l) * 1000, 1) * clamp(0, (0.045 - c) * 1000, 1) * (0.92 - l)) c h)',
+    drop: '0',
+  }),
 });
-export const LETTERING_EDGE = 'var(--gb-lettering-edge)';
+export const LETTERING_FILL = 'var(--gb-lettering-fill)';
 
 // The colour of a hit point readout by its tone (vitals.hpTone).
 export const HP_TONE_COLORS = Object.freeze({

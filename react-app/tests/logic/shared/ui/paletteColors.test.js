@@ -67,7 +67,7 @@ const KNOWN_SHORT = Object.freeze({
 });
 
 test('in every palette the text roles read on the surfaces they are written on (WCAG AA)', () => {
-  const text = ['textPrimary', 'textSecondary', 'textMuted', 'accentText', 'accentLabel', 'dangerText', 'warningText', 'successText', 'secondaryText', 'infoText'];
+  const text = ['textPrimary', 'textSecondary', 'textMuted', 'accentText', 'accentLabel', 'dangerText', 'warningText', 'successText', 'secondaryText', 'infoText', 'ruleEmphasis'];
   const surfaces = ['surface', 'surfaceRaised', 'surfaceHeader'];
   Object.values(PALETTES).forEach(({ id, colors }) => {
     const failing = text.flatMap((role) => surfaces

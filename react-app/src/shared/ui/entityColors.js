@@ -27,8 +27,9 @@ export const ITEM_ATTUNEMENT = '#a23b4d';
 
 // Dedicated accent for structured rich-text descriptions. Kept separate from
 // entity, action, spell-tag, and item-state colors so highlighted rules text
-// never implies one of those semantic meanings.
-export const RICH_TEXT_ACCENT = '#b7d36b';
+// never implies one of those semantic meanings. A palette role (ruleEmphasis),
+// as it is read as text: each palette darkens or lightens it to be read.
+export const RICH_TEXT_ACCENT = UI_COLORS.ruleEmphasis;
 
 // Action-economy accents (action / bonus action / reaction). Deliberately
 // outside every entity-kind hue (teal/violet/blue/etc.) so action type never
@@ -123,7 +124,7 @@ export const PANEL_TONES = Object.freeze({
   // The stat tiles beside Defenses, each its own: AC steel, Initiative the
   // accent its roll wears, Proficiency Bonus the skills' green, Inspiration
   // the violet.
-  armorClass: '#a9b8c9',
+  armorClass: UI_COLORS.armor,
   initiative: UI_COLORS.accent,
   proficiencyBonus: ENTITY_COLORS.skill,
   inspiration: UI_COLORS.spell,
