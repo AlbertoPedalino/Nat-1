@@ -1,16 +1,29 @@
 import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
-import { INK_EDGE, UI_SHADOWS } from './shadows.js';
-import { STICKER_PAPER } from './stickerPaper.js';
+import { INK_EDGE, UI_SHADOWS, INK_SOLID } from './shadows.js';
+import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
 import { cornerRadius } from './radius.js';
-import { PAPER } from './shapes.js';
+import { styleShapes } from './shapes.js';
 
 // The interface's surfaces, by kind. A box that is a surface spreads one and
 // adds only its own layout (`{ ...SURFACES.panel, p: 1 }`), so a restyle
 // changes every panel, well or card from here.
-// A comic print's faint halftone dots, behind the page and the map's panels.
-const HALFTONE = `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} 1px, transparent 1.4px)`;
-const HALFTONE_SIZE = '7px 7px';
+// The page's textures, as the style lays them (shapes.js surface): the paper
+// (the stickers, painted in the palette: stickerPaper.js) and a comic print's
+// faint halftone dots, `dot` px across every `step` px. Written on the page's
+// root with the palette's variables (ThemeChoiceProvider), as `--gb-surface-*`.
+export function surfaceVariables(paletteId, styleId) {
+  const { paper, halftone } = styleShapes(styleId).surface;
+  const stickers = paper === 'stickers';
+  return {
+    '--gb-surface-paper': stickers ? stickerPaperImage(paletteId) : 'none',
+    '--gb-surface-paper-size': stickers ? STICKER_PAPER_SIZE : 'auto',
+    '--gb-surface-halftone': halftone
+      ? `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} ${halftone.dot}px, transparent ${halftone.dot + 0.4}px)`
+      : 'none',
+    '--gb-surface-halftone-size': halftone ? `${halftone.step}px ${halftone.step}px` : 'auto',
+  };
+}
 
 // A comic cover's sunburst: rays in `color` fanning out from behind a title,
 // fading out before the edge of the box the title sits in (spread on it).
@@ -35,6 +48,8 @@ export function coverRaysSx(color = UI_COLORS.accent) {
         `radial-gradient(ellipse closest-side, ${UI_COLORS.page} 35%, transparent 100%)`,
       ].join(', '),
       maskImage: 'radial-gradient(ellipse closest-side, black 30%, transparent 100%)',
+      // As strongly as the style shines them (shapes.js surface.rays).
+      opacity: 'var(--gb-surface-rays)',
     },
   };
 }
@@ -69,7 +84,7 @@ export function cardToneSx(tone) {
 // concluded negotiation, a rolled fumble, a condition's rules card. The 2px
 // edge in its tone over a soft wash of it. `tone` is a palette colour (hex).
 export function calloutSx(tone) {
-  return { border: 2, borderColor: tone, borderRadius: 1, ...tintedSurfaceSx(tone, { amount: OPACITY.soft }) };
+  return { border: INK_SOLID, borderColor: tone, borderRadius: 1, ...tintedSurfaceSx(tone, { amount: OPACITY.soft }) };
 }
 
 // The empty track of a meter (a hit point or XP bar, the encounter's
@@ -86,8 +101,7 @@ export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({
     bgcolor: 'background.paper',
-    border: 2,
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     borderRadius: 1,
     boxShadow: UI_SHADOWS.box,
   }),
@@ -95,8 +109,7 @@ export const SURFACES = Object.freeze({
   // (interactive.js CARD_SX lights it under the cursor).
   card: Object.freeze({
     bgcolor: 'background.paper',
-    border: 2,
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     borderRadius: 1,
     boxShadow: UI_SHADOWS.box,
   }),
@@ -109,36 +122,34 @@ export const SURFACES = Object.freeze({
   }),
   // The page behind everything: the background with the game's things drawn
   // small all over it (stickerPaper.js) over a comic print's faint halftone
-  // dots.
+  // dots, as the style lays them (surfaceVariables).
   page: Object.freeze({
     bgcolor: 'background.default',
-    backgroundImage: `${STICKER_PAPER.image}, ${HALFTONE}`,
-    backgroundSize: `${STICKER_PAPER.size}, ${HALFTONE_SIZE}`,
+    backgroundImage: 'var(--gb-surface-paper), var(--gb-surface-halftone)',
+    backgroundSize: 'var(--gb-surface-paper-size), var(--gb-surface-halftone-size)',
   }),
   // A sunken well inside a panel: the details under a row, a field group.
   inset: Object.freeze({
     bgcolor: UI_COLORS.surfaceSunken,
-    border: 2,
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     borderRadius: 1,
   }),
   // A light row or tile laid on the page: list entries, stat tiles.
   wash: Object.freeze({
     ...tintedSurfaceSx(UI_COLORS.white, { amount: OPACITY.faint }),
-    border: 2,
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     borderRadius: 1,
   }),
   // Paper laid on the interface: a rulebook's boxed text (a read-aloud, a
   // sidebar), a picture that is missing. The ivory shading to its foot, the
   // brown ink on it, edged in ink with its solid shadow, its corners cut
-  // unevenly as a torn-out page's (PAPER, shapes.js).
+  // unevenly as a torn-out page's (the style's paper, shapes.js).
   paper: Object.freeze({
     backgroundColor: UI_COLORS.paper,
     backgroundImage: `linear-gradient(${UI_COLORS.paper}, ${UI_COLORS.paperShade})`,
     color: UI_COLORS.onPaper,
     border: INK_EDGE,
-    borderRadius: cornerRadius(...PAPER.corners),
+    borderRadius: (theme) => cornerRadius(...styleShapes(theme.gmboard?.styleId).paper.corners)(theme),
     boxShadow: UI_SHADOWS.box,
   }),
   // Every other row of a long, dense list or table (a catalog, a rule's

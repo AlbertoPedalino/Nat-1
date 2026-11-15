@@ -8,6 +8,7 @@ import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { ONE_LINE_SX } from '../../ui/textStyles.js';
 import CountStepper from '../../ui/CountStepper.jsx';
 import CornerCloseButton from '../../ui/CornerCloseButton.jsx';
+import { INK_EDGE, INK_SOLID } from '../../ui/shadows.js';
 
 export function CurrencyCoinBox({
   coin,
@@ -76,8 +77,7 @@ export function CurrencyCoinBox({
     <Box
       sx={{
         position: 'relative',
-        border: 2,
-        borderColor: UI_COLORS.edge,
+        border: INK_EDGE,
         borderRadius: 1,
         bgcolor: v.box.bgcolor,
         p: v.box.p,
@@ -99,7 +99,7 @@ export function CurrencyCoinBox({
                 height: 14,
                 borderRadius: '50%',
                 bgcolor: coin.tone,
-                border: '2px solid',
+                border: INK_SOLID,
                 borderColor: uiAlpha(UI_COLORS.white, OPACITY.strong),
                 cursor: 'pointer',
                 zIndex: 1,

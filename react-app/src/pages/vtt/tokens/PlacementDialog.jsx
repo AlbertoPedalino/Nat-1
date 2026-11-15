@@ -1,7 +1,7 @@
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 
 // The shell of a dialog pieces are dragged out of onto the map (an encounter,
 // a creature from the bestiary): a map dialog (SheetDialog, `surface="map"`)
@@ -42,7 +42,7 @@ const dropBackdropSx = {
 };
 
 // Always set, so the paper fades both ways.
-const fadeSx = { transition: `opacity ${DURATIONS.fast}ms ease` };
+const fadeSx = { transition: `opacity ${motionTime(DURATIONS.fast)} ease` };
 
 const placingSx = {
   opacity: 0,

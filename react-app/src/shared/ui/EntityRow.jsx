@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import Caption from './Caption.jsx';
 import { SURFACES } from './surfaces.js';
 import { UI_COLORS } from './colors.js';
-import { DURATIONS } from './motion.js';
+import { DURATIONS, motionTime } from './motion.js';
 import { FONT_WEIGHTS } from './fonts.js';
 import {
   BARE_BUTTON_SX, CARD_SX, LIST_ROW_RULE_SX, LIST_ROW_SX, focusRingSx,
@@ -95,7 +95,7 @@ const OPENS_SX = { cursor: 'pointer' };
 
 // A washed row that opens answers the cursor as a card does.
 const HOVER_SX = {
-  transition: `border-color ${DURATIONS.fast}ms ease`,
+  transition: `border-color ${motionTime(DURATIONS.fast)} ease`,
   '&:hover': { borderColor: UI_COLORS.accent },
 };
 

@@ -1,7 +1,7 @@
 import { CONTROL_HEIGHTS } from '../../ui/controlHeights.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { OPACITY, UI_COLORS, uiAlpha, washImage } from '../../ui/colors.js';
-import { inkShadow } from '../../ui/shadows.js';
+import { inkShadow, INK_WIDTH } from '../../ui/shadows.js';
 import { chipTintStyle } from '../../ui/entityColors.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 
@@ -34,7 +34,7 @@ export function markerOnSx(accent, { open = false } = {}) {
   return {
     ...MARKER_BASE_SX,
     ...chipTintStyle(accent, { bgAlpha: open ? OPACITY.line : OPACITY.fill, borderAlpha: 1 }),
-    borderWidth: 2,
+    borderWidth: INK_WIDTH,
     borderStyle: 'solid',
     boxShadow: open ? inkShadow(accent, 2) : 'none',
     '& .MuiChip-deleteIcon': { color: accent, '&:hover': { color: accent } },
@@ -61,7 +61,7 @@ export function markerSuggestedSx(accent) {
     cursor: 'pointer',
     color: UI_COLORS.textSecondary,
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: INK_WIDTH,
     borderStyle: 'solid',
     borderColor: uiAlpha(UI_COLORS.textSecondary, OPACITY.edge),
     boxShadow: 'none',

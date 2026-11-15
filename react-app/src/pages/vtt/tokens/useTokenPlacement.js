@@ -9,6 +9,7 @@ import {
 import { placeAroundCenter } from '../../../shared/vtt/tokens/placement.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene/scene.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { storedColor } from '../../../shared/ui/colors.js';
 import { launchLibraryEncounter } from '../../encounterbuilder/sync/handoff.js';
 import { readPersistedFight } from '../../encounterbuilder/state/storage.js';
 import {
@@ -204,7 +205,7 @@ export function useTokenPlacement({
       layer: targetLayer,
       hiddenFromPlayers: targetLayer === 'gm',
       label: secret ? '' : object.label,
-      color: object.color || VTT_COLORS.accent,
+      color: object.color || storedColor(VTT_COLORS.accent),
       iconKey: object.key,
       iconStrokeWidth: object.strokeWidth,
       rotation: 0,

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import MapMenu from '../map/MapMenu.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Everything that decides what the table sees, in one place: whether this scene
 // is the live one, whether the picture is frozen while the GM prepares the next,
@@ -109,5 +110,5 @@ export default function LiveControls({
 
 const iconSx = {
   minWidth: 28,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };

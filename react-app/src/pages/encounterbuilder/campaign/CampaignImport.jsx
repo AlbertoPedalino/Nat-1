@@ -12,6 +12,7 @@ import TagChip from '../../../shared/ui/TagChip.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SelectField from '../../../shared/ui/SelectField.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default encounterPanel({ state: ['campaignNotice'], context: ['campaignPlayers', 'dispatch'] }, CampaignImportView);
 
@@ -89,7 +90,7 @@ function CampaignImportView({ state, campaignPlayers, dispatch }) {
               {selected.players.length > 10 ? <TagChip label={`+${selected.players.length - 10} more`} /> : null}
             </Box>
             {state.campaignNotice ? (
-              <Typography variant="caption" sx={{ color: 'primary.main' }}>{state.campaignNotice}</Typography>
+              <Typography variant="caption" sx={{ color: UI_COLORS.accentLabel }}>{state.campaignNotice}</Typography>
             ) : null}
           </>
         ) : null}

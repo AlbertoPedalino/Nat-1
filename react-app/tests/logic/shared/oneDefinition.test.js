@@ -177,6 +177,32 @@ test('no literal colours outside the palettes and colour data', () => {
     .filter((hit) => !hit.startsWith('adapters/') && !hit.startsWith('data/')), []);
 });
 
+// A time moves at the chosen style's pace (shapes.js `motion`): it is written
+// through motionTime (motion.js), never a motion constant followed by "ms".
+test("a motion time takes the style's pace", () => {
+  assert.deepEqual(sourceLinesMatching(/\b(DURATIONS|BUSY_MOTION|ICON_MOTION|DIALOG_MOTION|METER_MOTION|GEM_MOTION)\.\w+[^`]*\}ms\b/), []);
+});
+
+// The ink line is as wide as the chosen style inks it (shapes.js `ink`):
+// INK_EDGE (the ink line in the ink), INK_SOLID (its width and style, a tone
+// set apart), INK_WIDTH (a width alone) or inkEdge(px, colour) for another
+// line of the comic cut, never a 2px line written by hand.
+test('an ink line takes the style\'s width', () => {
+  const handInked = /'2px solid'|\bborder(Top|Bottom|Left|Right)?: 2\b(?!\.)|\bborderWidth: 2\b(?!\.)|`2px solid \$\{/;
+  assert.deepEqual(sourceLinesMatching(handInked, { allow: ['shared/ui/shadows.js'] }), []);
+});
+
+// A role is the chosen palette's CSS variable, which MUI's colour helpers
+// cannot read: a colour is worked out with colors.js (uiAlpha, uiMix,
+// uiLighten, uiDarken; resolveColors where hexes are needed), the one contrast
+// check is inkOn's (pressable.js, worked per palette).
+test("colours are worked out by colors.js, never by MUI's helpers", () => {
+  assert.deepEqual(sourceFilesMatching(
+    /import\s*\{[^}]*\b(alpha|darken|lighten|emphasize|getContrastRatio|getLuminance|decomposeColor|recomposeColor|rgbToHex|hexToRgb)\b[^}]*\}\s*from\s*'@mui/,
+    { allow: ['shared/ui/pressable.js'] },
+  ), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],
@@ -647,8 +673,9 @@ test('the press is drawn only by the pressable recipes', () => {
 });
 
 test('the screentone and the halftone are drawn in one place each', () => {
-  assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\(-45deg/, { allow: ['shared/ui/colors.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/repeating-linear-gradient\((-45deg|var\(--gb-screentone)/, { allow: ['shared/ui/colors.js'] }), []);
   assert.deepEqual(sourceFilesMatching(/radial-gradient\(\$\{uiAlpha\(UI_COLORS\.textPrimary/, { allow: ['shared/ui/surfaces.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/--gb-surface-(paper|halftone)/, { allow: ['shared/ui/surfaces.js'] }), []);
 });
 
 // What kind an item is — weapon, armor, shield, ammunition, equippable — is

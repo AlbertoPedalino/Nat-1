@@ -4,6 +4,7 @@ import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../share
 import Panel from '../../../shared/ui/Panel.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -129,9 +130,9 @@ const stepMarkerSx = {
   flexShrink: 0,
   mt: 0.25,
   borderRadius: '50%',
-  border: '2px solid',
+  border: INK_SOLID,
   borderColor: 'primary.main',
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   fontSize: FONT_SIZES.xs,
   fontWeight: FONT_WEIGHTS.bold,
 };
@@ -142,8 +143,7 @@ const kwSx = {
   py: 0.25,
   mx: 0.25,
   borderRadius: 0.75,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   fontFamily: UI_FONTS.mono,
   fontSize: '0.78em',
   color: 'text.primary',

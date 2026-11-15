@@ -9,6 +9,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import BusyDie from '../../../shared/ui/BusyDie.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
 // list. GM only: a player has no scenes to list — RLS hands them the live one
@@ -99,7 +100,7 @@ const errorSx = {
 // instead of shifting around the broadcast mark.
 const iconSx = {
   minWidth: 24,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 const nameSx = {

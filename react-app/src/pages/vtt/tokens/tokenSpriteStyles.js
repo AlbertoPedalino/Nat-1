@@ -1,8 +1,8 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
-import { inkPieceShadow } from '../../../shared/ui/shadows.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
+import { inkPieceShadow, inkEdge } from '../../../shared/ui/shadows.js';
 import { chipSolidStyle } from '../../../shared/ui/entityColors.js';
 import { SEAL_RADIUS } from '../../../shared/ui/shapes.js';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
@@ -68,7 +68,7 @@ export const resizeHandleSx = {
   height: 14,
   p: 0,
   borderRadius: 0.375,
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
+  border: inkEdge(2, vttAlpha(VTT_COLORS.surface, OPACITY.solid)),
   bgcolor: VTT_COLORS.accent,
   boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, OPACITY.veil)}`,
   cursor: 'nwse-resize',
@@ -85,7 +85,7 @@ export const rotateHandleSx = {
   height: 16,
   p: 0,
   borderRadius: '50%',
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
+  border: inkEdge(2, vttAlpha(VTT_COLORS.surface, OPACITY.solid)),
   bgcolor: VTT_COLORS.accent,
   color: VTT_COLORS.surface,
   boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, OPACITY.veil)}`,
@@ -305,7 +305,7 @@ export const badgeSx = {
   fontSize: 'clamp(6px, 14cqmin, 10px)',
   lineHeight: 'clamp(8px, 18cqmin, 14px)',
   pointerEvents: 'none',
-  transition: `all ${DURATIONS.fast}ms ease`,
+  transition: `all ${motionTime(DURATIONS.fast)} ease`,
   ...hiddenBelow(TOKEN_DETAIL.outside),
 };
 
@@ -341,7 +341,7 @@ export const deadBadgeSx = {
   borderRadius: '50%',
   bgcolor: VTT_COLORS.dangerDeep,
   color: VTT_COLORS.deathText,
-  border: `2px solid ${vttAlpha(VTT_COLORS.surface, OPACITY.solid)}`,
+  border: inkEdge(2, vttAlpha(VTT_COLORS.surface, OPACITY.solid)),
   boxShadow: `0 2px 5px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}`,
   display: 'flex',
   alignItems: 'center',

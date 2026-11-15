@@ -19,6 +19,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { PART_ICON_BUTTON_SX } from '../../../shared/ui/pressable.js';
+import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
 
 const KEYBOARD_HEIGHT_STEP = 40;
 // Shared empty array: a fresh one per render would restart the markdown
@@ -319,8 +320,7 @@ const titlePreviewSx = {
   minWidth: 0,
   px: 1.75,
   py: 0.5,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   cursor: 'text',
 };
@@ -334,8 +334,7 @@ const previewSx = {
   flex: 1,
   minHeight: 0,
   p: 1.25,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   cursor: 'text',
   overflowY: 'auto',
@@ -370,8 +369,8 @@ const resizeGripSx = {
   height: 16,
   cursor: 'nwse-resize',
   touchAction: 'none',
-  borderRight: '2px solid',
-  borderBottom: '2px solid',
+  borderRight: INK_SOLID,
+  borderBottom: INK_SOLID,
   borderColor: 'divider',
   borderBottomRightRadius: 1,
   '&:hover, &:focus-visible': { borderColor: 'primary.main' },

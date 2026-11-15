@@ -1,6 +1,7 @@
 import { clamp } from '../numbers.js';
-import { darken, rgbToHex } from '@mui/material';
-import { HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS } from '../ui/colors.js';
+import {
+  HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS, readsPalette, resolveColors, uiAlpha, uiDarken,
+} from '../ui/colors.js';
 import { DAMAGE_TYPE_COLORS } from '../ui/entityColors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
@@ -34,10 +35,10 @@ export const VTT_COLORS = Object.freeze({
   stitchBackground: UI_COLORS.surfaceSunken,
   // The interface's vitals tones (HP_TONE_COLORS, TEMP_HP_TONE), a step
   // darker so bars stay legible over any map while following the sheet's.
-  hpHealthy: rgbToHex(darken(HP_TONE_COLORS.healthy, 0.2)),
-  hpWounded: rgbToHex(darken(HP_TONE_COLORS.wounded, 0.1)),
-  hpCritical: rgbToHex(darken(HP_TONE_COLORS.critical, 0.2)),
-  tempHp: rgbToHex(darken(TEMP_HP_TONE, 0.2)),
+  hpHealthy: uiDarken(HP_TONE_COLORS.healthy, 0.2),
+  hpWounded: uiDarken(HP_TONE_COLORS.wounded, 0.1),
+  hpCritical: uiDarken(HP_TONE_COLORS.critical, 0.2),
+  tempHp: uiDarken(TEMP_HP_TONE, 0.2),
   tempHpText: '#dff0fb',
   deathText: '#f7e9dc',
   neutralMark: '#e2dac6',
@@ -66,12 +67,28 @@ export const VTT_COLORS = Object.freeze({
   turnActive: '#3fe0ff',
 });
 
+// The map's colours as a canvas draws them: every one in `paletteId`'s hexes
+// (a canvas reads no CSS variables). Made once per palette.
+const CANVAS_PALETTES = new Map();
+export function vttCanvasColors(paletteId) {
+  if (!CANVAS_PALETTES.has(paletteId)) {
+    CANVAS_PALETTES.set(paletteId, Object.freeze(Object.fromEntries(
+      Object.entries(VTT_COLORS).map(([key, color]) => [key, resolveColors(color, paletteId)]),
+    )));
+  }
+  return CANVAS_PALETTES.get(paletteId);
+}
+
 // The map's darker hit point tones, for bars drawn over the board.
 export const VTT_HP_TONE_COLORS = Object.freeze({
   healthy: VTT_COLORS.hpHealthy, wounded: VTT_COLORS.hpWounded, critical: VTT_COLORS.hpCritical,
 });
 
+// A map colour at some opacity. A hex answers in rgba(); a role of the
+// palette (or a colour worked from one) in color-mix(), as uiAlpha; anything
+// else (currentColor) is returned as it is.
 export function vttAlpha(color, alpha) {
+  if (readsPalette(color)) return uiAlpha(color, clamp(Number(alpha), 0, 1));
   const match = /^#([0-9a-f]{6})$/i.exec(color || '');
   if (!match) return color;
   const value = Number.parseInt(match[1], 16);

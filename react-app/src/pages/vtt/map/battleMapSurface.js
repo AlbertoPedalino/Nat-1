@@ -4,6 +4,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { iconButtonLook } from '../../../shared/ui/pressable.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // The battle map's own recipes: what sits on the board itself. A dialog over
 // the map is SheetDialog with `surface="map"`, a menu is MapMenu, a floating
@@ -34,7 +35,7 @@ export const mapPanelSx = {
 export const mapPanelTitleSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 // The small icon buttons in a panel's title row (settings, close): the map's

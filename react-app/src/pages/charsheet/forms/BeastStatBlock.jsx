@@ -11,7 +11,7 @@ import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.j
 import { detailMetaSx, detailTitleSx } from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
@@ -330,7 +330,7 @@ export const dismissButtonSx = {
   px: 0.75,
   py: 0.25,
   fontSize: FONT_SIZES.xxs,
-  border: 2,
+  border: INK_SOLID,
   borderRadius: 1,
   ...actionButtonToneSx(UI_COLORS.dangerMuted),
 };

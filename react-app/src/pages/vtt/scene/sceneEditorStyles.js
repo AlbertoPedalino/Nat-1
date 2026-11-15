@@ -1,10 +1,9 @@
 import { SURFACES, washImage } from '../../../shared/ui/surfaces.js';
-import { panelScreentone } from '../../../shared/ui/colors.js';
+import { panelScreentone, normalizeHexColor, OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
-import { normalizeHexColor, OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
-import { UI_SHADOWS } from '../../../shared/ui/shadows.js';
+import { UI_SHADOWS, INK_SOLID } from '../../../shared/ui/shadows.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
@@ -193,7 +192,7 @@ export const sheetViewSx = {
     overscrollBehavior: 'contain',
     contain: 'layout paint',
   },
-  border: '2px solid',
+  border: INK_SOLID,
   borderColor: 'gmboard.vtt.accentBorderStrong',
   borderRadius: 1.5,
   // The dark glass laid over the page's plain colour rather than over the page
@@ -217,6 +216,6 @@ export const sheetLoadingSx = {
 
 // Half-transparent version of a stroke colour, for the layers not being edited.
 export function fade(color) {
-  const hex = normalizeHexColor(color, VTT_COLORS.accent);
-  return `${hex}55`;
+  const hex = normalizeHexColor(color);
+  return hex ? `${hex}55` : vttAlpha(VTT_COLORS.accent, OPACITY.line);
 }

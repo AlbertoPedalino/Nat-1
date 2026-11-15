@@ -265,7 +265,7 @@ const finalResultSx = {
 const finalEyebrowSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 const finalResultTextSx = {

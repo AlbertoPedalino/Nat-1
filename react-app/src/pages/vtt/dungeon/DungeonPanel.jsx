@@ -18,6 +18,7 @@ import { DRAG_SOURCE_SX } from '../../../shared/ui/interactive.js';
 import SelectField from '../../../shared/ui/SelectField.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import BusyDie from '../../../shared/ui/BusyDie.jsx';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // The dungeon this map is being played as.
 //
@@ -269,8 +270,7 @@ const lineSx = { fontSize: FONT_SIZES.md, color: 'text.primary' };
 const roomSx = {
   p: 1,
   borderRadius: 1.5,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   display: 'flex',
   flexDirection: 'column',
   gap: 0.25,

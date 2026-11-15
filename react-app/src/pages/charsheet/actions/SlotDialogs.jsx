@@ -6,13 +6,14 @@ import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
 
 // A choice row of these dialogs (a slot level, an option): edged and washed in
 // the accent while chosen, a fainter wash under the cursor. The wash is laid
 // over the dialog's own surface, so nothing behind the dialog shows through.
 function optionRowSx(selected) {
   return {
-    display: 'flex', alignItems: 'center', gap: 1, border: 2,
+    display: 'flex', alignItems: 'center', gap: 1, border: INK_SOLID,
     borderColor: selected ? UI_COLORS.accentText : UI_COLORS.edge,
     borderRadius: 1, px: 1, py: 0.75, cursor: 'pointer',
     ...(selected ? tintedSurfaceSx(UI_COLORS.accentText, { base: UI_COLORS.surfaceDeep }) : null),
@@ -232,7 +233,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
             {slotRecovery.levels.map((entry) => {
               const value = Number(slotRecoverySelection[String(entry.level)] || 0);
               return (
-                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 1, px: 0.75, py: 0.5 }}>
+                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: INK_EDGE, borderRadius: 1, px: 0.75, py: 0.5 }}>
                   <Typography sx={{ flex: 1, fontSize: FONT_SIZES.md, color: 'text.primary' }}>
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>

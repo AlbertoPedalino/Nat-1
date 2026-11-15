@@ -89,7 +89,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           {clickable ? (
             <ChevronDown
               size={ICON_SIZES.xs}
-              style={{ color: UI_COLORS.accent, flexShrink: 0, opacity: OPACITY.heavy, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+              style={{ color: UI_COLORS.accentLabel, flexShrink: 0, opacity: OPACITY.heavy, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
             />
           ) : null}
         </Box>

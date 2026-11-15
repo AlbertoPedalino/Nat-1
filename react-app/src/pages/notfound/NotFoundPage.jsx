@@ -7,6 +7,7 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../s
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import Caption from '../../shared/ui/Caption.jsx';
+import { UI_COLORS } from '../../shared/ui/colors.js';
 
 export default function NotFoundPage() {
   const location = useLocation();
@@ -68,7 +69,7 @@ const messageSx = {
 };
 
 const statusSx = {
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.lg,
   lineHeight: LINE_HEIGHTS.normal,
@@ -80,7 +81,7 @@ const compassSx = {
   height: { xs: 72, sm: 80 },
   display: 'grid',
   placeItems: 'center',
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   borderRadius: '50%',
 };
 

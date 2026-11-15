@@ -1,4 +1,4 @@
-import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
+import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { weatherTone } from '../../../shared/gmboard/weather.js';
 import { TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
@@ -6,7 +6,7 @@ import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { BARE_BUTTON_SX, CARD_PART_RULE_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import { BUBBLE_FROM_TAIL_SX, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
@@ -68,7 +68,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
           <Stack
             direction="row"
             spacing={0.75}
-            sx={{ ...footerSx, borderColor: alpha(tone || theme.palette.divider, OPACITY.edge) }}
+            sx={{ ...footerSx, borderColor: uiAlpha(tone || UI_COLORS.textSecondary, OPACITY.edge) }}
           >
             <WeatherTag weather={clock.weather} intensity={clock.intensity} />
             <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatCampaignDateTime(clock)}</Typography>

@@ -5,6 +5,7 @@ import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { BUILDER_TEXT } from '../layout/builderText.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -20,7 +21,7 @@ export default function XpPanel({ character, dispatch }) {
     <BuilderPanel id="panel-xp" title="Experience (XP)" icon={GAME_ICONS.experience} note={note}>
       <Stack spacing={1.25}>
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
-          <Typography sx={{ ...BUILDER_TEXT.value, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
+          <Typography sx={{ ...BUILDER_TEXT.value, color: UI_COLORS.accentLabel }}>Player Level {trackerLevel}</Typography>
           <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', whiteSpace: 'nowrap' }}>
             {isMaxLevel ? `${formatNumber(xp)} XP` : `${formatNumber(xp)} / ${formatNumber(nextXp)} XP`}
           </Typography>

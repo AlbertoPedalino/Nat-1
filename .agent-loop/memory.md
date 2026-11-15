@@ -13,7 +13,8 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 ## UI Conventions
 
-- Dark-only fantasy theme: `src/app/theme.js`.
+- Light palette = parchment (user's pick from the look-book, 2026-11-15); default choice still Dark. Plain accent lettering (label/link/icon, no ink) is `accentLabel`, never `accent`/'primary.main' (inked headings keep accent); `inkLettering` outline+shadow = palette `lettering` edge (dark: ink; light: contrast via oklch relative colour); sticker paper roles `pageDrawing`/`pageLine`; contrast test with KNOWN_SHORT = dark textMuted on surfaceRaised/surfaceHeader (pre-existing).
+- Themeable fantasy theme (2026-11-15): `buildTheme({ paletteId, styleId })` in `src/app/theme.js`, chosen by the viewer in the top bar's account menu (login/logout button; its Theme item from app/navigation/themeMenu.jsx via CloudMenu `extraItems` opens ThemeDialog: colours toggle + one preview card per style drawn in that style; menu opens even without cloud) (colours: System/Dark/Light = `PALETTES` in colors.js; style: `SHAPE_STYLES` in shapes.js, only `comic` so far; each style has the same keys, CSS shapes are `--gb-shape-*` vars, code-cut shapes via `useStyleShapes()`, shape pictures via `svgStylePicture`; the style's `ink` {edge, drop, depth} scales every shadows.js length via `--gb-ink-*`, ink lines only through INK_EDGE/INK_SOLID/INK_WIDTH/inkEdge, guarded; the style also sets `radius` (theme corner) and `surface` {paper, halftone, screentone, rays} → `--gb-surface-*`/`--gb-screentone-*`; sticker paper painted per palette, `PAPER_PICTURES` in stickerPaper.js, light falls back to dark's file; faces per style in `FONT_STYLES` (fonts.js), `UI_FONTS.<role>` = `var(--gb-font-<role>)`, canvas via `fontStacks(useStyleId())`, a non-base style's stylesheet linked by the provider; `motion` {pace, hop} → every time is `motionTime(ms)` = calc(ms * --gb-motion-pace), guarded). Light still wears the dark colours (placeholder) and the default is Dark until it has its own; then default `system`. `UI_COLORS.<role>` = `var(--gb-<role>)`: colour maths only via colors.js helpers (MUI alpha/lighten/darken guarded out), canvas via `vttCanvasColors(usePaletteId())`, colours saved in data via `storedColor` (hex), svgPicture/inkOn via themedValues.js. See src/README "The look".
 - Use MUI `sx` and theme tokens; no new CSS, `styled()`, inline `style`, or component color literals.
 - Existing `pages/library/styles.js` contains legacy literals; do not spread them.
 - Icons: `lucide-react`.
@@ -50,7 +51,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 ## Entry Points
 
-- `src/main.jsx`: StrictMode → ThemeProvider → CssBaseline → ToastProvider → BrowserRouter → AuthProvider → App.
+- `src/main.jsx`: StrictMode → ThemeChoiceProvider (ThemeProvider + palette variables) → CssBaseline → ToastProvider → BrowserRouter → AuthProvider → App.
 - `src/app/App.jsx` mounts `CloudAutoSync` and updates `document.title` from the current route via `shared/ui/pageTitle.js`.
 - Routes: `/`, `/charbuilder`, `/charsheet`, `/gmboard`, `/dm-screen`, `/library/:tool`, `/campaigns`, `/campaign-sheet`, `/vtt`, `/encounter-builder`.
 - Route strings are relative to `BrowserRouter`'s basename, derived from `import.meta.env.BASE_URL` (`/Nat-1/` in Vite). Native links must include that base; `pages/encounterbuilder/campaign/campaignSheetUrl.js` builds `/Nat-1/campaign-sheet?id=<id>&edit=1` with encoded ids.

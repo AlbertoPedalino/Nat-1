@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { BUSY_MOTION } from './motion.js';
+import { BUSY_MOTION, motionTime } from './motion.js';
 
 // The app's own icon (public/favicon.svg, the logo's d20) turning while
 // something is on the way or being done (a list loading, a save, an upload):
@@ -32,7 +32,7 @@ function frameSx(size) {
     width: size,
     height: size,
     flexShrink: 0,
-    animation: `gbBusyDie ${BUSY_MOTION.turn}ms cubic-bezier(.5, 0, .5, 1) infinite`,
+    animation: `gbBusyDie ${motionTime(BUSY_MOTION.turn)} cubic-bezier(.5, 0, .5, 1) infinite`,
     '@keyframes gbBusyDie': { to: { transform: 'rotate(360deg)' } },
     '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
   };

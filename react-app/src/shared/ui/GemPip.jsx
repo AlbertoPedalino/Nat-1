@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, darken, lighten } from '@mui/material';
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { Box } from '@mui/material';
+import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
 import { PANEL_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
-import { DURATIONS, GEM_MOTION } from './motion.js';
+import { DURATIONS, GEM_MOTION, motionTime } from './motion.js';
 import { SPARKLE_PATH } from './BubbleSparkles.jsx';
-import { GEM_CUTS } from './shapes.js';
+import { useStyleId } from './themeIds.js';
+import { styleShapes } from './shapes.js';
 
 // Every counter of the sheet that is spent and recovered one at a time — a
 // spell slot, a pact slot, a feature's uses, a free cast, a hit die — is a
@@ -16,8 +17,8 @@ import { GEM_CUTS } from './shapes.js';
 // sparkles; one spent sinks with a wobble (none for reduced motion).
 //
 // The colours and the sizes live here only (GEM_TONES, GEM_SIZES), the cuts
-// in shapes.js (GEM_CUTS): a new look for every gem is a change to those two
-// files. A skill's or a save's training mark is a gem of its own cut, still
+// in the style's shapes (shapes.js gemCuts): a new look for every gem is a
+// change to those two files. A skill's or a save's training mark is a gem of its own cut, still
 // (TrainingGem).
 //
 // - `available`: lit (there to spend) or an empty setting (spent).
@@ -27,8 +28,8 @@ import { GEM_CUTS } from './shapes.js';
 // - `onClick` makes it a button; without one it only shows.
 // Other props (aria-label, title, disabled…) go to the element.
 
-// The cuts are shapes.js's (GEM_CUTS): a counter's hexagon, a training mark's
-// four-sided diamond. Drawn here from them.
+// The cuts are the style's (shapes.js gemCuts): a counter's hexagon, a
+// training mark's four-sided diamond in the comic style. Drawn here from them.
 
 export const GEM_TONES = Object.freeze({
   slot: UI_COLORS.info,
@@ -52,7 +53,7 @@ function polygon(sides, cx, cy, rx, ry) {
 
 const points = (list) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 
-// A cut's drawing worked out once (GEM_CUTS: sides, outline and table as
+// A cut's drawing worked out once (a gemCuts entry: sides, outline and table as
 // centre and radii, the shadow's drop): its outline, table, facets, shadow
 // and empty setting. Light from the top left: a facet facing it is lit, one facing
 // away is in shade, the others keep the gem's own colour.
@@ -76,18 +77,26 @@ function gemCut({ sides, outer: outerAt, inner: innerAt, shadowDrop }) {
   });
 }
 
-const COUNTER_CUT = gemCut(GEM_CUTS.counter);
-const TRAINING_CUT = gemCut(GEM_CUTS.training);
+// A style's two cuts, worked out once per style.
+const CUTS = new Map();
+function useGemCuts() {
+  const styleId = useStyleId();
+  if (!CUTS.has(styleId)) {
+    const { gemCuts } = styleShapes(styleId);
+    CUTS.set(styleId, { counter: gemCut(gemCuts.counter), training: gemCut(gemCuts.training) });
+  }
+  return CUTS.get(styleId);
+}
 
 // A tone's flat shades, worked out once.
 const shadesCache = new Map();
 function shadesOf(tone) {
   if (!shadesCache.has(tone)) {
     shadesCache.set(tone, {
-      light: lighten(tone, 0.38),
+      light: uiLighten(tone, 0.38),
       base: tone,
-      dark: darken(tone, 0.42),
-      table: lighten(tone, 0.18),
+      dark: uiDarken(tone, 0.42),
+      table: uiLighten(tone, 0.18),
       rim: uiAlpha(tone, OPACITY.line),
     });
   }
@@ -102,6 +111,7 @@ export default function GemPip({
 }) {
   const px = GEM_SIZES[size] || GEM_SIZES.md;
   const shades = shadesOf(GEM_TONES[kind] || GEM_TONES.slot);
+  const { counter: cut } = useGemCuts();
   const interactive = typeof onClick === 'function';
   const motion = useStateChangeMotion(available);
   const outline = px >= GEM_SIZES.md ? 2.2 : 1.9;
@@ -121,8 +131,8 @@ export default function GemPip({
         sx={[svgSx, motion.state ? MOTION_SX[motion.state] : null]}
         onAnimationEnd={motion.done}
       >
-        {available ? <LitGem cut={COUNTER_CUT} shades={shades} /> : <GemSetting cut={COUNTER_CUT} shades={shades} />}
-        <GemOutline cut={COUNTER_CUT} selected={selected} width={outline} />
+        {available ? <LitGem cut={cut} shades={shades} /> : <GemSetting cut={cut} shades={shades} />}
+        <GemOutline cut={cut} selected={selected} width={outline} />
       </Box>
       {motion.state === 'relit' ? SPARKS.map(([dx, dy], index) => (
         <Box
@@ -145,13 +155,14 @@ export default function GemPip({
 // or expert (TRAINING_TONES). `training`: 'none', 'half', 'prof' or 'exp'.
 export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx }) {
   const shades = shadesOf(TRAINING_TONES[training] || TRAINING_TONES.prof);
+  const { training: cut } = useGemCuts();
   return (
     <Box component="svg" viewBox="0 0 100 100" aria-hidden sx={[trainingGemSx(size), sx]}>
       {training === 'prof' || training === 'exp'
-        ? <LitGem cut={TRAINING_CUT} shades={shades} />
-        : <GemSetting cut={TRAINING_CUT} shades={shades} />}
-      {training === 'half' ? <Box component="g" sx={HALF_LIT_SX}><LitGem cut={TRAINING_CUT} shades={shades} /></Box> : null}
-      <GemOutline cut={TRAINING_CUT} width={1.6} />
+        ? <LitGem cut={cut} shades={shades} />
+        : <GemSetting cut={cut} shades={shades} />}
+      {training === 'half' ? <Box component="g" sx={HALF_LIT_SX}><LitGem cut={cut} shades={shades} /></Box> : null}
+      <GemOutline cut={cut} width={1.6} />
     </Box>
   );
 }
@@ -232,7 +243,7 @@ function gemBoxSx(px, interactive, selected) {
     height: px,
     borderRadius: 1,
     cursor: interactive ? 'pointer' : 'default',
-    transition: `transform ${DURATIONS.fast}ms ease`,
+    transition: `transform ${motionTime(DURATIONS.fast)} ease`,
     ...(selected ? { transform: 'translateY(-2px)' } : null),
     ...(interactive ? {
       '&:hover:not(:disabled)': { transform: 'translateY(-1px)' },
@@ -248,7 +259,7 @@ const svgSx = { width: '100%', height: '100%', display: 'block', overflow: 'visi
 
 const MOTION_SX = Object.freeze({
   relit: {
-    animation: `gbGemRelit ${GEM_MOTION.relit}ms cubic-bezier(.2, 1.6, .4, 1)`,
+    animation: `gbGemRelit ${motionTime(GEM_MOTION.relit)} cubic-bezier(.2, 1.6, .4, 1)`,
     '@keyframes gbGemRelit': {
       '0%': { transform: 'scale(0.55)' },
       '60%': { transform: 'scale(1.22)' },
@@ -257,7 +268,7 @@ const MOTION_SX = Object.freeze({
     '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
   },
   spent: {
-    animation: `gbGemSpent ${GEM_MOTION.spent}ms ease-out`,
+    animation: `gbGemSpent ${motionTime(GEM_MOTION.spent)} ease-out`,
     '@keyframes gbGemSpent': {
       '0%': { transform: 'scale(1)' },
       '35%': { transform: 'scale(0.82) rotate(-6deg)' },
@@ -282,7 +293,7 @@ function sparkSx(px, dx, dy, index) {
     overflow: 'visible',
     '--gem-dx': `${dx * px}px`,
     '--gem-dy': `${dy * px}px`,
-    animation: `gbGemSpark ${GEM_MOTION.spark}ms ease-out ${index * GEM_MOTION.sparkStagger}ms both`,
+    animation: `gbGemSpark ${motionTime(GEM_MOTION.spark)} ease-out ${motionTime(index * GEM_MOTION.sparkStagger)} both`,
     '@keyframes gbGemSpark': {
       '0%': { transform: 'translate(0, 0) scale(0.3)', opacity: 1 },
       '100%': { transform: 'translate(var(--gem-dx), var(--gem-dy)) scale(1)', opacity: 0 },

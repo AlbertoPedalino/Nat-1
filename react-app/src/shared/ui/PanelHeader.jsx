@@ -4,7 +4,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
-import { UI_SHADOWS } from './shadows.js';
+import { UI_SHADOWS, INK_EDGE, inkEdge, INK_SOLID } from './shadows.js';
 import { RIBBON, SEAL_RADIUS, ribbonClip } from './shapes.js';
 import { svgPicture } from './svgPicture.js';
 import { useRootStyle } from './liveStyle.js';
@@ -20,19 +20,21 @@ export const panelBarSx = {
   alignItems: 'center',
   gap: 1,
   bgcolor: UI_COLORS.surfaceHeader,
-  borderBottom: 2,
+  borderBottom: INK_SOLID,
   borderColor: UI_COLORS.edge,
 };
 
 // A panel's bar cut as a ribbon (RIBBON, shapes.js): each end notched in a
-// swallowtail `notch` px deep, the notch inked like every edge, all inside the bar's own box (an
-// ornament poking out of a panel is cut by its frame and grows scrollbars).
-// Spread after the bar's padding: it widens the ends (`px`, theme units) to
-// clear the notch.
+// swallowtail `notch` deep (the style's, a CSS length), the notch inked like
+// every edge, all inside the bar's own box (an ornament poking out of a panel
+// is cut by its frame and grows scrollbars). Spread after the bar's padding:
+// it widens the ends (`pad`) to clear the notch.
 function notchInk(side, notch) {
-  const points = side === 'left' ? `0,0 ${notch},50 0,100` : `${notch},0 0,50 ${notch},100`;
+  // Drawn in a box of its own stretched over the notch (no aspect kept, the
+  // ink never scaled), so one picture fits every depth of notch.
+  const points = side === 'left' ? '0,0 10,50 0,100' : '10,0 0,50 10,100';
   // Twice the ink edge: the clip cuts the outer half of the line away.
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${notch} 100" preserveAspectRatio="none">`
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 100" preserveAspectRatio="none">'
     + `<polyline points="${points}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="4" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/></svg>`;
   return {
     content: '""',
@@ -47,18 +49,18 @@ function notchInk(side, notch) {
     pointerEvents: 'none',
   };
 }
-function ribbonSx(notch, px) {
+function ribbonSx({ notch, pad }) {
   return {
     position: 'relative',
-    px,
+    px: pad,
     clipPath: ribbonClip(notch),
     '&::before': notchInk('left', notch),
     '&::after': notchInk('right', notch),
   };
 }
 
-const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel.notch, RIBBON.panel.px);
-const TILE_RIBBON_SX = ribbonSx(RIBBON.tile.notch, RIBBON.tile.px);
+const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel);
+const TILE_RIBBON_SX = ribbonSx(RIBBON.tile);
 
 // The title bar of every panel, whole: the bar, its padding, its ribbon cut
 // and its screentone in `tone`. PanelHeader, a stat tile (`tile`: a
@@ -102,8 +104,7 @@ export function panelBadgeSx(tone = 'primary.main') {
     borderRadius: SEAL_RADIUS,
     bgcolor: tone,
     color: UI_COLORS.edge,
-    border: 2,
-    borderColor: UI_COLORS.edge,
+    border: INK_EDGE,
     // The seal's solid ink shadow, as under every drawn box.
     boxShadow: UI_SHADOWS.box,
     flexShrink: 0,
@@ -147,7 +148,7 @@ export function usePanelsWithoutLayers() {
 }
 
 export const panelFrameSx = {
-  border: `3px solid ${UI_COLORS.edge}`,
+  border: inkEdge(3),
   boxShadow: UI_SHADOWS.panel,
   overflow: 'hidden',
   willChange: { md: `var(${PANEL_LAYER_VAR}, transform)` },

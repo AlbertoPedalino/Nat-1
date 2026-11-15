@@ -59,7 +59,7 @@ export function CancelButton({ onClick, disabled, autoFocus, children = 'Cancel'
 export const dialogSectionTitleSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.md,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 // A section of a dialog's content: its title (with `action` at the end of

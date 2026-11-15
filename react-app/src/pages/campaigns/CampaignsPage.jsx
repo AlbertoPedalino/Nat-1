@@ -321,7 +321,7 @@ const characterIconSx = (canEdit) => ({ color: canEdit ? 'success.main' : 'gmboa
 const metaSx = { display: 'block', fontSize: FONT_SIZES.md, color: 'text.secondary' };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.5 };
 const statSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', fontFamily: UI_FONTS.mono, whiteSpace: 'nowrap' };
-const acStatSx = { color: 'primary.main' };
+const acStatSx = { color: UI_COLORS.accentLabel };
 const ppStatSx = { color: 'success.main' };
 const initStatSx = { color: 'gmboard.badge.cloud' };
 const characterSelectSx = { mt: 1.5, maxWidth: { xs: '100%', sm: 360 } };

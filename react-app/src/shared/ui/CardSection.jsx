@@ -10,7 +10,7 @@ import { ornamentOnRuleSx } from './ornament.js';
 // asks for, the weapon a spell attacks through, a spell's upcast text, the
 // spell written on a scroll, an item's ability choice. Set off from what is
 // above it by the card's part rule (CARD_PART_RULE_SX) with an ornament on its
-// middle (ORNAMENT, shapes.js), as a printed rulebook sets a fleuron between
+// middle (ornament.js, the style's), as a printed rulebook sets a fleuron between
 // its parts, its title in the
 // display face, small, in `tone` (the accent text by default; the rich-text
 // accent for a spell's rules). Every such part is one, so they keep one

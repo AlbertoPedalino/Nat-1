@@ -14,6 +14,7 @@ import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarF
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import HexcrawlLinkWarnings from './HexcrawlLinkWarnings.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { INK_SOLID } from '../../../shared/ui/shadows.js';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -145,7 +146,7 @@ const columnsSx = {
 const sectionCardSx = {
   p: 1.5,
   borderRadius: 1,
-  border: '2px solid',
+  border: INK_SOLID,
   borderColor: 'gmboard.vtt.accentBorder',
   bgcolor: 'gmboard.vtt.inset',
 };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { storedColor } from '../../../shared/ui/colors.js';
 import { DEFAULT_AREA_OPTIONS } from '../../../shared/vtt/map/areas.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 
@@ -9,7 +10,7 @@ import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 export function useSceneTools() {
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
-  const [drawColor, setDrawColor] = useState(VTT_COLORS.accent);
+  const [drawColor, setDrawColor] = useState(() => storedColor(VTT_COLORS.accent));
   const [drawWidth, setDrawWidth] = useState(3);
   const [areaOptions, setAreaOptions] = useState(DEFAULT_AREA_OPTIONS);
   const [measureShape, setMeasureShape] = useState('line');

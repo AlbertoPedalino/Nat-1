@@ -1,8 +1,8 @@
 import { UI_COLORS, uiMix } from './colors.js';
-import { inkShadow } from './shadows.js';
-import { DURATIONS } from './motion.js';
-import { svgPicture } from './svgPicture.js';
-import { BURSTS } from './shapes.js';
+import { inkShadow, inkEdge } from './shadows.js';
+import { DURATIONS, motionTime } from './motion.js';
+import { svgStylePicture } from './svgPicture.js';
+import { BURST_ASPECT } from './shapes.js';
 
 // The comic speech bubble: every toast and roll bubble is one. A thick ink
 // edge, a solid offset shadow — in ink, or in the moment's colour (the accent
@@ -18,12 +18,12 @@ export const SHOUT_TILT = 'rotate(-1.6deg) scale(1.06)';
 export function bubbleSx({ fill = UI_COLORS.bubble, tone = UI_COLORS.edge, pop = true } = {}) {
   return {
     bgcolor: fill,
-    border: `3px solid ${UI_COLORS.edge}`,
+    border: inkEdge(3),
     borderRadius: 2,
     boxShadow: inkShadow(tone),
     transform: `rotate(${TILT})`,
     ...(pop ? {
-      animation: `gbBubblePop ${DURATIONS.slow}ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
+      animation: `gbBubblePop ${motionTime(DURATIONS.slow)} cubic-bezier(0.34, 1.56, 0.64, 1)`,
       '@keyframes gbBubblePop': {
         from: { opacity: 0, transform: 'rotate(-4deg) scale(0.7)' },
         to: { opacity: 1, transform: `rotate(${TILT}) scale(1)` },
@@ -67,25 +67,28 @@ const xy = ([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`;
 const radians = (degrees) => (degrees * Math.PI) / 180;
 const polygon = (corners) => `M${corners.map(xy).join('L')}Z`;
 
-// The two shapes are shapes.js's (BURSTS); drawn here from them.
-const { width: KAPOW_WIDTH, squash: KAPOW_SQUASH, spikes: KAPOW_SPIKES, valleys: KAPOW_VALLEYS } = BURSTS.kapow;
-const { arms: CRASH_ARMS, kinks: CRASH_KINKS, middle: CRASH_MIDDLE } = BURSTS.crash;
-
-const KAPOW_PATH = (() => {
-  const at = (reach, angle) => [KAPOW_WIDTH / 2 + reach * Math.cos(radians(angle)), 50 + reach * KAPOW_SQUASH * Math.sin(radians(angle))];
-  return polygon(KAPOW_SPIKES.flatMap(([angle, reach, lean], index) => {
-    const next = KAPOW_SPIKES[(index + 1) % KAPOW_SPIKES.length][0] + (index === KAPOW_SPIKES.length - 1 ? 360 : 0);
-    return [at(reach * 0.97, angle + lean), at(KAPOW_VALLEYS[index] * 0.97, (angle + next) / 2)];
+// The two shapes are the style's (shapes.js bursts); drawn here from them.
+function kapowPath({ width, squash, spikes, valleys }) {
+  const at = (reach, angle) => [width / 2 + reach * Math.cos(radians(angle)), 50 + reach * squash * Math.sin(radians(angle))];
+  return polygon(spikes.flatMap(([angle, reach, lean], index) => {
+    const next = spikes[(index + 1) % spikes.length][0] + (index === spikes.length - 1 ? 360 : 0);
+    return [at(reach * 0.97, angle + lean), at(valleys[index] * 0.97, (angle + next) / 2)];
   }));
-})();
+}
 
-const CRASH_PATH = (() => {
+function crashPath({ arms, kinks, middle }) {
   const at = (reach, angle) => [50 + reach * Math.cos(radians(angle)), 50 + reach * Math.sin(radians(angle))];
-  return polygon(CRASH_ARMS.flatMap(([angle, reach], index) => {
-    const next = CRASH_ARMS[(index + 1) % CRASH_ARMS.length][0] + (index === CRASH_ARMS.length - 1 ? 360 : 0);
-    return [at(reach, angle), ...CRASH_KINKS.map(([share, off]) => at(reach * share, angle + off)), at(CRASH_MIDDLE, (angle + next) / 2)];
+  return polygon(arms.flatMap(([angle, reach], index) => {
+    const next = arms[(index + 1) % arms.length][0] + (index === arms.length - 1 ? 360 : 0);
+    return [at(reach, angle), ...kinks.map(([share, off]) => at(reach * share, angle + off)), at(middle, (angle + next) / 2)];
   }));
-})();
+}
+
+// Each burst's path and the width of its box (100 tall) in a style's bursts.
+const BURST_DRAWINGS = Object.freeze({
+  kapow: Object.freeze({ path: (bursts) => kapowPath(bursts.kapow), width: (bursts) => bursts.kapow.width }),
+  crash: Object.freeze({ path: (bursts) => crashPath(bursts.crash), width: () => 100 }),
+});
 
 // The dots' screen, in shape units, and the ink line round the shape. The
 // shape is drawn a little inside its box so the ink is not cut off.
@@ -95,25 +98,24 @@ const DOT_SHADE = 0.45;
 const INK_WIDTH = 3.4;
 const INSET = 0.92;
 
-function shapeImage(path, width, color) {
+function shapeSvg(path, width, color) {
   const fit = `transform="translate(${width / 2} 50) scale(${INSET}) translate(${-width / 2} -50)"`;
   const half = DOT_STEP / 2;
   const dot = uiMix(color, UI_COLORS.edge, DOT_SHADE);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 100">`
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 100">`
     // Rows DOT_STEP apart, every other row shifted half a step.
     + `<defs><pattern id="d" width="${DOT_STEP}" height="${DOT_STEP * 2}" patternUnits="userSpaceOnUse">`
     + `<g fill="${dot}"><circle cx="${half / 2}" cy="${half}" r="${DOT_RADIUS}"/><circle cx="${half * 1.5}" cy="${half * 3}" r="${DOT_RADIUS}"/></g></pattern></defs>`
     + `<g ${fit}><path d="${path}" fill="${color}"/>`
     + `<path d="${path}" fill="url(#d)"/>`
     + `<path d="${path}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="${INK_WIDTH}" stroke-linejoin="miter" stroke-miterlimit="6"/></g></svg>`;
-  return svgPicture(svg);
 }
 
-// A shape's picture is the same for every throw of its colour: made once.
-const pictures = new Map();
-function shapeBehindSx(color, path, width, turn) {
-  const key = `${path}|${color}`;
-  if (!pictures.has(key)) pictures.set(key, shapeImage(path, width, color));
+// A burst's picture, in a colour, drawn per style (the same key is the same
+// picture: made once for every throw of its colour).
+function shapeBehindSx(color, kind, turn) {
+  const drawing = BURST_DRAWINGS[kind];
+  const picture = svgStylePicture(`burst:${kind}|${color}`, ({ bursts }) => shapeSvg(drawing.path(bursts), drawing.width(bursts), color));
   return {
     position: 'relative',
     isolation: 'isolate',
@@ -124,10 +126,10 @@ function shapeBehindSx(color, path, width, turn) {
       position: 'absolute',
       left: '50%',
       top: '50%',
-      width: `${(2.2 * width) / 100}em`,
+      width: `calc(2.2em * ${BURST_ASPECT[kind]})`,
       height: '2.2em',
       transform: `translate(-50%, -50%) rotate(${turn})`,
-      backgroundImage: pictures.get(key),
+      backgroundImage: picture,
       backgroundSize: '100% 100%',
       zIndex: -1,
     },
@@ -135,11 +137,11 @@ function shapeBehindSx(color, path, width, turn) {
 }
 
 export function starburstSx(color = UI_COLORS.accent) {
-  return shapeBehindSx(color, KAPOW_PATH, KAPOW_WIDTH, '-8deg');
+  return shapeBehindSx(color, 'kapow', '-8deg');
 }
 
 export function splatSx(color = UI_COLORS.danger) {
-  return shapeBehindSx(color, CRASH_PATH, 100, '14deg');
+  return shapeBehindSx(color, 'crash', '14deg');
 }
 
 // A bubble spoken by something on the map (a piece's roll, the hex the party
@@ -147,7 +149,7 @@ export function splatSx(color = UI_COLORS.danger) {
 // as said by it rather than dropped onto the map from off screen.
 export const BUBBLE_FROM_TAIL_SX = Object.freeze({
   transformOrigin: 'bottom center',
-  animation: `gbBubbleFromTail ${DURATIONS.slow}ms cubic-bezier(0.34, 1.4, 0.64, 1)`,
+  animation: `gbBubbleFromTail ${motionTime(DURATIONS.slow)} cubic-bezier(0.34, 1.4, 0.64, 1)`,
   '@keyframes gbBubbleFromTail': {
     from: { opacity: 0, transform: 'scale(0.25)' },
     to: { opacity: 1, transform: 'scale(1)' },
@@ -161,7 +163,7 @@ export const BUBBLE_FROM_TAIL_SX = Object.freeze({
 // on the dice toast, the bubble's own tilt over a token. With `delay` (ms) it
 // is not there until it leaps in (the home cover's name, after the die lands).
 export function bubbleCheerSx(end = SHOUT_TILT, { delay = 0 } = {}) {
-  const cheer = `gbBubbleCheer ${DURATIONS.slow * 4}ms cubic-bezier(0.3, 0.9, 0.4, 1)`;
+  const cheer = `gbBubbleCheer ${motionTime(DURATIONS.slow * 4)} cubic-bezier(0.3, 0.9, 0.4, 1)`;
   return {
     transform: end,
     animation: delay ? `${cheer} ${delay}ms both, gbBubbleWait 1ms linear ${delay}ms both` : cheer,
@@ -184,7 +186,7 @@ export function bubbleCheerSx(end = SHOUT_TILT, { delay = 0 } = {}) {
 export const BUBBLE_REST = `rotate(${TILT})`;
 
 export const BUBBLE_SHAKE_SX = Object.freeze({
-  animation: `gbBubbleShake ${DURATIONS.slow * 2}ms ease-in-out`,
+  animation: `gbBubbleShake ${motionTime(DURATIONS.slow * 2)} ease-in-out`,
   '@keyframes gbBubbleShake': {
     '0%, 100%': { transform: `rotate(${TILT}) translateX(0)` },
     '20%': { transform: 'rotate(-3deg) translateX(-6px)' },

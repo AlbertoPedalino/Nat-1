@@ -12,12 +12,13 @@ import { OPACITY } from '../../../shared/ui/colors.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { centerInScroller } from '../../../shared/ui/scrollReveal.js';
 import BusyDie from '../../../shared/ui/BusyDie.jsx';
+import { inkEdge } from '../../../shared/ui/shadows.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
@@ -222,10 +223,10 @@ const thumbSx = (selected) => ({
   height: THUMB_H,
   borderRadius: 1,
   overflow: 'hidden',
-  outline: selected ? `2px solid ${VTT_COLORS.accent}` : `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
+  outline: selected ? inkEdge(2, VTT_COLORS.accent) : `1px solid ${vttAlpha(VTT_COLORS.accent, OPACITY.shade)}`,
   outlineOffset: selected ? 1 : 0,
   opacity: selected ? 1 : OPACITY.heavy,
-  transition: `opacity ${DURATIONS.fast}ms`,
+  transition: `opacity ${motionTime(DURATIONS.fast)}`,
   '&:hover': { opacity: 1 },
   // Brighter than the selected thumb's outline, so focus reads apart from it.
   ...focusRingSx({ tone: VTT_COLORS.accentHighlight }),

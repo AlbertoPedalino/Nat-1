@@ -18,6 +18,7 @@ import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { CARD_SX } from '../../../shared/ui/interactive.js';
 import BusyDie from '../../../shared/ui/BusyDie.jsx';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // Starting a scene: empty, or from a generated map.
 //
@@ -246,7 +247,7 @@ const freshSx = { ...cardSx, borderColor: 'primary.main' };
 const sceneOptionTitleSx = {
   ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.xl,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };
@@ -261,8 +262,7 @@ const openSx = { fontSize: FONT_SIZES.md };
 const frameSx = {
   width: '100%',
   height: { xs: '52vh', md: '60vh' },
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   bgcolor: VTT_COLORS.white,
 };

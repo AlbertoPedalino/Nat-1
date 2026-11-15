@@ -1,7 +1,8 @@
-import { getContrastRatio, lighten } from '@mui/material';
-import { UI_COLORS, OPACITY, panelScreentone } from './colors.js';
+import { getContrastRatio } from '@mui/material';
+import { UI_COLORS, OPACITY, panelScreentone, uiLighten } from './colors.js';
+import { themedValue } from './themedValues.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
-import { DURATIONS, ICON_MOTION } from './motion.js';
+import { DURATIONS, ICON_MOTION, motionTime } from './motion.js';
 import { LINE_HEIGHTS } from './fonts.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
@@ -13,9 +14,10 @@ import { LINE_HEIGHTS } from './fonts.js';
 // pressed (none for reduced motion). The raised button below takes it with
 // its shadows; a pressed panel (a stat tile) takes it alone.
 export const PRESS_MOTION_SX = Object.freeze({
-  transition: `transform ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease, border-color ${DURATIONS.fast}ms ease`,
-  '&:hover': { transform: 'translateY(-1px)' },
-  '&:active': { transform: 'translateY(1px) scale(0.97)' },
+  transition: `transform ${motionTime(DURATIONS.fast)} ease, box-shadow ${motionTime(DURATIONS.fast)} ease, background-color ${motionTime(DURATIONS.fast)} ease, border-color ${motionTime(DURATIONS.fast)} ease`,
+  // As far as the style hops (shapes.js motion.hop): 1px and 3% in the comic one.
+  '&:hover': { transform: 'translateY(calc(-1px * var(--gb-motion-hop)))' },
+  '&:active': { transform: 'translateY(calc(1px * var(--gb-motion-hop))) scale(calc(1 - 0.03 * var(--gb-motion-hop)))' },
   '@media (prefers-reduced-motion: reduce)': { '&:hover': { transform: 'none' }, '&:active': { transform: 'none' } },
 });
 
@@ -33,11 +35,15 @@ export const PRESSABLE_EDGE_SX = Object.freeze({
 });
 
 // The ink that reads best on `fill`: the edge colour on a light fill, the
-// primary text on a dark one.
+// primary text on a dark one. Worked out in each palette's hexes (a contrast
+// reads no CSS variables) and given as a themed value, so it follows the
+// chosen palette (themedValues.js).
 export function inkOn(fill) {
-  return getContrastRatio(fill, UI_COLORS.edge) >= getContrastRatio(fill, UI_COLORS.textPrimary)
-    ? UI_COLORS.edge
-    : UI_COLORS.textPrimary;
+  return themedValue(`ink-on:${fill}`, (resolve) => (
+    getContrastRatio(resolve(fill), resolve(UI_COLORS.edge)) >= getContrastRatio(resolve(fill), resolve(UI_COLORS.textPrimary))
+      ? UI_COLORS.edge
+      : UI_COLORS.textPrimary
+  ));
 }
 
 // A button that cannot be pressed now (a core book always in use, an action
@@ -63,7 +69,7 @@ export function pressableSx(fill) {
     // Plain CSS names, so the recipe also works in the theme's overrides
     // (where the sx shorthand `bgcolor` is not read).
     backgroundColor: fill,
-    '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], backgroundColor: lighten(fill, 0.12) },
+    '&:hover': { ...PRESSABLE_EDGE_SX['&:hover'], backgroundColor: uiLighten(fill, 0.12) },
     '&.Mui-disabled': { ...UNPRESSABLE_SX, color: ink },
   };
 }
@@ -87,7 +93,7 @@ export function iconButtonLook(radius = 1, { surface = UI_COLORS.surfaceRaised, 
     color: tone || UI_COLORS.textSecondary,
     '&:hover': {
       ...PRESSABLE_EDGE_SX['&:hover'],
-      backgroundColor: solidHover ? surface : lighten(surface, 0.08),
+      backgroundColor: solidHover ? surface : uiLighten(surface, 0.08),
       color: tone || UI_COLORS.accent,
     },
     // Its icon answers the pointer with a little twitch, as a thing touched.
@@ -97,7 +103,7 @@ export function iconButtonLook(radius = 1, { surface = UI_COLORS.surfaceRaised, 
 }
 
 const ICON_TWITCH_SX = Object.freeze({
-  animation: `gbIconTwitch ${ICON_MOTION.twitch}ms ease`,
+  animation: `gbIconTwitch ${motionTime(ICON_MOTION.twitch)} ease`,
   '@keyframes gbIconTwitch': {
     '25%': { rotate: '-14deg' },
     '60%': { rotate: '10deg' },

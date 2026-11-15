@@ -4,8 +4,8 @@ import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../.
 import { ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
-import { inkShadow } from '../../../shared/ui/shadows.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
+import { inkShadow, INK_EDGE } from '../../../shared/ui/shadows.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 
 export const nameSpanSx = { ...ONE_LINE_SX };
@@ -85,10 +85,9 @@ export const hpFlagSx = {
   gap: 0.25,
   px: 0.5,
   py: 0.25,
-  border: 2,
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   fontSize: FONT_SIZES.md,
   lineHeight: LINE_HEIGHTS.none,
   flex: '0 0 auto',
@@ -117,7 +116,7 @@ export const cardSx = {
   ...SURFACES.card,
   position: 'relative',
   p: 1,
-  transition: `border-color ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
+  transition: `border-color ${motionTime(DURATIONS.fast)} ease, box-shadow ${motionTime(DURATIONS.fast)} ease, background-color ${motionTime(DURATIONS.fast)} ease`,
 };
 
 export const hpRowSx = {

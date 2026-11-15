@@ -14,6 +14,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -109,8 +110,7 @@ const dieSx = {
   width: 26,
   height: 26,
   borderRadius: 1,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   fontSize: FONT_SIZES.lg,
   color: 'text.primary',
 };

@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, uiAlpha } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
+import { inkEdge } from '../../ui/shadows.js';
 
 // A d100 is close enough to a sphere that drawing one hundred independently
 // composited CSS planes buys very little motion and costs a great deal. This
@@ -56,7 +57,7 @@ const orbSx = {
   flex: '0 0 auto',
   borderRadius: '50%',
   // Green with a cream rim, like every other die and the app's icon.
-  border: `2px solid ${UI_COLORS.dieEdge}`,
+  border: inkEdge(2, UI_COLORS.dieEdge),
   bgcolor: UI_COLORS.dieFace,
   boxShadow: [
     'inset -12px -14px 18px rgba(0, 0, 0, 0.62)',

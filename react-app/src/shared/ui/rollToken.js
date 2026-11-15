@@ -1,17 +1,17 @@
 import { UI_COLORS } from './colors.js';
 import { INK_EDGE, inkShadow } from './shadows.js';
 import { tintedSurfaceSx } from './surfaces.js';
-import { DIE_GLYPH } from './shapes.js';
-import { svgPicture } from './svgPicture.js';
+import { DIE_GLYPH_BOX } from './shapes.js';
+import { svgStylePicture } from './svgPicture.js';
 
 // A dice formula in the rules' text ("8d6", "1d4 + 2", read only: EntryBlocks
 // through RichText): a small token in the rolls' lime, edged in ink with its
-// solid shadow, the die (DIE_GLYPH) before the figures. A stat block's rolls
+// solid shadow, the die (the style's dieGlyph) before the figures. A stat block's rolls
 // are buttons of their own (RollText).
-const DIE_PICTURE = svgPicture(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${DIE_GLYPH.size} ${DIE_GLYPH.size}">`
-  + `<path d="${DIE_GLYPH.path}" fill="${UI_COLORS.secondary}" stroke="${UI_COLORS.edge}" stroke-width="1"/></svg>`,
-);
+const DIE_PICTURE = svgStylePicture('die-glyph', ({ dieGlyph }) => (
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${DIE_GLYPH_BOX} ${DIE_GLYPH_BOX}">`
+  + `<path d="${dieGlyph.path}" fill="${UI_COLORS.secondary}" stroke="${UI_COLORS.edge}" stroke-width="1"/></svg>`
+));
 
 export const ROLL_TOKEN_SX = Object.freeze({
   ...tintedSurfaceSx(UI_COLORS.secondary),

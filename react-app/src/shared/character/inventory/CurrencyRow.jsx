@@ -6,9 +6,10 @@ import { currencyVariant, HOVER_ADD } from './currencyVariants.js';
 import { useIsPhone } from '../../ui/useIsPhone.js';
 import { FONT_SIZES, LETTER_SPACINGS, FONT_WEIGHTS, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
-import { DURATIONS } from '../../ui/motion.js';
+import { DURATIONS, motionTime } from '../../ui/motion.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import TipIconButton from '../../ui/TipIconButton.jsx';
+import { INK_EDGE } from '../../ui/shadows.js';
 
 // Move-left / move-right controls shown under each currency when reordering is
 // enabled (builder). Applies to coins and custom entries alike.
@@ -22,8 +23,7 @@ function ReorderBar({ canLeft, canRight, onLeft, onRight, mode = 'builder' }) {
         display: 'flex',
         justifyContent: 'space-between',
         mt: v.stepper.mt,
-        border: 2,
-        borderColor: UI_COLORS.edge,
+        border: INK_EDGE,
         borderRadius: 1,
         bgcolor: v.stepper.bgcolor,
       }}
@@ -67,7 +67,7 @@ function AddCurrencyTile({ onClick, mode = 'builder' }) {
         gap: 0.5,
         cursor: 'pointer',
         color: 'text.secondary',
-        transition: `color ${DURATIONS.fast}ms, border-color ${DURATIONS.fast}ms`,
+        transition: `color ${motionTime(DURATIONS.fast)}, border-color ${motionTime(DURATIONS.fast)}`,
         '&:hover, &:focus-visible': { color: HOVER_ADD, borderColor: HOVER_ADD },
       }}
     >

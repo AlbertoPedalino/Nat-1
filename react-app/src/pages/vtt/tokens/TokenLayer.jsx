@@ -10,6 +10,7 @@ import TokenSprite from './TokenSprite.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { pieceScreenStyle } from '../map/viewportGeometry.js';
+import { inkEdge } from '../../../shared/ui/shadows.js';
 
 const VIEWPORT_OVERSCAN = 180;
 
@@ -98,7 +99,7 @@ const TokenNode = memo(function TokenNode({
         position: 'absolute',
         left: 0,
         top: 0,
-        outline: selected ? `2px solid ${VTT_COLORS.accent}` : 'none',
+        outline: selected ? inkEdge(2, VTT_COLORS.accent) : 'none',
         outlineOffset: 3,
         boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, OPACITY.heavy)}` : 'none',
         zIndex: aboveFog ? 4 : selected ? 2 : undefined,

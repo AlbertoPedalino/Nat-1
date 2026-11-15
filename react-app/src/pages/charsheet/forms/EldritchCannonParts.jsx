@@ -13,6 +13,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -107,8 +108,7 @@ const rulesToggleSx = {
   gap: 0.75,
   px: 1,
   py: 0.75,
-  border: 2,
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   // Washes over the panel's paper: the toggle stays solid.
   ...tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }),
@@ -142,8 +142,7 @@ const rulesGroupSx = {
   minWidth: 0,
   px: 1,
   py: 0.75,
-  border: 2,
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   ...tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.edge }),
 };

@@ -30,6 +30,7 @@ import { FONT_WEIGHTS } from '../ui/fonts.js';
 import TagChip from '../ui/TagChip.jsx';
 import CornerCloseButton from '../ui/CornerCloseButton.jsx';
 import { UI_COLORS } from '../ui/colors.js';
+import { INK_SOLID } from '../ui/shadows.js';
 
 // The token, name and type line over a stat block. With `onClose` it draws
 // its own corner X (the battle map's side view); a SheetDialog or SidePanel
@@ -184,7 +185,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
 function Prop({ label, children }) {
   return (
     <Typography component="div" variant="body2">
-      <Box component="span" sx={{ color: 'primary.main', fontWeight: FONT_WEIGHTS.bold }}>{label}</Box>{' '}
+      <Box component="span" sx={{ color: UI_COLORS.accentLabel, fontWeight: FONT_WEIGHTS.bold }}>{label}</Box>{' '}
       {children}
     </Typography>
   );
@@ -236,7 +237,7 @@ function SectionHeading({ children }) {
       variant="h2"
       sx={{
         color: 'primary.main',
-        borderBottom: '2px solid',
+        borderBottom: INK_SOLID,
         borderColor: 'primary.main',
         pb: 0.5,
         mb: 0.25,

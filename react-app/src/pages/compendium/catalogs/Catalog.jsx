@@ -18,6 +18,7 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { TABLE_HEAD_ROW_SX } from '../../../shared/ui/ruleText.js';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // A compendium catalog: one definition's entries (catalogFilter.js) under a
 // filter bar made from its fields, a virtualized list with its columns (one
@@ -163,7 +164,7 @@ const headerRowSx = {
   flexShrink: 0,
 };
 
-const headerCellSx = { ...captionLabelSx, color: 'primary.main' };
+const headerCellSx = { ...captionLabelSx, color: UI_COLORS.accentLabel };
 
 const listBoxSx = { flex: 1, minHeight: 0 };
 

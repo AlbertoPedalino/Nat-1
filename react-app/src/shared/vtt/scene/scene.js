@@ -11,12 +11,12 @@ import { normalizeImageAtmospheres } from './atmosphere.js';
 import { normalizeImageFilters } from './imageFilters.js';
 import { clamp } from '../../numbers.js';
 import { numberOr } from '../../numbers.js';
-import { normalizeHexColor } from '../../ui/colors.js';
+import { normalizeHexColor, storedColor } from '../../ui/colors.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
-  color: VTT_COLORS.accent, lineWidth: 1, hexColor: VTT_COLORS.exploredHex,
+  color: storedColor(VTT_COLORS.accent), lineWidth: 1, hexColor: storedColor(VTT_COLORS.exploredHex),
   measureUnit: 'feet', milesPerCell: 6,
 });
 

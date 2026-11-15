@@ -6,6 +6,7 @@ import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // The card a generated result sits in (a dungeon room, a quest, a table on the
 // Roll tab): a header band with an icon, a title and whatever `header` adds
@@ -62,8 +63,7 @@ export const resultDetailSx = {
 };
 
 const cardSx = {
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 2,
   overflow: 'hidden',
 };
@@ -79,14 +79,13 @@ const headerBandSx = {
 const resultTitleSx = {
   ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.lg,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 const slotSx = {
   p: 0.75,
   borderRadius: 1,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderLeftWidth: 3,
 };
 

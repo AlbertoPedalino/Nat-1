@@ -2,7 +2,8 @@ import { Box } from '@mui/material';
 import { UI_COLORS, OPACITY, uiAlpha } from './colors.js';
 import { meterTrackSx } from './surfaces.js';
 import { METER_SEGMENTS } from './shapes.js';
-import { DURATIONS, METER_MOTION } from './motion.js';
+import { useStyleShapes } from './themeIds.js';
+import { DURATIONS, METER_MOTION, motionTime } from './motion.js';
 import { useLiveStyle } from './liveStyle.js';
 import { clamp } from '../numbers.js';
 import { asArray } from '../lists.js';
@@ -27,6 +28,9 @@ export default function SegmentedMeter({
   ratio, tone, segments = METER_SEGMENTS.bar, title, valueText, children = null, sx, ...props
 }) {
   const share = clamp(Number(ratio) || 0, 0, 1);
+  // A kind of cut (METER_SEGMENTS) is counted by the style; a number is a count.
+  const { meterSegments } = useStyleShapes();
+  const count = typeof segments === 'string' ? meterSegments[segments] : segments;
   // A string: a bare number would be written as pixels.
   const ref = useLiveStyle({ '--meter-share': String(share), '--meter-tone': tone });
   return (
@@ -40,7 +44,7 @@ export default function SegmentedMeter({
       aria-valuetext={valueText}
       aria-label={title}
       title={title}
-      sx={[TRACK_SX, segmentsSx(segments), ...asArray(sx)]}
+      sx={[TRACK_SX, segmentsSx(count), ...asArray(sx)]}
     >
       <Box sx={LAG_SX} />
       <Box sx={FILL_SX} />
@@ -51,7 +55,7 @@ export default function SegmentedMeter({
 
 const TRACK_SX = { ...meterTrackSx(10), position: 'relative', overflow: 'hidden' };
 
-// The cuts between segments (METER_SEGMENTS, shapes.js), over the fill, in
+// The cuts between segments (the style's meterSegments), over the fill, in
 // the track's own ink. One rule per segment count, made once; none for a
 // smooth strip.
 const SEGMENT_RULES = new Map();
@@ -83,7 +87,7 @@ const LAYER_SX = {
 const FILL_SX = {
   ...LAYER_SX,
   bgcolor: 'var(--meter-tone)',
-  transition: `transform ${DURATIONS.fast}ms ease-out`,
+  transition: `transform ${motionTime(DURATIONS.fast)} ease-out`,
   '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 };
 
@@ -93,7 +97,7 @@ const FILL_SX = {
 const LAG_SX = {
   ...LAYER_SX,
   bgcolor: UI_COLORS.accentHighlight,
-  transition: `transform ${METER_MOTION.drain}ms ease-in ${METER_MOTION.hold}ms`,
+  transition: `transform ${motionTime(METER_MOTION.drain)} ease-in ${motionTime(METER_MOTION.hold)}`,
   '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 };
 

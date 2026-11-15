@@ -7,7 +7,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 
@@ -38,7 +38,7 @@ export function PanelSection({ id, icon: Icon, title, summary, open, onToggle, c
         </Box>
         <Box
           component="span"
-          sx={{ display: 'flex', color: VTT_COLORS.textSecondary, transition: `transform ${DURATIONS.normal}ms`, transform: open ? 'rotate(180deg)' : 'none' }}
+          sx={{ display: 'flex', color: VTT_COLORS.textSecondary, transition: `transform ${motionTime(DURATIONS.normal)}`, transform: open ? 'rotate(180deg)' : 'none' }}
         >
           <ChevronDown size={ICON_SIZES.sm} />
         </Box>

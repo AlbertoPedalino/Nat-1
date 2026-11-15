@@ -58,7 +58,7 @@ export default function BookLinks() {
 const subheaderSx = {
   ...captionLabelSx,
   bgcolor: 'background.paper',
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   lineHeight: '36px',
 };
 

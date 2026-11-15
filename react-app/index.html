@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta name="color-scheme" content="dark" />
+    <!-- The viewer's theme (src/app/themeChoice.js, key gb:theme) before the app draws, so the first paint is in its scheme. -->
+    <script>
+      try {
+        var colors = (JSON.parse(localStorage.getItem('gb:theme') || 'null') || {}).colors;
+        if (colors === 'system') colors = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        if (colors === 'light') document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'light');
+      } catch (_) {}
+    </script>
     <link rel="icon" type="image/png" sizes="192x192" href="%BASE_URL%favicon.png" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <!-- The app's paper (shared/ui/stickerPaper.js): fetched with the page, so it is there at the first paint. -->

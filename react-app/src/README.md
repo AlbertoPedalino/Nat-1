@@ -42,17 +42,82 @@ rule per value; every hit point bar is `shared/character/combat/HitPointBars.jsx
 ## The look
 
 A new theme is a change to these files only; every component reads its look
-from them and holds none of its own (guarded by the oneDefinition tests):
+from them and holds none of its own (guarded by the oneDefinition tests).
+
+The viewer picks two things apart in the top bar's account menu (the login /
+logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
+`CloudMenu` as `extraItems`, opens the theme panel, `ThemeDialog.jsx`, where
+every style shows as a card drawn in that style): the **colours** (`PALETTES` in `colors.js`,
+or System) and the **style** (`SHAPE_STYLES` in `shapes.js`). The choice lives in
+`app/themeChoice.js` (localStorage `gb:theme`, read by `index.html` before the
+first paint); `app/ThemeChoiceProvider.jsx` builds the theme for it
+(`buildTheme` in `app/theme.js`) and writes the palette on the page's root.
+`UI_COLORS.<role>` is that palette's CSS variable (`var(--gb-accent)`), so:
+work a colour out only with `uiAlpha` / `uiMix` / `uiLighten` / `uiDarken`
+(never MUI's `alpha`/`lighten`/`darken`, guarded); a canvas takes
+`vttCanvasColors(usePaletteId())`; a colour saved in data takes `storedColor`
+(a hex in the base palette, never a variable); a picture built from markup
+(`svgPicture`) and the ink on a fill (`inkOn`) are drawn per palette by
+`shared/ui/themedValues.js`, no extra work at the call.
+
+There are two palettes: `dark` and `light` (a rulebook's parchment). Every
+palette fills the same roles and its text roles read on its surfaces at WCAG
+AA (both tested in `tests/logic/shared/ui/paletteColors.test.js`). The default
+choice is Dark. On a light palette the accent itself is too pale to read as
+plain lettering: a label, a link or an icon in the accent with no ink round
+it is `accentLabel` (the accent itself on the dark palette), while inked
+lettering keeps the accent. Inked lettering (`inkLettering`) is outlined in
+the palette's `lettering` edge: the ink on the dark palette, the side away
+from the letters on the light one (dark letters stand clean on the paper,
+light ones are inked). The page's drawings take `pageDrawing` and `pageLine`.
+
+A style is one entry of `SHAPE_STYLES` with the same keys as `comic` (guarded
+in `tests/logic/shared/ui/shapeStyles.test.js`). As with the palette, a shape
+that is a CSS value is the chosen style's variable (`SEAL_RADIUS`, `CREST`,
+`RIBBON`, `FOCUS_RING`, `CHOICE_MARK`, `BURST_ASPECT`: `var(--gb-shape-…)`); a
+shape worked out in code is read from the style (`useStyleShapes()` in
+`shared/ui/themeIds.js`: GemPip's cuts, SegmentedMeter's counts — pass it a
+`METER_SEGMENTS` kind, not a number); the theme's own controls (tabs,
+switches, sliders, the chosen row's bookmark) take `styleShapes(styleId)` in
+`buildTheme`; a picture cut in the style's shapes (ornament, die glyph,
+bursts) is `svgStylePicture`.
+
+The style also inks (`ink` in `shapes.js`: `edge` width, `drop` share of the
+solid shadows, `depth` of the soft ones, as `--gb-ink-*`). Every length in
+`shadows.js` is the comic one times the style's share, and an ink line is
+never written by hand (guarded): `INK_EDGE` (the line in ink), `INK_SOLID`
+(width and style, colour set apart), `INK_WIDTH` (a width alone),
+`inkEdge(px, colour)` (another line of the comic cut, as a bubble's 3px).
+
+It sets the corner `radius` (the theme's, so every sx `borderRadius: n`) and
+lays the surfaces (`surface`): the page's `paper` (the stickers, painted per
+palette: `PAPER_PICTURES` in `stickerPaper.js`, rebuilt for every palette by
+`scripts/build-sticker-paper.mjs`; a palette without its own lays the dark
+one), the page's `halftone`, the panel bars' `screentone` and the cover
+`rays`, written as `--gb-surface-*` / `--gb-screentone-*` by
+`surfaceVariables` (`surfaces.js`) and `shapeVariables`.
+
+It letters in its own faces: `FONT_STYLES` in `fonts.js` (font names live
+there only, guarded) gives each style its stacks by role and the stylesheet
+that loads them; `UI_FONTS.<role>` is `var(--gb-font-<role>)`; a canvas takes
+`fontStacks(useStyleId())`. The base style's stylesheet is the one
+`index.html` links (tested); another style's is linked by the provider when
+chosen. The type scale (`FONT_SIZES`…) stays one for every style.
+
+It moves at its own `motion`: `pace` scales every time (`--gb-motion-pace`;
+0 is no motion), so a time is always `motionTime(DURATIONS.fast)`, never a
+constant followed by `ms` (guarded); `hop` is how far a pressed thing hops
+and squashes (`PRESS_MOTION_SX`).
 
 | File (`shared/ui/`) | What it decides |
 | --- | --- |
-| `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palette: interface roles, the colour of each kind of thing, the map's tones (derived from the interface's) |
-| `fonts.js`, `textStyles.js` | the faces, the type scale, each text role |
-| `shadows.js`, `surfaces.js` | the ink: edges, solid shadows, surfaces (paper, stripe), the meter track |
-| `shapes.js` | every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's bursts, a switch, a checkbox, the ornament, the focus ring, a formula's die |
+| `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palettes (`PALETTES`: each role's hex per palette) and the interface roles as variables, the colour of each kind of thing, the map's tones (derived from the interface's) |
+| `fonts.js`, `textStyles.js` | the faces (per style: `FONT_STYLES`), the type scale, each text role |
+| `shadows.js`, `surfaces.js` | the ink (scaled by the style's `ink`): edges, solid shadows, surfaces (paper, stripe), the meter track |
+| `shapes.js` | the styles (`SHAPE_STYLES`) and every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's bursts, a switch, a checkbox, the ornament, the focus ring, a formula's die |
 | `ornament.js`, `ruleText.js`, `rollToken.js` | the ornament drawn once (card rules, page and section titles, a rule's list); a rule's list, boxed text and table in both renderers; a dice formula in the rules' text |
 | `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes |
-| `motion.js` | how long things move |
+| `motion.js` | how long things move (`motionTime`: at the style's pace) |
 | `app/theme.js` | how MUI's own components take the above (tabs, switches, checkboxes and radios via `ChoiceMarks`, sliders, dialogs, links, menus and chosen rows, focused fields, the focus ring, scrollbars, text selection, chips) |
 
 ## Page features

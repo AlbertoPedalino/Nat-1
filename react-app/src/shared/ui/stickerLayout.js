@@ -1,4 +1,4 @@
-import { UI_COLORS } from './colors.js';
+import { BASE_PALETTE_ID, UI_COLORS, resolveColors } from './colors.js';
 import { STICKER_DRAWINGS } from './gameIcons.js';
 import { seededRandom } from '../seededRandom.js';
 
@@ -106,8 +106,9 @@ export function scatter() {
 // The tile as an SVG: each drawing defined once and placed with <use>, each
 // sticker its solid shadow, then itself in the paper's colour, both edged in
 // ink, and again one tile over wherever it crosses an edge, so the repeat
-// shows no seam.
-export function paperSvg() {
+// shows no seam. Drawn in `paletteId`'s hexes: a picture reads no CSS
+// variables, so each palette has a paper of its own (stickerPaper.js).
+export function paperSvg(paletteId = BASE_PALETTE_ID) {
   const drawings = [D20, ...STICKER_DRAWINGS.map(drawingOf)];
   const symbols = drawings.map(({ box, paths }, index) => {
     const body = paths.map((path) => `<path d="${path.d}"${path.fill ? '' : ' fill="none"'}/>`).join('');
@@ -123,10 +124,10 @@ export function paperSvg() {
       const x = sticker.x + sx;
       const y = sticker.y + sy;
       if (x < -SIZE || x > TILE + SIZE || y < -SIZE || y > TILE + SIZE) return;
-      [[SHADOW, UI_COLORS.edge], [0, UI_COLORS.surfaceRaised]].forEach(([offset, fill]) => {
-        uses.push(`<use href="#s${sticker.drawing}" x="-${half}" y="-${half}" width="${SIZE}" height="${SIZE}" fill="${fill}" stroke="${UI_COLORS.edge}" stroke-width="${ink}" stroke-linejoin="round" transform="translate(${(x + offset).toFixed(2)} ${(y + offset).toFixed(2)}) rotate(${sticker.turn})"/>`);
+      [[SHADOW, UI_COLORS.pageLine], [0, UI_COLORS.pageDrawing]].forEach(([offset, fill]) => {
+        uses.push(`<use href="#s${sticker.drawing}" x="-${half}" y="-${half}" width="${SIZE}" height="${SIZE}" fill="${fill}" stroke="${UI_COLORS.pageLine}" stroke-width="${ink}" stroke-linejoin="round" transform="translate(${(x + offset).toFixed(2)} ${(y + offset).toFixed(2)}) rotate(${sticker.turn})"/>`);
       });
     }));
   });
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${TILE}" height="${TILE}" viewBox="0 0 ${TILE} ${TILE}"><defs>${symbols}</defs>${uses.join('')}</svg>`;
+  return resolveColors(`<svg xmlns="http://www.w3.org/2000/svg" width="${TILE}" height="${TILE}" viewBox="0 0 ${TILE} ${TILE}"><defs>${symbols}</defs>${uses.join('')}</svg>`, paletteId);
 }

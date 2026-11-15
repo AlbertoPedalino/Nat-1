@@ -1,15 +1,19 @@
 // Draws the app's sticker paper (src/shared/ui/stickerLayout.js) and has a
 // local headless Chrome paint it into the WebP images the app ships, at 1x
-// and 2x: public/paper/sticker-paper.webp and sticker-paper@2x.webp (WebP
-// keeps the transparency at a fraction of a PNG's weight).
+// and 2x, once per palette that has a paper (PAPER_PICTURES in
+// src/shared/ui/stickerPaper.js): public/paper/<name>.webp and <name>@2x.webp
+// (WebP keeps the transparency at a fraction of a PNG's weight).
 // Run after changing the paper's drawings or layout:
 //   node scripts/build-sticker-paper.mjs [path to chrome]
+// or for some palettes only (a palette's new colours):
+//   PAPER_PALETTES=light node scripts/build-sticker-paper.mjs
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { TILE, paperSvg } from '../src/shared/ui/stickerLayout.js';
+import { PAPER_PICTURES } from '../src/shared/ui/stickerPaper.js';
 
 const CHROME_CANDIDATES = [
   process.argv[2],
@@ -30,8 +34,8 @@ const work = mkdtempSync(join(tmpdir(), 'sticker-paper-'));
 try {
   // The page paints the SVG into a canvas (from a blob, so the canvas stays
   // readable) and writes the WebP's data URL into itself, which Chrome prints.
-  const page = (scale) => `<!doctype html><html><body><script>
-    const svg = ${JSON.stringify(paperSvg())};
+  const page = (scale, paletteId) => `<!doctype html><html><body><script>
+    const svg = ${JSON.stringify(paperSvg(paletteId))};
     const image = new Image();
     image.onload = () => {
       const canvas = document.createElement('canvas');
@@ -42,12 +46,16 @@ try {
     };
     image.src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   </script></body></html>`;
-  [[1, 'sticker-paper.webp'], [2, 'sticker-paper@2x.webp']].forEach(([scale, name]) => {
-    const file = join(work, `paper-${scale}.html`);
-    writeFileSync(file, page(scale));
+  const only = process.env.PAPER_PALETTES?.split(',').map((id) => id.trim()).filter(Boolean);
+  const pictures = Object.entries(PAPER_PICTURES).filter(([paletteId]) => !only || only.includes(paletteId)).flatMap(([paletteId, stem]) => (
+    [[1, `${stem}.webp`], [2, `${stem}@2x.webp`]].map(([scale, name]) => [scale, name, paletteId])
+  ));
+  pictures.forEach(([scale, name, paletteId]) => {
+    const file = join(work, `paper-${paletteId}-${scale}.html`);
+    writeFileSync(file, page(scale, paletteId));
     const dom = execFileSync(chrome, [
       '--headless=new', '--disable-gpu', '--virtual-time-budget=10000',
-      `--user-data-dir=${join(work, `profile-${scale}`)}`,
+      `--user-data-dir=${join(work, `profile-${paletteId}-${scale}`)}`,
       '--dump-dom', pathToFileURL(file).href,
     ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     const match = dom.match(/data:image\/webp;base64,([A-Za-z0-9+/=]+)/);

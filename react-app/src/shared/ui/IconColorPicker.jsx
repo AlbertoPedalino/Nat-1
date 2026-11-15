@@ -6,6 +6,7 @@ import { SWATCH_COLORS } from './swatches.js';
 import { UI_COLORS } from './colors.js';
 import { TEXT_STYLES } from './textStyles.js';
 import CardSection from './CardSection.jsx';
+import { INK_EDGE, INK_SOLID, inkEdge } from './shadows.js';
 
 export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
@@ -39,8 +40,8 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             sx={{
               width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
               // Inked like every swatch; the chosen one ringed in the accent.
-              bgcolor: color, border: 2, borderColor: UI_COLORS.edge,
-              outline: (localColor || currentColor) === color ? `2px solid ${UI_COLORS.accent}` : 'none',
+              bgcolor: color, border: INK_EDGE,
+              outline: (localColor || currentColor) === color ? inkEdge(2, UI_COLORS.accent) : 'none',
               outlineOffset: 1,
               '&:hover': { transform: 'scale(1.2)', transition: 'transform 0.12s' },
             }}
@@ -50,7 +51,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           onClick={() => pick(null)}
           sx={{
             width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-            bgcolor: UI_COLORS.surfaceRaised, border: 2,
+            bgcolor: UI_COLORS.surfaceRaised, border: INK_SOLID,
             borderColor: localColor == null && currentColor == null ? UI_COLORS.white : 'divider',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: FONT_SIZES.xs, color: 'text.secondary',
@@ -69,7 +70,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
         <Box
           sx={{
             width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-            bgcolor: displayColor, border: 2, borderColor: 'divider',
+            bgcolor: displayColor, border: INK_SOLID, borderColor: 'divider',
             position: 'relative', overflow: 'hidden',
           }}
         >

@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
 
+// The CSS written for an element's own classes (Emotion's rules in the page).
+function ownRules(element) {
+  const css = [...document.querySelectorAll('style')].map((style) => style.textContent).join('\n');
+  return [...element.classList]
+    .flatMap((name) => css.match(new RegExp(`\\.${name}\\{[^}]*\\}`, 'g')) || [])
+    .join('\n');
+}
+
 const feed = [{
   id: 'roll-1',
   actorName: 'Arannis',
@@ -18,9 +26,11 @@ describe('RollsButton', () => {
     const [roll, log] = screen.getAllByRole('button');
     expect(roll).toHaveAccessibleName('Roll dice');
     expect(log).toHaveAccessibleName('Roll log, 1 roll');
-    // A visible rule between the halves, so the pill does not read as one button.
-    expect(log).toHaveStyle({ borderLeftWidth: '2px', borderLeftStyle: 'solid' });
-    expect(roll).not.toHaveStyle({ borderLeftStyle: 'solid' });
+    // A visible rule between the halves, so the pill does not read as one
+    // button: the style's ink line (a CSS variable, which jsdom does not
+    // compute, so read from the element's own rule).
+    expect(ownRules(log)).toMatch(/border-left:var\(--gb-ink-edge\) solid/);
+    expect(ownRules(roll)).not.toMatch(/border-left:[^;]*solid/);
   });
 
   it('opens the dice picker straight from the dice half', () => {

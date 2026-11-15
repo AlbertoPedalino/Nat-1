@@ -7,7 +7,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import MapFloatingPanel from '../map/MapFloatingPanel.jsx';
 
@@ -143,7 +143,7 @@ const panelSx = {
   zIndex: 6,
   width: { xs: 260, sm: 330 },
   maxHeight: 'calc(100% - 104px)',
-  transition: `opacity ${DURATIONS.fast}ms ease`,
+  transition: `opacity ${motionTime(DURATIONS.fast)} ease`,
 };
 
 // Keep the drag source mounted and stationary. A quiet fade reveals the board

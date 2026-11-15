@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useDebouncedCallback } from './useDebouncedCallback.js';
-import { OPACITY } from './colors.js';
+import { OPACITY, storedColor } from './colors.js';
+import { INK_SOLID } from './shadows.js';
 
 // A native colour well that does not fight the picker it opens.
 //
@@ -28,7 +29,9 @@ export default function ColorField({
   const inputRef = useRef(null);
   const editing = useRef(false);
   const deferredChange = useDebouncedCallback((next) => onChange?.(next), deferMs);
-  const shown = value || '#000000';
+  // The well shows and gives hexes only: a role (a default such as the
+  // accent) is shown in the base palette's hex, as it would be saved.
+  const shown = storedColor(value) || '#000000';
 
   useEffect(() => {
     if (!editing.current && inputRef.current) inputRef.current.value = shown;
@@ -69,7 +72,7 @@ function swatchSx(size, tone) {
     height: size,
     flexShrink: 0,
     p: 0.25,
-    border: '2px solid',
+    border: INK_SOLID,
     borderColor: map ? 'gmboard.vtt.accentBorderStrong' : 'divider',
     borderRadius: 1,
     bgcolor: map ? 'gmboard.vtt.inset' : 'transparent',

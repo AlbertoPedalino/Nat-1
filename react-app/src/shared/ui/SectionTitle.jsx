@@ -3,14 +3,14 @@ import InfoHint from './InfoHint.jsx';
 import { captionLabelSx } from './PanelHeader.jsx';
 import { ICON_SIZES } from './iconSizes.js';
 import { UI_COLORS } from './colors.js';
-import { ORNAMENT } from './shapes.js';
+import { ORNAMENT_BOX } from './shapes.js';
 import { ornamentSx } from './ornament.js';
 import { asArray } from '../lists.js';
 
 // The heading of a group of controls or facts inside a panel, a dialog or a
 // menu: a piece's Conditions and Reminders, the scene panel's Battlemap and
 // Wind, the sheet's Armor and Weapons, a dialog's "Or generate one". The one
-// section heading of the app: the ornament's diamond before it (ORNAMENT, as
+// section heading of the app: the ornament's diamond before it (ornament.js, as
 // on a card's rule and before every listed rule), or `icon` (a lucide
 // component) in its place, its words, then an ink rule to the edge.
 //
@@ -34,6 +34,6 @@ export default function SectionTitle({ children, icon: Icon, hint, hintLabel, id
 
 const ROW_SX = { alignItems: 'center', minWidth: 0 };
 
-const DIAMOND_SX = ornamentSx(ORNAMENT.size - 2);
+const DIAMOND_SX = ornamentSx(ORNAMENT_BOX - 2);
 
 const RULE_SX = { flex: 1, minWidth: 12, height: 2, bgcolor: UI_COLORS.edge };

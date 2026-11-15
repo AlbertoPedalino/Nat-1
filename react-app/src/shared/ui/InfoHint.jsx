@@ -1,6 +1,7 @@
 import { Box, Tooltip } from '@mui/material';
 import { Info } from 'lucide-react';
 import { ICON_SIZES } from './iconSizes.js';
+import { UI_COLORS } from './colors.js';
 
 // A rule that only matters the first time, behind an icon. A panel that spells
 // out every one of them in a caption reads like documentation, and the control
@@ -22,5 +23,5 @@ const infoHintSx = {
   color: 'text.secondary',
   cursor: 'help',
   borderRadius: '50%',
-  '&:hover, &:focus-visible': { color: 'primary.main' },
+  '&:hover, &:focus-visible': { color: UI_COLORS.accentLabel },
 };

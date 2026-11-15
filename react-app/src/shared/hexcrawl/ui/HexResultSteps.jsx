@@ -10,6 +10,7 @@ import { boardInsetSx } from '../../gmboard/ui/surfaces.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
+import { UI_COLORS } from '../../ui/colors.js';
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
   return (
@@ -122,7 +123,7 @@ const boxSx = { ...boardInsetSx, p: 1.5 };
 const headerSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.md,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   mb: 0.75,
 };
 

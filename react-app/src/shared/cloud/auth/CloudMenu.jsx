@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Menu, MenuItem, Divider, Typography, Box, Tooltip } from '@mui/material';
+import { Button, Menu, MenuItem, Divider, Typography, Box } from '@mui/material';
 import { LogIn, LogOut, User, CloudUpload } from 'lucide-react';
 import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
@@ -35,7 +35,12 @@ const usernameLabelSx = {
   maxWidth: { xs: 110, sm: 180 },
 };
 
-export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {
+// `extraItems`: menu items the page adds after the account's (the top bar's
+// theme), there whether or not anyone is signed in: a list, or a function
+// given the menu's close and answering the list.
+export default function CloudMenu({
+  sx, buttonSx, canUploadDraft = false, onUploadDraft, extraItems = [],
+}) {
   const { cloudEnabled, status, username, role, signOut } = useAuth();
   const [anchor, setAnchor] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -81,21 +86,11 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
     if (state === 'error' || state === 'conflict') notify('error', failureMessage('Could not sync.', e.detail.error));
   });
 
-  if (!cloudEnabled) {
-    return (
-      <Tooltip title="Online features not configured">
-        <Box component="span" sx={{ display: 'inline-flex' }}>
-          <Button size="small" variant="outlined" disabled startIcon={<LogIn size={ICON_SIZES.sm} />} sx={{ ...loginBtnSx, ...buttonSx }}>
-            Log in
-          </Button>
-        </Box>
-      </Tooltip>
-    );
-  }
-
-  const dot = status === 'authed'
+  const dot = cloudEnabled && status === 'authed'
     ? (syncState === 'syncing' ? UI_COLORS.accent : syncState === 'error' ? UI_COLORS.danger : UI_COLORS.success)
     : null;
+
+  const authed = cloudEnabled && status === 'authed';
 
   return (
     <Box sx={{ display: 'inline-flex', ...sx }}>
@@ -103,19 +98,25 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         size="small"
         variant="outlined"
         color="primary"
-        startIcon={status === 'authed' ? <User size={ICON_SIZES.sm} /> : <LogIn size={ICON_SIZES.sm} />}
-        aria-label={status === 'authed' ? `Account: ${username || 'signed in'}` : 'Log in'}
+        startIcon={authed ? <User size={ICON_SIZES.sm} /> : <LogIn size={ICON_SIZES.sm} />}
+        aria-label={authed ? `Account: ${username || 'signed in'}` : 'Log in'}
         onClick={(e) => setAnchor(e.currentTarget)}
         sx={{ ...loginBtnSx, ...buttonSx }}
       >
-        {status === 'authed'
+        {authed
           ? <Box component="span" sx={usernameLabelSx}>{username || 'ACCOUNT'}</Box>
           : 'Log in'}
         {dot ? <Box component="span" sx={{ ml: 0.5, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>
 
       <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={close}>
-        {status === 'authed' ? [
+        {!cloudEnabled ? (
+          // Without the online features the menu still opens, for what the
+          // page adds (the theme): logging in is offered, and why it cannot be.
+          <MenuItem disabled>
+            <LogIn size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log in · online features not configured
+          </MenuItem>
+        ) : authed ? [
           <Box key="hdr" sx={{ px: 2, py: 0.5 }}>
             <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
               {username} · {role === 'gm' ? 'GM' : 'Player'}
@@ -142,9 +143,10 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
             <LogIn size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log in / Sign up
           </MenuItem>
         )}
+        {typeof extraItems === 'function' ? extraItems(close) : extraItems}
       </Menu>
 
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
+      {cloudEnabled ? <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} /> : null}
     </Box>
   );
 }

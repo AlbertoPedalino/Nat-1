@@ -2,7 +2,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { LAYERS } from '../../../shared/ui/layers.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
-import { UI_SHADOWS, INK_EDGE } from '../../../shared/ui/shadows.js';
+import { UI_SHADOWS, INK_EDGE, inkEdge } from '../../../shared/ui/shadows.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
@@ -41,8 +41,7 @@ export const hostSx = {
   // the short height of a phone in landscape, so the viewport was clipped before
   // its bottom-left and bottom-right controls.
   minHeight: 0,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
   // Match the fully covered player fog exactly. When a map ends, the empty
   // viewport is therefore indistinguishable from unexplored territory and
@@ -252,7 +251,7 @@ export const placementCountSx = {
   borderRadius: 12,
   bgcolor: VTT_COLORS.accent,
   color: VTT_COLORS.surface,
-  border: `2px solid ${VTT_COLORS.surface}`,
+  border: inkEdge(2, VTT_COLORS.surface),
   fontSize: FONT_SIZES.md,
   fontWeight: FONT_WEIGHTS.heavy,
   lineHeight: '22px',

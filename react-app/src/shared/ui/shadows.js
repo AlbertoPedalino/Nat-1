@@ -1,4 +1,14 @@
-import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { LETTERING_EDGE, UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+
+// The ink of the chosen style (shapes.js `ink`, written as `--gb-ink-*` on the
+// page's root): every length below is the comic one times the style's share,
+// so a style can ink thicker or thinner (`line`: every inked line follows the
+// edge), drop its solid shadows further or not at all (`drop`), and float its
+// surfaces higher or lower (`depth`). In px, as lengths of the comic cut.
+export const INK_WIDTH = 'var(--gb-ink-edge)';
+export const inkLine = (px) => `calc(${px}px * var(--gb-ink-line))`;
+const drop = (px) => `calc(${px}px * var(--gb-ink-drop))`;
+const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
 
 // The drop shadows of surfaces that sit above the page, one per height, so a
 // restyle changes depth in one place. Glows and focus rings stay with the
@@ -6,7 +16,7 @@ import { UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 // A solid shadow set off to the lower right, in ink or in a moment's colour:
 // the comic panel's and the speech bubble's.
 export function inkShadow(color = UI_COLORS.edge, offset = 3) {
-  return `${offset}px ${offset}px 0 ${color}`;
+  return `${drop(offset)} ${drop(offset)} 0 ${color}`;
 }
 
 // The same solid shadow under a shape cut out of its box (a crest, a
@@ -14,12 +24,22 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
 // follows the cut. A filter is a layer of its own, so only for a handful of
 // shapes on a screen, never for a list.
 export function inkCutShadow(offset = 3, color = UI_COLORS.edge) {
-  return `drop-shadow(${offset}px ${offset}px 0 ${color})`;
+  return `drop-shadow(${drop(offset)} ${drop(offset)} 0 ${color})`;
 }
 
-// The ink edge: the 2px black line round every drawn box and control. A frame
-// that is not a whole surface (a pill, a stepper, a tile) takes this.
-export const INK_EDGE = `2px solid ${UI_COLORS.edge}`;
+// The ink edge: the line round every drawn box and control (2px in the comic
+// style). A frame that is not a whole surface (a pill, a stepper, a tile)
+// takes this; a bolder one (a speech bubble's) is inkEdge(3), a line `px` wide
+// in the comic cut.
+export const INK_EDGE = `${INK_WIDTH} solid ${UI_COLORS.edge}`;
+
+// The ink line's width and style alone, its colour set apart (a frame in a
+// tone: `border: INK_SOLID, borderColor: tone`).
+export const INK_SOLID = `${INK_WIDTH} solid`;
+
+export function inkEdge(px, color = UI_COLORS.edge) {
+  return `${inkLine(px)} solid ${color}`;
+}
 
 // A piece laid on the board (a character's token): an ink outline round it
 // and its solid shadow under it, so it reads as a cut-out set down on the
@@ -28,15 +48,16 @@ export const INK_EDGE = `2px solid ${UI_COLORS.edge}`;
 // the map the shadow is the ink at half strength, so it reads as a shadow on
 // the board and never hides the name under the piece; `solid` draws it full,
 // as a panel's, for the same piece shown on the dark interface.
-export function inkPieceShadow({ outline = '2px', drop = '3px', around = '0px', solid = false } = {}) {
+export function inkPieceShadow({ outline = INK_WIDTH, drop: fall = '3px', around = '0px', solid = false } = {}) {
   const spread = `calc(${around} + ${outline})`;
   const shade = solid ? UI_COLORS.edge : uiAlpha(UI_COLORS.edge, OPACITY.strong);
-  return `0 0 0 ${spread} ${UI_COLORS.edge}, ${drop} ${drop} 0 ${around} ${shade}`;
+  const offset = `calc(${fall} * var(--gb-ink-drop))`;
+  return `0 0 0 ${spread} ${UI_COLORS.edge}, ${offset} ${offset} 0 ${around} ${shade}`;
 }
 
 // Inked lettering: a hard shadow under a title, a big number, a die's numeral.
 export function inkTextShadow(color = UI_COLORS.edge) {
-  return `1px 1px 0 ${color}`;
+  return `${drop(1)} ${drop(1)} 0 ${color}`;
 }
 
 // Comic lettering inked: an ink outline `width` thick round the letters, under
@@ -50,14 +71,21 @@ export function inkTextShadow(color = UI_COLORS.edge) {
 // every scroll, and made a desktop's large window stutter.
 export const APPLE_WEBKIT_QUERY = '@supports (font: -apple-system-body)';
 
-export function inkLettering(width, offset, color = UI_COLORS.edge) {
+//
+// Outline and shadow are the palette's lettering edge (LETTERING_EDGE: the
+// ink on a dark palette; on a light one the side away from the letters, so
+// dark letters stand clean on the paper and light ones are inked); a `color`
+// given draws both in it.
+export function inkLettering(width, offset, color) {
+  const outline = color || LETTERING_EDGE;
+  const shadow = outline;
   return {
-    WebkitTextStroke: `${width}px ${color}`,
+    WebkitTextStroke: `${inkLine(width)} ${outline}`,
     paintOrder: 'stroke fill',
-    textShadow: `${offset}px ${offset}px 0 ${color}`,
+    textShadow: `${drop(offset)} ${drop(offset)} 0 ${shadow}`,
     [APPLE_WEBKIT_QUERY]: {
       textShadow: 'none',
-      filter: `drop-shadow(${offset}px ${offset}px 0 ${color})`,
+      filter: `drop-shadow(${drop(offset)} ${drop(offset)} 0 ${shadow})`,
     },
   };
 }
@@ -65,23 +93,23 @@ export function inkLettering(width, offset, color = UI_COLORS.edge) {
 // An ink outline drawn round a silhouette (an icon drawn large, as the AC
 // shield) as a CSS filter, with the solid shadow under it in `shadow`.
 export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {
-  const edge = (x, y) => `drop-shadow(${x}px ${y}px 0 ${color})`;
-  return `${edge(1.5, 0)} ${edge(-1.5, 0)} ${edge(0, 1.5)} ${edge(0, -1.5)} drop-shadow(2px 2px 0 ${shadow})`;
+  const edge = (x, y) => `drop-shadow(${x ? inkLine(x) : 0} ${y ? inkLine(y) : 0} 0 ${color})`;
+  return `${edge(1.5, 0)} ${edge(-1.5, 0)} ${edge(0, 1.5)} ${edge(0, -1.5)} drop-shadow(${drop(2)} ${drop(2)} 0 ${shadow})`;
 }
 
 export const UI_SHADOWS = Object.freeze({
   // A bar resting on the page (the battle map's scene bar).
-  raised: `0 8px 24px ${uiAlpha(UI_COLORS.black, OPACITY.shade)}`,
+  raised: `0 ${depth(8)} ${depth(24)} ${uiAlpha(UI_COLORS.black, OPACITY.shade)}`,
   // Floating controls and notices: toasts, the dice dock, map hints, strips.
-  float: `0 6px 20px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
+  float: `0 ${depth(6)} ${depth(20)} ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
   // Pop-ups over the content: roll bubbles, the dice toast.
-  popup: `0 8px 28px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
+  popup: `0 ${depth(8)} ${depth(28)} ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
   // Under what can be pressed (a filled button): a solid ink edge, the drawn
   // look's depth; `pressed` is the same button pushed down.
-  press: `0 2px 0 ${UI_COLORS.edge}`,
-  pressed: `0 1px 0 ${UI_COLORS.edge}`,
+  press: `0 ${drop(2)} 0 ${UI_COLORS.edge}`,
+  pressed: `0 ${drop(1)} 0 ${UI_COLORS.edge}`,
   // The same button lifted under the cursor.
-  lifted: `0 3px 0 ${UI_COLORS.edge}`,
+  lifted: `0 ${drop(3)} 0 ${UI_COLORS.edge}`,
   // The comic panel's solid shadow, set off to the lower right: a main panel
   // (`panel`) and a box on the page (`box`).
   panel: inkShadow(),
@@ -89,5 +117,5 @@ export const UI_SHADOWS = Object.freeze({
   // Inked lettering: a hard shadow under titles and big numbers.
   inkText: inkTextShadow(),
   // Dialogs and floating panels.
-  overlay: `0 18px 52px ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
+  overlay: `0 ${depth(18)} ${depth(52)} ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
 });

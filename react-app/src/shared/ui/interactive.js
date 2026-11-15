@@ -1,6 +1,6 @@
 import { UI_COLORS } from './colors.js';
 import { SURFACES } from './surfaces.js';
-import { DURATIONS } from './motion.js';
+import { DURATIONS, motionTime } from './motion.js';
 import { FOCUS_RING } from './shapes.js';
 
 // The two shapes a thing you can open or click takes inside a panel, each
@@ -11,7 +11,7 @@ import { FOCUS_RING } from './shapes.js';
 // drawn card, its edge lit in the accent under the cursor.
 export const CARD_SX = Object.freeze({
   ...SURFACES.card,
-  transition: `border-color ${DURATIONS.fast}ms ease`,
+  transition: `border-color ${motionTime(DURATIONS.fast)} ease`,
   '&:hover': { borderColor: UI_COLORS.accent },
 });
 
@@ -48,9 +48,9 @@ export const LIST_ROW_SX = Object.freeze({
 export function focusRingSx({ inset = false, tone = 'primary.main' } = {}) {
   return {
     '&:focus-visible': {
-      outline: `${FOCUS_RING.width}px solid`,
+      outline: `${FOCUS_RING.width} solid`,
       outlineColor: tone,
-      outlineOffset: inset ? -FOCUS_RING.width : FOCUS_RING.gap,
+      outlineOffset: inset ? `calc(-1 * ${FOCUS_RING.width})` : FOCUS_RING.gap,
     },
   };
 }
@@ -74,7 +74,7 @@ export function readoutSx({ clickable = false, tone = null } = {}) {
     ...(tone ? { borderColor: tone } : null),
     ...(clickable ? {
       cursor: 'pointer',
-      transition: `border-color ${DURATIONS.fast}ms ease`,
+      transition: `border-color ${motionTime(DURATIONS.fast)} ease`,
       '&:hover': { borderColor: UI_COLORS.accent },
     } : null),
   };

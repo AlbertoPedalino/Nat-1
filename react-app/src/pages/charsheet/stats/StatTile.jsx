@@ -82,7 +82,7 @@ const crestInkSx = {
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  p: `${CREST.edge}px`,
+  p: CREST.edge,
   bgcolor: UI_COLORS.edge,
   clipPath: CREST.clip,
   transition: PRESS_MOTION_SX.transition,

@@ -30,6 +30,7 @@ import ToggleRow from '../../../shared/ui/ToggleRow.jsx';
 import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { hexLabel } from './hexLabel.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -228,8 +229,7 @@ const nextHexSx = {
   alignItems: 'flex-start',
   gap: 1,
   p: 1,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1.5,
   ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.wash, base: VTT_COLORS.surface }),
 };
@@ -245,8 +245,7 @@ const linkButtonSx = {
 
 const lastCardSx = {
   p: 1,
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1.5,
   ...tintedSurfaceSx(VTT_COLORS.black, { amount: OPACITY.shade, base: VTT_COLORS.surface }),
 };

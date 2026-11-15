@@ -13,7 +13,7 @@ import { INK_EDGE, inkShadow } from '../../shared/ui/shadows.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
 import { bubbleCheerSx } from '../../shared/ui/bubble.js';
-import { DURATIONS } from '../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../shared/ui/motion.js';
 import { CONTROL_FONT_SIZES, UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import NatOneDie, { NAT_ONE_LANDED_MS } from './NatOneDie.jsx';
@@ -181,7 +181,7 @@ function getCardSx(color) {
     alignItems: 'center',
     gap: '0.75rem',
     p: '1.75rem 1.5rem 1.5rem',
-    transition: `border-color ${DURATIONS.fast}ms ease, box-shadow ${DURATIONS.fast}ms ease, transform ${DURATIONS.fast}ms ease`,
+    transition: `border-color ${motionTime(DURATIONS.fast)} ease, box-shadow ${motionTime(DURATIONS.fast)} ease, transform ${motionTime(DURATIONS.fast)} ease`,
     '&:hover': {
       borderColor: color,
       boxShadow: inkShadow(UI_COLORS.edge, 5),
@@ -201,7 +201,7 @@ const cardLabelSx = {
   fontSize: FONT_SIZES.title,
   textAlign: 'center',
   color: UI_COLORS.textPrimary,
-  transition: `color ${DURATIONS.fast}ms ease`,
+  transition: `color ${motionTime(DURATIONS.fast)} ease`,
 };
 
 const cardDescSx = {

@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { CONTROL_FONT_SIZES, FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { OPACITY } from '../../ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../ui/colors.js';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
 import { tintedSurfaceSx } from '../../ui/surfaces.js';
 import SectionTitle from '../../ui/SectionTitle.jsx';
@@ -31,7 +31,7 @@ export default function SelectorGroup({
 }) {
   const theme = useTheme();
   const labelId = useId();
-  const gold = { color: theme.palette.primary.main };
+  const gold = { color: UI_COLORS.accentLabel };
 
   return (
     <Box>

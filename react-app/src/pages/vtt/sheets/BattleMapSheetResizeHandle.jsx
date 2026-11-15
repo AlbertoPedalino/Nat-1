@@ -13,7 +13,7 @@ import {
 } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 
 export default function BattleMapSheetResizeHandle({ containerRef, value, onCommit }) {
@@ -126,7 +126,7 @@ const handleSx = {
   userSelect: 'none',
   borderRadius: 1,
   background: `linear-gradient(90deg, transparent 42%, ${vttAlpha(VTT_COLORS.accent, OPACITY.line)} 43%, ${vttAlpha(VTT_COLORS.accent, OPACITY.line)} 57%, transparent 58%)`,
-  transition: `color ${DURATIONS.fast}ms ease, background-color ${DURATIONS.fast}ms ease`,
+  transition: `color ${motionTime(DURATIONS.fast)} ease, background-color ${motionTime(DURATIONS.fast)} ease`,
   '&:hover, &:focus-visible': {
     color: VTT_COLORS.accent,
     bgcolor: vttAlpha(VTT_COLORS.accent, OPACITY.soft),

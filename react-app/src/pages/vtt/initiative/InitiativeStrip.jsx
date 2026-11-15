@@ -11,7 +11,7 @@ import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
-import { DURATIONS } from '../../../shared/ui/motion.js';
+import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
 import { BARE_BUTTON_SX, focusRingSx } from '../../../shared/ui/interactive.js';
 import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 import { mapIconButtonSx } from '../map/battleMapSurface.js';
@@ -252,7 +252,7 @@ const entrySx = {
   borderRadius: 999,
   border: '1px solid transparent',
   color: VTT_COLORS.text,
-  transition: `background-color ${DURATIONS.normal}ms ease, border-color ${DURATIONS.normal}ms ease`,
+  transition: `background-color ${motionTime(DURATIONS.normal)} ease, border-color ${motionTime(DURATIONS.normal)} ease`,
 };
 
 const entryBodySx = {

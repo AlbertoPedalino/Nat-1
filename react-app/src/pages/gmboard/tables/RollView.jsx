@@ -18,6 +18,7 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -254,7 +255,7 @@ const statValueSx = {
 const statEmphasisSx = {
   ...statValueSx,
   fontWeight: FONT_WEIGHTS.bold,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
 };
 
 const statNoteSx = {

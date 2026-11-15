@@ -1,5 +1,4 @@
-import { alpha } from '@mui/material';
-import { UI_COLORS, OPACITY, TEMP_HP_TONE, washImage } from './colors.js';
+import { UI_COLORS, OPACITY, TEMP_HP_TONE, uiAlpha, washImage } from './colors.js';
 import { inkOn, pressableSx } from './pressable.js';
 import { inkShadow } from './shadows.js';
 
@@ -196,7 +195,7 @@ export function chipTintStyle(tone, { bgAlpha = OPACITY.fill, borderAlpha = OPAC
   return {
     backgroundColor: UI_COLORS.surfaceRaised,
     backgroundImage: washImage(tone, bgAlpha),
-    borderColor: alpha(tone, borderAlpha),
+    borderColor: uiAlpha(tone, borderAlpha),
     color: text,
   };
 }

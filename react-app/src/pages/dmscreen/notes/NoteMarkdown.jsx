@@ -6,6 +6,7 @@ import rehypeMarkMatches from '../search/rehypeMarkMatches.js';
 import { MARK_SX } from '../search/HighlightedText.jsx';
 import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS } from '../../../shared/ui/fonts.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // GFM without any raw-HTML plugin: note bodies are user text, so markup stays
 // markdown-only and anything HTML-like renders as inert characters.
@@ -72,7 +73,7 @@ const rootSx = {
 
 const headingSx = {
   fontWeight: FONT_WEIGHTS.bold,
-  color: 'primary.main',
+  color: UI_COLORS.accentLabel,
   mt: 1.5,
   mb: 0.5,
 };
@@ -123,14 +124,13 @@ const tableSx = {
 };
 
 const cellSx = {
-  border: '2px solid',
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   px: 0.75,
   py: 0.5,
   textAlign: 'left',
   verticalAlign: 'top',
 };
 
-const thSx = { ...cellSx, fontWeight: FONT_WEIGHTS.bold, color: 'primary.main' };
+const thSx = { ...cellSx, fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentLabel };
 
 const tdSx = cellSx;

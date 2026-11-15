@@ -20,6 +20,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { INK_SOLID } from '../../../shared/ui/shadows.js';
 
 // The hexcrawl, top to bottom in the order a table plays it: the clock and
 // the weather; the next hex (what it is, then how the party crosses it); the
@@ -129,13 +130,13 @@ const moveBarSx = {
   justifyContent: 'space-between',
   gap: 1.5,
   p: 1.5,
-  border: '2px solid',
+  border: INK_SOLID,
   borderColor: 'primary.main',
   borderRadius: 2,
   ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }),
 };
 
-const moveTitleSx = { ...captionLabelSx, color: 'primary.main' };
+const moveTitleSx = { ...captionLabelSx, color: UI_COLORS.accentLabel };
 
 const moveSummarySx = { fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 };
 

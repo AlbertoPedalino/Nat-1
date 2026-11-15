@@ -9,6 +9,7 @@ import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import CardSection from '../../../shared/ui/CardSection.jsx';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // Pieces of a spell row: its source badge, free-cast pips and the weapon
 // picker for spells cast through a weapon.
@@ -33,7 +34,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: 2, borderColor: UI_COLORS.edge, borderRadius: 0.625, ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }), ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', mt: 0.25, px: 1, py: 0.5, border: INK_EDGE, borderRadius: 0.625, ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }), ...(sx || {}) }}>
       <Typography sx={{ ...inlineMetaLabelSx, mr: 0.25 }}>
         Free Cast
       </Typography>

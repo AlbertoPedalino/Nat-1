@@ -32,6 +32,7 @@ import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import { useCostMode } from './useCostMode.js';
 import CostModeToggle from './CostModeToggle.jsx';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -234,8 +235,7 @@ const cannonBoardSx = {
   flexDirection: 'column',
   gap: 0.5,
   p: 0.75,
-  border: 2,
-  borderColor: UI_COLORS.edge,
+  border: INK_EDGE,
   borderRadius: 1,
 };
 

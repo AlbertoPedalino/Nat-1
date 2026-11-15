@@ -1,4 +1,5 @@
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { storedColor } from '../../../shared/ui/colors.js';
 
 // Several floor plans laid out as one picture.
 //
@@ -77,7 +78,7 @@ function loadImage(file) {
 // transparent: the gap between two plans is part of the map now, and a hole
 // through to the page behind it is not what a board looks like.
 export async function stitchImages(files, {
-  name = 'floors.png', background = VTT_COLORS.stitchBackground, gapRatio = DEFAULT_GAP_RATIO,
+  name = 'floors.png', background = storedColor(VTT_COLORS.stitchBackground), gapRatio = DEFAULT_GAP_RATIO,
 } = {}) {
   const list = [...(files || [])];
   if (list.length < 2) throw new Error('Joining floors takes at least two pictures.');
