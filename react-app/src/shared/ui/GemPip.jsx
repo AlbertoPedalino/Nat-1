@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
-import { PANEL_TONES, TRAINING_TONES } from './entityColors.js';
+import { GEM_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
 import { DURATIONS, GEM_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
 import { SPARKLE_PATH } from './BubbleSparkles.jsx';
@@ -16,7 +16,7 @@ import { styleShapes } from './shapes.js';
 // shadow under it every pressable thing has. A gem relit pops with a few
 // sparkles; one spent sinks with a wobble (none for reduced motion).
 //
-// The colours and the sizes live here only (GEM_TONES, GEM_SIZES), the cuts
+// The colours live in entityColors.js (GEM_TONES), the sizes here (GEM_SIZES), the cuts
 // in the style's shapes (shapes.js gemCuts): a new look for every gem is a
 // change to those two files. A skill's or a save's training mark is a gem of its own cut, still
 // (TrainingGem).
@@ -28,18 +28,12 @@ import { styleShapes } from './shapes.js';
 // - `onClick` makes it a button; without one it only shows.
 // Other props (aria-label, title, disabled…) go to the element.
 
-// The cuts are the style's (shapes.js gemCuts): a counter's hexagon, a
-// training mark's four-sided diamond in the comic style; a drop of blood and
-// a cross in the gothic one, a cartridge and a chevron in the war one, a
-// power cell in the sci-fi one. Drawn here from them.
-
-export const GEM_TONES = Object.freeze({
-  slot: UI_COLORS.info,
-  pact: UI_COLORS.spell,
-  uses: UI_COLORS.accent,
-  temporary: UI_COLORS.success,
-  hitDice: PANEL_TONES.hitPoints,
-});
+// The cuts are the style's (shapes.js gemCuts): a slot's or a hit die's
+// counter, a feature's uses, a training mark. The comic style's hexagons (the
+// counter and the uses told apart by colour) and four-sided diamond; the
+// gothic one's drops of blood, candles and crosses; the war one's cartridges,
+// grenades and chevrons; the sci-fi one's power cells. A cut may colour a
+// kind its own way (`tones`, over GEM_TONES). Drawn here from them.
 
 // Sizes easy to hit with a finger: 'md' in a panel of its own, 'sm' inside a
 // card's row.
@@ -56,7 +50,8 @@ function polygon(sides, cx, cy, rx, ry) {
 const points = (list) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 const pathOf = (list) => `M${points(list)}Z`;
 
-// A cut's drawing worked out once (a gemCuts entry): its outline, its parts
+// A cut's drawing worked out once (a gemCuts entry): its colours by kind
+// (`tones`, palette roles resolved), its outline, its parts
 // in their shades (`parts`: facets, or a drawn token's shading), its table,
 // whether the comic glint shines on it, its solid shadow and the rim of its
 // empty setting, all as SVG paths. A cut gem (`sides`, outline and table as
@@ -64,7 +59,11 @@ const pathOf = (list) => `M${points(list)}Z`;
 // facing away in shade, the others in the gem's own colour. A drawn token
 // (`outline`, `shading`) brings its parts drawn.
 function gemCut(cut) {
-  if (cut.outline) return drawnCut(cut);
+  const tones = Object.fromEntries(Object.entries(cut.tones || {}).map(([kind, role]) => [kind, UI_COLORS[role]]));
+  return Object.freeze({ tones, ...(cut.outline ? drawnCut(cut) : cutGem(cut)) });
+}
+
+function cutGem(cut) {
   const { sides, outer: outerAt, inner: innerAt, shadowDrop } = cut;
   const outer = polygon(sides, ...outerAt);
   const inner = polygon(sides, ...innerAt);
@@ -76,22 +75,21 @@ function gemCut(cut) {
     const facing = (mx * -0.6 + my * -0.8) / Math.hypot(mx, my);
     return { shape, shade: facing > 0.35 ? 'light' : facing < -0.35 ? 'dark' : 'base' };
   });
-  return Object.freeze({
+  return {
     parts,
     table: pathOf(inner),
     glint: true,
     outer: pathOf(outer),
     shadow: pathOf(outer.map(([x, y]) => [x, y + shadowDrop])),
     settingRim: pathOf(outer.map(([x, y]) => [50 + (x - 50) * 0.78, 46 + (y - 46) * 0.78 + 3])),
-  });
+  };
 }
 
-function drawnCut({ outline, shading, glint, centre: [cx, cy], shadowDrop, tone }) {
+function drawnCut({ outline, shading, glint, centre: [cx, cy], shadowDrop }) {
   // The shadow dropped and the setting's rim shrunk towards the centre.
   const shadowShift = `translate(0 ${shadowDrop})`;
   const settingRimShift = `translate(${cx} ${cy + 3}) scale(0.78) translate(${-cx} ${-cy})`;
-  return Object.freeze({
-    tone: tone ? UI_COLORS[tone] : null,
+  return {
     parts: shading.map(([shade, shape]) => ({ shape, shade })),
     table: null,
     glint,
@@ -100,16 +98,16 @@ function drawnCut({ outline, shading, glint, centre: [cx, cy], shadowDrop, tone 
     shadowShift,
     settingRim: outline,
     settingRimShift,
-  });
+  };
 }
 
-// A style's two cuts, worked out once per style.
+// A style's cuts, worked out once per style.
 const CUTS = new Map();
 function useGemCuts() {
   const styleId = useStyleId();
   if (!CUTS.has(styleId)) {
     const { gemCuts } = styleShapes(styleId);
-    CUTS.set(styleId, { counter: gemCut(gemCuts.counter), training: gemCut(gemCuts.training) });
+    CUTS.set(styleId, Object.fromEntries(Object.entries(gemCuts).map(([name, cut]) => [name, gemCut(cut)])));
   }
   return CUTS.get(styleId);
 }
@@ -136,8 +134,10 @@ export default function GemPip({
   available, kind = 'slot', size = 'md', selected = false, onClick, sx, ...props
 }) {
   const px = GEM_SIZES[size] || GEM_SIZES.md;
-  const { counter: cut } = useGemCuts();
-  const shades = shadesOf(cut.tone || GEM_TONES[kind] || GEM_TONES.slot);
+  const cuts = useGemCuts();
+  // A feature's uses take the uses' cut, every other counter the counter's.
+  const cut = kind === 'uses' ? cuts.uses : cuts.counter;
+  const shades = shadesOf(cut.tones[kind] || GEM_TONES[kind] || GEM_TONES.slot);
   const interactive = typeof onClick === 'function';
   const motion = useStateChangeMotion(available);
   const outline = px >= GEM_SIZES.md ? 2.2 : 1.9;

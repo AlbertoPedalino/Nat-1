@@ -1252,5 +1252,6 @@ test('words heard but not seen are SPOKEN_ONLY_SX', () => {
 // and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.
 test('a spendable counter is a GemPip', () => {
   assert.deepEqual(sourceFilesMatching(/PipButton/), []);
-  assert.deepEqual(sourceFilesMatching(/GEM_TONES\s*=|GEM_SIZES\s*=/, { allow: ['shared/ui/GemPip.jsx'] }), []);
+  assert.deepEqual(sourceFilesMatching(/GEM_TONES\s*=/, { allow: ['shared/ui/entityColors.js'] }), []);
+  assert.deepEqual(sourceFilesMatching(/GEM_SIZES\s*=/, { allow: ['shared/ui/GemPip.jsx'] }), []);
 });

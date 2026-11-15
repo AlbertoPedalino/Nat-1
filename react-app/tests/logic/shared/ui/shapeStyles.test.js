@@ -4,6 +4,8 @@ import {
   BASE_STYLE_ID, BURST_ASPECT, CHOICE_MARK, CREST, FOCUS_RING, RIBBON, SEAL_RADIUS, SHAPE_STYLES,
   shapeVariables, styleShapes,
 } from '../../../../src/shared/ui/shapes.js';
+import { UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
+import { GEM_TONES } from '../../../../src/shared/ui/entityColors.js';
 
 // The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
 // cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style picks.
@@ -22,14 +24,55 @@ test('every style cuts the same shapes as the base one', () => {
 test('every gem cut is cut or drawn whole', () => {
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
     Object.entries(shapes.gemCuts).forEach(([kind, cut]) => {
-      const keys = Object.keys(cut).sort();
+      const keys = Object.keys(cut).filter((key) => key !== 'tones').sort();
       const cutGem = ['inner', 'outer', 'shadowDrop', 'sides'];
       const drawn = ['centre', 'glint', 'outline', 'shading', 'shadowDrop'];
       assert.ok(
-        String(keys) === String(cutGem) || String(keys.filter((key) => key !== 'tone')) === String(drawn),
+        String(keys) === String(cutGem) || String(keys) === String(drawn),
         `${id} ${kind}: ${keys}`,
       );
       (cut.shading || []).forEach(([shade]) => assert.ok(['light', 'dark', 'table'].includes(shade), `${id} ${kind} ${shade}`));
+      Object.entries(cut.tones || {}).forEach(([counted, role]) => {
+        assert.ok(GEM_TONES[counted], `${id} ${kind} colours ${counted}, no counter's kind`);
+        assert.ok(UI_COLORS[role], `${id} ${kind} ${counted}: ${role} is no palette role`);
+      });
+    });
+  });
+});
+
+// A colour's hue in degrees, from its hex.
+function hueOf(hex) {
+  const [r, g, b] = [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const span = max - Math.min(r, g, b);
+  if (!span) return 0;
+  const sector = max === r ? ((g - b) / span) % 6 : max === g ? (b - r) / span + 2 : (r - g) / span + 4;
+  return (sector * 60 + 360) % 360;
+}
+
+// Two colours told apart at a glance: hues at least 25 degrees round the
+// wheel from each other (two reds of different depth read as one).
+function assertApart(first, second, message) {
+  const turn = Math.abs(hueOf(first) - hueOf(second));
+  assert.ok(Math.min(turn, 360 - turn) >= 25, `${message} (${first}, ${second})`);
+}
+
+// A slot's counter and a feature's uses sit side by side on a sheet: each
+// style tells them apart by their cut or, sharing one, by every colour, as
+// its own palettes paint them (a gothic accent is blood's red).
+test("a style's counters and uses never look alike", () => {
+  const drawing = ({ tones, ...cut }) => JSON.stringify(cut);
+  const colour = (cut, kind, paletteId) => resolveColors(UI_COLORS[(cut.tones || {})[kind]] || GEM_TONES[kind], paletteId);
+  Object.values(SHAPE_STYLES).forEach(({ id, palettes, shapes: { gemCuts: { counter, uses } } }) => {
+    Object.values(palettes).forEach((paletteId) => {
+      const usesColour = colour(uses, 'uses', paletteId);
+      Object.keys(GEM_TONES).filter((kind) => kind !== 'uses').forEach((kind) => {
+        if (drawing(counter) === drawing(uses)) {
+          assertApart(colour(counter, kind, paletteId), usesColour, `${id} ${paletteId}: ${kind} and uses share a cut and a colour`);
+        }
+      });
+      // Even drawn apart, a slot and a use are never one colour.
+      assertApart(colour(counter, 'slot', paletteId), usesColour, `${id} ${paletteId}: a slot and a use share a colour`);
     });
   });
 });

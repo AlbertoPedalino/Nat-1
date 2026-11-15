@@ -20,6 +20,22 @@
 // read from the style itself (styleShapes, useStyleShapes in themeIds.js), or
 // drawn per style as a picture (svgStylePicture).
 
+// The comic counter: a hexagonal gem, for a slot and a use alike.
+const HEXAGON_GEM = { sides: 6, outer: [50, 46, 44, 45], inner: [47, 43, 23, 23.5], shadowDrop: 6 };
+
+// The sci-fi counter: a power cell, for a slot and a use alike.
+const POWER_CELL = {
+  outline: 'M42 4 H58 V12 H62 Q70 12 70 20 V86 Q70 94 62 94 H38 Q30 94 30 86 V20 Q30 12 38 12 H42 Z',
+  shading: [
+    ['table', 'M37 22 H63 V42 H37 Z'],
+    ['table', 'M37 46 H63 V64 H37 Z'],
+    ['table', 'M37 68 H63 V86 H37 Z'],
+  ],
+  glint: false,
+  centre: [50, 50],
+  shadowDrop: 0,
+};
+
 // The comic cut: inked, hand-pressed and bold.
 const COMIC = deepFreeze({
   // A panel bar's ribbon: each end notched in a swallowtail `notch` px deep,
@@ -47,17 +63,22 @@ const COMIC = deepFreeze({
   // The gems' cuts, in a 100-unit box: `sides`, the outline and the table
   // (the flat top facet) as centre x, centre y, radius x, radius y — the table
   // set up and left so the facets round it catch the light unevenly — and how
-  // far the solid shadow drops. A counter's gem (a slot, a use, a hit die) is
-  // a hexagon; a training mark's (a skill's, a save's) a four-sided diamond,
-  // so a mark that is read never looks like a gem that is spent. A style may
-  // draw a token of its own instead of a cut gem (GOTHIC's drop of blood):
-  // `outline` an SVG path, `shading` its lit and shaded parts ([shade, path],
-  // the shades of GemPip: light, dark, table), `glint` whether the comic
-  // glint shines on it, `centre` the point its spent setting shrinks to and
-  // `tone` a palette role it is always drawn in (blood is red, whatever it
-  // counts), over the colour of what it counts.
+  // far the solid shadow drops. Three cuts: `counter` for a spell's slot (a
+  // pact slot, a temporary one) and a hit die, `uses` for a feature's uses,
+  // `training` for a skill's or a save's training mark. The comic counter and
+  // uses are one hexagon, told apart by their colours (GemPip GEM_TONES); its
+  // training mark a four-sided diamond, so a mark that is read never looks
+  // like a gem that is spent. A style may draw a token of its own instead of
+  // a cut gem (GOTHIC's drop of blood): `outline` an SVG path, `shading` its
+  // lit and shaded parts ([shade, path], the shades of GemPip: light, dark,
+  // table), `glint` whether the comic glint shines on it, `centre` the point
+  // its spent setting shrinks to. Either may bring `tones`, a palette role by
+  // what it counts (GEM_TONES' kinds), over the colour GemPip gives it: blood
+  // is red, brass a cartridge's. A style's counter and uses must differ in
+  // their cut or in every colour.
   gemCuts: {
-    counter: { sides: 6, outer: [50, 46, 44, 45], inner: [47, 43, 23, 23.5], shadowDrop: 6 },
+    counter: HEXAGON_GEM,
+    uses: HEXAGON_GEM,
     training: { sides: 4, outer: [50, 46, 38, 46], inner: [47, 42, 17, 21], shadowDrop: 6 },
   },
   // How many segments a meter is cut into: a bar on a page, a piece's bar a
@@ -152,19 +173,11 @@ const SCIFI = deepFreeze({
     foot: '8%',
   },
   bookmarkTab: { radius: '3px 3px 0 0', rise: 2, gap: 2 },
-  // A counter is a power cell, spent an empty socket.
+  // A counter and a use are power cells, spent an empty socket, told apart by
+  // their colours.
   gemCuts: {
-    counter: {
-      outline: 'M42 4 H58 V12 H62 Q70 12 70 20 V86 Q70 94 62 94 H38 Q30 94 30 86 V20 Q30 12 38 12 H42 Z',
-      shading: [
-        ['table', 'M37 22 H63 V42 H37 Z'],
-        ['table', 'M37 46 H63 V64 H37 Z'],
-        ['table', 'M37 68 H63 V86 H37 Z'],
-      ],
-      glint: false,
-      centre: [50, 50],
-      shadowDrop: 0,
-    },
+    counter: POWER_CELL,
+    uses: POWER_CELL,
     training: { sides: 3, outer: [50, 52, 40, 40], inner: [50, 54, 16, 16], shadowDrop: 0 },
   },
   meterSegments: { bar: 20, piece: 8, smooth: 0 },
@@ -201,7 +214,7 @@ const SCIFI = deepFreeze({
 });
 
 // The gothic cut: the comic one in a haunted land. Deeper, tattered
-// swallowtails, a pointed-arch crest, seals like dripped wax, arched tabs, a
+// swallowtails, a headstone for the crest, seals like dripped wax, arched tabs, a
 // cross for the ornament, torn paper; the comic ink, stickers and gems kept,
 // moving a little slower.
 const GOTHIC = deepFreeze({
@@ -211,14 +224,16 @@ const GOTHIC = deepFreeze({
     tile: { notch: 5, pad: 6 },
   },
   seal: { radius: '42% 58% 50% 50% / 60% 44% 56% 40%' },
+  // The ability scores' crest is a headstone: a round arch over a flat foot.
   crest: {
-    clip: 'polygon(0 18%, 18% 4%, 50% 0, 82% 4%, 100% 18%, 100% 80%, 50% 100%, 0 80%)',
+    clip: 'polygon(0 30%, 1.7% 22.2%, 6.7% 15%, 14.6% 8.8%, 25% 4%, 37.1% 1%, 50% 0, 62.9% 1%, 75% 4%, 85.4% 8.8%, 93.3% 15%, 98.3% 22.2%, 100% 30%, 100% 100%, 0 100%)',
     edge: 3,
-    foot: '22%',
+    foot: '0%',
   },
   bookmarkTab: { radius: '10px 10px 0 0', rise: 4, gap: 4 },
-  // A counter is a drop of blood, spent a dried stain; a training mark a
-  // grave's cross.
+  // A counter is a drop of blood (red for a spell's slot, the pact's violet),
+  // spent a dried stain; a use an amber candle, burnt out once spent; a training
+  // mark a grave's cross.
   gemCuts: {
     counter: {
       outline: 'M50 4 C46 18 20 42 20 64 A30 30 0 0 0 80 64 C80 42 54 18 50 4 Z',
@@ -229,8 +244,20 @@ const GOTHIC = deepFreeze({
       glint: false,
       centre: [50, 62],
       shadowDrop: 5,
-      // Blood, whatever it counts.
-      tone: 'danger',
+      tones: { slot: 'danger' },
+    },
+    uses: {
+      outline: 'M50 4 C58 16 64 24 64 34 A14 14 0 0 1 36 34 C36 24 42 16 50 4 Z M36 54 H64 V94 H36 Z',
+      shading: [
+        ['table', 'M50 20 C54 27 56 31 56 36 A6 6 0 0 1 44 36 C44 31 46 27 50 20 Z'],
+        ['dark', 'M56 54 H64 V94 H56 Z'],
+        ['light', 'M39 54 H44 V90 H39 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 5,
+      // Amber: the style's accent is blood's red.
+      tones: { uses: 'warning' },
     },
     training: {
       outline: 'M36 2 H64 V22 H90 V48 H64 V98 H36 V48 H10 V22 H36 Z',
@@ -271,8 +298,9 @@ const WAR = deepFreeze({
     foot: '24%',
   },
   bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
-  // A counter is a cartridge, spent an empty chamber; a training mark a rank
-  // chevron.
+  // A counter is a cartridge (brass for a spell's slot, steel for the
+  // pact's), spent an empty chamber; a use an olive grenade, an empty pouch once
+  // thrown; a training mark a rank chevron.
   gemCuts: {
     counter: {
       outline: 'M34 94 V46 C34 28 41 13 50 4 C59 13 66 28 66 46 V94 Z',
@@ -284,8 +312,21 @@ const WAR = deepFreeze({
       glint: true,
       centre: [50, 50],
       shadowDrop: 4,
-      // Brass, whatever it counts.
-      tone: 'warning',
+      tones: { slot: 'warning', pact: 'armor' },
+    },
+    uses: {
+      outline: 'M24 62 A26 32 0 0 1 76 62 A26 32 0 0 1 24 62 Z M40 14 H60 V32 H40 Z M60 16 H68 C74 16 76 22 76 30 V46 L70 44 V28 C70 24 68 22 64 22 H60 Z',
+      shading: [
+        ['dark', 'M62 33.6 A26 32 0 0 1 62 90.4 C70 82 72 72 72 62 C72 52 70 42 62 33.6 Z'],
+        ['dark', 'M25 56 H75 V60 H25 Z'],
+        ['dark', 'M27 74 H73 V78 H27 Z'],
+        ['dark', 'M48 31 H52 V93 H48 Z'],
+        ['light', 'M32 48 C34 42 38 38 42 36 C40 42 38 46 38 52 Z'],
+      ],
+      glint: false,
+      centre: [50, 60],
+      shadowDrop: 4,
+      tones: { uses: 'secondary' },
     },
     training: {
       outline: 'M4 50 L50 10 L96 50 V84 L50 46 L4 84 Z',

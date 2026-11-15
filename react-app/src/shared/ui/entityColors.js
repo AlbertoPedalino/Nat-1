@@ -130,6 +130,16 @@ export const PANEL_TONES = Object.freeze({
   inspiration: UI_COLORS.spell,
 });
 
+// A counter's gem (GemPip) by what it counts, under a style's own colours
+// (shapes.js gemCuts `tones`).
+export const GEM_TONES = Object.freeze({
+  slot: UI_COLORS.info,
+  pact: UI_COLORS.spell,
+  uses: UI_COLORS.accent,
+  temporary: UI_COLORS.success,
+  hitDice: PANEL_TONES.hitPoints,
+});
+
 // A skill's or a save's training gem (TrainingGem): half and full proficiency in the accent, expertise
 // in a colour well apart from it (a lime next to the sunflower read as one).
 export const TRAINING_TONES = Object.freeze({
