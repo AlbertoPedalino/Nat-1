@@ -58,10 +58,15 @@ logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
 `CloudMenu` as `extraItems`, opens the theme panel, `ThemeDialog.jsx`, where
 every style shows as a card drawn in its own theme): the **style**
 (`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
-War horror) and the **mode** (System, Dark, Light). Each style draws each mode
-in a palette of its own (its `palettes`: comic in `dark` and `light`, the
-parchment; gothic in `dread` and `mist`; sci-fi in `neon` and `neonLight`; war
-in `trench` and `dossier`). A new style is data only: its palettes in
+War horror; Arcane astral; Pirate seas; Steampunk; Dwarven forge; Feywild;
+Cosmic horror; Pixel retro) and the **mode** (System, Dark, Light). Each style
+draws each mode in a palette of its own (its `palettes`: comic in `dark` and
+`light`, the parchment; gothic in `dread` and `mist`; sci-fi in `neon` and
+`neonLight`; war in `trench` and `dossier`; astral in `starlight` and
+`vellum`; pirate in `deepSea` and `seaChart`; steampunk in `foundry` and
+`patent`; dwarven in `forge` and `granite`; fey in `twilight` and `blossom`;
+cosmic in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; every light
+one tints its panel bars in its accent and lays a page of its own colour). A new style is data only: its palettes in
 `colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in
 `gameIcons.js` (a set may spread the comic one and redraw some roles) and,
 with sticker paper, its papers (`PAPER_PICTURES`); no component changes,
@@ -120,7 +125,13 @@ switches, sliders, the chosen row's bookmark) take `styleShapes(styleId)` in
 bursts) is `svgStylePicture`.
 
 The style also inks (`ink` in `shapes.js`: `edge` width, `drop` share of the
-solid shadows, `depth` of the soft ones, as `--gb-ink-*`). Every length in
+solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
+figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels
+(`panel`: the title `bar` a filled strip or only a rule in the panel's tone,
+its `hatch`, a `frame` solid or double `frameWidth` wide, the icon on a seal
+or `bare`, a soft `float` shadow), written as whole values by
+`surfaceVariables` (`--gb-panel-*`), the comic's own where a style builds as
+the comic does, so its panels stay exactly as they were. Every length in
 `shadows.js` is the comic one times the style's share, and an ink line is
 never written by hand (guarded): `INK_EDGE` (the line in ink), `INK_SOLID`
 (width and style, colour set apart), `INK_WIDTH` (a width alone),

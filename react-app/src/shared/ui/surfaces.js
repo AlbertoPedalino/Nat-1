@@ -1,6 +1,6 @@
 import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
 import { VTT_COLORS } from '../vtt/colors.js';
-import { INK_EDGE, UI_SHADOWS, INK_SOLID } from './shadows.js';
+import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js';
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
 import { cornerRadius } from './radius.js';
 import { styleShapes } from './shapes.js';
@@ -13,15 +13,40 @@ import { styleShapes } from './shapes.js';
 // faint halftone dots, `dot` px across every `step` px. Written on the page's
 // root with the palette's variables (ThemeChoiceProvider), as `--gb-surface-*`.
 export function surfaceVariables(paletteId, styleId) {
-  const { paper, halftone } = styleShapes(styleId).surface;
+  const { surface: { paper, halftone }, panel } = styleShapes(styleId);
   const stickers = paper === 'stickers';
+  const bare = panel.badge === 'bare';
   return {
+    ...panelVariables(panel, bare),
     '--gb-surface-paper': stickers ? stickerPaperImage(paletteId) : 'none',
     '--gb-surface-paper-size': stickers ? STICKER_PAPER_SIZE : 'auto',
     '--gb-surface-halftone': halftone
       ? `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} ${halftone.dot}px, transparent ${halftone.dot + 0.4}px)`
       : 'none',
     '--gb-surface-halftone-size': halftone ? `${halftone.step}px ${halftone.step}px` : 'auto',
+  };
+}
+
+// How the style builds a panel (shapes.js panel), as whole values the panel's
+// recipes read (PanelHeader.jsx, SURFACES.panel): the comic's own values where
+// the style builds as the comic does, so its panels are drawn exactly as they
+// were. A variable set to `initial` is unset: its recipe falls back to the
+// panel's tone.
+function panelVariables(panel, bare) {
+  const float = (solid, fall, blur) => (panel.float ? `${solid}, ${panelFloatShadow(panel.float, fall, blur)}` : solid);
+  return {
+    // The bar: the header's paper, or none over a rule in the panel's tone.
+    '--gb-panel-bar-paper': panel.bar === 'fill' ? UI_COLORS.surfaceHeader : 'transparent',
+    '--gb-panel-bar-rule': panel.bar === 'rule' ? 'initial' : UI_COLORS.edge,
+    '--gb-panel-bar-hatch': panel.hatch ? 'auto' : '0 0',
+    // The badge: a seal in the tone with the ink on it, or the drawing bare.
+    '--gb-panel-badge-fill': bare ? 'transparent' : 'initial',
+    '--gb-panel-badge-ink': bare ? 'initial' : UI_COLORS.onFill,
+    '--gb-panel-badge-edge': bare ? 'none' : INK_EDGE,
+    '--gb-panel-badge-shadow': bare ? 'none' : UI_SHADOWS.box,
+    // The shadows of a main panel and of a framed box.
+    '--gb-panel-shadow': float(UI_SHADOWS.panel, 6, 18),
+    '--gb-panel-box-shadow': float(UI_SHADOWS.box, 3, 10),
   };
 }
 
@@ -103,7 +128,8 @@ export const SURFACES = Object.freeze({
     bgcolor: 'background.paper',
     border: INK_EDGE,
     borderRadius: 1,
-    boxShadow: UI_SHADOWS.box,
+    // Its solid shadow, and a soft one as the style floats its panels.
+    boxShadow: 'var(--gb-panel-box-shadow)',
   }),
   // A card inside a panel: the drawn edge, lifted a little off the panel
   // (interactive.js CARD_SX lights it under the cursor).

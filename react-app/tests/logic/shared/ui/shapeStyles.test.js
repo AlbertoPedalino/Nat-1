@@ -133,6 +133,10 @@ test('the sticker paper is painted in hexes, and every palette with a paper has 
     assert.ok(existsSync(`public/paper/${stem}.webp`) && existsSync(`public/paper/${stem}@2x.webp`), stem);
   });
   assert.match(stickerPaperImage('light'), /sticker-paper-light\.webp/);
+  // A style laying the paper has it painted in both its palettes.
+  Object.values(SHAPE_STYLES).filter(({ shapes }) => shapes.surface.paper === 'stickers').forEach(({ id, palettes }) => {
+    Object.values(palettes).forEach((paletteId) => assert.ok(PAPER_PICTURES[paletteId], `${id} ${paletteId}`));
+  });
   assert.equal(stickerPaperImage('unknown'), stickerPaperImage('dark'));
 });
 

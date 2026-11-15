@@ -22,6 +22,10 @@ export const PAPER_PICTURES = Object.freeze({
   light: 'sticker-paper-light',
   dread: 'sticker-paper-dread',
   mist: 'sticker-paper-mist',
+  deepSea: 'sticker-paper-deep-sea',
+  seaChart: 'sticker-paper-sea-chart',
+  twilight: 'sticker-paper-twilight',
+  blossom: 'sticker-paper-blossom',
 });
 
 const BASE = import.meta.env?.BASE_URL || '/';

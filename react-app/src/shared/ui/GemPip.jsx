@@ -32,7 +32,9 @@ import { styleShapes } from './shapes.js';
 // counter, a feature's uses, a training mark. The comic style's hexagons (the
 // counter and the uses told apart by colour) and four-sided diamond; the
 // gothic one's drops of blood, candles and crosses; the war one's cartridges,
-// grenades and chevrons; the sci-fi one's power cells. A cut may colour a
+// grenades and chevrons; the sci-fi one's power cells; and every other
+// style's own (stars and moons, doubloons, gears, rune stones, flowers, eyes,
+// pixel coins). A cut may colour a
 // kind its own way (`tones`, over GEM_TONES). Drawn here from them.
 
 // Sizes easy to hit with a finger: 'md' in a panel of its own, 'sm' inside a

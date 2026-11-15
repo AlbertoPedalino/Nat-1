@@ -71,6 +71,96 @@ const WAR_FONTS = Object.freeze({
   mono: '"Special Elite", "Courier New", monospace',
 });
 
+// The astral faces: a grimoire of the heavens. Cinzel Decorative for the
+// signs, Uncial Antiqua for the voice, Marcellus for labels and names,
+// Spectral for the text.
+const ASTRAL_FONTS = Object.freeze({
+  display: '"Marcellus", Georgia, serif',
+  prose: '"Spectral", Georgia, serif',
+  cardName: '"Spectral SC", "Spectral", Georgia, serif',
+  body: '"Spectral", Georgia, serif',
+  shout: '"Uncial Antiqua", "Cinzel Decorative", Georgia, serif',
+  heading: '"Cinzel Decorative", "Marcellus", Georgia, serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The pirate faces: a captain's log. Fondamento for the signs, Rum Raisin
+// for the voice, Alegreya Sans SC for labels, IM Fell DW Pica for the old
+// prose and the names, the comic's Alegreya for the text.
+const PIRATE_FONTS = Object.freeze({
+  display: '"Alegreya Sans SC", system-ui, sans-serif',
+  prose: '"IM Fell DW Pica", Georgia, serif',
+  cardName: '"IM Fell DW Pica SC", "IM Fell DW Pica", Georgia, serif',
+  body: '"Alegreya", Georgia, serif',
+  shout: '"Rum Raisin", "Fondamento", Georgia, serif',
+  heading: '"Fondamento", "IM Fell DW Pica SC", Georgia, serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The steampunk faces: a patent office. Playfair Display SC for the signs
+// and the names, Abril Fatface's poster type for the voice, Roboto Slab for
+// labels, Lora for the text, a typewriter for the mono. (Rye's metrics are
+// broken: font-size-adjust draws it four times too large.)
+const STEAMPUNK_FONTS = Object.freeze({
+  display: '"Roboto Slab", Georgia, serif',
+  prose: '"Lora", Georgia, serif',
+  cardName: '"Playfair Display SC", Georgia, serif',
+  body: '"Lora", Georgia, serif',
+  shout: '"Abril Fatface", "Playfair Display SC", Georgia, serif',
+  heading: '"Playfair Display SC", Georgia, serif',
+  mono: '"Courier Prime", "Courier New", monospace',
+});
+
+// The dwarven faces: runes cut in stone. Metamorphous for the signs, New
+// Rocker for the voice, Barlow Condensed for labels, Vollkorn for the text.
+const DWARVEN_FONTS = Object.freeze({
+  display: '"Barlow Condensed", "Arial Narrow", sans-serif',
+  prose: '"Vollkorn", Georgia, serif',
+  cardName: '"Vollkorn SC", "Vollkorn", Georgia, serif',
+  body: '"Vollkorn", Georgia, serif',
+  shout: '"New Rocker", "Metamorphous", Georgia, serif',
+  heading: '"Metamorphous", "Vollkorn SC", Georgia, serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The fey faces: a fairy tale's. Berkshire Swash for the signs, Henny Penny
+// for the voice, Quicksand for labels, the comic's Alegreya for the text.
+const FEY_FONTS = Object.freeze({
+  display: '"Quicksand", system-ui, sans-serif',
+  prose: '"Alegreya", Georgia, serif',
+  cardName: '"Alegreya SC", "Alegreya", Georgia, serif',
+  body: '"Alegreya", Georgia, serif',
+  shout: '"Henny Penny", "Berkshire Swash", Georgia, serif',
+  heading: '"Berkshire Swash", "Alegreya SC", Georgia, serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The cosmic faces: a professor's case notes. Cormorant Unicase for the
+// signs, Eater for the voice, Spectral SC for labels and names, Crimson Pro
+// for the text, a typewriter for the mono.
+const COSMIC_FONTS = Object.freeze({
+  display: '"Spectral SC", Georgia, serif',
+  prose: '"Crimson Pro", Georgia, serif',
+  cardName: '"Spectral SC", Georgia, serif',
+  body: '"Crimson Pro", Georgia, serif',
+  shout: '"Eater", "Cormorant Unicase", Georgia, serif',
+  heading: '"Cormorant Unicase", "Spectral SC", Georgia, serif',
+  mono: '"Courier Prime", "Courier New", monospace',
+});
+
+// The pixel faces: an 8-bit screen. Press Start 2P for the signs and the
+// voice, VT323 for labels and numbers, Pixelify Sans for the text,
+// Silkscreen for the names.
+const PIXEL_FONTS = Object.freeze({
+  display: '"VT323", ui-monospace, monospace',
+  prose: '"Pixelify Sans", system-ui, sans-serif',
+  cardName: '"Silkscreen", "Pixelify Sans", system-ui, sans-serif',
+  body: '"Pixelify Sans", system-ui, sans-serif',
+  shout: '"Press Start 2P", "VT323", ui-monospace, monospace',
+  heading: '"Press Start 2P", "VT323", ui-monospace, monospace',
+  mono: '"VT323", ui-monospace, monospace',
+});
+
 // How large each lettering is drawn against its size (CSS font-size-adjust),
 // by role: the comic faces' own, which the sizes were chosen for. A style's
 // faces are fitted to them (FONT_STYLES `fits`, over these), so a size reads
@@ -111,6 +201,41 @@ export const FONT_STYLES = Object.freeze({
     stacks: SCIFI_FONTS,
     fits: Object.freeze({ heading: 'ex-height 0.5', caps: 'cap-height 0.7' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400..800;1,400..800&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap',
+  }),
+  astral: Object.freeze({
+    stacks: ASTRAL_FONTS,
+    fits: Object.freeze({ body: 'ex-height 0.46', heading: 'ex-height 0.56', shout: 'cap-height 0.66', cover: 'ex-height 0.5' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Marcellus&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spectral+SC:wght@600&family=Uncial+Antiqua&display=swap',
+  }),
+  pirate: Object.freeze({
+    stacks: PIRATE_FONTS,
+    fits: Object.freeze({ heading: 'ex-height 0.52', caps: 'cap-height 0.7' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Alegreya+Sans+SC:wght@500;700;800&family=Fondamento&family=IM+Fell+DW+Pica:ital@0;1&family=IM+Fell+DW+Pica+SC&family=Rum+Raisin&display=swap',
+  }),
+  steampunk: Object.freeze({
+    stacks: STEAMPUNK_FONTS,
+    fits: Object.freeze({ body: 'ex-height 0.49', heading: 'ex-height 0.47', shout: 'cap-height 0.64', cover: 'ex-height 0.41' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Courier+Prime&family=Lora:ital,wght@0,400..700;1,400..700&family=Playfair+Display+SC:wght@700;900&family=Roboto+Slab:wght@400..800&display=swap',
+  }),
+  dwarven: Object.freeze({
+    stacks: DWARVEN_FONTS,
+    fits: Object.freeze({ body: 'ex-height 0.46', heading: 'ex-height 0.52', caps: 'cap-height 0.78', cover: 'ex-height 0.45' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Metamorphous&family=New+Rocker&family=Vollkorn:ital,wght@0,400..900;1,400..900&family=Vollkorn+SC:wght@600;700&display=swap',
+  }),
+  fey: Object.freeze({
+    stacks: FEY_FONTS,
+    fits: Object.freeze({ shout: 'cap-height 0.74' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Alegreya+SC:wght@700&family=Berkshire+Swash&family=Henny+Penny&family=Quicksand:wght@400..700&display=swap',
+  }),
+  cosmic: Object.freeze({
+    stacks: COSMIC_FONTS,
+    fits: Object.freeze({ body: 'ex-height 0.46', heading: 'ex-height 0.41', shout: 'cap-height 0.62' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Cormorant+Unicase:wght@600;700&family=Courier+Prime&family=Crimson+Pro:ital,wght@0,400..800;1,400..800&family=Eater&family=Spectral+SC:wght@500;700&display=swap',
+  }),
+  pixel: Object.freeze({
+    stacks: PIXEL_FONTS,
+    fits: Object.freeze({ body: 'ex-height 0.45', heading: 'ex-height 0.42', shout: 'cap-height 0.5', caps: 'cap-height 0.82', cover: 'ex-height 0.36' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap',
   }),
 });
 

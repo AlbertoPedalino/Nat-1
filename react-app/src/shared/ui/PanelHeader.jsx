@@ -4,7 +4,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
-import { UI_SHADOWS, INK_EDGE, inkEdge, INK_SOLID } from './shadows.js';
+import { INK_SOLID } from './shadows.js';
 import { RIBBON, SEAL_RADIUS, ribbonClip } from './shapes.js';
 import { svgPicture } from './svgPicture.js';
 import { useRootStyle } from './liveStyle.js';
@@ -15,11 +15,16 @@ import { useRootStyle } from './liveStyle.js';
 // title. `tone` colours the badge and the title (Movement turns orange under a
 // penalty); `children` go at the end.
 
+// How the style builds a panel (shapes.js panel) is written on the page's
+// root as whole values (surfaces.js panelVariables), so every recipe here is
+// made once and follows the chosen style.
+
 export const panelBarSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  bgcolor: UI_COLORS.surfaceHeader,
+  // The header's paper, or none: a title over a rule (the style's bar).
+  bgcolor: 'var(--gb-panel-bar-paper)',
   borderBottom: INK_SOLID,
   borderColor: UI_COLORS.edge,
 };
@@ -72,7 +77,12 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
     ...panelBarSx,
     ...panelBarPadSx,
     ...(tile ? TILE_RIBBON_SX : PANEL_RIBBON_SX),
+    // The rule under the bar: the ink, or the panel's tone under a bar that
+    // is only a rule.
+    borderColor: `var(--gb-panel-bar-rule, ${tone})`,
     backgroundImage: panelScreentone(tone),
+    // The screentone, or none (shapes.js panel.hatch).
+    backgroundSize: 'var(--gb-panel-bar-hatch)',
   };
 }
 
@@ -84,7 +94,8 @@ export function panelTabBarSx(tone = UI_COLORS.accent) {
 }
 
 // The icon's badge in a panel bar: a wax seal in the tone, edged in ink, its
-// game drawing large enough to read (PANEL_BADGE_ICON).
+// game drawing large enough to read (PANEL_BADGE_ICON); or, as the style
+// draws it (shapes.js panel.badge 'bare'), the drawing alone in the tone.
 export const PANEL_BADGE_ICON = ICON_SIZES.xl;
 // The badge's outer size: its icon, 4px of padding (the seal is round: the
 // drawing keeps clear of its edge) and 2px of edge a side. A bar without a
@@ -95,18 +106,18 @@ export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 12;
 // the sheet's tab bar).
 const panelBarPadSx = { px: '0.8rem', py: '0.36rem' };
 
-export function panelBadgeSx(tone = 'primary.main') {
+export function panelBadgeSx(tone = UI_COLORS.accent) {
   return {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     p: 0.5,
     borderRadius: SEAL_RADIUS,
-    bgcolor: tone,
-    color: UI_COLORS.onFill,
-    border: INK_EDGE,
+    bgcolor: `var(--gb-panel-badge-fill, ${tone})`,
+    color: `var(--gb-panel-badge-ink, ${tone})`,
+    border: 'var(--gb-panel-badge-edge)',
     // The seal's solid ink shadow, as under every drawn box.
-    boxShadow: UI_SHADOWS.box,
+    boxShadow: 'var(--gb-panel-badge-shadow)',
     flexShrink: 0,
   };
 }
@@ -124,7 +135,7 @@ export const panelTitleSx = {
 export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.body}, 16cqi)` };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
-// thicker ink frame and its solid shadow. Boxes inside it keep the thinner
+// thicker ink frame and its solid shadow (as the style frames and floats it). Boxes inside it keep the thinner
 // edge, so the panels read first.
 //
 // From md up each main panel is drawn on a layer of its own. Where a card
@@ -148,8 +159,9 @@ export function usePanelsWithoutLayers() {
 }
 
 export const panelFrameSx = {
-  border: inkEdge(3),
-  boxShadow: UI_SHADOWS.panel,
+  // The style's frame (shapes.js panel.frame, frameWidth), scaled with its ink.
+  border: `calc(var(--gb-panel-frame-width) * var(--gb-ink-line)) var(--gb-panel-frame-style) ${UI_COLORS.edge}`,
+  boxShadow: 'var(--gb-panel-shadow)',
   overflow: 'hidden',
   willChange: { md: `var(${PANEL_LAYER_VAR}, transform)` },
 };

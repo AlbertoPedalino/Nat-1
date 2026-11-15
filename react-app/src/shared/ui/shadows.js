@@ -12,6 +12,14 @@ const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
 // How far a solid shadow blurs out: none in a drawn style, a lit line's halo
 // in a glowing one (shapes.js ink.glow).
 const GLOW = 'var(--gb-ink-glow)';
+// How strongly the style inks its lettering (shapes.js ink.lettering).
+const LETTERING_INK = 'var(--gb-ink-lettering)';
+
+// A panel's soft shadow under its solid one, `float` its strength (shapes.js
+// panel.float, more than 0): `fall` and `blur` px in the comic cut.
+export function panelFloatShadow(float, fall, blur) {
+  return `0 ${depth(fall)} ${depth(blur)} ${uiAlpha(UI_COLORS.black, OPACITY.shade * float)}`;
+}
 
 // The drop shadows of surfaces that sit above the page, one per height, so a
 // restyle changes depth in one place. Glows and focus rings stay with the
@@ -81,12 +89,14 @@ export const APPLE_WEBKIT_QUERY = '@supports (font: -apple-system-body)';
 // thinly in a deep shade of itself, and no shadow falls).
 export function inkLettering(width, offset, color = UI_COLORS.edge) {
   // The shadow falls and blurs as far as the palette drops lettering's (a
-  // light one: none, a lit style's halo included).
-  const fall = `calc(${drop(offset)} * var(--gb-lettering-drop))`;
-  const blur = `calc(${GLOW} * var(--gb-lettering-drop))`;
+  // light one: none, a lit style's halo included), outline and shadow as
+  // strongly as the style inks its lettering (shapes.js ink.lettering: 0
+  // printed plain).
+  const fall = `calc(${drop(offset)} * var(--gb-lettering-drop) * ${LETTERING_INK})`;
+  const blur = `calc(${GLOW} * var(--gb-lettering-drop) * ${LETTERING_INK})`;
   return {
     WebkitTextFillColor: 'currentColor',
-    WebkitTextStroke: `calc(${inkLine(width)} * ${LETTERING_LINE}) ${letteringStroke(color)}`,
+    WebkitTextStroke: `calc(${inkLine(width)} * ${LETTERING_LINE} * ${LETTERING_INK}) ${letteringStroke(color)}`,
     paintOrder: 'stroke fill',
     textShadow: `${fall} ${fall} ${blur} ${color}`,
     [APPLE_WEBKIT_QUERY]: {

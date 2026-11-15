@@ -135,7 +135,16 @@ const COMIC = deepFreeze({
   // same for the soft shadows under what floats; `glow` how far (px) every
   // solid shadow and inked lettering blurs out round itself, a lit line's
   // halo (0: a hard drawn shadow).
-  ink: { edge: 2, drop: 1, depth: 1, glow: 0 },
+  // `lettering` how strongly titles and figures are inked (an outline and a
+  // solid shadow, shadows.js inkLettering): 1 the comic's, 0 printed plain.
+  ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 1 },
+  // How a panel is built (PanelHeader.jsx): its title `bar` a filled strip
+  // ('fill') or only a rule in the panel's tone under the title ('rule'),
+  // `hatch` its screentone, the `frame` round it 'solid' or 'double' and
+  // `frameWidth` px wide (the comic cut's, scaled with the ink), its icon on a
+  // wax seal or 'bare', and how far it `float`s on a soft shadow (0: none,
+  // the ink's solid shadow alone).
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
@@ -202,7 +211,8 @@ const SCIFI = deepFreeze({
   focusRing: { width: 2, gap: 2 },
   choiceMark: { size: 18 },
   dieGlyph: { path: 'M6 0.5 L11.5 6 L6 11.5 L0.5 6 Z' },
-  ink: { edge: 1, drop: 0, depth: 1.5, glow: 6 },
+  ink: { edge: 1, drop: 0, depth: 1.5, glow: 6, lettering: 1 },
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
   radius: 3,
   surface: {
     paper: 'none',
@@ -361,7 +371,8 @@ const WAR = deepFreeze({
   focusRing: { width: 3, gap: 2 },
   choiceMark: { size: 20 },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
-  ink: { edge: 2, drop: 1, depth: 1.2, glow: 0 },
+  ink: { edge: 2, drop: 1, depth: 1.2, glow: 0, lettering: 1 },
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
   radius: 2,
   surface: {
     paper: 'none',
@@ -372,6 +383,476 @@ const WAR = deepFreeze({
   motion: { pace: 1.2, hop: 0.4 },
 });
 
+// The astral cut: a wizard's tower under the stars. Fine swallowtails, moon
+// seals, an orb for the crest, glowing lines instead of solid shadows, stars,
+// moons and sparkles for the gems, stars over the page.
+const ASTRAL = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 14 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '50%' },
+  crest: {
+    clip: 'polygon(100% 50%, 98.3% 62.9%, 93.3% 75%, 85.4% 85.4%, 75% 93.3%, 62.9% 98.3%, 50% 100%, 37.1% 98.3%, 25% 93.3%, 14.6% 85.4%, 6.7% 75%, 1.7% 62.9%, 0 50%, 1.7% 37.1%, 6.7% 25%, 14.6% 14.6%, 25% 6.7%, 37.1% 1.7%, 50% 0, 62.9% 1.7%, 75% 6.7%, 85.4% 14.6%, 93.3% 25%, 98.3% 37.1%)',
+    edge: 2,
+    foot: '6%',
+  },
+  bookmarkTab: { radius: '14px 14px 0 0', rise: 3, gap: 3 },
+  // A counter is a star (a gold one for a spell's slot), a use a silver
+  // moon, a training mark a sparkle.
+  gemCuts: {
+    counter: {
+      outline: 'M50 6 L61.8 36.8 L94.7 38.5 L69 59.2 L77.6 91 L50 73 L22.4 91 L31 59.2 L5.3 38.5 L38.2 36.8 Z',
+      shading: [
+        ['dark', 'M50 53 L94.7 38.5 L69 59.2 Z'],
+        ['dark', 'M50 53 L77.6 91 L50 73 Z'],
+        ['dark', 'M50 53 L22.4 91 L31 59.2 Z'],
+        ['light', 'M50 53 L38.2 36.8 L50 6 Z'],
+        ['light', 'M50 53 L31 59.2 L5.3 38.5 Z'],
+      ],
+      glint: false,
+      centre: [50, 53],
+      shadowDrop: 0,
+      tones: { slot: 'warning' },
+    },
+    uses: {
+      outline: 'M58 6 A44 44 0 1 0 94 66 A36 36 0 0 1 58 6 Z',
+      shading: [
+        ['dark', 'M30 86 A44 44 0 0 0 94 66 A36 36 0 0 1 52 80 Z'],
+        ['light', 'M22 30 A44 44 0 0 1 40 12 A40 40 0 0 0 28 40 Z'],
+      ],
+      glint: false,
+      centre: [44, 54],
+      shadowDrop: 0,
+      tones: { uses: 'armor' },
+    },
+    training: {
+      outline: 'M50 4 L60 40 L96 50 L60 60 L50 96 L40 60 L4 50 L40 40 Z',
+      shading: [
+        ['dark', 'M50 50 L96 50 L60 60 L50 96 Z'],
+        ['light', 'M50 50 L50 4 L40 40 L4 50 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 0,
+    },
+  },
+  ornament: { path: 'M6 0 L7.2 4.8 L12 6 L7.2 7.2 L6 12 L4.8 7.2 L0 6 L4.8 4.8 Z' },
+  bookmarkMark: { width: 4, inset: 4, radius: '0 6px 6px 0' },
+  paper: { corners: [1, 1, 1, 1] },
+  ink: { edge: 2, drop: 0, depth: 1.2, glow: 4, lettering: 0 },
+  panel: { bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1 },
+  radius: 12,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1, step: 16 },
+    screentone: { line: 1, gap: 8, angle: 30 },
+    rays: 1,
+  },
+  motion: { pace: 1.1, hop: 0.6 },
+});
+
+// The pirate cut: a ship's deck. Long pennants, doubloon seals, a wooden
+// sign for the crest, planks over the bars, a deck that rolls a little.
+const PIRATE = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 16, pad: 24 },
+    tile: { notch: 6, pad: 7 },
+  },
+  seal: { radius: '50%' },
+  crest: {
+    clip: 'polygon(4% 0, 96% 0, 100% 10%, 98% 50%, 100% 90%, 96% 100%, 4% 100%, 0 90%, 2% 50%, 0 10%)',
+    edge: 3,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '4px 4px 0 0', rise: 3, gap: 4 },
+  // A counter is a doubloon, a use a bottle of rum, a training mark the X
+  // that marks the spot.
+  gemCuts: {
+    counter: {
+      outline: 'M8 50 A42 42 0 1 1 92 50 A42 42 0 1 1 8 50 Z',
+      shading: [
+        ['table', 'M22 50 A28 28 0 1 1 78 50 A28 28 0 1 1 22 50 Z'],
+        ['dark', 'M46 34 H54 V46 H66 V54 H54 V66 H46 V54 H34 V46 H46 Z'],
+      ],
+      glint: true,
+      centre: [50, 50],
+      shadowDrop: 6,
+      tones: { slot: 'accent' },
+    },
+    uses: {
+      outline: 'M43 4 H57 V14 H55 V30 C55 36 72 40 72 54 V90 Q72 96 66 96 H34 Q28 96 28 90 V54 C28 40 45 36 45 30 V14 H43 Z',
+      shading: [
+        ['table', 'M28 60 H72 V80 H28 Z'],
+        ['dark', 'M62 46 C68 48 72 50 72 54 V90 Q72 96 66 96 H62 Z'],
+        ['light', 'M33 52 H37 V88 H33 Z'],
+      ],
+      glint: false,
+      centre: [50, 60],
+      shadowDrop: 6,
+      tones: { uses: 'success' },
+    },
+    training: {
+      outline: 'M14 4 L50 36 L86 4 L96 14 L64 50 L96 86 L86 96 L50 64 L14 96 L4 86 L36 50 L4 14 Z',
+      shading: [
+        ['dark', 'M50 50 L64 50 L96 86 L86 96 L50 64 Z'],
+        ['light', 'M4 14 L14 4 L50 36 L36 50 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 6,
+    },
+  },
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0 },
+  ornament: { path: 'M1 0 L6 4.5 L11 0 L12 1 L7.5 6 L12 11 L11 12 L6 7.5 L1 12 L0 11 L4.5 6 L0 1 Z' },
+  paper: { corners: [1.5, 0.5, 2, 0.75] },
+  radius: 6,
+  surface: {
+    paper: 'stickers',
+    halftone: { dot: 0.8, step: 6 },
+    screentone: { line: 2, gap: 9, angle: 0 },
+    rays: 0.8,
+  },
+  motion: { pace: 1, hop: 1.2 },
+});
+
+// The steampunk cut: a brass machine. Straight riveted plates, a hex nut for
+// the crest, gears, bulbs and nuts for the gems, pinstripes over the bars.
+const STEAMPUNK = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 14 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '30%' },
+  crest: {
+    clip: 'polygon(20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%, 0 50%)',
+    edge: 3,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '2px 2px 0 0', rise: 2, gap: 3 },
+  // A counter is a gear (brass for a spell's slot), a use an electric bulb,
+  // a training mark a hex nut.
+  gemCuts: {
+    counter: {
+      outline: 'M40.1 15.4 L42 3.7 L58 3.7 L59.9 15.4 L67.4 18.5 L77.1 11.6 L88.4 22.9 L81.5 32.6 L84.6 40.1 L96.3 42 L96.3 58 L84.6 59.9 L81.5 67.4 L88.4 77.1 L77.1 88.4 L67.4 81.5 L59.9 84.6 L58 96.3 L42 96.3 L40.1 84.6 L32.6 81.5 L22.9 88.4 L11.6 77.1 L18.5 67.4 L15.4 59.9 L3.7 58 L3.7 42 L15.4 40.1 L18.5 32.6 L11.6 22.9 L22.9 11.6 L32.6 18.5 Z',
+      shading: [
+        ['table', 'M28 50 A22 22 0 1 1 72 50 A22 22 0 1 1 28 50 Z'],
+        ['dark', 'M42 50 A8 8 0 1 1 58 50 A8 8 0 1 1 42 50 Z'],
+      ],
+      glint: true,
+      centre: [50, 50],
+      shadowDrop: 5,
+      tones: { slot: 'accent' },
+    },
+    uses: {
+      outline: 'M50 4 A30 30 0 0 1 72 54 C66 62 62 66 62 72 H38 C38 66 34 62 28 54 A30 30 0 0 1 50 4 Z M38 76 H62 V84 H38 Z M42 88 H58 V96 H42 Z',
+      shading: [
+        ['light', 'M50 16 A18 18 0 0 1 64 44 C60 50 56 54 56 60 H44 C44 54 40 50 36 44 A18 18 0 0 1 50 16 Z'],
+        ['dark', 'M54 76 H62 V84 H54 Z'],
+        ['dark', 'M52 88 H58 V96 H52 Z'],
+      ],
+      glint: true,
+      centre: [50, 40],
+      shadowDrop: 5,
+      tones: { uses: 'info' },
+    },
+    training: {
+      outline: 'M50 6 L88 28 L88 72 L50 94 L12 72 L12 28 Z',
+      shading: [
+        ['dark', 'M50 50 L88 28 L88 72 L50 94 Z'],
+        ['light', 'M50 50 L12 28 L50 6 Z'],
+        ['dark', 'M38 50 A12 12 0 1 1 62 50 A12 12 0 1 1 38 50 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 5,
+    },
+  },
+  meterSegments: { bar: 12, piece: 6, smooth: 0 },
+  ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
+  panel: { bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1 },
+  ornament: { path: 'M4.6 1.8 L4.8 0.1 L7.2 0.1 L7.4 1.8 L8.9 2.7 L10.5 2 L11.7 4.1 L10.3 5.1 L10.3 6.9 L11.7 7.9 L10.5 10 L8.9 9.3 L7.4 10.2 L7.2 11.9 L4.8 11.9 L4.6 10.2 L3.1 9.3 L1.5 10 L0.3 7.9 L1.7 6.9 L1.7 5.1 L0.3 4.1 L1.5 2 L3.1 2.7 Z' },
+  bookmarkMark: { width: 4, inset: 3, radius: '0' },
+  paper: { corners: [0.3, 0.3, 0.3, 0.3] },
+  radius: 4,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 0.6, step: 5 },
+    screentone: { line: 1, gap: 4, angle: 90 },
+    rays: 0.6,
+  },
+  motion: { pace: 1.1, hop: 0.6 },
+});
+
+// The dwarven cut: a hall carved in the mountain. Plain hewn bars, chipped
+// stone seals, a stone tablet for the crest, heavy ink, slow and heavy moves.
+const DWARVEN = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 12 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '18% 26% 22% 14%' },
+  crest: {
+    clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 100%, 0 100%, 0 14%)',
+    edge: 4,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '2px 2px 0 0', rise: 3, gap: 3 },
+  // A counter is a carved rune stone, a use a tankard of ale, a training mark
+  // an anvil.
+  gemCuts: {
+    counter: {
+      outline: 'M30 6 L72 10 Q90 14 90 34 L86 80 Q84 94 68 94 L28 92 Q12 90 12 74 L14 26 Q16 8 30 6 Z',
+      shading: [
+        ['dark', 'M46 22 H54 V78 H46 Z'],
+        ['dark', 'M54 34 L68 24 L72 30 L54 42 Z'],
+        ['dark', 'M46 50 L32 40 L28 46 L46 58 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 6,
+    },
+    uses: {
+      outline: 'M18 20 H66 V88 Q66 94 60 94 H24 Q18 94 18 88 Z M66 32 H80 Q92 32 92 46 V62 Q92 76 80 76 H66 V66 H78 Q82 66 82 62 V46 Q82 42 78 42 H66 Z M14 10 Q14 4 20 4 H64 Q70 4 70 10 V20 H14 Z',
+      shading: [
+        ['table', 'M18 8 H66 V18 H18 Z'],
+        ['dark', 'M18 36 H66 V42 H18 Z'],
+        ['dark', 'M18 72 H66 V78 H18 Z'],
+        ['light', 'M24 46 H30 V68 H24 Z'],
+      ],
+      glint: false,
+      centre: [44, 54],
+      shadowDrop: 6,
+      tones: { uses: 'warning' },
+    },
+    training: {
+      outline: 'M6 20 H70 Q92 20 96 30 Q80 36 66 36 L60 50 H70 V62 H76 V76 H24 V62 H30 V50 H40 L32 36 H18 Q8 34 6 20 Z',
+      shading: [
+        ['dark', 'M24 62 H76 V76 H24 Z'],
+        ['light', 'M10 22 H68 V26 H12 Z'],
+      ],
+      glint: false,
+      centre: [50, 48],
+      shadowDrop: 6,
+    },
+  },
+  ornament: { path: 'M1 1 H11 V5 H7.5 V12 H4.5 V5 H1 Z' },
+  bookmarkMark: { width: 5, inset: 3, radius: '0' },
+  paper: { corners: [0.5, 0.25, 0.5, 0.25] },
+  ink: { edge: 3, drop: 1.2, depth: 1, glow: 0, lettering: 0 },
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0 },
+  radius: 3,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1.2, step: 9 },
+    screentone: { line: 3, gap: 10, angle: 0 },
+    rays: 0.7,
+  },
+  motion: { pace: 1.3, hop: 0.5 },
+});
+
+// The fey cut: a grove where the fair folk dance. Vine swallowtails, petal
+// seals, a scalloped arch of leaves for the crest, a soft glow, flowers,
+// mushrooms and leaves for the gems, fireflies over the page, bouncy moves.
+const FEY = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 14 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '50% 50% 50% 8%' },
+  crest: {
+    clip: 'polygon(0 100%, 0 12%, 4.2% 7.4%, 8.3% 3.5%, 12.5% 0.9%, 16.7% 0, 20.8% 0.9%, 25% 3.5%, 29.2% 7.4%, 33.3% 12%, 37.5% 7.4%, 41.7% 3.5%, 45.8% 0.9%, 50% 0, 54.2% 0.9%, 58.3% 3.5%, 62.5% 7.4%, 66.7% 12%, 70.8% 7.4%, 75% 3.5%, 79.2% 0.9%, 83.3% 0, 87.5% 0.9%, 91.7% 3.5%, 95.8% 7.4%, 100% 12%, 100% 100%)',
+    edge: 3,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '16px 16px 0 0', rise: 5, gap: 4 },
+  // A counter is a flower, a use a toadstool, a training mark a leaf.
+  gemCuts: {
+    counter: {
+      outline: 'M38.2 35.8 A17 17 0 1 1 61.8 35.8 A17 17 0 1 1 69 58.2 A17 17 0 1 1 50 72 A17 17 0 1 1 31 58.2 A17 17 0 1 1 38.2 35.8 Z',
+      shading: [
+        ['table', 'M40 52 A10 10 0 1 1 60 52 A10 10 0 1 1 40 52 Z'],
+      ],
+      glint: false,
+      centre: [50, 52],
+      shadowDrop: 5,
+    },
+    uses: {
+      outline: 'M8 50 C8 22 28 8 50 8 C72 8 92 22 92 50 Q92 56 84 56 H16 Q8 56 8 50 Z M38 56 H62 L66 90 Q66 96 60 96 H40 Q34 96 34 90 Z',
+      shading: [
+        ['light', 'M30 30 A7 7 0 1 1 44 30 A7 7 0 1 1 30 30 Z'],
+        ['light', 'M58 22 A6 6 0 1 1 70 22 A6 6 0 1 1 58 22 Z'],
+        ['light', 'M64 42 A5 5 0 1 1 74 42 A5 5 0 1 1 64 42 Z'],
+        ['dark', 'M56 56 H62 L66 90 Q66 96 60 96 H58 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 5,
+    },
+    training: {
+      outline: 'M50 4 C78 20 88 50 50 96 C12 50 22 20 50 4 Z',
+      shading: [
+        ['dark', 'M50 4 C78 20 88 50 50 96 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 5,
+    },
+  },
+  ornament: { path: 'M6 0 C10 3 10 8 6 12 C2 8 2 3 6 0 Z' },
+  bookmarkMark: { width: 5, inset: 4, radius: '0 8px 8px 0' },
+  paper: { corners: [2, 1, 2, 1] },
+  ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 0.5 },
+  panel: { bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1 },
+  radius: 14,
+  surface: {
+    paper: 'stickers',
+    halftone: { dot: 1.4, step: 14 },
+    screentone: { line: 1, gap: 6, angle: 60 },
+    rays: 1,
+  },
+  motion: { pace: 1.2, hop: 1.4 },
+});
+
+// The cosmic cut: something vast beneath the waves. Torn swallowtails,
+// shapeless seals, a warped slab for the crest, a faint sickly glow, eyes and
+// tentacles for the gems, slow and uneasy moves.
+const COSMIC = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 14 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '58% 42% 63% 37% / 41% 56% 44% 59%' },
+  crest: {
+    clip: 'polygon(6% 4%, 30% 0, 52% 5%, 74% 0, 96% 6%, 100% 34%, 95% 62%, 100% 92%, 72% 100%, 48% 95%, 24% 100%, 2% 94%, 5% 64%, 0 34%)',
+    edge: 3,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '12px 4px 0 0', rise: 4, gap: 4 },
+  // A counter is an eye, open while there, shut once spent; a use a curled
+  // tentacle; a training mark a sigil.
+  gemCuts: {
+    counter: {
+      outline: 'M4 50 C24 18 76 18 96 50 C76 82 24 82 4 50 Z',
+      shading: [
+        ['table', 'M32 50 A18 18 0 1 1 68 50 A18 18 0 1 1 32 50 Z'],
+        ['dark', 'M47 36 Q50 50 47 64 H53 Q50 50 53 36 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 4,
+    },
+    uses: {
+      outline: 'M30 96 C10 70 20 40 46 30 C66 22 84 34 80 52 C76 66 58 66 56 56 C54 48 62 44 68 48 C66 38 52 36 44 44 C34 54 38 74 52 96 Z',
+      shading: [
+        ['table', 'M28 74 A4 4 0 1 1 36 74 A4 4 0 1 1 28 74 Z'],
+        ['table', 'M28 56 A4 4 0 1 1 36 56 A4 4 0 1 1 28 56 Z'],
+        ['table', 'M38 40 A3.5 3.5 0 1 1 45 40 A3.5 3.5 0 1 1 38 40 Z'],
+      ],
+      glint: false,
+      centre: [50, 60],
+      shadowDrop: 4,
+      tones: { uses: 'spell' },
+    },
+    training: {
+      outline: 'M10 50 A40 40 0 1 1 90 50 A40 40 0 1 1 10 50 Z',
+      shading: [
+        ['dark', 'M26 50 A24 24 0 1 1 74 50 A24 24 0 1 1 26 50 Z'],
+        ['table', 'M42 50 A8 8 0 1 1 58 50 A8 8 0 1 1 42 50 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 4,
+    },
+  },
+  ornament: { path: 'M0 6 C3 1 9 1 12 6 C9 11 3 11 0 6 Z' },
+  paper: { corners: [0.5, 2, 1, 1.5] },
+  ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 0 },
+  panel: { bar: 'rule', hatch: false, frame: 'solid', frameWidth: 2, badge: 'bare', float: 1 },
+  radius: 6,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1, step: 11 },
+    screentone: { line: 1, gap: 5, angle: 15 },
+    rays: 0.4,
+  },
+  motion: { pace: 1.4, hop: 0.3 },
+});
+
+// The pixel cut: an 8-bit cartridge. Square everything, stepped corners,
+// pixel coins, potions and hearts for the gems, scanlines over the bars,
+// snappy moves.
+const PIXEL = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 0, pad: 12 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '0' },
+  crest: {
+    clip: 'polygon(8% 0, 92% 0, 92% 6%, 96% 6%, 96% 12%, 100% 12%, 100% 100%, 0 100%, 0 12%, 4% 12%, 4% 6%, 8% 6%)',
+    edge: 3,
+    foot: '0%',
+  },
+  bookmarkTab: { radius: '0', rise: 4, gap: 4 },
+  // A counter is a pixel coin, a use a pixel potion, a training mark a pixel
+  // heart.
+  gemCuts: {
+    counter: {
+      outline: 'M30 6 H70 V14 H80 V22 H88 V30 H94 V70 H88 V78 H80 V86 H70 V94 H30 V86 H20 V78 H12 V70 H6 V30 H12 V22 H20 V14 H30 Z',
+      shading: [
+        ['table', 'M42 26 H58 V74 H42 Z'],
+        ['light', 'M20 30 H28 V50 H20 Z'],
+        ['dark', 'M80 30 H86 V70 H80 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 6,
+    },
+    uses: {
+      outline: 'M40 6 H60 V20 H56 V30 H70 V38 H80 V86 H72 V94 H28 V86 H20 V38 H30 V30 H44 V20 H40 Z',
+      shading: [
+        ['table', 'M24 56 H76 V86 H24 Z'],
+        ['light', 'M28 42 H34 V52 H28 Z'],
+      ],
+      glint: false,
+      centre: [50, 56],
+      shadowDrop: 6,
+      tones: { uses: 'danger' },
+    },
+    training: {
+      outline: 'M14 20 H42 V28 H58 V20 H86 V28 H94 V54 H86 V62 H78 V70 H70 V78 H58 V86 H42 V78 H30 V70 H22 V62 H14 V54 H6 V28 H14 Z',
+      shading: [
+        ['light', 'M14 28 H26 V40 H14 Z'],
+        ['dark', 'M78 40 H86 V54 H78 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 6,
+    },
+  },
+  ornament: { path: 'M4 0 H8 V4 H12 V8 H8 V12 H4 V8 H0 V4 H4 Z' },
+  bookmarkMark: { width: 4, inset: 0, radius: '0' },
+  paper: { corners: [0, 0, 0, 0] },
+  dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
+  ink: { edge: 3, drop: 1, depth: 1, glow: 0, lettering: 1 },
+  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
+  radius: 1,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1, step: 6 },
+    screentone: { line: 2, gap: 4, angle: 0 },
+    rays: 0.3,
+  },
+  motion: { pace: 0.6, hop: 1 },
+});
+
 // The looks' styles the viewer can choose from (the "Style" of the account
 // menu's theme panel), each with the palette it is drawn in for each mode
 // (`palettes`: dark and light, ids of colors.js PALETTES).
@@ -380,6 +861,13 @@ export const SHAPE_STYLES = Object.freeze({
   scifi: Object.freeze({ id: 'scifi', label: 'Sci-fi', palettes: Object.freeze({ dark: 'neon', light: 'neonLight' }), shapes: SCIFI }),
   gothic: Object.freeze({ id: 'gothic', label: 'Comic gothic', palettes: Object.freeze({ dark: 'dread', light: 'mist' }), shapes: GOTHIC }),
   war: Object.freeze({ id: 'war', label: 'War horror', palettes: Object.freeze({ dark: 'trench', light: 'dossier' }), shapes: WAR }),
+  astral: Object.freeze({ id: 'astral', label: 'Arcane astral', palettes: Object.freeze({ dark: 'starlight', light: 'vellum' }), shapes: ASTRAL }),
+  pirate: Object.freeze({ id: 'pirate', label: 'Pirate seas', palettes: Object.freeze({ dark: 'deepSea', light: 'seaChart' }), shapes: PIRATE }),
+  steampunk: Object.freeze({ id: 'steampunk', label: 'Steampunk', palettes: Object.freeze({ dark: 'foundry', light: 'patent' }), shapes: STEAMPUNK }),
+  dwarven: Object.freeze({ id: 'dwarven', label: 'Dwarven forge', palettes: Object.freeze({ dark: 'forge', light: 'granite' }), shapes: DWARVEN }),
+  fey: Object.freeze({ id: 'fey', label: 'Feywild', palettes: Object.freeze({ dark: 'twilight', light: 'blossom' }), shapes: FEY }),
+  cosmic: Object.freeze({ id: 'cosmic', label: 'Cosmic horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: COSMIC }),
+  pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
 });
 
 export const BASE_STYLE_ID = 'comic';
@@ -457,6 +945,9 @@ export function shapeVariables(styleId) {
     '--gb-ink-drop': String(shapes.ink.drop),
     '--gb-ink-depth': String(shapes.ink.depth),
     '--gb-ink-glow': `${shapes.ink.glow}px`,
+    '--gb-ink-lettering': String(shapes.ink.lettering),
+    '--gb-panel-frame-width': `${shapes.panel.frameWidth}px`,
+    '--gb-panel-frame-style': shapes.panel.frame,
     '--gb-screentone-line': `${shapes.surface.screentone.line}px`,
     '--gb-screentone-gap': `${shapes.surface.screentone.gap}px`,
     '--gb-screentone-angle': `${shapes.surface.screentone.angle}deg`,
