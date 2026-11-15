@@ -5,9 +5,10 @@ import {
   shapeVariables, styleShapes,
 } from '../../../../src/shared/ui/shapes.js';
 
-// The keys of a shapes object, nested, as paths ('crest.clip', …).
+// The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
+// cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style picks.
 function shapeKeys(value, prefix = '') {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return [prefix];
+  if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\./.test(prefix)) return [prefix];
   return Object.entries(value).flatMap(([key, inner]) => shapeKeys(inner, prefix ? `${prefix}.${key}` : key));
 }
 
@@ -15,6 +16,21 @@ test('every style cuts the same shapes as the base one', () => {
   const base = shapeKeys(styleShapes(BASE_STYLE_ID)).sort();
   Object.values(SHAPE_STYLES).forEach((style) => {
     assert.deepEqual(shapeKeys(style.shapes).sort(), base, style.id);
+  });
+});
+
+test('every gem cut is cut or drawn whole', () => {
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
+    Object.entries(shapes.gemCuts).forEach(([kind, cut]) => {
+      const keys = Object.keys(cut).sort();
+      const cutGem = ['inner', 'outer', 'shadowDrop', 'sides'];
+      const drawn = ['centre', 'glint', 'outline', 'shading', 'shadowDrop'];
+      assert.ok(
+        String(keys) === String(cutGem) || String(keys.filter((key) => key !== 'tone')) === String(drawn),
+        `${id} ${kind}: ${keys}`,
+      );
+      (cut.shading || []).forEach(([shade]) => assert.ok(['light', 'dark', 'table'].includes(shade), `${id} ${kind} ${shade}`));
+    });
   });
 });
 

@@ -75,7 +75,17 @@ work a colour out only with `uiAlpha` / `uiMix` / `uiLighten` / `uiDarken`
 `vttCanvasColors(usePaletteId())`; a colour saved in data takes `storedColor`
 (a hex in the base palette, never a variable); a picture built from markup
 (`svgPicture`) and the ink on a fill (`inkOn`) are drawn per palette by
-`shared/ui/themedValues.js`, no extra work at the call.
+`shared/ui/themedValues.js`, no extra work at the call. Three such values
+keep a colour of meaning readable on any palette (`pressable.js`): `inkOn`
+picks the lettering for a fill (on a light palette the page's surface too,
+for a deep fill); `stickerSx(tone)` fills a solid chip or a map mark (the
+tone itself on a dark palette, a pale wash of it on a light one, where the
+tones read as text are deep); `textTone(colour)` writes a colour of meaning
+as plain text (an entity's colour, a tier, a panel's tone in a row: on a
+light palette as deep a shade as reads at AA). A die is the dark green
+solid in every palette, so what is drawn on it takes the style's dark
+palette's colours (`shared/character/dice/dieColors.js`: `dieColor`,
+`diePicture`).
 
 Every palette (`PALETTES` in `colors.js`) fills the same roles and its text roles read on its surfaces at WCAG
 AA (both tested in `tests/logic/shared/ui/paletteColors.test.js`). The default
@@ -98,7 +108,10 @@ in `tests/logic/shared/ui/shapeStyles.test.js`). As with the palette, a shape
 that is a CSS value is the chosen style's variable (`SEAL_RADIUS`, `CREST`,
 `RIBBON`, `FOCUS_RING`, `CHOICE_MARK`, `BURST_ASPECT`: `var(--gb-shape-…)`); a
 shape worked out in code is read from the style (`useStyleShapes()` in
-`shared/ui/themeIds.js`: GemPip's cuts, SegmentedMeter's counts — pass it a
+`shared/ui/themeIds.js`: GemPip's cuts — a cut gem, or a token the style
+draws (`outline` and `shading`, maybe always in one `tone`: gothic's drops of
+blood and crosses, war's cartridges and chevrons, sci-fi's power cells) —,
+SegmentedMeter's counts — pass it a
 `METER_SEGMENTS` kind, not a number); the theme's own controls (tabs,
 switches, sliders, the chosen row's bookmark) take `styleShapes(styleId)` in
 `buildTheme`; a picture cut in the style's shapes (ornament, die glyph,
@@ -124,7 +137,10 @@ there only, guarded) gives each style its stacks by role and the stylesheet
 that loads them; `UI_FONTS.<role>` is `var(--gb-font-<role>)`; a canvas takes
 `fontStacks(useStyleId())`. The base style's stylesheet is the one
 `index.html` links (tested); another style's is linked by the provider when
-chosen. The type scale (`FONT_SIZES`…) stays one for every style.
+chosen. The type scale (`FONT_SIZES`…) stays one for every style; a style
+fits its faces to it (`fits`: font-size-adjust by role over the comic's,
+`FONT_FITS`), so a condensed blackletter or a wide sign reads as large as the
+comic face at the same size.
 
 Its ink may `glow` (a lit line's halo: every solid shadow and inked lettering
 blurs out by `--gb-ink-glow`, 0 in Comic). A theme's variables are composed

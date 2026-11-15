@@ -29,7 +29,9 @@ import { styleShapes } from './shapes.js';
 // Other props (aria-label, title, disabled…) go to the element.
 
 // The cuts are the style's (shapes.js gemCuts): a counter's hexagon, a
-// training mark's four-sided diamond in the comic style. Drawn here from them.
+// training mark's four-sided diamond in the comic style; a drop of blood and
+// a cross in the gothic one, a cartridge and a chevron in the war one, a
+// power cell in the sci-fi one. Drawn here from them.
 
 export const GEM_TONES = Object.freeze({
   slot: UI_COLORS.info,
@@ -52,28 +54,52 @@ function polygon(sides, cx, cy, rx, ry) {
 }
 
 const points = (list) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+const pathOf = (list) => `M${points(list)}Z`;
 
-// A cut's drawing worked out once (a gemCuts entry: sides, outline and table as
-// centre and radii, the shadow's drop): its outline, table, facets, shadow
-// and empty setting. Light from the top left: a facet facing it is lit, one facing
-// away is in shade, the others keep the gem's own colour.
-function gemCut({ sides, outer: outerAt, inner: innerAt, shadowDrop }) {
+// A cut's drawing worked out once (a gemCuts entry): its outline, its parts
+// in their shades (`parts`: facets, or a drawn token's shading), its table,
+// whether the comic glint shines on it, its solid shadow and the rim of its
+// empty setting, all as SVG paths. A cut gem (`sides`, outline and table as
+// centre and radii): light from the top left, a facet facing it lit, one
+// facing away in shade, the others in the gem's own colour. A drawn token
+// (`outline`, `shading`) brings its parts drawn.
+function gemCut(cut) {
+  if (cut.outline) return drawnCut(cut);
+  const { sides, outer: outerAt, inner: innerAt, shadowDrop } = cut;
   const outer = polygon(sides, ...outerAt);
   const inner = polygon(sides, ...innerAt);
-  const facets = outer.map((from, i) => {
+  const parts = outer.map((from, i) => {
     const to = outer[(i + 1) % sides];
-    const shape = points([from, to, inner[(i + 1) % sides], inner[i]]);
+    const shape = pathOf([from, to, inner[(i + 1) % sides], inner[i]]);
     const mx = (from[0] + to[0]) / 2 - 50;
     const my = (from[1] + to[1]) / 2 - 46;
     const facing = (mx * -0.6 + my * -0.8) / Math.hypot(mx, my);
     return { shape, shade: facing > 0.35 ? 'light' : facing < -0.35 ? 'dark' : 'base' };
   });
   return Object.freeze({
-    facets,
-    outer: points(outer),
-    inner: points(inner),
-    shadow: points(outer.map(([x, y]) => [x, y + shadowDrop])),
-    settingRim: points(outer.map(([x, y]) => [50 + (x - 50) * 0.78, 46 + (y - 46) * 0.78 + 3])),
+    parts,
+    table: pathOf(inner),
+    glint: true,
+    outer: pathOf(outer),
+    shadow: pathOf(outer.map(([x, y]) => [x, y + shadowDrop])),
+    settingRim: pathOf(outer.map(([x, y]) => [50 + (x - 50) * 0.78, 46 + (y - 46) * 0.78 + 3])),
+  });
+}
+
+function drawnCut({ outline, shading, glint, centre: [cx, cy], shadowDrop, tone }) {
+  // The shadow dropped and the setting's rim shrunk towards the centre.
+  const shadowShift = `translate(0 ${shadowDrop})`;
+  const settingRimShift = `translate(${cx} ${cy + 3}) scale(0.78) translate(${-cx} ${-cy})`;
+  return Object.freeze({
+    tone: tone ? UI_COLORS[tone] : null,
+    parts: shading.map(([shade, shape]) => ({ shape, shade })),
+    table: null,
+    glint,
+    outer: outline,
+    shadow: outline,
+    shadowShift,
+    settingRim: outline,
+    settingRimShift,
   });
 }
 
@@ -110,8 +136,8 @@ export default function GemPip({
   available, kind = 'slot', size = 'md', selected = false, onClick, sx, ...props
 }) {
   const px = GEM_SIZES[size] || GEM_SIZES.md;
-  const shades = shadesOf(GEM_TONES[kind] || GEM_TONES.slot);
   const { counter: cut } = useGemCuts();
+  const shades = shadesOf(cut.tone || GEM_TONES[kind] || GEM_TONES.slot);
   const interactive = typeof onClick === 'function';
   const motion = useStateChangeMotion(available);
   const outline = px >= GEM_SIZES.md ? 2.2 : 1.9;
@@ -169,18 +195,24 @@ export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx })
 
 export const TRAINING_GEM_SIZE = 14;
 
-// A gem's drawing, for either cut: lit (facets, table, glint and its solid
-// shadow), its empty setting, its outline.
+// A gem's drawing, for either cut: lit (its parts in their shades over its
+// own colour, table, glint and its solid shadow), its empty setting, its
+// outline.
 function LitGem({ cut, shades }) {
   return (
     <>
-      <polygon points={cut.shadow} fill={UI_COLORS.edge} />
-      {cut.facets.map((facet) => (
-        <polygon key={facet.shape} points={facet.shape} fill={shades[facet.shade]} {...FACET_LINE} />
+      <path d={cut.shadow} transform={cut.shadowShift} fill={UI_COLORS.edge} />
+      {cut.table ? null : <path d={cut.outer} fill={shades.base} />}
+      {cut.parts.map((part) => (
+        <path key={part.shape} d={part.shape} fill={shades[part.shade]} {...FACET_LINE} />
       ))}
-      <polygon points={cut.inner} fill={shades.table} {...FACET_LINE} />
-      <path d="M34 30 l12 -7 l3 5 l-12 7 z" fill={UI_COLORS.white} />
-      <circle cx="62" cy="25" r="3.4" fill={UI_COLORS.white} opacity={0.85} />
+      {cut.table ? <path d={cut.table} fill={shades.table} {...FACET_LINE} /> : null}
+      {cut.glint ? (
+        <>
+          <path d="M34 30 l12 -7 l3 5 l-12 7 z" fill={UI_COLORS.white} />
+          <circle cx="62" cy="25" r="3.4" fill={UI_COLORS.white} opacity={0.85} />
+        </>
+      ) : null}
     </>
   );
 }
@@ -188,16 +220,16 @@ function LitGem({ cut, shades }) {
 function GemSetting({ cut, shades }) {
   return (
     <>
-      <polygon points={cut.outer} fill={UI_COLORS.surfaceSunken} />
-      <polygon points={cut.settingRim} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />
+      <path d={cut.outer} fill={UI_COLORS.surfaceSunken} />
+      <path d={cut.settingRim} transform={cut.settingRimShift} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />
     </>
   );
 }
 
 function GemOutline({ cut, selected = false, width }) {
   return (
-    <polygon
-      points={cut.outer}
+    <path
+      d={cut.outer}
       fill="none"
       stroke={selected ? UI_COLORS.accent : UI_COLORS.edge}
       strokeWidth={selected ? width + 0.6 : width}

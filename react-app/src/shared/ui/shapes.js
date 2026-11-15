@@ -49,7 +49,13 @@ const COMIC = deepFreeze({
   // set up and left so the facets round it catch the light unevenly — and how
   // far the solid shadow drops. A counter's gem (a slot, a use, a hit die) is
   // a hexagon; a training mark's (a skill's, a save's) a four-sided diamond,
-  // so a mark that is read never looks like a gem that is spent.
+  // so a mark that is read never looks like a gem that is spent. A style may
+  // draw a token of its own instead of a cut gem (GOTHIC's drop of blood):
+  // `outline` an SVG path, `shading` its lit and shaded parts ([shade, path],
+  // the shades of GemPip: light, dark, table), `glint` whether the comic
+  // glint shines on it, `centre` the point its spent setting shrinks to and
+  // `tone` a palette role it is always drawn in (blood is red, whatever it
+  // counts), over the colour of what it counts.
   gemCuts: {
     counter: { sides: 6, outer: [50, 46, 44, 45], inner: [47, 43, 23, 23.5], shadowDrop: 6 },
     training: { sides: 4, outer: [50, 46, 38, 46], inner: [47, 42, 17, 21], shadowDrop: 6 },
@@ -146,8 +152,19 @@ const SCIFI = deepFreeze({
     foot: '8%',
   },
   bookmarkTab: { radius: '3px 3px 0 0', rise: 2, gap: 2 },
+  // A counter is a power cell, spent an empty socket.
   gemCuts: {
-    counter: { sides: 4, outer: [50, 46, 40, 44], inner: [48, 44, 18, 20], shadowDrop: 0 },
+    counter: {
+      outline: 'M42 4 H58 V12 H62 Q70 12 70 20 V86 Q70 94 62 94 H38 Q30 94 30 86 V20 Q30 12 38 12 H42 Z',
+      shading: [
+        ['table', 'M37 22 H63 V42 H37 Z'],
+        ['table', 'M37 46 H63 V64 H37 Z'],
+        ['table', 'M37 68 H63 V86 H37 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 0,
+    },
     training: { sides: 3, outer: [50, 52, 40, 40], inner: [50, 54, 16, 16], shadowDrop: 0 },
   },
   meterSegments: { bar: 20, piece: 8, smooth: 0 },
@@ -200,6 +217,32 @@ const GOTHIC = deepFreeze({
     foot: '22%',
   },
   bookmarkTab: { radius: '10px 10px 0 0', rise: 4, gap: 4 },
+  // A counter is a drop of blood, spent a dried stain; a training mark a
+  // grave's cross.
+  gemCuts: {
+    counter: {
+      outline: 'M50 4 C46 18 20 42 20 64 A30 30 0 0 0 80 64 C80 42 54 18 50 4 Z',
+      shading: [
+        ['dark', 'M62 36 C72 48 80 56 80 64 A30 30 0 0 1 52 94 C68 88 76 74 72 60 C70 52 66 44 62 36 Z'],
+        ['light', 'M30 66 C30 56 36 46 42 38 C40 48 38 56 38 66 C38 72 34 74 32 72 C30 71 30 69 30 66 Z'],
+      ],
+      glint: false,
+      centre: [50, 62],
+      shadowDrop: 5,
+      // Blood, whatever it counts.
+      tone: 'danger',
+    },
+    training: {
+      outline: 'M36 2 H64 V22 H90 V48 H64 V98 H36 V48 H10 V22 H36 Z',
+      shading: [
+        ['dark', 'M54 2 H64 V22 H90 V48 H64 V98 H54 V40 H80 V30 H54 Z'],
+        ['light', 'M36 2 H44 V30 H10 V22 H36 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 5,
+    },
+  },
   ornament: { path: 'M5 0 L7 0 L7 3 L10 3 L10 5 L7 5 L7 12 L5 12 L5 5 L2 5 L2 3 L5 3 Z' },
   paper: { corners: [0.3, 2, 0.5, 1.5] },
   radius: 8,
@@ -228,9 +271,32 @@ const WAR = deepFreeze({
     foot: '24%',
   },
   bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
+  // A counter is a cartridge, spent an empty chamber; a training mark a rank
+  // chevron.
   gemCuts: {
-    counter: { sides: 8, outer: [50, 46, 42, 42], inner: [47, 43, 20, 20], shadowDrop: 4 },
-    training: { sides: 4, outer: [50, 46, 38, 46], inner: [47, 42, 17, 21], shadowDrop: 4 },
+    counter: {
+      outline: 'M34 94 V46 C34 28 41 13 50 4 C59 13 66 28 66 46 V94 Z',
+      shading: [
+        ['table', 'M34 46 C34 28 41 13 50 4 C59 13 66 28 66 46 Z'],
+        ['dark', 'M58 46 H66 V94 H58 Z'],
+        ['dark', 'M34 84 H66 V94 H34 Z'],
+      ],
+      glint: true,
+      centre: [50, 50],
+      shadowDrop: 4,
+      // Brass, whatever it counts.
+      tone: 'warning',
+    },
+    training: {
+      outline: 'M4 50 L50 10 L96 50 V84 L50 46 L4 84 Z',
+      shading: [
+        ['dark', 'M50 46 L96 84 V70 L50 32 Z'],
+        ['light', 'M4 50 L50 10 L50 20 L4 60 Z'],
+      ],
+      glint: false,
+      centre: [50, 48],
+      shadowDrop: 4,
+    },
   },
   meterSegments: { bar: 10, piece: 5, smooth: 0 },
   bursts: {
