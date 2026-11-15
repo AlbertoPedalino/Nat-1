@@ -3,6 +3,7 @@ import DieFace2D from './DieFace2D.jsx';
 import { rollLogCalculation, rollLogDieColor, rollOutcome } from './rollLogPresentation.js';
 import { FONT_SIZES, FONT_WEIGHTS } from '../../ui/fonts.js';
 import Caption from '../../ui/Caption.jsx';
+import DiceSetScope from '../../ui/DiceSetScope.jsx';
 
 export default function RollCalculation({ entry }) {
   const { dice, modifier, total, formula, modeLabel } = rollLogCalculation(entry);
@@ -21,7 +22,9 @@ export default function RollCalculation({ entry }) {
           return (
             <Box key={index} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
               {operator ? <Typography sx={{ color: 'text.secondary' }}>{operator}</Typography> : null}
-              <DieFace2D value={die.v} faces={die.faces} color={rollLogDieColor(die)} dimmed={die.kept === false} />
+              <DiceSetScope dice={entry.dice}>
+                <DieFace2D value={die.v} faces={die.faces} color={rollLogDieColor(die)} dimmed={die.kept === false} />
+              </DiceSetScope>
               {die.kept === false ? <Caption>discarded</Caption> : null}
             </Box>
           );

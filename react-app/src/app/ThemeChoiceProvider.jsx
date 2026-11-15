@@ -4,13 +4,16 @@ import {
 import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material';
 import { buildTheme } from './theme.js';
 import {
-  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, normalizeThemeChoice, paletteForStyle, readThemeChoice, resolvedMode,
-  writeThemeChoice,
+  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, chosenDice, normalizeThemeChoice, paletteForStyle, readThemeChoice,
+  resolvedMode, writeThemeChoice,
 } from './themeChoice.js';
+import { diceVariables, normalizeDice, setViewerDice } from '../shared/ui/diceSets.js';
+import { DiceSetProvider, appDieIcon } from '../shared/ui/DiceSetScope.jsx';
+import { BASE_STYLE_ID } from '../shared/ui/shapes.js';
 import { paletteOf, paletteVariables } from '../shared/ui/colors.js';
 import { shapeVariables } from '../shared/ui/shapes.js';
 import { surfaceVariables } from '../shared/ui/surfaces.js';
-import { fontStylesheet, fontVariables } from '../shared/ui/fonts.js';
+import { fontVariables, linkStyleFonts } from '../shared/ui/fonts.js';
 import { subscribeThemedValues, themedValuesVersion, themedVariables } from '../shared/ui/themedValues.js';
 import { useEventListener } from '../shared/ui/useEventListener.js';
 
@@ -36,6 +39,10 @@ export function ThemeChoiceProvider({ children }) {
   const mode = resolvedMode(choice.mode, prefersLight);
   const paletteId = paletteForStyle(choice.style, mode);
   const theme = useMemo(() => buildTheme({ paletteId, styleId: choice.style }), [paletteId, choice.style]);
+  const { style: diceStyle, colors: diceColors } = chosenDice(choice);
+  const dice = useMemo(() => normalizeDice({ style: diceStyle, colors: diceColors }), [diceStyle, diceColors]);
+  // The dice rolls sent to the table carry (rollFeed.js), kept as it renders.
+  setViewerDice(dice);
 
   const setChoice = useCallback((patch) => {
     setChoiceState((current) => {
@@ -58,22 +65,35 @@ export function ThemeChoiceProvider({ children }) {
 
   // The chosen style's faces, loaded when it is chosen.
   useEffect(() => linkStyleFonts(choice.style), [choice.style]);
+  // The dice's figures, when their cut is another style's.
+  useEffect(() => linkStyleFonts(diceStyle), [diceStyle]);
+
+  // The tab's icon: the app's d20 in the viewer's dice (index.html links the
+  // comic one, public/favicon.svg).
+  useEffect(() => {
+    const icon = document.querySelector('link[rel="icon"][type="image/svg+xml"]');
+    if (!icon) return;
+    if (!icon.dataset.file) icon.dataset.file = icon.getAttribute('href');
+    icon.setAttribute('href', diceColors === BASE_STYLE_ID ? icon.dataset.file : appDieIcon(diceColors));
+  }, [diceColors]);
 
   const value = useMemo(() => ({ choice, mode, paletteId, setChoice }), [choice, mode, paletteId, setChoice]);
 
   return (
     <ThemeChoiceContext.Provider value={value}>
       <ThemeProvider theme={theme}>
-        <ThemeVariables paletteId={paletteId} styleId={choice.style} />
-        {children}
+        <DiceSetProvider value={dice}>
+          <ThemeVariables paletteId={paletteId} styleId={choice.style} dice={dice} />
+          {children}
+        </DiceSetProvider>
       </ThemeProvider>
     </ThemeChoiceContext.Provider>
   );
 }
 
-// The viewer's choice ({ mode, style }), the mode it is drawn in now (`mode`:
-// dark or light, System resolved), the palette, and setChoice({ mode?,
-// style? }), which keeps it.
+// The viewer's choice ({ mode, style, diceStyle, diceColors }), the mode it is drawn in now
+// (`mode`: dark or light, System resolved), the palette, and setChoice({ mode?,
+// style?, diceStyle?, diceColors? }), which keeps it.
 export function useThemeChoice() {
   return useContext(ThemeChoiceContext);
 }
@@ -100,19 +120,9 @@ export function useThemedValuesVersion() {
   return useSyncExternalStore(subscribeThemedValues, themedValuesVersion, themedValuesVersion);
 }
 
-// Links a style's faces once (the base style's are linked by index.html).
-export function linkStyleFonts(styleId) {
-  const href = fontStylesheet(styleId);
-  const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
-  if (!href || links.some((link) => link.getAttribute('href') === href)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
 
-// The chosen theme's variables on :root.
-function ThemeVariables({ paletteId, styleId }) {
+// The chosen theme's variables on :root, the viewer's dice over the palette's.
+function ThemeVariables({ paletteId, styleId, dice }) {
   useThemedValuesVersion();
-  return <GlobalStyles styles={{ ':root': themeVariables(paletteId, styleId) }} />;
+  return <GlobalStyles styles={{ ':root': { ...themeVariables(paletteId, styleId), ...diceVariables(dice) } }} />;
 }

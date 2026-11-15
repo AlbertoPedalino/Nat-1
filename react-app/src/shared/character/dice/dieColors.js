@@ -13,12 +13,15 @@ function darkPaletteOf(styleId) {
   return SHAPE_STYLES[styleId]?.palettes.dark || BASE_PALETTE_ID;
 }
 
-// MUI's text tokens, as a die's colour may be given ('text.primary').
-const TEXT_TOKENS = Object.freeze({ 'text.primary': UI_COLORS.textPrimary, 'text.secondary': UI_COLORS.textSecondary });
+// MUI's text tokens, as a die's colour may be given ('text.primary'): a
+// neutral number is the die's own ink (its set's, diceSets.js).
+const TEXT_TOKENS = Object.freeze({ 'text.primary': UI_COLORS.onDie, 'text.secondary': UI_COLORS.textSecondary });
 
-// A colour drawn on a die.
+// A colour drawn on a die. The die's ink stays its variable, which a roll's
+// dice set (DiceSetScope) writes.
 export function dieColor(color) {
   const role = TEXT_TOKENS[color] || color;
+  if (role === UI_COLORS.onDie) return role;
   if (!role || !readsPalette(role)) return role;
   return themedValue(`die-color:${role}`, (resolve, { styleId }) => resolveColors(role, darkPaletteOf(styleId)));
 }

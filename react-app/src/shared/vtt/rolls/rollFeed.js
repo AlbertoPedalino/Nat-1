@@ -12,6 +12,7 @@ import { DICE_LIMITS } from '../../character/dice/dice.js';
 import { normalizeRollIdentity } from '../../character/dice/rollLogPresentation.js';
 import { makeId } from '../../ids.js';
 import { numberOrNull } from '../../numbers.js';
+import { sharedDice, viewerDiceChoice } from '../../ui/diceSets.js';
 
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 50;
@@ -60,8 +61,10 @@ function normalizeTimestamp(value) {
 // A dice roll as it goes out on the table's channel: the toast fields (label,
 // detail, total, dice), who rolled it and for which piece, how the roller is
 // drawn (`identity`: colour, shape, label — see normalizeRollIdentity), and
-// who may see it. Every screen that rolls makes its entries here: the sheet, the map
-// (custom and creature rolls) and the encounter builder.
+// who may see it, and the dice the roller rolls with (`dice`: their style and
+// colours, diceSets.js), so the table sees their dice. Every screen that rolls makes its entries
+// here: the sheet, the map (custom and creature rolls) and the encounter
+// builder.
 export function makeRollEntry(toast, {
   idPrefix = 'roll', actorName = 'GM', characterId = null, sourceRef = null, identity = {}, note = '', visibility = 'gm',
 } = {}) {
@@ -76,6 +79,7 @@ export function makeRollEntry(toast, {
     note: note || '',
     visibility: visibility === 'public' ? 'public' : 'gm',
     thrown: Boolean(toast?.rolls?.length),
+    dice: viewerDiceChoice(),
   };
 }
 
@@ -137,6 +141,9 @@ export function normalizeRoll(entry) {
     // Requests physical playback on an open map. Both the map roller and a
     // synced sheet roll set it; notices without dice never do.
     thrown: Boolean(entry.thrown && rolls.length),
+    // The roller's dice; none (an older client's roll) is drawn in the
+    // viewer's own.
+    dice: sharedDice(entry.dice),
     at,
   };
 }

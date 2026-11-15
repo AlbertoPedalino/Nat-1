@@ -88,10 +88,20 @@ for a deep fill); `stickerSx(tone)` fills a solid chip or a map mark (the
 tone itself on a dark palette, a pale wash of it on a light one, where the
 tones read as text are deep); `textTone(colour)` writes a colour of meaning
 as plain text (an entity's colour, a tier, a panel's tone in a row: on a
-light palette as deep a shade as reads at AA). A die is the dark green
-solid in every palette, so what is drawn on it takes the style's dark
-palette's colours (`shared/character/dice/dieColors.js`: `dieColor`,
-`diePicture`).
+light palette as deep a shade as reads at AA). A die is dark in every
+palette, so what is drawn on it takes the style's dark palette's colours
+(`shared/character/dice/dieColors.js`: `dieColor`, `diePicture`).
+
+The dice a player rolls with are theirs (`shared/ui/diceSets.js`, chosen in
+the theme panel's Dice tab, kept in `gb:theme` as `diceStyle` and
+`diceColors`, each the look's own unless picked): a style's cut (`DICE_STYLES`:
+the figures' face, the rim's thickness) and a set of colours (`DICE_COLORS`:
+face, lit face, number, edge, and the logo's ramp). The viewer's are the die
+roles' variables on the root and the `DiceSetProvider` context; a roll sent to
+the table carries its roller's (`rollFeed.js`: `dice`), and the toast, the
+bubble, the thrown dice and the log draw it in them (`DiceSetScope`). The
+app's d20 (`appDie.js`: the home logo, the busy die, the tab's icon) wears the
+viewer's colours.
 
 Every palette (`PALETTES` in `colors.js`) fills the same roles and its text roles read on its surfaces at WCAG
 AA (both tested in `tests/logic/shared/ui/paletteColors.test.js`). The default

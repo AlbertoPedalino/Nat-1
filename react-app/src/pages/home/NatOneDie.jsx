@@ -1,35 +1,18 @@
 import { Box } from '@mui/material';
-import { LOGO_COLORS, OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
+import { OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
+import { APP_DIE_FACES, APP_DIE_OUTLINE, appDiePoints } from '../../shared/ui/appDie.js';
+import { useDiceSet } from '../../shared/ui/DiceSetScope.jsx';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 
-// The app's logo on the home cover: the inked, cel-shaded d20 (the same
-// drawing as public/favicon.svg). It spins in, all but settled on a 20… and
+// The app's logo on the home cover: the inked, cel-shaded d20 (appDie.js, the
+// same drawing as the tab's icon), in the viewer's dice set (diceSets.js). It spins in, all but settled on a 20… and
 // flips over onto a 1, the app's name. A click rolls it again, and the
 // cover's name with it. Flat on purpose: a 2D drawing that turns, no 3D die.
 
 const INK = UI_COLORS.edge;
 
-const P = {
-  Top: [256, 36], UR: [450, 148], LR: [450, 372], Bot: [256, 484], LL: [62, 372], UL: [62, 148],
-  T: [256, 140], L: [150, 322], R: [362, 322],
-};
-const HEX = ['Top', 'UR', 'LR', 'Bot', 'LL', 'UL'];
-// Light from the top left: the faces facing it lit, the rest shaded.
-const FACES = [
-  [['Top', 'UL', 'T'], 'light'],
-  [['Top', 'T', 'UR'], 'midLight'],
-  [['UL', 'L', 'T'], 'midLight'],
-  [['UR', 'T', 'R'], 'midDark'],
-  [['UL', 'LL', 'L'], 'mid'],
-  [['UR', 'R', 'LR'], 'dark'],
-  [['LL', 'Bot', 'L'], 'midDark'],
-  [['L', 'Bot', 'R'], 'dark'],
-  [['R', 'Bot', 'LR'], 'darkest'],
-  [['T', 'L', 'R'], 'mid'],
-];
-const points = (names) => names.map((name) => P[name].join(',')).join(' ');
 
 // The roll, in one rhythm: a fast spin slowing down with the 20 coming
 // upright (0–70%), and just before it settles the die flips over at once
@@ -47,7 +30,6 @@ export const NAT_ONE_LANDED_MS = ROLL_MS * LANDED;
 
 const numeralSx = {
   fontFamily: UI_FONTS.shout,
-  fill: LOGO_COLORS.numeral,
   stroke: INK,
   strokeWidth: 12,
   strokeLinejoin: 'round',
@@ -60,6 +42,8 @@ const numeralSx = {
 // false for a die at rest on its 1, `onRoll` asks for another roll.
 export default function NatOneDie({ roll = 0, animate = true, onRoll, sx }) {
   const still = !animate;
+  const { logo, style: { font } } = useDiceSet();
+  const numeral = { ...numeralSx, fontFamily: font, fill: logo.numeral };
   return (
     <Box
       component="button"
@@ -70,15 +54,15 @@ export default function NatOneDie({ roll = 0, animate = true, onRoll, sx }) {
     >
       <Box key={roll} component="svg" viewBox="20 20 472 480" sx={still ? { ...svgSx, ...STILL_SX } : svgSx} aria-hidden="true">
         <g className="die">
-          <polygon points={points(HEX)} fill={INK} stroke={INK} strokeWidth={24} strokeLinejoin="round" transform="translate(16 16)" />
-          {FACES.map(([face, shade]) => (
-            <polygon key={face.join('-')} points={points(face)} fill={LOGO_COLORS[shade]} stroke={INK} strokeWidth={12} strokeLinejoin="round" />
+          <polygon points={appDiePoints(APP_DIE_OUTLINE)} fill={INK} stroke={INK} strokeWidth={24} strokeLinejoin="round" transform="translate(16 16)" />
+          {APP_DIE_FACES.map(([face, shade]) => (
+            <polygon key={face.join('-')} points={appDiePoints(face)} fill={logo[shade]} stroke={INK} strokeWidth={12} strokeLinejoin="round" />
           ))}
-          <polygon points={points(HEX)} fill="none" stroke={INK} strokeWidth={24} strokeLinejoin="round" />
+          <polygon points={appDiePoints(APP_DIE_OUTLINE)} fill="none" stroke={INK} strokeWidth={24} strokeLinejoin="round" />
           <path d="M 120 150 L 176 112 L 188 128 L 134 168 Z" fill={UI_COLORS.white} opacity={OPACITY.veil} />
           <circle cx={206} cy={98} r={9} fill={UI_COLORS.white} opacity={OPACITY.veil} />
-          <text className="twenty" x={256} y={292} fontSize={112} style={numeralSx}>20</text>
-          <text className="one" x={258} y={300} fontSize={150} style={numeralSx}>1</text>
+          <text className="twenty" x={256} y={292} fontSize={112} style={numeral}>20</text>
+          <text className="one" x={258} y={300} fontSize={150} style={numeral}>1</text>
         </g>
       </Box>
       {/* Dazed by its own roll: stars circle the die once it lands on the 1. */}

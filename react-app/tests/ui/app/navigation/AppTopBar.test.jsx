@@ -44,10 +44,10 @@ describe('AppTopBar', () => {
     fireEvent.click(within(screen.getByTestId('account-menu')).getByRole('menuitem', { name: 'Theme' }));
     const panel = screen.getByRole('dialog', { name: 'Theme' });
     fireEvent.click(within(panel).getByRole('button', { name: 'Light' }));
-    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'comic' });
+    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'comic', diceStyle: 'style', diceColors: 'style' });
     expect(document.documentElement.dataset.palette).toBe('light');
     fireEvent.click(within(panel).getByRole('radio', { name: 'Sci-fi' }));
-    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'scifi' });
+    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'scifi', diceStyle: 'style', diceColors: 'style' });
     expect(document.documentElement.dataset.palette).toBe('neonLight');
     expect(document.documentElement.dataset.style).toBe('scifi');
   });

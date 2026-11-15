@@ -164,14 +164,15 @@ test('no inline style on HTML elements', () => {
 // Interface colours come from shared/ui/colors.js (UI_COLORS, uiAlpha) and the
 // battle map's from shared/vtt/colors.js; the theme is built from them.
 // Literal colours remain only where they are data: selectable palettes,
-// stored tones, map cell/marker colours, rendered die pixels, adapter cards.
+// stored tones, map cell/marker colours, rendered die pixels, the dice sets
+// (a roller's set travels with their roll), adapter cards.
 test('no literal colours outside the palettes and colour data', () => {
   const DATA = [
     'shared/ui/colors.js', 'shared/vtt/colors.js', 'app/theme.js', 'shared/ui/entityColors.js',
     'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js', 'shared/character/inventory/itemRarity.js',
     'shared/ui/swatches.js', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
     'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
-    'shared/character/dice/D100Orb.jsx',
+    'shared/character/dice/D100Orb.jsx', 'shared/ui/diceSets.js',
   ];
   assert.deepEqual(sourceLinesMatching(/['"`]#[0-9a-fA-F]{3,8}['"`]|rgba?\(\s*\d/, { allow: DATA })
     .filter((hit) => !hit.startsWith('adapters/') && !hit.startsWith('data/')), []);

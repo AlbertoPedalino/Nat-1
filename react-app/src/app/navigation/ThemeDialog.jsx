@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Box, ButtonBase, Stack, ThemeProvider, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import { Box, ButtonBase, Stack, Tab, Tabs, ThemeProvider, Typography } from '@mui/material';
 import { Palette } from 'lucide-react';
 import SheetDialog, { DialogSection, DoneButton } from '../../shared/ui/SheetDialog.jsx';
 import ChoiceToggle from '../../shared/ui/ChoiceToggle.jsx';
@@ -12,20 +12,27 @@ import { SURFACES } from '../../shared/ui/surfaces.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 import { buildTheme } from '../theme.js';
-import { MODE_CHOICES, STYLE_CHOICES, paletteForStyle } from '../themeChoice.js';
-import {
-  linkStyleFonts, themeVariables, useThemeChoice, useThemedValuesVersion,
-} from '../ThemeChoiceProvider.jsx';
+import { MODE_CHOICES, STYLE_CHOICES, STYLE_DICE, chosenDice, paletteForStyle } from '../themeChoice.js';
+import { DICE_COLORS, DICE_STYLES } from '../../shared/ui/diceSets.js';
+import DiceSetScope from '../../shared/ui/DiceSetScope.jsx';
+import Die3D from '../../shared/character/dice/Die3D.jsx';
+import { themeVariables, useThemeChoice, useThemedValuesVersion } from '../ThemeChoiceProvider.jsx';
+import { FONT_SIZES, linkStyleFonts } from '../../shared/ui/fonts.js';
 import { pressableSx } from '../../shared/ui/pressable.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 
-// The theme panel, opened from the account menu: the mode (System follows the
-// device) and the look's style, kept in this browser. Every style shows as a
-// card drawn in that style and in the palette it draws the current mode in
-// (its bar, its seal, its gems, its button), the chosen one lit: a style
-// added to SHAPE_STYLES shows here without more.
+// The theme panel, opened from the account menu, kept in this browser. Its
+// Look tab: the mode (System follows the device) and the look's style, every
+// style a card drawn in that style and in the palette it draws the current
+// mode in (its bar, its seal, its gems, its button), the chosen one lit. Its
+// Dice tab: the dice the viewer rolls with, what the table sees them roll —
+// their style (a theme's cut: figures and rim) and their colours apart, each
+// the look's own unless picked. A style added to SHAPE_STYLES shows here
+// without more.
 export default function ThemeDialog({ open, onClose }) {
   const { choice, mode, setChoice } = useThemeChoice();
+  const [tab, setTab] = useState('look');
+  const dice = chosenDice(choice);
   // Every style's faces, so each sample is lettered in its own.
   useEffect(() => {
     if (open) STYLE_CHOICES.forEach(({ id }) => linkStyleFonts(id));
@@ -39,28 +46,77 @@ export default function ThemeDialog({ open, onClose }) {
       maxWidth="sm"
       actions={<DoneButton onClick={onClose} />}
     >
-      <DialogSection title="Mode">
-        <ChoiceToggle
-          ariaLabel="Mode"
-          options={MODE_CHOICES.map(({ id, label }) => ({ value: id, label }))}
-          value={choice.mode}
-          onChange={(nextMode) => setChoice({ mode: nextMode })}
-        />
-      </DialogSection>
-      <DialogSection title="Style">
-        <Box role="radiogroup" aria-label="Style" sx={cardGridSx}>
-          {STYLE_CHOICES.map(({ id, label }) => (
-            <StyleCard
-              key={id}
-              styleId={id}
-              label={label}
-              paletteId={paletteForStyle(id, mode)}
-              chosen={id === choice.style}
-              onChoose={() => setChoice({ style: id })}
+      <Tabs value={tab} onChange={(event, next) => setTab(next)} aria-label="Theme" sx={tabsSx}>
+        <Tab value="look" label="Look" />
+        <Tab value="dice" label="Dice" />
+      </Tabs>
+      {tab === 'look' ? (
+        <>
+          <DialogSection title="Mode">
+            <ChoiceToggle
+              ariaLabel="Mode"
+              options={MODE_CHOICES.map(({ id, label }) => ({ value: id, label }))}
+              value={choice.mode}
+              onChange={(nextMode) => setChoice({ mode: nextMode })}
             />
-          ))}
-        </Box>
-      </DialogSection>
+          </DialogSection>
+          <DialogSection title="Style">
+            <Box role="radiogroup" aria-label="Style" sx={cardGridSx}>
+              {STYLE_CHOICES.map(({ id, label }) => (
+                <StyleCard
+                  key={id}
+                  styleId={id}
+                  label={label}
+                  paletteId={paletteForStyle(id, mode)}
+                  chosen={id === choice.style}
+                  onChoose={() => setChoice({ style: id })}
+                />
+              ))}
+            </Box>
+          </DialogSection>
+        </>
+      ) : (
+        <>
+          <DialogSection title="Dice style">
+            <Box role="radiogroup" aria-label="Dice style" sx={diceGridSx}>
+              <DiceCard
+                dice={{ style: choice.style, colors: dice.colors }}
+                label="Match look"
+                chosen={choice.diceStyle === STYLE_DICE}
+                onChoose={() => setChoice({ diceStyle: STYLE_DICE })}
+              />
+              {Object.values(DICE_STYLES).map(({ id, label }) => (
+                <DiceCard
+                  key={id}
+                  dice={{ style: id, colors: dice.colors }}
+                  label={label}
+                  chosen={choice.diceStyle === id}
+                  onChoose={() => setChoice({ diceStyle: id })}
+                />
+              ))}
+            </Box>
+          </DialogSection>
+          <DialogSection title="Dice colors">
+            <Box role="radiogroup" aria-label="Dice colors" sx={diceGridSx}>
+              <DiceCard
+                dice={{ style: dice.style, colors: choice.style }}
+                label="Match look"
+                chosen={choice.diceColors === STYLE_DICE}
+                onChoose={() => setChoice({ diceColors: STYLE_DICE })}
+              />
+              {Object.values(DICE_COLORS).map(({ id, label }) => (
+                <DiceCard
+                  key={id}
+                  dice={{ style: dice.style, colors: id }}
+                  label={label}
+                  chosen={choice.diceColors === id}
+                  onChoose={() => setChoice({ diceColors: id })}
+                />
+              ))}
+            </Box>
+          </DialogSection>
+        </>
+      )}
     </SheetDialog>
   );
 }
@@ -98,6 +154,31 @@ function StyleCard({ styleId, label, paletteId, chosen, onChoose }) {
     </ButtonBase>
   );
 }
+
+// A dice choice's card: a d20 as it would be rolled (`dice`: { style, colors }),
+// showing its 20, and the choice's name.
+function DiceCard({ dice, label, chosen, onChoose }) {
+  return (
+    <ButtonBase role="radio" aria-checked={chosen} aria-label={label} onClick={onChoose} sx={[cardSx, diceCardSx, chosen && chosenCardSx]}>
+      <DiceSetScope dice={dice}>
+        <Die3D value={20} faces={20} color="text.primary" size={60} seed={`dice-card:${dice.style}:${dice.colors}`} spin={false} />
+      </DiceSetScope>
+      <Typography component="span" sx={diceLabelSx}>{label}</Typography>
+    </ButtonBase>
+  );
+}
+
+const tabsSx = { mb: 1 };
+
+const diceGridSx = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))',
+  gap: 1,
+};
+
+const diceCardSx = { alignItems: 'center', textAlign: 'center' };
+
+const diceLabelSx = { ...TEXT_STYLES.label, fontSize: FONT_SIZES.xs, color: 'text.secondary' };
 
 const cardGridSx = {
   display: 'grid',

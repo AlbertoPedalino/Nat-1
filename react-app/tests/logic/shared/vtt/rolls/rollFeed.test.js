@@ -13,7 +13,9 @@ import {
   rollAuthor,
   normalizeRoll,
   rollToast,
+  makeRollEntry,
 } from '../../../../../src/shared/vtt/rolls/rollFeed.js';
+import { setViewerDice } from '../../../../../src/shared/ui/diceSets.js';
 
 const roll = (patch = {}) => ({
   characterId: 'char-1',
@@ -264,4 +266,14 @@ test('nextRollExpiry: the earliest live roll to run out, none once all are gone'
   assert.equal(nextRollExpiry(feed, { now: 1000 + ROLL_TTL_MS }), 5000 + ROLL_TTL_MS);
   assert.equal(nextRollExpiry(feed, { now: 5000 + ROLL_TTL_MS }), null);
   assert.equal(nextRollExpiry([], { now: 0 }), null);
+});
+
+test("a roll carries its roller's dice, and only dice that exist", () => {
+  setViewerDice({ style: 'pixel', colors: 'gothic' });
+  const entry = makeRollEntry({ label: 'Attack', total: 12, rolls: [{ v: 12, faces: 20 }] });
+  assert.deepEqual(entry.dice, { style: 'pixel', colors: 'gothic' });
+  assert.deepEqual(normalizeRoll(entry).dice, { style: 'pixel', colors: 'gothic' });
+  assert.equal(normalizeRoll({ ...entry, dice: { style: 'plaid', colors: 'plaid' } }).dice, null);
+  assert.equal(normalizeRoll({ ...entry, dice: undefined }).dice, null);
+  setViewerDice(null);
 });

@@ -1,11 +1,14 @@
 import { Box } from '@mui/material';
 import { BUSY_MOTION, motionTime } from './motion.js';
 import { publicAsset } from '../publicAsset.js';
+import { appDieIcon, useDiceSet } from './DiceSetScope.jsx';
+import { BASE_STYLE_ID } from './shapes.js';
 
-// The app's own icon (public/favicon.svg, the logo's d20) turning while
-// something is on the way or being done (a list loading, a save, an upload):
-// the one "working" mark of the app, in place of MUI's spinning ring. The very
-// file of the icon, so a new logo is the new working mark too. `size` in px.
+// The app's own icon (the logo's d20, appDie.js) turning while something is on
+// the way or being done (a list loading, a save, an upload): the one "working"
+// mark of the app, in place of MUI's spinning ring. In the viewer's dice set:
+// the comic set's is the very file of the icon (public/favicon.svg), so a new
+// logo is the new working mark too. `size` in px.
 const APP_ICON = publicAsset('favicon.svg');
 
 // How large it turns: beside the words of a loading line, alone in the space
@@ -14,10 +17,11 @@ const APP_ICON = publicAsset('favicon.svg');
 export const BUSY_SIZES = Object.freeze({ line: 32, area: 72 });
 
 export default function BusyDie({ size = 16, label = 'Working', sx }) {
+  const { id } = useDiceSet();
   return (
     <Box
       component="img"
-      src={APP_ICON}
+      src={id === BASE_STYLE_ID ? APP_ICON : appDieIcon(id)}
       alt=""
       role="progressbar"
       aria-label={label}

@@ -3,6 +3,7 @@ import { LAYERS } from '../../../shared/ui/layers.js';
 import { Box } from '@mui/material';
 import Die3D from '../../../shared/character/dice/Die3D.jsx';
 import D100Orb from '../../../shared/character/dice/D100Orb.jsx';
+import DiceSetScope from '../../../shared/ui/DiceSetScope.jsx';
 import { faceNumbering } from '../../../shared/character/dice/dice3d.js';
 import { dieGeometry } from '../../../shared/character/dice/polyhedra.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -262,44 +263,47 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
   }, [onSettled, roll.id, thrown, startedAt]);
 
   return (
-    <Box sx={{ ...anchorSx, left: x, top: y }}>
-      {thrown.dice.map((die, index) => (
-        <Box
-          key={index}
-          ref={(element) => { bodyRefs.current[index] = element; }}
-          sx={{
-            ...bodySx,
-            marginLeft: `${-thrown.size / 2}px`,
-            marginTop: `${-thrown.size / 2}px`,
-          }}
-        >
-          <Box ref={(element) => { shadowRefs.current[index] = element; }} sx={shadowSx} />
-          {Number(die.faces) === 100 ? (
-            <D100Orb
-              value={die.v}
-              color={VTT_COLORS.accent}
-              size={thrown.size}
-              revealed={false}
-              textureRef={(element) => { solidRefs.current[index] = element; }}
-              resultRef={(element) => { resultRefs.current[index] = element; }}
-            />
-          ) : (
-            <Die3D
-              value={die.v}
-              faces={die.faces}
-              color={VTT_COLORS.accent}
-              size={thrown.size}
-              seed={`${roll.id}:${index}`}
-              numbering={die.numbering}
-              landing={die.landed}
-              solid={thrown.dice.length <= 3}
-              spin={false}
-              solidRef={(element) => { solidRefs.current[index] = element; }}
-            />
-          )}
-        </Box>
-      ))}
-    </Box>
+    // The roller's dice (DiceSetScope), wherever the throw lands.
+    <DiceSetScope dice={roll.dice}>
+      <Box sx={{ ...anchorSx, left: x, top: y }}>
+        {thrown.dice.map((die, index) => (
+          <Box
+            key={index}
+            ref={(element) => { bodyRefs.current[index] = element; }}
+            sx={{
+              ...bodySx,
+              marginLeft: `${-thrown.size / 2}px`,
+              marginTop: `${-thrown.size / 2}px`,
+            }}
+          >
+            <Box ref={(element) => { shadowRefs.current[index] = element; }} sx={shadowSx} />
+            {Number(die.faces) === 100 ? (
+              <D100Orb
+                value={die.v}
+                color={VTT_COLORS.accent}
+                size={thrown.size}
+                revealed={false}
+                textureRef={(element) => { solidRefs.current[index] = element; }}
+                resultRef={(element) => { resultRefs.current[index] = element; }}
+              />
+            ) : (
+              <Die3D
+                value={die.v}
+                faces={die.faces}
+                color={VTT_COLORS.accent}
+                size={thrown.size}
+                seed={`${roll.id}:${index}`}
+                numbering={die.numbering}
+                landing={die.landed}
+                solid={thrown.dice.length <= 3}
+                spin={false}
+                solidRef={(element) => { solidRefs.current[index] = element; }}
+              />
+            )}
+          </Box>
+        ))}
+      </Box>
+    </DiceSetScope>
   );
 }
 

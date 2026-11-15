@@ -4,10 +4,12 @@ import { faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { OPACITY, UI_COLORS, uiAlpha, uiMix } from '../../ui/colors.js';
+import { OPACITY, UI_COLORS, readsPalette, uiAlpha, uiMix } from '../../ui/colors.js';
 import { LINE_HEIGHTS } from '../../ui/fonts.js';
 import { APPLE_WEBKIT_QUERY, inkTextShadow } from '../../ui/shadows.js';
 import { dieColor, diePicture } from './dieColors.js';
+import { useDiceSet } from '../../ui/DiceSetScope.jsx';
+import { dataPicture } from '../../ui/svgPicture.js';
 
 // A die that was thrown, rather than a number in a box: the real solid for its
 // number of sides, tumbling and coming to rest with the rolled face towards you.
@@ -37,6 +39,10 @@ export default function Die3D({
   solid = false,
 }) {
   const geometry = dieGeometry(faces, size / 2);
+  // The dice the die is one of: the viewer's, or its roller's (DiceSetScope):
+  // their colours, their style's figures and rim.
+  const dice = useDiceSet();
+  const { rim, font } = dice.style;
   // A die thrown on the map is numbered like a real one and lands on whichever
   // face the throw left on top, so the caller says which. A die standing for a
   // number that was already rolled simply wears it on the face that faces out.
@@ -93,6 +99,7 @@ export default function Die3D({
               key={index}
               sx={{
                 ...faceSx,
+                fontFamily: font,
                 width: size,
                 height: size,
                 fontSize: glyph,
@@ -101,7 +108,7 @@ export default function Die3D({
                 // or — on a coin — a disc the browser rounds off for us.
                 ...(face.corners ? {
                   bgcolor: 'transparent',
-                  backgroundImage: facePicture(face.corners, faceTint(face, dimmed)),
+                  backgroundImage: facePicture(face.corners, faceTint(face, dimmed, dice), dice.edge, rim),
                   backgroundSize: '100% 100%',
                 } : { borderRadius: face.borderRadius }),
                 transform: face.transform,
@@ -112,7 +119,7 @@ export default function Die3D({
               }}
             >
               {face.corners ? null : (
-                <Box sx={{ ...faceFillSx, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, dimmed)) }} />
+                <Box sx={{ ...faceFillSx, inset: `${rim}%`, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, dimmed, dice)) }} />
               )}
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
@@ -223,13 +230,14 @@ const solidSx = {
 // is fun. The coin is painted like the dice.
 //
 // Drawn like a cartoon: flat bands instead of a smooth gradient — the face
-// towards you, the lit ring round it, and the faces turning away in shadow.
-function faceTint(face, dimmed) {
+// towards you, the lit ring round it, and the faces turning away in shadow,
+// in the colours of the die's set (`dice`, diceSets.js).
+function faceTint(face, dimmed, dice) {
   const lit = Math.max(0, face.towardsViewer);
   if (dimmed) return uiMix(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
-  if (lit >= 0.9) return UI_COLORS.dieFace;
-  if (lit >= 0.4) return UI_COLORS.dieFaceLit;
-  return uiMix(UI_COLORS.dieFace, UI_COLORS.dieEdge, 0.4);
+  if (lit >= 0.9) return dice.face;
+  if (lit >= 0.4) return dice.faceLit;
+  return uiMix(dice.face, dice.edge, 0.4);
 }
 
 // The numbers on the faces that did not land: cream like the result, but
@@ -270,28 +278,28 @@ const rimSx = {
 };
 
 // A polygon face drawn as one picture: the ink rim, and the face's colour
-// inset within it as a coin's fill is (FACE_INSET). Not a box cut out with clip-path:
+// inset within it as a coin's fill is, `rim` per cent in (the dice style's).
+// Not a box cut out with clip-path:
 // a clip on each face of a tumbling solid is redrawn every frame, and on a
 // desktop a throw of four dice dropped two frames in three (22ms a frame,
 // 13.7ms drawn this way). Kept per shape and colour, so a die draws each once.
+// In the set's own hexes; a dropped die's tint is the palette's (diePicture).
 const FACE_PICTURES = new Map();
-const FACE_INSET = 9;
-function facePicture(corners, tint) {
-  const key = `${corners.join(' ')}|${tint}`;
+function facePicture(corners, tint, edge, rim) {
+  const key = `${corners.join(' ')}|${tint}|${edge}|${rim}`;
   let picture = FACE_PICTURES.get(key);
   if (!picture) {
     const points = (scale, shift) => corners.map(([x, y]) => `${shift + x * scale},${shift + y * scale}`).join(' ');
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">'
-      + `<polygon points="${points(1, 0)}" fill="${UI_COLORS.dieEdge}"/>`
-      + `<polygon points="${points(1 - (2 * FACE_INSET) / 100, FACE_INSET)}" fill="${tint}"/></svg>`;
-    picture = diePicture(svg);
+      + `<polygon points="${points(1, 0)}" fill="${edge}"/>`
+      + `<polygon points="${points(1 - (2 * rim) / 100, rim)}" fill="${tint}"/></svg>`;
+    picture = readsPalette(svg) ? diePicture(svg) : dataPicture(svg);
     FACE_PICTURES.set(key, picture);
   }
   return picture;
 }
 
-// A coin's disc of colour within its rim.
+// A coin's disc of colour within its rim (inset by the dice's rim).
 const faceFillSx = {
   position: 'absolute',
-  inset: `${FACE_INSET}%`,
 };

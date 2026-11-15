@@ -83,6 +83,7 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
           size={40}
           justify="center"
           seed={roll.id}
+          rolledWith={roll.dice}
         />
 
         {layout.total != null && (

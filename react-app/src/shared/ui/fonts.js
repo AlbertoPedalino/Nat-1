@@ -353,3 +353,14 @@ export const LINE_HEIGHTS = Object.freeze({
   normal: 1.4,
   relaxed: 1.6,
 });
+
+// Links a style's faces once (the base style's are linked by index.html).
+export function linkStyleFonts(styleId) {
+  const href = fontStylesheet(styleId);
+  const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+  if (!href || links.some((link) => link.getAttribute('href') === href)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}

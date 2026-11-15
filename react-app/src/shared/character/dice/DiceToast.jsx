@@ -88,6 +88,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         modifierColor={layout.modifierColor}
         size={58}
         seed={seed}
+        rolledWith={toast?.dice}
         // The whole solid, however many faces it has: a toast shows one roll at
         // a time, and this is where you actually look at what came up. A fistful
         // of hundred-sided dice is thousands of separately composited planes, so
