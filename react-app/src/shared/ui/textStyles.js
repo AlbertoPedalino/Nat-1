@@ -1,4 +1,4 @@
-import { UI_FONTS, LETTER_SPACINGS, FONT_WEIGHTS } from './fonts.js';
+import { FONT_FITS, UI_FONTS, LETTER_SPACINGS, FONT_WEIGHTS } from './fonts.js';
 import { inkLettering } from './shadows.js';
 
 // The interface's text treatments, by role. Each fixes the typeface, weight,
@@ -9,8 +9,8 @@ export const TEXT_STYLES = Object.freeze({
   // Small capitals over a section, a column, a tag: "SAVING THROWS".
   label: Object.freeze({
     fontFamily: UI_FONTS.display,
-    // Its own size, not the body text's adjustment (theme.js).
-    fontSizeAdjust: 'none',
+    // Its own fit, not the body text's (theme.js; fonts.js FONT_FITS).
+    fontSizeAdjust: FONT_FITS.caps,
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: LETTER_SPACINGS.sm,
     textTransform: 'uppercase',
@@ -31,7 +31,7 @@ export const TEXT_STYLES = Object.freeze({
     // so at the same size they read small: drawn a third larger (their cap
     // height 0.68 of the size, raised to 0.92) wherever a figure stands, the
     // local sizes untouched.
-    fontSizeAdjust: 'cap-height 0.92',
+    fontSizeAdjust: FONT_FITS.figure,
     ...inkLettering(2, 2),
   }),
   // A tag's words on its solid chip (TagChip): the figure's face, without its
@@ -40,13 +40,13 @@ export const TEXT_STYLES = Object.freeze({
   tag: Object.freeze({
     fontFamily: UI_FONTS.shout,
     fontWeight: FONT_WEIGHTS.regular,
-    fontSizeAdjust: 'cap-height 0.92',
+    fontSizeAdjust: FONT_FITS.figure,
   }),
   // The voice: what happens in the moment, shouted in comic lettering (a
   // roll's name and total, NATURAL 20!, a toast's Done!/Oops!). Always inked: an ink outline and its solid shadow.
   shout: Object.freeze({
     fontFamily: UI_FONTS.shout,
-    fontSizeAdjust: 'none',
+    fontSizeAdjust: FONT_FITS.shout,
     fontWeight: FONT_WEIGHTS.regular,
     letterSpacing: LETTER_SPACINGS.md,
     ...inkLettering(2, 2),
@@ -60,7 +60,7 @@ export const TEXT_STYLES = Object.freeze({
     // The blackletter's lower case is short (x-height 0.45 of the size) and
     // reads small beside the body text: drawn a fifth larger (raised to
     // 0.55) wherever a heading stands, the local sizes untouched.
-    fontSizeAdjust: 'ex-height 0.55',
+    fontSizeAdjust: FONT_FITS.heading,
     // A thinner outline than the shout's: the blackletter's fine strokes
     // would fill in under 2px.
     ...inkLettering(1.5, 2),
@@ -69,7 +69,7 @@ export const TEXT_STYLES = Object.freeze({
   // face, the app's own sign, outlined in ink, its solid shadow set well off.
   cover: Object.freeze({
     fontFamily: UI_FONTS.heading,
-    fontSizeAdjust: 'none',
+    fontSizeAdjust: FONT_FITS.cover,
     // The blackletter's heaviest cut: a title, not a heading.
     fontWeight: FONT_WEIGHTS.black,
     letterSpacing: LETTER_SPACINGS.sm,

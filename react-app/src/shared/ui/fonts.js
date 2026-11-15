@@ -71,6 +71,24 @@ const WAR_FONTS = Object.freeze({
   mono: '"Special Elite", "Courier New", monospace',
 });
 
+// How large each lettering is drawn against its size (CSS font-size-adjust),
+// by role: the comic faces' own, which the sizes were chosen for. A style's
+// faces are fitted to them (FONT_STYLES `fits`, over these), so a size reads
+// the same in every style: a narrow or short face (a blackletter, a
+// condensed sign) is drawn larger, a wide one smaller, where a label or a
+// title has the room the comic's had. Every role a TEXT_STYLES treatment
+// fits: `body` (the theme's text, Alegreya's short lower case raised),
+// `heading`, `figure` (and the tag on its chip), `caps` (the label's small
+// capitals: a variable named …label breaks Emotion), `shout`, `cover`.
+const COMIC_FITS = Object.freeze({
+  body: 'ex-height 0.52',
+  heading: 'ex-height 0.55',
+  figure: 'cap-height 0.92',
+  caps: 'none',
+  shout: 'none',
+  cover: 'none',
+});
+
 // Every style's faces: `stacks` (the same roles as COMIC_FONTS) and the
 // `stylesheet` that loads them. The base style's is linked by index.html, so
 // it is there at the first paint; another style's is linked when it is chosen.
@@ -81,14 +99,17 @@ export const FONT_STYLES = Object.freeze({
   }),
   gothic: Object.freeze({
     stacks: GOTHIC_FONTS,
+    fits: Object.freeze({ heading: 'ex-height 0.72' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Cinzel:wght@500;700&family=Creepster&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Pirata+One&display=swap',
   }),
   war: Object.freeze({
     stacks: WAR_FONTS,
+    fits: Object.freeze({ heading: 'ex-height 0.5' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Stardos+Stencil:wght@400;700&display=swap',
   }),
   scifi: Object.freeze({
     stacks: SCIFI_FONTS,
+    fits: Object.freeze({ heading: 'ex-height 0.5', caps: 'cap-height 0.7' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400..800;1,400..800&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap',
   }),
 });
@@ -113,9 +134,20 @@ export function fontStylesheet(styleId) {
   return fontStyle(styleId).stylesheet;
 }
 
-// The variables a style fills, { '--gb-font-display': '"Rubik", …', … }.
+// A lettering role's fit as the chosen style's CSS variable (COMIC_FITS).
+const fitVariableName = (role) => `--gb-${role}-size-fit`;
+export const FONT_FITS = Object.freeze(Object.fromEntries(
+  Object.keys(COMIC_FITS).map((role) => [role, `var(${fitVariableName(role)})`]),
+));
+
+// The variables a style fills, { '--gb-font-display': '"Rubik", …', … }: its
+// stacks and its fits.
 export function fontVariables(styleId) {
-  return Object.fromEntries(Object.entries(fontStacks(styleId)).map(([role, stack]) => [fontVariableName(role), stack]));
+  const fits = { ...COMIC_FITS, ...fontStyle(styleId).fits };
+  return {
+    ...Object.fromEntries(Object.entries(fontStacks(styleId)).map(([role, stack]) => [fontVariableName(role), stack])),
+    ...Object.fromEntries(Object.entries(fits).map(([role, fit]) => [fitVariableName(role), fit])),
+  };
 }
 
 // The type scale. Every font size in the interface is one of these steps, so a

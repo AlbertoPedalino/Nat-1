@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import { createTheme } from '@mui/material';
-import { UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, CONTROL_FONT_SIZES } from '../shared/ui/fonts.js';
+import { FONT_FITS, UI_FONTS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, CONTROL_FONT_SIZES } from '../shared/ui/fonts.js';
 import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
 import { chipTintStyle } from '../shared/ui/entityColors.js';
@@ -205,7 +205,7 @@ function themeOptions(chosen, styleId) {
             // short (x-height 0.46 of the size): everything inherits it raised
             // to 0.52, a little larger than the sans it replaced. The roles in
             // other faces set their own (TEXT_STYLES), so only Alegreya grows.
-            fontSizeAdjust: 'ex-height 0.52',
+            fontSizeAdjust: FONT_FITS.body,
             backgroundColor: UI_COLORS.page,
             backgroundImage: SURFACES.page.backgroundImage,
             backgroundSize: SURFACES.page.backgroundSize,
