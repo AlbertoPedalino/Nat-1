@@ -105,3 +105,15 @@ test('every style sets the pace and the hop, the comic one at full', async () =>
   assert.deepEqual([shapeVariables('comic')['--gb-motion-pace'], shapeVariables('comic')['--gb-motion-hop']], ['1', '1']);
   assert.equal(motionTime(120), 'calc(120ms * var(--gb-motion-pace))');
 });
+
+test('every style draws every icon role', async () => {
+  const { ICON_SETS } = await import('../../../../src/shared/ui/gameIcons.js');
+  Object.entries(ICON_SETS).forEach(([kind, sets]) => {
+    const roles = Object.keys(sets.comic).sort();
+    Object.keys(SHAPE_STYLES).forEach((styleId) => {
+      assert.ok(sets[styleId], `${kind} has no ${styleId} set`);
+      assert.deepEqual(Object.keys(sets[styleId]).sort(), roles, `${kind} ${styleId}`);
+      assert.ok(Object.values(sets[styleId]).every((icon) => typeof icon === 'function' || typeof icon === 'object'), `${kind} ${styleId}`);
+    });
+  });
+});

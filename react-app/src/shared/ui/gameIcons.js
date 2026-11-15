@@ -21,6 +21,24 @@ import {
   Route, ScrollText, Shield, ShieldAlert, ShieldCheck, ShieldHalf, ShieldPlus, ShieldQuestion, ShieldX, Skull,
   Snowflake, Sparkles, Sun, SunMedium, Sword, Swords, Tent, ThermometerSun, Trees, User, Wheat, Wind,
 } from 'lucide-react';
+import {
+  TbAlertTriangle, TbAlien, TbArrowBigUp, TbArrowBigUpLines, TbAtom, TbAxe, TbBackpack, TbBadge,
+  TbBan, TbBatteryCharging, TbBellRinging, TbBiohazard, TbBolt, TbBomb, TbBook2, TbBooks,
+  TbBox, TbBuildingCastle, TbBuildingFortress, TbBuildingSkyscraper, TbCampfire, TbCertificate, TbChartLine, TbChartRadar,
+  TbClipboardList, TbClipboardText, TbCloud, TbCloudFog, TbCloudRain, TbCloudSnow, TbCloudStorm, TbCoffee,
+  TbCoins, TbCompass, TbCpu, TbCross, TbCrosshair, TbDatabase, TbDeviceDesktop, TbDiamond,
+  TbDice, TbDice1, TbDna2, TbDoor, TbEye, TbFileDescription, TbFileText, TbFirstAidKit,
+  TbFlag3, TbFlame, TbFlare, TbFlower, TbGhost, TbHammer, TbHandStop, TbHeartPlus,
+  TbHeartbeat, TbHistory, TbHome, TbId, TbLeaf, TbMap, TbMap2, TbMask,
+  TbMeteor, TbMoon, TbMountain, TbMusic, TbPaw, TbPlanet, TbPlant, TbPlant2,
+  TbRadar2, TbRoad, TbRobot, TbRocket, TbRoute, TbRun, TbShield, TbShieldCheck,
+  TbShieldExclamation, TbShieldHalf, TbShieldHalfFilled, TbShieldLock, TbShieldPlus, TbShieldQuestion, TbShieldStar, TbShieldX,
+  TbSkull, TbSnowflake, TbSparkles, TbStairsUp, TbStars, TbSun, TbSunHigh, TbSword,
+  TbSwords, TbTarget, TbTemperatureSun, TbTent, TbTool, TbTrees, TbUser, TbUserShield,
+  TbWand, TbWind,
+} from 'react-icons/tb';
+import { createElement } from 'react';
+import { useStyleId } from './themeIds.js';
 
 // The interface's game icons, by what they stand for: one place picks the
 // drawing for a role, and every panel, tile and roll button that plays that
@@ -35,7 +53,7 @@ import {
 // that shows the game's world — a weapon, a skull, a scroll, a castle, a die —
 // is a role here, named by what it stands for, so a new look for the whole app
 // (another genre) is a change to this file only (guarded).
-export const GAME_ICONS = Object.freeze({
+const COMIC_GAME_ICONS = Object.freeze({
   // The sheet's panels.
   abilityScores: GiMuscleUp,
   hitPoints: GiHearts,
@@ -129,7 +147,7 @@ export const GAME_ICONS = Object.freeze({
 // header, its picker, the Links menu (TOOL_CATALOG). Drawn large, so game
 // drawings; a small button that opens a tool (the sheet beside the map, the
 // compendium in the bar) keeps its stroke role above.
-export const TOOL_ICONS = Object.freeze({
+const COMIC_TOOL_ICONS = Object.freeze({
   characters: GiBattleGear,
   builder: GiAnvilImpact,
   campaigns: GiCampfire,
@@ -146,7 +164,7 @@ export const TOOL_ICONS = Object.freeze({
 // A character's class mark (classIcon.js), and the mark of no known class:
 // game drawings with a plain silhouette, read on a piece and on a portrait's
 // seal, each one no other role uses.
-export const CLASS_ICONS = Object.freeze({
+const COMIC_CLASS_ICONS = Object.freeze({
   artificer: GiGearHammer,
   barbarian: GiBattleAxe,
   bard: GiLyre,
@@ -171,27 +189,27 @@ export const CLASS_ICONS = Object.freeze({
   shaman: GiTotemHead,
   warrior: GiCrossedAxes,
 });
-export const FALLBACK_CLASS_ICON = GiCharacter;
+const COMIC_FALLBACK_CLASS_ICON = GiCharacter;
 
 // The hexcrawl's seasons, weather, terrains and populations (hexIcons.js).
-export const SEASON_ICONS = Object.freeze({
+const COMIC_SEASON_ICONS = Object.freeze({
   Spring: Flower2, Summer: Sun, Autumn: LeafyGreen, Winter: Snowflake,
 });
-export const WEATHER_ICONS = Object.freeze({ Clear: Sun, Rain: CloudRain, Snow: Snowflake });
-export const FALLBACK_WEATHER_ICON = CloudSun;
+const COMIC_WEATHER_ICONS = Object.freeze({ Clear: Sun, Rain: CloudRain, Snow: Snowflake });
+const COMIC_FALLBACK_WEATHER_ICON = CloudSun;
 // Keyed by the terrain option id, and by its label too, because a hex stores the
 // label rather than the id.
-export const TERRAIN_ICONS = Object.freeze({
+const COMIC_TERRAIN_ICONS = Object.freeze({
   road: Route, plains: Wheat, forest: Trees, mountain: Mountain,
   Road: Route, Plains: Wheat, Forest: Trees, Mountain,
 });
-export const POPULATION_ICONS = Object.freeze({
+const COMIC_POPULATION_ICONS = Object.freeze({
   unexplored: Compass, frontier: Tent, settled: Castle, random: Compass,
 });
 
 // The battle map's atmosphere presets (AtmospherePicker), and the mark of an
 // unknown one.
-export const ATMOSPHERE_ICONS = Object.freeze({
+const COMIC_ATMOSPHERE_ICONS = Object.freeze({
   none: Ban,
   rain: CloudRain,
   storm: CloudLightning,
@@ -207,11 +225,11 @@ export const ATMOSPHERE_ICONS = Object.freeze({
   haunted: House,
   goldvault: Coins,
 });
-export const FALLBACK_ATMOSPHERE_ICON = Cloud;
+const COMIC_FALLBACK_ATMOSPHERE_ICON = Cloud;
 
 // The map generators a new scene can start from (NewSceneDialog), and the mark
 // of an unknown one.
-export const SCENE_GENERATOR_ICONS = Object.freeze({
+const COMIC_SCENE_GENERATOR_ICONS = Object.freeze({
   dungeon: Castle,
   cave: Mountain,
   dwelling: Home,
@@ -219,10 +237,10 @@ export const SCENE_GENERATOR_ICONS = Object.freeze({
   city: Landmark,
   realm: Map,
 });
-export const FALLBACK_SCENE_GENERATOR_ICON = Map;
+const COMIC_FALLBACK_SCENE_GENERATOR_ICON = Map;
 
 // The GM Board's random tables (tableCatalog.js).
-export const TABLE_ICONS = Object.freeze({
+const COMIC_TABLE_ICONS = Object.freeze({
   weather: CloudRain, event: Map, loot: Coins, compl: AlertTriangle, encounter: Swords, trap: Flame, env: Leaf,
 });
 
@@ -240,3 +258,241 @@ export const STICKER_DRAWINGS = Object.freeze([
   GiBroadsword, GiShinyApple, GiVisoredHelm, GiCrystalBall, GiPotionBall, GiHeartBottle, GiGhost, GiLantern,
   GiAcorn, GiKey, GiMushroomGills,
 ]);
+
+// The sci-fi style's icons (Tabler: one even stroke, a console's line icons,
+// lit like the style's lines), role for role with the comic ones above: every
+// style draws every role (tested).
+const SCIFI_GAME_ICONS = Object.freeze({
+  abilityScores: TbChartRadar,
+  hitPoints: TbHeartbeat,
+  armorClass: TbShieldHalfFilled,
+  inspiration: TbBolt,
+  savingThrows: TbShieldCheck,
+  skills: TbTool,
+  senses: TbRadar2,
+  movement: TbRun,
+  proficiencies: TbCertificate,
+  defenses: TbShieldLock,
+  conditions: TbBiohazard,
+  reminders: TbBellRinging,
+  actions: TbTarget,
+  attack: TbCrosshair,
+  damage: TbBomb,
+  heal: TbFirstAidKit,
+  tempHp: TbShieldPlus,
+  roll: TbDice,
+  bonus: TbArrowBigUp,
+  rollLog: TbHistory,
+  characterName: TbId,
+  experience: TbChartLine,
+  books: TbBooks,
+  classes: TbBadge,
+  level: TbArrowBigUpLines,
+  subclass: TbStars,
+  spells: TbAtom,
+  spellSlots: TbBatteryCharging,
+  weaponMasteries: TbSword,
+  species: TbDna2,
+  background: TbFileText,
+  equipment: TbBackpack,
+  currency: TbCoins,
+  inventory: TbBox,
+  sheet: TbFileDescription,
+  preview: TbEye,
+  characterSheet: TbClipboardText,
+  encounter: TbSwords,
+  build: TbHammer,
+  reference: TbBook2,
+  quest: TbFlag3,
+  dungeon: TbBuildingFortress,
+  statBlock: TbClipboardList,
+  door: TbDoor,
+  monster: TbAlien,
+  dead: TbSkull,
+  beast: TbPaw,
+  armor: TbShield,
+  maxHp: TbHeartPlus,
+  minimumRoll: TbDice1,
+  criticalSuccess: TbSparkles,
+  criticalFailure: TbSkull,
+  magic: TbSparkles,
+  coinHeads: TbUser,
+  coinTails: TbCross,
+  advantage: TbShieldCheck,
+  disadvantage: TbShieldExclamation,
+  advantageBoth: TbShieldHalf,
+  situational: TbShieldQuestion,
+  autoFail: TbShieldX,
+  shortRest: TbCoffee,
+  longRest: TbMoon,
+  weapons: TbSword,
+  gear: TbBackpack,
+  attuned: TbDiamond,
+  loot: TbCoins,
+  trap: TbAlertTriangle,
+  camp: TbTent,
+  environment: TbPlant2,
+  safe: TbShieldCheck,
+  travel: TbRoute,
+  mount: TbRocket,
+  tier: TbStairsUp,
+});
+
+const SCIFI_TOOL_ICONS = Object.freeze({
+  characters: TbUserShield,
+  builder: TbCpu,
+  campaigns: TbPlanet,
+  gmboard: TbCompass,
+  dmscreen: TbDeviceDesktop,
+  vtt: TbMap2,
+  encounters: TbSwords,
+  compendium: TbDatabase,
+});
+
+const SCIFI_CLASS_ICONS = Object.freeze({
+  artificer: TbRobot,
+  barbarian: TbAxe,
+  bard: TbMusic,
+  cleric: TbSun,
+  druid: TbLeaf,
+  fighter: TbSword,
+  monk: TbHandStop,
+  paladin: TbShieldStar,
+  ranger: TbCrosshair,
+  rogue: TbMask,
+  sorcerer: TbMeteor,
+  warlock: TbEye,
+  wizard: TbAtom,
+  'death knight': TbSkull,
+  'demon hunter': TbFlame,
+  evoker: TbFlare,
+  hunter: TbTarget,
+  mage: TbWand,
+  priest: TbSunHigh,
+  shaman: TbCampfire,
+  warrior: TbSwords,
+});
+
+const SCIFI_SEASON_ICONS = Object.freeze({
+  Spring: TbFlower,
+  Summer: TbSun,
+  Autumn: TbLeaf,
+  Winter: TbSnowflake,
+});
+
+const SCIFI_WEATHER_ICONS = Object.freeze({
+  Clear: TbSun,
+  Rain: TbCloudRain,
+  Snow: TbSnowflake,
+});
+
+const SCIFI_TERRAIN_ICONS = Object.freeze({
+  road: TbRoad,
+  plains: TbPlant,
+  forest: TbTrees,
+  mountain: TbMountain,
+  Road: TbRoad,
+  Plains: TbPlant,
+  Forest: TbTrees,
+  Mountain: TbMountain,
+});
+
+const SCIFI_POPULATION_ICONS = Object.freeze({
+  unexplored: TbCompass,
+  frontier: TbTent,
+  settled: TbBuildingCastle,
+  random: TbCompass,
+});
+
+const SCIFI_ATMOSPHERE_ICONS = Object.freeze({
+  none: TbBan,
+  rain: TbCloudRain,
+  storm: TbCloudStorm,
+  wind: TbWind,
+  fog: TbCloudFog,
+  snow: TbSnowflake,
+  blizzard: TbCloudSnow,
+  sandstorm: TbCloud,
+  fire: TbFlame,
+  heatwave: TbTemperatureSun,
+  sunrays: TbSunHigh,
+  swamp: TbTrees,
+  haunted: TbGhost,
+  goldvault: TbCoins,
+});
+
+const SCIFI_SCENE_GENERATOR_ICONS = Object.freeze({
+  dungeon: TbBuildingFortress,
+  cave: TbMountain,
+  dwelling: TbHome,
+  village: TbTrees,
+  city: TbBuildingSkyscraper,
+  realm: TbMap,
+});
+
+const SCIFI_TABLE_ICONS = Object.freeze({
+  weather: TbCloudRain,
+  event: TbMap,
+  loot: TbCoins,
+  compl: TbAlertTriangle,
+  encounter: TbSwords,
+  trap: TbFlame,
+  env: TbLeaf,
+});
+
+const SCIFI_FALLBACK_CLASS_ICON = TbUser;
+
+const SCIFI_FALLBACK_WEATHER_ICON = TbCloud;
+
+const SCIFI_FALLBACK_ATMOSPHERE_ICON = TbCloud;
+
+const SCIFI_FALLBACK_SCENE_GENERATOR_ICON = TbMap;
+
+// A role drawn in the chosen style's set: a component that takes the drawing
+// the style gives it (`icons`: { styleId: component }, the comic one when a
+// style has none), so a panel's badge or a roll button changes with the
+// style. Props, the ref among them, go to the drawing.
+function styledIcon(icons) {
+  function StyledIcon(props) {
+    return createElement(icons[useStyleId()] || icons.comic, props);
+  }
+  return StyledIcon;
+}
+
+// A set of roles, each drawn in the chosen style's set (`sets`: { styleId:
+// { role: component } }).
+function styledIconMap(sets) {
+  return Object.freeze(Object.fromEntries(Object.keys(sets.comic).map((role) => [
+    role,
+    styledIcon(Object.fromEntries(Object.entries(sets).map(([styleId, set]) => [styleId, set[role]]))),
+  ])));
+}
+
+// Every style's set of a kind of role, for what checks they are whole.
+export const ICON_SETS = Object.freeze({
+  GAME_ICONS: Object.freeze({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS }),
+  TOOL_ICONS: Object.freeze({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS }),
+  CLASS_ICONS: Object.freeze({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS }),
+  SEASON_ICONS: Object.freeze({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS }),
+  WEATHER_ICONS: Object.freeze({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS }),
+  TERRAIN_ICONS: Object.freeze({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS }),
+  POPULATION_ICONS: Object.freeze({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS }),
+  ATMOSPHERE_ICONS: Object.freeze({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS }),
+  SCENE_GENERATOR_ICONS: Object.freeze({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS }),
+  TABLE_ICONS: Object.freeze({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS }),
+});
+
+export const GAME_ICONS = styledIconMap({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS });
+export const TOOL_ICONS = styledIconMap({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS });
+export const CLASS_ICONS = styledIconMap({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS });
+export const SEASON_ICONS = styledIconMap({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS });
+export const WEATHER_ICONS = styledIconMap({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS });
+export const TERRAIN_ICONS = styledIconMap({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS });
+export const POPULATION_ICONS = styledIconMap({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS });
+export const ATMOSPHERE_ICONS = styledIconMap({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS });
+export const SCENE_GENERATOR_ICONS = styledIconMap({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS });
+export const TABLE_ICONS = styledIconMap({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS });
+export const FALLBACK_CLASS_ICON = styledIcon({ comic: COMIC_FALLBACK_CLASS_ICON, scifi: SCIFI_FALLBACK_CLASS_ICON });
+export const FALLBACK_WEATHER_ICON = styledIcon({ comic: COMIC_FALLBACK_WEATHER_ICON, scifi: SCIFI_FALLBACK_WEATHER_ICON });
+export const FALLBACK_ATMOSPHERE_ICON = styledIcon({ comic: COMIC_FALLBACK_ATMOSPHERE_ICON, scifi: SCIFI_FALLBACK_ATMOSPHERE_ICON });
+export const FALLBACK_SCENE_GENERATOR_ICON = styledIcon({ comic: COMIC_FALLBACK_SCENE_GENERATOR_ICON, scifi: SCIFI_FALLBACK_SCENE_GENERATOR_ICON });

@@ -139,7 +139,7 @@ and squashes (`PRESS_MOTION_SX`).
 | `shadows.js`, `surfaces.js` | the ink (scaled by the style's `ink`): edges, solid shadows, surfaces (paper, stripe), the meter track |
 | `shapes.js` | the styles (`SHAPE_STYLES`) and every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's bursts, a switch, a checkbox, the ornament, the focus ring, a formula's die |
 | `ornament.js`, `ruleText.js`, `rollToken.js` | the ornament drawn once (card rules, page and section titles, a rule's list); a rule's list, boxed text and table in both renderers; a dice formula in the rules' text |
-| `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes |
+| `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes — each role drawn in the chosen style's set (comic: game-icons.net and lucide; sci-fi: Tabler line icons), the same role keys in every set (`ICON_SETS`, tested); a role is a component that picks its drawing by `useStyleId()` |
 | `motion.js` | how long things move (`motionTime`: at the style's pace) |
 | `app/theme.js` | how MUI's own components take the above (tabs, switches, checkboxes and radios via `ChoiceMarks`, sliders, dialogs, links, menus and chosen rows, focused fields, the focus ring, scrollbars, text selection, chips) |
 
