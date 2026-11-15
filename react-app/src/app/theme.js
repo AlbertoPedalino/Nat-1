@@ -69,6 +69,11 @@ export function buildTheme({ paletteId = BASE_PALETTE_ID, styleId = BASE_STYLE_I
 
 function themeOptions(chosen, styleId) {
   const hex = chosen.colors;
+  // MUI writes a coloured outlined or text button's label in its palette's
+  // main: on a dark palette the role's own colour reads as lettering, on a
+  // light one its readable tone (`<role>Text`) is given instead, so a Rest key
+  // or a Delete reads on the paper. Fills of these colours are the app's own.
+  const tone = (role) => (chosen.mode === 'light' ? hex[`${role}Text`] : hex[role]);
   const shapes = styleShapes(styleId);
   const { bookmarkTab, switch: toggle, sliderThumb } = shapes;
   return {
@@ -85,19 +90,19 @@ function themeOptions(chosen, styleId) {
         contrastText: hex.onAccent,
       },
       secondary: {
-        main: hex.secondary,
+        main: tone('secondary'),
       },
       error: {
-        main: hex.danger,
+        main: tone('danger'),
       },
       warning: {
-        main: hex.warning,
+        main: tone('warning'),
       },
       success: {
-        main: hex.success,
+        main: tone('success'),
       },
       info: {
-        main: hex.info,
+        main: tone('info'),
       },
       text: {
         primary: hex.textPrimary,
@@ -213,7 +218,7 @@ function themeOptions(chosen, styleId) {
           // Selected text in gold with the ink on it, and the caret of every
           // field in gold, instead of the system's blue.
           html: { scrollbarColor: `${UI_COLORS.accent} ${UI_COLORS.surfaceSunken}`, caretColor: UI_COLORS.accent },
-          '::selection': { backgroundColor: UI_COLORS.accent, color: UI_COLORS.edge },
+          '::selection': { backgroundColor: UI_COLORS.accent, color: UI_COLORS.onFill },
           '*': { scrollbarWidth: 'thin' },
           '*::-webkit-scrollbar': { width: 12, height: 12 },
           '*::-webkit-scrollbar-track, *::-webkit-scrollbar-corner': { backgroundColor: UI_COLORS.surfaceSunken },
@@ -262,8 +267,8 @@ function themeOptions(chosen, styleId) {
         // surface: in the accent's ink (MUI would write it in the accent
         // itself, unreadable on a light palette).
         variants: [
-          { props: { variant: 'outlined', color: 'primary' }, style: { color: UI_COLORS.accentLabel } },
-          { props: { variant: 'text', color: 'primary' }, style: { color: UI_COLORS.accentLabel } },
+          { props: { variant: 'outlined', color: 'primary' }, style: { color: UI_COLORS.accentPlain } },
+          { props: { variant: 'text', color: 'primary' }, style: { color: UI_COLORS.accentPlain } },
         ],
       },
       // A group of buttons is one raised button: the group carries the shadow
@@ -300,9 +305,9 @@ function themeOptions(chosen, styleId) {
           },
         },
         variants: [
-          { props: { color: 'error' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.danger, color: UI_COLORS.edge } } },
-          { props: { color: 'success' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.success, color: UI_COLORS.edge } } },
-          { props: { color: 'warning' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.warning, color: UI_COLORS.edge } } },
+          { props: { color: 'error' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.danger, color: UI_COLORS.onFill } } },
+          { props: { color: 'success' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.success, color: UI_COLORS.onFill } } },
+          { props: { color: 'warning' }, style: { '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: UI_COLORS.warning, color: UI_COLORS.onFill } } },
         ],
       },
       // Every button, link and control MUI draws takes the app's keyboard focus
@@ -319,7 +324,7 @@ function themeOptions(chosen, styleId) {
         },
         variants: [
           { props: { color: 'error' }, style: { color: UI_COLORS.danger, '&:hover': { color: UI_COLORS.danger } } },
-          { props: { color: 'primary' }, style: { color: UI_COLORS.accentText, '&:hover': { color: UI_COLORS.accentLabel } } },
+          { props: { color: 'primary' }, style: { color: UI_COLORS.accentText, '&:hover': { color: UI_COLORS.accentPlain } } },
         ],
       },
       // A chosen row (lists, menus): an accent wash with a bar on its left edge.
@@ -360,7 +365,7 @@ function themeOptions(chosen, styleId) {
             textDecorationColor: UI_COLORS.accent,
             textDecorationThickness: 2,
             textUnderlineOffset: 3,
-            '&:hover': { color: UI_COLORS.accentLabel, textDecorationThickness: 3 },
+            '&:hover': { color: UI_COLORS.accentPlain, textDecorationThickness: 3 },
           },
         },
       },

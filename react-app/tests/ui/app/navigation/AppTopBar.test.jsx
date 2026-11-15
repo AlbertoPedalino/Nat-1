@@ -39,12 +39,17 @@ describe('AppTopBar', () => {
     expect(within(panel).getByRole('radio', { name: 'Comic' })).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('the panel keeps the colours chosen there', () => {
+  test('the panel keeps the mode and the style chosen there, and draws the style in its palette', () => {
     renderBar();
     fireEvent.click(within(screen.getByTestId('account-menu')).getByRole('menuitem', { name: 'Theme' }));
-    fireEvent.click(within(screen.getByRole('dialog', { name: 'Theme' })).getByRole('button', { name: 'Light' }));
-    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ colors: 'light', style: 'comic' });
+    const panel = screen.getByRole('dialog', { name: 'Theme' });
+    fireEvent.click(within(panel).getByRole('button', { name: 'Light' }));
+    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'comic' });
     expect(document.documentElement.dataset.palette).toBe('light');
+    fireEvent.click(within(panel).getByRole('radio', { name: 'Sci-fi' }));
+    expect(JSON.parse(localStorage.getItem('gb:theme'))).toEqual({ mode: 'light', style: 'scifi' });
+    expect(document.documentElement.dataset.palette).toBe('neonLight');
+    expect(document.documentElement.dataset.style).toBe('scifi');
   });
 
   test('leaves the compendium out on the compendium page itself', () => {

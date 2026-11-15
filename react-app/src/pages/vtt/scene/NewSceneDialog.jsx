@@ -247,7 +247,7 @@ const freshSx = { ...cardSx, borderColor: 'primary.main' };
 const sceneOptionTitleSx = {
   ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.xl,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 const cardBlurbSx = { fontSize: FONT_SIZES.lg, color: 'text.secondary', lineHeight: LINE_HEIGHTS.normal };

@@ -64,7 +64,7 @@ function CombatViewView({ state, dispatch }) {
           <Panel icon={GAME_ICONS.encounter} title={`Round ${combat.round}`}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
               <Typography sx={{ color: 'text.secondary' }}>
-                Turn: <Box component="span" sx={{ color: UI_COLORS.accentLabel, fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>
+                Turn: <Box component="span" sx={{ color: UI_COLORS.accentPlain, fontWeight: FONT_WEIGHTS.heavy }}>{current?.name || '—'}</Box>
               </Typography>
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
                 <Button variant="outlined" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'prevTurn' })}>

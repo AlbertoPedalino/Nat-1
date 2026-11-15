@@ -7,9 +7,10 @@
     <!-- The viewer's theme (src/app/themeChoice.js, key gb:theme) before the app draws, so the first paint is in its scheme. -->
     <script>
       try {
-        var colors = (JSON.parse(localStorage.getItem('gb:theme') || 'null') || {}).colors;
-        if (colors === 'system') colors = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        if (colors === 'light') document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'light');
+        var theme = JSON.parse(localStorage.getItem('gb:theme') || 'null') || {};
+        var mode = theme.mode || theme.colors;
+        if (mode === 'system') mode = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        if (mode === 'light') document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'light');
       } catch (_) {}
     </script>
     <link rel="icon" type="image/png" sizes="192x192" href="%BASE_URL%favicon.png" />

@@ -137,9 +137,9 @@ export default function CharBuilder() {
           {cloudConflict ? (
             <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
           ) : null}
-          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: UI_COLORS.accentLabel }}>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: UI_COLORS.accentPlain }}>
             <ActiveIcon size={ICON_SIZES.md} />
-            <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: UI_COLORS.accentLabel }}>{activeStep.label}</Typography>
+            <Typography variant="h2" sx={{ ...BUILDER_TEXT.stepTitle, color: UI_COLORS.accentPlain }}>{activeStep.label}</Typography>
             <TagChip label={`${state.tab + 1} / ${STEPS.length}`} />
           </Stack>
 

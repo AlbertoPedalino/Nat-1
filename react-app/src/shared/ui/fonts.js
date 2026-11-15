@@ -33,6 +33,18 @@ const COMIC_FONTS = Object.freeze({
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
+// The sci-fi faces: a console's lettering. Orbitron for the voice and the
+// signs, Rajdhani for labels and names, Exo 2 for the text, a terminal mono.
+const SCIFI_FONTS = Object.freeze({
+  display: '"Rajdhani", "Exo 2", system-ui, sans-serif',
+  prose: '"Exo 2", system-ui, sans-serif',
+  cardName: '"Rajdhani", "Exo 2", system-ui, sans-serif',
+  body: '"Exo 2", system-ui, sans-serif',
+  shout: '"Orbitron", "Rajdhani", system-ui, sans-serif',
+  heading: '"Orbitron", "Rajdhani", system-ui, sans-serif',
+  mono: '"Share Tech Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
 // Every style's faces: `stacks` (the same roles as COMIC_FONTS) and the
 // `stylesheet` that loads them. The base style's is linked by index.html, so
 // it is there at the first paint; another style's is linked when it is chosen.
@@ -40,6 +52,10 @@ export const FONT_STYLES = Object.freeze({
   comic: Object.freeze({
     stacks: COMIC_FONTS,
     stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Alegreya+SC:wght@700&family=Germania+One&family=Grenze+Gotisch:wght@700;900&family=Rubik:wght@400;500;600;700;800&display=swap',
+  }),
+  scifi: Object.freeze({
+    stacks: SCIFI_FONTS,
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400..800;1,400..800&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap',
   }),
 });
 

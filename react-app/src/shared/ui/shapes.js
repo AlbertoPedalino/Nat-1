@@ -105,8 +105,10 @@ const COMIC = deepFreeze({
   // box and control (every other inked line, a lettering's outline or a
   // bubble's, scales with it); `drop` how far every solid shadow falls, as a
   // share of the comic one (0: a flat style, no solid shadows); `depth` the
-  // same for the soft shadows under what floats.
-  ink: { edge: 2, drop: 1, depth: 1 },
+  // same for the soft shadows under what floats; `glow` how far (px) every
+  // solid shadow and inked lettering blurs out round itself, a lit line's
+  // halo (0: a hard drawn shadow).
+  ink: { edge: 2, drop: 1, depth: 1, glow: 0 },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
@@ -127,9 +129,66 @@ const COMIC = deepFreeze({
   motion: { pace: 1, hop: 1 },
 });
 
-// The looks' styles the viewer can choose from (the "Style" of the account menu).
+// The sci-fi cut: a ship's console. Chamfered, near-square corners, thin lit
+// lines that glow instead of solid shadows, diamond gems, an octagonal crest,
+// scanlines over the bars and a grid of points over the page, quick moves
+// with no hop. Made to test that a style changing every piece carries.
+const SCIFI = deepFreeze({
+  // Straight bars: no swallowtail.
+  ribbon: {
+    panel: { notch: 0, pad: 12 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '4px' },
+  crest: {
+    clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 86%, 88% 100%, 12% 100%, 0 86%, 0 14%)',
+    edge: 1,
+    foot: '8%',
+  },
+  bookmarkTab: { radius: '3px 3px 0 0', rise: 2, gap: 2 },
+  gemCuts: {
+    counter: { sides: 4, outer: [50, 46, 40, 44], inner: [48, 44, 18, 20], shadowDrop: 0 },
+    training: { sides: 3, outer: [50, 52, 40, 40], inner: [50, 54, 16, 16], shadowDrop: 0 },
+  },
+  meterSegments: { bar: 20, piece: 8, smooth: 0 },
+  bursts: {
+    kapow: {
+      width: 120,
+      squash: 0.7,
+      spikes: [[-90, 62, 0], [-45, 58, 0], [0, 62, 0], [45, 58, 0], [90, 62, 0], [135, 58, 0], [180, 62, 0], [225, 58, 0]],
+      valleys: [30, 30, 30, 30, 30, 30, 30, 30],
+    },
+    crash: {
+      arms: [[-90, 46], [-30, 46], [30, 46], [90, 46], [150, 46], [210, 46]],
+      kinks: [[0.7, 0], [0.85, 0]],
+      middle: 30,
+    },
+  },
+  switch: { width: 44, height: 22, thumb: 14, inset: 4 },
+  sliderThumb: { size: 16 },
+  ornament: { path: 'M3 0 L9 0 L12 6 L9 12 L3 12 L0 6 Z' },
+  bookmarkMark: { width: 3, inset: 2, radius: '0' },
+  paper: { corners: [0.5, 0.5, 0.5, 0.5] },
+  focusRing: { width: 2, gap: 2 },
+  choiceMark: { size: 18 },
+  dieGlyph: { path: 'M6 0.5 L11.5 6 L6 11.5 L0.5 6 Z' },
+  ink: { edge: 1, drop: 0, depth: 1.5, glow: 6 },
+  radius: 3,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1, step: 22 },
+    screentone: { line: 1, gap: 4, angle: 0 },
+    rays: 0.6,
+  },
+  motion: { pace: 0.7, hop: 0 },
+});
+
+// The looks' styles the viewer can choose from (the "Style" of the account
+// menu's theme panel), each with the palette it is drawn in for each mode
+// (`palettes`: dark and light, ids of colors.js PALETTES).
 export const SHAPE_STYLES = Object.freeze({
-  comic: Object.freeze({ id: 'comic', label: 'Comic', shapes: COMIC }),
+  comic: Object.freeze({ id: 'comic', label: 'Comic', palettes: Object.freeze({ dark: 'dark', light: 'light' }), shapes: COMIC }),
+  scifi: Object.freeze({ id: 'scifi', label: 'Sci-fi', palettes: Object.freeze({ dark: 'neon', light: 'neonLight' }), shapes: SCIFI }),
 });
 
 export const BASE_STYLE_ID = 'comic';
@@ -206,6 +265,7 @@ export function shapeVariables(styleId) {
     '--gb-ink-line': String(shapes.ink.edge / COMIC.ink.edge),
     '--gb-ink-drop': String(shapes.ink.drop),
     '--gb-ink-depth': String(shapes.ink.depth),
+    '--gb-ink-glow': `${shapes.ink.glow}px`,
     '--gb-screentone-line': `${shapes.surface.screentone.line}px`,
     '--gb-screentone-gap': `${shapes.surface.screentone.gap}px`,
     '--gb-screentone-angle': `${shapes.surface.screentone.angle}deg`,

@@ -103,7 +103,7 @@ export function panelBadgeSx(tone = 'primary.main') {
     p: 0.5,
     borderRadius: SEAL_RADIUS,
     bgcolor: tone,
-    color: UI_COLORS.edge,
+    color: UI_COLORS.onFill,
     border: INK_EDGE,
     // The seal's solid ink shadow, as under every drawn box.
     boxShadow: UI_SHADOWS.box,

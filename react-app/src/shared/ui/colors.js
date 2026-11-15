@@ -28,7 +28,7 @@ const COMIC_DARK = Object.freeze({
   // surfaces, with no ink round it: here the accent itself; a light palette
   // darkens it to be read. A lettering inked in the accent (a heading, a
   // figure) keeps the accent, its ink outline carries it on any surface.
-  accentLabel: '#ffc83d',
+  accentPlain: '#ffc83d',
   onAccent: '#2a1c00',
 
   // Text, brightest to faintest, and the strongest neutral outline.
@@ -53,6 +53,10 @@ const COMIC_DARK = Object.freeze({
   // The drawn outline round panels, cards and buttons, and the solid shadow
   // under what can be pressed: the interface's drawn, cartoon edge.
   edge: '#0d0b09',
+  // The dark lettering written on a light fill (a gold button's label, the
+  // icon on a seal, inkOn's dark choice): the ink, apart from the line round
+  // things (edge), which a palette may draw in light.
+  onFill: '#0d0b09',
   // The drawings over the page (the sticker paper, stickerLayout.js): their
   // fill and the line they are cut in, a shade off the page so they are felt
   // more than seen.
@@ -132,7 +136,7 @@ const PARCHMENT_LIGHT = Object.freeze({
   accentText: '#8a5a00',
   accentHighlight: '#ffe08a',
   accentMuted: '#b07c12',
-  accentLabel: '#8a5a00',
+  accentPlain: '#8a5a00',
   onAccent: '#2a1c00',
   textPrimary: '#2b2118',
   textSecondary: '#55473a',
@@ -148,6 +152,7 @@ const PARCHMENT_LIGHT = Object.freeze({
   surfaceSunken: '#e4d2ae',
   surfaceDarkest: '#d6c197',
   edge: '#1e140c',
+  onFill: '#1e140c',
   pageDrawing: '#f2e5c8',
   pageLine: '#d2bd92',
   ruleEmphasis: '#4a6614',
@@ -179,12 +184,130 @@ const PARCHMENT_LIGHT = Object.freeze({
   pcToken: '#3f72c8',
 });
 
-// The palettes the viewer can choose from (the "Colours" of the account menu),
-// each with the MUI mode it is drawn in and how its inked lettering is
-// lettered (`lettering`, LETTERING_FILL).
+// The sci-fi style's dark palette, neon: a night city's signs. Deep
+// blue-black surfaces, lines lit in cyan (edge), a magenta accent, acid green,
+// amber and electric blue; the dark lettering on its fills stays dark
+// (onFill).
+const NEON_DARK = Object.freeze({
+  ...COMIC_DARK,
+  accent: '#ff3fd2',
+  accentText: '#ff8be6',
+  accentHighlight: '#ffc2f3',
+  accentMuted: '#b02a92',
+  accentPlain: '#ff6fe0',
+  onAccent: '#14001a',
+  textPrimary: '#e6f4ff',
+  textSecondary: '#a9c1d9',
+  textMuted: '#8ba2bb',
+  textFaint: '#56657a',
+  outline: '#2a3a55',
+  surfaceRaised: '#141c33',
+  bubble: '#1b2644',
+  surfaceHeader: '#111831',
+  surface: '#0d1428',
+  surfaceDeep: '#0a1022',
+  page: '#060a17',
+  surfaceSunken: '#050814',
+  surfaceDarkest: '#03050d',
+  edge: '#2bd9ff',
+  onFill: '#05030d',
+  pageDrawing: '#0d1428',
+  pageLine: '#1a2a48',
+  ruleEmphasis: '#5ff2c4',
+  armor: '#9fb4d6',
+  dangerStrong: '#ff2e63',
+  danger: '#ff3b6b',
+  dangerText: '#ff8fab',
+  dangerMuted: '#c06a85',
+  dangerDeep: '#a3163f',
+  dangerSurface: '#2a0614',
+  warning: '#ffb020',
+  warningStrong: '#ff8a00',
+  warningText: '#ffd27a',
+  penalty: '#ffb020',
+  penaltyText: '#ffd27a',
+  success: '#2cff9a',
+  successText: '#9dffd0',
+  secondary: '#b6ff3c',
+  secondaryStrong: '#86e000',
+  secondaryText: '#ddff9e',
+  onSecondary: '#0d1a00',
+  info: '#29a8ff',
+  infoText: '#9fd6ff',
+  spell: '#b388ff',
+  reference: '#cfe3ff',
+  paper: '#11203a',
+  paperShade: '#0c172b',
+  onPaper: '#bfe4ff',
+  pcToken: '#29a8ff',
+});
+
+// The sci-fi style's light palette: a lab's clean console. Ice-white panels
+// over a cool grey page, lines in a deep cyan, a magenta accent, every
+// `<role>Text` deep enough to read on the white.
+const NEON_LIGHT = Object.freeze({
+  ...NEON_DARK,
+  accent: '#c8139c',
+  accentText: '#960e75',
+  accentHighlight: '#ffd1f2',
+  accentMuted: '#a3388a',
+  accentPlain: '#960e75',
+  onAccent: '#ffffff',
+  textPrimary: '#0e1a2b',
+  textSecondary: '#33475f',
+  textMuted: '#526579',
+  textFaint: '#8a9bb0',
+  outline: '#b4c3d4',
+  surfaceRaised: '#ffffff',
+  bubble: '#ffffff',
+  surfaceHeader: '#eaf2fa',
+  surface: '#f6fafd',
+  surfaceDeep: '#edf3f9',
+  page: '#dde7f1',
+  surfaceSunken: '#d6e1ec',
+  surfaceDarkest: '#c7d4e2',
+  edge: '#0b8fb3',
+  onFill: '#04121c',
+  pageDrawing: '#e6eef6',
+  pageLine: '#c3d3e3',
+  ruleEmphasis: '#0b7356',
+  armor: '#3f5f86',
+  dangerStrong: '#d1124a',
+  danger: '#d81b55',
+  dangerText: '#a50d3b',
+  dangerMuted: '#c46a86',
+  dangerDeep: '#8e0b33',
+  dangerSurface: '#fde2ea',
+  warning: '#e08600',
+  warningStrong: '#d06a00',
+  warningText: '#8a4b00',
+  penalty: '#e08600',
+  penaltyText: '#8a4b00',
+  success: '#0aa868',
+  successText: '#066b43',
+  secondary: '#5aa800',
+  secondaryStrong: '#468400',
+  secondaryText: '#355f00',
+  onSecondary: '#0d1a00',
+  info: '#0a7fd8',
+  infoText: '#0a5ba0',
+  spell: '#7a3ee0',
+  reference: '#3b5578',
+  paper: '#ffffff',
+  paperShade: '#e9f1f9',
+  onPaper: '#14263d',
+  pcToken: '#2d6fd0',
+});
+
+// Every palette, each with the MUI mode it is drawn in and how its inked
+// lettering is lettered (`lettering`, LETTERING_FILL). A style draws its dark
+// and its light mode in two of them (shapes.js SHAPE_STYLES `palettes`:
+// comic in dark and light, the parchment; sci-fi in neon and neonLight).
 export const PALETTES = Object.freeze({
   dark: Object.freeze({ id: 'dark', label: 'Dark', mode: 'dark', lettering: 'ink', colors: COMIC_DARK }),
   light: Object.freeze({ id: 'light', label: 'Light', mode: 'light', lettering: 'lift', colors: PARCHMENT_LIGHT }),
+  neon: Object.freeze({ id: 'neon', label: 'Neon', mode: 'dark', lettering: 'ink', colors: NEON_DARK }),
+  neonLight: Object.freeze({ id: 'neonLight', label: 'Neon light', mode: 'light', lettering: 'ink', colors: NEON_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no
@@ -280,6 +403,11 @@ export const OPACITY = Object.freeze({
 });
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+// A colour written as '#rrggbb' (a palette's hex, a saved colour).
+export function isHexColor(value) {
+  return typeof value === 'string' && HEX_COLOR.test(value);
+}
 const percent = (share) => Number((share * 100).toFixed(2));
 
 // A colour of the palette at some opacity: uiAlpha(UI_COLORS.accent, OPACITY.edge).
@@ -400,7 +528,7 @@ function mixColors(first, firstShare, second, secondShare) {
 // in lowercase, or `fallback` when it is not one.
 export function normalizeHexColor(value, fallback = null) {
   const color = typeof value === 'string' ? value.trim() : '';
-  return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : fallback;
+  return HEX_COLOR.test(color) ? color.toLowerCase() : fallback;
 }
 
 // The comic screentone: fine diagonal hatching in a colour — a panel bar's

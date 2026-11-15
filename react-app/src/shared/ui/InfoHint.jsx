@@ -23,5 +23,5 @@ const infoHintSx = {
   color: 'text.secondary',
   cursor: 'help',
   borderRadius: '50%',
-  '&:hover, &:focus-visible': { color: UI_COLORS.accentLabel },
+  '&:hover, &:focus-visible': { color: UI_COLORS.accentPlain },
 };

@@ -90,7 +90,7 @@ function CampaignImportView({ state, campaignPlayers, dispatch }) {
               {selected.players.length > 10 ? <TagChip label={`+${selected.players.length - 10} more`} /> : null}
             </Box>
             {state.campaignNotice ? (
-              <Typography variant="caption" sx={{ color: UI_COLORS.accentLabel }}>{state.campaignNotice}</Typography>
+              <Typography variant="caption" sx={{ color: UI_COLORS.accentPlain }}>{state.campaignNotice}</Typography>
             ) : null}
           </>
         ) : null}

@@ -4,7 +4,8 @@ import {
 import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material';
 import { buildTheme } from './theme.js';
 import {
-  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, normalizeThemeChoice, paletteForColors, readThemeChoice, writeThemeChoice,
+  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, normalizeThemeChoice, paletteForStyle, readThemeChoice, resolvedMode,
+  writeThemeChoice,
 } from './themeChoice.js';
 import { paletteOf, paletteVariables } from '../shared/ui/colors.js';
 import { shapeVariables } from '../shared/ui/shapes.js';
@@ -17,20 +18,23 @@ import { useEventListener } from '../shared/ui/useEventListener.js';
 // is the default one and cannot be changed.
 const FIXED_CHOICE = Object.freeze({
   choice: DEFAULT_THEME_CHOICE,
-  paletteId: paletteForColors(DEFAULT_THEME_CHOICE.colors, false),
+  mode: resolvedMode(DEFAULT_THEME_CHOICE.mode, false),
+  paletteId: paletteForStyle(DEFAULT_THEME_CHOICE.style, resolvedMode(DEFAULT_THEME_CHOICE.mode, false)),
   setChoice: () => {},
 });
 
 const ThemeChoiceContext = createContext(FIXED_CHOICE);
 
-// The app's theme, as the viewer chose it (themeChoice.js): builds the one MUI
-// theme for the chosen palette and style, and writes the palette's variables
+// The app's theme, as the viewer chose it (themeChoice.js): the chosen style in
+// the palette it draws the chosen mode in. Builds the one MUI theme for them,
+// and writes the palette's variables
 // (UI_COLORS' roles), the style's (shapes.js) and the values worked out from them (themedValues.js) on
 // the page's root. A choice made in another tab of the app follows here too.
 export function ThemeChoiceProvider({ children }) {
   const [choice, setChoiceState] = useState(readThemeChoice);
   const prefersLight = useMediaQuery('(prefers-color-scheme: light)', { noSsr: true });
-  const paletteId = paletteForColors(choice.colors, prefersLight);
+  const mode = resolvedMode(choice.mode, prefersLight);
+  const paletteId = paletteForStyle(choice.style, mode);
   const theme = useMemo(() => buildTheme({ paletteId, styleId: choice.style }), [paletteId, choice.style]);
 
   const setChoice = useCallback((patch) => {
@@ -52,19 +56,10 @@ export function ThemeChoiceProvider({ children }) {
     root.dataset.style = choice.style;
   }, [paletteId, choice.style]);
 
-  // The chosen style's faces, loaded when it is chosen (the base style's are
-  // linked by index.html already).
-  useEffect(() => {
-    const href = fontStylesheet(choice.style);
-    const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
-    if (!href || links.some((link) => link.getAttribute('href') === href)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    document.head.appendChild(link);
-  }, [choice.style]);
+  // The chosen style's faces, loaded when it is chosen.
+  useEffect(() => linkStyleFonts(choice.style), [choice.style]);
 
-  const value = useMemo(() => ({ choice, paletteId, setChoice }), [choice, paletteId, setChoice]);
+  const value = useMemo(() => ({ choice, mode, paletteId, setChoice }), [choice, mode, paletteId, setChoice]);
 
   return (
     <ThemeChoiceContext.Provider value={value}>
@@ -76,26 +71,48 @@ export function ThemeChoiceProvider({ children }) {
   );
 }
 
-// The viewer's choice ({ colors, style }), the palette it is drawn in, and
-// setChoice({ colors?, style? }), which keeps it.
+// The viewer's choice ({ mode, style }), the mode it is drawn in now (`mode`:
+// dark or light, System resolved), the palette, and setChoice({ mode?,
+// style? }), which keeps it.
 export function useThemeChoice() {
   return useContext(ThemeChoiceContext);
 }
 
-// The palette's and the style's variables and the themed values on :root,
-// rewritten when the choice changes or a new value is registered (a picture
-// first drawn): the store's subscription redraws it then, and only then.
-function ThemeVariables({ paletteId, styleId }) {
-  useSyncExternalStore(subscribeThemedValues, themedValuesVersion, themedValuesVersion);
-  const styles = {
-    ':root': {
-      colorScheme: paletteOf(paletteId).mode,
-      ...paletteVariables(paletteId),
-      ...shapeVariables(styleId),
-      ...surfaceVariables(paletteId, styleId),
-      ...fontVariables(styleId),
-      ...themedVariables(paletteId, styleId),
-    },
+// Every variable a theme fills, a palette and a style together: the palette's
+// roles, the style's shapes and ink, surfaces and faces, and the values worked
+// out in them (themedValues.js). What the page's root wears, and what a
+// style's sample in the theme panel wears on itself (ThemeDialog), so a sample
+// is drawn in its own theme whatever the page wears.
+export function themeVariables(paletteId, styleId) {
+  return {
+    colorScheme: paletteOf(paletteId).mode,
+    ...paletteVariables(paletteId),
+    ...shapeVariables(styleId),
+    ...surfaceVariables(paletteId, styleId),
+    ...fontVariables(styleId),
+    ...themedVariables(paletteId, styleId),
   };
-  return <GlobalStyles styles={styles} />;
+}
+
+// Redraws its caller when a themed value is first registered (a picture first
+// drawn), so the variables it writes include it.
+export function useThemedValuesVersion() {
+  return useSyncExternalStore(subscribeThemedValues, themedValuesVersion, themedValuesVersion);
+}
+
+// Links a style's faces once (the base style's are linked by index.html).
+export function linkStyleFonts(styleId) {
+  const href = fontStylesheet(styleId);
+  const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+  if (!href || links.some((link) => link.getAttribute('href') === href)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+// The chosen theme's variables on :root.
+function ThemeVariables({ paletteId, styleId }) {
+  useThemedValuesVersion();
+  return <GlobalStyles styles={{ ':root': themeVariables(paletteId, styleId) }} />;
 }

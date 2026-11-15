@@ -136,7 +136,7 @@ const moveBarSx = {
   ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.wash }),
 };
 
-const moveTitleSx = { ...captionLabelSx, color: UI_COLORS.accentLabel };
+const moveTitleSx = { ...captionLabelSx, color: UI_COLORS.accentPlain };
 
 const moveSummarySx = { fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 };
 

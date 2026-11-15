@@ -43,7 +43,7 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
 const ART_SX = {
   ...tintedSurfaceSx(UI_COLORS.accent),
   border: `1px solid ${uiAlpha(UI_COLORS.accent, OPACITY.line)}`,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 const MISSING_SX = {

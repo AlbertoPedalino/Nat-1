@@ -78,7 +78,7 @@ export default function ScoresStep({ state, dispatch }) {
                           <MiniBadge
                             key={`${bonus.source}-${index}`}
                             label={`${bonus.source} +${bonus.value}`}
-                            color={UI_COLORS.accentLabel}
+                            color={UI_COLORS.accentPlain}
                           />
                         ))}
                       </Stack>

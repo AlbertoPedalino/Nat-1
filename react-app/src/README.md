@@ -47,8 +47,11 @@ from them and holds none of its own (guarded by the oneDefinition tests).
 The viewer picks two things apart in the top bar's account menu (the login /
 logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
 `CloudMenu` as `extraItems`, opens the theme panel, `ThemeDialog.jsx`, where
-every style shows as a card drawn in that style): the **colours** (`PALETTES` in `colors.js`,
-or System) and the **style** (`SHAPE_STYLES` in `shapes.js`). The choice lives in
+every style shows as a card drawn in its own theme): the **style**
+(`SHAPE_STYLES` in `shapes.js`: Comic, Sci-fi) and the **mode** (System, Dark,
+Light). Each style draws each mode in a palette of its own (its `palettes`:
+Comic in `dark` and `light`, the parchment; Sci-fi in `neon` and `neonLight`),
+so the palette follows from the two (`paletteForStyle`). The choice lives in
 `app/themeChoice.js` (localStorage `gb:theme`, read by `index.html` before the
 first paint); `app/ThemeChoiceProvider.jsx` builds the theme for it
 (`buildTheme` in `app/theme.js`) and writes the palette on the page's root.
@@ -60,18 +63,19 @@ work a colour out only with `uiAlpha` / `uiMix` / `uiLighten` / `uiDarken`
 (`svgPicture`) and the ink on a fill (`inkOn`) are drawn per palette by
 `shared/ui/themedValues.js`, no extra work at the call.
 
-There are two palettes: `dark` and `light` (a rulebook's parchment). Every
-palette fills the same roles and its text roles read on its surfaces at WCAG
+Every palette (`PALETTES` in `colors.js`) fills the same roles and its text roles read on its surfaces at WCAG
 AA (both tested in `tests/logic/shared/ui/paletteColors.test.js`). The default
 choice is Dark. On a light palette the accent itself is too pale to read as
 plain lettering: a label, a link or an icon in the accent with no ink round
-it is `accentLabel` (the accent itself on the dark palette), while inked
+it is `accentPlain` (the accent itself on the dark palette), while inked
 lettering keeps the accent. Inked lettering (`inkLettering`) is always
 outlined in the ink; the palette's `lettering` decides the rest: on the dark
 palette the letters keep their colour over their solid shadow, on the light
 one a dark neutral (the text's browns) is lifted to a light tone, a tone's
 colour is kept (a title matches its badge), and no shadow falls. The page's
-drawings take `pageDrawing` and `pageLine`; a rule's own marks (sub-headings,
+drawings take `pageDrawing` and `pageLine`; `edge` is the line round things
+(a palette may light it, as neon's cyan) and `onFill` the dark lettering on a
+fill (inkOn's dark choice); a rule's own marks (sub-headings,
 bold, references) `ruleEmphasis` (RICH_TEXT_ACCENT); the AC tile `armor`.
 
 A style is one entry of `SHAPE_STYLES` with the same keys as `comic` (guarded
@@ -106,6 +110,13 @@ that loads them; `UI_FONTS.<role>` is `var(--gb-font-<role>)`; a canvas takes
 `fontStacks(useStyleId())`. The base style's stylesheet is the one
 `index.html` links (tested); another style's is linked by the provider when
 chosen. The type scale (`FONT_SIZES`…) stays one for every style.
+
+Its ink may `glow` (a lit line's halo: every solid shadow and inked lettering
+blurs out by `--gb-ink-glow`, 0 in Comic). A theme's variables are composed
+once (`themeVariables` in `ThemeChoiceProvider.jsx`) for the page's root and
+for each style's sample in the theme panel, so a sample wears its own theme.
+No variable may be named `…label`: Emotion reads `label:` in a style as the
+class's name and the class stops matching (tested).
 
 It moves at its own `motion`: `pace` scales every time (`--gb-motion-pace`;
 0 is no motion), so a time is always `motionTime(DURATIONS.fast)`, never a

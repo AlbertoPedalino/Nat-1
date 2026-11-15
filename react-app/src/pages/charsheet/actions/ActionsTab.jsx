@@ -189,7 +189,7 @@ export default function ActionsTab({ C, sheet, resources }) {
 
       {actionSections.map(section => (
         <Box key={section.key} sx={{ minWidth: 0 }}>
-          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accentLabel }}>
+          <Typography sx={{ ...levelHeaderSx, color: UI_COLORS.accentPlain }}>
             {section.title}
           </Typography>
           <Box sx={{ display: 'grid', gap: 0.5, minWidth: 0 }}>

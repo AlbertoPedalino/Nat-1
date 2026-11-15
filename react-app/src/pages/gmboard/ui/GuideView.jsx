@@ -132,7 +132,7 @@ const stepMarkerSx = {
   borderRadius: '50%',
   border: INK_SOLID,
   borderColor: 'primary.main',
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   fontSize: FONT_SIZES.xs,
   fontWeight: FONT_WEIGHTS.bold,
 };

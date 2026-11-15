@@ -13,7 +13,7 @@ export default function StatePanel({
   return (
     <Box role="status" sx={[panelSx, sx]}>
       {loading ? <BusyDie size={BUSY_SIZES.area} /> : null}
-      {!loading && Icon ? <Box component={Icon} size={28} aria-hidden sx={{ color: UI_COLORS.accentLabel }} /> : null}
+      {!loading && Icon ? <Box component={Icon} size={28} aria-hidden sx={{ color: UI_COLORS.accentPlain }} /> : null}
       {title ? <Typography sx={titleSx}>{title}</Typography> : null}
       {children ? <Typography sx={messageSx}>{children}</Typography> : null}
       {action}

@@ -9,6 +9,9 @@ export const INK_WIDTH = 'var(--gb-ink-edge)';
 export const inkLine = (px) => `calc(${px}px * var(--gb-ink-line))`;
 const drop = (px) => `calc(${px}px * var(--gb-ink-drop))`;
 const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
+// How far a solid shadow blurs out: none in a drawn style, a lit line's halo
+// in a glowing one (shapes.js ink.glow).
+const GLOW = 'var(--gb-ink-glow)';
 
 // The drop shadows of surfaces that sit above the page, one per height, so a
 // restyle changes depth in one place. Glows and focus rings stay with the
@@ -16,7 +19,7 @@ const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
 // A solid shadow set off to the lower right, in ink or in a moment's colour:
 // the comic panel's and the speech bubble's.
 export function inkShadow(color = UI_COLORS.edge, offset = 3) {
-  return `${drop(offset)} ${drop(offset)} 0 ${color}`;
+  return `${drop(offset)} ${drop(offset)} ${GLOW} ${color}`;
 }
 
 // The same solid shadow under a shape cut out of its box (a crest, a
@@ -24,7 +27,7 @@ export function inkShadow(color = UI_COLORS.edge, offset = 3) {
 // follows the cut. A filter is a layer of its own, so only for a handful of
 // shapes on a screen, never for a list.
 export function inkCutShadow(offset = 3, color = UI_COLORS.edge) {
-  return `drop-shadow(${drop(offset)} ${drop(offset)} 0 ${color})`;
+  return `drop-shadow(${drop(offset)} ${drop(offset)} ${GLOW} ${color})`;
 }
 
 // The ink edge: the line round every drawn box and control (2px in the comic
@@ -57,7 +60,7 @@ export function inkPieceShadow({ outline = INK_WIDTH, drop: fall = '3px', around
 
 // Inked lettering: a hard shadow under a title, a big number, a die's numeral.
 export function inkTextShadow(color = UI_COLORS.edge) {
-  return `${drop(1)} ${drop(1)} 0 ${color}`;
+  return `${drop(1)} ${drop(1)} ${GLOW} ${color}`;
 }
 
 // Comic lettering inked: an ink outline `width` thick round the letters, under
@@ -78,15 +81,15 @@ export const APPLE_WEBKIT_QUERY = '@supports (font: -apple-system-body)';
 // tone, a tone's colour kept, and no shadow falls).
 export function inkLettering(width, offset, color = UI_COLORS.edge) {
   // The shadow falls as far as the palette drops lettering's (a light one: none).
-  const fall = `calc(${offset}px * var(--gb-ink-drop) * var(--gb-lettering-drop))`;
+  const fall = `calc(${drop(offset)} * var(--gb-lettering-drop))`;
   return {
     WebkitTextFillColor: LETTERING_FILL,
     WebkitTextStroke: `${inkLine(width)} ${color}`,
     paintOrder: 'stroke fill',
-    textShadow: `${fall} ${fall} 0 ${color}`,
+    textShadow: `${fall} ${fall} ${GLOW} ${color}`,
     [APPLE_WEBKIT_QUERY]: {
       textShadow: 'none',
-      filter: `drop-shadow(${fall} ${fall} 0 ${color})`,
+      filter: `drop-shadow(${fall} ${fall} ${GLOW} ${color})`,
     },
   };
 }
@@ -95,7 +98,7 @@ export function inkLettering(width, offset, color = UI_COLORS.edge) {
 // shield) as a CSS filter, with the solid shadow under it in `shadow`.
 export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {
   const edge = (x, y) => `drop-shadow(${x ? inkLine(x) : 0} ${y ? inkLine(y) : 0} 0 ${color})`;
-  return `${edge(1.5, 0)} ${edge(-1.5, 0)} ${edge(0, 1.5)} ${edge(0, -1.5)} drop-shadow(${drop(2)} ${drop(2)} 0 ${shadow})`;
+  return `${edge(1.5, 0)} ${edge(-1.5, 0)} ${edge(0, 1.5)} ${edge(0, -1.5)} drop-shadow(${drop(2)} ${drop(2)} ${GLOW} ${shadow})`;
 }
 
 export const UI_SHADOWS = Object.freeze({
@@ -107,10 +110,10 @@ export const UI_SHADOWS = Object.freeze({
   popup: `0 ${depth(8)} ${depth(28)} ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
   // Under what can be pressed (a filled button): a solid ink edge, the drawn
   // look's depth; `pressed` is the same button pushed down.
-  press: `0 ${drop(2)} 0 ${UI_COLORS.edge}`,
-  pressed: `0 ${drop(1)} 0 ${UI_COLORS.edge}`,
+  press: `0 ${drop(2)} ${GLOW} ${UI_COLORS.edge}`,
+  pressed: `0 ${drop(1)} ${GLOW} ${UI_COLORS.edge}`,
   // The same button lifted under the cursor.
-  lifted: `0 ${drop(3)} 0 ${UI_COLORS.edge}`,
+  lifted: `0 ${drop(3)} ${GLOW} ${UI_COLORS.edge}`,
   // The comic panel's solid shadow, set off to the lower right: a main panel
   // (`panel`) and a box on the page (`box`).
   panel: inkShadow(),

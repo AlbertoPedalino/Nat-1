@@ -185,7 +185,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
 function Prop({ label, children }) {
   return (
     <Typography component="div" variant="body2">
-      <Box component="span" sx={{ color: UI_COLORS.accentLabel, fontWeight: FONT_WEIGHTS.bold }}>{label}</Box>{' '}
+      <Box component="span" sx={{ color: UI_COLORS.accentPlain, fontWeight: FONT_WEIGHTS.bold }}>{label}</Box>{' '}
       {children}
     </Typography>
   );

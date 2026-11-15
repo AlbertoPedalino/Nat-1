@@ -110,5 +110,5 @@ export default function LiveControls({
 
 const iconSx = {
   minWidth: 28,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };

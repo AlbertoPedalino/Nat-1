@@ -100,7 +100,7 @@ const errorSx = {
 // instead of shifting around the broadcast mark.
 const iconSx = {
   minWidth: 24,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 const nameSx = {

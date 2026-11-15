@@ -35,7 +35,7 @@ export const mapPanelSx = {
 export const mapPanelTitleSx = {
   ...TEXT_STYLES.title,
   fontSize: FONT_SIZES.md,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 // The small icon buttons in a panel's title row (settings, close): the map's

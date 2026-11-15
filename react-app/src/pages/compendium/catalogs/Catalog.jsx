@@ -164,7 +164,7 @@ const headerRowSx = {
   flexShrink: 0,
 };
 
-const headerCellSx = { ...captionLabelSx, color: UI_COLORS.accentLabel };
+const headerCellSx = { ...captionLabelSx, color: UI_COLORS.accentPlain };
 
 const listBoxSx = { flex: 1, minHeight: 0 };
 

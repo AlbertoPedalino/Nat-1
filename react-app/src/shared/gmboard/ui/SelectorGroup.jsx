@@ -31,7 +31,7 @@ export default function SelectorGroup({
 }) {
   const theme = useTheme();
   const labelId = useId();
-  const gold = { color: UI_COLORS.accentLabel };
+  const gold = { color: UI_COLORS.accentPlain };
 
   return (
     <Box>

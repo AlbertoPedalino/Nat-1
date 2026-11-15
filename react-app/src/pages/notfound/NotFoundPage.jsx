@@ -69,7 +69,7 @@ const messageSx = {
 };
 
 const statusSx = {
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   fontWeight: FONT_WEIGHTS.bold,
   letterSpacing: LETTER_SPACINGS.lg,
   lineHeight: LINE_HEIGHTS.normal,
@@ -81,7 +81,7 @@ const compassSx = {
   height: { xs: 72, sm: 80 },
   display: 'grid',
   placeItems: 'center',
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   borderRadius: '50%',
 };
 

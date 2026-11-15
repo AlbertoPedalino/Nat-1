@@ -255,7 +255,7 @@ const statValueSx = {
 const statEmphasisSx = {
   ...statValueSx,
   fontWeight: FONT_WEIGHTS.bold,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 const statNoteSx = {

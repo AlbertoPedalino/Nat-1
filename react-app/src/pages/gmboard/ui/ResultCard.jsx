@@ -79,7 +79,7 @@ const headerBandSx = {
 const resultTitleSx = {
   ...TEXT_STYLES.cardName,
   fontSize: FONT_SIZES.lg,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
 };
 
 const slotSx = {

@@ -87,7 +87,7 @@ export const hpFlagSx = {
   py: 0.25,
   border: INK_EDGE,
   borderRadius: 1,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   fontSize: FONT_SIZES.md,
   lineHeight: LINE_HEIGHTS.none,
   flex: '0 0 auto',

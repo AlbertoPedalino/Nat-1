@@ -21,7 +21,7 @@ export default function XpPanel({ character, dispatch }) {
     <BuilderPanel id="panel-xp" title="Experience (XP)" icon={GAME_ICONS.experience} note={note}>
       <Stack spacing={1.25}>
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
-          <Typography sx={{ ...BUILDER_TEXT.value, color: UI_COLORS.accentLabel }}>Player Level {trackerLevel}</Typography>
+          <Typography sx={{ ...BUILDER_TEXT.value, color: UI_COLORS.accentPlain }}>Player Level {trackerLevel}</Typography>
           <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', whiteSpace: 'nowrap' }}>
             {isMaxLevel ? `${formatNumber(xp)} XP` : `${formatNumber(xp)} / ${formatNumber(nextXp)} XP`}
           </Typography>

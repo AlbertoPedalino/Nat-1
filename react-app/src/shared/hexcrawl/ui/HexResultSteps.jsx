@@ -123,7 +123,7 @@ const boxSx = { ...boardInsetSx, p: 1.5 };
 const headerSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.md,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   mb: 0.75,
 };
 

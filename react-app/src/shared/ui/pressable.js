@@ -34,14 +34,14 @@ export const PRESSABLE_EDGE_SX = Object.freeze({
   '&:active': { ...PRESS_MOTION_SX['&:active'], boxShadow: UI_SHADOWS.pressed },
 });
 
-// The ink that reads best on `fill`: the edge colour on a light fill, the
+// The ink that reads best on `fill`: the dark lettering (onFill) on a light fill, the
 // primary text on a dark one. Worked out in each palette's hexes (a contrast
 // reads no CSS variables) and given as a themed value, so it follows the
 // chosen palette (themedValues.js).
 export function inkOn(fill) {
   return themedValue(`ink-on:${fill}`, (resolve) => (
-    getContrastRatio(resolve(fill), resolve(UI_COLORS.edge)) >= getContrastRatio(resolve(fill), resolve(UI_COLORS.textPrimary))
-      ? UI_COLORS.edge
+    getContrastRatio(resolve(fill), resolve(UI_COLORS.onFill)) >= getContrastRatio(resolve(fill), resolve(UI_COLORS.textPrimary))
+      ? UI_COLORS.onFill
       : UI_COLORS.textPrimary
   ));
 }

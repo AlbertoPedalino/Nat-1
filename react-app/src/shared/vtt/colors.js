@@ -1,6 +1,6 @@
 import { clamp } from '../numbers.js';
 import {
-  HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS, readsPalette, resolveColors, uiAlpha, uiDarken,
+  HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS, isHexColor, readsPalette, resolveColors, uiAlpha, uiDarken,
 } from '../ui/colors.js';
 import { DAMAGE_TYPE_COLORS } from '../ui/entityColors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
@@ -88,12 +88,6 @@ export const VTT_HP_TONE_COLORS = Object.freeze({
 // palette (or a colour worked from one) in color-mix(), as uiAlpha; anything
 // else (currentColor) is returned as it is.
 export function vttAlpha(color, alpha) {
-  if (readsPalette(color)) return uiAlpha(color, clamp(Number(alpha), 0, 1));
-  const match = /^#([0-9a-f]{6})$/i.exec(color || '');
-  if (!match) return color;
-  const value = Number.parseInt(match[1], 16);
-  const red = (value >> 16) & 255;
-  const green = (value >> 8) & 255;
-  const blue = value & 255;
-  return `rgba(${red}, ${green}, ${blue}, ${clamp(Number(alpha), 0, 1)})`;
+  if (!isHexColor(color) && !readsPalette(color)) return color;
+  return uiAlpha(color, clamp(Number(alpha), 0, 1));
 }

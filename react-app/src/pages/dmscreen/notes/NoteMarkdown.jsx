@@ -73,7 +73,7 @@ const rootSx = {
 
 const headingSx = {
   fontWeight: FONT_WEIGHTS.bold,
-  color: UI_COLORS.accentLabel,
+  color: UI_COLORS.accentPlain,
   mt: 1.5,
   mb: 0.5,
 };
@@ -131,6 +131,6 @@ const cellSx = {
   verticalAlign: 'top',
 };
 
-const thSx = { ...cellSx, fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentLabel };
+const thSx = { ...cellSx, fontWeight: FONT_WEIGHTS.bold, color: UI_COLORS.accentPlain };
 
 const tdSx = cellSx;

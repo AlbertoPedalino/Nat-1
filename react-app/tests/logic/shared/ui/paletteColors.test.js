@@ -67,7 +67,7 @@ const KNOWN_SHORT = Object.freeze({
 });
 
 test('in every palette the text roles read on the surfaces they are written on (WCAG AA)', () => {
-  const text = ['textPrimary', 'textSecondary', 'textMuted', 'accentText', 'accentLabel', 'dangerText', 'warningText', 'successText', 'secondaryText', 'infoText', 'ruleEmphasis'];
+  const text = ['textPrimary', 'textSecondary', 'textMuted', 'accentText', 'accentPlain', 'dangerText', 'warningText', 'successText', 'secondaryText', 'infoText', 'ruleEmphasis'];
   const surfaces = ['surface', 'surfaceRaised', 'surfaceHeader'];
   Object.values(PALETTES).forEach(({ id, colors }) => {
     const failing = text.flatMap((role) => surfaces
@@ -78,4 +78,20 @@ test('in every palette the text roles read on the surfaces they are written on (
     assert.ok(contrast(colors.onAccent, colors.accent) >= 4.5, `${id} onAccent`);
     assert.ok(contrast(colors.onPaper, colors.paper) >= 4.5, `${id} onPaper`);
   });
+});
+
+// Emotion names a class after a `label:` it finds in the CSS, so a variable
+// named …label (`--gb-accent-label: #fff`) turned a style sample's class into
+// `css-x-#fff`, a selector that matches nothing: its whole theme was lost.
+test('no theme variable is named like an Emotion label', async () => {
+  const { shapeVariables, SHAPE_STYLES } = await import('../../../../src/shared/ui/shapes.js');
+  const { fontVariables } = await import('../../../../src/shared/ui/fonts.js');
+  const { surfaceVariables } = await import('../../../../src/shared/ui/surfaces.js');
+  const names = Object.keys(PALETTES).flatMap((paletteId) => Object.keys(SHAPE_STYLES).flatMap((styleId) => [
+    ...Object.keys(paletteVariables(paletteId)),
+    ...Object.keys(shapeVariables(styleId)),
+    ...Object.keys(fontVariables(styleId)),
+    ...Object.keys(surfaceVariables(paletteId, styleId)),
+  ]));
+  assert.deepEqual(names.filter((name) => /label/i.test(name)), []);
 });
