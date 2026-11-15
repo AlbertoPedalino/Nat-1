@@ -1240,6 +1240,13 @@ test("the look's shapes live in shapes.js", () => {
   assert.deepEqual(sourceFilesMatching(/\bpolygon\(\s*[46],/, { allow: ['shared/ui/shapes.js'] }), []);
 });
 
+// Words for a screen reader only take SPOKEN_ONLY_SX: three local copies wrote
+// `width: 1`, which sx reads as 100%, and a count's hidden words stretched the
+// encounter library sideways.
+test('words heard but not seen are SPOKEN_ONLY_SX', () => {
+  assert.deepEqual(sourceFilesMatching(/inset\(50%\)|rect\(0,\s*0,\s*0,\s*0\)/, { allow: ['shared/ui/textStyles.js'] }), []);
+});
+
 // Every counter spent and recovered one at a time (spell and pact slots, a
 // feature's uses, free casts, hit dice) is a row of GemPips: the cut, colours
 // and sizes live in shared/ui/GemPip.jsx only, so a new look is one file.

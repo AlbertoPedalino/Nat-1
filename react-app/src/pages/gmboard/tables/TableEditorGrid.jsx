@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, useTheme } from '@mui/material';
 import { resolveCellCommit } from './tableEdit.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { SPOKEN_ONLY_SX, TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
@@ -39,7 +39,7 @@ export default function TableEditorGrid({ rows, columns, matchField, onEdit, tab
       sx={containerSx}
     >
       <Table size="small" sx={{ '& td, & th': { borderColor: theme.palette.gmboard.rowDivider } }}>
-        {tableLabel ? <Box component="caption" sx={visuallyHiddenSx}>{tableLabel}</Box> : null}
+        {tableLabel ? <Box component="caption" sx={SPOKEN_ONLY_SX}>{tableLabel}</Box> : null}
         <TableHead>
           <TableRow sx={{ bgcolor: theme.palette.gmboard.headerOverlay }}>
             {columns.map((col) => (
@@ -105,17 +105,6 @@ export default function TableEditorGrid({ rows, columns, matchField, onEdit, tab
   );
 }
 
-const visuallyHiddenSx = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: 'hidden',
-  clip: 'rect(0,0,0,0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-};
 
 const headCellSx = {
   ...TEXT_STYLES.label,

@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
-import { TEXT_STYLES } from './textStyles.js';
+import { SPOKEN_ONLY_SX, TEXT_STYLES } from './textStyles.js';
 import { INK_EDGE, inkShadow } from './shadows.js';
 import { inkOn } from './pressable.js';
 import { SEAL_RADIUS } from './shapes.js';
@@ -22,16 +22,6 @@ export default function CountSeal({ count, tone = UI_COLORS.accent, sx }) {
     </>
   );
 }
-
-// Heard, not seen.
-const SPOKEN_ONLY_SX = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  overflow: 'hidden',
-  clipPath: 'inset(50%)',
-  whiteSpace: 'nowrap',
-};
 
 function sealSx(tone) {
   return {

@@ -12,6 +12,7 @@ import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
+import { SPOKEN_ONLY_SX } from '../../../shared/ui/textStyles.js';
 
 export default function NoteBoard() {
   const { state, dispatch, addNewNote } = useDmScreen();
@@ -75,7 +76,7 @@ export default function NoteBoard() {
 
   return (
     <Box sx={boardSx}>
-      <Box role="status" aria-live="polite" sx={liveRegionSx}>{announcement}</Box>
+      <Box role="status" aria-live="polite" sx={SPOKEN_ONLY_SX}>{announcement}</Box>
       <Box sx={actionsSx}>
         {notes.length > 0 ? (
           <SearchField
@@ -146,15 +147,6 @@ const boardSx = {
   width: 1,
 };
 
-// Off-screen but still rendered: a `display: none` region is never announced.
-const liveRegionSx = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  overflow: 'hidden',
-  clipPath: 'inset(50%)',
-  whiteSpace: 'nowrap',
-};
 
 const actionsSx = {
   display: 'flex',

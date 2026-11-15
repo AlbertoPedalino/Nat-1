@@ -95,6 +95,23 @@ export const TEXT_STYLES = Object.freeze({
   }),
 });
 
+// Words heard, not seen: read aloud by a screen reader, drawn nowhere (a
+// count's words beside its seal, a live region's announcements, a table's
+// caption). Still rendered, as a region with `display: none` is never read.
+// Its box is 1px square: `width: 1` in sx would be the whole width, and the
+// words would stretch the page.
+export const SPOKEN_ONLY_SX = Object.freeze({
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  margin: '-1px',
+  padding: 0,
+  border: 0,
+  overflow: 'hidden',
+  clipPath: 'inset(50%)',
+  whiteSpace: 'nowrap',
+});
+
 // Text kept to one line, cut with an ellipsis where it runs out of room (a
 // name in a row, a title in a strip). Its box may shrink below the text.
 export const ONE_LINE_SX = Object.freeze({
