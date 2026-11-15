@@ -36,12 +36,12 @@ import {
   GiLeafSwirl, GiLevelEndFlag, GiLightBulb, GiLockedChest, GiMadScientist, GiMagicGate, GiMagicHat,
   GiMagicPotion, GiMechanicalArm, GiMineWagon, GiMiner, GiMining, GiMoebiusStar, GiMoebiusTriangle,
   GiMonsterGrasp, GiMoonClaws, GiMoonOrbit, GiMountainCave, GiMountaintop, GiMushroomCloud, GiMushroomHouse,
-  GiNightSky, GiNinjaHead, GiOctopus, GiOilDrum, GiOpenTreasureChest, GiOrbital, GiOwl, GiPalmTree,
+  GiNightSky, GiNinjaHead, GiOilDrum, GiOpenTreasureChest, GiOrbital, GiOwl, GiPalmTree,
   GiParrotHead, GiPipes, GiPirateCannon, GiPirateCaptain, GiPirateCoat, GiPirateFlag, GiPirateHat,
   GiPirateHook, GiPirateSkull, GiPortal, GiPotionOfMadness, GiPowerButton, GiPsychicWaves, GiRadarSweep,
   GiRetroController, GiRevolver, GiRobotGolem, GiRopeCoil, GiRoundShield, GiRuneStone, GiRuneSword,
   GiSailboat, GiSharkFin, GiSharkJaws, GiShieldBash, GiShipBow, GiShipWheel, GiSkeletonKey, GiSlime,
-  GiSpanner, GiSpikedHalo, GiSpiralBloom, GiSprout, GiSpyglass, GiSquid, GiStandingPotion, GiStarGate,
+  GiSpanner, GiSpikedHalo, GiSpiralBloom, GiSprout, GiSpyglass, GiStandingPotion, GiStarGate,
   GiStarProminences, GiSteamBlast, GiSteampunkGoggles, GiStoneBlock, GiStoneBridge, GiStonePile,
   GiStoneWall, GiSun, GiSundial, GiSunflower, GiSunrise, GiSwordman, GiTargetPrize, GiTeapot,
   GiTentacleStrike, GiTentaclesBarrier, GiTentaclesSkull, GiTesla, GiTeslaCoil, GiTeslaTurret, GiTopHat,
@@ -49,6 +49,7 @@ import {
   GiZeppelin,
   GiCircuitry, GiCpu, GiCyberEye, GiCyborgFace, GiDatabase, GiDeliveryDrone, GiHolosphere, GiKatana,
   GiLaserGun, GiLaserWarning, GiProcessor, GiRobotHelmet, GiServerRack,
+  GiAlienSkull, GiCrackedAlienSkull,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -845,8 +846,9 @@ const FEY_TOOL_ICONS = Object.freeze({
   compendium: GiSpellBook,
 });
 
-// The cosmic style's icons: the comic drawings, the deep where it has a face
-// of its own (tentacles, eyes, portals, a mad scientist).
+// The cosmic style's icons: the comic drawings, what waits beyond the stars
+// where it has a face of its own (tentacles, eyes, portals, alien skulls, a
+// mad scientist).
 const COSMIC_GAME_ICONS = Object.freeze({
   ...COMIC_GAME_ICONS,
   abilityScores: GiBrainTentacle,
@@ -865,8 +867,8 @@ const COSMIC_GAME_ICONS = Object.freeze({
   sheet: GiMoebiusStar,
   preview: GiEyeball,
   species: GiAlienStare,
-  monster: GiOctopus,
-  beast: GiSquid,
+  monster: GiAlienSkull,
+  beast: GiCrackedAlienSkull,
   dead: GiGooSkull,
   magic: GiPortal,
   dungeon: GiStarGate,

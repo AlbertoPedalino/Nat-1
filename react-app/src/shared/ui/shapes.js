@@ -706,15 +706,16 @@ const DWARVEN = deepFreeze({
   motion: { pace: 1.3, hop: 0.5 },
 });
 
-// The fey cut: a grove where the fair folk dance. Vine swallowtails, petal
-// seals, a scalloped arch of leaves for the crest, a soft glow, flowers,
-// mushrooms and leaves for the gems, fireflies over the page, bouncy moves.
+// The fey cut: a grove where the fair folk dance. Bars scalloped as petals,
+// petal seals, a scalloped arch of leaves for the crest, a soft glow,
+// flowers, mushrooms and leaves for the gems, bouncy moves.
 const FEY = deepFreeze({
   ...COMIC,
   ribbon: {
-    panel: { notch: 0, pad: 14 },
-    tile: { notch: 0, pad: 4 },
-    ends: '0,0 0,100',
+    panel: { notch: 10, pad: 20 },
+    tile: { notch: 4, pad: 6 },
+    // Each end a pair of scallops, as petals.
+    ends: '10,0 3,12 0,25 3,38 10,50 3,62 0,75 3,88 10,100',
   },
   seal: { radius: '50% 50% 50% 8%' },
   crest: {
@@ -760,9 +761,9 @@ const FEY = deepFreeze({
   ornament: { path: 'M6 0 C10 3 10 8 6 12 C2 8 2 3 6 0 Z' },
   bookmarkMark: { width: 5, inset: 4, radius: '0 8px 8px 0' },
   paper: { corners: [2, 1, 2, 1] },
-  ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 0.5 },
+  ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 1 },
   panel: {
-    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
     flourish: { kind: 'vine', width: 96, height: 22, at: 'right' },
   },
   radius: 14,
@@ -775,15 +776,16 @@ const FEY = deepFreeze({
   motion: { pace: 1.2, hop: 1.4 },
 });
 
-// The cosmic cut: something vast beneath the waves. Torn swallowtails,
-// shapeless seals, a warped slab for the crest, a faint sickly glow, eyes and
-// tentacles for the gems, slow and uneasy moves.
+// The cosmic cut: something vast between the stars. Bars that waver at the
+// ends, shapeless seals, a warped slab for the crest, a faint sickly glow,
+// eyes and tentacles for the gems, slow and uneasy moves.
 const COSMIC = deepFreeze({
   ...COMIC,
   ribbon: {
-    panel: { notch: 0, pad: 14 },
-    tile: { notch: 0, pad: 4 },
-    ends: '0,0 0,100',
+    panel: { notch: 12, pad: 22 },
+    tile: { notch: 5, pad: 7 },
+    // Each end a wavering, living edge.
+    ends: '10,0 5,9 8,20 3,32 6,44 0,55 5,66 2,78 7,89 10,100',
   },
   seal: { radius: '58% 42% 63% 37% / 41% 56% 44% 59%' },
   crest: {
@@ -831,14 +833,14 @@ const COSMIC = deepFreeze({
   },
   ornament: { path: 'M0 6 C3 1 9 1 12 6 C9 11 3 11 0 6 Z' },
   paper: { corners: [0.5, 2, 1, 1.5] },
-  ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 0 },
+  ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 1 },
   panel: {
-    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 2, badge: 'bare', float: 1,
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
     flourish: { kind: 'tentacle', width: 90, height: 22, at: 'right' },
   },
   radius: 6,
   surface: {
-    paper: 'depths',
+    paper: 'beyond',
     halftone: { dot: 1, step: 11 },
     screentone: { line: 1, gap: 5, angle: 15 },
     rays: 0.4,
@@ -1006,7 +1008,7 @@ export const SHAPE_STYLES = Object.freeze({
   steampunk: Object.freeze({ id: 'steampunk', label: 'Steampunk', palettes: Object.freeze({ dark: 'foundry', light: 'patent' }), shapes: STEAMPUNK }),
   dwarven: Object.freeze({ id: 'dwarven', label: 'Dwarven forge', palettes: Object.freeze({ dark: 'forge', light: 'granite' }), shapes: DWARVEN }),
   fey: Object.freeze({ id: 'fey', label: 'Feywild', palettes: Object.freeze({ dark: 'twilight', light: 'blossom' }), shapes: FEY }),
-  cosmic: Object.freeze({ id: 'cosmic', label: 'Cosmic horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: COSMIC }),
+  cosmic: Object.freeze({ id: 'cosmic', label: 'Cosmic horror', palettes: Object.freeze({ dark: 'void', light: 'asylum' }), shapes: COSMIC }),
   pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
   cyberpunk: Object.freeze({ id: 'cyberpunk', label: 'Cyberpunk', palettes: Object.freeze({ dark: 'overdrive', light: 'daylight' }), shapes: CYBERPUNK }),
 });

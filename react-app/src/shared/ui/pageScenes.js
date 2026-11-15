@@ -22,8 +22,9 @@
 // planets ("Free Planets in Space Pixel Game Background Pack"), the moonrise
 // ("Free Moon Pixel Game Backgrounds"), the foundries ("Free Steampunk
 // Cityscape Pixel Backgrounds"), the caverns ("Free Crystal Cave Pixel Art
-// Backgrounds"), the enchanted wood ("Free Fairy-Tale Game Backgrounds"), the
-// depths ("Free Underwater World Parallax Game Backgrounds"), the wilds
+// Backgrounds"), the enchanted wood ("Forest and Trees Free Pixel
+// Backgrounds"), the sky beyond ("Free Moon Pixel Game Backgrounds", "Free
+// Nature Backgrounds Pixel Art"), the wilds
 // ("4 Free Seamless Nature Pixel Backgrounds").
 
 const GRAVEYARD_PNG = 'data:image/png;base64,'
@@ -121,10 +122,10 @@ const SCENES = Object.freeze({
   foundries: Object.freeze({ pictures: Object.freeze({ dark: 'foundries-night.png', light: 'foundries-airship.png' }), pixelated: true }),
   // Dwarven: a crystal cavern in the dark, one opening on the day.
   caverns: Object.freeze({ pictures: Object.freeze({ dark: 'caverns-deep.png', light: 'caverns-open.png' }), pixelated: true }),
-  // Fey: glowing trees, a wood of toadstools.
-  enchanted: Object.freeze({ pictures: Object.freeze({ dark: 'enchanted-glow.webp', light: 'enchanted-mushrooms.webp' }), pixelated: false }),
-  // Cosmic: bones on the sea floor, the open sea.
-  depths: Object.freeze({ pictures: Object.freeze({ dark: 'depths-bones.webp', light: 'depths-sea.webp' }), pixelated: false }),
+  // Fey: a wood in blue twilight, an old oak under a pastel sky.
+  enchanted: Object.freeze({ pictures: Object.freeze({ dark: 'enchanted-twilight.png', light: 'enchanted-oak.png' }), pixelated: true }),
+  // Cosmic: a blood moon through dead branches, an alien aurora over the peaks.
+  beyond: Object.freeze({ pictures: Object.freeze({ dark: 'beyond-bloodmoon.png', light: 'beyond-aurora.png' }), pixelated: true }),
   // Pixel: a tree at dusk, a snowy peak.
   wilds: Object.freeze({ pictures: Object.freeze({ dark: 'wilds-dusk.png', light: 'wilds-peak.png' }), pixelated: true }),
 });
