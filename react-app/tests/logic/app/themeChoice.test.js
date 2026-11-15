@@ -15,7 +15,7 @@ test('a theme choice keeps only known modes and styles', () => {
   assert.deepEqual(normalizeThemeChoice({ mode: 'light', style: 'scifi' }), { mode: 'light', style: 'scifi', diceStyle: STYLE_DICE, diceColors: STYLE_DICE });
   assert.deepEqual(normalizeThemeChoice({ mode: 'plaid', style: 'chrome' }), DEFAULT_THEME_CHOICE);
   assert.deepEqual(MODE_CHOICES.map(({ id }) => id), ['system', 'dark', 'light']);
-  assert.deepEqual(STYLE_CHOICES.map(({ id }) => id), ['comic', 'scifi', 'gothic', 'war', 'astral', 'pirate', 'steampunk', 'dwarven', 'fey', 'cosmic', 'pixel', 'cyberpunk']);
+  assert.deepEqual(STYLE_CHOICES.map(({ id }) => id), ['comic', 'scifi', 'gothic', 'war', 'astral', 'pirate', 'steampunk', 'dwarven', 'fey', 'abyssal', 'pixel', 'cyberpunk']);
 });
 
 test('a choice kept before modes is read as the mode of its palette', () => {

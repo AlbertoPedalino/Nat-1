@@ -48,8 +48,7 @@ import {
   GiTreehouse, GiTrophy, GiTrophyCup, GiUnicorn, GiValve, GiVineFlower, GiVortex, GiWatch, GiWizardFace,
   GiZeppelin,
   GiCircuitry, GiCpu, GiCyberEye, GiCyborgFace, GiDatabase, GiDeliveryDrone, GiHolosphere, GiKatana,
-  GiLaserGun, GiLaserWarning, GiProcessor, GiRobotHelmet, GiServerRack,
-  GiAlienSkull, GiCrackedAlienSkull,
+  GiLaserGun, GiLaserWarning, GiProcessor, GiRobotHelmet, GiServerRack, GiOctopus, GiSquid,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -846,10 +845,10 @@ const FEY_TOOL_ICONS = Object.freeze({
   compendium: GiSpellBook,
 });
 
-// The cosmic style's icons: the comic drawings, what waits beyond the stars
-// where it has a face of its own (tentacles, eyes, portals, alien skulls, a
+// The abyssal style's icons: the comic drawings, the drowned deep where it
+// has a face of its own (tentacles, eyes, an octopus and a squid, portals, a
 // mad scientist).
-const COSMIC_GAME_ICONS = Object.freeze({
+const ABYSSAL_GAME_ICONS = Object.freeze({
   ...COMIC_GAME_ICONS,
   abilityScores: GiBrainTentacle,
   hitPoints: GiBleedingHeart,
@@ -867,8 +866,8 @@ const COSMIC_GAME_ICONS = Object.freeze({
   sheet: GiMoebiusStar,
   preview: GiEyeball,
   species: GiAlienStare,
-  monster: GiAlienSkull,
-  beast: GiCrackedAlienSkull,
+  monster: GiOctopus,
+  beast: GiSquid,
   dead: GiGooSkull,
   magic: GiPortal,
   dungeon: GiStarGate,
@@ -881,7 +880,7 @@ const COSMIC_GAME_ICONS = Object.freeze({
   longRest: GiEvilMoon,
 });
 
-const COSMIC_TOOL_ICONS = Object.freeze({
+const ABYSSAL_TOOL_ICONS = Object.freeze({
   ...COMIC_TOOL_ICONS,
   characters: GiMadScientist,
   builder: GiBrainTentacle,
@@ -1061,10 +1060,10 @@ const STYLE_ICONS = Object.freeze({
     GAME_ICONS: FEY_GAME_ICONS,
     TOOL_ICONS: FEY_TOOL_ICONS,
   }),
-  cosmic: Object.freeze({
+  abyssal: Object.freeze({
     ...COMIC_STYLE_SETS,
-    GAME_ICONS: COSMIC_GAME_ICONS,
-    TOOL_ICONS: COSMIC_TOOL_ICONS,
+    GAME_ICONS: ABYSSAL_GAME_ICONS,
+    TOOL_ICONS: ABYSSAL_TOOL_ICONS,
   }),
   pixel: Object.freeze({
     ...COMIC_STYLE_SETS,

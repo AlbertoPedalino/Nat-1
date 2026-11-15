@@ -59,13 +59,13 @@ logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
 every style shows as a card drawn in its own theme): the **style**
 (`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
 War horror; Arcane astral; Pirate seas; Steampunk; Dwarven forge; Feywild;
-Cosmic horror; Pixel retro; Cyberpunk) and the **mode** (System, Dark, Light). Each style
+Abyssal horror; Pixel retro; Cyberpunk) and the **mode** (System, Dark, Light). Each style
 draws each mode in a palette of its own (its `palettes`: comic in `dark` and
 `light`, the parchment; gothic in `dread` and `mist`; sci-fi in `neon` and
 `neonLight`; war in `trench` and `dossier`; astral in `starlight` and
 `vellum`; pirate in `deepSea` and `seaChart`; steampunk in `foundry` and
 `patent`; dwarven in `forge` and `granite`; fey in `twilight` and `blossom`;
-cosmic in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; cyberpunk
+abyssal in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; cyberpunk
 in `overdrive` and `daylight`; every light
 one tints its panel bars in its accent and lays a page of its own colour). A new style is data only: its palettes in
 `colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in

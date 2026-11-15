@@ -48,7 +48,7 @@ export const DICE_COLORS = Object.freeze({
   steampunk: colorSet('steampunk', 'Brass', { face: '#6a4416', faceLit: '#b07a26', number: '#fff1c8', edge: '#160d04' }),
   dwarven: colorSet('dwarven', 'Runestone', { face: '#2f343e', faceLit: '#555e70', number: '#ff8a2a', edge: '#0b0d10' }),
   fey: colorSet('fey', 'Orchid', { face: '#5a1f52', faceLit: '#a8429a', number: '#b9ffe0', edge: '#180616' }),
-  cosmic: colorSet('cosmic', 'Void', { face: '#120c22', faceLit: '#3a2468', number: '#b6ff3c', edge: '#000000' }),
+  abyssal: colorSet('abyssal', 'Abyss', { face: '#0b2a24', faceLit: '#1f5e4e', number: '#9dffcf', edge: '#020a08' }),
   pixel: colorSet('pixel', '8-bit', { face: '#1b2f9a', faceLit: '#3f63e8', number: '#ffd23f', edge: '#0b0b22' }),
   cyberpunk: colorSet('cyberpunk', 'Hazard', { face: '#151515', faceLit: '#3a3a12', number: '#fcee0a', edge: '#000000' }),
 });
@@ -57,7 +57,7 @@ export const DICE_COLORS = Object.freeze({
 // Die3D's rim round each face. A console's hairline, a stone's slab.
 const RIMS = Object.freeze({
   comic: 9, scifi: 4, gothic: 11, war: 12, astral: 5, pirate: 10,
-  steampunk: 7, dwarven: 14, fey: 6, cosmic: 8, pixel: 13, cyberpunk: 5,
+  steampunk: 7, dwarven: 14, fey: 6, abyssal: 8, pixel: 13, cyberpunk: 5,
 });
 
 // A theme's cut of a die: its numbers in the theme's own figures (its shout

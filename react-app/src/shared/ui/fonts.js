@@ -135,10 +135,10 @@ const FEY_FONTS = Object.freeze({
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
-// The cosmic faces: a professor's case notes. Cormorant Unicase for the
+// The abyssal faces: a 1920s professor's case notes. Cormorant Unicase for the
 // signs, Eater for the voice, Spectral SC for labels and names, Crimson Pro
 // for the text, a typewriter for the mono.
-const COSMIC_FONTS = Object.freeze({
+const ABYSSAL_FONTS = Object.freeze({
   display: '"Spectral SC", Georgia, serif',
   prose: '"Crimson Pro", Georgia, serif',
   cardName: '"Spectral SC", Georgia, serif',
@@ -241,8 +241,8 @@ export const FONT_STYLES = Object.freeze({
     fits: Object.freeze({ shout: 'cap-height 0.74' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Alegreya+SC:wght@700&family=Berkshire+Swash&family=Henny+Penny&family=Quicksand:wght@400..700&display=swap',
   }),
-  cosmic: Object.freeze({
-    stacks: COSMIC_FONTS,
+  abyssal: Object.freeze({
+    stacks: ABYSSAL_FONTS,
     fits: Object.freeze({ body: 'ex-height 0.46', heading: 'ex-height 0.41', shout: 'cap-height 0.62' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Cormorant+Unicase:wght@600;700&family=Courier+Prime&family=Crimson+Pro:ital,wght@0,400..800;1,400..800&family=Eater&family=Spectral+SC:wght@500;700&display=swap',
   }),

@@ -153,11 +153,12 @@ const COMIC = deepFreeze({
   // wax seal or 'bare', and how far it `float`s on a soft shadow (0: none,
   // the ink's solid shadow alone). Its title's `flourish`: an ornament drawn
   // on the bar (panelOrnaments.js: a line of stars, rivets, a vine, a
-  // tentacle) `width` by `height` px, at its `right` end or at both `ends`;
-  // 'none' for none.
+  // tentacle's coiled tip) `width` by `height` px, at its `right` end or at
+  // both `ends`, 'none' for none; and its `trim`, a band repeated along the
+  // bar's foot (a tentacle's suckers), 'none' for none.
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
@@ -232,7 +233,7 @@ const SCIFI = deepFreeze({
   ink: { edge: 1, drop: 0, depth: 1.5, glow: 6, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   radius: 3,
   surface: {
@@ -400,7 +401,7 @@ const WAR = deepFreeze({
   ink: { edge: 2, drop: 1, depth: 1.2, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   radius: 2,
   surface: {
@@ -476,7 +477,7 @@ const ASTRAL = deepFreeze({
   ink: { edge: 2, drop: 0, depth: 1.2, glow: 4, lettering: 0 },
   panel: {
     bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1,
-    flourish: { kind: 'stars', width: 96, height: 16, at: 'right' },
+    flourish: { kind: 'stars', width: 96, height: 16, at: 'right', trim: 'none' },
   },
   radius: 12,
   surface: {
@@ -544,7 +545,7 @@ const PIRATE = deepFreeze({
   },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   ornament: { path: 'M1 0 L6 4.5 L11 0 L12 1 L7.5 6 L12 11 L11 12 L6 7.5 L1 12 L0 11 L4.5 6 L0 1 Z' },
   paper: { corners: [1.5, 0.5, 2, 0.75] },
@@ -618,7 +619,7 @@ const STEAMPUNK = deepFreeze({
   ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
   panel: {
     bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1,
-    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends' },
+    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends', trim: 'none' },
   },
   ornament: { path: 'M4.6 1.8 L4.8 0.1 L7.2 0.1 L7.4 1.8 L8.9 2.7 L10.5 2 L11.7 4.1 L10.3 5.1 L10.3 6.9 L11.7 7.9 L10.5 10 L8.9 9.3 L7.4 10.2 L7.2 11.9 L4.8 11.9 L4.6 10.2 L3.1 9.3 L1.5 10 L0.3 7.9 L1.7 6.9 L1.7 5.1 L0.3 4.1 L1.5 2 L3.1 2.7 Z' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
@@ -694,7 +695,7 @@ const DWARVEN = deepFreeze({
   ink: { edge: 3, drop: 1.2, depth: 1, glow: 0, lettering: 0 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   radius: 3,
   surface: {
@@ -764,7 +765,7 @@ const FEY = deepFreeze({
   ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'vine', width: 96, height: 22, at: 'right' },
+    flourish: { kind: 'vine', width: 96, height: 22, at: 'right', trim: 'none' },
   },
   radius: 14,
   surface: {
@@ -776,16 +777,17 @@ const FEY = deepFreeze({
   motion: { pace: 1.2, hop: 1.4 },
 });
 
-// The cosmic cut: something vast between the stars. Bars that waver at the
-// ends, shapeless seals, a warped slab for the crest, a faint sickly glow,
-// eyes and tentacles for the gems, slow and uneasy moves.
-const COSMIC = deepFreeze({
+// The abyssal cut: what sleeps in the drowned city, as a 1920s expedition
+// finds it. Bars that are tentacles (tapering ends, a coiled tip, suckers
+// along their underside), shapeless seals, a warped slab for the crest, a
+// faint sickly glow, eyes and tentacles for the gems, slow and uneasy moves.
+const ABYSSAL = deepFreeze({
   ...COMIC,
   ribbon: {
     panel: { notch: 12, pad: 22 },
     tile: { notch: 5, pad: 7 },
-    // Each end a wavering, living edge.
-    ends: '10,0 5,9 8,20 3,32 6,44 0,55 5,66 2,78 7,89 10,100',
+    // Each end tapering as a tentacle does.
+    ends: '10,0 7,14 4,30 1.5,46 0,55 1.5,66 4,78 7,90 10,100',
   },
   seal: { radius: '58% 42% 63% 37% / 41% 56% 44% 59%' },
   crest: {
@@ -836,11 +838,11 @@ const COSMIC = deepFreeze({
   ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'tentacle', width: 90, height: 22, at: 'right' },
+    flourish: { kind: 'tentacle', width: 86, height: 40, at: 'right', trim: 'suckers' },
   },
   radius: 6,
   surface: {
-    paper: 'beyond',
+    paper: 'depths',
     halftone: { dot: 1, step: 11 },
     screentone: { line: 1, gap: 5, angle: 15 },
     rays: 0.4,
@@ -910,7 +912,7 @@ const PIXEL = deepFreeze({
   ink: { edge: 3, drop: 1, depth: 1, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right', trim: 'none' },
   },
   radius: 1,
   surface: {
@@ -983,7 +985,7 @@ const CYBERPUNK = deepFreeze({
   ink: { edge: 1.5, drop: 1, depth: 1, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'bare', float: 0,
-    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right' },
+    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right', trim: 'none' },
   },
   radius: 2,
   surface: {
@@ -1008,7 +1010,7 @@ export const SHAPE_STYLES = Object.freeze({
   steampunk: Object.freeze({ id: 'steampunk', label: 'Steampunk', palettes: Object.freeze({ dark: 'foundry', light: 'patent' }), shapes: STEAMPUNK }),
   dwarven: Object.freeze({ id: 'dwarven', label: 'Dwarven forge', palettes: Object.freeze({ dark: 'forge', light: 'granite' }), shapes: DWARVEN }),
   fey: Object.freeze({ id: 'fey', label: 'Feywild', palettes: Object.freeze({ dark: 'twilight', light: 'blossom' }), shapes: FEY }),
-  cosmic: Object.freeze({ id: 'cosmic', label: 'Cosmic horror', palettes: Object.freeze({ dark: 'void', light: 'asylum' }), shapes: COSMIC }),
+  abyssal: Object.freeze({ id: 'abyssal', label: 'Abyssal horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: ABYSSAL }),
   pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
   cyberpunk: Object.freeze({ id: 'cyberpunk', label: 'Cyberpunk', palettes: Object.freeze({ dark: 'overdrive', light: 'daylight' }), shapes: CYBERPUNK }),
 });
@@ -1048,12 +1050,16 @@ export function ribbonEndsClip(ends, notch) {
   return `polygon(${[left(points[0]), ...points.map(right), ...points.slice(1).reverse().map(left)].join(', ')})`;
 }
 
+// The tile a bar's trim repeats along its foot, px.
+export const TRIM_TILE = Object.freeze({ width: 18, height: 8 });
+
 // Where a panel title's flourish sits (shapes' panel.flourish), as the two
 // background layers the bar keeps for it (PanelHeader.jsx): one at its right
 // end, or one at each end; none drawn at no size.
-function flourishVariables({ kind, width, height, at }) {
+function flourishVariables({ kind, width, height, at, trim }) {
   const size = kind === 'none' ? '0 0' : `${width}px ${height}px`;
   return {
+    '--gb-panel-trim-size': trim === 'none' ? '0 0' : `${TRIM_TILE.width}px ${TRIM_TILE.height}px`,
     '--gb-panel-flourish-size': size,
     '--gb-panel-flourish-size-2': at === 'ends' ? size : '0 0',
     '--gb-panel-flourish-at': at === 'ends' ? 'left 4px center' : 'right 10px center',

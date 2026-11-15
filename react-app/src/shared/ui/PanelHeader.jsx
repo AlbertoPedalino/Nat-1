@@ -7,7 +7,7 @@ import { ICON_SIZES } from './iconSizes.js';
 import { INK_SOLID } from './shadows.js';
 import { RIBBON, SEAL_RADIUS } from './shapes.js';
 import { svgStylePicture } from './svgPicture.js';
-import { barEndInkSvg, flourishSvg } from './panelOrnaments.js';
+import { barEndInkSvg, flourishSvg, trimSvg } from './panelOrnaments.js';
 import { useRootStyle } from './liveStyle.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
@@ -70,6 +70,9 @@ function ribbonSx({ notch, pad, clip }) {
 // line of stars, a vine, a tentacle at the bar's right end, a rivet at each
 // end; at no size where the style has none.
 const FLOURISH = svgStylePicture('panel-flourish', (shapes) => flourishSvg(shapes.panel.flourish.kind));
+// Its trim, repeated along the bar's foot (a tentacle's suckers); at no size
+// where the style has none.
+const TRIM = svgStylePicture('panel-trim', (shapes) => trimSvg(shapes.panel.flourish.trim));
 
 const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel);
 const TILE_RIBBON_SX = ribbonSx(RIBBON.tile);
@@ -90,10 +93,10 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
     // The flourish (twice: at one end or at each) over the screentone, or
     // none (shapes.js panel.hatch). A tile's narrow bar has no room for one.
     ...(tile ? { backgroundImage: panelScreentone(tone), backgroundSize: 'var(--gb-panel-bar-hatch)' } : {
-      backgroundImage: `${FLOURISH}, ${FLOURISH}, ${panelScreentone(tone)}`,
-      backgroundSize: 'var(--gb-panel-flourish-size), var(--gb-panel-flourish-size-2), var(--gb-panel-bar-hatch)',
-      backgroundPosition: 'var(--gb-panel-flourish-at), var(--gb-panel-flourish-at-2), 0 0',
-      backgroundRepeat: 'no-repeat, no-repeat, repeat',
+      backgroundImage: `${FLOURISH}, ${FLOURISH}, ${TRIM}, ${panelScreentone(tone)}`,
+      backgroundSize: 'var(--gb-panel-flourish-size), var(--gb-panel-flourish-size-2), var(--gb-panel-trim-size), var(--gb-panel-bar-hatch)',
+      backgroundPosition: 'var(--gb-panel-flourish-at), var(--gb-panel-flourish-at-2), left bottom, 0 0',
+      backgroundRepeat: 'no-repeat, no-repeat, repeat-x, repeat',
     }),
   };
 }
