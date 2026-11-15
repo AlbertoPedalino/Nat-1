@@ -1,4 +1,4 @@
-import { LETTERING_FILL, UI_COLORS, uiAlpha, OPACITY } from './colors.js';
+import { LETTERING_LINE, letteringStroke, UI_COLORS, uiAlpha, OPACITY } from './colors.js';
 
 // The ink of the chosen style (shapes.js `ink`, written as `--gb-ink-*` on the
 // page's root): every length below is the comic one times the style's share,
@@ -76,20 +76,22 @@ export const APPLE_WEBKIT_QUERY = '@supports (font: -apple-system-body)';
 
 //
 // Outline and shadow are the ink, or `color` when given; the letters are
-// filled and their shadow dropped as the palette letters (colors.js
-// LETTERINGS: on a light palette dark neutral letters are lifted to a light
-// tone, a tone's colour kept, and no shadow falls).
+// filled, outlined and their shadow dropped as the palette letters (colors.js
+// LETTERINGS: on a light palette a neutral is printed plain, a tone outlined
+// thinly in a deep shade of itself, and no shadow falls).
 export function inkLettering(width, offset, color = UI_COLORS.edge) {
-  // The shadow falls as far as the palette drops lettering's (a light one: none).
+  // The shadow falls and blurs as far as the palette drops lettering's (a
+  // light one: none, a lit style's halo included).
   const fall = `calc(${drop(offset)} * var(--gb-lettering-drop))`;
+  const blur = `calc(${GLOW} * var(--gb-lettering-drop))`;
   return {
-    WebkitTextFillColor: LETTERING_FILL,
-    WebkitTextStroke: `${inkLine(width)} ${color}`,
+    WebkitTextFillColor: 'currentColor',
+    WebkitTextStroke: `calc(${inkLine(width)} * ${LETTERING_LINE}) ${letteringStroke(color)}`,
     paintOrder: 'stroke fill',
-    textShadow: `${fall} ${fall} ${GLOW} ${color}`,
+    textShadow: `${fall} ${fall} ${blur} ${color}`,
     [APPLE_WEBKIT_QUERY]: {
       textShadow: 'none',
-      filter: `drop-shadow(${fall} ${fall} ${GLOW} ${color})`,
+      filter: `drop-shadow(${fall} ${fall} ${blur} ${color})`,
     },
   };
 }

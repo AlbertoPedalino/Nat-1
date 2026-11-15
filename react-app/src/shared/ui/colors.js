@@ -523,20 +523,20 @@ const MIST_LIGHT = Object.freeze({
   pcToken: '#3e5a8a',
 });
 
-// Every palette, each with the MUI mode it is drawn in and how its inked
-// lettering is lettered (`lettering`, LETTERING_FILL). A style draws its dark
-// and its light mode in two of them (shapes.js SHAPE_STYLES `palettes`:
-// comic in dark and light, the parchment; sci-fi in neon and neonLight; war
-// in trench and dossier; gothic in dread and mist).
+// Every palette, with the MUI mode it is drawn in (which also sets how its
+// inked lettering is lettered, LETTERINGS). A style draws its dark and its
+// light mode in two of them (shapes.js SHAPE_STYLES `palettes`: comic in dark
+// and light, the parchment; sci-fi in neon and neonLight; war in trench and
+// dossier; gothic in dread and mist).
 export const PALETTES = Object.freeze({
-  dark: Object.freeze({ id: 'dark', mode: 'dark', lettering: 'ink', colors: COMIC_DARK }),
-  light: Object.freeze({ id: 'light', mode: 'light', lettering: 'lift', colors: PARCHMENT_LIGHT }),
-  neon: Object.freeze({ id: 'neon', mode: 'dark', lettering: 'ink', colors: NEON_DARK }),
-  neonLight: Object.freeze({ id: 'neonLight', mode: 'light', lettering: 'ink', colors: NEON_LIGHT }),
-  trench: Object.freeze({ id: 'trench', mode: 'dark', lettering: 'ink', colors: TRENCH_DARK }),
-  dossier: Object.freeze({ id: 'dossier', mode: 'light', lettering: 'lift', colors: DOSSIER_LIGHT }),
-  dread: Object.freeze({ id: 'dread', mode: 'dark', lettering: 'ink', colors: DREAD_DARK }),
-  mist: Object.freeze({ id: 'mist', mode: 'light', lettering: 'lift', colors: MIST_LIGHT }),
+  dark: Object.freeze({ id: 'dark', mode: 'dark', colors: COMIC_DARK }),
+  light: Object.freeze({ id: 'light', mode: 'light', colors: PARCHMENT_LIGHT }),
+  neon: Object.freeze({ id: 'neon', mode: 'dark', colors: NEON_DARK }),
+  neonLight: Object.freeze({ id: 'neonLight', mode: 'light', colors: NEON_LIGHT }),
+  trench: Object.freeze({ id: 'trench', mode: 'dark', colors: TRENCH_DARK }),
+  dossier: Object.freeze({ id: 'dossier', mode: 'light', colors: DOSSIER_LIGHT }),
+  dread: Object.freeze({ id: 'dread', mode: 'dark', colors: DREAD_DARK }),
+  mist: Object.freeze({ id: 'mist', mode: 'light', colors: MIST_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no
@@ -562,33 +562,39 @@ export const UI_COLORS = Object.freeze(Object.fromEntries(Object.entries(COMIC_D
 // The CSS variables a palette fills, { '--gb-accent': '#ffc83d', … }: written
 // on the page's root by the theme (ThemeChoiceProvider).
 export function paletteVariables(paletteId) {
-  const { colors, lettering } = paletteOf(paletteId);
+  const { colors, mode } = paletteOf(paletteId);
   return {
     ...Object.fromEntries(Object.entries(colors)
       .filter(([key]) => !FIXED_COLOR_KEYS.has(key))
       .map(([key, hex]) => [colorVariableName(key), hex])),
-    '--gb-lettering-fill': (LETTERINGS[lettering] || LETTERINGS.ink).fill,
-    '--gb-lettering-drop': (LETTERINGS[lettering] || LETTERINGS.ink).drop,
+    ...Object.fromEntries(Object.entries(LETTERINGS[mode])
+      .map(([part, value]) => [`--gb-lettering-${part}`, value])),
   };
 }
 
-// How inked lettering (shadows.js inkLettering) is lettered, always outlined
-// in the ink. On a dark palette (`ink`) the letters keep their own colour and
-// drop their solid shadow. On a light one (`lift`) a dark neutral (the text's
-// browns: lightness under 0.6, chroma under 0.045) is lifted to a light tone
-// of itself, as dark letters in a dark outline read as a blot, while a
-// colour of a tone keeps itself, so a title matches its badge and buttons;
-// and no solid shadow falls under it, which on the paper only thickened the
-// letters. The fill is worked out where the letters are drawn, as it reads
-// their colour (currentColor).
+// How inked lettering (shadows.js inkLettering) is lettered, by the
+// palette's mode. On a dark palette the letters keep their own colour,
+// outlined in the ink (the colour inkLettering is given) over their solid
+// shadow. On a light one dark letters on the paper need no ink to read: a
+// neutral (the text's browns: lightness under 0.6, chroma under 0.045) is
+// printed plain, its outline gone, and a colour of a tone is outlined thinly
+// in a deep shade of itself, so a title still matches its badge without the
+// thick black outline that filled in the letters; no solid shadow falls. The
+// outline is worked out where the letters are drawn, as it reads the
+// letters' colour (currentColor). `initial` leaves the outline to the ink.
+const NEUTRAL_LETTERS = 'clamp(0, (0.6 - l) * 1000, 1) * clamp(0, (0.045 - c) * 1000, 1)';
 const LETTERINGS = Object.freeze({
-  ink: Object.freeze({ fill: 'currentColor', drop: '1' }),
-  lift: Object.freeze({
-    fill: 'oklch(from currentColor calc(l + clamp(0, (0.6 - l) * 1000, 1) * clamp(0, (0.045 - c) * 1000, 1) * (0.92 - l)) c h)',
+  dark: Object.freeze({ stroke: 'initial', line: '1', drop: '1' }),
+  light: Object.freeze({
+    stroke: `oklch(from currentColor calc(l * 0.45) c h / calc(1 - ${NEUTRAL_LETTERS}))`,
+    line: '0.6',
     drop: '0',
   }),
 });
-export const LETTERING_FILL = 'var(--gb-lettering-fill)';
+// The outline's colour (the ink `color` when the palette leaves it) and its
+// width's share.
+export const letteringStroke = (color) => `var(--gb-lettering-stroke, ${color})`;
+export const LETTERING_LINE = 'var(--gb-lettering-line)';
 
 // The colour of a hit point readout by its tone (vitals.hpTone).
 export const HP_TONE_COLORS = Object.freeze({
