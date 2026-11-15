@@ -79,6 +79,7 @@ function sceneLayerSx(chosen, paper) {
   if (!PAGE_SCENE_KINDS.includes(paper)) return null;
   const { colors, mode } = chosen;
   const scene = pageScene(paper, mode);
+  const inked = (options) => dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode], options));
   return {
     '&::before': {
       content: '""',
@@ -86,13 +87,14 @@ function sceneLayerSx(chosen, paper) {
       inset: 0,
       zIndex: -1,
       pointerEvents: 'none',
-      backgroundImage: scene.inked
-        ? dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode]))
-        : `${washImage(colors.page, OPACITY[VEIL])}, url("${scene.picture}")`,
+      backgroundImage: scene.inked ? inked() : `${washImage(colors.page, OPACITY[VEIL])}, url("${scene.picture}")`,
       backgroundSize: 'cover',
       backgroundPosition: 'center bottom',
       backgroundRepeat: 'no-repeat',
       imageRendering: scene.pixelated ? 'pixelated' : 'auto',
+      // A screen taller than wide (a phone) shows only the scene's middle: an
+      // inked scene framed for it.
+      ...(scene.inked ? { '@media (max-aspect-ratio: 1/1)': { backgroundImage: inked({ tall: true }) } } : null),
     },
   };
 }

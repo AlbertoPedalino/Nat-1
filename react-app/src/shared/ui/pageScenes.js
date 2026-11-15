@@ -10,7 +10,8 @@ import { publicAsset } from '../publicAsset.js';
 // LINE_SHARE (a backdrop, never as loud as the panels on it). Each repeats
 // side by side without a seam, so its `frame` (x, y in its own pixels) moves
 // what is seen: the graveyard's bell tower to the right, lower, clear of the
-// titles.
+// titles; `tallFrame` on a screen taller than wide (a phone), where only the
+// middle of the picture shows: the church in the middle.
 //
 // A painted scene keeps its own colours: one picture per mode (public/scenes),
 // under a veil of the page's colour (VEIL) so it stays behind the panels;
@@ -109,7 +110,9 @@ const GRAVEYARD_PNG = 'data:image/png;base64,'
   + 'A6OkRRlRIozhsgDa/wKi1Bqfmp36agAAAABJRU5ErkJggg==';
 
 const SCENES = Object.freeze({
-  graveyard: Object.freeze({ inked: true, png: GRAVEYARD_PNG, width: 576, height: 324, frame: Object.freeze([-160, -60]) }),
+  graveyard: Object.freeze({
+    inked: true, png: GRAVEYARD_PNG, width: 576, height: 324, frame: Object.freeze([-160, -60]), tallFrame: Object.freeze([58, -60]),
+  }),
   // Cyberpunk: neon towers by night, a sunlit district by day.
   megacity: Object.freeze({ pictures: Object.freeze({ dark: 'megacity-night.png', light: 'megacity-day.png' }), pixelated: true }),
   // Pirate: palms against a sunset at sea, an island and a sail by day.
@@ -159,9 +162,10 @@ const channels = (hex) => hexChannels(hex).map((value) => value / 255);
 
 // A scene drawn in two hexes: `ground` for its black, its white `share` of the
 // way from `ground` to `towards`, its pixels kept sharp however large it is
-// laid, framed as the scene frames itself.
-export function sceneSvg(kind, ground, towards, share) {
-  const { png, width, height, frame: [x, y] } = SCENES[kind];
+// laid, framed as the scene frames itself (`tall`: its tallFrame).
+export function sceneSvg(kind, ground, towards, share, { tall = false } = {}) {
+  const { png, width, height, frame, tallFrame } = SCENES[kind];
+  const [x, y] = tall && tallFrame ? tallFrame : frame;
   const from = channels(ground);
   const to = channels(towards).map((value, index) => from[index] + (value - from[index]) * share);
   const table = (index) => `tableValues="${from[index].toFixed(3)} ${to[index].toFixed(3)}"`;
