@@ -9,11 +9,15 @@ import { prefixer } from 'stylis';
 // a finger never does. Focus and pressed looks are untouched.
 //
 // It is done once, where the styles become CSS (the Emotion cache main.jsx
-// provides), so no component writes the media query by hand. A rule that is
-// already inside a hover media query (`@media (hover: none)` …) is the
-// author's own answer and is left alone. A selector list that mixes hover with
-// something else (`&:hover, &:focus-visible`) is split: the focus half stays
-// as it is, the hover half is gated.
+// provides), so no component writes the media query by hand. A hover rule
+// already under `@media (hover: hover)` is the author's own and is left as it
+// is. One under `@media (hover: none)` is dropped: it is MUI's touch reset
+// (an IconButton's or a ToggleButton's fill turned transparent while a finger's
+// last tap keeps it hovered), which, with every hover look gated, only ever
+// emptied the button just tapped — on the battle map the board showed through
+// it. A selector list that mixes hover with something else (`&:hover,
+// &:focus-visible`) is split: the focus half stays as it is, the hover half is
+// gated.
 
 const HOVER_MEDIA = '@media (hover: hover)';
 
@@ -21,11 +25,13 @@ function isHover(selector) {
   return selector.includes(':hover');
 }
 
-function insideHoverMedia(element) {
+// The hover media query a rule is inside ('(hover: none)', '(hover: hover)'),
+// or null.
+function hoverMedia(element) {
   for (let node = element.root; node; node = node.root) {
-    if (node.type === '@media' && node.value.includes('hover')) return true;
+    if (node.type === '@media' && node.value.includes('hover')) return node.value;
   }
-  return false;
+  return null;
 }
 
 // The rule again, as a child of `root`: the copy is not top level, so the
@@ -47,7 +53,14 @@ function atRule(element, value, children) {
 export function gateHover(element) {
   if (element.type !== 'rule' || element.hoverGated) return;
   const hover = element.props.filter(isHover);
-  if (!hover.length || insideHoverMedia(element)) return;
+  if (!hover.length) return;
+  const media = hoverMedia(element);
+  // A touch device's hover reset: nothing to draw (an empty rule is left out).
+  if (media && media.includes('hover: none')) {
+    element.children = [];
+    return;
+  }
+  if (media) return;
   const rest = element.props.filter((selector) => !isHover(selector));
   const original = { ...element };
   // Mutated in place: the serializer is already holding this element.

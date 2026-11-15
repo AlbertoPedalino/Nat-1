@@ -30,10 +30,24 @@ describe('hover only where there is a hover', () => {
     ]);
   });
 
-  it("leaves the author's own hover query alone", () => {
-    assert.deepEqual(inserted('.a:hover{color:blue;@media (hover: none){color:red;}}'), [
+  it("leaves the author's own (hover: hover) query as it is", () => {
+    assert.deepEqual(inserted('@media (hover: hover){.a:hover{color:blue;}}'), [
       '@media (hover: hover){.a:hover{color:blue;}}',
-      '@media (hover: none){.a:hover{color:red;}}',
+    ]);
+  });
+
+  // MUI's IconButton and ToggleButton reset their hover fill to transparent
+  // on a touch device; with every hover gated that reset only emptied the
+  // button a finger had just tapped (the battle map showed through it).
+  it('drops a touch device hover reset', () => {
+    assert.deepEqual(inserted('.a:hover{background-color:gold;@media (hover: none){background-color:transparent;}}'), [
+      '@media (hover: hover){.a:hover{background-color:gold;}}',
+    ]);
+  });
+
+  it('keeps what else a (hover: none) query holds', () => {
+    assert.deepEqual(inserted('@media (hover: none){.a{opacity:1;}}'), [
+      '@media (hover: none){.a{opacity:1;}}',
     ]);
   });
 
