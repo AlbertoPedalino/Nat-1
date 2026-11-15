@@ -18,7 +18,16 @@ in one folder.
 (each tool's name, colour and icon — the icons are `TOOL_ICONS` in `shared/ui/gameIcons.js`). Generic inputs
 such as `ColorField` and `InfoHint` belong to `shared/ui/`, with the one piece for
 each recurring job (guarded by `tests/logic/shared/oneDefinition*.test.js`):
-`ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
+`KeyBar` (a bar of keys pressed one at a time: the rests, the dice — one
+raised pill, `look` raised, gold or a screen's own; no hand-built ButtonGroup,
+guarded), `DoneButton` / `CancelButton` / `ResetButton` (a dialog's ways out, in
+`SheetDialog.jsx`: nothing to confirm, nothing done, start over; guarded),
+`ChoiceToggle` (one choice among a few, a bar of keys) and `SelectorGroup`
+(`shared/gmboard/ui/`: a choice whose options carry a tone or a second line —
+an NPC's attitude, starting equipment, the board's options), an on/off toggle
+inside a panel is `goldToggleSx` while a bar's own key flips contained/outlined
+(TopBarButton, the map's `MAP_SHEET_TOGGLE_SX`), `QuickHourButtons` (letting
+the campaign's time pass), `ToggleRow` (an on/off setting), `LabeledSlider` (a dragged value, `marks` for
 labelled stops), `TipIconButton` (an icon button, `danger` for one that removes; every icon button
 stands raised from the theme, `PART_ICON_BUTTON_SX` only for an icon that is part of
 something else), `CloseButton` / `CornerCloseButton` (every X), `RowExpandButton` (a

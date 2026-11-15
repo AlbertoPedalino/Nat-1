@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
 import { cornerRadius } from '../../../shared/ui/radius.js';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { RichText } from '../../../shared/content/RichText.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
@@ -8,12 +7,13 @@ import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { ENTRY_BUTTON_SX } from '../../../shared/ui/entryCard.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { eldritchCannonRuleGroups } from '../../../shared/character/forms/eldritchCannonForm.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import DisclosureButton from '../../../shared/ui/DisclosureButton.jsx';
 
 // The cannon's rules at a glance, folded under the active boards.
 export function CannonRulesSummary({ maxHp, level }) {
@@ -22,16 +22,12 @@ export function CannonRulesSummary({ maxHp, level }) {
   return (
     <ExpandableCard
       containerSx={rulesPanelSx}
-      summary={({ toggle, open }) => {
-        const Chevron = open ? ChevronDown : ChevronRight;
-        return (
-          <Box onClick={toggle} sx={rulesToggleSx}>
-            <Chevron size={13} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />
-            <Typography sx={rulesToggleTitleSx}>Cannon Rules</Typography>
-            <Typography sx={rulesToggleMetaSx}>Create / Operate / Object</Typography>
-          </Box>
-        );
-      }}
+      summary={({ toggle, open }) => (
+        <Box sx={rulesToggleRowSx}>
+          <DisclosureButton open={open} onToggle={toggle} label="Cannon Rules" />
+          <Typography sx={rulesToggleMetaSx}>Create / Operate / Object</Typography>
+        </Box>
+      )}
       detailsSx={{ pt: 0.5 }}
       details={(
         <Box sx={rulesSummarySx}>
@@ -102,28 +98,13 @@ const rulesPanelSx = {
   mb: 0.75,
 };
 
-const rulesToggleSx = {
+// The rules' opener (DisclosureButton) and what they hold, on one line.
+const rulesToggleRowSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 0.75,
-  px: 1,
-  py: 0.75,
-  border: INK_EDGE,
-  borderRadius: 1,
-  // Washes over the panel's paper: the toggle stays solid.
-  ...tintedSurfaceSx(UI_COLORS.surfaceHeader, { amount: OPACITY.strong }),
-  cursor: 'pointer',
-  '&:hover': {
-    borderColor: uiAlpha(UI_COLORS.accent, OPACITY.edge),
-    ...tintedSurfaceSx(UI_COLORS.accent, { amount: OPACITY.soft }),
-  },
 };
 
-const rulesToggleTitleSx = {
-  ...TEXT_STYLES.label,
-  fontSize: FONT_SIZES.xxs,
-  color: UI_COLORS.accentText,
-};
 
 const rulesToggleMetaSx = {
   ml: 'auto',

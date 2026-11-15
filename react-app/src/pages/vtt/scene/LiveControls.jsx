@@ -8,6 +8,7 @@ import {
 import MapMenu from '../map/MapMenu.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 
 // Everything that decides what the table sees, in one place: whether this scene
 // is the live one, whether the picture is frozen while the GM prepares the next,
@@ -37,7 +38,6 @@ export default function LiveControls({
     return (
       <Button
         size="small"
-        color="inherit"
         variant="outlined"
         startIcon={<Radio size={ICON_SIZES.sm} />}
         aria-pressed={false}
@@ -77,7 +77,7 @@ export default function LiveControls({
       >
         <Button
           size="small"
-          variant={projectorFollowing ? 'outlined' : 'contained'}
+          sx={goldToggleSx(!projectorFollowing)}
           startIcon={projectorFollowing ? <Lock size={ICON_SIZES.sm} /> : <LockOpen size={ICON_SIZES.sm} />}
           aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
           aria-pressed={!projectorFollowing}

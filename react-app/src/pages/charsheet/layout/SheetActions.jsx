@@ -1,32 +1,31 @@
-import { Box, Button, ButtonGroup } from '@mui/material';
-import { phoneHiddenLabelSx } from '../../../shared/ui/iconOnlyOnPhone.js';
-import { actionButtonTextSx } from '../../../shared/ui/actionButton.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
+import { Box } from '@mui/material';
+import KeyBar from '../../../shared/ui/KeyBar.jsx';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { sheetResponsive } from './layout.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 
 // The header's actions: resting, which changes the character (Hit Dice, hit
-// points, resources). The dice float at the bottom of the sheet instead
-// (SheetDiceDock), within reach wherever the sheet is scrolled. On a phone and
-// in an embedded sheet the group takes the width.
+// points, resources), as the app's bar of keys (KeyBar), each rest in its
+// tone. The dice float at the bottom of the sheet instead (SheetDiceDock),
+// within reach wherever the sheet is scrolled. On a phone and in an embedded
+// sheet the bar takes the width.
 export default function SheetActions({
   readOnly, embedded, onShortRest, onLongRest,
 }) {
   if (readOnly) return null;
-  const groupSx = { flex: sheetResponsive(embedded, { xs: 1, sm: 'none' }) };
+  const keyWidthSx = { flex: sheetResponsive(embedded, { xs: 1, sm: 'none' }) };
   return (
     <Box sx={{
       display: 'flex', gap: 1, flexShrink: 0, justifySelf: 'end', width: sheetResponsive(embedded, { xs: '100%', sm: 'auto' }),
     }}>
-      <ButtonGroup size="small" variant="outlined" aria-label="Rest" sx={groupSx}>
-        <Button color="warning" startIcon={<GAME_ICONS.shortRest size={ICON_SIZES.sm} />} onClick={onShortRest} aria-label="Short rest" sx={actionButtonTextSx}>
-          Short<Box component="span" sx={phoneHiddenLabelSx}>&nbsp;rest</Box>
-        </Button>
-        <Button color="info" startIcon={<GAME_ICONS.longRest size={ICON_SIZES.sm} />} onClick={onLongRest} aria-label="Long rest" sx={actionButtonTextSx}>
-          Long<Box component="span" sx={phoneHiddenLabelSx}>&nbsp;rest</Box>
-        </Button>
-      </ButtonGroup>
+      <KeyBar
+        label="Rest"
+        sx={{ display: 'flex', width: sheetResponsive(embedded, { xs: '100%', sm: 'auto' }) }}
+        keys={[
+          { id: 'short', icon: GAME_ICONS.shortRest, label: 'Short rest', tone: UI_COLORS.warningText, onClick: onShortRest, sx: keyWidthSx },
+          { id: 'long', icon: GAME_ICONS.longRest, label: 'Long rest', tone: UI_COLORS.infoText, onClick: onLongRest, sx: keyWidthSx },
+        ]}
+      />
     </Box>
   );
 }
-

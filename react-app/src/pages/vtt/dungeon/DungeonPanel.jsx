@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
-import { Trash2, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
@@ -19,6 +19,7 @@ import SelectField from '../../../shared/ui/SelectField.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import BusyDie from '../../../shared/ui/BusyDie.jsx';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 // The dungeon this map is being played as.
 //
@@ -90,9 +91,7 @@ export default function DungeonPanel({
           {dungeonKey ? 'Roll it again' : 'Roll the dungeon'}
         </Button>
         {dungeonKey ? (
-          <Button size="small" startIcon={<Trash2 size={ICON_SIZES.sm} />} disabled={busy} onClick={onClear}>
-            Clear
-          </Button>
+          <ClearButton disabled={busy} onClick={onClear} />
         ) : null}
         <InfoHint
           label="About rolling a dungeon"

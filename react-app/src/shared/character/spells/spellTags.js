@@ -20,6 +20,7 @@ export function isRitualSpell(spell) {
 
   return Boolean(
     truthy(spell.ritual)
+    || truthy(spell.isRitual)
     || truthy(spell.meta?.ritual)
     || truthy(spell._adapterData?.ritual)
   );

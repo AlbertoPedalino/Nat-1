@@ -8,7 +8,7 @@ import {
 import { stitchImages } from './stitch.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { failureMessage } from '../../../shared/ui/busyAction.js';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DoneButton } from '../../../shared/ui/SheetDialog.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { ErrorLine } from '../../../shared/ui/LoadStatus.jsx';
@@ -102,7 +102,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
           Back
         </Button>
       ) : null}
-      actions={<Button onClick={close} disabled={Boolean(progress)}>Close</Button>}
+      actions={<DoneButton onClick={close} disabled={Boolean(progress)}>Close</DoneButton>}
     >
       {!generator ? (
         <Stack spacing={1.25}>

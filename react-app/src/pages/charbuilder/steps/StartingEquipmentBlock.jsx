@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { equipmentTypeCandidates } from '../../../shared/content/catalogs/equipmentTypes.js';
 import {
   flattenEquip,
@@ -9,6 +9,7 @@ import { BUILDER_TEXT } from '../layout/builderText.js';
 import BuilderBox from '../layout/BuilderBox.jsx';
 import { SURFACES } from '../../../shared/ui/surfaces.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 
 // One source's starting-equipment choices (class or background) in the
 // builder's equipment step.
@@ -39,22 +40,13 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
         {blocks.map((block) => (
           <Box key={block.key} sx={{ ...SURFACES.inset, p: 1.25 }}>
             <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>{block.label}</Typography>
-            <Stack spacing={0.75}>
-              {block.options.map((option) => {
-                const selected = character.equipChoices[block.key] === option.value;
-                return (
-                  <Button
-                    key={`${block.key}-${option.value}`}
-                    size="small"
-                    variant={selected ? 'contained' : 'outlined'}
-                    sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                    onClick={() => dispatch({ type: 'equipment/choose', block, value: option.value })}
-                  >
-                    {option.value.toUpperCase()}) {option.label}
-                  </Button>
-                );
-              })}
-            </Stack>
+            <SelectorGroup
+              options={block.options}
+              value={character.equipChoices[block.key]}
+              getId={(option) => option.value}
+              getLabel={(option) => `${option.value.toUpperCase()}) ${option.label}`}
+              onChange={(option) => dispatch({ type: 'equipment/choose', block, value: option.value })}
+            />
           </Box>
         ))}
         {typeSlots.map((slot) => {
@@ -66,28 +58,18 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
               <Typography sx={{ ...BUILDER_TEXT.body, color: 'text.secondary', mb: 1 }}>
                 Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
               </Typography>
-              <Stack spacing={0.75}>
-                {candidates.map((cand) => {
-                  const ref = `${cand.name}|${cand.source}`;
-                  const selected = selectedRef === ref;
-                  return (
-                    <Button
-                      key={ref}
-                      size="small"
-                      variant={selected ? 'contained' : 'outlined'}
-                      sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                      onClick={() => dispatch({
-                        type: 'equipment/select-type-item',
-                        key: slot.slotKey,
-                        item: { ...cand, qty: 1 },
-                        prevRef: selectedRef,
-                      })}
-                    >
-                      {cand.name}
-                    </Button>
-                  );
+              <SelectorGroup
+                options={candidates}
+                value={selectedRef}
+                getId={(cand) => `${cand.name}|${cand.source}`}
+                getLabel={(cand) => cand.name}
+                onChange={(cand) => dispatch({
+                  type: 'equipment/select-type-item',
+                  key: slot.slotKey,
+                  item: { ...cand, qty: 1 },
+                  prevRef: selectedRef,
                 })}
-              </Stack>
+              />
             </Box>
           );
         })}

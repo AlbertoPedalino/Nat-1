@@ -10,6 +10,7 @@ import CornerCloseButton, { CloseButton } from './CornerCloseButton.jsx';
 import Caption from './Caption.jsx';
 import { useIsPhone } from './useIsPhone.js';
 import { MAP_PAPER_SX } from './mapPaper.js';
+import {  } from './SheetDialog.jsx';
 
 // Dialog chrome that matches the panels (the header-tint bar over an ink line,
 // uppercase display title) so dialogs feel native to the sheet rather than
@@ -50,6 +51,16 @@ const titleTextSx = {
 export function CancelButton({ onClick, disabled, autoFocus, children = 'Cancel' }) {
   return (
     <Button onClick={onClick} disabled={disabled} autoFocus={autoFocus} sx={{ color: 'text.secondary' }}>
+      {children}
+    </Button>
+  );
+}
+
+// The way out of a dialog that has nothing to confirm ("Done", "Close"): the
+// accent's plain lettering, the same in every such dialog.
+export function DoneButton({ onClick, disabled, children = 'Done' }) {
+  return (
+    <Button onClick={onClick} disabled={disabled}>
       {children}
     </Button>
   );

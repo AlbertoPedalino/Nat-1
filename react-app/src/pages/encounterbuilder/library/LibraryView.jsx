@@ -24,6 +24,7 @@ import StatePanel from '../../../shared/ui/StatePanel.jsx';
 import Caption from '../../../shared/ui/Caption.jsx';
 import CountSeal from '../../../shared/ui/CountSeal.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 // A saved encounter is found by its name, its quest or a creature in it, and
 // filtered by quest.
@@ -52,9 +53,7 @@ function LibraryViewView({ state, dispatch, monsterDb }) {
         icon={LibraryIcon}
         title="Library"
         action={(
-          <Button size="small" color="error" variant="outlined" startIcon={<Trash2 size={ICON_SIZES.sm} />} onClick={clearAll} disabled={!items.length}>
-            Clear All
-          </Button>
+          <ClearButton disabled={!items.length} onClick={clearAll}>Clear all</ClearButton>
         )}
       >
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>

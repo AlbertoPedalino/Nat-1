@@ -8,7 +8,7 @@ import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIco
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DoneButton } from '../../../shared/ui/SheetDialog.jsx';
 import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import CampaignCalendarFields from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
@@ -43,7 +43,7 @@ export default function HexcrawlSettingsDialog({
       maxWidth="md"
       icon={<Settings size={ICON_SIZES.md} />}
       title="Hexcrawl settings"
-      actions={<Button onClick={onClose}>Done</Button>}
+      actions={<DoneButton onClick={onClose} />}
     >
       <HexcrawlLinkWarnings board={board} clockLinked={clockLinked} error={error} />
 

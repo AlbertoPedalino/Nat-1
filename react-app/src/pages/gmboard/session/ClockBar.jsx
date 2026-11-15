@@ -6,8 +6,8 @@ import { CalendarDays, Pencil } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM } from '../../../shared/gmboard/campaignTime.js';
 import { WeatherCard } from '../../../shared/gmboard/ui/WeatherSummary.jsx';
-import CampaignCalendarFields, { QUICK_HOURS, quickButtonSx } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import CampaignCalendarFields, { QUICK_HOURS, QuickHourButtons } from '../../../shared/gmboard/ui/CampaignCalendarFields.jsx';
+import SheetDialog, { DoneButton } from '../../../shared/ui/SheetDialog.jsx';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -29,11 +29,7 @@ export default function ClockBar() {
       title="Clock & weather"
       actions={(
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}>
-          {QUICK_HOURS.slice(0, 3).map((hours) => (
-            <Button key={hours} size="small" variant="outlined" color="inherit" onClick={() => advanceManual(hours)} sx={quickButtonSx}>
-              +{hours}h
-            </Button>
-          ))}
+          <QuickHourButtons hours={QUICK_HOURS.slice(0, 3)} onAdvance={advanceManual} />
           <Button size="small" variant="outlined" startIcon={<Pencil size={ICON_SIZES.xs} />} onClick={() => setEditing(true)}>
             Edit
           </Button>
@@ -54,7 +50,7 @@ export default function ClockBar() {
         maxWidth="sm"
         title="Clock & weather"
         icon={<CalendarDays size={ICON_SIZES.lg} />}
-        actions={<Button onClick={() => setEditing(false)}>Done</Button>}
+        actions={<DoneButton onClick={() => setEditing(false)} />}
       >
         <CampaignCalendarFields
           clock={state}

@@ -1,10 +1,9 @@
 import { Button, Stack } from '@mui/material';
 import { PanelRightClose } from 'lucide-react';
-import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import { CONTROL_HEIGHTS } from '../../../shared/ui/controlHeights.js';
 import SheetCharacterSelect from '../sheets/SheetCharacterSelect.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import { MAP_SHEET_TOGGLE_SX } from './sceneViewportStyles.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -33,7 +32,7 @@ export default function BattleMapViewSwitch({
         title={hasSheets ? undefined : 'No character sheet is available to you.'}
         aria-label={showingSheet ? 'Hide character sheet' : 'Show character sheet'}
         onClick={() => onViewChange(showingSheet ? 'map' : 'sheet')}
-        sx={buttonSx}
+        sx={MAP_SHEET_TOGGLE_SX}
       >
         Sheet
       </Button>
@@ -47,9 +46,4 @@ const rootSx = {
   flexShrink: 0,
 };
 
-const buttonSx = {
-  minWidth: 92,
-  height: CONTROL_HEIGHTS.xl,
-  fontSize: FONT_SIZES.sm,
-  
-};
+

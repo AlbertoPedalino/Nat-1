@@ -1,10 +1,10 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Clock } from 'lucide-react';
 import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
-import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DoneButton } from '../../../shared/ui/SheetDialog.jsx';
 import { hexLabel } from './hexLabel.js';
 import WeatherTag from './WeatherTag.jsx';
 
@@ -28,7 +28,7 @@ export default function HexResultDialog({ result, onClose }) {
       // it is the standing condition every roll below was made under, and it is
       // the first thing the table asks about.
       headerRight={clock ? <WeatherTag weather={clock.weather} intensity={clock.intensity} /> : null}
-      actions={<Button onClick={onClose}>Close</Button>}
+      actions={<DoneButton onClick={onClose}>Close</DoneButton>}
     >
       {clock ? (
         <Box sx={lineSx}>

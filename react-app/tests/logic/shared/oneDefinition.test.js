@@ -183,6 +183,20 @@ test("a motion time takes the style's pace", () => {
   assert.deepEqual(sourceLinesMatching(/\b(DURATIONS|BUSY_MOTION|ICON_MOTION|DIALOG_MOTION|METER_MOTION|GEM_MOTION)\.\w+[^`]*\}ms\b/), []);
 });
 
+// A bar of keys pressed one at a time (the rests, the dice) is KeyBar: one
+// construction, one look, so two bars never drift apart again.
+test('a bar of keys is a KeyBar', () => {
+  assert.deepEqual(sourceFilesMatching(/<ButtonGroup\b/), []);
+  assert.deepEqual(sourceFilesMatching(/\bKEY_BAR_SX\b/, { allow: ['shared/ui/pressable.js', 'shared/ui/KeyBar.jsx', 'app/theme.js'] }), []);
+});
+
+// A dialog's way out is one of SheetDialog's: CancelButton (nothing done),
+// DoneButton (nothing to confirm: Done, Close), ResetButton (start over).
+// A map menu's footer is a row of outlined keys, Done the first of them.
+test("a dialog's Done or Close is the DoneButton", () => {
+  assert.deepEqual(sourceLinesMatching(/<Button\b[^>]*>\s*(Done|Close)\s*<\/Button>/, { allow: ['pages/vtt/map/MapMenu.jsx'] }), []);
+});
+
 // The ink line is as wide as the chosen style inks it (shapes.js `ink`):
 // INK_EDGE (the ink line in the ink), INK_SOLID (its width and style, a tone
 // set apart), INK_WIDTH (a width alone) or inkEdge(px, colour) for another
@@ -934,7 +948,7 @@ test('a flat icon button is part of something else', () => {
       'shared/ui/pressable.js',
       'shared/ui/SearchField.jsx',
       'shared/content/FiveEToolsLink.jsx',
-      'shared/character/dice/DiceControl.jsx',
+      'shared/ui/KeyBar.jsx',
       'pages/dmscreen/notes/NoteCard.jsx',
       'pages/vtt/sheets/FloatingSheetPanel.jsx',
     ],

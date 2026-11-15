@@ -4,7 +4,7 @@ import { mapIconButtonSx, mapPanelButtonSx } from './battleMapSurface.js';
 import {
   cornerButtonsSx,
   fullscreenBtnSx,
-  fullscreenSheetButtonSx,
+  MAP_SHEET_TOGGLE_SX,
   selectionCountSx,
   selectionToolbarSx,
 } from './sceneViewportStyles.js';
@@ -58,7 +58,7 @@ export function CornerButtons({
           startIcon={<GAME_ICONS.characterSheet size={ICON_SIZES.sm} />}
           aria-label={sheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
           onClick={() => onSheetOpenChange(!sheetOpen)}
-          sx={fullscreenSheetButtonSx}
+          sx={MAP_SHEET_TOGGLE_SX}
         >
           Sheet
         </Button>

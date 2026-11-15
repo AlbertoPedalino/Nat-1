@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { encounterPanel } from '../state/EncounterBuilderContext.jsx';
-import { clampInt } from '../../../shared/numbers.js';
+import { campaignAverageLevel } from '../state/partyState.js';
 import LoadStatus from '../../../shared/ui/LoadStatus.jsx';
 import { runBusy } from '../../../shared/ui/busyAction.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
@@ -97,10 +97,4 @@ function CampaignImportView({ state, campaignPlayers, dispatch }) {
       </Stack>
     </Panel>
   );
-}
-
-function campaignAverageLevel(players) {
-  if (!players.length) return 1;
-  const total = players.reduce((sum, player) => sum + clampInt(player.level, 1, 20, 1), 0);
-  return clampInt(total / players.length, 1, 20, 1);
 }

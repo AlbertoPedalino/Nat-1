@@ -21,6 +21,7 @@ import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import { SURFACES, calloutSx, meterTrackSx, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -67,23 +68,13 @@ function NegotiationDialogView({ open, onClose, state, dispatch }) {
           title="NPC attitude"
           hint="Changing attitude resets Patience and Interest. The threshold is preserved."
         >
-          <Box sx={attitudeGridSx}>
-            {NPC_ATTITUDES.map((item) => {
-              const selected = item.id === negotiation.attitude;
-              return (
-                <Button
-                  key={item.id}
-                  variant={selected ? 'contained' : 'outlined'}
-                  color={selected ? attitudeColor(item.id) : 'inherit'}
-                  onClick={() => setAttitude(item.id)}
-                  sx={attitudeButtonSx}
-                >
-                  <span>{item.label}</span>
-                  <small>P {item.patience} · I {item.interest}</small>
-                </Button>
-              );
-            })}
-          </Box>
+          <SelectorGroup
+            options={NPC_ATTITUDES}
+            value={negotiation.attitude}
+            onChange={(item) => setAttitude(item.id)}
+            getSub={(item) => `Patience ${item.patience} · Interest ${item.interest}`}
+            getTone={(item) => ({ color: attitudeTone(item.id) })}
+          />
         </DialogSection>
 
         <TextField
@@ -176,10 +167,11 @@ function MeterCard({ label, value, max, color, prominent = false }) {
   );
 }
 
-function attitudeColor(attitudeId) {
-  if (attitudeId === 'hostile') return 'error';
-  if (attitudeId === 'friendly') return 'success';
-  return 'primary';
+// An attitude's tone, read as lettering on the option.
+function attitudeTone(attitudeId) {
+  if (attitudeId === 'hostile') return UI_COLORS.dangerText;
+  if (attitudeId === 'friendly') return UI_COLORS.successText;
+  return UI_COLORS.accentPlain;
 }
 
 function formatActionDelta(action) {
@@ -188,28 +180,6 @@ function formatActionDelta(action) {
     action.patienceDelta ? `Patience ${signed(action.patienceDelta)}` : '',
   ].filter(Boolean).join(' · ');
 }
-
-const attitudeGridSx = {
-  display: 'grid',
-  gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-  gap: 0.75,
-  mt: 1,
-};
-
-const attitudeButtonSx = {
-  minHeight: { xs: 46, sm: 58 },
-  display: 'flex',
-  flexDirection: { xs: 'row', sm: 'column' },
-  justifyContent: 'center',
-  gap: { xs: 1, sm: 0.25 },
-  fontSize: FONT_SIZES.sm,
-  '& small': {
-    fontFamily: UI_FONTS.mono,
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.bold,
-    opacity: OPACITY.veil,
-  },
-};
 
 const meterGridSx = {
   display: 'grid',

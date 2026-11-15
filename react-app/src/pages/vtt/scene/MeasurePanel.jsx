@@ -9,6 +9,7 @@ import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
@@ -85,7 +86,8 @@ export function MeasurePanel({
 
       <Button
         size="small"
-        variant={paintMode === 'measure' ? 'contained' : 'outlined'}
+        aria-pressed={paintMode === 'measure'}
+        sx={goldToggleSx(paintMode === 'measure')}
         startIcon={<Ruler size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange(paintMode === 'measure' ? 'select' : 'measure')}
       >

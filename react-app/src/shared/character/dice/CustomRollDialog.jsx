@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { DICE_LIMITS } from './dice.js';
-import SheetDialog from '../../ui/SheetDialog.jsx';
+import SheetDialog, { ResetButton, DoneButton } from '../../ui/SheetDialog.jsx';
 import { signed, withModifier } from '../../ui/numberFormat.js';
 import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS, FONT_SIZES } from '../../ui/fonts.js';
@@ -67,8 +67,8 @@ export default function CustomRollDialog({
       icon={<GAME_ICONS.roll size={ICON_SIZES.xl} />}
       actions={(
         <>
-          <Button onClick={reset} variant="text" size="small" sx={{ color: 'text.secondary', mr: 'auto' }}>Reset</Button>
-          <Button onClick={handleClose} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>Close</Button>
+          <ResetButton onClick={reset} />
+          <DoneButton onClick={handleClose}>Close</DoneButton>
           <Button onClick={handleRoll} variant="contained" size="small" disabled={!hasSelection}>
             Roll
           </Button>

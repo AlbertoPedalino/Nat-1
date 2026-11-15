@@ -37,7 +37,8 @@ const EXTRA_CLASS_DEFINITION_FIELDS = [
 
 const ACTIVE_TOGGLE_FIELD = /^[A-Za-z][A-Za-z0-9_]*Active$/;
 
-function pickFields(source, fields) {
+// The named fields of `source` that are set, as a new object.
+export function pickFields(source, fields) {
   const out = {};
   fields.forEach((field) => {
     if (source[field] !== undefined) out[field] = source[field];

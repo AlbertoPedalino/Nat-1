@@ -19,7 +19,7 @@ import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from 
 import { TOOL_CATALOG } from './toolCatalog.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
 import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
-import SheetDialog from '../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DoneButton } from '../../shared/ui/SheetDialog.jsx';
 import SelectField from '../../shared/ui/SelectField.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { LINE_HEIGHTS } from '../../shared/ui/fonts.js';
@@ -209,7 +209,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
       maxWidth="sm"
       title="Linked tools"
       icon={<Network size={ICON_SIZES.lg} />}
-      actions={<Button disabled={working} onClick={() => setOpen(false)}>Close</Button>}
+      actions={<DoneButton disabled={working} onClick={() => setOpen(false)}>Close</DoneButton>}
     >
         {loading ? <LoadingLine centered label="Loading linked tools…" /> : <Stack spacing={2}>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>

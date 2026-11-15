@@ -23,6 +23,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { hpBonusPerLevelOf } from '../../../shared/character/combat/hp.js';
 import { speciesWithVersion } from '../../../shared/character/progression/speciesVersion.js';
 import { DEFAULT_BACKGROUND_PATTERN } from '../../../shared/character/progression/abilityScores.js';
+import { pickFields } from '../../../shared/character/profile/characterExport.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -49,13 +50,6 @@ const FEAT_SNAPSHOT_FIELDS = [
   'spellGrantOverrides',
 ];
 
-function pickFields(source, fields) {
-  const out = {};
-  fields.forEach((field) => {
-    if (source[field] !== undefined) out[field] = source[field];
-  });
-  return out;
-}
 
 function makeClassSnapshot(cls = null) {
   if (!cls || typeof cls !== 'object') return null;

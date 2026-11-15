@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { CornerDownRight, History, Trash2 } from 'lucide-react';
+import { CornerDownRight, History } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import { boardTone, complicationVisual, eventVisual } from '../../../shared/gmboard/ui/resultVisuals.js';
@@ -19,6 +19,7 @@ import SectionTitle from '../../../shared/ui/SectionTitle.jsx';
 import { CARD_PART_RULE_SX } from '../../../shared/ui/interactive.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
 
@@ -173,16 +174,7 @@ export default function RollView() {
           <History size={ICON_SIZES.xs} color={theme.palette.text.secondary} />
           <SectionTitle>Roll History</SectionTitle>
           <Typography sx={historyNoteSx}>Kept until this page is reloaded.</Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            startIcon={<Trash2 size={ICON_SIZES.xs} />}
-            disabled={!rolls.length}
-            onClick={() => dispatch({ type: 'clearRolls' })}
-          >
-            Clear
-          </Button>
+          <ClearButton disabled={!rolls.length} onClick={() => dispatch({ type: 'clearRolls' })} />
         </Stack>
         {rolls.length ? (
           <Box component="ol" aria-label="Roll history, newest first" sx={historyListSx}>

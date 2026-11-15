@@ -89,7 +89,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
         title="Familiar —"
         titleNode={<BeastTitle name={b.name} source={b.source} />}
         aside={(
-          <Button size="small" onClick={dismiss} sx={dismissButtonSx}>
+          <Button size="small" variant="outlined" onClick={dismiss} sx={dismissButtonSx}>
             Dismiss familiar
           </Button>
         )}

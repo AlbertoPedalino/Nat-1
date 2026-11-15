@@ -83,7 +83,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         title="Transformed —"
         titleNode={<BeastTitle name={b.name} source={b.source} />}
         aside={(
-          <Button size="small" onClick={revert} sx={dismissButtonSx}>
+          <Button size="small" variant="outlined" onClick={revert} sx={dismissButtonSx}>
             Revert to normal form
           </Button>
         )}

@@ -1,4 +1,4 @@
-import { Button, Stack, TextField, Tooltip } from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 import {
   CircleDashed,
   Eraser,
@@ -17,6 +17,8 @@ import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
+import TipIconButton from '../../../shared/ui/TipIconButton.jsx';
 
 // Shared by both audiences: drawing and notes are everyone's. The laser is its
 // own tool — it leaves nothing behind, so it does not belong beside the ones
@@ -70,18 +72,15 @@ export function DrawPanel({
           onChange={(event) => onDrawWidthChange(Number(event.target.value))}
           sx={{ flex: 1 }}
         />
-        <Tooltip title="Undo your last mark">
-          <span>
-            <Button size="small" onClick={onUndoDrawing} disabled={busy || !canUndo}>
-              <Undo2 size={ICON_SIZES.sm} />
-            </Button>
-          </span>
-        </Tooltip>
+        <TipIconButton title="Undo your last mark" size="small" onClick={onUndoDrawing} disabled={busy || !canUndo}>
+          <Undo2 size={ICON_SIZES.sm} />
+        </TipIconButton>
       </Stack>
 
       <Button
         size="small"
-        variant={paintMode === 'select' ? 'contained' : 'outlined'}
+        aria-pressed={paintMode === 'select'}
+        sx={goldToggleSx(paintMode === 'select')}
         startIcon={<MousePointer2 size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange('select')}
       >

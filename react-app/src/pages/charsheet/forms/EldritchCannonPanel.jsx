@@ -20,8 +20,7 @@ import {
   updateCannonHpPatch,
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
-import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
@@ -33,6 +32,7 @@ import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import { useCostMode } from './useCostMode.js';
 import CostModeToggle from './CostModeToggle.jsx';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon
@@ -147,6 +147,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 </Typography>
                 <Button
                   size="small"
+                  variant="outlined"
                   onClick={() => dismiss(index)}
                   sx={{ ...dismissButtonSx, ml: 'auto' }}
                 >
@@ -213,7 +214,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: FONT_SIZES.md, borderColor: uiAlpha(UI_COLORS.accent, OPACITY.strong), color: UI_COLORS.accentText, '&:hover': { borderColor: UI_COLORS.accentText, ...tintedSurfaceSx(UI_COLORS.accentText, { amount: OPACITY.soft, base: UI_COLORS.surfaceRaised }) } }}
+            sx={{ fontSize: FONT_SIZES.md, ...actionButtonToneSx(UI_COLORS.accentText) }}
           >
             Activate Cannon
           </Button>

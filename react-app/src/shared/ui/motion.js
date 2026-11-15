@@ -12,6 +12,17 @@ export function motionTime(ms) {
   return `calc(${ms}ms * var(--gb-motion-pace))`;
 }
 
+// How far a thing moves as it is touched (a hop under the cursor, a lift, a
+// press), in px of the comic style, as far as the style hops
+// (`--gb-motion-hop`; 0: it stays put); and how much it squashes when pressed.
+export function motionShift(x, y) {
+  return `translate(calc(${x}px * var(--gb-motion-hop)), calc(${y}px * var(--gb-motion-hop)))`;
+}
+
+export function motionSquash(amount) {
+  return `scale(calc(1 - ${amount} * var(--gb-motion-hop)))`;
+}
+
 export const DURATIONS = Object.freeze({
   fast: 120,
   normal: 160,

@@ -13,7 +13,7 @@ import { INK_EDGE, inkShadow } from '../../shared/ui/shadows.js';
 import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
 import { bubbleCheerSx } from '../../shared/ui/bubble.js';
-import { DURATIONS, motionTime } from '../../shared/ui/motion.js';
+import { DURATIONS, motionTime, motionShift } from '../../shared/ui/motion.js';
 import { CONTROL_FONT_SIZES, UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import NatOneDie, { NAT_ONE_LANDED_MS } from './NatOneDie.jsx';
@@ -185,7 +185,7 @@ function getCardSx(color) {
     '&:hover': {
       borderColor: color,
       boxShadow: inkShadow(UI_COLORS.edge, 5),
-      transform: 'translate(-2px, -2px)',
+      transform: motionShift(-2, -2),
     },
     '&:hover .card-label': { color },
     '@media (max-width: 600px)': {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { Box, ButtonBase, Button, Stack, ThemeProvider, Typography } from '@mui/material';
+import { Box, ButtonBase, Stack, ThemeProvider, Typography } from '@mui/material';
 import { Palette } from 'lucide-react';
-import SheetDialog, { DialogSection } from '../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { DialogSection, DoneButton } from '../../shared/ui/SheetDialog.jsx';
 import ChoiceToggle from '../../shared/ui/ChoiceToggle.jsx';
 import PanelHeader from '../../shared/ui/PanelHeader.jsx';
 import CountSeal from '../../shared/ui/CountSeal.jsx';
@@ -35,7 +35,7 @@ export default function ThemeDialog({ open, onClose }) {
       title="Theme"
       icon={<Palette size={ICON_SIZES.lg} />}
       maxWidth="sm"
-      actions={<Button variant="contained" onClick={onClose}>Done</Button>}
+      actions={<DoneButton onClick={onClose} />}
     >
       <DialogSection title="Mode">
         <ChoiceToggle

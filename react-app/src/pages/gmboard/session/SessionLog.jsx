@@ -1,12 +1,12 @@
-import { Box, Button, Typography, useTheme } from '@mui/material';
-import { History, Trash2 } from 'lucide-react';
+import { Box, Typography, useTheme } from '@mui/material';
+import { History } from 'lucide-react';
 import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import BoardPanel from '../ui/BoardPanel.jsx';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
+import ClearButton from '../../../shared/ui/ClearButton.jsx';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -20,16 +20,7 @@ export default function SessionLog() {
       count={entries.length}
       spacing={1}
       actions={(
-        <Button
-          size="small"
-          variant="outlined"
-          color="error"
-          startIcon={<Trash2 size={ICON_SIZES.xs} />}
-          onClick={() => dispatch({ type: 'clearLog' })}
-          disabled={!entries.length}
-        >
-          Clear
-        </Button>
+        <ClearButton disabled={!entries.length} onClick={() => dispatch({ type: 'clearLog' })} />
       )}
     >
       <Box sx={logBoxSx}>

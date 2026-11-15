@@ -4,7 +4,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Download, Save } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
-import SheetDialog from '../../shared/ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../shared/ui/SheetDialog.jsx';
 import {
   listAllCharacters, listMyCharacters, fetchCloudMeta, pullCharacter,
   deleteCloudCharacter, deleteOwnCloudCharacter, getCloudCharacter,
@@ -183,9 +183,7 @@ export default function CharacterPicker() {
         title="Save Character"
         icon={<Save size={ICON_SIZES.xl} />}
         actions={(
-          <Button onClick={() => setDialogRow(null)} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={() => setDialogRow(null)} />
         )}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 0.5 }}>

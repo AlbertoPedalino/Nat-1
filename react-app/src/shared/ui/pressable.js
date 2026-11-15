@@ -2,7 +2,7 @@ import { getContrastRatio } from '@mui/material';
 import { UI_COLORS, OPACITY, panelScreentone, uiLighten } from './colors.js';
 import { themedValue } from './themedValues.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
-import { DURATIONS, ICON_MOTION, motionTime } from './motion.js';
+import { DURATIONS, ICON_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
 import { LINE_HEIGHTS } from './fonts.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
@@ -16,8 +16,8 @@ import { LINE_HEIGHTS } from './fonts.js';
 export const PRESS_MOTION_SX = Object.freeze({
   transition: `transform ${motionTime(DURATIONS.fast)} ease, box-shadow ${motionTime(DURATIONS.fast)} ease, background-color ${motionTime(DURATIONS.fast)} ease, border-color ${motionTime(DURATIONS.fast)} ease`,
   // As far as the style hops (shapes.js motion.hop): 1px and 3% in the comic one.
-  '&:hover': { transform: 'translateY(calc(-1px * var(--gb-motion-hop)))' },
-  '&:active': { transform: 'translateY(calc(1px * var(--gb-motion-hop))) scale(calc(1 - 0.03 * var(--gb-motion-hop)))' },
+  '&:hover': { transform: motionShift(0, -1) },
+  '&:active': { transform: `${motionShift(0, 1)} ${motionSquash(0.03)}` },
   '@media (prefers-reduced-motion: reduce)': { '&:hover': { transform: 'none' }, '&:active': { transform: 'none' } },
 });
 

@@ -47,7 +47,7 @@ export function PlayAreaControls({ scene, busy, onPlayAreaChange, onFitPlayArea 
             >
               Refit to the map
             </Button>
-            <Button size="small" fullWidth disabled={busy} onClick={() => onPlayAreaChange(null)}>
+            <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => onPlayAreaChange(null)}>
               Use the whole scene
             </Button>
           </Stack>

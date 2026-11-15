@@ -70,7 +70,7 @@ function CombatViewView({ state, dispatch }) {
                 <Button variant="outlined" startIcon={<ArrowLeft size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'prevTurn' })}>
                   Previous
                 </Button>
-                <Button variant="contained" color="error" endIcon={<ArrowRight size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'nextTurn' })}>
+                <Button variant="contained" endIcon={<ArrowRight size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'nextTurn' })}>
                   Next
                 </Button>
                 <Button variant="outlined" startIcon={<RotateCcw size={ICON_SIZES.sm} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>

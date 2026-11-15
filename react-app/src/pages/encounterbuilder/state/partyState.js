@@ -150,7 +150,8 @@ function isDefaultPlaceholderParty(players) {
   ));
 }
 
-function campaignAverageLevel(players) {
+// The campaign's sheets' average level, 1 to 20 (1 with no sheets).
+export function campaignAverageLevel(players) {
   if (!players.length) return 1;
   const total = players.reduce((sum, player) => sum + clampInt(player.level, 1, 20, 1), 0);
   return clampInt(total / players.length, 1, 20, 1);

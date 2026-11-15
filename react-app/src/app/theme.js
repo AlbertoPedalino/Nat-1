@@ -272,7 +272,9 @@ function themeOptions(chosen, styleId) {
         ],
       },
       // A group of buttons is one raised button: the group carries the shadow
-      // and the press, its halves stay flat inside it (Roll | Log, the rests).
+      // and the press, its halves stay flat inside it. The app's own bars of
+      // keys (the rests, the dice) are KeyBar (shared/ui/KeyBar.jsx), built on
+      // the same KEY_BAR_SX.
       MuiButtonGroup: {
         styleOverrides: {
           root: ({ ownerState }) => (ownerState.variant === 'text' ? {} : KEY_BAR_SX),

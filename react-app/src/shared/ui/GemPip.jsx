@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
 import { PANEL_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
-import { DURATIONS, GEM_MOTION, motionTime } from './motion.js';
+import { DURATIONS, GEM_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
 import { SPARKLE_PATH } from './BubbleSparkles.jsx';
 import { useStyleId } from './themeIds.js';
 import { styleShapes } from './shapes.js';
@@ -244,10 +244,10 @@ function gemBoxSx(px, interactive, selected) {
     borderRadius: 1,
     cursor: interactive ? 'pointer' : 'default',
     transition: `transform ${motionTime(DURATIONS.fast)} ease`,
-    ...(selected ? { transform: 'translateY(-2px)' } : null),
+    ...(selected ? { transform: motionShift(0, -2) } : null),
     ...(interactive ? {
-      '&:hover:not(:disabled)': { transform: 'translateY(-1px)' },
-      '&:active:not(:disabled)': { transform: 'translateY(1px) scale(0.94)' },
+      '&:hover:not(:disabled)': { transform: motionShift(0, -1) },
+      '&:active:not(:disabled)': { transform: `${motionShift(0, 1)} ${motionSquash(0.06)}` },
       '&:disabled': { cursor: 'default' },
       ...focusRingSx({ tone: UI_COLORS.accentText }),
     } : null),

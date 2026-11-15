@@ -240,7 +240,7 @@ export default function HPBlock({
               size="small"
               variant="outlined"
               onClick={onDeathSave}
-              sx={{ ml: 'auto', minWidth: 36, height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs, color: 'text.secondary', borderColor: 'divider' }}
+              sx={{ ml: 'auto', minWidth: 36, height: CONTROL_HEIGHTS.sm, fontSize: FONT_SIZES.xxxs }}
             >
               Roll
             </Button>

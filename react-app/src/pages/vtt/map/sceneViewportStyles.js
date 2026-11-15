@@ -112,7 +112,7 @@ export const selectionToolbarSx = {
   borderRadius: 1,
   bgcolor: VTT_COLORS.surface,
   border: INK_EDGE,
-  boxShadow: 4,
+  boxShadow: UI_SHADOWS.float,
 };
 
 export const selectionCountSx = {
@@ -148,13 +148,13 @@ export const playAreaStrokeProps = {
 };
 
 // The fullscreen Sheet: dark glass, gold edge, the tools toggle's height.
-export const fullscreenSheetButtonSx = {
+// The map's Sheet key (the view switch and the fullscreen map's corner): a bar
+// key that shows or hides a character sheet, filled while it shows (the
+// theme's contained and outlined buttons), the same wherever it stands.
+export const MAP_SHEET_TOGGLE_SX = {
   height: CONTROL_HEIGHTS.xl,
-  minWidth: 88,
-  borderColor: vttAlpha(VTT_COLORS.accent, OPACITY.edge),
-  bgcolor: VTT_COLORS.surface,
-  fontSize: FONT_SIZES.xs,
-  '&:hover': { bgcolor: VTT_COLORS.surfaceRaised },
+  minWidth: 92,
+  fontSize: FONT_SIZES.sm,
 };
 
 // Above the rail (top 48), which hangs just below the tools toggle.

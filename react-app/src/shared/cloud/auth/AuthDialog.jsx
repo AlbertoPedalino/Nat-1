@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Tabs, Tab } from '@mui/material';
 import { LogIn } from 'lucide-react';
-import SheetDialog from '../../ui/SheetDialog.jsx';
+import SheetDialog, { CancelButton } from '../../ui/SheetDialog.jsx';
 import { useAuth } from './AuthProvider.jsx';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { ICON_SIZES } from '../../ui/iconSizes.js';
@@ -46,9 +46,7 @@ export default function AuthDialog({ open, onClose }) {
       icon={<LogIn size={ICON_SIZES.xl} />}
       actions={(
         <>
-          <Button onClick={handleClose} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={handleClose} />
           <Button onClick={submit} variant="contained" size="small" disabled={busy}>
             {busy ? '...' : (mode === 'login' ? 'Log in' : 'Sign up')}
           </Button>

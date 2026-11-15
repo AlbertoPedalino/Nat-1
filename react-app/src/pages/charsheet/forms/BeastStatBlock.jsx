@@ -1,5 +1,5 @@
 import { Box, Button, Link, Typography } from '@mui/material';
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
@@ -11,11 +11,12 @@ import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.j
 import { detailMetaSx, detailTitleSx } from '../layout/DetailPanel.jsx';
 import { TEXT_STYLES, ONE_LINE_SX } from '../../../shared/ui/textStyles.js';
 import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
-import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
+import { INK_EDGE } from '../../../shared/ui/shadows.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { CARD_PART_RULE_SX, CARD_SX, LIST_ROW_RULE_SX, BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import RowExpandButton from '../../../shared/ui/RowExpandButton.jsx';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -182,7 +183,6 @@ export function BeastPickerRow({
       containerSx={BEAST_ROW_SX}
       disabled={!beast}
       summary={({ open, toggle, disabled }) => {
-        const Chevron = open ? ChevronDown : ChevronRight;
         return (
           <Box
             onClick={disabled ? undefined : toggle}
@@ -191,9 +191,7 @@ export function BeastPickerRow({
               cursor: disabled ? 'default' : 'pointer',
             }}
           >
-            {disabled
-              ? <Box sx={{ width: 14, flexShrink: 0 }} />
-              : <Chevron size={14} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />}
+            <RowExpandButton open={open} onToggle={toggle} label={name} disabled={disabled} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <BeastNameLink name={name} source={source} sx={{ fontSize: FONT_SIZES.xl }} />
               <Typography noWrap sx={summaryColor ? { ...subSx, color: summaryColor } : subSx}>{summary}</Typography>
@@ -321,17 +319,16 @@ export function CreatureOptionRow({ label, children }) {
   );
 }
 
-// Muted text button for "dismiss / revert" actions on summon-style panels
-// (Wild Companion, Wild Shape, Eldritch Cannon). No outline/icon — a small
-// low-emphasis control so it never competes with the roll/HP controls above it.
+// The "dismiss / revert" action of a summon-style panel (Wild Companion, Wild
+// Shape, Eldritch Cannon): the theme's outlined button (variant="outlined"),
+// small and in the muted danger tone, so it never competes with the roll and
+// HP controls above it.
 export const dismissButtonSx = {
   minWidth: 0,
   flexShrink: 0,
   px: 0.75,
   py: 0.25,
   fontSize: FONT_SIZES.xxs,
-  border: INK_SOLID,
-  borderRadius: 1,
   ...actionButtonToneSx(UI_COLORS.dangerMuted),
 };
 

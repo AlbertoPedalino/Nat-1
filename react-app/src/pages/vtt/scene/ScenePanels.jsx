@@ -12,6 +12,7 @@ import {
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import Caption from '../../../shared/ui/Caption.jsx';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import { goldToggleSx } from '../../../shared/ui/actionButton.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -82,8 +83,8 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
         slotProps={{ htmlInput: { min: 1 / Math.max(1, scene.fog.scale || 1), step: 'any' } }}
       />
       <Stack direction="row" spacing={1}>
-        <Button size="small" fullWidth onClick={() => onFogAll(true)} disabled={busy}>Reveal all</Button>
-        <Button size="small" fullWidth onClick={() => onFogAll(false)} disabled={busy}>Cover all</Button>
+        <Button size="small" variant="outlined" fullWidth onClick={() => onFogAll(true)} disabled={busy}>Reveal all</Button>
+        <Button size="small" variant="outlined" fullWidth onClick={() => onFogAll(false)} disabled={busy}>Cover all</Button>
       </Stack>
       <Caption>
         While a brush is selected the left button paints and the middle one pans.
@@ -125,7 +126,8 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
     <Stack spacing={1}>
       <Button
         size="small"
-        variant={active ? 'contained' : 'outlined'}
+        aria-pressed={active}
+        sx={goldToggleSx(active)}
         startIcon={<Pointer size={ICON_SIZES.sm} />}
         onClick={() => onPaintModeChange(active ? 'select' : 'laser')}
       >

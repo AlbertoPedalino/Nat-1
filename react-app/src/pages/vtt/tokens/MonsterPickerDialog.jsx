@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Button,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { Stack, TextField } from '@mui/material';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { monsterFilterDefaults } from '../../../shared/bestiary/filters.js';
@@ -13,6 +9,7 @@ import PlacementDialog from './PlacementDialog.jsx';
 import GmLayerSwitch from './GmLayerSwitch.jsx';
 import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 import Caption from '../../../shared/ui/Caption.jsx';
+import { DoneButton } from '../../../shared/ui/SheetDialog.jsx';
 
 
 // The encounter builder's own bestiary panel, in a dialog. Same filters, same
@@ -47,7 +44,7 @@ export default function MonsterPickerDialog({
           <Caption sx={{ mr: 'auto', pl: 1 }}>
             Drag with mouse, touch or pen, or use + to place automatically.
           </Caption>
-          <Button onClick={onClose} disabled={busy}>Done</Button>
+          <DoneButton onClick={onClose} disabled={busy} />
         </>
       )}
     >

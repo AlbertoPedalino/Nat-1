@@ -3,16 +3,10 @@ import { Box, Popover } from '@mui/material';
 import CustomRollDialog from './CustomRollDialog.jsx';
 import RollLogList from './RollLogList.jsx';
 import { UI_COLORS, OPACITY } from '../../ui/colors.js';
-import { phoneHiddenLabelSx } from '../../ui/iconOnlyOnPhone.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { CONTROL_FONT_SIZES } from '../../ui/fonts.js';
-import { SURFACES, tintedSurfaceSx, washImage } from '../../ui/surfaces.js';
-import { ICON_SIZES } from '../../ui/iconSizes.js';
+import { washImage } from '../../ui/surfaces.js';
 import { GAME_ICONS } from '../../ui/gameIcons.js';
 import { LIST_ROW_RULE_SX } from '../../../shared/ui/interactive.js';
-import { KEY_BAR_SX, PART_ICON_BUTTON_SX } from '../../ui/pressable.js';
-import TipIconButton from '../../ui/TipIconButton.jsx';
-import { INK_SOLID } from '../../ui/shadows.js';
+import KeyBar, { KEY_BAR_LOOKS } from '../../ui/KeyBar.jsx';
 
 // The dice on every screen that rolls (character sheet, battle map, encounter
 // builder): one look everywhere, a pill of two keys — rolling first, the log
@@ -23,7 +17,7 @@ import { INK_SOLID } from '../../ui/shadows.js';
 //
 // The pill is the accent gold (GOLD_SURFACE), the one bright thing at the
 // bottom of a dark sheet. `labels` writes Roll and Log beside the icons from
-// a tablet up (phoneHiddenLabelSx: a phone keeps the icons); a corner of the
+// a tablet up (KeyBar: a phone keeps the icons); a corner of the
 // map passes `labels={false}`. `surface` restyles the pieces for a screen with
 // its own chrome — the map, often fullscreen: { groupSx, segmentSx,
 // dividerColor, paperSx, dialog } where `dialog` holds props for
@@ -41,20 +35,18 @@ export default function DiceControl({
   const logProps = {
     'aria-label': logLabel, 'aria-haspopup': 'dialog', 'aria-expanded': anchor ? 'true' : undefined, onClick: toggleLog,
   };
-  const keyLabel = (text) => (labels ? <Box component="span" sx={[phoneHiddenLabelSx, keyLabelSx]}>{text}</Box> : null);
-
   return (
     <>
-      <Box role="group" aria-label="Dice" sx={[pillSx, surface.groupSx, sx]}>
-        <TipIconButton title="Roll dice" size="small" onClick={() => setRollerOpen(true)} sx={[keySx, surface.segmentSx]}>
-          <GAME_ICONS.roll size={ICON_SIZES.md} />
-          {keyLabel('Roll')}
-        </TipIconButton>
-        <TipIconButton title="Roll log" size="small" {...logProps} sx={[keySx, surface.segmentSx, dividerSx(surface.dividerColor), anchor ? openSx : null]}>
-          <GAME_ICONS.rollLog size={ICON_SIZES.md} />
-          {keyLabel('Log')}
-        </TipIconButton>
-      </Box>
+      <KeyBar
+        label="Dice"
+        look={surface}
+        labels={labels}
+        sx={sx}
+        keys={[
+          { id: 'roll', icon: GAME_ICONS.roll, label: 'Roll', title: 'Roll dice', onClick: () => setRollerOpen(true) },
+          { id: 'log', icon: GAME_ICONS.rollLog, label: 'Log', title: 'Roll log', ...logProps, sx: anchor ? openSx : null },
+        ]}
+      />
       <Popover
         open={Boolean(anchor)}
         anchorEl={anchor}
@@ -77,41 +69,8 @@ export default function DiceControl({
   );
 }
 
-// The pill is one raised button, as a button group is.
-const pillSx = {
-  ...SURFACES.panel,
-  ...KEY_BAR_SX,
-  display: 'inline-flex',
-  alignItems: 'stretch',
-  borderRadius: 999,
-  overflow: 'hidden',
-};
-
-// A key of the pill: the pill is the raised button, its keys lie in it.
-const keySx = { ...PART_ICON_BUTTON_SX, borderRadius: 0, px: 1, gap: 0.75 };
-
-// Roll / Log beside the icons: the controls' capitals.
-const keyLabelSx = { ...TEXT_STYLES.label, fontSize: CONTROL_FONT_SIZES.normal };
-
-// The pill everywhere but the map: filled with the accent, dark icons, inked
-// edge; a touch larger to tap.
-const GOLD_SURFACE = Object.freeze({
-  groupSx: { bgcolor: 'primary.main' },
-  segmentSx: {
-    color: 'primary.contrastText',
-    px: 1.5,
-    py: 0.75,
-    // Darkened over the pill's gold, not see-through, its ink kept dark: the
-    // icon buttons' accent under the cursor would be gold on gold.
-    '&:hover': { ...tintedSurfaceSx(UI_COLORS.black, { base: 'primary.main' }), color: 'primary.contrastText' },
-  },
-});
-
-// The rule between the two halves, on the log half itself: a rule set from the
-// group would lose to the buttons' own `border: 0`.
-function dividerSx(color = UI_COLORS.edge) {
-  return { borderLeft: INK_SOLID, borderLeftColor: color };
-}
+// The pill everywhere but the map: the gold bar of keys (KeyBar).
+const GOLD_SURFACE = KEY_BAR_LOOKS.gold;
 
 // The half whose popover is open is lit: the wash laid over the button's own
 // solid background (replacing it would let the page show through), and kept

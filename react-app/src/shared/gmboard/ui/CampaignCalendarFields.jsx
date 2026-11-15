@@ -149,19 +149,7 @@ function AdvanceForm({ disabled, onAdvance }) {
     <Box>
       <SectionTitle sx={{ mb: 0.5 }}>Let time pass · the weather keeps rolling</SectionTitle>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.75 }}>
-        {QUICK_HOURS.map((amount) => (
-          <Button
-            key={amount}
-            size="small"
-            variant="outlined"
-            color="inherit"
-            disabled={disabled}
-            onClick={() => advance(amount)}
-            sx={quickButtonSx}
-          >
-            +{amount}h
-          </Button>
-        ))}
+        <QuickHourButtons onAdvance={advance} disabled={disabled} />
         <NumberField
           label="Hours"
           value={hours}
@@ -189,4 +177,22 @@ const dateRowSx = {
 
 const errorSx = { color: 'error.main', fontSize: FONT_SIZES.md, mt: 0.5 };
 
-export const quickButtonSx = { minWidth: 0, px: 1, fontSize: CONTROL_FONT_SIZES.normal };
+const quickButtonSx = { minWidth: 0, px: 1, fontSize: CONTROL_FONT_SIZES.normal };
+
+// The keys that let time pass by a set number of hours ("+1h", "+4h"…): the
+// campaign clock's bar and the calendar dialog alike. `hours` the steps shown
+// (QUICK_HOURS by default), `onAdvance(hours)` lets that many pass.
+export function QuickHourButtons({ hours = QUICK_HOURS, onAdvance, disabled = false }) {
+  return hours.map((amount) => (
+    <Button
+      key={amount}
+      size="small"
+      variant="outlined"
+      disabled={disabled}
+      onClick={() => onAdvance(amount)}
+      sx={quickButtonSx}
+    >
+      +{amount}h
+    </Button>
+  ));
+}

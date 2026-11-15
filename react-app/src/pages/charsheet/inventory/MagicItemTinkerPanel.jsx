@@ -60,10 +60,6 @@ function availableSlotOptions(regularSlots, pactSlots, sheet) {
   return [...regular, ...pact];
 }
 
-function artificerLevel(character) {
-  return classLevel(character, 'Artificer');
-}
-
 function baseReplicatedItemLimit(level) {
   if (level >= 18) return 6;
   if (level >= 14) return 5;
@@ -158,7 +154,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     if (next === inventory) return;
     if (
       hasImprovedArmorer(character)
-      && replicatedNonArmorCount(next) > baseReplicatedItemLimit(artificerLevel(character))
+      && replicatedNonArmorCount(next) > baseReplicatedItemLimit(classLevel(character, 'Artificer'))
     ) {
       onNotice?.('Transmute Magic Item', 'The Armorer additional replicated item must remain in the Armor category.');
       return;

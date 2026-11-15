@@ -1,6 +1,7 @@
 import { titleCase } from '../../ui/textCase.js';
 import { ABILITY_ABBREVIATIONS, SPELL_SCHOOL_NAMES, abilityKey } from '../../content/rulesVocabulary.js';
 import { formatCastingTime, formatMaterialComponent, formatSpellComponents, formatSpellDuration, formatSpellRange } from './spellNormalization.js';
+import { isRitualSpell } from './spellTags.js';
 // Single source for a spell's header meta (Casting Time / Range / Components /
 // Duration). Both the builder selection panel and the sheet spell card derive
 // their meta line + meta grid from here, so the format lives in one place.
@@ -42,10 +43,6 @@ function formatTagList(values, labelMap) {
     .map((v) => (labelMap ? (labelMap[String(v).toUpperCase()] || titleCase(v)) : titleCase(v)))
     .filter((label) => label && !seen.has(label) && seen.add(label))
     .join(', ');
-}
-
-function isRitualSpell(spell) {
-  return Boolean(spell?.ritual || spell?.isRitual || spell?.meta?.ritual);
 }
 
 // Label/value pairs for a meta grid (sheet card + builder expanded body).

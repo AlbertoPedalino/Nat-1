@@ -4,9 +4,9 @@ import { TEXT_STYLES } from './textStyles.js';
 import { toggleSx } from './pressable.js';
 import { washImage } from './surfaces.js';
 
-// The label of a compact action button in a button group (the sheet's Rest
-// group, the dice control): small uppercase display face, one line, the buttons of
-// a group sharing its width.
+// The label of a compact action button in a bar of keys (KeyBar: the rests,
+// the dice): small uppercase display face, one line, the keys of a bar sharing
+// its width.
 export const actionButtonTextSx = {
   flex: 1,
   whiteSpace: 'nowrap',

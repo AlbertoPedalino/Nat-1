@@ -66,8 +66,8 @@ test("a top bar's button is a TopBarButton", () => {
 test('a word dropped on a phone goes through phoneHiddenLabelSx', () => {
   assert.deepEqual(sourceFilesMatching(/\bphoneHiddenLabelSx\b/, {
     allow: [
-      'shared/ui/iconOnlyOnPhone.js', 'shared/ui/TopBarButton.jsx', 'pages/charsheet/layout/SheetActions.jsx',
-      'shared/character/dice/RollerVerb.jsx', 'shared/character/dice/DiceControl.jsx',
+      'shared/ui/iconOnlyOnPhone.js', 'shared/ui/TopBarButton.jsx', 'shared/ui/KeyBar.jsx',
+      'shared/character/dice/RollerVerb.jsx',
     ],
   }), []);
 });
