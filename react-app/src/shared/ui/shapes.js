@@ -163,8 +163,8 @@ const COMIC = deepFreeze({
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
   // ('stickers', the game's things as stickers: stickerPaper.js; a style's own
-  // tile, pagePatterns.js: 'stars', 'waves'…; a scene drawn behind every
-  // screen, pageScenes.js: 'graveyard'; 'none'); the
+  // tile, pagePatterns.js: 'stars', 'blueprint'…; a scene drawn behind every
+  // screen, pageScenes.js: 'graveyard', 'megacity', 'tropics'; 'none'); the
   // page's `halftone` dots (`dot` px across, every `step` px; null for none);
   // the `screentone` hatching of a panel's bar (`line` px of every `gap` px,
   // at `angle` degrees; a line of 0 for none); and how strongly a title's
@@ -550,7 +550,7 @@ const PIRATE = deepFreeze({
   paper: { corners: [1.5, 0.5, 2, 0.75] },
   radius: 6,
   surface: {
-    paper: 'waves',
+    paper: 'tropics',
     halftone: { dot: 0.8, step: 6 },
     screentone: { line: 2, gap: 9, angle: 0 },
     rays: 0.8,
@@ -985,7 +985,7 @@ const CYBERPUNK = deepFreeze({
   },
   radius: 2,
   surface: {
-    paper: 'circuit',
+    paper: 'megacity',
     halftone: { dot: 0.7, step: 4 },
     screentone: { line: 1, gap: 3, angle: 0 },
     rays: 0.5,

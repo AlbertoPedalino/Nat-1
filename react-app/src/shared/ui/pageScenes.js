@@ -1,5 +1,6 @@
 // The pages' scenes: an illustration laid behind every screen of a style
-// (shapes.js surface.paper), in place of a texture. Each is a 1-bit picture
+// (shapes.js surface.paper), in place of a texture, laid by the theme
+// (theme.js). Two kinds. An inked scene is a 1-bit picture
 // (white lines on black), kept here as its PNG, recoloured per palette by an
 // SVG filter (sceneSvg): the black the page, the white a shade towards its
 // lettering's colour on a dark palette, towards the ink on a light one, at
@@ -8,9 +9,16 @@
 // what is seen: the graveyard's bell tower to the right, lower, clear of the
 // titles.
 //
-// The graveyard: "Free 1-bit Graveyard Pixel Art Backgrounds" by CraftPix.net
-// (craftpix.net, free asset licence: used in the app, never offered as a file
-// of its own; credited in README.md).
+//
+// A painted scene keeps its own colours: one picture per mode (public/scenes),
+// under a veil of the page's colour (VEIL) so it stays behind the panels;
+// `pixelated` keeps a pixel-art picture's pixels sharp.
+//
+// From CraftPix.net's free assets (craftpix.net, free asset licence: used in
+// the app, never offered as a file of its own; credited in README.md): the
+// graveyard ("Free 1-bit Graveyard Pixel Art Backgrounds"), the megacity
+// ("Free Futuristic City Pixel Art Backgrounds"), the tropics ("Free Beach 2D
+// Game Backgrounds").
 
 const GRAVEYARD_PNG = 'data:image/png;base64,'
   + 'iVBORw0KGgoAAAANSUhEUgAAAkAAAAFEAQAAAADnmLwQAAAWLUlEQVR42u1cXWwc13X+7t2hdujI3JFj1HQqa8euUdhFH+gWqBVH'
@@ -92,10 +100,33 @@ const GRAVEYARD_PNG = 'data:image/png;base64,'
   + 'A6OkRRlRIozhsgDa/wKi1Bqfmp36agAAAABJRU5ErkJggg==';
 
 const SCENES = Object.freeze({
-  graveyard: Object.freeze({ png: GRAVEYARD_PNG, width: 576, height: 324, frame: Object.freeze([-160, -60]) }),
+  graveyard: Object.freeze({ inked: true, png: GRAVEYARD_PNG, width: 576, height: 324, frame: Object.freeze([-160, -60]) }),
+  // Cyberpunk: neon towers by night, a sunlit district by day.
+  megacity: Object.freeze({ pictures: Object.freeze({ dark: 'megacity-night.png', light: 'megacity-day.png' }), pixelated: true }),
+  // Pirate: palms against a sunset at sea, an island and a sail by day.
+  tropics: Object.freeze({ pictures: Object.freeze({ dark: 'tropics-sunset.webp', light: 'tropics-island.webp' }), pixelated: false }),
 });
 
 export const PAGE_SCENE_KINDS = Object.freeze(Object.keys(SCENES));
+
+// The page's colour over a painted scene, as an opacity step (colors.js
+// OPACITY): enough to quiet it behind the panels.
+export const VEIL = 'strong';
+
+const BASE = import.meta.env?.BASE_URL || '/';
+
+// A scene: { inked, pixelated } and, painted, its picture's URL for `mode`.
+export function pageScene(kind, mode) {
+  const scene = SCENES[kind];
+  return {
+    inked: Boolean(scene.inked),
+    pixelated: scene.inked || scene.pixelated,
+    picture: scene.pictures ? `${BASE}scenes/${scene.pictures[mode]}` : null,
+  };
+}
+
+// Every painted scene's files, for what checks they ship.
+export const SCENE_PICTURES = Object.freeze(Object.values(SCENES).flatMap((scene) => Object.values(scene.pictures || {})));
 
 // How far a scene's lines go from the page towards the lettering (dark) or
 // the ink (light).

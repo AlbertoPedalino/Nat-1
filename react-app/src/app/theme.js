@@ -12,7 +12,7 @@ import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
 import { SURFACES, washImage } from '../shared/ui/surfaces.js';
-import { LINE_SHARE, PAGE_SCENE_KINDS, sceneSvg } from '../shared/ui/pageScenes.js';
+import { LINE_SHARE, PAGE_SCENE_KINDS, VEIL, pageScene, sceneSvg } from '../shared/ui/pageScenes.js';
 import { dataPicture } from '../shared/ui/svgPicture.js';
 import { focusRingSx } from '../shared/ui/interactive.js';
 import { INK_EDGE, inkShadow, INK_WIDTH } from '../shared/ui/shadows.js';
@@ -70,13 +70,15 @@ export function buildTheme({ paletteId = BASE_PALETTE_ID, styleId = BASE_STYLE_I
 }
 
 // A style's scene laid behind the whole app: fixed to the window, under
-// every page (which lets it through, SURFACES.page), in the palette's own
-// colours: its lines towards the lettering's colour on a dark palette,
-// towards the ink on a light one (pageScenes.js LINE_SHARE). Nothing for a
-// style without one.
+// every page (which lets it through, SURFACES.page). An inked scene in the
+// palette's own colours: its lines towards the lettering's colour on a dark
+// palette, towards the ink on a light one (pageScenes.js LINE_SHARE); a
+// painted one under a veil of the page's colour (VEIL). Nothing for a style
+// without one.
 function sceneLayerSx(chosen, paper) {
   if (!PAGE_SCENE_KINDS.includes(paper)) return null;
   const { colors, mode } = chosen;
+  const scene = pageScene(paper, mode);
   return {
     '&::before': {
       content: '""',
@@ -84,10 +86,13 @@ function sceneLayerSx(chosen, paper) {
       inset: 0,
       zIndex: -1,
       pointerEvents: 'none',
-      backgroundImage: dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode])),
+      backgroundImage: scene.inked
+        ? dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode]))
+        : `${washImage(colors.page, OPACITY[VEIL])}, url("${scene.picture}")`,
       backgroundSize: 'cover',
       backgroundPosition: 'center bottom',
       backgroundRepeat: 'no-repeat',
+      imageRendering: scene.pixelated ? 'pixelated' : 'auto',
     },
   };
 }

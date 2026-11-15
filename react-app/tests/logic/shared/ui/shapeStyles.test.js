@@ -198,3 +198,9 @@ test("the comic's bar keeps its swallowtail cut", async () => {
   const { ribbonEndsClip } = await import('../../../../src/shared/ui/shapes.js');
   assert.equal(ribbonEndsClip(styleShapes('comic').ribbon.ends, 'n'), 'polygon(0 0, 100% 0, calc(100% - n) 50%, 100% 100%, 0 100%, n 50%)');
 });
+
+test('every painted scene ships its pictures', async () => {
+  const { existsSync } = await import('node:fs');
+  const { SCENE_PICTURES } = await import('../../../../src/shared/ui/pageScenes.js');
+  SCENE_PICTURES.forEach((file) => assert.ok(existsSync(`public/scenes/${file}`), file));
+});
