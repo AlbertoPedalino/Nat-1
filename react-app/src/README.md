@@ -57,9 +57,14 @@ The viewer picks two things apart in the top bar's account menu (the login /
 logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
 `CloudMenu` as `extraItems`, opens the theme panel, `ThemeDialog.jsx`, where
 every style shows as a card drawn in its own theme): the **style**
-(`SHAPE_STYLES` in `shapes.js`: Comic, Sci-fi) and the **mode** (System, Dark,
-Light). Each style draws each mode in a palette of its own (its `palettes`:
-Comic in `dark` and `light`, the parchment; Sci-fi in `neon` and `neonLight`),
+(`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
+War horror) and the **mode** (System, Dark, Light). Each style draws each mode
+in a palette of its own (its `palettes`: comic in `dark` and `light`, the
+parchment; gothic in `dread` and `mist`; sci-fi in `neon` and `neonLight`; war
+in `trench` and `dossier`). A new style is data only: its palettes in
+`colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in
+`gameIcons.js` (a set may spread the comic one and redraw some roles) and,
+with sticker paper, its papers (`PAPER_PICTURES`); no component changes,
 so the palette follows from the two (`paletteForStyle`). The choice lives in
 `app/themeChoice.js` (localStorage `gb:theme`, read by `index.html` before the
 first paint); `app/ThemeChoiceProvider.jsx` builds the theme for it

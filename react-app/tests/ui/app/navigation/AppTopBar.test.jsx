@@ -36,7 +36,7 @@ describe('AppTopBar', () => {
     fireEvent.click(within(screen.getByTestId('account-menu')).getByRole('menuitem', { name: 'Theme' }));
     const panel = screen.getByRole('dialog', { name: 'Theme' });
     expect(within(panel).getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
-    expect(within(panel).getByRole('radio', { name: 'Comic' })).toHaveAttribute('aria-checked', 'true');
+    expect(within(panel).getByRole('radio', { name: 'Comic fantasy' })).toHaveAttribute('aria-checked', 'true');
   });
 
   test('the panel keeps the mode and the style chosen there, and draws the style in its palette', () => {

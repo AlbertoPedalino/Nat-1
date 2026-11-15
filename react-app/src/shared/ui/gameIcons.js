@@ -13,6 +13,8 @@ import {
   GiWhiteTower, GiWolfHead, GiMushroomGills, GiAnvilImpact, GiCompass, GiCampfire, GiBattleGear,
   GiGearHammer, GiLyre, GiHolySymbol, GiOakLeaf, GiTemplarShield, GiCloakDagger, GiFireball, GiPointyHat, GiCharacter,
   GiCrownedSkull, GiHornedSkull, GiDragonHead, GiHuntingHorn, GiCrystalWand, GiSunPriest, GiTotemHead, GiCrossedAxes,
+  GiAmmoBox, GiBattleTank, GiBinoculars, GiBiohazard, GiBleedingHeart, GiBookPile, GiBrain, GiBrodieHelmet, GiBulletImpacts, GiBunker, GiCampCookingPot, GiChemicalDrop, GiCrosshair, GiFiles, GiFlyingFlag, GiFootprint, GiGasMask, GiJerrycan, GiLandMine, GiMachineGun, GiMedal, GiMedicalPack, GiMilitaryFort, GiMoneyStack, GiNightSleep, GiNotebook, GiOpenedFoodCan, GiPaperClip, GiPistolGun, GiPocketWatch, GiPoisonGas, GiRadioTower, GiRadioactive, GiRank3, GiRifle, GiSergeant, GiShamblingZombie, GiSpy, GiStamper, GiStarMedal, GiSwapBag, GiSyringe, GiTargeted, GiTombstone, GiTrenchAssault, GiTrenchBodyArmor, GiTrenchKnife, GiTrenchSpade, GiTruck, GiWolfHowl, GiWoodenDoor,
+  GiBatWing, GiBlackBook, GiBleedingEye, GiBloodySword, GiBoneKnife, GiBurningSkull, GiCandleHolder, GiCandleSkull, GiCastleRuins, GiCoffin, GiCowled, GiCrossedBones, GiCursedStar, GiDrippingKnife, GiGraveFlowers, GiGraveyard, GiHangingSpider, GiMagicPortal, GiOpenChest, GiPentacle, GiPentagramRose, GiRaven, GiRibcage, GiScrollUnfurled, GiScythe, GiSkullCrack, GiSkullCrossedBones, GiSkullSignet, GiSkullStaff, GiVampireDracula, GiWolfTrap,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -448,6 +450,178 @@ const SCIFI_FALLBACK_ATMOSPHERE_ICON = TbCloud;
 
 const SCIFI_FALLBACK_SCENE_GENERATOR_ICON = TbMap;
 
+// The war style's icons: the comic drawings, the game's world re-drawn as a
+// WWII horror where it has a face of its own (a gas mask, a Brodie helmet,
+// a trench knife, a zombie, a tombstone).
+const WAR_GAME_ICONS = Object.freeze({
+  ...COMIC_GAME_ICONS,
+  abilityScores: GiBrain,
+  hitPoints: GiBleedingHeart,
+  armorClass: GiTrenchBodyArmor,
+  inspiration: GiStarMedal,
+  savingThrows: GiGasMask,
+  skills: GiTrenchKnife,
+  senses: GiBinoculars,
+  movement: GiFootprint,
+  proficiencies: GiRank3,
+  defenses: GiBrodieHelmet,
+  conditions: GiBiohazard,
+  reminders: GiPocketWatch,
+  actions: GiTrenchAssault,
+  characterName: GiNotebook,
+  experience: GiMedal,
+  books: GiBookPile,
+  classes: GiSergeant,
+  spells: GiRadioactive,
+  spellSlots: GiChemicalDrop,
+  background: GiFiles,
+  equipment: GiAmmoBox,
+  currency: GiMoneyStack,
+  inventory: GiSwapBag,
+  sheet: GiPaperClip,
+  preview: GiSpy,
+  weaponMasteries: GiRifle,
+  encounter: GiMachineGun,
+  dungeon: GiBunker,
+  quest: GiStamper,
+  monster: GiShamblingZombie,
+  dead: GiTombstone,
+  beast: GiWolfHowl,
+  door: GiWoodenDoor,
+  loot: GiJerrycan,
+  trap: GiLandMine,
+  camp: GiCampCookingPot,
+  shortRest: GiOpenedFoodCan,
+  longRest: GiNightSleep,
+  weapons: GiPistolGun,
+  criticalSuccess: GiTargeted,
+  criticalFailure: GiDeathSkull,
+  damage: GiBulletImpacts,
+  heal: GiMedicalPack,
+  tempHp: GiSyringe,
+  attack: GiCrosshair,
+  magic: GiPoisonGas,
+  statBlock: GiNotebook,
+  travel: GiTruck,
+  mount: GiBattleTank,
+  tier: GiRank3,
+});
+
+
+const WAR_TOOL_ICONS = Object.freeze({
+  ...COMIC_TOOL_ICONS,
+  characters: GiBrodieHelmet,
+  builder: GiTrenchSpade,
+  campaigns: GiFlyingFlag,
+  gmboard: GiRadioTower,
+  dmscreen: GiFiles,
+  vtt: GiMilitaryFort,
+  encounters: GiMachineGun,
+  compendium: GiBookPile,
+});
+
+const WAR_CLASS_ICONS = COMIC_CLASS_ICONS;
+
+const WAR_SEASON_ICONS = COMIC_SEASON_ICONS;
+
+const WAR_WEATHER_ICONS = COMIC_WEATHER_ICONS;
+
+const WAR_TERRAIN_ICONS = COMIC_TERRAIN_ICONS;
+
+const WAR_POPULATION_ICONS = COMIC_POPULATION_ICONS;
+
+const WAR_ATMOSPHERE_ICONS = COMIC_ATMOSPHERE_ICONS;
+
+const WAR_SCENE_GENERATOR_ICONS = COMIC_SCENE_GENERATOR_ICONS;
+
+const WAR_TABLE_ICONS = COMIC_TABLE_ICONS;
+
+const WAR_FALLBACK_CLASS_ICON = COMIC_FALLBACK_CLASS_ICON;
+
+const WAR_FALLBACK_WEATHER_ICON = COMIC_FALLBACK_WEATHER_ICON;
+
+const WAR_FALLBACK_ATMOSPHERE_ICON = COMIC_FALLBACK_ATMOSPHERE_ICON;
+
+const WAR_FALLBACK_SCENE_GENERATOR_ICON = COMIC_FALLBACK_SCENE_GENERATOR_ICON;
+
+// The gothic style's icons: the comic drawings, the game's world haunted
+// where it has a face of its own (a vampire, a coffin, a bat, a candle skull).
+const GOTHIC_GAME_ICONS = Object.freeze({
+  ...COMIC_GAME_ICONS,
+  hitPoints: GiBleedingHeart,
+  armorClass: GiRibcage,
+  inspiration: GiCandleSkull,
+  savingThrows: GiCrossedBones,
+  senses: GiBleedingEye,
+  reminders: GiCandleHolder,
+  conditions: GiHangingSpider,
+  actions: GiBloodySword,
+  spells: GiPentacle,
+  spellSlots: GiPentagramRose,
+  species: GiVampireDracula,
+  background: GiScrollUnfurled,
+  sheet: GiBlackBook,
+  preview: GiSkullCrack,
+  subclass: GiCursedStar,
+  experience: GiRaven,
+  classes: GiSkullCrossedBones,
+  monster: GiBatWing,
+  dead: GiCoffin,
+  beast: GiWolfHowl,
+  criticalFailure: GiDeathSkull,
+  criticalSuccess: GiBurningSkull,
+  magic: GiMagicPortal,
+  trap: GiWolfTrap,
+  dungeon: GiCastleRuins,
+  quest: GiScythe,
+  loot: GiOpenChest,
+  door: GiWoodenDoor,
+  longRest: GiNightSleep,
+  encounter: GiDrippingKnife,
+  weapons: GiBoneKnife,
+  tier: GiSkullSignet,
+  books: GiBookPile,
+  level: GiSkullStaff,
+  camp: GiGraveyard,
+});
+
+
+const GOTHIC_TOOL_ICONS = Object.freeze({
+  ...COMIC_TOOL_ICONS,
+  characters: GiCowled,
+  builder: GiBoneKnife,
+  campaigns: GiGraveFlowers,
+  gmboard: GiLantern,
+  dmscreen: GiBlackBook,
+  vtt: GiCastleRuins,
+  encounters: GiDrippingKnife,
+  compendium: GiSpellBook,
+});
+
+const GOTHIC_CLASS_ICONS = COMIC_CLASS_ICONS;
+
+const GOTHIC_SEASON_ICONS = COMIC_SEASON_ICONS;
+
+const GOTHIC_WEATHER_ICONS = COMIC_WEATHER_ICONS;
+
+const GOTHIC_TERRAIN_ICONS = COMIC_TERRAIN_ICONS;
+
+const GOTHIC_POPULATION_ICONS = COMIC_POPULATION_ICONS;
+
+const GOTHIC_ATMOSPHERE_ICONS = COMIC_ATMOSPHERE_ICONS;
+
+const GOTHIC_SCENE_GENERATOR_ICONS = COMIC_SCENE_GENERATOR_ICONS;
+
+const GOTHIC_TABLE_ICONS = COMIC_TABLE_ICONS;
+
+const GOTHIC_FALLBACK_CLASS_ICON = COMIC_FALLBACK_CLASS_ICON;
+
+const GOTHIC_FALLBACK_WEATHER_ICON = COMIC_FALLBACK_WEATHER_ICON;
+
+const GOTHIC_FALLBACK_ATMOSPHERE_ICON = COMIC_FALLBACK_ATMOSPHERE_ICON;
+
+const GOTHIC_FALLBACK_SCENE_GENERATOR_ICON = COMIC_FALLBACK_SCENE_GENERATOR_ICON;
+
 // A role drawn in the chosen style's set: a component that takes the drawing
 // the style gives it (`icons`: { styleId: component }, the comic one when a
 // style has none), so a panel's badge or a roll button changes with the
@@ -470,29 +644,29 @@ function styledIconMap(sets) {
 
 // Every style's set of a kind of role, for what checks they are whole.
 export const ICON_SETS = Object.freeze({
-  GAME_ICONS: Object.freeze({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS }),
-  TOOL_ICONS: Object.freeze({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS }),
-  CLASS_ICONS: Object.freeze({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS }),
-  SEASON_ICONS: Object.freeze({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS }),
-  WEATHER_ICONS: Object.freeze({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS }),
-  TERRAIN_ICONS: Object.freeze({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS }),
-  POPULATION_ICONS: Object.freeze({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS }),
-  ATMOSPHERE_ICONS: Object.freeze({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS }),
-  SCENE_GENERATOR_ICONS: Object.freeze({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS }),
-  TABLE_ICONS: Object.freeze({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS }),
+  GAME_ICONS: Object.freeze({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS, war: WAR_GAME_ICONS, gothic: GOTHIC_GAME_ICONS }),
+  TOOL_ICONS: Object.freeze({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS, war: WAR_TOOL_ICONS, gothic: GOTHIC_TOOL_ICONS }),
+  CLASS_ICONS: Object.freeze({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS, war: WAR_CLASS_ICONS, gothic: GOTHIC_CLASS_ICONS }),
+  SEASON_ICONS: Object.freeze({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS, war: WAR_SEASON_ICONS, gothic: GOTHIC_SEASON_ICONS }),
+  WEATHER_ICONS: Object.freeze({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS, war: WAR_WEATHER_ICONS, gothic: GOTHIC_WEATHER_ICONS }),
+  TERRAIN_ICONS: Object.freeze({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS, war: WAR_TERRAIN_ICONS, gothic: GOTHIC_TERRAIN_ICONS }),
+  POPULATION_ICONS: Object.freeze({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS, war: WAR_POPULATION_ICONS, gothic: GOTHIC_POPULATION_ICONS }),
+  ATMOSPHERE_ICONS: Object.freeze({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS, war: WAR_ATMOSPHERE_ICONS, gothic: GOTHIC_ATMOSPHERE_ICONS }),
+  SCENE_GENERATOR_ICONS: Object.freeze({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS, war: WAR_SCENE_GENERATOR_ICONS, gothic: GOTHIC_SCENE_GENERATOR_ICONS }),
+  TABLE_ICONS: Object.freeze({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS, war: WAR_TABLE_ICONS, gothic: GOTHIC_TABLE_ICONS }),
 });
 
-export const GAME_ICONS = styledIconMap({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS });
-export const TOOL_ICONS = styledIconMap({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS });
-export const CLASS_ICONS = styledIconMap({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS });
-export const SEASON_ICONS = styledIconMap({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS });
-export const WEATHER_ICONS = styledIconMap({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS });
-export const TERRAIN_ICONS = styledIconMap({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS });
-export const POPULATION_ICONS = styledIconMap({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS });
-export const ATMOSPHERE_ICONS = styledIconMap({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS });
-export const SCENE_GENERATOR_ICONS = styledIconMap({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS });
-export const TABLE_ICONS = styledIconMap({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS });
-export const FALLBACK_CLASS_ICON = styledIcon({ comic: COMIC_FALLBACK_CLASS_ICON, scifi: SCIFI_FALLBACK_CLASS_ICON });
-export const FALLBACK_WEATHER_ICON = styledIcon({ comic: COMIC_FALLBACK_WEATHER_ICON, scifi: SCIFI_FALLBACK_WEATHER_ICON });
-export const FALLBACK_ATMOSPHERE_ICON = styledIcon({ comic: COMIC_FALLBACK_ATMOSPHERE_ICON, scifi: SCIFI_FALLBACK_ATMOSPHERE_ICON });
-export const FALLBACK_SCENE_GENERATOR_ICON = styledIcon({ comic: COMIC_FALLBACK_SCENE_GENERATOR_ICON, scifi: SCIFI_FALLBACK_SCENE_GENERATOR_ICON });
+export const GAME_ICONS = styledIconMap({ comic: COMIC_GAME_ICONS, scifi: SCIFI_GAME_ICONS, war: WAR_GAME_ICONS, gothic: GOTHIC_GAME_ICONS });
+export const TOOL_ICONS = styledIconMap({ comic: COMIC_TOOL_ICONS, scifi: SCIFI_TOOL_ICONS, war: WAR_TOOL_ICONS, gothic: GOTHIC_TOOL_ICONS });
+export const CLASS_ICONS = styledIconMap({ comic: COMIC_CLASS_ICONS, scifi: SCIFI_CLASS_ICONS, war: WAR_CLASS_ICONS, gothic: GOTHIC_CLASS_ICONS });
+export const SEASON_ICONS = styledIconMap({ comic: COMIC_SEASON_ICONS, scifi: SCIFI_SEASON_ICONS, war: WAR_SEASON_ICONS, gothic: GOTHIC_SEASON_ICONS });
+export const WEATHER_ICONS = styledIconMap({ comic: COMIC_WEATHER_ICONS, scifi: SCIFI_WEATHER_ICONS, war: WAR_WEATHER_ICONS, gothic: GOTHIC_WEATHER_ICONS });
+export const TERRAIN_ICONS = styledIconMap({ comic: COMIC_TERRAIN_ICONS, scifi: SCIFI_TERRAIN_ICONS, war: WAR_TERRAIN_ICONS, gothic: GOTHIC_TERRAIN_ICONS });
+export const POPULATION_ICONS = styledIconMap({ comic: COMIC_POPULATION_ICONS, scifi: SCIFI_POPULATION_ICONS, war: WAR_POPULATION_ICONS, gothic: GOTHIC_POPULATION_ICONS });
+export const ATMOSPHERE_ICONS = styledIconMap({ comic: COMIC_ATMOSPHERE_ICONS, scifi: SCIFI_ATMOSPHERE_ICONS, war: WAR_ATMOSPHERE_ICONS, gothic: GOTHIC_ATMOSPHERE_ICONS });
+export const SCENE_GENERATOR_ICONS = styledIconMap({ comic: COMIC_SCENE_GENERATOR_ICONS, scifi: SCIFI_SCENE_GENERATOR_ICONS, war: WAR_SCENE_GENERATOR_ICONS, gothic: GOTHIC_SCENE_GENERATOR_ICONS });
+export const TABLE_ICONS = styledIconMap({ comic: COMIC_TABLE_ICONS, scifi: SCIFI_TABLE_ICONS, war: WAR_TABLE_ICONS, gothic: GOTHIC_TABLE_ICONS });
+export const FALLBACK_CLASS_ICON = styledIcon({ comic: COMIC_FALLBACK_CLASS_ICON, scifi: SCIFI_FALLBACK_CLASS_ICON, war: WAR_FALLBACK_CLASS_ICON, gothic: GOTHIC_FALLBACK_CLASS_ICON });
+export const FALLBACK_WEATHER_ICON = styledIcon({ comic: COMIC_FALLBACK_WEATHER_ICON, scifi: SCIFI_FALLBACK_WEATHER_ICON, war: WAR_FALLBACK_WEATHER_ICON, gothic: GOTHIC_FALLBACK_WEATHER_ICON });
+export const FALLBACK_ATMOSPHERE_ICON = styledIcon({ comic: COMIC_FALLBACK_ATMOSPHERE_ICON, scifi: SCIFI_FALLBACK_ATMOSPHERE_ICON, war: WAR_FALLBACK_ATMOSPHERE_ICON, gothic: GOTHIC_FALLBACK_ATMOSPHERE_ICON });
+export const FALLBACK_SCENE_GENERATOR_ICON = styledIcon({ comic: COMIC_FALLBACK_SCENE_GENERATOR_ICON, scifi: SCIFI_FALLBACK_SCENE_GENERATOR_ICON, war: WAR_FALLBACK_SCENE_GENERATOR_ICON, gothic: GOTHIC_FALLBACK_SCENE_GENERATOR_ICON });

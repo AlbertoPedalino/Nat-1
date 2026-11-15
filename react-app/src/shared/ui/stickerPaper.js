@@ -20,6 +20,8 @@ import { TILE } from './stickerLayout.js';
 export const PAPER_PICTURES = Object.freeze({
   dark: 'sticker-paper',
   light: 'sticker-paper-light',
+  dread: 'sticker-paper-dread',
+  mist: 'sticker-paper-mist',
 });
 
 const BASE = import.meta.env?.BASE_URL || '/';

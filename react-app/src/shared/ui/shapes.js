@@ -183,12 +183,96 @@ const SCIFI = deepFreeze({
   motion: { pace: 0.7, hop: 0 },
 });
 
+// The gothic cut: the comic one in a haunted land. Deeper, tattered
+// swallowtails, a pointed-arch crest, seals like dripped wax, arched tabs, a
+// cross for the ornament, torn paper; the comic ink, stickers and gems kept,
+// moving a little slower.
+const GOTHIC = deepFreeze({
+  ...COMIC,
+  ribbon: {
+    panel: { notch: 14, pad: 22 },
+    tile: { notch: 5, pad: 6 },
+  },
+  seal: { radius: '42% 58% 50% 50% / 60% 44% 56% 40%' },
+  crest: {
+    clip: 'polygon(0 18%, 18% 4%, 50% 0, 82% 4%, 100% 18%, 100% 80%, 50% 100%, 0 80%)',
+    edge: 3,
+    foot: '22%',
+  },
+  bookmarkTab: { radius: '10px 10px 0 0', rise: 4, gap: 4 },
+  ornament: { path: 'M5 0 L7 0 L7 3 L10 3 L10 5 L7 5 L7 12 L5 12 L5 5 L2 5 L2 3 L5 3 Z' },
+  paper: { corners: [0.3, 2, 0.5, 1.5] },
+  radius: 8,
+  surface: {
+    paper: 'stickers',
+    halftone: { dot: 1, step: 7 },
+    screentone: { line: 2, gap: 6, angle: -45 },
+    rays: 0.8,
+  },
+  motion: { pace: 1.15, hop: 0.8 },
+});
+
+// The war cut: a WWII dossier gone wrong. Straight labels like a crate's
+// stencil, round rubber-stamp seals, a rank chevron for the crest, folder
+// tabs, a military star, paper grain over the page and hatching over the
+// bars, heavy ink and slow, wary moves.
+const WAR = deepFreeze({
+  ribbon: {
+    panel: { notch: 0, pad: 12 },
+    tile: { notch: 0, pad: 4 },
+  },
+  seal: { radius: '50%' },
+  crest: {
+    clip: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)',
+    edge: 2,
+    foot: '24%',
+  },
+  bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
+  gemCuts: {
+    counter: { sides: 8, outer: [50, 46, 42, 42], inner: [47, 43, 20, 20], shadowDrop: 4 },
+    training: { sides: 4, outer: [50, 46, 38, 46], inner: [47, 42, 17, 21], shadowDrop: 4 },
+  },
+  meterSegments: { bar: 10, piece: 5, smooth: 0 },
+  bursts: {
+    kapow: {
+      width: 125,
+      squash: 0.82,
+      spikes: [[-90, 60, 6], [-58, 44, -5], [-30, 64, 8], [-6, 40, -2], [20, 58, 7], [44, 46, -6], [70, 66, 4], [96, 42, -3], [120, 60, 9], [146, 48, -7], [170, 62, 3], [196, 40, -4], [222, 58, 6], [248, 46, -5]],
+      valleys: [30, 34, 28, 33, 30, 35, 29, 33, 31, 28, 34, 30, 32, 29],
+    },
+    crash: {
+      arms: [[-80, 50], [-15, 38], [35, 52], [100, 36], [160, 50], [230, 40]],
+      kinks: [[0.6, 14], [0.8, 20]],
+      middle: 30,
+    },
+  },
+  switch: { width: 46, height: 26, thumb: 16, inset: 5 },
+  sliderThumb: { size: 18 },
+  ornament: { path: 'M6 0 L7.4 4.1 L11.7 4.1 L8.2 6.7 L9.5 10.8 L6 8.3 L2.5 10.8 L3.8 6.7 L0.3 4.1 L4.6 4.1 Z' },
+  bookmarkMark: { width: 4, inset: 3, radius: '0' },
+  paper: { corners: [0, 0.4, 0, 0.8] },
+  focusRing: { width: 3, gap: 2 },
+  choiceMark: { size: 20 },
+  dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
+  ink: { edge: 2, drop: 1, depth: 1.2, glow: 0 },
+  radius: 2,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 0.8, step: 4 },
+    screentone: { line: 1, gap: 5, angle: 45 },
+    rays: 0.5,
+  },
+  motion: { pace: 1.2, hop: 0.4 },
+});
+
 // The looks' styles the viewer can choose from (the "Style" of the account
 // menu's theme panel), each with the palette it is drawn in for each mode
 // (`palettes`: dark and light, ids of colors.js PALETTES).
 export const SHAPE_STYLES = Object.freeze({
-  comic: Object.freeze({ id: 'comic', label: 'Comic', palettes: Object.freeze({ dark: 'dark', light: 'light' }), shapes: COMIC }),
+  comic: Object.freeze({ id: 'comic', label: 'Comic fantasy', palettes: Object.freeze({ dark: 'dark', light: 'light' }), shapes: COMIC }),
   scifi: Object.freeze({ id: 'scifi', label: 'Sci-fi', palettes: Object.freeze({ dark: 'neon', light: 'neonLight' }), shapes: SCIFI }),
+  gothic: Object.freeze({ id: 'gothic', label: 'Comic gothic', palettes: Object.freeze({ dark: 'dread', light: 'mist' }), shapes: GOTHIC }),
+  war: Object.freeze({ id: 'war', label: 'War horror', palettes: Object.freeze({ dark: 'trench', light: 'dossier' }), shapes: WAR }),
 });
 
 export const BASE_STYLE_ID = 'comic';

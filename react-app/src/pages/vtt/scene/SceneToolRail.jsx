@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 import { MousePointer2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { SURFACES, tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
+import { SURFACES } from '../../../shared/ui/surfaces.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { OPACITY } from '../../../shared/ui/colors.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
-import { BARE_BUTTON_SX } from '../../../shared/ui/interactive.js';
 import MapFloatingPanel from '../map/MapFloatingPanel.jsx';
+import { toggleSx } from '../../../shared/ui/pressable.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -46,7 +45,7 @@ export default function SceneToolRail({
             onCursor?.();
             setOpenId(cursorGroup ? 'cursor' : null);
           }}
-          sx={{ ...railButtonSx, ...(activeId === 'cursor' ? railButtonActiveSx : null) }}
+          sx={railKeySx(activeId === 'cursor')}
         >
           <MousePointer2 size={ICON_SIZES.md} />
           <Typography component="span" sx={railLabelSx}>Cursor</Typography>
@@ -66,7 +65,7 @@ export default function SceneToolRail({
                 group.onActivate?.();
                 setOpenId(panelOpen ? null : group.id);
               }}
-              sx={{ ...railButtonSx, ...(active ? railButtonActiveSx : null) }}
+              sx={railKeySx(active)}
             >
               <Icon size={ICON_SIZES.md} />
               <Typography component="span" sx={railLabelSx}>{group.label}</Typography>
@@ -105,27 +104,24 @@ const railSx = {
   overflowY: 'auto',
 };
 
-const railButtonSx = {
-  ...BARE_BUTTON_SX,
-  width: 62,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  textAlign: 'center',
-  gap: 0.25,
-  px: 0.5,
-  py: 0.75,
-  borderRadius: 1,
-  color: VTT_COLORS.textSecondary,
-  // Washed over the rail's own surface, so the button stays solid.
-  '&:hover': { color: VTT_COLORS.accent, ...tintedSurfaceSx(VTT_COLORS.accent, { amount: OPACITY.soft, base: VTT_COLORS.surface }) },
-};
-
-const railButtonActiveSx = {
-  color: VTT_COLORS.surface,
-  bgcolor: VTT_COLORS.accent,
-  '&:hover': { color: VTT_COLORS.surface, bgcolor: VTT_COLORS.accent },
-};
+// A tool's key: the app's raised toggle (toggleSx), lit in the map's accent
+// while its tool is on, its icon over its name.
+function railKeySx(active) {
+  return {
+    ...toggleSx(active, VTT_COLORS.accent),
+    width: 62,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    gap: 0.25,
+    px: 0.5,
+    py: 0.75,
+    borderRadius: 1,
+    cursor: 'pointer',
+    font: 'inherit',
+  };
+}
 
 const railLabelSx = {
   ...TEXT_STYLES.title,

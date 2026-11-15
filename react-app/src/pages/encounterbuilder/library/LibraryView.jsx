@@ -25,6 +25,7 @@ import Caption from '../../../shared/ui/Caption.jsx';
 import CountSeal from '../../../shared/ui/CountSeal.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import ClearButton from '../../../shared/ui/ClearButton.jsx';
+import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 
 // A saved encounter is found by its name, its quest or a creature in it, and
 // filtered by quest.
@@ -156,10 +157,10 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
         {fight ? (
           <Button
             size="small"
-            variant="contained"
-            color="secondary"
+            variant="outlined"
             startIcon={<RotateCcw size={ICON_SIZES.sm} />}
             onClick={() => dispatch({ type: 'resumeFight', entry: fight, monsters })}
+            sx={RESUME_SX}
           >
             Resume
           </Button>
@@ -218,3 +219,6 @@ function QuestAssignment({ encounter, options, dispatch, notify }) {
   );
 }
 
+// A fight to take up again: the app's one-colour action button, in the green
+// that marks what is still running (as it was filled before).
+const RESUME_SX = actionButtonToneSx(UI_COLORS.secondaryText);

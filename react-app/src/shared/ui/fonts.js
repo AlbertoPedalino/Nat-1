@@ -45,6 +45,32 @@ const SCIFI_FONTS = Object.freeze({
   mono: '"Share Tech Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
+// The gothic faces: a haunted chronicle. Pirata One for the signs, Creepster
+// dripping for the voice, Cinzel for labels, IM Fell for the old prose and
+// the names, the comic's Alegreya kept for the interface's text.
+const GOTHIC_FONTS = Object.freeze({
+  display: '"Cinzel", Georgia, serif',
+  prose: '"IM Fell English", Georgia, serif',
+  cardName: '"IM Fell English SC", "IM Fell English", Georgia, serif',
+  body: '"Alegreya", Georgia, serif',
+  shout: '"Creepster", "Pirata One", Georgia, serif',
+  heading: '"Pirata One", "IM Fell English SC", Georgia, serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The war faces: a stencilled crate and a typed report. Black Ops One for
+// the signs, Stardos Stencil for the voice, Oswald for labels and names,
+// PT Serif for the text, a typewriter for the mono.
+const WAR_FONTS = Object.freeze({
+  display: '"Oswald", "Arial Narrow", sans-serif',
+  prose: '"PT Serif", Georgia, serif',
+  cardName: '"Oswald", "Arial Narrow", sans-serif',
+  body: '"PT Serif", Georgia, serif',
+  shout: '"Stardos Stencil", "Black Ops One", "Arial Narrow", sans-serif',
+  heading: '"Black Ops One", "Stardos Stencil", "Arial Narrow", sans-serif',
+  mono: '"Special Elite", "Courier New", monospace',
+});
+
 // Every style's faces: `stacks` (the same roles as COMIC_FONTS) and the
 // `stylesheet` that loads them. The base style's is linked by index.html, so
 // it is there at the first paint; another style's is linked when it is chosen.
@@ -52,6 +78,14 @@ export const FONT_STYLES = Object.freeze({
   comic: Object.freeze({
     stacks: COMIC_FONTS,
     stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Alegreya+SC:wght@700&family=Germania+One&family=Grenze+Gotisch:wght@700;900&family=Rubik:wght@400;500;600;700;800&display=swap',
+  }),
+  gothic: Object.freeze({
+    stacks: GOTHIC_FONTS,
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Cinzel:wght@500;700&family=Creepster&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Pirata+One&display=swap',
+  }),
+  war: Object.freeze({
+    stacks: WAR_FONTS,
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Stardos+Stencil:wght@400;700&display=swap',
   }),
   scifi: Object.freeze({
     stacks: SCIFI_FONTS,
