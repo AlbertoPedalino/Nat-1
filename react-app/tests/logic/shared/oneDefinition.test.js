@@ -1257,3 +1257,13 @@ test('a spendable counter is a GemPip', () => {
   assert.deepEqual(sourceFilesMatching(/GEM_TONES\s*=/, { allow: ['shared/ui/entityColors.js'] }), []);
   assert.deepEqual(sourceFilesMatching(/GEM_SIZES\s*=/, { allow: ['shared/ui/GemPip.jsx'] }), []);
 });
+
+// A file shipped in public/ is addressed through publicAsset
+// (shared/publicAsset.js), never by reading Vite's BASE_URL again: the router's
+// basename (main.jsx) and a route's address (characterRoutes.js) are routes,
+// not files.
+test('public files are addressed through publicAsset', () => {
+  assert.deepEqual(sourceFilesMatching(/\bBASE_URL\b/, {
+    allow: ['shared/publicAsset.js', 'main.jsx', 'shared/character/profile/characterRoutes.js'],
+  }), []);
+});

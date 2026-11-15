@@ -1,11 +1,12 @@
 import { Box } from '@mui/material';
 import { BUSY_MOTION, motionTime } from './motion.js';
+import { publicAsset } from '../publicAsset.js';
 
 // The app's own icon (public/favicon.svg, the logo's d20) turning while
 // something is on the way or being done (a list loading, a save, an upload):
 // the one "working" mark of the app, in place of MUI's spinning ring. The very
 // file of the icon, so a new logo is the new working mark too. `size` in px.
-const APP_ICON = `${import.meta.env?.BASE_URL || '/'}favicon.svg`;
+const APP_ICON = publicAsset('favicon.svg');
 
 // How large it turns: beside the words of a loading line, alone in the space
 // a panel or a page would take. Inside a button it takes the button's icon

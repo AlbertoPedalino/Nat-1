@@ -6,7 +6,7 @@ import { LETTERING_LINE, letteringStroke, UI_COLORS, uiAlpha, OPACITY } from './
 // edge), drop its solid shadows further or not at all (`drop`), and float its
 // surfaces higher or lower (`depth`). In px, as lengths of the comic cut.
 export const INK_WIDTH = 'var(--gb-ink-edge)';
-export const inkLine = (px) => `calc(${px}px * var(--gb-ink-line))`;
+const inkLine = (px) => `calc(${px}px * var(--gb-ink-line))`;
 const drop = (px) => `calc(${px}px * var(--gb-ink-drop))`;
 const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
 // How far a solid shadow blurs out: none in a drawn style, a lit line's halo

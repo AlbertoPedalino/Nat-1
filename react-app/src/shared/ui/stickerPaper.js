@@ -1,4 +1,5 @@
 import { BASE_PALETTE_ID } from './colors.js';
+import { publicAsset } from '../publicAsset.js';
 import { TILE } from './stickerLayout.js';
 
 // The app's paper: the game's things (a d20, a sword, a potion, a key …)
@@ -22,11 +23,10 @@ export const PAPER_PICTURES = Object.freeze({
   light: 'sticker-paper-light',
 });
 
-const BASE = import.meta.env?.BASE_URL || '/';
 
 export const STICKER_PAPER_SIZE = `${TILE}px ${TILE}px`;
 
 export function stickerPaperImage(paletteId = BASE_PALETTE_ID) {
-  const picture = `${BASE}paper/${PAPER_PICTURES[paletteId] || PAPER_PICTURES[BASE_PALETTE_ID]}`;
+  const picture = publicAsset(`paper/${PAPER_PICTURES[paletteId] || PAPER_PICTURES[BASE_PALETTE_ID]}`);
   return `image-set(url("${picture}.webp") 1x, url("${picture}@2x.webp") 2x)`;
 }

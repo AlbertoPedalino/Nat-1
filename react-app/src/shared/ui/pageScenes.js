@@ -1,3 +1,6 @@
+import { hexChannels } from './colors.js';
+import { publicAsset } from '../publicAsset.js';
+
 // The pages' scenes: an illustration laid behind every screen of a style
 // (shapes.js surface.paper), in place of a texture, laid by the theme
 // (theme.js). Two kinds. An inked scene is a 1-bit picture
@@ -8,7 +11,6 @@
 // side by side without a seam, so its `frame` (x, y in its own pixels) moves
 // what is seen: the graveyard's bell tower to the right, lower, clear of the
 // titles.
-//
 //
 // A painted scene keeps its own colours: one picture per mode (public/scenes),
 // under a veil of the page's colour (VEIL) so it stays behind the panels;
@@ -136,15 +138,13 @@ export const PAGE_SCENE_KINDS = Object.freeze(Object.keys(SCENES));
 // OPACITY): enough to quiet it behind the panels.
 export const VEIL = 'strong';
 
-const BASE = import.meta.env?.BASE_URL || '/';
-
 // A scene: { inked, pixelated } and, painted, its picture's URL for `mode`.
 export function pageScene(kind, mode) {
   const scene = SCENES[kind];
   return {
     inked: Boolean(scene.inked),
     pixelated: scene.inked || scene.pixelated,
-    picture: scene.pictures ? `${BASE}scenes/${scene.pictures[mode]}` : null,
+    picture: scene.pictures ? publicAsset(`scenes/${scene.pictures[mode]}`) : null,
   };
 }
 
@@ -155,7 +155,7 @@ export const SCENE_PICTURES = Object.freeze(Object.values(SCENES).flatMap((scene
 // the ink (light).
 export const LINE_SHARE = Object.freeze({ dark: 0.38, light: 0.32 });
 
-const channels = (hex) => [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16) / 255);
+const channels = (hex) => hexChannels(hex).map((value) => value / 255);
 
 // A scene drawn in two hexes: `ground` for its black, its white `share` of the
 // way from `ground` to `towards`, its pixels kept sharp however large it is

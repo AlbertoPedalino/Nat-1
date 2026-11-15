@@ -1602,7 +1602,8 @@ export function uiDarken(color, amount) {
   return uiMix(color, UI_COLORS.black, amount);
 }
 
-function hexChannels(hex) {
+// A hex's red, green and blue, 0-255.
+export function hexChannels(hex) {
   const value = String(hex).replace('#', '');
   return [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16));
 }
