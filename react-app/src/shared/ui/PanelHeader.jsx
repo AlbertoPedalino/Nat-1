@@ -5,8 +5,9 @@ import { TEXT_STYLES } from './textStyles.js';
 import { SURFACES } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { INK_SOLID } from './shadows.js';
-import { RIBBON, SEAL_RADIUS, ribbonClip } from './shapes.js';
-import { svgPicture } from './svgPicture.js';
+import { RIBBON, SEAL_RADIUS } from './shapes.js';
+import { svgStylePicture } from './svgPicture.js';
+import { barEndInkSvg, flourishSvg } from './panelOrnaments.js';
 import { useRootStyle } from './liveStyle.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
@@ -29,18 +30,19 @@ export const panelBarSx = {
   borderColor: UI_COLORS.edge,
 };
 
-// A panel's bar cut as a ribbon (RIBBON, shapes.js): each end notched in a
-// swallowtail `notch` deep (the style's, a CSS length), the notch inked like
-// every edge, all inside the bar's own box (an ornament poking out of a panel
-// is cut by its frame and grows scrollbars). Spread after the bar's padding:
-// it widens the ends (`pad`) to clear the notch.
+// A panel's bar cut as the style cuts it (RIBBON, shapes.js ribbon.ends): the
+// comic's swallowtail, a spear point, a scroll's roll, a pixel stair, `notch`
+// deep (the style's, a CSS length), each cut end inked like every edge, all
+// inside the bar's own box (an ornament poking out of a panel is cut by its
+// frame and grows scrollbars). Spread after the bar's padding: it widens the
+// ends (`pad`) to clear the notch.
+const END_INK = Object.freeze({
+  left: svgStylePicture('panel-end-left', (shapes) => barEndInkSvg(shapes.ribbon.ends, 'left')),
+  right: svgStylePicture('panel-end-right', (shapes) => barEndInkSvg(shapes.ribbon.ends, 'right')),
+});
 function notchInk(side, notch) {
   // Drawn in a box of its own stretched over the notch (no aspect kept, the
   // ink never scaled), so one picture fits every depth of notch.
-  const points = side === 'left' ? '0,0 10,50 0,100' : '10,0 0,50 10,100';
-  // Twice the ink edge: the clip cuts the outer half of the line away.
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 100" preserveAspectRatio="none">'
-    + `<polyline points="${points}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="4" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/></svg>`;
   return {
     content: '""',
     position: 'absolute',
@@ -49,20 +51,25 @@ function notchInk(side, notch) {
     // Down over the bar's bottom border, as the clip is.
     bottom: -2,
     width: notch,
-    backgroundImage: svgPicture(svg),
+    backgroundImage: END_INK[side],
     backgroundSize: '100% 100%',
     pointerEvents: 'none',
   };
 }
-function ribbonSx({ notch, pad }) {
+function ribbonSx({ notch, pad, clip }) {
   return {
     position: 'relative',
     px: pad,
-    clipPath: ribbonClip(notch),
+    clipPath: clip,
     '&::before': notchInk('left', notch),
     '&::after': notchInk('right', notch),
   };
 }
+
+// A title's flourish, as the style draws it (shapes.js panel.flourish): a
+// line of stars, a vine, a tentacle at the bar's right end, a rivet at each
+// end; at no size where the style has none.
+const FLOURISH = svgStylePicture('panel-flourish', (shapes) => flourishSvg(shapes.panel.flourish.kind));
 
 const PANEL_RIBBON_SX = ribbonSx(RIBBON.panel);
 const TILE_RIBBON_SX = ribbonSx(RIBBON.tile);
@@ -80,9 +87,14 @@ export function panelTitleBarSx(tone = UI_COLORS.accent, { tile = false } = {}) 
     // The rule under the bar: the ink, or the panel's tone under a bar that
     // is only a rule.
     borderColor: `var(--gb-panel-bar-rule, ${tone})`,
-    backgroundImage: panelScreentone(tone),
-    // The screentone, or none (shapes.js panel.hatch).
-    backgroundSize: 'var(--gb-panel-bar-hatch)',
+    // The flourish (twice: at one end or at each) over the screentone, or
+    // none (shapes.js panel.hatch). A tile's narrow bar has no room for one.
+    ...(tile ? { backgroundImage: panelScreentone(tone), backgroundSize: 'var(--gb-panel-bar-hatch)' } : {
+      backgroundImage: `${FLOURISH}, ${FLOURISH}, ${panelScreentone(tone)}`,
+      backgroundSize: 'var(--gb-panel-flourish-size), var(--gb-panel-flourish-size-2), var(--gb-panel-bar-hatch)',
+      backgroundPosition: 'var(--gb-panel-flourish-at), var(--gb-panel-flourish-at-2), 0 0',
+      backgroundRepeat: 'no-repeat, no-repeat, repeat',
+    }),
   };
 }
 

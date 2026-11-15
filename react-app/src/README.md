@@ -129,9 +129,16 @@ solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
 figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels
 (`panel`: the title `bar` a filled strip or only a rule in the panel's tone,
 its `hatch`, a `frame` solid or double `frameWidth` wide, the icon on a seal
-or `bare`, a soft `float` shadow), written as whole values by
-`surfaceVariables` (`--gb-panel-*`), the comic's own where a style builds as
-the comic does, so its panels stay exactly as they were. Every length in
+or `bare`, a soft `float` shadow, the title's `flourish`: a line of stars,
+rivets, a vine, a tentacle, drawn in `panelOrnaments.js`), written as whole
+values by `surfaceVariables` (`--gb-panel-*`), the comic's own where a style
+builds as the comic does, so its panels stay exactly as they were. Each bar's
+ends are cut its own way (`ribbon.ends`: the comic's swallowtail, a spear
+point, a folder tab, a scroll, a pixel stair; `ribbonEndsClip`, inked by
+`barEndInkSvg`), and each style cuts its own ability crest (`crest`, `side`
+keeping the figures inside). Each style lays its own page (`surface.paper`:
+the comic's sticker paper, or a tile from `pagePatterns.js`: tracery, camo,
+circuit, stars, waves, blueprint, stone, leaves, void, pixels). Every length in
 `shadows.js` is the comic one times the style's share, and an ink line is
 never written by hand (guarded): `INK_EDGE` (the line in ink), `INK_SOLID`
 (width and style, colour set apart), `INK_WIDTH` (a width alone),

@@ -40,21 +40,29 @@ const POWER_CELL = {
 const COMIC = deepFreeze({
   // A panel bar's ribbon: each end notched in a swallowtail `notch` px deep,
   // the ends widened by `pad` px to clear it. A stat tile's is shallower and
-  // slimmer, so its name (Armor Class, Inspiration) keeps the room.
+  // slimmer, so its name (Armor Class, Inspiration) keeps the room. `ends`
+  // is how each end is cut, the left end's edge from top to foot as points in
+  // a box `notch` wide by 100 tall (x 0 the bar's edge, 10 the notch's
+  // depth), the right end its mirror: the comic's swallowtail, a style's own
+  // cut (a spear point, a scroll's roll, a pixel stair; a straight edge when
+  // its bar is a plate or a rule).
   ribbon: {
     panel: { notch: 10, pad: 18 },
     tile: { notch: 4, pad: 5 },
+    ends: '0,0 10,50 0,100',
   },
   // A wax seal's edge: round, but not perfectly, as if pressed by hand. The
   // badge an icon stands on (a panel's, a tool's on the home page) takes it.
   seal: { radius: '46% 54% 48% 52% / 55% 45% 55% 45%' },
   // The ability scores' crest: square shoulders, a point at the foot. `edge`
-  // is its ink (px), `foot` the room its figures keep clear of the point (a
-  // share of the crest's width).
+  // is its ink (px), `foot` the room its figures keep clear of the point and
+  // `side` of the crest's sides (shares of the crest's width). Every style
+  // cuts its own, the figures always inside.
   crest: {
     clip: 'polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%)',
     edge: 3,
     foot: '22%',
+    side: '0%',
   },
   // A tab is a notebook's bookmark: rounded at the top, open at the foot where
   // it stands on its bar's ruled line; the open one rises by `rise` px. `gap`
@@ -143,12 +151,19 @@ const COMIC = deepFreeze({
   // `hatch` its screentone, the `frame` round it 'solid' or 'double' and
   // `frameWidth` px wide (the comic cut's, scaled with the ink), its icon on a
   // wax seal or 'bare', and how far it `float`s on a soft shadow (0: none,
-  // the ink's solid shadow alone).
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
+  // the ink's solid shadow alone). Its title's `flourish`: an ornament drawn
+  // on the bar (panelOrnaments.js: a line of stars, rivets, a vine, a
+  // tentacle) `width` by `height` px, at its `right` end or at both `ends`;
+  // 'none' for none.
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
-  // ('stickers', the game's things as stickers: stickerPaper.js; 'none'); the
+  // ('stickers', the game's things as stickers: stickerPaper.js; a style's own
+  // tile, pagePatterns.js: 'tracery', 'stars', 'waves'…; 'none'); the
   // page's `halftone` dots (`dot` px across, every `step` px; null for none);
   // the `screentone` hatching of a panel's bar (`line` px of every `gap` px,
   // at `angle` degrees; a line of 0 for none); and how strongly a title's
@@ -172,14 +187,16 @@ const COMIC = deepFreeze({
 const SCIFI = deepFreeze({
   // Straight bars: no swallowtail.
   ribbon: {
-    panel: { notch: 0, pad: 12 },
-    tile: { notch: 0, pad: 4 },
+    panel: { notch: 10, pad: 18 },
+    tile: { notch: 4, pad: 7 },
+    ends: '10,0 0,30 0,70 10,100',
   },
   seal: { radius: '4px' },
   crest: {
     clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 86%, 88% 100%, 12% 100%, 0 86%, 0 14%)',
     edge: 1,
     foot: '8%',
+    side: '0%',
   },
   bookmarkTab: { radius: '3px 3px 0 0', rise: 2, gap: 2 },
   // A counter and a use are power cells, spent an empty socket, told apart by
@@ -212,10 +229,13 @@ const SCIFI = deepFreeze({
   choiceMark: { size: 18 },
   dieGlyph: { path: 'M6 0.5 L11.5 6 L6 11.5 L0.5 6 Z' },
   ink: { edge: 1, drop: 0, depth: 1.5, glow: 6, lettering: 1 },
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   radius: 3,
   surface: {
-    paper: 'none',
+    paper: 'circuit',
     halftone: { dot: 1, step: 22 },
     screentone: { line: 1, gap: 4, angle: 0 },
     rays: 0.6,
@@ -232,6 +252,7 @@ const GOTHIC = deepFreeze({
   ribbon: {
     panel: { notch: 14, pad: 22 },
     tile: { notch: 5, pad: 6 },
+    ends: '10,0 0,50 10,100',
   },
   seal: { radius: '42% 58% 50% 50% / 60% 44% 56% 40%' },
   // The ability scores' crest is a headstone: a round arch over a flat foot.
@@ -239,6 +260,7 @@ const GOTHIC = deepFreeze({
     clip: 'polygon(0 30%, 1.7% 22.2%, 6.7% 15%, 14.6% 8.8%, 25% 4%, 37.1% 1%, 50% 0, 62.9% 1%, 75% 4%, 85.4% 8.8%, 93.3% 15%, 98.3% 22.2%, 100% 30%, 100% 100%, 0 100%)',
     edge: 3,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '10px 10px 0 0', rise: 4, gap: 4 },
   // A counter is a drop of blood (red for a spell's slot, the pact's violet),
@@ -284,7 +306,7 @@ const GOTHIC = deepFreeze({
   paper: { corners: [0.3, 2, 0.5, 1.5] },
   radius: 8,
   surface: {
-    paper: 'stickers',
+    paper: 'tracery',
     halftone: { dot: 1, step: 7 },
     screentone: { line: 2, gap: 6, angle: -45 },
     rays: 0.8,
@@ -298,14 +320,17 @@ const GOTHIC = deepFreeze({
 // bars, heavy ink and slow, wary moves.
 const WAR = deepFreeze({
   ribbon: {
-    panel: { notch: 0, pad: 12 },
-    tile: { notch: 0, pad: 4 },
+    panel: { notch: 12, pad: 20 },
+    tile: { notch: 5, pad: 7 },
+    ends: '10,0 0,100',
   },
   seal: { radius: '50%' },
   crest: {
-    clip: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)',
+    // A dog tag: rounded corners, the chain's notch in its side.
+    clip: 'polygon(8% 0, 92% 0, 97% 3%, 100% 10%, 100% 90%, 97% 97%, 92% 100%, 8% 100%, 3% 97%, 0 90%, 0 62%, 4% 58%, 4% 42%, 0 38%, 0 10%, 3% 3%)',
     edge: 2,
-    foot: '24%',
+    foot: '0%',
+    side: '2%',
   },
   bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
   // A counter is a cartridge (brass for a spell's slot, steel for the
@@ -372,10 +397,13 @@ const WAR = deepFreeze({
   choiceMark: { size: 20 },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
   ink: { edge: 2, drop: 1, depth: 1.2, glow: 0, lettering: 1 },
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   radius: 2,
   surface: {
-    paper: 'none',
+    paper: 'camo',
     halftone: { dot: 0.8, step: 4 },
     screentone: { line: 1, gap: 5, angle: 45 },
     rays: 0.5,
@@ -391,12 +419,15 @@ const ASTRAL = deepFreeze({
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
+    ends: '0,0 0,100',
   },
   seal: { radius: '50%' },
   crest: {
-    clip: 'polygon(100% 50%, 98.3% 62.9%, 93.3% 75%, 85.4% 85.4%, 75% 93.3%, 62.9% 98.3%, 50% 100%, 37.1% 98.3%, 25% 93.3%, 14.6% 85.4%, 6.7% 75%, 1.7% 62.9%, 0 50%, 1.7% 37.1%, 6.7% 25%, 14.6% 14.6%, 25% 6.7%, 37.1% 1.7%, 50% 0, 62.9% 1.7%, 75% 6.7%, 85.4% 14.6%, 93.3% 25%, 98.3% 37.1%)',
+    // A plaque, its corners cut round inwards.
+    clip: 'polygon(90% 0, 91.3% 8%, 95% 13.9%, 100% 16%, 100% 84%, 95% 86.1%, 91.3% 92%, 90% 100%, 10% 100%, 8.7% 92%, 5% 86.1%, 0 84%, 0 16%, 5% 13.9%, 8.7% 8%, 10% 0)',
     edge: 2,
-    foot: '6%',
+    foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '14px 14px 0 0', rise: 3, gap: 3 },
   // A counter is a star (a gold one for a spell's slot), a use a silver
@@ -442,10 +473,13 @@ const ASTRAL = deepFreeze({
   bookmarkMark: { width: 4, inset: 4, radius: '0 6px 6px 0' },
   paper: { corners: [1, 1, 1, 1] },
   ink: { edge: 2, drop: 0, depth: 1.2, glow: 4, lettering: 0 },
-  panel: { bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1 },
+  panel: {
+    bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1,
+    flourish: { kind: 'stars', width: 96, height: 16, at: 'right' },
+  },
   radius: 12,
   surface: {
-    paper: 'none',
+    paper: 'stars',
     halftone: { dot: 1, step: 16 },
     screentone: { line: 1, gap: 8, angle: 30 },
     rays: 1,
@@ -460,12 +494,14 @@ const PIRATE = deepFreeze({
   ribbon: {
     panel: { notch: 16, pad: 24 },
     tile: { notch: 6, pad: 7 },
+    ends: '10,0 5,7 1.3,25 0,50 1.3,75 5,93 10,100',
   },
   seal: { radius: '50%' },
   crest: {
     clip: 'polygon(4% 0, 96% 0, 100% 10%, 98% 50%, 100% 90%, 96% 100%, 4% 100%, 0 90%, 2% 50%, 0 10%)',
     edge: 3,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '4px 4px 0 0', rise: 3, gap: 4 },
   // A counter is a doubloon, a use a bottle of rum, a training mark the X
@@ -505,12 +541,15 @@ const PIRATE = deepFreeze({
       shadowDrop: 6,
     },
   },
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   ornament: { path: 'M1 0 L6 4.5 L11 0 L12 1 L7.5 6 L12 11 L11 12 L6 7.5 L1 12 L0 11 L4.5 6 L0 1 Z' },
   paper: { corners: [1.5, 0.5, 2, 0.75] },
   radius: 6,
   surface: {
-    paper: 'stickers',
+    paper: 'waves',
     halftone: { dot: 0.8, step: 6 },
     screentone: { line: 2, gap: 9, angle: 0 },
     rays: 0.8,
@@ -525,12 +564,15 @@ const STEAMPUNK = deepFreeze({
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
+    ends: '0,0 0,100',
   },
   seal: { radius: '30%' },
   crest: {
-    clip: 'polygon(20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%, 0 50%)',
+    // A cartouche: a long plate pointed at each side.
+    clip: 'polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%)',
     edge: 3,
     foot: '0%',
+    side: '5%',
   },
   bookmarkTab: { radius: '2px 2px 0 0', rise: 2, gap: 3 },
   // A counter is a gear (brass for a spell's slot), a use an electric bulb,
@@ -573,13 +615,16 @@ const STEAMPUNK = deepFreeze({
   },
   meterSegments: { bar: 12, piece: 6, smooth: 0 },
   ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
-  panel: { bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1,
+    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends' },
+  },
   ornament: { path: 'M4.6 1.8 L4.8 0.1 L7.2 0.1 L7.4 1.8 L8.9 2.7 L10.5 2 L11.7 4.1 L10.3 5.1 L10.3 6.9 L11.7 7.9 L10.5 10 L8.9 9.3 L7.4 10.2 L7.2 11.9 L4.8 11.9 L4.6 10.2 L3.1 9.3 L1.5 10 L0.3 7.9 L1.7 6.9 L1.7 5.1 L0.3 4.1 L1.5 2 L3.1 2.7 Z' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
   paper: { corners: [0.3, 0.3, 0.3, 0.3] },
   radius: 4,
   surface: {
-    paper: 'none',
+    paper: 'blueprint',
     halftone: { dot: 0.6, step: 5 },
     screentone: { line: 1, gap: 4, angle: 90 },
     rays: 0.6,
@@ -592,14 +637,16 @@ const STEAMPUNK = deepFreeze({
 const DWARVEN = deepFreeze({
   ...COMIC,
   ribbon: {
-    panel: { notch: 0, pad: 12 },
-    tile: { notch: 0, pad: 4 },
+    panel: { notch: 8, pad: 16 },
+    tile: { notch: 4, pad: 6 },
+    ends: '0,0 0,35 10,35 10,65 0,65 0,100',
   },
   seal: { radius: '18% 26% 22% 14%' },
   crest: {
     clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 100%, 0 100%, 0 14%)',
     edge: 4,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '2px 2px 0 0', rise: 3, gap: 3 },
   // A counter is a carved rune stone, a use a tankard of ale, a training mark
@@ -644,10 +691,13 @@ const DWARVEN = deepFreeze({
   bookmarkMark: { width: 5, inset: 3, radius: '0' },
   paper: { corners: [0.5, 0.25, 0.5, 0.25] },
   ink: { edge: 3, drop: 1.2, depth: 1, glow: 0, lettering: 0 },
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   radius: 3,
   surface: {
-    paper: 'none',
+    paper: 'stone',
     halftone: { dot: 1.2, step: 9 },
     screentone: { line: 3, gap: 10, angle: 0 },
     rays: 0.7,
@@ -663,12 +713,14 @@ const FEY = deepFreeze({
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
+    ends: '0,0 0,100',
   },
   seal: { radius: '50% 50% 50% 8%' },
   crest: {
     clip: 'polygon(0 100%, 0 12%, 4.2% 7.4%, 8.3% 3.5%, 12.5% 0.9%, 16.7% 0, 20.8% 0.9%, 25% 3.5%, 29.2% 7.4%, 33.3% 12%, 37.5% 7.4%, 41.7% 3.5%, 45.8% 0.9%, 50% 0, 54.2% 0.9%, 58.3% 3.5%, 62.5% 7.4%, 66.7% 12%, 70.8% 7.4%, 75% 3.5%, 79.2% 0.9%, 83.3% 0, 87.5% 0.9%, 91.7% 3.5%, 95.8% 7.4%, 100% 12%, 100% 100%)',
     edge: 3,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '16px 16px 0 0', rise: 5, gap: 4 },
   // A counter is a flower, a use a toadstool, a training mark a leaf.
@@ -708,10 +760,13 @@ const FEY = deepFreeze({
   bookmarkMark: { width: 5, inset: 4, radius: '0 8px 8px 0' },
   paper: { corners: [2, 1, 2, 1] },
   ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 0.5 },
-  panel: { bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1 },
+  panel: {
+    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
+    flourish: { kind: 'vine', width: 96, height: 22, at: 'right' },
+  },
   radius: 14,
   surface: {
-    paper: 'stickers',
+    paper: 'leaves',
     halftone: { dot: 1.4, step: 14 },
     screentone: { line: 1, gap: 6, angle: 60 },
     rays: 1,
@@ -727,12 +782,14 @@ const COSMIC = deepFreeze({
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
+    ends: '0,0 0,100',
   },
   seal: { radius: '58% 42% 63% 37% / 41% 56% 44% 59%' },
   crest: {
     clip: 'polygon(6% 4%, 30% 0, 52% 5%, 74% 0, 96% 6%, 100% 34%, 95% 62%, 100% 92%, 72% 100%, 48% 95%, 24% 100%, 2% 94%, 5% 64%, 0 34%)',
     edge: 3,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '12px 4px 0 0', rise: 4, gap: 4 },
   // A counter is an eye, open while there, shut once spent; a use a curled
@@ -774,10 +831,13 @@ const COSMIC = deepFreeze({
   ornament: { path: 'M0 6 C3 1 9 1 12 6 C9 11 3 11 0 6 Z' },
   paper: { corners: [0.5, 2, 1, 1.5] },
   ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 0 },
-  panel: { bar: 'rule', hatch: false, frame: 'solid', frameWidth: 2, badge: 'bare', float: 1 },
+  panel: {
+    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 2, badge: 'bare', float: 1,
+    flourish: { kind: 'tentacle', width: 90, height: 22, at: 'right' },
+  },
   radius: 6,
   surface: {
-    paper: 'none',
+    paper: 'void',
     halftone: { dot: 1, step: 11 },
     screentone: { line: 1, gap: 5, angle: 15 },
     rays: 0.4,
@@ -791,14 +851,17 @@ const COSMIC = deepFreeze({
 const PIXEL = deepFreeze({
   ...COMIC,
   ribbon: {
-    panel: { notch: 0, pad: 12 },
-    tile: { notch: 0, pad: 4 },
+    panel: { notch: 10, pad: 18 },
+    tile: { notch: 5, pad: 7 },
+    ends: '10,0 6,0 6,20 3,20 3,40 0,40 0,60 3,60 3,80 6,80 6,100 10,100',
   },
   seal: { radius: '0' },
   crest: {
-    clip: 'polygon(8% 0, 92% 0, 92% 6%, 96% 6%, 96% 12%, 100% 12%, 100% 100%, 0 100%, 0 12%, 4% 12%, 4% 6%, 8% 6%)',
+    // A pixel frame: every corner a stair.
+    clip: 'polygon(8% 0, 92% 0, 92% 6%, 96% 6%, 96% 12%, 100% 12%, 100% 88%, 96% 88%, 96% 94%, 92% 94%, 92% 100%, 8% 100%, 8% 94%, 4% 94%, 4% 88%, 0 88%, 0 12%, 4% 12%, 4% 6%, 8% 6%)',
     edge: 3,
     foot: '0%',
+    side: '0%',
   },
   bookmarkTab: { radius: '0', rise: 4, gap: 4 },
   // A counter is a pixel coin, a use a pixel potion, a training mark a pixel
@@ -842,10 +905,13 @@ const PIXEL = deepFreeze({
   paper: { corners: [0, 0, 0, 0] },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
   ink: { edge: 3, drop: 1, depth: 1, glow: 0, lettering: 1 },
-  panel: { bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' },
+  },
   radius: 1,
   surface: {
-    paper: 'none',
+    paper: 'pixels',
     halftone: { dot: 1, step: 6 },
     screentone: { line: 2, gap: 4, angle: 0 },
     rays: 0.3,
@@ -887,13 +953,35 @@ export const DIE_GLYPH_BOX = 12;
 const shapeVariable = (name) => `var(--gb-shape-${name})`;
 
 export const RIBBON = Object.freeze({
-  panel: Object.freeze({ notch: shapeVariable('ribbon-panel-notch'), pad: shapeVariable('ribbon-panel-pad') }),
-  tile: Object.freeze({ notch: shapeVariable('ribbon-tile-notch'), pad: shapeVariable('ribbon-tile-pad') }),
+  panel: Object.freeze({ notch: shapeVariable('ribbon-panel-notch'), pad: shapeVariable('ribbon-panel-pad'), clip: shapeVariable('ribbon-panel-clip') }),
+  tile: Object.freeze({ notch: shapeVariable('ribbon-tile-notch'), pad: shapeVariable('ribbon-tile-pad'), clip: shapeVariable('ribbon-tile-clip') }),
 });
 
-// The ribbon's cut for a notch `notch` deep (a CSS length): a swallowtail at each end.
-export function ribbonClip(notch) {
-  return `polygon(0 0, 100% 0, calc(100% - ${notch}) 50%, 100% 100%, 0 100%, ${notch} 50%)`;
+// A bar's cut (a clip-path) for its `ends` (shapes' ribbon.ends: the left
+// end's edge, top to foot, in a box 10 wide by 100 tall) and a notch `notch`
+// deep (a CSS length): along the top from the left end's first point, down
+// the right end (its mirror), back along the foot and up the left end. The
+// comic's swallowtail: polygon(0 0, 100% 0, calc(100% - n) 50%, 100% 100%,
+// 0 100%, n 50%).
+export function ribbonEndsClip(ends, notch) {
+  const points = ends.split(' ').map((point) => point.split(',').map(Number));
+  const across = (x) => (x === 0 ? '' : x === 10 ? notch : `${notch} * ${x / 10}`);
+  const left = ([x, y]) => `${x === 0 ? '0' : x === 10 ? notch : `calc(${across(x)})`} ${y === 0 ? '0' : `${y}%`}`;
+  const right = ([x, y]) => `${x === 0 ? '100%' : `calc(100% - ${across(x)})`} ${y === 0 ? '0' : `${y}%`}`;
+  return `polygon(${[left(points[0]), ...points.map(right), ...points.slice(1).reverse().map(left)].join(', ')})`;
+}
+
+// Where a panel title's flourish sits (shapes' panel.flourish), as the two
+// background layers the bar keeps for it (PanelHeader.jsx): one at its right
+// end, or one at each end; none drawn at no size.
+function flourishVariables({ kind, width, height, at }) {
+  const size = kind === 'none' ? '0 0' : `${width}px ${height}px`;
+  return {
+    '--gb-panel-flourish-size': size,
+    '--gb-panel-flourish-size-2': at === 'ends' ? size : '0 0',
+    '--gb-panel-flourish-at': at === 'ends' ? 'left 4px center' : 'right 10px center',
+    '--gb-panel-flourish-at-2': 'right 4px center',
+  };
 }
 
 export const SEAL_RADIUS = shapeVariable('seal-radius');
@@ -902,6 +990,7 @@ export const CREST = Object.freeze({
   clip: shapeVariable('crest-clip'),
   edge: shapeVariable('crest-edge'),
   foot: shapeVariable('crest-foot'),
+  side: shapeVariable('crest-side'),
 });
 
 export const FOCUS_RING = Object.freeze({
@@ -931,10 +1020,13 @@ export function shapeVariables(styleId) {
     '--gb-shape-ribbon-panel-pad': `${shapes.ribbon.panel.pad}px`,
     '--gb-shape-ribbon-tile-notch': `${shapes.ribbon.tile.notch}px`,
     '--gb-shape-ribbon-tile-pad': `${shapes.ribbon.tile.pad}px`,
+    '--gb-shape-ribbon-panel-clip': ribbonEndsClip(shapes.ribbon.ends, 'var(--gb-shape-ribbon-panel-notch)'),
+    '--gb-shape-ribbon-tile-clip': ribbonEndsClip(shapes.ribbon.ends, 'var(--gb-shape-ribbon-tile-notch)'),
     '--gb-shape-seal-radius': shapes.seal.radius,
     '--gb-shape-crest-clip': shapes.crest.clip,
     '--gb-shape-crest-edge': `${shapes.crest.edge}px`,
     '--gb-shape-crest-foot': shapes.crest.foot,
+    '--gb-shape-crest-side': shapes.crest.side,
     '--gb-shape-focus-width': `${shapes.focusRing.width}px`,
     '--gb-shape-focus-gap': `${shapes.focusRing.gap}px`,
     '--gb-shape-choice-mark': `${shapes.choiceMark.size}px`,
@@ -948,6 +1040,7 @@ export function shapeVariables(styleId) {
     '--gb-ink-lettering': String(shapes.ink.lettering),
     '--gb-panel-frame-width': `${shapes.panel.frameWidth}px`,
     '--gb-panel-frame-style': shapes.panel.frame,
+    ...flourishVariables(shapes.panel.flourish),
     '--gb-screentone-line': `${shapes.surface.screentone.line}px`,
     '--gb-screentone-gap': `${shapes.surface.screentone.gap}px`,
     '--gb-screentone-angle': `${shapes.surface.screentone.angle}deg`,

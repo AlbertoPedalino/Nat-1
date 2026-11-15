@@ -98,8 +98,8 @@ const crestFaceSx = {
   containerType: 'inline-size',
 };
 
-// The figures stay clear of the point.
-const CREST_FOOT_SX = { pb: CREST.foot };
+// The figures stay clear of the point and of the crest's cut sides.
+const CREST_FOOT_SX = { pb: CREST.foot, px: CREST.side };
 
 // A crest you press hops as a tile does, its ink edge lit in its tone.
 function crestClickableSx(tone) {

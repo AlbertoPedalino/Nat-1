@@ -1,4 +1,6 @@
-import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY, washImage, resolveColors } from './colors.js';
+import { pagePattern } from './pagePatterns.js';
+import { dataPicture } from './svgPicture.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js';
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
@@ -14,17 +16,25 @@ import { styleShapes } from './shapes.js';
 // root with the palette's variables (ThemeChoiceProvider), as `--gb-surface-*`.
 export function surfaceVariables(paletteId, styleId) {
   const { surface: { paper, halftone }, panel } = styleShapes(styleId);
-  const stickers = paper === 'stickers';
   const bare = panel.badge === 'bare';
   return {
     ...panelVariables(panel, bare),
-    '--gb-surface-paper': stickers ? stickerPaperImage(paletteId) : 'none',
-    '--gb-surface-paper-size': stickers ? STICKER_PAPER_SIZE : 'auto',
+    ...pagePaper(paper, paletteId),
     '--gb-surface-halftone': halftone
       ? `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} ${halftone.dot}px, transparent ${halftone.dot + 0.4}px)`
       : 'none',
     '--gb-surface-halftone-size': halftone ? `${halftone.step}px ${halftone.step}px` : 'auto',
   };
+}
+
+// The page's drawings, as the style lays them (shapes.js surface.paper): the
+// comic's sticker paper (pictures painted per palette, stickerPaper.js), a
+// style's own tile (pagePatterns.js) painted in the palette's hexes, or none.
+function pagePaper(paper, paletteId) {
+  if (paper === 'stickers') return { '--gb-surface-paper': stickerPaperImage(paletteId), '--gb-surface-paper-size': STICKER_PAPER_SIZE };
+  if (paper === 'none') return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
+  const { svg, width, height } = pagePattern(paper);
+  return { '--gb-surface-paper': dataPicture(resolveColors(svg, paletteId)), '--gb-surface-paper-size': `${width}px ${height}px` };
 }
 
 // How the style builds a panel (shapes.js panel), as whole values the panel's
