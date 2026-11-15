@@ -95,7 +95,7 @@ const BURST_DRAWINGS = Object.freeze({
 const DOT_STEP = 5;
 const DOT_RADIUS = 1.25;
 const DOT_SHADE = 0.45;
-const INK_WIDTH = 3.4;
+const BURST_INK = 3.4;
 const INSET = 0.92;
 
 function shapeSvg(path, width, color) {
@@ -108,7 +108,7 @@ function shapeSvg(path, width, color) {
     + `<g fill="${dot}"><circle cx="${half / 2}" cy="${half}" r="${DOT_RADIUS}"/><circle cx="${half * 1.5}" cy="${half * 3}" r="${DOT_RADIUS}"/></g></pattern></defs>`
     + `<g ${fit}><path d="${path}" fill="${color}"/>`
     + `<path d="${path}" fill="url(#d)"/>`
-    + `<path d="${path}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="${INK_WIDTH}" stroke-linejoin="miter" stroke-miterlimit="6"/></g></svg>`;
+    + `<path d="${path}" fill="none" stroke="${UI_COLORS.edge}" stroke-width="${BURST_INK}" stroke-linejoin="miter" stroke-miterlimit="6"/></g></svg>`;
 }
 
 // A burst's picture, in a colour, drawn per style (the same key is the same

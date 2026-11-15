@@ -529,14 +529,14 @@ const MIST_LIGHT = Object.freeze({
 // comic in dark and light, the parchment; sci-fi in neon and neonLight; war
 // in trench and dossier; gothic in dread and mist).
 export const PALETTES = Object.freeze({
-  dark: Object.freeze({ id: 'dark', label: 'Dark', mode: 'dark', lettering: 'ink', colors: COMIC_DARK }),
-  light: Object.freeze({ id: 'light', label: 'Light', mode: 'light', lettering: 'lift', colors: PARCHMENT_LIGHT }),
-  neon: Object.freeze({ id: 'neon', label: 'Neon', mode: 'dark', lettering: 'ink', colors: NEON_DARK }),
-  neonLight: Object.freeze({ id: 'neonLight', label: 'Neon light', mode: 'light', lettering: 'ink', colors: NEON_LIGHT }),
-  trench: Object.freeze({ id: 'trench', label: 'Trench', mode: 'dark', lettering: 'ink', colors: TRENCH_DARK }),
-  dossier: Object.freeze({ id: 'dossier', label: 'Dossier', mode: 'light', lettering: 'lift', colors: DOSSIER_LIGHT }),
-  dread: Object.freeze({ id: 'dread', label: 'Dread', mode: 'dark', lettering: 'ink', colors: DREAD_DARK }),
-  mist: Object.freeze({ id: 'mist', label: 'Mist', mode: 'light', lettering: 'lift', colors: MIST_LIGHT }),
+  dark: Object.freeze({ id: 'dark', mode: 'dark', lettering: 'ink', colors: COMIC_DARK }),
+  light: Object.freeze({ id: 'light', mode: 'light', lettering: 'lift', colors: PARCHMENT_LIGHT }),
+  neon: Object.freeze({ id: 'neon', mode: 'dark', lettering: 'ink', colors: NEON_DARK }),
+  neonLight: Object.freeze({ id: 'neonLight', mode: 'light', lettering: 'ink', colors: NEON_LIGHT }),
+  trench: Object.freeze({ id: 'trench', mode: 'dark', lettering: 'ink', colors: TRENCH_DARK }),
+  dossier: Object.freeze({ id: 'dossier', mode: 'light', lettering: 'lift', colors: DOSSIER_LIGHT }),
+  dread: Object.freeze({ id: 'dread', mode: 'dark', lettering: 'ink', colors: DREAD_DARK }),
+  mist: Object.freeze({ id: 'mist', mode: 'light', lettering: 'lift', colors: MIST_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no

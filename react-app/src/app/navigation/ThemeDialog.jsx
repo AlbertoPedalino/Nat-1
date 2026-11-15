@@ -16,6 +16,8 @@ import { MODE_CHOICES, STYLE_CHOICES, paletteForStyle } from '../themeChoice.js'
 import {
   linkStyleFonts, themeVariables, useThemeChoice, useThemedValuesVersion,
 } from '../ThemeChoiceProvider.jsx';
+import { pressableSx } from '../../shared/ui/pressable.js';
+import { UI_COLORS } from '../../shared/ui/colors.js';
 
 // The theme panel, opened from the account menu: the mode (System follows the
 // device) and the look's style, kept in this browser. Every style shows as a
@@ -126,14 +128,14 @@ const sampleSx = {
 
 const sampleRowSx = { alignItems: 'center', p: 1 };
 
+// The sample's button: the app's raised button in the accent (pressableSx),
+// drawn as a span, as the card itself is the button.
 const sampleButtonSx = {
+  ...pressableSx(UI_COLORS.accent),
   ...TEXT_STYLES.label,
   ml: 'auto',
   px: 1,
   py: 0.25,
-  bgcolor: 'primary.main',
-  color: 'primary.contrastText',
-  border: SURFACES.panel.border,
   borderRadius: 1,
 };
 
