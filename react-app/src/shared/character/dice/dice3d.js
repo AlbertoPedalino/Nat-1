@@ -110,3 +110,13 @@ export function tumbleTurns(seed) {
     lateMs: Math.round(next() * 160),
   };
 }
+
+// How much light a face of a die catches (0 to 1): how squarely it looks the
+// way the face the die rests on looks (`upFace`, the result, towards the
+// viewer). The die's flat bands are cut from it (Die3D): the result's face,
+// the lit ring round it, the faces turning away in shadow.
+export function faceLight(face, upFace) {
+  const [x, y, z] = face.normal;
+  const [ux, uy, uz] = upFace.normal;
+  return Math.max(0, x * ux + y * uy + z * uz);
+}

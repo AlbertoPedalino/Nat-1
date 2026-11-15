@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   faceLabel,
+  faceLight,
   faceNumbering,
   faceValues,
   tumbleTurns,
 } from '../../../../../src/shared/character/dice/dice3d.js';
 import { seededRandom } from '../../../../../src/shared/seededRandom.js';
+import { dieGeometry } from '../../../../../src/shared/character/dice/polyhedra.js';
 
 test('the face that lands is the value that was rolled', () => {
   assert.equal(faceValues(20, 17, 20, 'seed', 3)[3], 17);
@@ -85,4 +87,18 @@ test('dice keep every throw they ever made: the shared generator, one number ski
   const next = seededRandom('room-1', { warmup: 1 });
   assert.deepEqual([next(), next(), next()].map((v) => v.toFixed(6)), ['0.635061', '0.526473', '0.188653']);
   assert.deepEqual(faceValues(20, 17, 20, 'seed-a'), [17, 8, 9, 6, 3, 10, 15, 13, 18, 1, 20, 14, 4, 12, 7, 11, 5, 16, 19, 2]);
+});
+
+// A die thrown on the map comes to rest on whichever face the throw left on
+// top: the light falls on that face, the result's, whatever face the solid
+// was cut with towards the viewer.
+test('the face a die lands on is the face the light falls on', () => {
+  [4, 6, 8, 10, 12, 20].forEach((sides) => {
+    const { faces } = dieGeometry(sides, 20);
+    faces.forEach((upFace, landed) => {
+      const light = faces.map((face) => faceLight(face, upFace));
+      assert.equal(light.indexOf(Math.max(...light)), landed, `d${sides} on face ${landed}`);
+      assert.ok(Math.abs(light[landed] - 1) < 1e-6, `d${sides} on face ${landed}`);
+    });
+  });
 });

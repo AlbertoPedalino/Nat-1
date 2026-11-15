@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import CoinFace from './CoinFace.jsx';
-import { faceValues, tumbleTurns } from './dice3d.js';
+import { faceLight, faceValues, tumbleTurns } from './dice3d.js';
 import { dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
@@ -47,6 +47,9 @@ export default function Die3D({
   // face the throw left on top, so the caller says which. A die standing for a
   // number that was already rolled simply wears it on the face that faces out.
   const landed = landing ?? geometry.landing;
+  // The face the light falls on: the one the die came to rest on, wherever the
+  // throw turned it (a die thrown on the map lands on any face).
+  const upFace = geometry.faces[landed];
   const values = numbering || faceValues(geometry.faces.length, value, faces, seed, landed);
   const tumble = tumbleTurns(seed);
 
@@ -108,7 +111,7 @@ export default function Die3D({
                 // or — on a coin — a disc the browser rounds off for us.
                 ...(face.corners ? {
                   bgcolor: 'transparent',
-                  backgroundImage: facePicture(face.corners, faceTint(face, dimmed, dice), dice.edge, rim),
+                  backgroundImage: facePicture(face.corners, faceTint(face, upFace, dimmed, dice), dice.edge, rim),
                   backgroundSize: '100% 100%',
                 } : { borderRadius: face.borderRadius }),
                 transform: face.transform,
@@ -119,7 +122,7 @@ export default function Die3D({
               }}
             >
               {face.corners ? null : (
-                <Box sx={{ ...faceFillSx, inset: `${rim}%`, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, dimmed, dice)) }} />
+                <Box sx={{ ...faceFillSx, inset: `${rim}%`, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, upFace, dimmed, dice)) }} />
               )}
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
@@ -231,9 +234,11 @@ const solidSx = {
 //
 // Drawn like a cartoon: flat bands instead of a smooth gradient — the face
 // towards you, the lit ring round it, and the faces turning away in shadow,
-// in the colours of the die's set (`dice`, diceSets.js).
-function faceTint(face, dimmed, dice) {
-  const lit = Math.max(0, face.towardsViewer);
+// in the colours of the die's set (`dice`, diceSets.js). Towards you is
+// towards the face the die rests on (`upFace`), not the face the solid is
+// cut with towards you: a die thrown on the map is turned onto its result.
+function faceTint(face, upFace, dimmed, dice) {
+  const lit = faceLight(face, upFace);
   if (dimmed) return uiMix(UI_COLORS.surfaceHeader, UI_COLORS.surfaceRaised, lit);
   if (lit >= 0.9) return dice.face;
   if (lit >= 0.4) return dice.faceLit;
