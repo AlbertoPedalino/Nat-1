@@ -162,9 +162,9 @@ const COMIC = deepFreeze({
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
   // The surfaces' textures (surfaces.js): `paper` the drawings over the page
-  // ('stickers', the game's things as stickers: stickerPaper.js; a style's own
-  // tile, pagePatterns.js: 'stars', 'blueprint'…; a scene drawn behind every
-  // screen, pageScenes.js: 'graveyard', 'megacity', 'tropics'; 'none'); the
+  // ('stickers', the game's things as stickers: stickerPaper.js; a scene
+  // drawn behind every screen, pageScenes.js: 'graveyard', 'tropics'…;
+  // 'none'); the
   // page's `halftone` dots (`dot` px across, every `step` px; null for none);
   // the `screentone` hatching of a panel's bar (`line` px of every `gap` px,
   // at `angle` degrees; a line of 0 for none); and how strongly a title's
@@ -236,7 +236,7 @@ const SCIFI = deepFreeze({
   },
   radius: 3,
   surface: {
-    paper: 'circuit',
+    paper: 'planets',
     halftone: { dot: 1, step: 22 },
     screentone: { line: 1, gap: 4, angle: 0 },
     rays: 0.6,
@@ -404,7 +404,7 @@ const WAR = deepFreeze({
   },
   radius: 2,
   surface: {
-    paper: 'camo',
+    paper: 'ruins',
     halftone: { dot: 0.8, step: 4 },
     screentone: { line: 1, gap: 5, angle: 45 },
     rays: 0.5,
@@ -480,7 +480,7 @@ const ASTRAL = deepFreeze({
   },
   radius: 12,
   surface: {
-    paper: 'stars',
+    paper: 'moonrise',
     halftone: { dot: 1, step: 16 },
     screentone: { line: 1, gap: 8, angle: 30 },
     rays: 1,
@@ -625,7 +625,7 @@ const STEAMPUNK = deepFreeze({
   paper: { corners: [0.3, 0.3, 0.3, 0.3] },
   radius: 4,
   surface: {
-    paper: 'blueprint',
+    paper: 'foundries',
     halftone: { dot: 0.6, step: 5 },
     screentone: { line: 1, gap: 4, angle: 90 },
     rays: 0.6,
@@ -698,7 +698,7 @@ const DWARVEN = deepFreeze({
   },
   radius: 3,
   surface: {
-    paper: 'stone',
+    paper: 'caverns',
     halftone: { dot: 1.2, step: 9 },
     screentone: { line: 3, gap: 10, angle: 0 },
     rays: 0.7,
@@ -767,7 +767,7 @@ const FEY = deepFreeze({
   },
   radius: 14,
   surface: {
-    paper: 'leaves',
+    paper: 'enchanted',
     halftone: { dot: 1.4, step: 14 },
     screentone: { line: 1, gap: 6, angle: 60 },
     rays: 1,
@@ -838,7 +838,7 @@ const COSMIC = deepFreeze({
   },
   radius: 6,
   surface: {
-    paper: 'void',
+    paper: 'depths',
     halftone: { dot: 1, step: 11 },
     screentone: { line: 1, gap: 5, angle: 15 },
     rays: 0.4,
@@ -912,7 +912,7 @@ const PIXEL = deepFreeze({
   },
   radius: 1,
   surface: {
-    paper: 'pixels',
+    paper: 'wilds',
     halftone: { dot: 1, step: 6 },
     screentone: { line: 2, gap: 4, angle: 0 },
     rays: 0.3,

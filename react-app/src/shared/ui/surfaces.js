@@ -1,7 +1,5 @@
-import { UI_COLORS, uiAlpha, OPACITY, washImage, resolveColors } from './colors.js';
-import { pagePattern } from './pagePatterns.js';
+import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
 import { PAGE_SCENE_KINDS } from './pageScenes.js';
-import { dataPicture } from './svgPicture.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js';
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
@@ -30,16 +28,13 @@ export function surfaceVariables(paletteId, styleId) {
 
 // The page's drawings, as the style lays them (shapes.js surface.paper): the
 // comic's sticker paper (pictures painted per palette, stickerPaper.js), a
-// style's own tile (pagePatterns.js) painted in the palette's hexes, a scene
-// (pageScenes.js) or none.
+// scene (pageScenes.js) or none.
 function pagePaper(paper, paletteId) {
   if (paper === 'stickers') return { '--gb-surface-paper': stickerPaperImage(paletteId), '--gb-surface-paper-size': STICKER_PAPER_SIZE };
-  if (paper === 'none') return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
   // A scene is laid once behind the whole app (theme.js): the page lets it
   // through.
   if (PAGE_SCENE_KINDS.includes(paper)) return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto', '--gb-surface-page-fill': 'transparent' };
-  const { svg, width, height } = pagePattern(paper);
-  return { '--gb-surface-paper': dataPicture(resolveColors(svg, paletteId)), '--gb-surface-paper-size': `${width}px ${height}px` };
+  return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
 }
 
 // How the style builds a panel (shapes.js panel), as whole values the panel's

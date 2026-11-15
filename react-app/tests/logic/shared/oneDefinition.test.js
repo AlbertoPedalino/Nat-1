@@ -975,15 +975,15 @@ test('panel layers are switched only through usePanelsWithoutLayers', () => {
 // Any transform built from a value (translate, rotate, scale, matrix) counts:
 // a piece turned with its handle moves every frame too. Left out, as they only
 // hold values fixed once: stickerLayout.js (an SVG string built at build
-// time), pagePatterns.js and panelOrnaments.js (a style's page tile and title
-// drawings, SVG strings drawn once per palette), bubble.js (a bubble's fixed
+// time), panelOrnaments.js (a style's title drawings, SVG strings drawn once
+// per palette), bubble.js (a bubble's fixed
 // tilt, a sparkle's turn picked once) and polyhedra.js (a die's face
 // geometry).
 test('a place that moves every frame is written through useLiveStyle', () => {
   const dynamicTransform = /(translate|translate3d|rotate|scale|matrix3d)\(\$\{/;
   const offenders = [];
   for (const file of sourceFilesMatching(dynamicTransform, {
-    allow: ['shared/ui/stickerLayout.js', 'shared/ui/pagePatterns.js', 'shared/ui/panelOrnaments.js', 'shared/ui/bubble.js', 'shared/character/dice/polyhedra.js'],
+    allow: ['shared/ui/stickerLayout.js', 'shared/ui/panelOrnaments.js', 'shared/ui/bubble.js', 'shared/character/dice/polyhedra.js'],
   })) {
     const lines = readSource(file).split('\n');
     lines.forEach((line, index) => {

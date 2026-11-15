@@ -18,7 +18,13 @@
 // the app, never offered as a file of its own; credited in README.md): the
 // graveyard ("Free 1-bit Graveyard Pixel Art Backgrounds"), the megacity
 // ("Free Futuristic City Pixel Art Backgrounds"), the tropics ("Free Beach 2D
-// Game Backgrounds").
+// Game Backgrounds"), the ruins ("Free War Pixel Art 2D Backgrounds"), the
+// planets ("Free Planets in Space Pixel Game Background Pack"), the moonrise
+// ("Free Moon Pixel Game Backgrounds"), the foundries ("Free Steampunk
+// Cityscape Pixel Backgrounds"), the caverns ("Free Crystal Cave Pixel Art
+// Backgrounds"), the enchanted wood ("Free Fairy-Tale Game Backgrounds"), the
+// depths ("Free Underwater World Parallax Game Backgrounds"), the wilds
+// ("4 Free Seamless Nature Pixel Backgrounds").
 
 const GRAVEYARD_PNG = 'data:image/png;base64,'
   + 'iVBORw0KGgoAAAANSUhEUgAAAkAAAAFEAQAAAADnmLwQAAAWLUlEQVR42u1cXWwc13X+7t2hdujI3JFj1HQqa8euUdhFH+gWqBVH'
@@ -105,6 +111,22 @@ const SCENES = Object.freeze({
   megacity: Object.freeze({ pictures: Object.freeze({ dark: 'megacity-night.png', light: 'megacity-day.png' }), pixelated: true }),
   // Pirate: palms against a sunset at sea, an island and a sail by day.
   tropics: Object.freeze({ pictures: Object.freeze({ dark: 'tropics-sunset.webp', light: 'tropics-island.webp' }), pixelated: false }),
+  // War: a ruined town under the moon, in a yellow haze by day.
+  ruins: Object.freeze({ pictures: Object.freeze({ dark: 'ruins-night.webp', light: 'ruins-day.webp' }), pixelated: false }),
+  // Sci-fi: a gas giant, an ice giant.
+  planets: Object.freeze({ pictures: Object.freeze({ dark: 'planets-jupiter.png', light: 'planets-uranus.png' }), pixelated: true }),
+  // Astral: a golden moon over the forest, a pale one over the clouds.
+  moonrise: Object.freeze({ pictures: Object.freeze({ dark: 'moonrise-forest.png', light: 'moonrise-clouds.png' }), pixelated: true }),
+  // Steampunk: foundries lit at night, an airship over the city by day.
+  foundries: Object.freeze({ pictures: Object.freeze({ dark: 'foundries-night.png', light: 'foundries-airship.png' }), pixelated: true }),
+  // Dwarven: a crystal cavern in the dark, one opening on the day.
+  caverns: Object.freeze({ pictures: Object.freeze({ dark: 'caverns-deep.png', light: 'caverns-open.png' }), pixelated: true }),
+  // Fey: glowing trees, a wood of toadstools.
+  enchanted: Object.freeze({ pictures: Object.freeze({ dark: 'enchanted-glow.webp', light: 'enchanted-mushrooms.webp' }), pixelated: false }),
+  // Cosmic: bones on the sea floor, the open sea.
+  depths: Object.freeze({ pictures: Object.freeze({ dark: 'depths-bones.webp', light: 'depths-sea.webp' }), pixelated: false }),
+  // Pixel: a tree at dusk, a snowy peak.
+  wilds: Object.freeze({ pictures: Object.freeze({ dark: 'wilds-dusk.png', light: 'wilds-peak.png' }), pixelated: true }),
 });
 
 export const PAGE_SCENE_KINDS = Object.freeze(Object.keys(SCENES));
