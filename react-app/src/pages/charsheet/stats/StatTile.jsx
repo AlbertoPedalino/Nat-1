@@ -13,9 +13,10 @@ import { useFitText } from '../../../shared/ui/useFitText.js';
 // big under it. Its name keeps a panel title's size where the tile has room
 // and is shrunk to the bar where it has not (useFitText). It fills the height it is given, so a row of tiles stands as
 // tall as the panel beside it, its frame and bar the same as that panel's.
-// Every tile wears the one tile tone (PANEL_TONES.statTile), the theme's, so
-// a row of them reads as one family in every style; `tone` changes it only to
-// say something (an untrained shield, a check at disadvantage).
+// `tone` is the tile's own colour (PANEL_TONES: AC, Initiative, Proficiency
+// Bonus and Inspiration each their own, the ability scores their panel's), or
+// another to say something (an untrained shield, a check at disadvantage);
+// without one a tile wears the theme's accent (the spell figures).
 // `value` is the figure (a string or number) or a drawing; `clickable` lights
 // its edge in its tone under the cursor; `active` fills the body with its tone
 // (Inspiration held), its figure in the ink that reads on it. `crest` cuts the

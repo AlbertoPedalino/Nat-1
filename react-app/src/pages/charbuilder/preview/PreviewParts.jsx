@@ -19,10 +19,10 @@ import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 
 
 // The preview's own colours, kept apart from the class panels' gold under
-// them: the character (the name, Defense) in the armour's steel,
+// them: the character (the name, Defense) in the sheet's Armor Class steel,
 // what they are trained in (Proficiencies, Weapon Masteries) in the sheet's
 // Skills green.
-export const CHARACTER_TONE = UI_COLORS.armor;
+export const CHARACTER_TONE = PANEL_TONES.armorClass;
 export const TRAINING_TONE = PANEL_TONES.skills;
 
 // A preview section: the sheet's panel (PanelHeader over the body), its

@@ -121,10 +121,14 @@ export const PANEL_TONES = Object.freeze({
   // Everything an item is (starting equipment, currency, the inventory)
   // wears the items' bordeaux, as the attune button and item tags do.
   items: ITEM_ATTUNEMENT,
-  // Every stat tile (AC, Initiative, Proficiency Bonus, Inspiration, the
-  // spell figures, the ability scores): one tone, the theme's accent, as a
-  // panel's bar wears by default, so the tiles read as one family in every
-  // style.
+  // The stat tiles beside Defenses, each its own: AC steel, Initiative the
+  // accent its roll wears, Proficiency Bonus the skills' green, Inspiration
+  // the violet. A tile with no tone of its own (the spell figures) wears the
+  // theme's accent, as a panel's bar does by default.
+  armorClass: UI_COLORS.armor,
+  initiative: UI_COLORS.accent,
+  proficiencyBonus: ENTITY_COLORS.skill,
+  inspiration: UI_COLORS.spell,
   statTile: UI_COLORS.accent,
 });
 
@@ -155,7 +159,7 @@ export const ROLL_KIND_TONES = Object.freeze({
   abilityCheck: PANEL_TONES.abilityScores,
   save: PANEL_TONES.savingThrows,
   skill: PANEL_TONES.skills,
-  initiative: PANEL_TONES.statTile,
+  initiative: PANEL_TONES.initiative,
   attack: ROLL_TONES.attack,
   damage: ROLL_TONES.damage,
   heal: ROLL_TONES.heal,

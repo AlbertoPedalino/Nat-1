@@ -108,10 +108,10 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
             onPick={rollInitiative}
             onClick={() => rollInitiative(initAdvArg)}
           >
-            <StatTile label="Initiative" value={<InitiativeFigure value={signed(initMod)} advantage={initHasAdv} last={lastInitiative} />} clickable />
+            <StatTile tone={PANEL_TONES.initiative} label="Initiative" value={<InitiativeFigure value={signed(initMod)} advantage={initHasAdv} last={lastInitiative} />} clickable />
           </RollModeArea>
         </Tooltip>
-        <StatTile label="Prof. Bonus" value={signed(getPB(C))} />
+        <StatTile tone={PANEL_TONES.proficiencyBonus} label="Prof. Bonus" value={signed(getPB(C))} />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
       </Box>
       <Box sx={{ display: 'flex', minWidth: 0 }}>
@@ -149,7 +149,7 @@ function InitiativeFigure({ value, advantage, last }) {
       {mark ? <mark.Icon size={ICON_SIZES.sm} color={mark.color} style={{ position: 'absolute', top: 4, right: 4 }} /> : null}
       {last != null ? (
         <Typography sx={lastInitiativeSx}>
-          Last <Box component="span" sx={{ color: textTone(PANEL_TONES.statTile) }}>{last}</Box>
+          Last <Box component="span" sx={{ color: textTone(PANEL_TONES.initiative) }}>{last}</Box>
         </Typography>
       ) : null}
     </>
@@ -171,11 +171,12 @@ function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
     <StatTile
+      tone={PANEL_TONES.inspiration}
       clickable
       active={insp}
       onClick={onToggle}
       label="Inspiration"
-      value={<GAME_ICONS.inspiration size={ICON_SIZES.hero} style={{ color: insp ? inkOn(PANEL_TONES.statTile) : UI_COLORS.textMuted }} />}
+      value={<GAME_ICONS.inspiration size={ICON_SIZES.hero} style={{ color: insp ? inkOn(PANEL_TONES.inspiration) : UI_COLORS.textMuted }} />}
     />
   );
 }

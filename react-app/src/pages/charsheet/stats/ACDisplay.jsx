@@ -6,6 +6,7 @@ import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import { inkOutlineFilter } from '../../../shared/ui/shadows.js';
+import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import StatTile from './StatTile.jsx';
 
 // The Armor Class tile, the shield drawn behind its figure: the character's header uses it, and so
@@ -23,7 +24,7 @@ export default function ACDisplay({ value, shieldUnproficient, source, showBadge
       <Tooltip title={tooltipText}>
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <StatTile
-            tone={shieldUnproficient ? UI_COLORS.penalty : undefined}
+            tone={shieldUnproficient ? UI_COLORS.penalty : PANEL_TONES.armorClass}
             label="AC"
             value={(
               <Box sx={shieldSx}>
