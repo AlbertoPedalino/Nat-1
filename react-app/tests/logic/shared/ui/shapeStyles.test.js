@@ -310,3 +310,19 @@ test("every style draws its speech bubble from kinds that exist, in the palette'
     assert.ok(!`${boxShadow} ${filter}`.includes('--gb-bubble-'), `${id} shadow reads no bubble variable`);
   });
 });
+
+// A bubble written in an ink of its own (dark on paper) letters its titles
+// and totals as a light page does: no solid shadow under dark letters, which
+// read as a second black copy of the text. Every other bubble keeps the
+// page's lettering.
+test("a paper bubble letters its dark ink as a light page does, every other bubble as its page", async () => {
+  const { bubbleLettering } = await import('../../../../src/shared/ui/bubbleLooks.js');
+  const { letteringVariables } = await import('../../../../src/shared/ui/colors.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes: { bubble } }) => {
+    ['dark', 'light'].forEach((mode) => {
+      const expected = letteringVariables(bubble.ink === 'textPrimary' ? mode : 'light');
+      assert.deepEqual(bubbleLettering(id, mode), expected, `${id} ${mode}`);
+    });
+  });
+  assert.equal(bubbleLettering('war', 'dark')['--gb-lettering-drop'], '0');
+});

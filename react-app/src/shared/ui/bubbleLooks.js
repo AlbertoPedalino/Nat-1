@@ -1,4 +1,4 @@
-import { OPACITY, UI_COLORS, uiAlpha, uiMix, washImage } from './colors.js';
+import { OPACITY, UI_COLORS, letteringVariables, paletteOf, uiAlpha, uiMix, washImage } from './colors.js';
 import { styleShapes } from './shapes.js';
 import { themedValue } from './themedValues.js';
 import { dataPicture } from './svgPicture.js';
@@ -243,6 +243,17 @@ export function bubbleShadow(styleId, tone, drop = 3) {
 
 // One of the bubble's values as the chosen style's variable.
 const value = (key) => themedValue(`bubble:${key}`, (resolve, { styleId }) => bubbleLook(styleId, resolve)[key]);
+
+// How its inked lettering (a title, a total) is lettered: as the page's, or
+// for a bubble written in an ink of its own (dark on paper), as on a light
+// page, with no solid shadow under the dark letters (colors.js LETTERINGS).
+export function bubbleLettering(styleId, paletteMode) {
+  return letteringVariables(styleShapes(styleId).bubble.ink === 'textPrimary' ? paletteMode : 'light');
+}
+export const BUBBLE_LETTERING = Object.freeze(Object.fromEntries(Object.keys(letteringVariables('dark')).map((name) => [
+  name,
+  themedValue(`bubble:lettering:${name}`, (resolve, { styleId, paletteId }) => bubbleLettering(styleId, paletteOf(paletteId).mode)[name]),
+])));
 
 const KEYS = ['background', 'backgroundClip', 'border', 'borderImage', 'radius', 'outline', 'outlineOffset', 'tilt', 'tail', 'tailWidth', 'tailHeight', 'tailReach',
   ...INK_ROLES.map((role) => `ink:${role}`), ...Object.keys(NO_DECOR).map((key) => `decor:${key}`)];

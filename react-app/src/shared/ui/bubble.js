@@ -1,6 +1,6 @@
 import { OPACITY, UI_COLORS, colorVariableName } from './colors.js';
 import { DURATIONS, motionTime } from './motion.js';
-import { BUBBLE, BUBBLE_DECOR_PROPS, BUBBLE_INK_ROLES, bubbleShadowSx } from './bubbleLooks.js';
+import { BUBBLE, BUBBLE_DECOR_PROPS, BUBBLE_INK_ROLES, BUBBLE_LETTERING, bubbleShadowSx } from './bubbleLooks.js';
 
 // The speech bubble: every toast, every roll and game notice, every bubble on
 // the map is one, drawn as the chosen style draws it (shapes.js `bubble`,
@@ -19,8 +19,12 @@ export function bubbleToneSx(tone, drop = 3) {
   return bubbleShadowSx(tone, drop);
 }
 
-// The text roles the bubble writes in (a paper bubble's ink), set on it.
-const INK_SX = Object.fromEntries(BUBBLE_INK_ROLES.map((role) => [colorVariableName(role), BUBBLE[`ink:${role}`]]));
+// The text roles the bubble writes in (a paper bubble's ink), and how its
+// inked lettering is lettered on it, set on it.
+const INK_SX = {
+  ...Object.fromEntries(BUBBLE_INK_ROLES.map((role) => [colorVariableName(role), BUBBLE[`ink:${role}`]])),
+  ...BUBBLE_LETTERING,
+};
 
 // What is drawn on the bubble (a console's brackets, tape, a hazard stripe).
 const DECOR_SX = Object.freeze({

@@ -1601,8 +1601,7 @@ export function paletteVariables(paletteId) {
     ...Object.fromEntries(Object.entries(colors)
       .filter(([key]) => !FIXED_COLOR_KEYS.has(key))
       .map(([key, hex]) => [colorVariableName(key), hex])),
-    ...Object.fromEntries(Object.entries(LETTERINGS[mode])
-      .map(([part, value]) => [`--gb-lettering-${part}`, value])),
+    ...letteringVariables(mode),
   };
 }
 
@@ -1625,6 +1624,14 @@ const LETTERINGS = Object.freeze({
     drop: '0',
   }),
 });
+// The lettering variables for a mode's ground ('dark' or 'light'): what a
+// palette writes on the page, and what a paper bubble on a dark page writes
+// on itself (bubbleLooks.js), its dark ink lettered as on a light page.
+export function letteringVariables(mode) {
+  return Object.fromEntries(Object.entries(LETTERINGS[mode] || LETTERINGS.dark)
+    .map(([part, value]) => [`--gb-lettering-${part}`, value]));
+}
+
 // The outline's colour (the ink `color` when the palette leaves it) and its
 // width's share.
 export const letteringStroke = (color) => `var(--gb-lettering-stroke, ${color})`;
