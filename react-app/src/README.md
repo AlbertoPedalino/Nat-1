@@ -53,9 +53,9 @@ rule per value; every hit point bar is `shared/character/combat/HitPointBars.jsx
 A new theme is a change to these files only; every component reads its look
 from them and holds none of its own (guarded by the oneDefinition tests).
 
-The viewer picks two things apart in the top bar's account menu (the login /
-logout button: its Theme item, `app/navigation/themeMenu.jsx`, passed to
-`CloudMenu` as `extraItems`, opens the theme panel, `ThemeDialog.jsx`, where
+The viewer picks two things apart in the top bar's settings (the gear,
+`app/navigation/SettingsMenu.jsx`, beside the account button: its Theme item
+opens the theme panel, `ThemeDialog.jsx`, where
 every style shows as a card drawn in its own theme): the **style**
 (`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
 War horror; Arcane astral; Pirate seas; Steampunk; Dwarven forge; Feywild;

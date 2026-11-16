@@ -35,11 +35,11 @@ const usernameLabelSx = {
   maxWidth: { xs: 110, sm: 180 },
 };
 
-// `extraItems`: menu items the page adds after the account's (the top bar's
-// theme), there whether or not anyone is signed in: a list, or a function
-// given the menu's close and answering the list.
+// The account button: signed out, Log in opens the login panel straight away;
+// signed in, the account's name opens its menu (upload, log out). Without the
+// online features there is no account to offer, so nothing is drawn.
 export default function CloudMenu({
-  sx, buttonSx, canUploadDraft = false, onUploadDraft, extraItems = [],
+  sx, buttonSx, canUploadDraft = false, onUploadDraft,
 }) {
   const { cloudEnabled, status, username, role, signOut } = useAuth();
   const [anchor, setAnchor] = useState(null);
@@ -92,6 +92,14 @@ export default function CloudMenu({
 
   const authed = cloudEnabled && status === 'authed';
 
+  // Signed out with the menu open (a session ended elsewhere): the menu goes,
+  // and does not open again by itself at the next sign-in.
+  useEffect(() => {
+    if (!authed) setAnchor(null);
+  }, [authed]);
+
+  if (!cloudEnabled) return null;
+
   return (
     <Box sx={{ display: 'inline-flex', ...sx }}>
       <Button
@@ -100,7 +108,8 @@ export default function CloudMenu({
         color="primary"
         startIcon={authed ? <User size={ICON_SIZES.sm} /> : <LogIn size={ICON_SIZES.sm} />}
         aria-label={authed ? `Account: ${username || 'signed in'}` : 'Log in'}
-        onClick={(e) => setAnchor(e.currentTarget)}
+        aria-haspopup={authed ? 'menu' : 'dialog'}
+        onClick={(e) => (authed ? setAnchor(e.currentTarget) : setAuthOpen(true))}
         sx={{ ...loginBtnSx, ...buttonSx }}
       >
         {authed
@@ -109,20 +118,14 @@ export default function CloudMenu({
         {dot ? <Box component="span" sx={{ ml: 0.5, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>
 
-      <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={close}>
-        {!cloudEnabled ? (
-          // Without the online features the menu still opens, for what the
-          // page adds (the theme): logging in is offered, and why it cannot be.
-          <MenuItem disabled>
-            <LogIn size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log in · online features not configured
-          </MenuItem>
-        ) : authed ? [
-          <Box key="hdr" sx={{ px: 2, py: 0.5 }}>
-            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
-              {username} · {role === 'gm' ? 'GM' : 'Player'}
-            </Typography>
-          </Box>,
-          <Divider key="d1" />,
+      <Menu anchorEl={anchor} open={authed && Boolean(anchor)} onClose={close}>
+        <Box sx={{ px: 2, py: 0.5 }}>
+          <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
+            {username} · {role === 'gm' ? 'GM' : 'Player'}
+          </Typography>
+        </Box>
+        <Divider />
+        {[
           ...(canUploadDraft ? [
             <MenuItem key="uploaddraft" onClick={() => { close(); onUploadDraft?.(); }}>
               <CloudUpload size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Upload to cloud
@@ -138,15 +141,10 @@ export default function CloudMenu({
           <MenuItem key="out" onClick={async () => { close(); await signOut(); notify('success', 'Logged out.'); }}>
             <LogOut size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log out
           </MenuItem>,
-        ] : (
-          <MenuItem onClick={() => { close(); setAuthOpen(true); }}>
-            <LogIn size={ICON_SIZES.sm} style={{ marginRight: 8 }} /> Log in / Sign up
-          </MenuItem>
-        )}
-        {typeof extraItems === 'function' ? extraItems(close) : extraItems}
+        ]}
       </Menu>
 
-      {cloudEnabled ? <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} /> : null}
+      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
     </Box>
   );
 }

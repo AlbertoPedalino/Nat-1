@@ -10,7 +10,7 @@
 // GemPip, SegmentedMeter, bubble.js, CountSeal, CardSection, the theme's
 // tabs, switches and sliders) hold no shape of their own (guarded).
 //
-// The viewer chooses a style (SHAPE_STYLES, the account menu's "Style"), apart
+// The viewer chooses a style (SHAPE_STYLES, the theme panel's styles), apart
 // from the palette, and every style cuts the same shapes its own way: a new
 // style is one more entry below, with the same keys as COMIC (guarded). As a
 // palette's roles are, a shape that is a CSS value is the chosen style's CSS

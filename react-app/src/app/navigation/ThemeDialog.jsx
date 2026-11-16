@@ -22,7 +22,7 @@ import { FONT_SIZES, linkStyleFonts } from '../../shared/ui/fonts.js';
 import { pressableSx } from '../../shared/ui/pressable.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
 
-// The theme panel, opened from the account menu, kept in this browser. Its
+// The theme panel, opened from the top bar's settings, kept in this browser. Its
 // Look tab: the mode (System follows the device) and the look's style, every
 // style a card drawn in that style and in the palette it draws the current
 // mode in (its bar, its seal, its gems, its button), the chosen one lit. Its

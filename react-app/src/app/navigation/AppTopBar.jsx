@@ -5,7 +5,7 @@ import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import TopBarButton from '../../shared/ui/TopBarButton.jsx';
-import { useThemeMenu } from './themeMenu.jsx';
+import SettingsMenu from './SettingsMenu.jsx';
 import { UI_COLORS, panelScreentone } from '../../shared/ui/colors.js';
 import { panelBarSx } from '../../shared/ui/PanelHeader.jsx';
 import { UI_SHADOWS } from '../../shared/ui/shadows.js';
@@ -16,16 +16,14 @@ export { APP_TOP_BAR_HEIGHT };
 // The app's one top bar, on every page (through AppPage, never on its own):
 // `home` offers Home, `backTo` a Back link to that path named `backLabel`.
 // `start` adds the page's own navigation next to them (the sheet's Builder);
-// `children` sit on the right, before the compendium and the cloud menu
-// (which takes `cloudMenuProps`: the builder's draft upload), for the page's
-// own tools (Links). Every button placed in it is a TopBarButton. Every bar
-// offers the compendium, except the compendium's own page (`compendium`); the
-// account menu also holds the theme (themeMenu.jsx: its item and its panel).
-// `sx` adds to the bar's look.
+// `children` sit on the right, before the compendium, the settings (the theme:
+// SettingsMenu.jsx) and the cloud menu (which takes `cloudMenuProps`: the
+// builder's draft upload), for the page's own tools (Links). Every button
+// placed in it is a TopBarButton. Every bar offers the compendium, except the
+// compendium's own page (`compendium`). `sx` adds to the bar's look.
 export default function AppTopBar({
   sx, children, home = false, backTo, backLabel = 'Back', compendium = true, start = null, cloudMenuProps = null,
 }) {
-  const theme = useThemeMenu();
   return (
     <Box sx={{ ...appTopBarSx, ...sx }}>
       {home || backTo || start ? (
@@ -47,8 +45,8 @@ export default function AppTopBar({
       ) : null}
       {children}
       {compendium ? <CompendiumButton /> : null}
-      <CloudMenu {...cloudMenuProps} extraItems={theme.items} />
-      {theme.dialog}
+      <SettingsMenu />
+      <CloudMenu {...cloudMenuProps} />
     </Box>
   );
 }
