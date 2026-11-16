@@ -99,20 +99,22 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
           <RemindersBlock sheet={sheet} actions={effectActions} />
         </Box>
       ) : null}
-      <Box sx={{ ...statRowSx, order: sheetResponsive(embedded, { xs: 1, md: 0 }) }}>
-        <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
-        <Tooltip title={initTooltip}>
-          <RollModeArea
-            sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}
-            sources={{ adv: initHasAdv, disadv: false }}
-            onPick={rollInitiative}
-            onClick={() => rollInitiative(initAdvArg)}
-          >
-            <StatTile tone={PANEL_TONES.initiative} label="Initiative" value={<InitiativeFigure value={signed(initMod)} advantage={initHasAdv} last={lastInitiative} />} clickable />
-          </RollModeArea>
-        </Tooltip>
-        <StatTile tone={PANEL_TONES.proficiencyBonus} label="Prof. Bonus" value={signed(getPB(C))} />
-        <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
+      <Box sx={{ ...statCellSx, order: sheetResponsive(embedded, { xs: 1, md: 0 }) }}>
+        <Box sx={statRowSx}>
+          <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
+          <Tooltip title={initTooltip}>
+            <RollModeArea
+              sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}
+              sources={{ adv: initHasAdv, disadv: false }}
+              onPick={rollInitiative}
+              onClick={() => rollInitiative(initAdvArg)}
+            >
+              <StatTile tone={PANEL_TONES.initiative} label="Initiative" value={<InitiativeFigure value={signed(initMod)} advantage={initHasAdv} last={lastInitiative} />} clickable />
+            </RollModeArea>
+          </Tooltip>
+          <StatTile tone={PANEL_TONES.proficiencyBonus} label="Prof. Bonus" value={signed(getPB(C))} />
+          <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
+        </Box>
       </Box>
       <Box sx={{ display: 'flex', minWidth: 0 }}>
         <CharacterDefenses C={C} activeConditions={sheet?.activeConditions || []} />
@@ -129,13 +131,29 @@ const rightTopGridSx = {
 };
 
 // AC, Initiative, Proficiency Bonus and Inspiration: four even tiles filling
-// their cell as tall as Defenses beside them.
+// their cell as tall as Defenses beside them. Where the cell is too narrow
+// for four (a small phone, a narrow embedded sheet) they stand two by two,
+// read by a container query on the cell: four in a row there shrank a wide
+// face's names (the pixel style's "Inspiration") past what useFitText may
+// shrink them, and they were cut.
+const STAT_ROW_TWO_BY_TWO = 340;
+
+const statCellSx = {
+  display: 'flex',
+  minWidth: 0,
+  containerType: 'inline-size',
+};
+
 const statRowSx = {
+  flex: 1,
   display: 'grid',
   gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
   gap: '0.45rem',
   alignItems: 'stretch',
   minWidth: 0,
+  [`@container (max-width: ${STAT_ROW_TWO_BY_TWO - 0.02}px)`]: {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  },
 };
 
 // Initiative's figure, with the advantage mark in its corner when the sheet
