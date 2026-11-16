@@ -76,7 +76,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   };
 
   return (
-    <Panel icon={GAME_ICONS.savingThrows} title="Saving Throws" tone={PANEL_TONES.savingThrows} sx={{ mb: '0.6rem' }} bodySx={{}}>
+    <Panel icon={GAME_ICONS.savingThrows} title="Saving Throws" tone={PANEL_TONES.savingThrows} bodySx={{}}>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {ABILITIES.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;

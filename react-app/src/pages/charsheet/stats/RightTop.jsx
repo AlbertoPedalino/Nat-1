@@ -25,7 +25,7 @@ import { statValueSx } from '../../../shared/ui/PanelHeader.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import StatTile from './StatTile.jsx';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
-import { sheetResponsive } from '../layout/layout.js';
+import { SHEET_PANEL_GAP, sheetResponsive } from '../layout/layout.js';
 
 export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -123,7 +123,7 @@ export default function RightTop({ C, sheet, embedded = false, onRoll, onToggleC
 
 const rightTopGridSx = {
   display: 'grid',
-  gap: '0.4rem',
+  gap: SHEET_PANEL_GAP,
   width: '100%',
   alignItems: 'stretch',
 };

@@ -8,6 +8,12 @@ export const SHEET_AREAS = {
   leftCol: 'leftCol',
 };
 
+// The room between two of the sheet's panels, side by side or one over the
+// other, everywhere on the sheet: wide enough that a banner reaching past its
+// panel's sides (the comic's ribbon tails, panelBanner.js BANNER_REACH) and a
+// tentacle's tip (panelGrip.js) stay clear of the next panel's.
+export const SHEET_PANEL_GAP = '0.875rem';
+
 // A cell of the sheet's grid: allowed to shrink below its content. Not
 // clipped: a panel filling its cell draws its ink shadow past the cell's edge
 // (each panel clips its own content).
@@ -31,7 +37,7 @@ export const SHEET_GRID = {
     `,
     md: `"${SHEET_AREAS.leftCol} ${SHEET_AREAS.skills} ${SHEET_AREAS.right}"`,
   },
-  gap: '0.55rem',
+  gap: SHEET_PANEL_GAP,
 };
 
 // A sheet's responsive value, the phone's when the sheet is embedded: an

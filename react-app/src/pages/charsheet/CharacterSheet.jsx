@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SHEET_AREAS, SHEET_GRID_ITEM_SX, sheetColumnSx, sheetGridSx, sheetResponsive } from './layout/layout.js';
+import {
+  SHEET_AREAS, SHEET_GRID_ITEM_SX, SHEET_PANEL_GAP, sheetColumnSx, sheetGridSx, sheetResponsive,
+} from './layout/layout.js';
 import SheetHeader from './layout/SheetHeader.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
 import HPBlock from './resources/HPBlock.jsx';
@@ -152,7 +154,7 @@ export default function CharacterSheet({
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
-        <Stack direction={sheetResponsive(embedded, { xs: 'column', md: 'row-reverse' })} spacing={0.75} sx={{ pt: '0.55rem', alignItems: 'stretch' }}>
+        <Stack direction={sheetResponsive(embedded, { xs: 'column', md: 'row-reverse' })} spacing={SHEET_PANEL_GAP} sx={{ pt: SHEET_PANEL_GAP, alignItems: 'stretch' }}>
           <HPBlock sheet={sheet} fillWidth={embedded}
             onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
             onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
@@ -166,7 +168,7 @@ export default function CharacterSheet({
           display: 'grid',
           width: '100%',
           ...gridSx,
-          pt: '0.55rem',
+          pt: SHEET_PANEL_GAP,
           alignItems: 'start',
           minWidth: 0,
         }}>
@@ -177,7 +179,7 @@ export default function CharacterSheet({
           <Box sx={{
             display: sheetResponsive(embedded, { xs: 'contents', md: 'flex' }),
             flexDirection: sheetResponsive(embedded, { md: 'column' }),
-            gap: sheetResponsive(embedded, { md: '0.55rem' }),
+            gap: sheetResponsive(embedded, { md: SHEET_PANEL_GAP }),
             gridArea: sheetResponsive(embedded, { md: SHEET_AREAS.leftCol }),
             ...SHEET_GRID_ITEM_SX,
           }}>
@@ -197,7 +199,7 @@ export default function CharacterSheet({
           <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.skills }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
-          <Stack spacing={0.5} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
+          <Stack spacing={SHEET_PANEL_GAP} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} embedded={embedded} onRoll={rollD20}
               onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
               effectActions={readOnly ? readOnlyEffectActions : effectActions}
