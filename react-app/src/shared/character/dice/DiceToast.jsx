@@ -9,6 +9,7 @@ import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
 import { useRollMoment } from '../../ui/rollMoment.js';
 import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
+import { useWarmRolls } from './warmRolls.js';
 import TagChip from '../../ui/TagChip.jsx';
 import BubbleHeader from '../../ui/BubbleHeader.jsx';
 
@@ -29,6 +30,9 @@ const toastRootSx = {
 
 
 export default function DiceToast({ toast, onClose, hidden = false }) {
+  // What a roll draws worked out ahead, so the first one after a page load
+  // does not restyle the page as it shows (warmRolls.js).
+  useWarmRolls();
   const layout = toast ? resolveToastLayout(toast) : null;
   // Its colour, and a natural 20's or 1's moment (rollMoment.js).
   const drawn = useRollMoment(layout, SHOUT_TILT);
@@ -54,7 +58,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       // The roll's colour throws the bubble's shadow; a 20 or a 1 its own.
       ...drawn.bubbleSx,
     }}>
-      <RollMomentEffect key={seed} moment={moment} seed={seed} />
+      <RollMomentEffect key={`moment:${seed}`} moment={moment} seed={seed} />
       <BubbleHeader onClose={onClose}>
         <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || UI_COLORS.textPrimary, mb: 0.25 }}>
           {layout.label}
@@ -75,7 +79,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         // Keyed by the throw, not just seeded by it: rolling again while the
         // toast is still up replaces its contents rather than remounting them,
         // and a CSS animation that never remounts never plays again.
-        key={seed}
+        key={`dice:${seed}`}
         dice={layout.dice}
         modifier={layout.modifier}
         modifierColor={layout.modifierColor}

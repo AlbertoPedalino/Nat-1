@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import CoinFace from './CoinFace.jsx';
 import { faceLight, faceValues, tumbleTurns } from './dice3d.js';
-import { dieGeometry } from './polyhedra.js';
+import { DIE_SHAPES, dieGeometry } from './polyhedra.js';
 import { clamp } from '../../numbers.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { OPACITY, UI_COLORS, readsPalette, uiAlpha, uiMix } from '../../ui/colors.js';
@@ -111,7 +111,7 @@ export default function Die3D({
                 // or — on a coin — a disc the browser rounds off for us.
                 ...(face.corners ? {
                   bgcolor: 'transparent',
-                  backgroundImage: facePicture(face.corners, faceTint(face, upFace, dimmed, dice), dice.edge, rim),
+                  backgroundImage: faceBackground(face, upFace, dimmed, dice),
                   backgroundSize: '100% 100%',
                 } : { borderRadius: face.borderRadius }),
                 transform: face.transform,
@@ -122,7 +122,7 @@ export default function Die3D({
               }}
             >
               {face.corners ? null : (
-                <Box sx={{ ...faceFillSx, inset: `${rim}%`, borderRadius: face.borderRadius, bgcolor: dieColor(faceTint(face, upFace, dimmed, dice)) }} />
+                <Box sx={{ ...faceFillSx, inset: `${rim}%`, borderRadius: face.borderRadius, bgcolor: faceFill(face, upFace, dimmed, dice) }} />
               )}
               {/* A coin is struck, not numbered: the two sides carry a head and
                   a cross, and the 1 and 2 behind them are only what the total is
@@ -290,6 +290,32 @@ const rimSx = {
 // 13.7ms drawn this way). Kept per shape and colour, so a die draws each once.
 // In the set's own hexes; a dropped die's tint is the palette's (diePicture).
 const FACE_PICTURES = new Map();
+// A face as it is painted: a polygon's picture, or a coin's fill.
+function faceBackground(face, upFace, dimmed, dice) {
+  return facePicture(face.corners, faceTint(face, upFace, dimmed, dice), dice.edge, dice.style.rim);
+}
+function faceFill(face, upFace, dimmed, dice) {
+  return dieColor(faceTint(face, upFace, dimmed, dice));
+}
+
+// Every face of the dice that can be thrown, as any landing paints it, kept
+// or dropped (`dice`: a resolved set, useDiceSet). A face's picture is a
+// theme value (dieColors.js), and the first one drawn in a new colour
+// rewrites every variable on :root — the whole page restyled in the middle of
+// a throw, the first one after a page load the worst of them. Worked out
+// ahead, while nothing moves, there is nothing left to register when the dice
+// fly. Every shape but the d100, which is thrown and shown as an orb
+// (D100Orb) and draws no faces where a roll is shown.
+export function warmDieFaces(dice) {
+  DIE_SHAPES.filter((shape) => shape !== 100).forEach((sides) => {
+    const { faces } = dieGeometry(sides);
+    faces.forEach((upFace) => faces.forEach((face) => [false, true].forEach((dimmed) => {
+      if (face.corners) faceBackground(face, upFace, dimmed, dice);
+      else faceFill(face, upFace, dimmed, dice);
+    })));
+  });
+}
+
 function facePicture(corners, tint, edge, rim) {
   const key = `${corners.join(' ')}|${tint}|${edge}|${rim}`;
   let picture = FACE_PICTURES.get(key);

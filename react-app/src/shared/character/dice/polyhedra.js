@@ -137,6 +137,8 @@ const SOLIDS = {
 };
 
 const SHAPES = Object.keys(SOLIDS).map(Number).sort((a, b) => a - b);
+// Every shape a die is drawn as (dieShapeFor): the coin and the solids.
+export const DIE_SHAPES = Object.freeze([2, ...SHAPES]);
 
 // A two-sided die is a coin, and there is no polyhedron with two faces. It is
 // built by hand instead: two discs back to back, with a band of narrow panels

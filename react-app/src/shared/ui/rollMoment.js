@@ -373,6 +373,7 @@ export function useRollMoment(layout, rest) {
   };
 }
 
-// The moments' shadows, worked out before the first roll, so a natural 20 or
-// 1 never rewrites the page's variables as it shows.
+// The moments' shadows and bursts, worked out before the first roll, so a
+// natural 20 or 1 never rewrites the page's variables as it shows.
 Object.values(MOMENT_WORDS).forEach(({ shadow, drop }) => bubbleToneSx(UI_COLORS[shadow], drop));
+MOMENTS.forEach((moment) => momentBurstSx(moment));

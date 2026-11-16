@@ -2,6 +2,7 @@ import { isCriticalD20 } from './dice.js';
 import { signed } from '../../ui/numberFormat.js';
 import { UI_COLORS } from '../../ui/colors.js';
 import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
+import { ROLL_LOG_COLORS } from './rollLogPresentation.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -18,13 +19,15 @@ export const ROLL_MODE_CHIP = {
   disadvantage: { label: 'DIS', tone: UI_COLORS.warning, color: 'warning' },
 };
 
+// A die's result on its face, in the roll log's colours (ROLL_LOG_COLORS):
+// its highest face as a natural 20, its 1 as a natural 1.
 export function rollDieColor(value, faces) {
   // A coin has no good side and no bad one. Heads is 1, and colouring it like a
   // fumbled roll made the head come up red.
-  if ((faces || 20) <= 2) return 'text.primary';
-  if (value >= (faces || 20)) return UI_COLORS.accentText;
-  if (value <= 1) return UI_COLORS.danger;
-  return 'text.primary';
+  if ((faces || 20) <= 2) return ROLL_LOG_COLORS.normal;
+  if (value >= (faces || 20)) return ROLL_LOG_COLORS.nat20;
+  if (value <= 1) return ROLL_LOG_COLORS.nat1;
+  return ROLL_LOG_COLORS.normal;
 }
 
 export function resolveToastLayout(toast) {
@@ -51,9 +54,9 @@ export function resolveToastLayout(toast) {
   // The roll's colour, by its kind (null: neutral). A natural 20 or 1 keeps
   // its own colours over it.
   const tone = ROLL_KIND_TONES[toast?.meta?.kind] || null;
-  let totalColor = tone || 'text.primary';
-  if (isCrit) totalColor = UI_COLORS.accentText;
-  else if (isFail) totalColor = UI_COLORS.danger;
+  let totalColor = tone || ROLL_LOG_COLORS.normal;
+  if (isCrit) totalColor = ROLL_LOG_COLORS.nat20;
+  else if (isFail) totalColor = ROLL_LOG_COLORS.nat1;
   const modifierColor = modifier ? (String(modifier).startsWith('-') || String(modifier).startsWith('−') ? UI_COLORS.dangerText : UI_COLORS.successText) : null;
 
   return {

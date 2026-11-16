@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 import { THROWN_DIE_SIZE, thrownDieSize } from '../../../../../src/shared/vtt/rolls/dicePhysics.js';
-import DiceTray, { RESULT_REVEAL_HOLD_MS } from '../../../../../src/pages/vtt/rolls/DiceTray.jsx';
+import DiceTray, { MAX_START_LAG_MS, RESULT_REVEAL_HOLD_MS } from '../../../../../src/pages/vtt/rolls/DiceTray.jsx';
 
 const mocks = vi.hoisted(() => ({ simulateThrow: vi.fn() }));
 
@@ -12,6 +12,7 @@ vi.mock('../../../../../src/shared/vtt/rolls/dicePhysics.js', async (importOrigi
 
 vi.mock('../../../../../src/shared/character/dice/Die3D.jsx', () => ({
   default: () => <div data-testid="die" />,
+  warmDieFaces: () => {},
 }));
 
 beforeEach(() => {
@@ -54,7 +55,9 @@ test('a coin result waits for the final pose to be painted and visibly settled',
   );
 
   expect(onSettled).not.toHaveBeenCalled();
-  act(() => vi.advanceTimersByTime(99));
+  // The throw's clock starts at its first drawn frame (one stubbed animation
+  // frame in), so it lands 100 ms after that.
+  act(() => vi.advanceTimersByTime(100));
   expect(onSettled).not.toHaveBeenCalled();
 
   act(() => vi.advanceTimersByTime(1));
@@ -116,7 +119,8 @@ test('a d100 uses one lightweight orb and reveals its value only after landing',
   expect(screen.queryByTestId('die')).not.toBeInTheDocument();
   expect(result).not.toHaveAttribute('data-visible');
 
-  act(() => vi.advanceTimersByTime(100));
+  // Landed 100 ms after the first drawn frame, one stubbed frame in.
+  act(() => vi.advanceTimersByTime(101));
   expect(result).toHaveAttribute('data-visible', 'true');
 });
 
@@ -149,4 +153,21 @@ test('the dice animation is painted above the fullscreen character sheet', () =>
     zIndex: '11',
     pointerEvents: 'none',
   });
+});
+
+// A die's body as painted: where the throw has it (frames above: the first in
+// the air at z 120, the last on the table).
+const bodyTransform = () => screen.getByTestId('die').parentElement.style.transform;
+
+test.each([
+  ['a slow first frame still starts the throw from the air', 300, 'translate3d(0px, -19.2px, 0)'],
+  ['a first frame too late to start shows the dice where they are by now', MAX_START_LAG_MS + 100, 'translate3d(16px, 5px, 0)'],
+])('%s', (_, lag, pose) => {
+  // The render between a roll and its first frame (the map, the toast, the
+  // dice) is what the lag stands for; the second case is a tab come back to.
+  vi.stubGlobal('requestAnimationFrame', (callback) => setTimeout(() => callback(performance.now()), lag));
+  render(<DiceTray throws={[{ roll: { id: `lag-${lag}`, rolls: [{ faces: 20, v: 7 }] }, x: 300, y: 200 }]} />);
+
+  act(() => vi.advanceTimersByTime(lag));
+  expect(bodyTransform()).toContain(pose);
 });

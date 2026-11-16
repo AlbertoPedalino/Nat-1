@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DIE_SHAPES } from './polyhedra.js';
 import { Box, Button, Typography } from '@mui/material';
 import { DICE_LIMITS } from './dice.js';
 import SheetDialog, { ResetButton, DoneButton } from '../../ui/SheetDialog.jsx';
@@ -18,7 +19,8 @@ import { GAME_ICONS } from '../../ui/gameIcons.js';
 // the result (character sheet toast, encounter roll log + dice toast, …). This
 // keeps the identical picker UI in one place across the app.
 
-const DICE_TYPES = [2, 4, 6, 8, 10, 12, 20, 100];
+// Every die the app draws (polyhedra.js), each one offered.
+const DICE_TYPES = DIE_SHAPES;
 
 // `footer`: a line under the dice (who will see the roll, for the GM).
 export default function CustomRollDialog({

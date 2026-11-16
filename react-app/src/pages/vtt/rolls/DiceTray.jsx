@@ -17,6 +17,7 @@ import { clamp } from '../../../shared/numbers.js';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { writeLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { useElementSize } from '../../../shared/ui/useElementSize.js';
+import { useWarmRolls } from '../../../shared/character/dice/warmRolls.js';
 import { clippedMapLayerSx } from '../map/sceneViewportStyles.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
@@ -29,6 +30,14 @@ export const RESULT_REVEAL_HOLD_MS = 160;
 // climbed the screen as it rose would look like it was flying away.
 const LIFT = 0.16;
 const GROWTH = 0.0018;
+// How late a throw's first painted frame may be and still start from the air.
+// Between a roll and the first frame of its throw there is a render of the
+// map, the toast and the dice themselves — 150 to 300 ms with a handful of
+// d20s — and a clock already running through it dropped the whole fall: the
+// dice appeared mid-bounce, a quarter of the throw never drawn. A first frame
+// later than this is not that render but a map opened, or a tab come back to,
+// mid-throw: the dice are shown where they are by now.
+export const MAX_START_LAG_MS = 500;
 
 // The map as a table: dice come down onto the board, bounce, skid into each
 // other and settle showing what was rolled.
@@ -40,6 +49,8 @@ const GROWTH = 0.0018;
 export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   const hostRef = useRef(null);
   const table = useElementSize(hostRef);
+  // The dice's faces worked out before the first throw (warmRolls.js).
+  useWarmRolls();
   // When each throw was first seen here, on this machine's clock.
   //
   // A throw plays from that moment, not from when its component mounted:
@@ -48,17 +59,20 @@ export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   // hanging there. It also means somebody who opens the map mid-throw sees the
   // dice where they actually are, and the roller's clock never has to agree
   // with anybody else's.
-  const startedAt = useRef(new Map());
-
+  // `at` is moved once, to the first frame actually drawn (`begun`; see
+  // MAX_START_LAG_MS), and kept here so a remount does not move it again.
+  const starts = useRef(new Map());
 
   const live = throws || [];
   const now = Date.now();
   for (const entry of live) {
-    if (!startedAt.current.has(entry.roll.id)) startedAt.current.set(entry.roll.id, now);
+    if (!starts.current.has(entry.roll.id)) {
+      starts.current.set(entry.roll.id, { at: now, begun: false });
+    }
   }
   // Rolls expire; their start times must not outlive them.
-  for (const id of startedAt.current.keys()) {
-    if (!live.some((entry) => entry.roll.id === id)) startedAt.current.delete(id);
+  for (const id of starts.current.keys()) {
+    if (!live.some((entry) => entry.roll.id === id)) starts.current.delete(id);
   }
 
   return (
@@ -70,7 +84,7 @@ export default function DiceTray({ throws, onThrowSettled, centered = false }) {
           at={{ x: entry.x, y: entry.y }}
           table={table}
           centered={centered}
-          startedAt={startedAt.current.get(entry.roll.id)}
+          start={starts.current.get(entry.roll.id)}
           onSettled={onThrowSettled}
         />
       )) : null}
@@ -78,7 +92,7 @@ export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   );
 }
 
-function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
+function DiceThrow({ roll, at, table, start, onSettled, centered }) {
   const bodyRefs = useRef([]);
   const solidRefs = useRef([]);
   const shadowRefs = useRef([]);
@@ -174,20 +188,31 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
   // the frame list, and painting `undefined` threw out of the animation loop —
   // leaving the dice hanging wherever they were, which happened more often the
   // more dice there were to draw.
-  const frameAt = (now) => Math.max(0, Math.floor((now - (startedAt ?? now)) / thrown.frameMs));
+  const frameAt = (now) => Math.max(0, Math.floor((now - (start?.at ?? now)) / thrown.frameMs));
+
+  // The throw's clock starts at its first drawn frame, if that comes soon
+  // enough after the roll (MAX_START_LAG_MS); once only, whatever remounts.
+  const begin = (now) => {
+    if (!start || start.begun) return;
+    start.begun = true;
+    if (now - start.at <= MAX_START_LAG_MS) start.at = now;
+  };
 
   // Written straight to the elements rather than through state: a throw is sixty
   // frames a second of pure movement, and re-rendering the tree for each would
   // be a lot of React for something the compositor can do alone.
   //
   // Before the first paint, or the dice show for one frame stacked at the anchor
-  // before the throw starts. Wherever the throw is up to, not necessarily its
-  // beginning.
+  // before the throw starts. Wherever the throw is up to: its beginning while
+  // its clock has not started, unless it is too late to start (begin).
   useLayoutEffect(() => {
     const { frames } = thrown;
-    if (frames.length) paint(frames[Math.min(frameAt(Date.now()), frames.length - 1)]);
+    if (!frames.length) return;
+    const now = Date.now();
+    const fresh = start && !start.begun && now - start.at <= MAX_START_LAG_MS;
+    paint(frames[fresh ? 0 : Math.min(frameAt(now), frames.length - 1)]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [thrown, startedAt]);
+  }, [thrown, start]);
 
   useEffect(() => {
     const { frames } = thrown;
@@ -221,7 +246,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
       notifySettled();
       return undefined;
     }
-    if (frameAt(Date.now()) >= frames.length - 1) {
+    if (start?.begun && frameAt(Date.now()) >= frames.length - 1) {
       paint(frames[frames.length - 1]);
       revealD100Results();
       notifyAfterFinalPaint();
@@ -238,7 +263,9 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
     }
 
     const tick = () => {
-      const index = frameAt(Date.now());
+      const now = Date.now();
+      begin(now);
+      const index = frameAt(now);
       paint(frames[Math.min(index, frames.length - 1)]);
       // A slow frame skips ahead rather than stretching the throw, and the loop
       // only ends once the dice are down.
@@ -251,7 +278,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
     animationRaf = requestAnimationFrame(tick);
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onSettled, roll.id, thrown, startedAt]);
+  }, [onSettled, roll.id, thrown, start]);
 
   return (
     // The roller's dice (DiceSetScope), wherever the throw lands.
@@ -271,7 +298,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
             {Number(die.faces) === 100 ? (
               <D100Orb
                 value={die.v}
-                color={VTT_COLORS.accent}
+                color={VTT_COLORS.thrownDie}
                 size={thrown.size}
                 revealed={false}
                 textureRef={(element) => { solidRefs.current[index] = element; }}
@@ -281,7 +308,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
               <Die3D
                 value={die.v}
                 faces={die.faces}
-                color={VTT_COLORS.accent}
+                color={VTT_COLORS.thrownDie}
                 size={thrown.size}
                 seed={`${roll.id}:${index}`}
                 numbering={die.numbering}

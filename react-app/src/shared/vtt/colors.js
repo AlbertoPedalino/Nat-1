@@ -20,6 +20,8 @@ export const VTT_COLORS = Object.freeze({
   surface: UI_COLORS.surface,
   surfaceRaised: UI_COLORS.surfaceRaised,
   accent: UI_COLORS.accentText,
+  // The result on a die thrown on the map (DiceTray), whatever it came up.
+  thrownDie: UI_COLORS.accentText,
   accentHighlight: UI_COLORS.accentHighlight,
   text: UI_COLORS.textPrimary,
   textSecondary: UI_COLORS.textSecondary,
