@@ -115,7 +115,7 @@ const clickableSx = {
 const coordSx = {
   ...TEXT_STYLES.label,
   fontSize: FONT_SIZES.xs,
-  color: 'text.secondary',
+  color: UI_COLORS.textSecondary,
 };
 
 const headlineSx = {
@@ -125,7 +125,7 @@ const headlineSx = {
   lineHeight: LINE_HEIGHTS.snug,
 };
 
-const lineSx = { fontSize: FONT_SIZES.lg, color: 'text.primary', lineHeight: LINE_HEIGHTS.normal };
+const lineSx = { fontSize: FONT_SIZES.lg, color: UI_COLORS.textPrimary, lineHeight: LINE_HEIGHTS.normal };
 
 const footerSx = {
   alignItems: 'center',
@@ -134,5 +134,5 @@ const footerSx = {
   ...CARD_PART_RULE_SX,
 };
 
-const footerTextSx = { fontSize: FONT_SIZES.sm, color: 'text.secondary', whiteSpace: 'nowrap' };
+const footerTextSx = { fontSize: FONT_SIZES.sm, color: UI_COLORS.textSecondary, whiteSpace: 'nowrap' };
 

@@ -1,4 +1,4 @@
-import { OPACITY, UI_COLORS, uiAlpha, uiMix } from './colors.js';
+import { OPACITY, UI_COLORS, uiAlpha, uiMix, washImage } from './colors.js';
 import { styleShapes } from './shapes.js';
 import { themedValue } from './themedValues.js';
 import { dataPicture } from './svgPicture.js';
@@ -15,14 +15,15 @@ import { UI_SHADOWS, inkDrop, inkShadow } from './shadows.js';
 //
 // Every value is worked out for the chosen style and palette (themedValue),
 // so a bubble is written once and wears whatever the page, or its scope
-// (StyleScope), wears. Its shadow takes the moment's colour from
-// --gb-bubble-tone (and how far it falls from --gb-bubble-drop), which the
-// bubble's user sets (bubbleToneSx).
+// (StyleScope), wears. Its shadow is worked out the same way for each colour
+// it falls in (a roll's kind, a natural 20 or 1, a notice's severity:
+// bubbleShadowSx), as a value never left to a variable the page would read
+// at its root. A bubble that is paper writes its text in an `ink` of its own
+// (the text roles, set on the bubble), and a `decor` may be drawn on it
+// (BUBBLE_DECORS: a console's corner brackets, a strip of tape, a hazard
+// stripe).
 
 const { black: BLACK, white: WHITE } = UI_COLORS;
-const TONE = 'var(--gb-bubble-tone)';
-const DROP = 'var(--gb-bubble-drop)';
-const fall = (share = 1) => inkDrop(`${DROP} * ${share}`);
 
 // The inside of the bubble: CSS backgrounds over its fill.
 const BUBBLE_TEXTURES = Object.freeze({
@@ -54,6 +55,8 @@ const BUBBLE_TEXTURES = Object.freeze({
 // the texture's. Each draws its band in the fill, its line in `line`.
 const FRAME = 48;
 const SLICE = 16;
+// The frame's width on the page, px: its 16-unit corners drawn at 12px.
+const FRAME_WIDTH = 12;
 const frameSvg = (inside) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FRAME} ${FRAME}">${inside}</svg>`;
 const torn = () => {
   const edge = (from, to, along) => Array.from({ length: 9 }, (_, i) => along(from + ((to - from) * i) / 8, i % 2 ? 2.5 : 0.5));
@@ -95,21 +98,41 @@ const BUBBLE_FRAMES = Object.freeze({
   }),
 });
 
-// The shadow the bubble throws, in --gb-bubble-tone: as CSS box-shadow, or as
-// a filter where a frame or a soft glow draws its shape.
+// The shadow the bubble throws in `tone`, `drop` as far as the ink's solid
+// shadows fall (3, the comic's): as CSS box-shadow, or as a filter where a
+// frame or a soft glow draws its shape.
 const BUBBLE_SHADOWS = Object.freeze({
-  // The comic's solid shadow, down and right: the ink's own (inkShadow).
-  ink: () => ({ boxShadow: inkShadow(TONE, DROP), filter: 'none' }),
+  // The comic's solid shadow, down and right: the ink's own.
+  ink: (tone, drop) => ({ boxShadow: inkShadow(tone, drop), filter: 'none' }),
   // A solid shadow straight under it.
-  under: () => ({ boxShadow: `0 ${fall(1.6)} 0 ${TONE}`, filter: 'none' }),
-  // A soft dark shadow, as a hanging thing casts.
-  soft: () => ({ boxShadow: `${UI_SHADOWS.popup}, 0 ${fall(0.6)} 0 ${TONE}`, filter: 'none' }),
+  under: (tone, drop) => ({ boxShadow: `0 ${inkDrop(drop * 1.6)} 0 ${tone}`, filter: 'none' }),
+  // A soft dark shadow, as a hanging thing casts, edged in its colour.
+  soft: (tone, drop) => ({ boxShadow: `${UI_SHADOWS.popup}, 0 ${inkDrop(drop * 0.6)} 0 ${tone}`, filter: 'none' }),
   // A glow of its colour round it.
-  glow: () => ({ boxShadow: 'none', filter: `drop-shadow(0 0 7px ${uiAlpha(TONE, OPACITY.strong)})` }),
+  glow: (tone) => ({ boxShadow: 'none', filter: `drop-shadow(0 0 7px ${uiAlpha(tone, OPACITY.strong)}) drop-shadow(0 0 2px ${tone})` }),
   // Its drawn shape's shadow, solid, down and right.
-  drop: () => ({ boxShadow: 'none', filter: `drop-shadow(${fall()} ${fall()} 0 ${TONE})` }),
+  drop: (tone, drop) => ({ boxShadow: 'none', filter: `drop-shadow(${inkDrop(drop)} ${inkDrop(drop)} 0 ${tone})` }),
   // A pixel block's shadow, clear of its outline.
-  block: () => ({ boxShadow: `${fall(1.6)} ${fall(1.6)} 0 3px ${TONE}`, filter: 'none' }),
+  block: (tone, drop) => ({ boxShadow: `${inkDrop(drop * 1.6)} ${inkDrop(drop * 1.6)} 0 3px ${tone}`, filter: 'none' }),
+});
+
+// What is drawn on the bubble (its ::after), as CSS: where it stands and its
+// background. `line` is the style's border role.
+const NO_DECOR = Object.freeze({ content: 'none', top: 'auto', right: 'auto', bottom: 'auto', left: 'auto', width: 'auto', height: 'auto', background: 'transparent', transform: 'none' });
+const BUBBLE_DECORS = Object.freeze({
+  none: () => NO_DECOR,
+  // A console's corner brackets, in the accent.
+  brackets: () => {
+    const bar = (at, size) => `${washImage(UI_COLORS.accent, OPACITY.solid)} ${at} / ${size} no-repeat`;
+    return { ...NO_DECOR, content: '""', top: '4px', right: '4px', bottom: '4px', left: '4px',
+      background: [bar('top left', '12px 2px'), bar('top left', '2px 12px'), bar('bottom right', '12px 2px'), bar('bottom right', '2px 12px')].join(', ') };
+  },
+  // A strip of tape holding it on, across its top.
+  tape: () => ({ ...NO_DECOR, content: '""', top: '-8px', left: '50%', width: '52px', height: '16px',
+    background: uiMix(UI_COLORS.paperShade, UI_COLORS.paper, 0.4), transform: 'translateX(-50%) rotate(3deg)' }),
+  // A hazard stripe along its foot.
+  hazard: () => ({ ...NO_DECOR, content: '""', left: '0', right: '0', bottom: '0', height: '5px',
+    background: `repeating-linear-gradient(135deg, ${UI_COLORS.accent} 0 6px, ${BLACK} 6px 12px)` }),
 });
 
 // The tail, where a bubble speaks from something: an SVG `width` by `height`
@@ -147,6 +170,7 @@ const BUBBLE_TAILS = Object.freeze({
 export const BUBBLE_TEXTURE_KINDS = Object.freeze(Object.keys(BUBBLE_TEXTURES));
 export const BUBBLE_FRAME_KINDS = Object.freeze(Object.keys(BUBBLE_FRAMES));
 export const BUBBLE_SHADOW_KINDS = Object.freeze(Object.keys(BUBBLE_SHADOWS));
+export const BUBBLE_DECOR_KINDS = Object.freeze(Object.keys(BUBBLE_DECORS));
 export const BUBBLE_TAIL_KINDS = Object.freeze(Object.keys(BUBBLE_TAILS));
 
 // The style's bubble's tail, drawn (its size, overlap and SVG).
@@ -162,6 +186,21 @@ export function bubbleFrame(bubble) {
   return frame ? frame({ fill: UI_COLORS[bubble.fill], line: UI_COLORS[bubble.border.role] }) : null;
 }
 
+// The text roles a bubble writes its text in: the palette's own, or for a
+// bubble that is paper, its `ink` and shades of it towards the paper.
+const INK_ROLES = Object.freeze(['textPrimary', 'textSecondary', 'textMuted', 'accentText']);
+function inkRoles(bubble) {
+  if (bubble.ink === 'textPrimary') return Object.fromEntries(INK_ROLES.map((role) => [role, UI_COLORS[role]]));
+  const ink = UI_COLORS[bubble.ink];
+  const paper = UI_COLORS[bubble.fill];
+  return {
+    textPrimary: ink,
+    textSecondary: uiMix(ink, paper, 0.25),
+    textMuted: uiMix(ink, paper, 0.4),
+    accentText: uiMix(UI_COLORS.accent, ink, 0.45),
+  };
+}
+
 // Every CSS value of the style's bubble, its colours resolved by `resolve`
 // (a palette's hexes; left as roles where none is given): what bubble.js
 // writes, and what a test reads.
@@ -173,31 +212,47 @@ export function bubbleLook(styleId, resolve = (text) => text) {
   const tail = bubbleTail(bubble);
   const picture = (svg) => dataPicture(resolve(svg));
   const { width, style, role } = bubble.border;
+  const decor = BUBBLE_DECORS[bubble.decor]();
+  const ink = inkRoles(bubble);
   const look = {
     background: BUBBLE_TEXTURES[bubble.texture](fill),
     // Inside a frame only: the frame draws the band round it.
     backgroundClip: frame ? 'padding-box' : 'border-box',
-    border: frame ? `${SLICE / 2}px solid transparent` : (width ? `calc(${width}px * var(--gb-ink-line)) ${style} ${UI_COLORS[role]}` : 'none'),
+    border: frame ? `${FRAME_WIDTH}px solid transparent` : (width ? `calc(${width}px * var(--gb-ink-line)) ${style} ${UI_COLORS[role]}` : 'none'),
     radius: frame ? '0' : (bubble.radius === 'theme' ? `${shapes.radius * 2}px` : bubble.radius),
     outline: bubble.outline.width ? `${bubble.outline.width}px solid ${UI_COLORS[bubble.outline.role]}` : 'none',
     outlineOffset: `${bubble.outline.offset}px`,
     tilt: `${bubble.tilt}deg`,
-    ...BUBBLE_SHADOWS[bubble.shadow](),
     tailWidth: `${tail.width}px`,
     tailHeight: `${tail.height}px`,
     tailReach: `${tail.height - tail.overlap}px`,
+    ...Object.fromEntries(INK_ROLES.map((inkRole) => [`ink:${inkRole}`, ink[inkRole]])),
+    ...Object.fromEntries(Object.entries(decor).map(([key, text]) => [`decor:${key}`, text])),
   };
   return {
     ...Object.fromEntries(Object.entries(look).map(([key, text]) => [key, resolve(text)])),
-    borderImage: frame ? `${picture(frame.svg)} ${SLICE} / ${SLICE / 2}px ${frame.repeat}` : 'none',
+    borderImage: frame ? `${picture(frame.svg)} ${SLICE} / ${FRAME_WIDTH}px ${frame.repeat}` : 'none',
     tail: picture(tail.svg),
   };
+}
+
+// The style's shadow in `tone`, falling `drop`: { boxShadow, filter }.
+export function bubbleShadow(styleId, tone, drop = 3) {
+  return BUBBLE_SHADOWS[styleShapes(styleId).bubble.shadow](tone, drop);
 }
 
 // One of the bubble's values as the chosen style's variable.
 const value = (key) => themedValue(`bubble:${key}`, (resolve, { styleId }) => bubbleLook(styleId, resolve)[key]);
 
-export const BUBBLE = Object.freeze(Object.fromEntries(
-  ['background', 'backgroundClip', 'border', 'borderImage', 'radius', 'outline', 'outlineOffset', 'tilt', 'boxShadow', 'filter', 'tail', 'tailWidth', 'tailHeight', 'tailReach']
-    .map((key) => [key, value(key)]),
-));
+const KEYS = ['background', 'backgroundClip', 'border', 'borderImage', 'radius', 'outline', 'outlineOffset', 'tilt', 'tail', 'tailWidth', 'tailHeight', 'tailReach',
+  ...INK_ROLES.map((role) => `ink:${role}`), ...Object.keys(NO_DECOR).map((key) => `decor:${key}`)];
+export const BUBBLE = Object.freeze(Object.fromEntries(KEYS.map((key) => [key, value(key)])));
+export const BUBBLE_INK_ROLES = INK_ROLES;
+export const BUBBLE_DECOR_PROPS = Object.freeze(Object.keys(NO_DECOR));
+
+// The bubble's shadow in `tone` (a palette role), `drop` as far as the ink's
+// shadows fall: one value per colour, worked out for each style and palette.
+export function bubbleShadowSx(tone, drop = 3) {
+  const shadowValue = (key) => themedValue(`bubble:shadow:${key}|${tone}|${drop}`, (resolve, { styleId }) => resolve(bubbleShadow(styleId, tone, drop)[key]));
+  return { boxShadow: shadowValue('boxShadow'), filter: shadowValue('filter') };
+}

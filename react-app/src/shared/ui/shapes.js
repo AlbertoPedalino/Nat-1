@@ -38,11 +38,14 @@ const POWER_CELL = {
 
 // The comic cut: inked, hand-pressed and bold.
 const COMIC = deepFreeze({
-  // The speech bubble (bubble.js, bubbleLooks.js): its `fill` role and `texture`, a drawn `frame` or none, its `radius` ('theme': two of the
-  // style's units), `border` and `outline`, `tilt` (degrees), `shadow` and `tail` (drawn only where it speaks from something). The comic's: a
+  // The speech bubble (bubble.js, bubbleLooks.js): its `fill` role, the `ink` its text is written in (the palette's text, or a paper's), its
+  // `texture`, a drawn `frame` or none, its `radius` ('theme': two of the
+  // style's units), `border` and `outline`, `tilt` (degrees), `shadow`, `tail` (drawn only where it speaks from something) and a `decor`
+  // drawn on it. The comic's: a
   // speech balloon, inked thick, a little askew, a solid shadow, an inked triangle for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'plain',
     frame: 'none',
     radius: 'theme',
@@ -51,6 +54,7 @@ const COMIC = deepFreeze({
     tilt: -0.8,
     shadow: 'ink',
     tail: { kind: 'triangle', fill: 'bubble', line: 'edge' },
+    decor: 'none',
   },
   // A panel bar's ribbon: each end notched in a swallowtail `notch` px deep,
   // the ends widened by `pad` px to clear it. A stat tile's is shallower and
@@ -239,9 +243,10 @@ const COMIC = deepFreeze({
 // scanlines over the bars and a grid of points over the page, quick moves
 // with no hop. Made to test that a style changing every piece carries.
 const SCIFI = deepFreeze({
-  // A console's panel: two corners cut, a lit line, scanlines, a glow, a leader line for a tail.
+  // A console's panel: two corners cut, a lit line, corner brackets, scanlines, a glow, a leader line for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'scanlines',
     frame: 'chamfer',
     radius: 'theme',
@@ -250,6 +255,7 @@ const SCIFI = deepFreeze({
     tilt: 0,
     shadow: 'glow',
     tail: { kind: 'leader', fill: 'edge', line: 'edge' },
+    decor: 'brackets',
   },
   // Straight bars: no swallowtail.
   ribbon: {
@@ -328,14 +334,16 @@ const GOTHIC = deepFreeze({
   // A pointed arch in a double thin line, a soft shadow, candle wax running off for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'arch',
     frame: 'none',
     radius: '50% 50% 4px 4px / 26px 26px 4px 4px',
-    border: { width: 1.5, style: 'solid', role: 'accent' },
+    border: { width: 1.5, style: 'solid', role: 'accentText' },
     outline: { width: 1, offset: 3, role: 'accentMuted' },
     tilt: 0,
     shadow: 'soft',
     tail: { kind: 'drip', fill: 'accent', line: 'accent' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -431,9 +439,10 @@ const GOTHIC = deepFreeze({
 // tabs, a military star, paper grain over the page and hatching over the
 // bars, heavy ink and slow, wary moves.
 const WAR = deepFreeze({
-  // A typed field form: square, ruled, askew, a paper corner for a tail.
+  // A typed field form on paper, taped on: square, ruled, askew, a paper corner for a tail.
   bubble: {
-    fill: 'surfaceRaised',
+    fill: 'paper',
+    ink: 'onPaper',
     texture: 'ruled',
     frame: 'none',
     radius: '2px',
@@ -441,7 +450,8 @@ const WAR = deepFreeze({
     outline: { width: 0, offset: 0, role: 'edge' },
     tilt: -1.6,
     shadow: 'ink',
-    tail: { kind: 'paper', fill: 'surfaceRaised', line: 'edge' },
+    tail: { kind: 'paper', fill: 'paper', line: 'edge' },
+    decor: 'tape',
   },
   ribbon: {
     panel: { notch: 12, pad: 20 },
@@ -553,6 +563,7 @@ const ASTRAL = deepFreeze({
   // Night glass dusted with stars, a soft glow, three stars trailing for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'stardust',
     frame: 'none',
     radius: '16px',
@@ -561,6 +572,7 @@ const ASTRAL = deepFreeze({
     tilt: 0,
     shadow: 'glow',
     tail: { kind: 'stars', fill: 'accent', line: 'accent' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -661,9 +673,10 @@ const ASTRAL = deepFreeze({
 // sign for the crest, planks over the bars, a deck that rolls a little.
 const PIRATE = deepFreeze({
   ...COMIC,
-  // A torn scrap of a stained chart, a torn strip for a tail.
+  // A torn scrap of a stained sea chart, in sepia ink, a torn strip for a tail.
   bubble: {
-    fill: 'bubble',
+    fill: 'paper',
+    ink: 'onPaper',
     texture: 'stain',
     frame: 'torn',
     radius: 'theme',
@@ -671,7 +684,8 @@ const PIRATE = deepFreeze({
     outline: { width: 0, offset: 0, role: 'edge' },
     tilt: -1,
     shadow: 'drop',
-    tail: { kind: 'torn', fill: 'bubble', line: 'bubble' },
+    tail: { kind: 'torn', fill: 'paper', line: 'paper' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -769,6 +783,7 @@ const STEAMPUNK = deepFreeze({
   // A brass plate, bevelled and riveted, a bracket for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'arch',
     frame: 'plate',
     radius: 'theme',
@@ -777,6 +792,7 @@ const STEAMPUNK = deepFreeze({
     tilt: 0,
     shadow: 'drop',
     tail: { kind: 'bracket', fill: 'accent', line: 'edge' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -879,6 +895,7 @@ const DWARVEN = deepFreeze({
   // A carved slab, every corner chiselled, grained, a stone wedge for a tail.
   bubble: {
     fill: 'surfaceRaised',
+    ink: 'textPrimary',
     texture: 'grain',
     frame: 'slab',
     radius: 'theme',
@@ -887,6 +904,7 @@ const DWARVEN = deepFreeze({
     tilt: 0,
     shadow: 'drop',
     tail: { kind: 'wedge', fill: 'surfaceRaised', line: 'edge' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -988,6 +1006,7 @@ const FEY = deepFreeze({
   // A leaf-shaped petal, a soft glow, a curling tendril for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'glow',
     frame: 'none',
     radius: '60% 10% 60% 10% / 40% 10% 40% 10%',
@@ -996,6 +1015,7 @@ const FEY = deepFreeze({
     tilt: 0,
     shadow: 'glow',
     tail: { kind: 'curl', fill: 'accent', line: 'accent' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -1095,6 +1115,7 @@ const ABYSSAL = deepFreeze({
   // A wet blot of ink, its edge uneven, ink dripping off for a tail.
   bubble: {
     fill: 'surfaceDeep',
+    ink: 'textPrimary',
     texture: 'glow',
     frame: 'none',
     radius: '42% 58% 48% 52% / 30% 34% 66% 70%',
@@ -1103,6 +1124,7 @@ const ABYSSAL = deepFreeze({
     tilt: 0,
     shadow: 'glow',
     tail: { kind: 'drips', fill: 'surfaceDeep', line: 'accentMuted' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -1202,6 +1224,7 @@ const PIXEL = deepFreeze({
   // A pixel dialog box, a double square border, a block shadow, a stepped tail.
   bubble: {
     fill: 'surface',
+    ink: 'textPrimary',
     texture: 'plain',
     frame: 'none',
     radius: '0',
@@ -1210,6 +1233,7 @@ const PIXEL = deepFreeze({
     tilt: 0,
     shadow: 'block',
     tail: { kind: 'stairs', fill: 'surface', line: 'textPrimary' },
+    decor: 'none',
   },
   moments: {
     nat20: {
@@ -1309,9 +1333,10 @@ const PIXEL = deepFreeze({
 // moves.
 const CYBERPUNK = deepFreeze({
   ...SCIFI,
-  // A slanted panel, its corners sliced, a lit bar down its side, an angular tab for a tail.
+  // A slanted panel, its corners sliced, a lit bar down its side, a hazard stripe at its foot, an angular tab for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'plain',
     frame: 'slant',
     radius: 'theme',
@@ -1320,6 +1345,7 @@ const CYBERPUNK = deepFreeze({
     tilt: 0,
     shadow: 'drop',
     tail: { kind: 'angular', fill: 'bubble', line: 'accent' },
+    decor: 'hazard',
   },
   moments: {
     nat20: {
@@ -1420,6 +1446,7 @@ const LAVENDER = deepFreeze({
   // A puffy pastel balloon, its shadow straight under it, two puffs trailing for a tail.
   bubble: {
     fill: 'bubble',
+    ink: 'textPrimary',
     texture: 'wash',
     frame: 'none',
     radius: '26px',
@@ -1428,6 +1455,7 @@ const LAVENDER = deepFreeze({
     tilt: -1.2,
     shadow: 'under',
     tail: { kind: 'puffs', fill: 'bubble', line: 'edge' },
+    decor: 'none',
   },
   moments: {
     nat20: {

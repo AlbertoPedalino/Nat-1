@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import D100Orb from './D100Orb.jsx';
 import Die3D from './Die3D.jsx';
 import { FONT_SIZES } from '../../ui/fonts.js';
+import { UI_COLORS } from '../../ui/colors.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import DiceSetScope from '../../ui/DiceSetScope.jsx';
 
@@ -58,6 +59,6 @@ const rowSx = {
 const modifierSx = {
   ...TEXT_STYLES.shout,
   fontSize: FONT_SIZES.title,
-  color: 'text.secondary',
+  color: UI_COLORS.textSecondary,
   ml: 0.25,
 };

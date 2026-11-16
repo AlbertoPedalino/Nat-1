@@ -279,7 +279,7 @@ test("the comic's moments keep their KAPOW and crash", () => {
 // as its style draws it, from kinds that exist, in the palette's roles only.
 test("every style draws its speech bubble from kinds that exist, in the palette's roles", async () => {
   const {
-    BUBBLE_FRAME_KINDS, BUBBLE_SHADOW_KINDS, BUBBLE_TAIL_KINDS, BUBBLE_TEXTURE_KINDS, bubbleLook,
+    BUBBLE_DECOR_KINDS, BUBBLE_FRAME_KINDS, BUBBLE_SHADOW_KINDS, BUBBLE_TAIL_KINDS, BUBBLE_TEXTURE_KINDS, bubbleLook, bubbleShadow,
   } = await import('../../../../src/shared/ui/bubbleLooks.js');
   const { resolveColors } = await import('../../../../src/shared/ui/colors.js');
   Object.values(SHAPE_STYLES).forEach(({ id, palettes, shapes: { bubble } }) => {
@@ -288,17 +288,25 @@ test("every style draws its speech bubble from kinds that exist, in the palette'
     assert.ok(BUBBLE_FRAME_KINDS.includes(bubble.frame), `${id} frame ${bubble.frame}`);
     assert.ok(BUBBLE_SHADOW_KINDS.includes(bubble.shadow), `${id} shadow ${bubble.shadow}`);
     assert.ok(BUBBLE_TAIL_KINDS.includes(bubble.tail.kind), `${id} tail ${bubble.tail.kind}`);
-    [bubble.border.role, bubble.outline.role, bubble.tail.fill, bubble.tail.line].forEach((role) => assert.ok(UI_COLORS[role], `${id} ${role}`));
+    assert.ok(BUBBLE_DECOR_KINDS.includes(bubble.decor), `${id} decor ${bubble.decor}`);
+    [bubble.ink, bubble.border.role, bubble.outline.role, bubble.tail.fill, bubble.tail.line].forEach((role) => assert.ok(UI_COLORS[role], `${id} ${role}`));
     Object.values(palettes).forEach((paletteId) => {
       const look = bubbleLook(id, (text) => resolveColors(text, paletteId));
       Object.entries(look).forEach(([key, value]) => {
         assert.equal(typeof value, 'string', `${id} ${key}`);
         assert.ok(!value.includes('undefined'), `${id} ${key}`);
-        // Only the bubble's own tone and the style's ink are left to the page.
-        const left = (value.match(/var\(--gb-[a-z0-9-]+\)/g) || []).filter((name) => !/--gb-(bubble-(tone|drop)|ink-(drop|glow|line|depth))\)/.test(name));
+        // Only the style's ink widths and falls are left to the page.
+        const left = (value.match(/var\(--gb-[a-z0-9-]+\)/g) || []).filter((name) => !/--gb-(ink-(drop|glow|line|depth)|bubble-tilt)\)/.test(name));
         assert.deepEqual(left, [], `${id} ${paletteId} ${key}`);
       });
     });
   });
   assert.equal(bubbleLook('comic').radius, '20px', "the comic's bubble keeps its corners");
+  // Its shadow is worked out in the colour it falls in, never read from a
+  // variable the page's root would resolve without it (a roll's kind kept).
+  Object.keys(SHAPE_STYLES).forEach((id) => {
+    const { boxShadow, filter } = bubbleShadow(id, UI_COLORS.info, 3);
+    assert.ok(`${boxShadow} ${filter}`.includes(UI_COLORS.info), `${id} shadow in its tone`);
+    assert.ok(!`${boxShadow} ${filter}`.includes('--gb-bubble-'), `${id} shadow reads no bubble variable`);
+  });
 });

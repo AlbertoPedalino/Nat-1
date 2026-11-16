@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
@@ -162,7 +163,7 @@ const actorSx = {
 const labelSx = {
   ...TEXT_STYLES.shout,
   fontSize: FONT_SIZES.xxl,
-  color: 'text.primary',
+  color: UI_COLORS.textPrimary,
   mb: 0.25,
 };
 
@@ -183,7 +184,7 @@ const totalSx = {
 
 const detailSx = {
   fontSize: FONT_SIZES.sm,
-  color: 'text.primary',
+  color: UI_COLORS.textPrimary,
   lineHeight: LINE_HEIGHTS.normal,
 };
 

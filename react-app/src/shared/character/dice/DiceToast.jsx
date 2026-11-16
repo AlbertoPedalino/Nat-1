@@ -57,7 +57,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     }}>
       <RollMomentEffect key={seed} moment={moment} seed={seed} />
       <BubbleHeader onClose={onClose}>
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || UI_COLORS.textPrimary, mb: 0.25 }}>
           {layout.label}
         </Typography>
       </BubbleHeader>
@@ -107,7 +107,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       )}
 
       {layout.total == null && layout.dice.length === 0 && layout.detail && (
-        <Typography sx={{ fontSize: FONT_SIZES.xl, color: 'text.primary', mt: 0.25 }}>
+        <Typography sx={{ fontSize: FONT_SIZES.xl, color: UI_COLORS.textPrimary, mt: 0.25 }}>
           {layout.detail}
         </Typography>
       )}

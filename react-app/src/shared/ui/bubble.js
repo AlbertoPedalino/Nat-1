@@ -1,6 +1,6 @@
-import { OPACITY, UI_COLORS } from './colors.js';
+import { OPACITY, UI_COLORS, colorVariableName } from './colors.js';
 import { DURATIONS, motionTime } from './motion.js';
-import { BUBBLE } from './bubbleLooks.js';
+import { BUBBLE, BUBBLE_DECOR_PROPS, BUBBLE_INK_ROLES, bubbleShadowSx } from './bubbleLooks.js';
 
 // The speech bubble: every toast, every roll and game notice, every bubble on
 // the map is one, drawn as the chosen style draws it (shapes.js `bubble`,
@@ -13,10 +13,19 @@ import { BUBBLE } from './bubbleLooks.js';
 const TILT = 'var(--gb-bubble-tilt)';
 export const SHOUT_TILT = `rotate(calc(${TILT} * 2)) scale(1.06)`;
 
-// The colour the bubble's shadow falls in, and how far (as the ink's 3px).
+// The colour the bubble's shadow falls in (a palette role), and how far (as
+// the ink's 3px): the style's shadow in it.
 export function bubbleToneSx(tone, drop = 3) {
-  return { '--gb-bubble-tone': tone, '--gb-bubble-drop': String(drop) };
+  return bubbleShadowSx(tone, drop);
 }
+
+// The text roles the bubble writes in (a paper bubble's ink), set on it.
+const INK_SX = Object.fromEntries(BUBBLE_INK_ROLES.map((role) => [colorVariableName(role), BUBBLE[`ink:${role}`]]));
+
+// What is drawn on the bubble (a console's brackets, tape, a hazard stripe).
+const DECOR_SX = Object.freeze({
+  '&::after': { position: 'absolute', pointerEvents: 'none', ...Object.fromEntries(BUBBLE_DECOR_PROPS.map((prop) => [prop, BUBBLE[`decor:${prop}`]])) },
+});
 
 // The bubble itself; `tone` colours its shadow. It sits as the style tilts it
 // and, with `pop`, snaps in like a speech balloon drawn in.
@@ -31,8 +40,9 @@ export function bubbleSx({ tone = UI_COLORS.edge, pop = true } = {}) {
     borderRadius: BUBBLE.radius,
     outline: BUBBLE.outline,
     outlineOffset: BUBBLE.outlineOffset,
-    boxShadow: BUBBLE.boxShadow,
-    filter: BUBBLE.filter,
+    color: UI_COLORS.textPrimary,
+    ...INK_SX,
+    ...DECOR_SX,
     transform: `rotate(${TILT})`,
     ...(pop ? {
       animation: `gbBubblePop ${motionTime(DURATIONS.slow)} cubic-bezier(0.34, 1.56, 0.64, 1)`,
