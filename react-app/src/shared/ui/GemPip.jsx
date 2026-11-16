@@ -4,7 +4,7 @@ import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
 import { GEM_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
 import { DURATIONS, GEM_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
-import { SPARKLE_PATH } from './BubbleSparkles.jsx';
+import { PARTICLE_GLYPHS } from './momentParticles.js';
 import { useStyleId } from './themeIds.js';
 import { styleShapes } from './shapes.js';
 
@@ -170,7 +170,7 @@ export default function GemPip({
           aria-hidden
           sx={sparkSx(px, dx, dy, index)}
         >
-          <path d={SPARKLE_PATH} fill={UI_COLORS.accentHighlight} stroke={UI_COLORS.edge} strokeWidth={2.2} strokeLinejoin="round" />
+          <path d={PARTICLE_GLYPHS.sparkle.d} fill={UI_COLORS.accentHighlight} stroke={UI_COLORS.edge} strokeWidth={2.2} strokeLinejoin="round" />
         </Box>
       )) : null}
     </Box>

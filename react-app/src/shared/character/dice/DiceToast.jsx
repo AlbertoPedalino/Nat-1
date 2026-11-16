@@ -6,9 +6,9 @@ import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { BUBBLE_SHAKE_SX, SHOUT_TILT, bubbleCheerSx, bubbleSx, bubbleTailSx, splatSx, starburstSx } from '../../ui/bubble.js';
-import BubbleDizzy from '../../ui/BubbleDizzy.jsx';
-import BubbleSparkles from '../../ui/BubbleSparkles.jsx';
+import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
+import { momentBurstSx, rollMoment, useRollMoment } from '../../ui/rollMoment.js';
+import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
 import { inkShadow } from '../../ui/shadows.js';
 import TagChip from '../../ui/TagChip.jsx';
 import BubbleHeader from '../../ui/BubbleHeader.jsx';
@@ -30,6 +30,11 @@ const toastRootSx = {
 
 
 export default function DiceToast({ toast, onClose, hidden = false }) {
+  const layout = toast ? resolveToastLayout(toast) : null;
+  // A natural 20 or 1: the style's moment (rollMoment.js).
+  const moment = rollMoment(layout);
+  const drawn = useRollMoment(moment, SHOUT_TILT);
+
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(onClose, 6000);
@@ -40,7 +45,6 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   // an old result that arrived during the background view.
   if (!toast || hidden) return null;
 
-  const layout = resolveToastLayout(toast);
   // The moment of the throw: two rolls a second apart are two throws, and the
   // same throw re-rendered is still one.
   const seed = `${toast.timestamp || 0}:${layout.label}`;
@@ -48,31 +52,22 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      // A natural 20 or 1 throws its shadow in its own colour.
       // The roll's colour throws the bubble's shadow; a 20 or a 1 its own.
       ...(layout.tone ? { boxShadow: inkShadow(layout.tone) } : {}),
-      ...(layout.isCrit ? { boxShadow: inkShadow(UI_COLORS.accent, 4), ...bubbleCheerSx(SHOUT_TILT) } : {}),
-      ...(layout.isFail ? { boxShadow: inkShadow(UI_COLORS.danger), ...BUBBLE_SHAKE_SX } : {}),
+      ...drawn?.bubbleSx,
     }}>
-      {/* A natural 20 sparkles all round the bubble; a natural 1 sees stars. */}
-      {layout.isCrit ? <BubbleSparkles key={seed} /> : null}
-      {layout.isFail ? <BubbleDizzy key={seed} /> : null}
+      <RollMomentEffect key={seed} moment={moment} seed={seed} />
       <BubbleHeader onClose={onClose}>
         <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || 'text.primary', mb: 0.25 }}>
           {layout.label}
         </Typography>
       </BubbleHeader>
 
-      {layout.isCrit && (
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: UI_COLORS.accentText, mb: 0.25 }}>
-          NATURAL 20!
+      {drawn ? (
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: drawn.labelColor, mb: 0.25 }}>
+          {drawn.label}
         </Typography>
-      )}
-      {layout.isFail && (
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: UI_COLORS.danger, mb: 0.25 }}>
-          NATURAL 1
-        </Typography>
-      )}
+      ) : null}
 
       {layout.modeChip && (
         <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
@@ -105,9 +100,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
             // A natural 20 or 1 is written light on its burst, the ink outline
             // keeping it legible on the gold as on the red.
             color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
-            ...(layout.isCrit ? starburstSx(UI_COLORS.accent) : null),
-            ...(layout.isFail ? splatSx(UI_COLORS.dangerDeep) : null),
-            ...(!layout.isCrit && !layout.isFail ? { display: 'inline-block' } : null),
+            ...(moment ? { ...momentBurstSx(moment), ...drawn.numberSx } : { display: 'inline-block' }),
           }}>
             {layout.total}
           </Typography>

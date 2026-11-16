@@ -654,10 +654,12 @@ test('a thin frame or rule is drawn only by its recipe, board pieces and tiny ma
 
 // No glows and no thin rings: a picked or open thing casts its solid shadow
 // in its colour (inkShadow(tone)), a hovered one changes its edge colour. The
-// battle map keeps its own glows (selection, light, focus over the board).
+// battle map keeps its own glows (selection, light, focus over the board),
+// and a roll's natural 20 or 1 may light its total from within (a hologram's,
+// a neon's: rollMoment.js), a moment that shouts, never a state.
 test('no glow or ring shadows outside the battle map', () => {
   const glow = /[`'"]0 0 (0 )?\d+px/;
-  const hits = sourceLinesMatching(glow).filter((hit) => !hit.startsWith('pages/vtt/'));
+  const hits = sourceLinesMatching(glow).filter((hit) => !hit.startsWith('pages/vtt/') && !hit.startsWith('shared/ui/rollMoment.js'));
   assert.deepEqual(hits, []);
 });
 
@@ -978,13 +980,13 @@ test('panel layers are switched only through usePanelsWithoutLayers', () => {
 // hold values fixed once: stickerLayout.js (an SVG string built at build
 // time), panelOrnaments.js (a style's title drawings, SVG strings drawn once
 // per palette), bubble.js (a bubble's fixed
-// tilt, a sparkle's turn picked once) and polyhedra.js (a die's face
-// geometry).
+// tilt, a sparkle's turn picked once), rollMoment.js (a burst's turn, the
+// style's) and polyhedra.js (a die's face geometry).
 test('a place that moves every frame is written through useLiveStyle', () => {
   const dynamicTransform = /(translate|translate3d|rotate|scale|matrix3d)\(\$\{/;
   const offenders = [];
   for (const file of sourceFilesMatching(dynamicTransform, {
-    allow: ['shared/ui/stickerLayout.js', 'shared/ui/panelOrnaments.js', 'shared/ui/bubble.js', 'shared/character/dice/polyhedra.js'],
+    allow: ['shared/ui/stickerLayout.js', 'shared/ui/panelOrnaments.js', 'shared/ui/bubble.js', 'shared/ui/rollMoment.js', 'shared/character/dice/polyhedra.js'],
   })) {
     const lines = readSource(file).split('\n');
     lines.forEach((line, index) => {

@@ -27,6 +27,42 @@ const tidy = (d) => d.replace(/-?\d+\.\d+(e-?\d+)?/g, (number) => String(roundTo
 // A closed path through points.
 export const polygonPath = (points) => `M${points.map(([x, y]) => `${roundToTenth(x)} ${roundToTenth(y)}`).join(' L')} Z`;
 
+// A star's corners: `points` tips round `centre`, reaching `reach` (one for
+// all, or one per tip), notched at `inner`, each tip leaning `lean` degrees,
+// the first at `rotate` degrees, squashed to `squash` of its height (a roll's
+// burst, a particle's glyph).
+export function starCorners({ points, reach, inner, lean = 0, rotate = -90, centre: [cx, cy] = [50, 50], squash = 1 }) {
+  const pick = (value, index) => (Array.isArray(value) ? value[index % value.length] : value);
+  const at = (length, degrees) => [cx + length * Math.cos((degrees * Math.PI) / 180), cy + length * squash * Math.sin((degrees * Math.PI) / 180)];
+  return Array.from({ length: points }, (_, index) => {
+    const angle = rotate + (index * 360) / points;
+    return [at(pick(reach, index), angle + pick(lean, index)), at(pick(inner, index), angle + 180 / points)];
+  }).flat();
+}
+
+// The points of a crescent: inside the circle `outer` ([x, y, r]), outside
+// `bite`, its two arcs met where the circles cross, each in `steps` steps (an
+// astral banner's moons, a roll's eclipse).
+export function crescentPoints([ox, oy, or], [bx, by, br], steps = 24) {
+  const apart = Math.hypot(bx - ox, by - oy);
+  const along = (or * or - br * br + apart * apart) / (2 * apart);
+  const half = Math.sqrt(Math.max(0, or * or - along * along));
+  const [ux, uy] = [(bx - ox) / apart, (by - oy) / apart];
+  const meet = [ox + ux * along, oy + uy * along];
+  const ends = [[meet[0] - uy * half, meet[1] + ux * half], [meet[0] + uy * half, meet[1] - ux * half]];
+  const arc = ([cx, cy, r], from, to, keep) => {
+    const a0 = Math.atan2(from[1] - cy, from[0] - cx);
+    let sweep = Math.atan2(to[1] - cy, to[0] - cx) - a0;
+    sweep = ((sweep % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const middle = a0 + sweep / 2;
+    if (!keep([cx + Math.cos(middle) * r, cy + Math.sin(middle) * r])) sweep -= Math.PI * 2;
+    return Array.from({ length: steps + 1 }, (_, i) => [cx + Math.cos(a0 + (sweep * i) / steps) * r, cy + Math.sin(a0 + (sweep * i) / steps) * r]);
+  };
+  const outside = ([x, y]) => Math.hypot(x - bx, y - by) > br;
+  const inside = ([x, y]) => Math.hypot(x - ox, y - oy) < or;
+  return [...arc([ox, oy, or], ends[0], ends[1], outside), ...arc([bx, by, br], ends[1], ends[0], inside).slice(1, -1)];
+}
+
 // A brush stroke along `points` ([x, y, pressure]), `size` px at full
 // pressure, as a closed, smoothed outline (perfect-freehand).
 const BRUSH = Object.freeze({

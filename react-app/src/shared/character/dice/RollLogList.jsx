@@ -1,4 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material';
+import { MOMENT_WORDS } from '../../ui/rollMoment.js';
 import RollActorLabel from './RollActorLabel.jsx';
 import RollCalculation from './RollCalculation.jsx';
 import { rollOutcome } from './rollLogPresentation.js';
@@ -47,7 +48,7 @@ function RollLogRow({ entry }) {
         {entry.at ? <Typography sx={timeSx}>{formatClockTime(new Date(entry.at))}</Typography> : null}
       </Stack>
       {outcome.isCrit || outcome.isFail ? (
-        <Typography sx={{ ...tagSx, color: outcome.color }}>{outcome.isCrit ? 'NATURAL 20!' : 'NATURAL 1'}</Typography>
+        <Typography sx={{ ...tagSx, color: outcome.color }}>{MOMENT_WORDS[outcome.isCrit ? 'nat20' : 'nat1'].label}</Typography>
       ) : null}
       <RollCalculation entry={entry} />
       {rest ? <Typography sx={detailSx}>{rest}</Typography> : null}

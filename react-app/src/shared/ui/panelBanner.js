@@ -1,7 +1,7 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
 import { styleShapes } from './shapes.js';
-import { drawingCache, polygonPath, raggedEdge, sketch } from './handDrawing.js';
+import { crescentPoints, drawingCache, polygonPath, raggedEdge, sketch } from './handDrawing.js';
 
 // A panel's title bar drawn as the style draws it (shapes.js panel.banner): a
 // ribbon, a scroll, a nameplate, a slab… with the title lettered on it, drawn
@@ -119,33 +119,11 @@ function tape(w) {
   ];
 }
 
-// The points of a crescent: inside the circle `outer` ([x, y, r]), outside
-// `bite`, its two arcs met where the circles cross.
-function crescent([ox, oy, or], [bx, by, br]) {
-  const apart = Math.hypot(bx - ox, by - oy);
-  const along = (or * or - br * br + apart * apart) / (2 * apart);
-  const half = Math.sqrt(Math.max(0, or * or - along * along));
-  const [ux, uy] = [(bx - ox) / apart, (by - oy) / apart];
-  const meet = [ox + ux * along, oy + uy * along];
-  const ends = [[meet[0] - uy * half, meet[1] + ux * half], [meet[0] + uy * half, meet[1] - ux * half]];
-  const arc = ([cx, cy, r], from, to, keep) => {
-    const a0 = Math.atan2(from[1] - cy, from[0] - cx);
-    let sweep = Math.atan2(to[1] - cy, to[0] - cx) - a0;
-    sweep = ((sweep % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-    const middle = a0 + sweep / 2;
-    if (!keep([cx + Math.cos(middle) * r, cy + Math.sin(middle) * r])) sweep -= Math.PI * 2;
-    return Array.from({ length: 25 }, (_, i) => [cx + Math.cos(a0 + (sweep * i) / 24) * r, cy + Math.sin(a0 + (sweep * i) / 24) * r]);
-  };
-  const outside = ([x, y]) => Math.hypot(x - bx, y - by) > br;
-  const inside = ([x, y]) => Math.hypot(x - ox, y - oy) < or;
-  return [...arc([ox, oy, or], ends[0], ends[1], outside), ...arc([bx, by, br], ends[1], ends[0], inside).slice(1, -1)];
-}
-
 // Astral: a night band between two crescent moons, a few stars caught in it.
 function moons(w) {
   const random = seededRandom(`banner-moons-${Math.round(w)}`);
   const stars = Array.from({ length: Math.round(w / 50) }, () => ({ tag: 'circle', cx: 34 + random() * (w - 68), cy: 17 + random() * 18, r: 0.7 + random() * 1.1, fill: 'accentHighlight', opacity: OPACITY.heavy }));
-  const moon = (x, s, seed) => sketch('polygon', crescent([x, 27, 15], [x + s * 6, 23, 12]), { seed, roughness: 0.4, stroke: 'edge', strokeWidth: 1.4, fill: 'accentMuted', fillStyle: 'solid' });
+  const moon = (x, s, seed) => sketch('polygon', crescentPoints([x, 27, 15], [x + s * 6, 23, 12]), { seed, roughness: 0.4, stroke: 'edge', strokeWidth: 1.4, fill: 'accentMuted', fillStyle: 'solid' });
   return [
     castShadow([[20, 13], [w - 20, 13], [w - 20, 41], [20, 41]]),
     ...sketch('rectangle', 20, 13, w - 40, 28, { seed: 1, roughness: 0.3, stroke: 'accentMuted', strokeWidth: 1.4, fill: 'surfaceHeader', fillStyle: 'solid' }),

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BASE_STYLE_ID, BURST_ASPECT, CHOICE_MARK, CREST, FOCUS_RING, RIBBON, SEAL_RADIUS, SHAPE_STYLES,
+  BASE_STYLE_ID, CHOICE_MARK, CREST, FOCUS_RING, MOMENT_BURST, RIBBON, SEAL_RADIUS, SHAPE_STYLES,
   shapeVariables, styleShapes,
 } from '../../../../src/shared/ui/shapes.js';
 import { UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
@@ -9,9 +9,10 @@ import { GEM_TONES } from '../../../../src/shared/ui/entityColors.js';
 
 // The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
 // cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style
-// picks; so is a card's marker, with whatever lines, cap or pupil it draws.
+// picks; so is a card's marker, with whatever lines, cap or pupil it draws,
+// and a roll moment's burst and effect, each with its kind's own measures.
 function shapeKeys(value, prefix = '') {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\.|^marker$/.test(prefix)) return [prefix];
+  if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\.|^marker$|^moments\.[a-z0-9]+\.(burst|effect)$/.test(prefix)) return [prefix];
   return Object.entries(value).flatMap(([key, inner]) => shapeKeys(inner, prefix ? `${prefix}.${key}` : key));
 }
 
@@ -82,8 +83,8 @@ test('every shape given as a CSS variable is filled by every style', () => {
   const used = [
     RIBBON.panel.notch, RIBBON.panel.pad, RIBBON.tile.notch, RIBBON.tile.pad, SEAL_RADIUS,
     CREST.clip, CREST.edge, CREST.foot, FOCUS_RING.width, FOCUS_RING.gap, CHOICE_MARK.size,
-    BURST_ASPECT.kapow, BURST_ASPECT.crash,
-  ].map((variable) => /^var\((--gb-shape-[a-z-]+)\)$/.exec(variable)?.[1]);
+    MOMENT_BURST.nat20.aspect, MOMENT_BURST.nat20.turn, MOMENT_BURST.nat1.aspect, MOMENT_BURST.nat1.turn,
+  ].map((variable) => /^var\((--gb-shape-[a-z0-9-]+)\)$/.exec(variable)?.[1]);
   assert.ok(used.every(Boolean));
   Object.keys(SHAPE_STYLES).forEach((styleId) => {
     const filled = shapeVariables(styleId);
@@ -219,4 +220,57 @@ test("every style marks a card's kind with a shape of its own, in the 12 by 30 b
     outlines.add(marker.outline);
   });
   assert.equal(outlines.size, Object.keys(SHAPE_STYLES).length, 'no two styles share a marker');
+});
+
+test("every style draws a natural 20's and a natural 1's moment from kinds that exist", async () => {
+  const { BURST_KINDS, BURST_PAINTS, MOMENTS, NUMBER_LOOK_KINDS, burstPath } = await import('../../../../src/shared/ui/rollMoment.js');
+  const { PARTICLE_GLYPHS, PARTICLE_LOOKS, PARTICLE_MODES } = await import('../../../../src/shared/ui/momentParticles.js');
+  const { BUBBLE_MOTIONS } = await import('../../../../src/shared/ui/bubble.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes: { moments } }) => {
+    assert.deepEqual(Object.keys(moments).sort(), [...MOMENTS].sort(), id);
+    Object.entries(moments).forEach(([moment, { burst, fill, paint, number, turn, motion, effect }]) => {
+      const at = `${id} ${moment}`;
+      assert.ok(BURST_KINDS.includes(burst.kind), `${at} burst ${burst.kind}`);
+      assert.match(burstPath(burst), /^M[\d.\s-]+(L[\d.\s-]+)+Z$/, `${at} burst path`);
+      assert.ok(UI_COLORS[fill], `${at} fill ${fill}`);
+      assert.ok(BURST_PAINTS.includes(paint), `${at} paint ${paint}`);
+      assert.ok(NUMBER_LOOK_KINDS.includes(number), `${at} number ${number}`);
+      assert.equal(typeof turn, 'number', `${at} turn`);
+      assert.ok(BUBBLE_MOTIONS[motion], `${at} motion ${motion}`);
+      assert.ok(PARTICLE_GLYPHS[effect.glyph], `${at} glyph ${effect.glyph}`);
+      assert.ok(PARTICLE_MODES.includes(effect.mode), `${at} mode ${effect.mode}`);
+      assert.ok(PARTICLE_LOOKS.includes(effect.look), `${at} look ${effect.look}`);
+      assert.ok(effect.count > 0 && effect.size[0] <= effect.size[1], `${at} count and size`);
+      effect.colors.forEach((role) => assert.ok(UI_COLORS[role], `${at} colour ${role}`));
+    });
+  });
+});
+
+test('every burst is drawn in every paint as one SVG, in the palette\'s roles only', async () => {
+  const { BURST_PAINTS, burstSvg } = await import('../../../../src/shared/ui/rollMoment.js');
+  const { burst } = SHAPE_STYLES.comic.shapes.moments.nat20;
+  BURST_PAINTS.forEach((paint) => {
+    const svg = burstSvg({ burst, paint, fill: 'accent' });
+    assert.match(svg, /^<svg [^>]*viewBox="0 0 130 100">.*<\/svg>$/s, paint);
+    // Black and white are fixed in every palette; every other colour is a role.
+    const literals = (svg.match(/#[0-9a-f]{3,6}\b/gi) || []).filter((hex) => !['#ffffff', '#000000'].includes(hex.toLowerCase()));
+    assert.deepEqual(literals, [], `${paint} has a literal colour`);
+  });
+});
+
+test('every particle layout stays in place for a throw, and moves for another', async () => {
+  const { PARTICLE_MODES, particleLayout } = await import('../../../../src/shared/ui/momentParticles.js');
+  PARTICLE_MODES.forEach((mode) => {
+    assert.deepEqual(particleLayout(mode, 6, 'roll-1'), particleLayout(mode, 6, 'roll-1'), mode);
+    assert.equal(particleLayout(mode, 6, 'roll-1').length, 6, mode);
+  });
+  assert.notDeepEqual(particleLayout('fly', 6, 'roll-1'), particleLayout('fly', 6, 'roll-2'));
+});
+
+test("the comic's moments keep their KAPOW and crash", () => {
+  const comic = shapeVariables('comic');
+  assert.deepEqual(
+    [comic['--gb-shape-nat20-aspect'], comic['--gb-shape-nat20-turn'], comic['--gb-shape-nat1-aspect'], comic['--gb-shape-nat1-turn']],
+    ['1.3', '-8deg', '1', '14deg'],
+  );
 });

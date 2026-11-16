@@ -13,6 +13,7 @@ import { normalizeRollIdentity } from '../../character/dice/rollLogPresentation.
 import { makeId } from '../../ids.js';
 import { numberOrNull } from '../../numbers.js';
 import { sharedDice, viewerDiceChoice } from '../../ui/diceSets.js';
+import { sharedStyle, viewerStyleId } from '../../ui/shapes.js';
 
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 50;
@@ -61,8 +62,9 @@ function normalizeTimestamp(value) {
 // A dice roll as it goes out on the table's channel: the toast fields (label,
 // detail, total, dice), who rolled it and for which piece, how the roller is
 // drawn (`identity`: colour, shape, label — see normalizeRollIdentity), and
-// who may see it, and the dice the roller rolls with (`dice`: their style and
-// colours, diceSets.js), so the table sees their dice. Every screen that rolls makes its entries
+// who may see it, the dice the roller rolls with (`dice`: their style and
+// colours, diceSets.js), so the table sees their dice, and the style the
+// roller draws in (`style`, shapes.js), so the table sees their bubble. Every screen that rolls makes its entries
 // here: the sheet, the map (custom and creature rolls) and the encounter
 // builder.
 export function makeRollEntry(toast, {
@@ -80,6 +82,7 @@ export function makeRollEntry(toast, {
     visibility: visibility === 'public' ? 'public' : 'gm',
     thrown: Boolean(toast?.rolls?.length),
     dice: viewerDiceChoice(),
+    style: viewerStyleId(),
   };
 }
 
@@ -144,6 +147,8 @@ export function normalizeRoll(entry) {
     // The roller's dice; none (an older client's roll) is drawn in the
     // viewer's own.
     dice: sharedDice(entry.dice),
+    // The roller's style, its bubble drawn in it; none is the viewer's own.
+    style: sharedStyle(entry.style),
     at,
   };
 }

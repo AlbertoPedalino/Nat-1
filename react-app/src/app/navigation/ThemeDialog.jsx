@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Box, ButtonBase, Stack, Tab, Tabs, ThemeProvider, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, ButtonBase, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { Palette } from 'lucide-react';
 import SheetDialog, { DialogSection, DoneButton } from '../../shared/ui/SheetDialog.jsx';
 import ChoiceToggle from '../../shared/ui/ChoiceToggle.jsx';
@@ -11,13 +11,13 @@ import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
 import { SURFACES } from '../../shared/ui/surfaces.js';
 import { TEXT_STYLES } from '../../shared/ui/textStyles.js';
 import { focusRingSx } from '../../shared/ui/interactive.js';
-import { buildTheme } from '../theme.js';
+import StyleScope from '../StyleScope.jsx';
 import { MODE_CHOICES, STYLE_CHOICES, STYLE_DICE, chosenDice } from '../themeChoice.js';
 import { paletteForStyle } from '../../shared/ui/shapes.js';
 import { DICE_COLORS, DICE_STYLES } from '../../shared/ui/diceSets.js';
 import DiceSetScope from '../../shared/ui/DiceSetScope.jsx';
 import Die3D from '../../shared/character/dice/Die3D.jsx';
-import { themeVariables, useThemeChoice, useThemedValuesVersion } from '../ThemeChoiceProvider.jsx';
+import { useThemeChoice } from '../ThemeChoiceProvider.jsx';
 import { FONT_SIZES, linkStyleFonts } from '../../shared/ui/fonts.js';
 import { pressableSx } from '../../shared/ui/pressable.js';
 import { UI_COLORS } from '../../shared/ui/colors.js';
@@ -125,15 +125,10 @@ export default function ThemeDialog({ open, onClose }) {
   );
 }
 
-// A style's card: a small sample drawn in that style, whatever the page wears.
-// Every variable of its theme (themeVariables: palette, shapes, ink, surfaces,
-// faces and the values worked out in them) is written on the card itself, and
-// what is cut in code (the gems) reads the style's MUI theme.
+// A style's card: a small sample drawn in that style, whatever the page wears
+// (StyleScope: its theme's variables on the sample, and its MUI theme for
+// what is cut in code, the gems), in the palette it draws the chosen mode in.
 function StyleCard({ styleId, label, paletteId, chosen, onChoose }) {
-  const theme = useMemo(() => buildTheme({ paletteId, styleId }), [paletteId, styleId]);
-  // Redrawn when the sample first registers a value, so it is written too.
-  useThemedValuesVersion();
-  const variables = themeVariables(paletteId, styleId);
   return (
     <ButtonBase
       role="radio"
@@ -142,18 +137,16 @@ function StyleCard({ styleId, label, paletteId, chosen, onChoose }) {
       onClick={onChoose}
       sx={[cardSx, chosen && chosenCardSx]}
     >
-      <ThemeProvider theme={theme}>
-        <Box sx={[variables, sampleSx]}>
-          <PanelHeader icon={GAME_ICONS.characterSheet} title={label} />
-          <Stack direction="row" spacing={1} sx={sampleRowSx}>
-            <CountSeal count={3} />
-            <GemPip available kind="slot" size="sm" />
-            <GemPip available kind="uses" size="sm" />
-            <GemPip available={false} kind="uses" size="sm" />
-            <Box component="span" sx={sampleButtonSx}>Roll</Box>
-          </Stack>
-        </Box>
-      </ThemeProvider>
+      <StyleScope styleId={styleId} paletteId={paletteId} sx={sampleSx}>
+        <PanelHeader icon={GAME_ICONS.characterSheet} title={label} />
+        <Stack direction="row" spacing={1} sx={sampleRowSx}>
+          <CountSeal count={3} />
+          <GemPip available kind="slot" size="sm" />
+          <GemPip available kind="uses" size="sm" />
+          <GemPip available={false} kind="uses" size="sm" />
+          <Box component="span" sx={sampleButtonSx}>Roll</Box>
+        </Stack>
+      </StyleScope>
       <Typography component="span" sx={cardLabelSx}>{chosen ? `${label} · in use` : label}</Typography>
     </ButtonBase>
   );

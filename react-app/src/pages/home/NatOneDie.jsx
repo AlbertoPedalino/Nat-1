@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { OPACITY, UI_COLORS } from '../../shared/ui/colors.js';
 import { APP_DIE_FACES, APP_DIE_OUTLINE, appDiePoints } from '../../shared/ui/appDie.js';
 import { useDiceSet } from '../../shared/ui/DiceSetScope.jsx';
-import BubbleDizzy from '../../shared/ui/BubbleDizzy.jsx';
+import MomentParticles from '../../shared/ui/MomentParticles.jsx';
 import { focusRingSx } from '../../shared/ui/interactive.js';
 
 // The app's logo on the home cover: the inked, cel-shaded d20 (appDie.js, the
@@ -66,7 +66,7 @@ export default function NatOneDie({ roll = 0, animate = true, onRoll, sx }) {
       </Box>
       {/* Dazed by its own roll: stars circle the die once it lands on the 1. */}
       <Box sx={starsAnchorSx}>
-        {still ? null : <BubbleDizzy key={`stars-${roll}`} delay={NAT_ONE_LANDED_MS} reachX={70} reachY={14} starSize={30} />}
+        {still ? null : <MomentParticles key={`stars-${roll}`} glyph="star" mode="orbit" count={3} size={[30, 30]} colors={['accent']} delay={NAT_ONE_LANDED_MS} reach={{ x: 70, y: 14 }} />}
       </Box>
     </Box>
   );

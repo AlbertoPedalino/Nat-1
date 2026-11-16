@@ -277,3 +277,17 @@ test("a roll carries its roller's dice, and only dice that exist", () => {
   assert.equal(normalizeRoll({ ...entry, dice: undefined }).dice, null);
   setViewerDice(null);
 });
+
+// The table sees a roll's bubble, and its natural 20 or 1, in the style of
+// the player who rolled it, whatever style each screen wears.
+test("a roll carries its roller's style, a style this client does not know drawn in the viewer's own", async () => {
+  const { setViewerStyle } = await import('../../../../../src/shared/ui/shapes.js');
+  setViewerStyle('gothic');
+  const entry = makeRollEntry({ label: 'Attack', total: 20, rolls: [{ v: 20, faces: 20 }] });
+  assert.equal(entry.style, 'gothic');
+  assert.equal(normalizeRoll(entry).style, 'gothic');
+  assert.equal(normalizeRoll({ ...entry, style: 'plaid' }).style, null);
+  assert.equal(normalizeRoll({ ...entry, style: undefined }).style, null);
+  setViewerStyle(null);
+  assert.equal(makeRollEntry({ label: 'Attack', total: 3 }).style, 'comic');
+});

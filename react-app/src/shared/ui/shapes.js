@@ -92,23 +92,51 @@ const COMIC = deepFreeze({
   // How many segments a meter is cut into: a bar on a page, a piece's bar a
   // few pixels tall on the map, none for a smooth strip (XP).
   meterSegments: { bar: 10, piece: 5, smooth: 0 },
-  // The bursts behind a total that shouts (bubble.js). The natural 20's KAPOW:
-  // `width` units wide by 100 tall, squashed by `squash`, sharp spikes of a few
-  // lengths each leaning a little ([angle, reach, lean] in degrees and units),
-  // valleys of a few depths. The natural 1's crash: six arms of different reach
-  // ([angle, reach]), each kinked along its trailing edge ([share of reach,
-  // degrees off]), round a full `middle` the number sits inside.
-  bursts: {
-    kapow: {
-      width: 130,
-      squash: 0.78,
-      spikes: [[-90, 64, 4], [-62, 52, -3], [-38, 62, 5], [-14, 50, 0], [8, 60, -4], [32, 54, 3], [58, 63, 6], [84, 50, -2], [108, 61, 4], [134, 53, -5], [158, 64, 3], [182, 51, 0], [206, 62, -4], [232, 52, 4]],
-      valleys: [37, 40, 36, 39, 38, 35, 40, 37, 39, 36, 38, 40, 36, 39],
+  // A natural 20's and a natural 1's moment (rollMoment.js): the `burst`
+  // drawn behind the total that shouts, in its `fill` role, painted in a
+  // technique (`paint`) and turned `turn` degrees; how the total is lettered
+  // on it (`number`); how the roll's bubble moves (`motion`, bubble.js
+  // BUBBLE_MOTIONS); and the particles drawn round it (`effect`,
+  // momentParticles.js, RollMomentEffect.jsx). A burst is of a
+  // `kind` (rollMoment.js BURSTS), drawn in a box `width` units wide (100
+  // where it gives none) by 100 tall. The comic's: the natural 20's KAPOW, squashed by `squash`, sharp
+  // spikes of a few lengths each leaning a little ([angle, reach, lean] in
+  // degrees and units), valleys of a few depths; the natural 1's crash, six
+  // arms of different reach ([angle, reach]), each kinked along its trailing
+  // edge ([share of reach, degrees off]), round a full `middle` the number
+  // sits inside; the bubble cheers on a 20 and groans on a 1, sparkling and
+  // seeing stars (particles: sparkles popping, stars circling).
+  moments: {
+    nat20: {
+      // KAPOW, a spring, sparkles all round.
+      burst: {
+        kind: 'kapow',
+        width: 130,
+        squash: 0.78,
+        spikes: [[-90, 64, 4], [-62, 52, -3], [-38, 62, 5], [-14, 50, 0], [8, 60, -4], [32, 54, 3], [58, 63, 6], [84, 50, -2], [108, 61, 4], [134, 53, -5], [158, 64, 3], [182, 51, 0], [206, 62, -4], [232, 52, 4]],
+        valleys: [37, 40, 36, 39, 38, 35, 40, 37, 39, 36, 38, 40, 36, 39],
+      },
+      fill: 'accent',
+      paint: 'comic',
+      number: 'ink',
+      turn: -8,
+      motion: 'cheer',
+      effect: { glyph: 'sparkle', mode: 'pop', count: 8, size: [18, 30], colors: ['accentHighlight', 'spell', 'accent'], look: 'ink' },
     },
-    crash: {
-      arms: [[-85, 48], [-20, 42], [40, 47], [110, 40], [170, 48], [235, 43]],
-      kinks: [[0.74, 8], [0.84, 13]],
-      middle: 33,
+    nat1: {
+      // A crash, a shake, stars circling the head.
+      burst: {
+        kind: 'crash',
+        arms: [[-85, 48], [-20, 42], [40, 47], [110, 40], [170, 48], [235, 43]],
+        kinks: [[0.74, 8], [0.84, 13]],
+        middle: 33,
+      },
+      fill: 'dangerDeep',
+      paint: 'comic',
+      number: 'ink',
+      turn: 14,
+      motion: 'groan',
+      effect: { glyph: 'star', mode: 'orbit', count: 3, size: [24, 24], colors: ['accent'], look: 'ink' },
     },
   },
   // An on/off switch (every ToggleRow): a rounded track `width` by `height`
@@ -219,17 +247,26 @@ const SCIFI = deepFreeze({
     training: { sides: 3, outer: [50, 52, 40, 40], inner: [50, 54, 16, 16], shadowDrop: 0 },
   },
   meterSegments: { bar: 20, piece: 8, smooth: 0 },
-  bursts: {
-    kapow: {
-      width: 120,
-      squash: 0.7,
-      spikes: [[-90, 62, 0], [-45, 58, 0], [0, 62, 0], [45, 58, 0], [90, 62, 0], [135, 58, 0], [180, 62, 0], [225, 58, 0]],
-      valleys: [30, 30, 30, 30, 30, 30, 30, 30],
+  moments: {
+    nat20: {
+      // A targeting hexagon drawn as a hologram, radar rings.
+      burst: { kind: 'notched', sides: 6, reach: 52, edge: 46, depth: 34, width: 115, squash: 0.87 },
+      fill: 'accent',
+      paint: 'hologram',
+      number: 'glow',
+      turn: 0,
+      motion: 'materialize',
+      effect: { glyph: 'ring', mode: 'ring', count: 3, size: [30, 30], colors: ['edge'], look: 'glow' },
     },
-    crash: {
-      arms: [[-90, 46], [-30, 46], [30, 46], [90, 46], [150, 46], [210, 46]],
-      kinks: [[0.7, 0], [0.85, 0]],
-      middle: 30,
+    nat1: {
+      // A warning octagon split open, a glitch, short-circuit sparks.
+      burst: { kind: 'polygon', points: [[31.6, 5.7], [68.4, 5.7], [94.3, 31.6], [85.6, 44.7], [94, 48.1], [72, 51.3], [89.3, 57.3], [94.3, 68.4], [68.4, 94.3], [31.6, 94.3], [5.7, 68.4], [5.7, 31.6]] },
+      fill: 'danger',
+      paint: 'hologram',
+      number: 'glow',
+      turn: 6,
+      motion: 'glitch',
+      effect: { glyph: 'spark', mode: 'fly', count: 9, size: [10, 16], colors: ['danger', 'edge'], look: 'glow' },
     },
   },
   switch: { width: 44, height: 22, thumb: 14, inset: 4 },
@@ -262,6 +299,28 @@ const SCIFI = deepFreeze({
 // moving a little slower.
 const GOTHIC = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A rose window cut in wood, rising from the dark, bats scattering.
+      burst: { kind: 'star', points: 12, reach: [54, 40, 46], inner: 28, width: 110, squash: 0.86 },
+      fill: 'accent',
+      paint: 'engraving',
+      number: 'engrave',
+      turn: -4,
+      motion: 'loom',
+      effect: { glyph: 'bat', mode: 'fly', count: 7, size: [22, 30], colors: ['spell', 'danger'], look: 'silhouette' },
+    },
+    nat1: {
+      // Blood spattered and running, the bubble fainting, drops falling.
+      burst: { kind: 'splat', base: 34, waves: [[5, 5], [11, 3, 30]], drips: [[70, 26, 9], [96, 34, 7], [122, 20, 8]] },
+      fill: 'dangerDeep',
+      paint: 'engraving',
+      number: 'engrave',
+      turn: 0,
+      motion: 'faint',
+      effect: { glyph: 'drop', mode: 'fall', count: 6, size: [12, 18], colors: ['danger', 'dangerDeep'], look: 'soft' },
+    },
+  },
   ribbon: {
     panel: { notch: 14, pad: 22 },
     tile: { notch: 5, pad: 6 },
@@ -390,17 +449,26 @@ const WAR = deepFreeze({
     },
   },
   meterSegments: { bar: 10, piece: 5, smooth: 0 },
-  bursts: {
-    kapow: {
-      width: 125,
-      squash: 0.82,
-      spikes: [[-90, 60, 6], [-58, 44, -5], [-30, 64, 8], [-6, 40, -2], [20, 58, 7], [44, 46, -6], [70, 66, 4], [96, 42, -3], [120, 60, 9], [146, 48, -7], [170, 62, 3], [196, 40, -4], [222, 58, 6], [248, 46, -5]],
-      valleys: [30, 34, 28, 33, 30, 35, 29, 33, 31, 28, 34, 30, 32, 29],
+  moments: {
+    nat20: {
+      // A rubber stamp in red ink, slammed down, shell casings flying.
+      burst: { kind: 'polygon', width: 130, points: [[14, 10], [116, 10], [126, 20], [126, 80], [116, 90], [14, 90], [4, 80], [4, 20]] },
+      fill: 'accent',
+      paint: 'stamp',
+      number: 'stamp',
+      turn: -8,
+      motion: 'stamp',
+      effect: { glyph: 'casing', mode: 'fly', count: 7, size: [12, 16], colors: ['warning'], look: 'flat' },
     },
-    crash: {
-      arms: [[-80, 50], [-15, 38], [35, 52], [100, 36], [160, 50], [230, 40]],
-      kinks: [[0.6, 14], [0.8, 20]],
-      middle: 30,
+    nat1: {
+      // A blast sprayed through a stencil, a shell-shock quake, smoke.
+      burst: { kind: 'star', points: 11, reach: [40, 41, 61, 55, 51, 49, 50, 45, 52, 56, 46], inner: [22, 29, 26, 22, 24, 24, 26, 24, 32, 23, 31], lean: [-6, -7, -7, -4, 1, 5, -9, 8, 1, 2, 4], width: 120, squash: 0.8 },
+      fill: 'dangerDeep',
+      paint: 'stencil',
+      number: 'stencil',
+      turn: 4,
+      motion: 'quake',
+      effect: { glyph: 'puff', mode: 'rise', count: 7, size: [22, 34], colors: ['surface', 'bubble'], look: 'soft' },
     },
   },
   switch: { width: 46, height: 26, thumb: 16, inset: 5 },
@@ -432,6 +500,29 @@ const WAR = deepFreeze({
 // moons and sparkles for the gems, stars over the page.
 const ASTRAL = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A compass star of light, rising, a constellation lighting up.
+      burst: { kind: 'star', points: 8, reach: [58, 34], inner: 14 },
+      fill: 'accent',
+      paint: 'starlight',
+      // Inked: the star is white at its heart, where a lit number would vanish.
+      number: 'ink',
+      turn: 0,
+      motion: 'ascend',
+      effect: { glyph: 'star', mode: 'pop', count: 8, size: [10, 18], colors: ['accentText', 'spell', 'textPrimary'], look: 'glow' },
+    },
+    nat1: {
+      // An eclipse, the light going out, shooting stars.
+      burst: { kind: 'crescent', outer: [50, 50, 46], bite: [66, 42, 40] },
+      fill: 'danger',
+      paint: 'starlight',
+      number: 'glow',
+      turn: -18,
+      motion: 'eclipse',
+      effect: { glyph: 'ember', mode: 'fall', count: 5, size: [8, 12], colors: ['accentText', 'spell'], look: 'glow' },
+    },
+  },
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
@@ -508,6 +599,28 @@ const ASTRAL = deepFreeze({
 // sign for the crest, planks over the bars, a deck that rolls a little.
 const PIRATE = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A ship's wheel on a sea chart, bobbing, gold doubloons tossed spinning.
+      burst: { kind: 'lobes', base: 33, amp: 17, count: 8, power: 6 },
+      fill: 'accent',
+      paint: 'chart',
+      number: 'engrave',
+      turn: 11,
+      motion: 'bob',
+      effect: { glyph: 'doubloon', mode: 'toss', count: 7, size: [20, 26], colors: ['accent'], look: 'gold' },
+    },
+    nat1: {
+      // A splash, capsizing and righting, air bubbles.
+      burst: { kind: 'lobes', base: 34, amp: 22, count: 7, power: 3, top: true, flat: 0.78, width: 110 },
+      fill: 'dangerDeep',
+      paint: 'chart',
+      number: 'engrave',
+      turn: -6,
+      motion: 'capsize',
+      effect: { glyph: 'bubble', mode: 'rise', count: 8, size: [8, 16], colors: ['info'], look: 'soft' },
+    },
+  },
   ribbon: {
     panel: { notch: 16, pad: 24 },
     tile: { notch: 6, pad: 7 },
@@ -579,6 +692,28 @@ const PIRATE = deepFreeze({
 // the crest, gears, bulbs and nuts for the gems, pinstripes over the bars.
 const STEAMPUNK = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A brass cog, wound up and sprung, steam.
+      burst: { kind: 'gear', teeth: 12, outer: 50, inner: 41 },
+      fill: 'accent',
+      paint: 'brass',
+      number: 'emboss',
+      turn: 8,
+      motion: 'windup',
+      effect: { glyph: 'puff', mode: 'rise', count: 6, size: [20, 30], colors: ['textPrimary'], look: 'soft' },
+    },
+    nat1: {
+      // A broken cog, sputtering and jamming, nuts flying off.
+      burst: { kind: 'gear', teeth: 12, outer: 50, inner: 41, missing: [2, 3, 8], crack: 6 },
+      fill: 'dangerDeep',
+      paint: 'brass',
+      number: 'emboss',
+      turn: -10,
+      motion: 'sputter',
+      effect: { glyph: 'nut', mode: 'fly', count: 6, size: [12, 16], colors: ['accent', 'textSecondary'], look: 'flat' },
+    },
+  },
   ribbon: {
     panel: { notch: 0, pad: 14 },
     tile: { notch: 0, pad: 4 },
@@ -655,6 +790,28 @@ const STEAMPUNK = deepFreeze({
 // stone seals, a stone tablet for the crest, heavy ink, slow and heavy moves.
 const DWARVEN = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A rune shield in molten metal, struck like a hammer, forge sparks.
+      burst: { kind: 'polygon', width: 110, points: [[32, 2], [78, 2], [102, 30], [94, 76], [55, 99], [16, 76], [8, 30]] },
+      fill: 'accent',
+      paint: 'molten',
+      number: 'glow',
+      turn: 0,
+      motion: 'hammer',
+      effect: { glyph: 'ember', mode: 'rise', count: 10, size: [6, 12], colors: ['accent', 'accentText', 'danger'], look: 'glow' },
+    },
+    nat1: {
+      // A cracked boulder, crumbling, debris falling.
+      burst: { kind: 'splat', base: 44, waves: [[3, 5, 20], [7, 3]], notches: [[-80, 0.7, 6]], steps: 60, rough: 3, seed: 'boulder' },
+      fill: 'dangerDeep',
+      paint: 'stone',
+      number: 'engrave',
+      turn: 0,
+      motion: 'crumble',
+      effect: { glyph: 'rock', mode: 'fall', count: 7, size: [8, 14], colors: ['textFaint', 'outline'], look: 'flat' },
+    },
+  },
   ribbon: {
     panel: { notch: 8, pad: 16 },
     tile: { notch: 4, pad: 6 },
@@ -730,6 +887,28 @@ const DWARVEN = deepFreeze({
 // flowers, mushrooms and leaves for the gems, bouncy moves.
 const FEY = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A watercolour flower, blooming, petals flying.
+      burst: { kind: 'lobes', base: 26, amp: 24, count: 6, power: 0.7, scallop: true },
+      fill: 'accent',
+      paint: 'watercolor',
+      number: 'soft',
+      turn: 15,
+      motion: 'bloom',
+      effect: { glyph: 'petal', mode: 'fly', count: 9, size: [10, 16], colors: ['secondary', 'accent', 'spell'], look: 'soft' },
+    },
+    nat1: {
+      // A hooked bramble, wilting, dry leaves falling.
+      burst: { kind: 'star', points: 9, reach: 52, inner: 30, lean: 16, width: 105, squash: 0.9 },
+      fill: 'danger',
+      paint: 'watercolor',
+      number: 'soft',
+      turn: -8,
+      motion: 'wilt',
+      effect: { glyph: 'leaf', mode: 'fall', count: 6, size: [12, 18], colors: ['secondary', 'dangerDeep'], look: 'soft' },
+    },
+  },
   ribbon: {
     panel: { notch: 10, pad: 20 },
     tile: { notch: 4, pad: 6 },
@@ -803,6 +982,28 @@ const FEY = deepFreeze({
 // for the gems, slow and uneasy moves.
 const ABYSSAL = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // An eye opening in bleeding ink, throbbing, eyes blinking open round it.
+      burst: { kind: 'lens', width: 140, height: 88 },
+      fill: 'accent',
+      paint: 'inkbleed',
+      number: 'glow',
+      turn: 0,
+      motion: 'throb',
+      effect: { glyph: 'eye', mode: 'blink', count: 5, size: [18, 24], colors: ['accentText'], look: 'glow' },
+    },
+    nat1: {
+      // An ink blot running, drowning, ink drops.
+      burst: { kind: 'splat', base: 35, waves: [[3, 7, 60], [7, 5, 120], [13, 3]], drips: [[84, 30, 8], [118, 22, 7]] },
+      fill: 'danger',
+      paint: 'inkbleed',
+      number: 'soft',
+      turn: 0,
+      motion: 'drown',
+      effect: { glyph: 'drop', mode: 'fall', count: 6, size: [12, 18], colors: ['spell', 'surfaceDarkest'], look: 'soft' },
+    },
+  },
   ribbon: {
     panel: { notch: 12, pad: 22 },
     tile: { notch: 5, pad: 7 },
@@ -876,6 +1077,28 @@ const ABYSSAL = deepFreeze({
 // snappy moves.
 const PIXEL = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // An 8-bit star, a sprite's jump, pixel coins.
+      burst: { kind: 'stairs', of: { kind: 'star', points: 8, reach: [52, 38], inner: 24 } },
+      fill: 'accent',
+      paint: 'pixel',
+      number: 'flat',
+      turn: 0,
+      motion: 'jump',
+      effect: { glyph: 'pixelCoin', mode: 'fly', count: 6, size: [14, 18], colors: ['accent'], look: 'flat' },
+    },
+    nat1: {
+      // A broken pixel block, GAME OVER blinking, falling blocks.
+      burst: { kind: 'stairs', of: { kind: 'splat', base: 40, waves: [[5, 8], [9, 5, 40]], steps: 18 } },
+      fill: 'danger',
+      paint: 'pixel',
+      number: 'flat',
+      turn: 0,
+      motion: 'gameover',
+      effect: { glyph: 'pixel', mode: 'fall', count: 9, size: [8, 12], colors: ['danger', 'textPrimary'], look: 'flat' },
+    },
+  },
   ribbon: {
     panel: { notch: 10, pad: 18 },
     tile: { notch: 5, pad: 7 },
@@ -952,6 +1175,28 @@ const PIXEL = deepFreeze({
 // moves.
 const CYBERPUNK = deepFreeze({
   ...SCIFI,
+  moments: {
+    nat20: {
+      // Neon shards, sliced in by a glitch, data fragments.
+      burst: { kind: 'star', points: 7, reach: [62, 40, 56, 36, 60, 44, 50], inner: [18, 22, 16, 20, 24, 18, 20], width: 130, squash: 0.75, rotate: -80 },
+      fill: 'accent',
+      paint: 'neon',
+      number: 'glow',
+      turn: -6,
+      motion: 'glitchin',
+      effect: { glyph: 'shard', mode: 'fly', count: 8, size: [10, 16], colors: ['accent', 'secondary', 'info'], look: 'glow' },
+    },
+    nat1: {
+      // A virus in neon, a short circuit, the virus spreading.
+      burst: { kind: 'virus', body: 30, spikes: 10, length: 13, knob: 4.5 },
+      fill: 'danger',
+      paint: 'neon',
+      number: 'glow',
+      turn: 8,
+      motion: 'short',
+      effect: { glyph: 'virus', mode: 'pop', count: 8, size: [12, 18], colors: ['danger', 'secondary'], look: 'glow' },
+    },
+  },
   ribbon: {
     panel: { notch: 10, pad: 18 },
     tile: { notch: 5, pad: 7 },
@@ -1026,6 +1271,28 @@ const CYBERPUNK = deepFreeze({
 // stickers.
 const LAVENDER = deepFreeze({
   ...COMIC,
+  moments: {
+    nat20: {
+      // A puffy POW cloud in pastel, boing, little POW bursts popping.
+      burst: { kind: 'lobes', base: 38, amp: 11, count: 10, scallop: true, width: 120, squash: 0.8 },
+      fill: 'accent',
+      paint: 'pastel',
+      number: 'ink',
+      turn: -6,
+      motion: 'boing',
+      effect: { glyph: 'pow', mode: 'pop', count: 8, size: [16, 24], colors: ['secondary', 'accent', 'accentText'], look: 'ink' },
+    },
+    nat1: {
+      // A zigzag bolt, deflating, dizzy spirals.
+      burst: { kind: 'polygon', points: [[58, 0], [18, 56], [46, 56], [30, 100], [86, 38], [56, 38], [74, 0]] },
+      fill: 'dangerDeep',
+      paint: 'pastel',
+      number: 'ink',
+      turn: 0,
+      motion: 'deflate',
+      effect: { glyph: 'spiral', mode: 'orbit', count: 3, size: [20, 22], colors: ['accentText'], look: 'ink' },
+    },
+  },
   marker: { outline: 'M6 1 L11 6 L8.5 10 L11 15 L8.5 20 L11 24 L6 29 L1 24 L3.5 20 L1 15 L3.5 10 L1 6 Z', lines: 'M6 6 V24' },
   // A use is amber: the style's accent is the spells' violet.
   gemCuts: { ...COMIC.gemCuts, uses: { ...COMIC.gemCuts.uses, tones: { uses: 'warning' } } },
@@ -1053,6 +1320,25 @@ export const SHAPE_STYLES = Object.freeze({
 });
 
 export const BASE_STYLE_ID = 'comic';
+
+// The style the viewer draws in, for what reads it outside React: a roll sent
+// to the table carries it (rollFeed.js), so every screen draws that roll's
+// bubble as its roller sees it. The theme's provider keeps it.
+let viewerStyle = BASE_STYLE_ID;
+
+export function setViewerStyle(styleId) {
+  viewerStyle = SHAPE_STYLES[styleId] ? styleId : BASE_STYLE_ID;
+}
+
+export function viewerStyleId() {
+  return viewerStyle;
+}
+
+// A style a roll carries, if it is one this client knows; null otherwise (an
+// older client's roll, or a style added since), drawn in the viewer's own.
+export function sharedStyle(styleId) {
+  return SHAPE_STYLES[styleId] ? styleId : null;
+}
 
 // A style's shapes, the base style's for an unknown id.
 export function styleShapes(styleId) {
@@ -1124,12 +1410,19 @@ export const FOCUS_RING = Object.freeze({
 
 export const CHOICE_MARK = Object.freeze({ size: shapeVariable('choice-mark') });
 
-// A burst's box is as wide as its shape for the height it is drawn at
-// (bubble.js): its width over its height.
-export const BURST_ASPECT = Object.freeze({
-  kapow: shapeVariable('kapow-aspect'),
-  crash: shapeVariable('crash-aspect'),
+// A moment's burst (rollMoment.js) as the chosen style draws it: its box as
+// wide as its shape for the height it is drawn at (its width over its
+// height), and how far it is turned.
+export const MOMENT_BURST = Object.freeze({
+  nat20: Object.freeze({ aspect: shapeVariable('nat20-aspect'), turn: shapeVariable('nat20-turn') }),
+  nat1: Object.freeze({ aspect: shapeVariable('nat1-aspect'), turn: shapeVariable('nat1-turn') }),
 });
+
+// The moments a roll can have, and the variables a style fills for each.
+const momentVariables = (moments) => Object.fromEntries(Object.entries(moments).flatMap(([moment, { burst, turn }]) => [
+  [`--gb-shape-${moment}-aspect`, String((burst.width ?? 100) / 100)],
+  [`--gb-shape-${moment}-turn`, `${turn}deg`],
+]));
 
 // The meters' kinds of cut (SegmentedMeter's `segments`), counted by the style.
 export const METER_SEGMENTS = Object.freeze({ bar: 'bar', piece: 'piece', smooth: 'smooth' });
@@ -1154,8 +1447,7 @@ export function shapeVariables(styleId) {
     '--gb-shape-focus-width': `${shapes.focusRing.width}px`,
     '--gb-shape-focus-gap': `${shapes.focusRing.gap}px`,
     '--gb-shape-choice-mark': `${shapes.choiceMark.size}px`,
-    '--gb-shape-kapow-aspect': String(shapes.bursts.kapow.width / 100),
-    '--gb-shape-crash-aspect': '1',
+    ...momentVariables(shapes.moments),
     '--gb-ink-edge': `${shapes.ink.edge}px`,
     '--gb-ink-line': String(shapes.ink.edge / COMIC.ink.edge),
     '--gb-ink-drop': String(shapes.ink.drop),

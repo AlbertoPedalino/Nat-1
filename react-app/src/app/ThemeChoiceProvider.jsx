@@ -10,7 +10,7 @@ import {
 import { diceVariables, normalizeDice, setViewerDice } from '../shared/ui/diceSets.js';
 import { DiceSetProvider, appDieIcon } from '../shared/ui/DiceSetScope.jsx';
 import { paletteOf, paletteVariables } from '../shared/ui/colors.js';
-import { BASE_STYLE_ID, paletteForStyle, shapeVariables } from '../shared/ui/shapes.js';
+import { BASE_STYLE_ID, paletteForStyle, setViewerStyle, shapeVariables } from '../shared/ui/shapes.js';
 import { surfaceVariables } from '../shared/ui/surfaces.js';
 import { fontVariables, linkStyleFonts } from '../shared/ui/fonts.js';
 import { subscribeThemedValues, themedValuesVersion, themedVariables } from '../shared/ui/themedValues.js';
@@ -40,8 +40,10 @@ export function ThemeChoiceProvider({ children }) {
   const theme = useMemo(() => buildTheme({ paletteId, styleId: choice.style }), [paletteId, choice.style]);
   const { style: diceStyle, colors: diceColors } = chosenDice(choice);
   const dice = useMemo(() => normalizeDice({ style: diceStyle, colors: diceColors }), [diceStyle, diceColors]);
-  // The dice rolls sent to the table carry (rollFeed.js), kept as it renders.
+  // The dice and the style rolls sent to the table carry (rollFeed.js), kept
+  // as it renders.
   setViewerDice(dice);
+  setViewerStyle(choice.style);
 
   const setChoice = useCallback((patch) => {
     setChoiceState((current) => {

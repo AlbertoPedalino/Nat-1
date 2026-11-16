@@ -122,7 +122,7 @@ bold, references) `ruleEmphasis` (RICH_TEXT_ACCENT); the AC tile `armor`.
 A style is one entry of `SHAPE_STYLES` with the same keys as `comic` (guarded
 in `tests/logic/shared/ui/shapeStyles.test.js`). As with the palette, a shape
 that is a CSS value is the chosen style's variable (`SEAL_RADIUS`, `CREST`,
-`RIBBON`, `FOCUS_RING`, `CHOICE_MARK`, `BURST_ASPECT`: `var(--gb-shape-…)`); a
+`RIBBON`, `FOCUS_RING`, `CHOICE_MARK`, `MOMENT_BURST`: `var(--gb-shape-…)`); a
 shape worked out in code is read from the style (`useStyleShapes()` in
 `shared/ui/themeIds.js`: GemPip's cuts — a cut gem, or a token the style
 draws (`outline` and `shading`, `tones` by kind over GEM_TONES: gothic's
@@ -133,7 +133,29 @@ SegmentedMeter's counts — pass it a
 `METER_SEGMENTS` kind, not a number); the theme's own controls (tabs,
 switches, sliders, the chosen row's bookmark) take `styleShapes(styleId)` in
 `buildTheme`; a picture cut in the style's shapes (ornament, die glyph,
-bursts) is `svgStylePicture`.
+bursts) is `svgStylePicture`. A roll's natural 20 and natural 1 are the
+style's `moments` (`nat20`, `nat1`), each data only: a `burst` behind the
+total (a kind of `BURSTS` in `shared/ui/rollMoment.js` and its measures:
+kapow, crash, star, lobes, splat, gear, crescent, lens, virus, notched,
+polygon, stairs), its `fill` role, the technique it is painted in (`paint`,
+`BURST_PAINTS`: comic, pastel, engraving, hologram, stencil, stamp,
+starlight, chart, brass, molten, stone, watercolor, inkbleed, pixel, neon),
+how the total is lettered on it (`number`, `NUMBER_LOOK_KINDS`), its `turn`,
+how the bubble moves (`motion`, `BUBBLE_MOTIONS` in `bubble.js`, every one
+settling at `--gb-bubble-rest`) and the particles round it (`effect`: a
+glyph, a mode and a look of `momentParticles.js`, drawn by
+`MomentParticles.jsx`, the comic's sparkles and circling stars among them;
+its glyphs are the app's one drawing of each, a gem's sparkle and the home
+die's stars too). What a moment says and its colours are `MOMENT_WORDS`
+(the toast, a bubble and the roll log). Stars and crescents are cut by the
+hand-drawing kit (`handDrawing.js` `starCorners`, `crescentPoints`). Every roll that shouts
+(the dice toast, a roll bubble on the map) takes them through `rollMoment`,
+`momentBurstSx`, `useRollMoment` and `RollMomentEffect`, never on its own; a
+new look is an entry in one of those lists and data in `shapes.js`. A roll
+sent to the table carries its roller's style (`style`, `viewerStyleId`), and
+the map draws its bubble in it (`app/StyleScope.jsx`: a part of the page in
+another style, the theme panel's samples too), so every player sees a roll
+as its roller does.
 
 The style also inks (`ink` in `shapes.js`: `edge` width, `drop` share of the
 solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
@@ -193,7 +215,7 @@ and squashes (`PRESS_MOTION_SX`).
 | `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palettes (`PALETTES`: each role's hex per palette) and the interface roles as variables, the colour of each kind of thing, the map's tones (derived from the interface's) |
 | `fonts.js`, `textStyles.js` | the faces (per style: `FONT_STYLES`), the type scale, each text role |
 | `shadows.js`, `surfaces.js` | the ink (scaled by the style's `ink`): edges, solid shadows, surfaces (paper, stripe), the meter track |
-| `shapes.js` | the styles (`SHAPE_STYLES`) and every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's bursts, a switch, a checkbox, the ornament, the focus ring, a formula's die |
+| `shapes.js` | the styles (`SHAPE_STYLES`) and every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's moments (`moments`: its bursts, motion and effect), a switch, a checkbox, the ornament, the focus ring, a formula's die |
 | `ornament.js`, `ruleText.js`, `rollToken.js` | the ornament drawn once (card rules, page and section titles, a rule's list); a rule's list, boxed text and table in both renderers; a dice formula in the rules' text |
 | `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes — each role drawn in the chosen style's set (comic: game-icons.net and lucide; sci-fi: Tabler line icons), the same role keys in every set (`ICON_SETS`, tested); a role is a component that picks its drawing by `useStyleId()` |
 | `motion.js` | how long things move (`motionTime`: at the style's pace) |
