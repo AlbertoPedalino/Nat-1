@@ -7,7 +7,10 @@ import { LETTERING_LINE, letteringStroke, UI_COLORS, uiAlpha, OPACITY } from './
 // surfaces higher or lower (`depth`). In px, as lengths of the comic cut.
 export const INK_WIDTH = 'var(--gb-ink-edge)';
 const inkLine = (px) => `calc(${px}px * var(--gb-ink-line))`;
-const drop = (px) => `calc(${px}px * var(--gb-ink-drop))`;
+// How far a solid shadow falls for `px` (a number, or an expression such as
+// a bubble's own drop), as the style drops its shadows.
+export const inkDrop = (px) => `calc(${px} * 1px * var(--gb-ink-drop))`;
+const drop = inkDrop;
 const depth = (px) => `calc(${px}px * var(--gb-ink-depth))`;
 // How far a solid shadow blurs out: none in a drawn style, a lit line's halo
 // in a glowing one (shapes.js ink.glow).

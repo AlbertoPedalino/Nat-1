@@ -6,10 +6,9 @@ import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
+import { SHOUT_TILT, bubbleSx, bubbleTailSx, bubbleToneSx } from '../../ui/bubble.js';
 import { momentBurstSx, rollMoment, useRollMoment } from '../../ui/rollMoment.js';
 import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
-import { inkShadow } from '../../ui/shadows.js';
 import TagChip from '../../ui/TagChip.jsx';
 import BubbleHeader from '../../ui/BubbleHeader.jsx';
 
@@ -19,7 +18,7 @@ import BubbleHeader from '../../ui/BubbleHeader.jsx';
 
 const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: LAYERS.diceToast,
-  // A speech bubble, its tail pointing down at the corner the roll came from.
+  // A speech bubble, its tail pointing down at the dice dock the roll came from.
   ...bubbleSx(), ...bubbleTailSx({ side: 'bottom', at: '82%' }),
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
   // No backdrop blur: behind a 95%-opaque surface it could not be seen, and
@@ -53,7 +52,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     <Box sx={{
       ...toastRootSx,
       // The roll's colour throws the bubble's shadow; a 20 or a 1 its own.
-      ...(layout.tone ? { boxShadow: inkShadow(layout.tone) } : {}),
+      ...(layout.tone ? bubbleToneSx(layout.tone) : null),
       ...drawn?.bubbleSx,
     }}>
       <RollMomentEffect key={seed} moment={moment} seed={seed} />

@@ -5,10 +5,9 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
+import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx, bubbleToneSx } from '../../../shared/ui/bubble.js';
 import { momentBurstSx, rollMoment, useRollMoment } from '../../../shared/ui/rollMoment.js';
 import RollMomentEffect from '../../../shared/ui/RollMomentEffect.jsx';
-import { inkShadow } from '../../../shared/ui/shadows.js';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
@@ -75,7 +74,7 @@ function RollBubbleCard({ roll, onDismiss }) {
         } : null)}
         sx={{
           ...rollBubbleSx,
-          ...(layout.tone ? { boxShadow: inkShadow(layout.tone) } : {}),
+          ...(layout.tone ? bubbleToneSx(layout.tone) : null),
           ...drawn?.bubbleSx,
           ...(onDismiss ? dismissableSx : {}),
         }}

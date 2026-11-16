@@ -38,6 +38,20 @@ const POWER_CELL = {
 
 // The comic cut: inked, hand-pressed and bold.
 const COMIC = deepFreeze({
+  // The speech bubble (bubble.js, bubbleLooks.js): its `fill` role and `texture`, a drawn `frame` or none, its `radius` ('theme': two of the
+  // style's units), `border` and `outline`, `tilt` (degrees), `shadow` and `tail` (drawn only where it speaks from something). The comic's: a
+  // speech balloon, inked thick, a little askew, a solid shadow, an inked triangle for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'plain',
+    frame: 'none',
+    radius: 'theme',
+    border: { width: 3, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: -0.8,
+    shadow: 'ink',
+    tail: { kind: 'triangle', fill: 'bubble', line: 'edge' },
+  },
   // A panel bar's ribbon: each end notched in a swallowtail `notch` px deep,
   // the ends widened by `pad` px to clear it. A stat tile's is shallower and
   // slimmer, so its name (Armor Class, Inspiration) keeps the room. `ends`
@@ -225,6 +239,18 @@ const COMIC = deepFreeze({
 // scanlines over the bars and a grid of points over the page, quick moves
 // with no hop. Made to test that a style changing every piece carries.
 const SCIFI = deepFreeze({
+  // A console's panel: two corners cut, a lit line, scanlines, a glow, a leader line for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'scanlines',
+    frame: 'chamfer',
+    radius: 'theme',
+    border: { width: 1, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'glow',
+    tail: { kind: 'leader', fill: 'edge', line: 'edge' },
+  },
   // Straight bars: no swallowtail.
   ribbon: {
     panel: { notch: 10, pad: 18 },
@@ -299,6 +325,18 @@ const SCIFI = deepFreeze({
 // moving a little slower.
 const GOTHIC = deepFreeze({
   ...COMIC,
+  // A pointed arch in a double thin line, a soft shadow, candle wax running off for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'arch',
+    frame: 'none',
+    radius: '50% 50% 4px 4px / 26px 26px 4px 4px',
+    border: { width: 1.5, style: 'solid', role: 'accent' },
+    outline: { width: 1, offset: 3, role: 'accentMuted' },
+    tilt: 0,
+    shadow: 'soft',
+    tail: { kind: 'drip', fill: 'accent', line: 'accent' },
+  },
   moments: {
     nat20: {
       // A rose window cut in wood, rising from the dark, bats scattering.
@@ -393,6 +431,18 @@ const GOTHIC = deepFreeze({
 // tabs, a military star, paper grain over the page and hatching over the
 // bars, heavy ink and slow, wary moves.
 const WAR = deepFreeze({
+  // A typed field form: square, ruled, askew, a paper corner for a tail.
+  bubble: {
+    fill: 'surfaceRaised',
+    texture: 'ruled',
+    frame: 'none',
+    radius: '2px',
+    border: { width: 0, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: -1.6,
+    shadow: 'ink',
+    tail: { kind: 'paper', fill: 'surfaceRaised', line: 'edge' },
+  },
   ribbon: {
     panel: { notch: 12, pad: 20 },
     tile: { notch: 5, pad: 7 },
@@ -500,6 +550,18 @@ const WAR = deepFreeze({
 // moons and sparkles for the gems, stars over the page.
 const ASTRAL = deepFreeze({
   ...COMIC,
+  // Night glass dusted with stars, a soft glow, three stars trailing for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'stardust',
+    frame: 'none',
+    radius: '16px',
+    border: { width: 1, style: 'solid', role: 'accentMuted' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'glow',
+    tail: { kind: 'stars', fill: 'accent', line: 'accent' },
+  },
   moments: {
     nat20: {
       // A compass star of light, rising, a constellation lighting up.
@@ -599,6 +661,18 @@ const ASTRAL = deepFreeze({
 // sign for the crest, planks over the bars, a deck that rolls a little.
 const PIRATE = deepFreeze({
   ...COMIC,
+  // A torn scrap of a stained chart, a torn strip for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'stain',
+    frame: 'torn',
+    radius: 'theme',
+    border: { width: 0, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: -1,
+    shadow: 'drop',
+    tail: { kind: 'torn', fill: 'bubble', line: 'bubble' },
+  },
   moments: {
     nat20: {
       // A ship's wheel on a sea chart, bobbing, gold doubloons tossed spinning.
@@ -692,6 +766,18 @@ const PIRATE = deepFreeze({
 // the crest, gears, bulbs and nuts for the gems, pinstripes over the bars.
 const STEAMPUNK = deepFreeze({
   ...COMIC,
+  // A brass plate, bevelled and riveted, a bracket for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'arch',
+    frame: 'plate',
+    radius: 'theme',
+    border: { width: 3, style: 'solid', role: 'accent' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'drop',
+    tail: { kind: 'bracket', fill: 'accent', line: 'edge' },
+  },
   moments: {
     nat20: {
       // A brass cog, wound up and sprung, steam.
@@ -790,6 +876,18 @@ const STEAMPUNK = deepFreeze({
 // stone seals, a stone tablet for the crest, heavy ink, slow and heavy moves.
 const DWARVEN = deepFreeze({
   ...COMIC,
+  // A carved slab, every corner chiselled, grained, a stone wedge for a tail.
+  bubble: {
+    fill: 'surfaceRaised',
+    texture: 'grain',
+    frame: 'slab',
+    radius: 'theme',
+    border: { width: 2, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'drop',
+    tail: { kind: 'wedge', fill: 'surfaceRaised', line: 'edge' },
+  },
   moments: {
     nat20: {
       // A rune shield in molten metal, struck like a hammer, forge sparks.
@@ -887,6 +985,18 @@ const DWARVEN = deepFreeze({
 // flowers, mushrooms and leaves for the gems, bouncy moves.
 const FEY = deepFreeze({
   ...COMIC,
+  // A leaf-shaped petal, a soft glow, a curling tendril for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'glow',
+    frame: 'none',
+    radius: '60% 10% 60% 10% / 40% 10% 40% 10%',
+    border: { width: 2, style: 'solid', role: 'accentMuted' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'glow',
+    tail: { kind: 'curl', fill: 'accent', line: 'accent' },
+  },
   moments: {
     nat20: {
       // A watercolour flower, blooming, petals flying.
@@ -982,6 +1092,18 @@ const FEY = deepFreeze({
 // for the gems, slow and uneasy moves.
 const ABYSSAL = deepFreeze({
   ...COMIC,
+  // A wet blot of ink, its edge uneven, ink dripping off for a tail.
+  bubble: {
+    fill: 'surfaceDeep',
+    texture: 'glow',
+    frame: 'none',
+    radius: '42% 58% 48% 52% / 30% 34% 66% 70%',
+    border: { width: 2, style: 'solid', role: 'accentMuted' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'glow',
+    tail: { kind: 'drips', fill: 'surfaceDeep', line: 'accentMuted' },
+  },
   moments: {
     nat20: {
       // An eye opening in bleeding ink, throbbing, eyes blinking open round it.
@@ -1077,6 +1199,18 @@ const ABYSSAL = deepFreeze({
 // snappy moves.
 const PIXEL = deepFreeze({
   ...COMIC,
+  // A pixel dialog box, a double square border, a block shadow, a stepped tail.
+  bubble: {
+    fill: 'surface',
+    texture: 'plain',
+    frame: 'none',
+    radius: '0',
+    border: { width: 3, style: 'solid', role: 'textPrimary' },
+    outline: { width: 3, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'block',
+    tail: { kind: 'stairs', fill: 'surface', line: 'textPrimary' },
+  },
   moments: {
     nat20: {
       // An 8-bit star, a sprite's jump, pixel coins.
@@ -1175,6 +1309,18 @@ const PIXEL = deepFreeze({
 // moves.
 const CYBERPUNK = deepFreeze({
   ...SCIFI,
+  // A slanted panel, its corners sliced, a lit bar down its side, an angular tab for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'plain',
+    frame: 'slant',
+    radius: 'theme',
+    border: { width: 0, style: 'solid', role: 'accent' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: 0,
+    shadow: 'drop',
+    tail: { kind: 'angular', fill: 'bubble', line: 'accent' },
+  },
   moments: {
     nat20: {
       // Neon shards, sliced in by a glitch, data fragments.
@@ -1271,6 +1417,18 @@ const CYBERPUNK = deepFreeze({
 // stickers.
 const LAVENDER = deepFreeze({
   ...COMIC,
+  // A puffy pastel balloon, its shadow straight under it, two puffs trailing for a tail.
+  bubble: {
+    fill: 'bubble',
+    texture: 'wash',
+    frame: 'none',
+    radius: '26px',
+    border: { width: 3, style: 'solid', role: 'edge' },
+    outline: { width: 0, offset: 0, role: 'edge' },
+    tilt: -1.2,
+    shadow: 'under',
+    tail: { kind: 'puffs', fill: 'bubble', line: 'edge' },
+  },
   moments: {
     nat20: {
       // A puffy POW cloud in pastel, boing, little POW bursts popping.

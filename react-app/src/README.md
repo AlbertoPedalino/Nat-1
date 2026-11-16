@@ -157,6 +157,19 @@ the map draws its bubble in it (`app/StyleScope.jsx`: a part of the page in
 another style, the theme panel's samples too), so every player sees a roll
 as its roller does.
 
+Every speech bubble (the dice toast and its game notices, the app's
+notices, a roll's or a hex's bubble on the map) is the style's `bubble`
+(`shapes.js`): its `fill` role and `texture`, a drawn `frame` (cut corners,
+a torn edge, a riveted plate…) or none, its `radius`, `border`, `outline`,
+`tilt`, `shadow` and `tail`, each a name from the lists in
+`shared/ui/bubbleLooks.js` (`BUBBLE_TEXTURES`, `BUBBLE_FRAMES`,
+`BUBBLE_SHADOWS`, `BUBBLE_TAILS`), worked out per style and palette as
+themed values. `bubble.js` `bubbleSx` draws it and `bubbleToneSx` sets the
+colour its shadow falls in (a roll's kind, a natural 20 or 1, a notice's
+severity); `bubbleTailSx` gives it a tail only where it speaks from
+something on the screen (a piece, a hex, the dice dock), never on the app's
+notices.
+
 The style also inks (`ink` in `shapes.js`: `edge` width, `drop` share of the
 solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
 figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels

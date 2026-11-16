@@ -274,3 +274,31 @@ test("the comic's moments keep their KAPOW and crash", () => {
     ['1.3', '-8deg', '1', '14deg'],
   );
 });
+
+// Every bubble (a toast, a roll or game notice, a bubble on the map) is drawn
+// as its style draws it, from kinds that exist, in the palette's roles only.
+test("every style draws its speech bubble from kinds that exist, in the palette's roles", async () => {
+  const {
+    BUBBLE_FRAME_KINDS, BUBBLE_SHADOW_KINDS, BUBBLE_TAIL_KINDS, BUBBLE_TEXTURE_KINDS, bubbleLook,
+  } = await import('../../../../src/shared/ui/bubbleLooks.js');
+  const { resolveColors } = await import('../../../../src/shared/ui/colors.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, palettes, shapes: { bubble } }) => {
+    assert.ok(UI_COLORS[bubble.fill], `${id} fill ${bubble.fill}`);
+    assert.ok(BUBBLE_TEXTURE_KINDS.includes(bubble.texture), `${id} texture ${bubble.texture}`);
+    assert.ok(BUBBLE_FRAME_KINDS.includes(bubble.frame), `${id} frame ${bubble.frame}`);
+    assert.ok(BUBBLE_SHADOW_KINDS.includes(bubble.shadow), `${id} shadow ${bubble.shadow}`);
+    assert.ok(BUBBLE_TAIL_KINDS.includes(bubble.tail.kind), `${id} tail ${bubble.tail.kind}`);
+    [bubble.border.role, bubble.outline.role, bubble.tail.fill, bubble.tail.line].forEach((role) => assert.ok(UI_COLORS[role], `${id} ${role}`));
+    Object.values(palettes).forEach((paletteId) => {
+      const look = bubbleLook(id, (text) => resolveColors(text, paletteId));
+      Object.entries(look).forEach(([key, value]) => {
+        assert.equal(typeof value, 'string', `${id} ${key}`);
+        assert.ok(!value.includes('undefined'), `${id} ${key}`);
+        // Only the bubble's own tone and the style's ink are left to the page.
+        const left = (value.match(/var\(--gb-[a-z0-9-]+\)/g) || []).filter((name) => !/--gb-(bubble-(tone|drop)|ink-(drop|glow|line|depth))\)/.test(name));
+        assert.deepEqual(left, [], `${id} ${paletteId} ${key}`);
+      });
+    });
+  });
+  assert.equal(bubbleLook('comic').radius, '20px', "the comic's bubble keeps its corners");
+});

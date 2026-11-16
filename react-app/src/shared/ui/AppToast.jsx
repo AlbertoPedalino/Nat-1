@@ -4,7 +4,7 @@ import { UI_FONTS, FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
-import { bubbleSx, bubbleTailSx } from './bubble.js';
+import { bubbleSx } from './bubble.js';
 import { TEXT_STYLES } from './textStyles.js';
 import BubbleHeader from './BubbleHeader.jsx';
 
@@ -71,10 +71,9 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               alignItems: 'flex-start',
               minWidth: 240,
               maxWidth: 360,
-              // A speech bubble, its shadow in the notice's colour, its tail
-              // pointing up at the bar it drops from.
+              // The style's bubble, its shadow in the notice's colour; no tail:
+              // a notice speaks from nothing on the screen.
               ...bubbleSx({ tone: color, pop: false }),
-              ...bubbleTailSx({ side: 'top', at: '82%' }),
               position: 'relative',
               overflow: 'visible',
               color: UI_COLORS.textPrimary,

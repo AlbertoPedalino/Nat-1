@@ -1,9 +1,9 @@
 import { OPACITY, UI_COLORS, uiMix } from './colors.js';
 import { svgStylePicture } from './svgPicture.js';
 import { MOMENT_BURST } from './shapes.js';
-import { BUBBLE_MOTIONS } from './bubble.js';
+import { BUBBLE_MOTIONS, bubbleToneSx } from './bubble.js';
 import { useStyleShapes } from './themeIds.js';
-import { APPLE_WEBKIT_QUERY, PLAIN_LETTERING, inkLettering, inkShadow } from './shadows.js';
+import { APPLE_WEBKIT_QUERY, PLAIN_LETTERING, inkLettering } from './shadows.js';
 import { LETTER_SPACINGS } from './fonts.js';
 import { seededRandom } from '../seededRandom.js';
 import { crescentPoints, polygonPath, starCorners } from './handDrawing.js';
@@ -360,7 +360,7 @@ export function useRollMoment(moment, rest) {
   const { motion, number, fill } = moments[moment];
   const { label, text, shadow, drop } = MOMENT_WORDS[moment];
   return {
-    bubbleSx: { boxShadow: inkShadow(UI_COLORS[shadow], drop), ...BUBBLE_MOTIONS[motion](rest) },
+    bubbleSx: { ...bubbleToneSx(UI_COLORS[shadow], drop), ...BUBBLE_MOTIONS[motion](rest) },
     numberSx: NUMBER_LOOKS[number](UI_COLORS[fill]),
     label,
     labelColor: UI_COLORS[text],

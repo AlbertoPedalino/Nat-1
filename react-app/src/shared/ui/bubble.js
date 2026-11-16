@@ -1,24 +1,38 @@
 import { OPACITY, UI_COLORS } from './colors.js';
-import { inkShadow, inkEdge } from './shadows.js';
 import { DURATIONS, motionTime } from './motion.js';
+import { BUBBLE } from './bubbleLooks.js';
 
-// The comic speech bubble: every toast and roll bubble is one. A thick ink
-// edge, a solid offset shadow — in ink, or in the moment's colour (the accent
-// on a natural 20, danger on a natural 1, a notice's severity) — and a tail
-// pointing where it speaks from.
+// The speech bubble: every toast, every roll and game notice, every bubble on
+// the map is one, drawn as the chosen style draws it (shapes.js `bubble`,
+// bubbleLooks.js: its fill and texture, frame, corners, border, tilt, shadow
+// and tail). Its shadow falls in the moment's colour (the accent on a natural
+// 20, danger on a natural 1, a notice's severity: bubbleToneSx), and where it
+// speaks from something it has a tail pointing there (bubbleTailSx).
 
-// The bubble's slight tilt, and the larger one of a moment that shouts.
-const TILT = '-0.8deg';
-export const SHOUT_TILT = 'rotate(-1.6deg) scale(1.06)';
+// The bubble's tilt (the style's), and the larger one of a moment that shouts.
+const TILT = 'var(--gb-bubble-tilt)';
+export const SHOUT_TILT = `rotate(calc(${TILT} * 2)) scale(1.06)`;
 
-// The bubble itself, filled with `fill`; `tone` colours its shadow. It sits a
-// little askew and, with `pop`, snaps in like a speech balloon drawn in.
-export function bubbleSx({ fill = UI_COLORS.bubble, tone = UI_COLORS.edge, pop = true } = {}) {
+// The colour the bubble's shadow falls in, and how far (as the ink's 3px).
+export function bubbleToneSx(tone, drop = 3) {
+  return { '--gb-bubble-tone': tone, '--gb-bubble-drop': String(drop) };
+}
+
+// The bubble itself; `tone` colours its shadow. It sits as the style tilts it
+// and, with `pop`, snaps in like a speech balloon drawn in.
+export function bubbleSx({ tone = UI_COLORS.edge, pop = true } = {}) {
   return {
-    bgcolor: fill,
-    border: inkEdge(3),
-    borderRadius: 2,
-    boxShadow: inkShadow(tone),
+    ...bubbleToneSx(tone),
+    '--gb-bubble-tilt': BUBBLE.tilt,
+    background: BUBBLE.background,
+    backgroundClip: BUBBLE.backgroundClip,
+    border: BUBBLE.border,
+    borderImage: BUBBLE.borderImage,
+    borderRadius: BUBBLE.radius,
+    outline: BUBBLE.outline,
+    outlineOffset: BUBBLE.outlineOffset,
+    boxShadow: BUBBLE.boxShadow,
+    filter: BUBBLE.filter,
     transform: `rotate(${TILT})`,
     ...(pop ? {
       animation: `gbBubblePop ${motionTime(DURATIONS.slow)} cubic-bezier(0.34, 1.56, 0.64, 1)`,
@@ -31,27 +45,24 @@ export function bubbleSx({ fill = UI_COLORS.bubble, tone = UI_COLORS.edge, pop =
   };
 }
 
-// The tail, drawn by the bubble's own ::before (the ink) and ::after (the
-// fill over it), on its `side` ('top' or 'bottom') at `at` along it. The
-// bubble must be positioned (relative, fixed or absolute).
-export function bubbleTailSx({ fill = UI_COLORS.bubble, side = 'bottom', at = '50%' } = {}) {
-  const point = side === 'top' ? 'borderBottom' : 'borderTop';
-  const piece = (width, height, offset, color) => ({
-    content: '""',
-    position: 'absolute',
-    left: at,
-    [side]: -offset,
-    transform: 'translateX(-50%)',
-    width: 0,
-    height: 0,
-    borderLeft: `${width}px solid transparent`,
-    borderRight: `${width}px solid transparent`,
-    [point]: `${height}px solid ${color}`,
-    pointerEvents: 'none',
-  });
+// The tail, only where the bubble speaks from something (a piece on the map,
+// a hex, the dice dock a roll comes from): the style's, drawn by the bubble's
+// own ::before on its `side` ('top' or 'bottom') at `at` along it, over the
+// bubble's edge so it joins it. The bubble must be positioned.
+export function bubbleTailSx({ side = 'bottom', at = '50%' } = {}) {
   return {
-    '&::before': piece(11, 15, 15, UI_COLORS.edge),
-    '&::after': piece(7, 10, 10, fill),
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: at,
+      [side]: `calc(-1 * ${BUBBLE.tailReach})`,
+      width: BUBBLE.tailWidth,
+      height: BUBBLE.tailHeight,
+      transform: side === 'top' ? 'translateX(-50%) scaleY(-1)' : 'translateX(-50%)',
+      backgroundImage: BUBBLE.tail,
+      backgroundSize: '100% 100%',
+      pointerEvents: 'none',
+    },
   };
 }
 
