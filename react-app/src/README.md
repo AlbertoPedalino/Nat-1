@@ -71,7 +71,7 @@ one tints its panel bars in its accent and lays a page of its own colour). A new
 `colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in
 `gameIcons.js` (a set may spread the comic one and redraw some roles) and,
 with sticker paper, its papers (`PAPER_PICTURES`); no component changes,
-so the palette follows from the two (`paletteForStyle`). The choice lives in
+so the palette follows from the two (`paletteForStyle` in `shapes.js`: the one way from a style to its palette, for the page, the theme panel's samples and the dice). The choice lives in
 `app/themeChoice.js` (localStorage `gb:theme`, read by `index.html` before the
 first paint); `app/ThemeChoiceProvider.jsx` builds the theme for it
 (`buildTheme` in `app/theme.js`) and writes the palette on the page's root.
