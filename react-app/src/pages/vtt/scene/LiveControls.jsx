@@ -40,6 +40,7 @@ export default function LiveControls({
         size="small"
         variant="outlined"
         startIcon={<Radio size={ICON_SIZES.sm} />}
+        sx={liveButtonSx}
         aria-pressed={false}
         onClick={onToggleLive}
       >
@@ -57,6 +58,7 @@ export default function LiveControls({
           variant="contained"
           startIcon={<Radio size={ICON_SIZES.sm} />}
           endIcon={<ChevronDown size={ICON_SIZES.xs} />}
+          sx={liveButtonSx}
           aria-label="Live"
           aria-pressed
           aria-haspopup="menu"
@@ -107,6 +109,15 @@ export default function LiveControls({
     </Stack>
   );
 }
+
+// On a phone the GM's bar drops its buttons' leading icons for width, but Go
+// live and Live keep their radio: it is the one sign at a glance of whether the
+// table is watching. `&&` outranks the bar's phone rule.
+const liveButtonSx = {
+  '&& .MuiButton-startIcon': {
+    display: 'inherit',
+  },
+};
 
 const iconSx = {
   minWidth: 28,
