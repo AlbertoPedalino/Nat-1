@@ -1,3 +1,4 @@
+import { WEAPON_SLOTS } from '../../../shared/character/inventory/itemContainers.js';
 import { ALL_KEY } from '../../../shared/ui/toggleChoices.js';
 import {
   ACTION_COLORS,
@@ -62,8 +63,9 @@ export function buildActionTags(action) {
   if (action._notProficient) {
     tags.push(tagBadge('noprof', 'noprof', 'No Prof'));
   }
-  if (action._weaponSlot) {
-    tags.push(tagBadge('slot', 'slot', action._weaponSlot));
+  const slot = WEAPON_SLOTS[action._weaponSlot];
+  if (slot) {
+    tags.push(tagBadge('slot', 'slot', slot.label));
   }
 
   // No adapter "fact" chips: what is fixed (area, duration, save DC, a THP or

@@ -20,7 +20,7 @@ import { itemCardName } from '../../../shared/character/inventory/replicateMagic
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
 import { canOneHand, canTwoHand, isThrownWeapon } from './equipmentSlots.js';
-import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
+import { WEAPON_SLOTS } from '../../../shared/character/inventory/itemContainers.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
@@ -103,18 +103,14 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 0.75, flexWrap: 'wrap' }}>
           {carried && isWeaponItem(item) ? (
             <Box sx={{ display: 'flex', gap: 0.25 }}>
-              {canOneHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => actions.equipSlot(index, 'mainHand')} label="MH" />
-              ) : null}
-              {canOneHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'offHand'} onClick={() => actions.equipSlot(index, 'offHand')} label="OH" />
-              ) : null}
-              {canTwoHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => actions.equipSlot(index, 'twoHands')} label="2H" />
-              ) : null}
-              {isThrownWeapon(item) ? (
-                <SlotBtn active={item.equippedSlot === THROWN_SLOT} onClick={() => actions.equipSlot(index, THROWN_SLOT)} label="Thrown" />
-              ) : null}
+              {[
+                [WEAPON_SLOTS.mainHand, canOneHand(item)],
+                [WEAPON_SLOTS.offHand, canOneHand(item)],
+                [WEAPON_SLOTS.twoHands, canTwoHand(item)],
+                [WEAPON_SLOTS.thrown, isThrownWeapon(item)],
+              ].map(([slot, fits]) => (fits ? (
+                <SlotBtn key={slot.id} active={item.equippedSlot === slot.id} onClick={() => actions.equipSlot(index, slot.id)} label={slot.short} />
+              ) : null))}
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={ICON_SIZES.xxs} /> : null}

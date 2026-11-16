@@ -4,8 +4,22 @@ import { isItemCarried, itemQty } from './weight.js';
 import { matchKey, splitNameSource } from '../../content/nameKeys.js';
 import { stripMarkup } from '../../content/markupText.js';
 
-// The equipped slot of a stack readied to throw (Thrown weapons).
-export const THROWN_SLOT = 'thrown';
+// The slots a weapon is equipped in: one hand, the other, both, or a stack
+// readied to throw (Thrown weapons). `id` is what an item keeps in its
+// `equippedSlot`, `short` its key's lettering on an inventory row, `label` how
+// a card names it (an attack's tag).
+export const WEAPON_SLOTS = Object.freeze({
+  mainHand: Object.freeze({ id: 'mainHand', short: 'MH', label: 'Main Hand' }),
+  offHand: Object.freeze({ id: 'offHand', short: 'OH', label: 'Off Hand' }),
+  twoHands: Object.freeze({ id: 'twoHands', short: '2H', label: 'Two Hands' }),
+  thrown: Object.freeze({ id: 'thrown', short: 'Thrown', label: 'Thrown' }),
+});
+export const MAIN_HAND_SLOT = WEAPON_SLOTS.mainHand.id;
+export const OFF_HAND_SLOT = WEAPON_SLOTS.offHand.id;
+export const TWO_HANDS_SLOT = WEAPON_SLOTS.twoHands.id;
+export const THROWN_SLOT = WEAPON_SLOTS.thrown.id;
+// The slots that hold a weapon in hand.
+export const HAND_SLOTS = Object.freeze([MAIN_HAND_SLOT, OFF_HAND_SLOT, TWO_HANDS_SLOT]);
 
 export function parseInventoryItemRef(ref) {
   const { name, source } = splitNameSource(ref);

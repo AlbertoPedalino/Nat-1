@@ -1,3 +1,4 @@
+import { HAND_SLOTS, OFF_HAND_SLOT, TWO_HANDS_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 import { getMod, getFinal, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../../../shared/character/proficiency/proficiencyQueries.js';
@@ -102,7 +103,7 @@ function selectedWeaponMastery(item, selectedMasteriesByWeapon, items) {
 }
 
 function isHeldWeapon(item) {
-  return ['mainHand', 'offHand', 'twoHands'].includes(item?.equippedSlot) || Boolean(item?.equipped && !item?.equippedSlot);
+  return HAND_SLOTS.includes(item?.equippedSlot) || Boolean(item?.equipped && !item?.equippedSlot);
 }
 
 // A weapon a spell attacks through (True Strike), told apart from another copy
@@ -139,7 +140,7 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
   const mod = getMod(getFinal(C, ability));
   const enhancement = weaponEnhancement(item);
   const held = (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length;
-  const twoHanded = item.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
+  const twoHanded = item.equippedSlot === TWO_HANDS_SLOT || isTwoHandedWeapon(item);
   const info = {
     ...weaponKindInfo(item, { shieldEquipped: hasEquippedShield(inventory) }),
     twoHanded,
@@ -191,7 +192,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon(item) ? (ctx.strMeleeDamageBonus || 0) : 0;
   // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon)
   // plus weapon-scoped rule reminders (Great Weapon Master) share one weapon profile.
-  const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
+  const wieldedTwoHanded = item?.equippedSlot === TWO_HANDS_SLOT || isTwoHandedWeapon(item);
   const weaponInfo = {
     ...weaponKindInfo(item, ctx),
     twoHanded: wieldedTwoHanded,
@@ -279,12 +280,12 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
 
   const weaponActions = [];
   const hasTWF = hasTwoWeaponFightingStyle(C);
-  const offHandItem = attacks.find(i => i.equippedSlot === 'offHand');
+  const offHandItem = attacks.find(i => i.equippedSlot === OFF_HAND_SLOT);
   const canLightExtra = offHandItem && canUseLightExtraAttack(C, inventory);
   const extraAttackOverrides = adapterRegistry.getWeaponExtraAttacks();
 
   attacks.forEach((item) => {
-    if (item.equippedSlot === 'offHand' && canLightExtra) return;
+    if (item.equippedSlot === OFF_HAND_SLOT && canLightExtra) return;
     const base = getWeaponDamageDice(item, item.equippedSlot);
     const mainAction = makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, ctx, { damageBase: base });
     weaponActions.push(mainAction);

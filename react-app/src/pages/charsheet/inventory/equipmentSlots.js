@@ -7,7 +7,7 @@ import { itemHasProperty } from '../../../shared/character/inventory/weaponPrope
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { isShield, isWeaponItem } from '../../../shared/character/inventory/itemKinds.js';
 import { itemQty } from '../../../shared/character/inventory/weight.js';
-import { THROWN_SLOT } from '../../../shared/character/inventory/itemContainers.js';
+import { HAND_SLOTS, MAIN_HAND_SLOT, OFF_HAND_SLOT, THROWN_SLOT, TWO_HANDS_SLOT } from '../../../shared/character/inventory/itemContainers.js';
 
 export function isLightWeapon(item) {
   return itemHasProperty(item, 'light');
@@ -68,7 +68,7 @@ export function hasEquippedShield(inventory) {
 export function isWieldingWeaponOrShield(inventory) {
   const list = inventory || [];
   const shield = list.some((i) => i.equipped && isShield(i));
-  const weapon = list.some((i) => ['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) && isWeaponItem(i));
+  const weapon = list.some((i) => HAND_SLOTS.includes(i.equippedSlot) && isWeaponItem(i));
   return shield || weapon;
 }
 
@@ -85,18 +85,18 @@ export function getOneHandDamageDice(item) {
 }
 
 export function getWeaponDamageDice(item, equippedSlot) {
-  if (equippedSlot === 'twoHands' && isVersatileWeapon(item)) {
+  if (equippedSlot === TWO_HANDS_SLOT && isVersatileWeapon(item)) {
     return getVersatileDamageDice(item) || getOneHandDamageDice(item);
   }
   return getOneHandDamageDice(item);
 }
 
 function getEquippedMainHandWeapon(inventory) {
-  return (inventory || []).find(i => i.equippedSlot === 'mainHand');
+  return (inventory || []).find(i => i.equippedSlot === MAIN_HAND_SLOT);
 }
 
 function getEquippedOffHandWeapon(inventory) {
-  return (inventory || []).find(i => i.equippedSlot === 'offHand');
+  return (inventory || []).find(i => i.equippedSlot === OFF_HAND_SLOT);
 }
 
 export function hasTwoWeaponFightingStyle(C) {
@@ -121,9 +121,9 @@ export function canUseLightExtraAttack(C, inventory) {
 
 export function getSlotConflictWarnings(inventory) {
   const warnings = [];
-  const hasTwoHandedWeapon = (inventory || []).some(i => i.equippedSlot === 'twoHands');
+  const hasTwoHandedWeapon = (inventory || []).some(i => i.equippedSlot === TWO_HANDS_SLOT);
   const hasShield = hasEquippedShield(inventory);
-  const hasOffHandWeapon = (inventory || []).some(i => i.equippedSlot === 'offHand');
+  const hasOffHandWeapon = (inventory || []).some(i => i.equippedSlot === OFF_HAND_SLOT);
 
   if (hasTwoHandedWeapon && hasShield) {
     warnings.push('Two-handed weapon with shield: cannot use both.');
@@ -208,12 +208,12 @@ export function equipToSlot(inventory, index, slot) {
       return;
     }
 
-    if (slot === 'twoHands' && (item.equippedSlot === 'mainHand' || item.equippedSlot === 'offHand')) {
+    if (slot === TWO_HANDS_SLOT && (item.equippedSlot === MAIN_HAND_SLOT || item.equippedSlot === OFF_HAND_SLOT)) {
       next.push(unequipItem(item));
       return;
     }
 
-    if ((slot === 'mainHand' || slot === 'offHand') && item.equippedSlot === 'twoHands') {
+    if ((slot === MAIN_HAND_SLOT || slot === OFF_HAND_SLOT) && item.equippedSlot === TWO_HANDS_SLOT) {
       next.push(unequipItem(item));
       return;
     }
