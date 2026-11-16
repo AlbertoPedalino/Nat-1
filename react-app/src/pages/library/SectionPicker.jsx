@@ -20,8 +20,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { failureMessage } from '../../shared/ui/busyAction.js';
-import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
-import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
+import { LoadingLine, ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared

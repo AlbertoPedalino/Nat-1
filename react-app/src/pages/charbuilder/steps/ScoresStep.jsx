@@ -2,11 +2,10 @@ import { Alert, Box, Button, Grid, Stack, Tab, Tabs, TextField, Typography } fro
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { STANDARD_ARRAY } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
-import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
+import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore, baseScoreField } from '../../../shared/character/progression/abilityScores.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
-import { baseScoreField } from '../../../shared/character/progression/abilityScores.js';
 import { ICON_SIZES } from '../../../shared/ui/iconSizes.js';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';

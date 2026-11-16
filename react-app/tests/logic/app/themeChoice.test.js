@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  DEFAULT_THEME_CHOICE, MODE_CHOICES, STYLE_CHOICES, STYLE_DICE, chosenDice, normalizeThemeChoice, paletteForStyle,
+  DEFAULT_THEME_CHOICE, MODE_CHOICES, STYLE_CHOICES, STYLE_DICE, chosenDice, normalizeThemeChoice,
   resolvedMode,
 } from '../../../src/app/themeChoice.js';
 import {
   DICE_COLORS, DICE_STYLES, diceVariables, normalizeDice, resolveDice, sharedDice,
 } from '../../../src/shared/ui/diceSets.js';
 import { PALETTES } from '../../../src/shared/ui/colors.js';
-import { SHAPE_STYLES } from '../../../src/shared/ui/shapes.js';
+import { SHAPE_STYLES, paletteForStyle } from '../../../src/shared/ui/shapes.js';
 
 test('a theme choice keeps only known modes and styles', () => {
   assert.deepEqual(normalizeThemeChoice(null), DEFAULT_THEME_CHOICE);

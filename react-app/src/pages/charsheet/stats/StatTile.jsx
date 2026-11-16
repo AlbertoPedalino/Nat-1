@@ -1,8 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { inkOn } from '../../../shared/ui/pressable.js';
+import { inkOn, PRESS_MOTION_SX } from '../../../shared/ui/pressable.js';
 import { PANEL_BADGE_BOX, panelFrameSx, panelTitleBarSx, STAT_TILE_SIZE, tileTitleSx, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
-import { PRESS_MOTION_SX } from '../../../shared/ui/pressable.js';
 import { inkCutShadow } from '../../../shared/ui/shadows.js';
 import { CREST } from '../../../shared/ui/shapes.js';
 

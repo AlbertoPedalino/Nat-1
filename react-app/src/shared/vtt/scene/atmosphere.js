@@ -1,5 +1,4 @@
-import { clamp } from '../../numbers.js';
-import { numberOr } from '../../numbers.js';
+import { clamp, numberOr } from '../../numbers.js';
 // Atmosphere is scene state, but its animation is not. Every viewer receives this
 // small description and renders the same seeded atmosphere locally; no frame or
 // particle position ever crosses the wire.

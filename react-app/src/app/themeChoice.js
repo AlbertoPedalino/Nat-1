@@ -64,9 +64,3 @@ export function resolvedMode(mode, prefersLight) {
   if (mode === SYSTEM_MODE) return prefersLight ? 'light' : 'dark';
   return mode === 'light' ? 'light' : 'dark';
 }
-
-// The palette a style is drawn in for a mode ('dark' or 'light').
-export function paletteForStyle(styleId, mode) {
-  const style = SHAPE_STYLES[styleId] || SHAPE_STYLES[BASE_STYLE_ID];
-  return style.palettes[mode] || style.palettes.dark;
-}

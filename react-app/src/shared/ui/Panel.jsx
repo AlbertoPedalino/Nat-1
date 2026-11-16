@@ -16,9 +16,8 @@ export default function Panel({
 }) {
   return (
     <Paper id={id} variant="outlined" sx={{ ...panelFrameSx, ...(fill ? FILL_FRAME_SX : null), ...sx }}>
-      <PanelHeader icon={icon} title={title} tone={tone} titleSx={titleSx}>
+      <PanelHeader icon={icon} title={title} tone={tone} titleSx={titleSx} action={action}>
         <CountSeal count={count} tone={tone} />
-        {action ? <Box sx={{ ml: 'auto' }}>{action}</Box> : null}
       </PanelHeader>
       <Box sx={[bodySx ?? panelBodySx, fill ? FILL_BODY_SX : null]}>{children}</Box>
     </Paper>

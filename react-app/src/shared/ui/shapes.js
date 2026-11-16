@@ -1045,6 +1045,14 @@ export function styleShapes(styleId) {
   return (SHAPE_STYLES[styleId] || SHAPE_STYLES[BASE_STYLE_ID]).shapes;
 }
 
+// The palette a style is drawn in for a mode ('dark' or 'light'): the base
+// style's for an unknown id, its dark one for a mode it has none for. The one
+// way from a style to its palette (the page's, a sample's, a die's).
+export function paletteForStyle(styleId, mode) {
+  const style = SHAPE_STYLES[styleId] || SHAPE_STYLES[BASE_STYLE_ID];
+  return style.palettes[mode] || style.palettes.dark;
+}
+
 // The boxes the ornament's and the die glyph's paths are drawn in, px: a
 // layout size, the same in every style.
 export const ORNAMENT_BOX = 12;

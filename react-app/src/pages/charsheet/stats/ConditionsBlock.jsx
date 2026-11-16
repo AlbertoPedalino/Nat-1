@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
-import { EXHAUSTION_KEY, EXHAUSTION_MAX } from '../../../shared/character/combat/conditions.js';
-import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
+import { EXHAUSTION_KEY, EXHAUSTION_MAX, CONDITIONS } from '../../../shared/character/combat/conditions.js';
 import {
   CONDITION_ACCENT as COND_ACCENT,
   ConditionCard,

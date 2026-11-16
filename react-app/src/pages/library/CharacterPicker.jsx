@@ -24,9 +24,8 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { promptText } from '../../shared/ui/promptText.js';
 import { campaignSheetPath } from '../../shared/character/profile/characterRoutes.js';
 import { failureMessage } from '../../shared/ui/busyAction.js';
-import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
+import { LoadingLine, ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 import { ICON_SIZES } from '../../shared/ui/iconSizes.js';
-import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same

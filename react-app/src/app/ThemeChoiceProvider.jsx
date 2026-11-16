@@ -4,14 +4,13 @@ import {
 import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material';
 import { buildTheme } from './theme.js';
 import {
-  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, chosenDice, normalizeThemeChoice, paletteForStyle, readThemeChoice,
+  DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, chosenDice, normalizeThemeChoice, readThemeChoice,
   resolvedMode, writeThemeChoice,
 } from './themeChoice.js';
 import { diceVariables, normalizeDice, setViewerDice } from '../shared/ui/diceSets.js';
 import { DiceSetProvider, appDieIcon } from '../shared/ui/DiceSetScope.jsx';
-import { BASE_STYLE_ID } from '../shared/ui/shapes.js';
 import { paletteOf, paletteVariables } from '../shared/ui/colors.js';
-import { shapeVariables } from '../shared/ui/shapes.js';
+import { BASE_STYLE_ID, paletteForStyle, shapeVariables } from '../shared/ui/shapes.js';
 import { surfaceVariables } from '../shared/ui/surfaces.js';
 import { fontVariables, linkStyleFonts } from '../shared/ui/fonts.js';
 import { subscribeThemedValues, themedValuesVersion, themedVariables } from '../shared/ui/themedValues.js';

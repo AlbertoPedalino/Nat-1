@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
-import { getAllResourceDefs } from '../../../shared/character/resources/restResources.js';
+import { getAllResourceDefs, normalizeResourceMax } from '../../../shared/character/resources/restResources.js';
 import { resolveActionFormulas, collectAdapterActions } from '../../../shared/character/sheet/adapterActions.js';
 import { makeWildShapeActions } from '../../../shared/character/forms/wildShapeActions.js';
 import { FILTERS, SECTION_DEFS, buildActionTags } from './actionTags.js';
-import { normalizeResourceMax } from '../../../shared/character/resources/restResources.js';
 import { makeWeaponActions } from './weaponActions.js';
 import { loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
 import { levelHeaderSx, panelRootSx, panelToolbarSx } from '../spells/spellsTabStyles.js';

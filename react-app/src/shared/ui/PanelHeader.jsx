@@ -283,18 +283,32 @@ const GRIPPED_BAR_SX = {
 };
 
 // A bar the style draws as a banner (shapes.js panel.banner): the drawing in
-// place of the bar's paper, screentone, cut ends and rule, behind what the bar
-// holds (its own layer: the drawing goes under the badge and the title), what
-// it holds kept in from the banner's ends.
+// place of the bar's paper, screentone, cut ends and rule. The banner spans
+// the bar's badge, title and count (BANNER_ZONE_SX); the bar's action stands
+// after it on the panel, never on the drawing.
 const BANNER_BAR_SX = {
   ...UNCUT_BAR_SX,
   bgcolor: 'transparent',
   backgroundImage: 'none',
   borderBottom: 0,
+  pl: 0,
+  pr: '0.8rem',
+};
+
+// What the banner is drawn across, behind (its own layer: the drawing goes
+// under the badge and the title), kept in from the banner's ends; its title
+// sized to it (bannerTitleSx).
+const BANNER_ZONE_SX = {
+  position: 'relative',
   isolation: 'isolate',
+  flex: 1,
+  minWidth: 0,
   minHeight: BANNER_HEIGHT,
-  px: `${BANNER_INSET + 20}px`,
-  // Its title sized to the bar (bannerTitleSx).
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1,
+  pl: `${BANNER_INSET + 20}px`,
+  pr: `${BANNER_INSET + 12}px`,
   containerType: 'inline-size',
 };
 
@@ -316,17 +330,23 @@ function bannerTitleSx({ on, color, halo, inked }, size) {
   };
 }
 
-export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, children }) {
+// `children` follow the title (a count); `action` stands at the bar's end.
+export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, action, children }) {
   const { grip, banner } = useStyleShapes().panel;
   const gripped = grip !== 'none';
   const lettering = bannerTitle(banner);
-  return (
-    <Box sx={[panelTitleBarSx(tone), lettering && BANNER_BAR_SX, gripped && GRIPPED_BAR_SX]}>
-      {lettering ? <PanelBanner kind={banner} room={gripped ? GRIP_ROOM : 0} /> : null}
-      {gripped ? <PanelGrip kind={grip} /> : null}
+  const heading = (
+    <>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
       <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>
       {children}
+    </>
+  );
+  return (
+    <Box sx={[panelTitleBarSx(tone), lettering && BANNER_BAR_SX, gripped && GRIPPED_BAR_SX]}>
+      {gripped ? <PanelGrip kind={grip} /> : null}
+      {lettering ? <Box sx={BANNER_ZONE_SX}><PanelBanner kind={banner} />{heading}</Box> : heading}
+      {action ? <Box sx={{ ml: 'auto', flexShrink: 0 }}>{action}</Box> : null}
     </Box>
   );
 }

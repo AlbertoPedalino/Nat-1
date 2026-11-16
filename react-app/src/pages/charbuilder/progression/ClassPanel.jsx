@@ -153,7 +153,7 @@ export default function ClassPanel({ state, character, dispatch }) {
       icon={GAME_ICONS.classes}
       note={activeExtra ? 'Selecting multiclass class' : 'Selecting primary class'}
       action={
-        <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.5 }}>
+        <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
           {activeExtra ? (
             <Button size="small" color="error" startIcon={<Trash2 size={ICON_SIZES.md} />} onClick={requestRemove}>
               Remove

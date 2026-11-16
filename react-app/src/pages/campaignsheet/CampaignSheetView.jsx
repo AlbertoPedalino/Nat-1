@@ -1,8 +1,7 @@
 import AppPage from '../../app/navigation/AppPage.jsx';
 import CharacterSheet from '../charsheet/CharacterSheet.jsx';
 import { useCloudCharacterRow } from '../../shared/cloud/sync/useCloudCharacterRow.js';
-import { LoadingLine } from '../../shared/ui/LoadStatus.jsx';
-import { ErrorLine } from '../../shared/ui/LoadStatus.jsx';
+import { LoadingLine, ErrorLine } from '../../shared/ui/LoadStatus.jsx';
 
 function charIdFromUrl() {
   return new URLSearchParams(window.location.search).get('id');

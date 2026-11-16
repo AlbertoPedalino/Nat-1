@@ -1,5 +1,5 @@
-import { BASE_PALETTE_ID, UI_COLORS, readsPalette, resolveColors } from '../../ui/colors.js';
-import { SHAPE_STYLES } from '../../ui/shapes.js';
+import { UI_COLORS, readsPalette, resolveColors } from '../../ui/colors.js';
+import { paletteForStyle } from '../../ui/shapes.js';
 import { dataPicture } from '../../ui/svgPicture.js';
 import { themedValue } from '../../ui/themedValues.js';
 
@@ -9,9 +9,7 @@ import { themedValue } from '../../ui/themedValues.js';
 // colours of the style's dark palette, whatever the mode: on a light palette
 // the page's dark text and pale surfaces would vanish on the green or wash
 // the die out. On a dark palette these are the page's own colours.
-function darkPaletteOf(styleId) {
-  return SHAPE_STYLES[styleId]?.palettes.dark || BASE_PALETTE_ID;
-}
+const darkPaletteOf = (styleId) => paletteForStyle(styleId, 'dark');
 
 // MUI's text tokens, as a die's colour may be given ('text.primary'): a
 // neutral number is the die's own ink (its set's, diceSets.js).
