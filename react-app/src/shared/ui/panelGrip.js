@@ -91,8 +91,10 @@ function tentacle(width, height) {
   const line = resample(centreline([6, 0], [1, 0], [
     { sway: [width - CORNER, 0], amp: SWAY, periods: Math.max(0.5, Math.round((width / 240) * 2) / 2) },
     { curl: { r: CORNER, turns: 0.25, side: 1, shrink: 0 } },
-    { sway: [width + 4, drop], amp: SWAY, periods: 1 },
-    { curl: { r: 9, turns: 1.5, side: -1, shrink: 0.85 } },
+    // Down the frame, its tip curled away small enough to stay in the gap
+    // between two panels side by side, never over the next one's content.
+    { sway: [width - 1, drop], amp: SWAY, periods: 1 },
+    { curl: { r: 5, turns: 1.5, side: -1, shrink: 0.85 } },
   ]));
   // Each point's normal, to the underside (below the top run, outside the side).
   const normals = line.map((_, i) => {

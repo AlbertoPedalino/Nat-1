@@ -14,7 +14,9 @@ test("the tentacle reaches over the panel's top edge and down its right side, a 
     assert.ok(box.left < 0 && box.left > -16, `${width}: past the left edge, slightly (${box.left})`);
     assert.ok(box.top < 0 && box.top > -20, `${width}: over the top edge (${box.top})`);
     const right = box.left + box.width;
-    assert.ok(right > width && right < width + 32, `${width}: past the right edge, slightly (${right})`);
+    // Its tip stays in the gap between two panels side by side (the box keeps
+    // 4px round the ink).
+    assert.ok(right > width && right <= width + 14, `${width}: past the right edge, slightly (${right})`);
     assert.ok(box.top + box.height > 40 && box.top + box.height < Math.max(height, 90) + 30, `${width}: down the side (${box.top + box.height})`);
   });
 });

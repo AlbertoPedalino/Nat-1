@@ -39,18 +39,22 @@ function stripes(clip, width, role, { line, gap, angle }, opacity) {
 // `points`): what lifts it off the panel.
 const castShadow = (points) => ({ tag: 'path', d: polygonPath(points.map(([x, y]) => [x + 2, y + 3])), fill: 'edge', opacity: OPACITY.edge });
 
-// The comic's ribbon: the swallowtail, flat and unfolded. One straight band
-// in a deep magenta, each end cut into a swallowtail a little past the
-// panel's sides, inked, its style's screentone across it in ink, a gold
+// The comic's ribbon: the swallowtail, flat and unfolded. One band in a deep
+// magenta, laid a little askew (its left end RIBBON_TILT px higher than its
+// right, whatever its width), each end cut into a swallowtail a little past
+// the panel's sides, inked, its style's screentone across it in ink, a gold
 // thread along each edge.
+const RIBBON_TILT = 4;
 function ribbon(w, shapes) {
-  const points = [[-12, 9], [w + 12, 9], [w + 2, 25], [w + 12, 41], [-12, 41], [-2, 25]];
+  const askew = ([x, y]) => [x, y + RIBBON_TILT * (x / w - 0.5)];
+  const points = [[-12, 9], [w + 12, 9], [w + 2, 25], [w + 12, 41], [-12, 41], [-2, 25]].map(askew);
   const band = polygonPath(points);
+  const thread = (y) => { const [[x1, y1], [x2, y2]] = [[-14, y], [w + 14, y]].map(askew); return `M${x1} ${y1} L${x2} ${y2}`; };
   return [
     castShadow(points),
     ...sketch('path', band, { seed: 5, roughness: 0.3, fill: 'dangerDeep', fillStyle: 'solid' }),
     stripes(band, w, 'edge', shapes.surface.screentone, OPACITY.shade),
-    { tag: 'g', clip: band, children: [{ tag: 'path', d: `M-14 13.5 H${w + 14} M-14 36.5 H${w + 14}`, fill: 'none', stroke: 'accent', strokeWidth: 1.6 }] },
+    { tag: 'g', clip: band, children: [{ tag: 'path', d: `${thread(13.5)} ${thread(36.5)}`, fill: 'none', stroke: 'accent', strokeWidth: 1.6 }] },
     ...sketch('path', band, { seed: 6, roughness: 0.3, stroke: 'edge', strokeWidth: 2.6 }),
   ];
 }

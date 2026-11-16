@@ -284,16 +284,23 @@ const GRIPPED_BAR_SX = {
 
 // A bar the style draws as a banner (shapes.js panel.banner): the drawing in
 // place of the bar's paper, screentone, cut ends and rule. The banner spans
-// the bar's badge, title and count (BANNER_ZONE_SX); the bar's action stands
-// after it on the panel, never on the drawing.
+// the bar's badge, title and count (BANNER_ZONE_SX), from end to end of the
+// bar, so it is set in (or reaches past) both sides alike; the bar's action
+// stands after it on the panel, never on the drawing, with the bar's room
+// after it, only while the action shows something (a Clear with nothing to
+// clear draws nothing and keeps no room).
+const PANEL_ACTION = '[data-panel-action]';
 const BANNER_BAR_SX = {
   ...UNCUT_BAR_SX,
   bgcolor: 'transparent',
   backgroundImage: 'none',
   borderBottom: 0,
-  pl: 0,
-  pr: '0.8rem',
+  px: 0,
+  [`&:has(> ${PANEL_ACTION}:not(:empty))`]: { pr: '0.8rem' },
 };
+
+// The box of a bar's action, gone while the action draws nothing.
+const PANEL_ACTION_SX = { ml: 'auto', flexShrink: 0, '&:empty': { display: 'none' } };
 
 // What the banner is drawn across, behind (its own layer: the drawing goes
 // under the badge and the title), kept in from the banner's ends; its title
@@ -319,13 +326,17 @@ const BANNER_ZONE_SX = {
 // inked as the comic letters light letters on a deep banner (inkLettering).
 // On one line, as a banner holds one: shrinking with a narrow bar (its
 // container) rather than wrapping out of the drawing, cut short only past
-// that.
+// that. Its box keeps room past the last letter and under the line for its
+// ink (the outline, the shadow that falls right and down) and a slanted
+// face's overhang, which the cut-short box would clip.
 function bannerTitleSx({ on, color, halo, inked }, size) {
   const lettering = (inked && inkLettering(2, 2)) || (halo && inkLettering(2, 0, UI_COLORS[halo])) || PLAIN_LETTERING;
   return {
     color: color ? UI_COLORS[color] : inkOn(UI_COLORS[on]),
     ...lettering,
     ...ONE_LINE_SX,
+    pr: '0.3em',
+    pb: '0.12em',
     fontSize: `min(${size}, 9.5cqi)`,
   };
 }
@@ -346,7 +357,7 @@ export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent
     <Box sx={[panelTitleBarSx(tone), lettering && BANNER_BAR_SX, gripped && GRIPPED_BAR_SX]}>
       {gripped ? <PanelGrip kind={grip} /> : null}
       {lettering ? <Box sx={BANNER_ZONE_SX}><PanelBanner kind={banner} />{heading}</Box> : heading}
-      {action ? <Box sx={{ ml: 'auto', flexShrink: 0 }}>{action}</Box> : null}
+      {action ? <Box data-panel-action sx={PANEL_ACTION_SX}>{action}</Box> : null}
     </Box>
   );
 }
