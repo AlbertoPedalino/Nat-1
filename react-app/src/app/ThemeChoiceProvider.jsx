@@ -2,7 +2,7 @@ import {
   createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore,
 } from 'react';
 import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material';
-import { buildTheme } from './theme.js';
+import { themeFor } from './theme.js';
 import {
   DEFAULT_THEME_CHOICE, THEME_CHOICE_KEY, chosenDice, normalizeThemeChoice, readThemeChoice,
   resolvedMode, writeThemeChoice,
@@ -37,7 +37,7 @@ export function ThemeChoiceProvider({ children }) {
   const prefersLight = useMediaQuery('(prefers-color-scheme: light)', { noSsr: true });
   const mode = resolvedMode(choice.mode, prefersLight);
   const paletteId = paletteForStyle(choice.style, mode);
-  const theme = useMemo(() => buildTheme({ paletteId, styleId: choice.style }), [paletteId, choice.style]);
+  const theme = themeFor(paletteId, choice.style);
   const { style: diceStyle, colors: diceColors } = chosenDice(choice);
   const dice = useMemo(() => normalizeDice({ style: diceStyle, colors: diceColors }), [diceStyle, diceColors]);
   // The dice and the style rolls sent to the table carry (rollFeed.js), kept
@@ -104,15 +104,22 @@ export function useThemeChoice() {
 // out in them (themedValues.js). What the page's root wears, and what a
 // style's sample in the theme panel wears on itself (ThemeDialog), so a sample
 // is drawn in its own theme whatever the page wears.
+// Worked out once for each palette and style while no value is newly
+// registered: the page's root and every StyleScope ask for them on each render.
+const VARIABLES = new Map();
 export function themeVariables(paletteId, styleId) {
-  return {
-    colorScheme: paletteOf(paletteId).mode,
-    ...paletteVariables(paletteId),
-    ...shapeVariables(styleId),
-    ...surfaceVariables(paletteId, styleId),
-    ...fontVariables(styleId),
-    ...themedVariables(paletteId, styleId),
-  };
+  const key = `${paletteId}|${styleId}|${themedValuesVersion()}`;
+  if (!VARIABLES.has(key)) {
+    VARIABLES.set(key, {
+      colorScheme: paletteOf(paletteId).mode,
+      ...paletteVariables(paletteId),
+      ...shapeVariables(styleId),
+      ...surfaceVariables(paletteId, styleId),
+      ...fontVariables(styleId),
+      ...themedVariables(paletteId, styleId),
+    });
+  }
+  return VARIABLES.get(key);
 }
 
 // Redraws its caller when a themed value is first registered (a picture first

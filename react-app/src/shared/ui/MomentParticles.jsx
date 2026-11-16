@@ -68,7 +68,7 @@ const MODES = Object.freeze({
 // The two swings an orbiting particle rides (left and right, up and down, a
 // quarter turn apart) so it stays upright as it circles: the stars over a
 // dazed cartoon head. One turn takes ORBIT_MS; they go round ORBIT_TURNS
-// times, `reach` px out, and fade.
+// times, `reach` px out, fade, and stop: never left turning unseen.
 const ORBIT_MS = 900;
 const ORBIT_TURNS = 3;
 const ORBIT_REACH = Object.freeze({ x: 46, y: 12 });
@@ -143,8 +143,8 @@ export default function MomentParticles({
           // Each a share of a turn behind the one before.
           const phase = -(ORBIT_MS / count) * index;
           return (
-            <Box key={index} sx={{ position: 'absolute', animation: `gbParticleOrbitX${reach.x} ${ORBIT_MS / 2}ms ease-in-out ${phase}ms infinite alternate`, ...swing(`gbParticleOrbitX${reach.x}`, 'X', reach.x) }}>
-              <Box sx={{ animation: `gbParticleOrbitY${reach.y} ${ORBIT_MS / 2}ms ease-in-out ${phase - ORBIT_MS / 4}ms infinite alternate`, ...swing(`gbParticleOrbitY${reach.y}`, 'Y', reach.y) }}>
+            <Box key={index} sx={{ position: 'absolute', animation: `gbParticleOrbitX${reach.x} ${ORBIT_MS / 2}ms ease-in-out ${delay + phase}ms ${ORBIT_TURNS * 2} alternate both`, ...swing(`gbParticleOrbitX${reach.x}`, 'X', reach.x) }}>
+              <Box sx={{ animation: `gbParticleOrbitY${reach.y} ${ORBIT_MS / 2}ms ease-in-out ${delay + phase - ORBIT_MS / 4}ms ${ORBIT_TURNS * 2 + 1} alternate both`, ...swing(`gbParticleOrbitY${reach.y}`, 'Y', reach.y) }}>
                 <Box sx={{ width: sizeOf(index), height: sizeOf(index), ml: `${-sizeOf(index) / 2}px`, mt: `${-sizeOf(index) / 2}px`, opacity: index === 1 ? OPACITY.heavy : 1 }}>
                   <Glyph glyph={glyph} color={colorOf(index)} look={look} />
                 </Box>

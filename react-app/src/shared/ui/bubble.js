@@ -1,6 +1,7 @@
 import { OPACITY, UI_COLORS, colorVariableName } from './colors.js';
 import { DURATIONS, motionTime } from './motion.js';
 import { BUBBLE, BUBBLE_DECOR_PROPS, BUBBLE_INK_ROLES, BUBBLE_LETTERING, bubbleShadowSx } from './bubbleLooks.js';
+import { ROLL_KIND_TONES } from './entityColors.js';
 
 // The speech bubble: every toast, every roll and game notice, every bubble on
 // the map is one, drawn as the chosen style draws it (shapes.js `bubble`,
@@ -18,6 +19,13 @@ export const SHOUT_TILT = `rotate(calc(${TILT} * 2)) scale(1.06)`;
 export function bubbleToneSx(tone, drop = 3) {
   return bubbleShadowSx(tone, drop);
 }
+
+// The shadows a bubble wears most (the ink's, every roll kind's colour, every
+// notice's), worked out before the first bubble shows: one that first shows
+// in a new colour rewrites the page's variables, and the whole page (the
+// battle map with it) is restyled.
+[UI_COLORS.edge, UI_COLORS.success, UI_COLORS.danger, UI_COLORS.warning, UI_COLORS.infoText, ...Object.values(ROLL_KIND_TONES)]
+  .forEach((tone) => bubbleShadowSx(tone));
 
 // The text roles the bubble writes in (a paper bubble's ink), and how its
 // inked lettering is lettered on it, set on it.
@@ -140,7 +148,7 @@ export function bubbleCheerSx(end = SHOUT_TILT, { delay = 0 } = {}) {
 export const BUBBLE_REST = `rotate(${TILT})`;
 
 // A bubble that groans (a natural 1): it shakes once instead of popping in.
-export function bubbleGroanSx(rest = BUBBLE_REST) {
+function bubbleGroanSx(rest = BUBBLE_REST) {
   return motionSx('gbBubbleShake', rest, DURATIONS.slow * 2, 'ease-in-out', {
     '0%, 100%': { transform: REST },
     '20%': { transform: 'rotate(-3deg) translateX(-6px)' },

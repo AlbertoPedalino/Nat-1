@@ -69,6 +69,17 @@ export function buildTheme({ paletteId = BASE_PALETTE_ID, styleId = BASE_STYLE_I
   return createTheme(themeOptions(chosen, styleId));
 }
 
+// The theme for a palette and a style, built once and kept: the page's, and
+// every part drawn in another style (StyleScope: a roll bubble on the map in
+// its roller's style, a style's sample), which would otherwise build a whole
+// MUI theme each time one appears.
+const THEMES = new Map();
+export function themeFor(paletteId = BASE_PALETTE_ID, styleId = BASE_STYLE_ID) {
+  const key = `${paletteId}|${styleId}`;
+  if (!THEMES.has(key)) THEMES.set(key, buildTheme({ paletteId, styleId }));
+  return THEMES.get(key);
+}
+
 // A style's scene laid behind the whole app: fixed to the window, under
 // every page (which lets it through, SURFACES.page). An inked scene in the
 // palette's own colours: its lines towards the lettering's colour on a dark

@@ -6,8 +6,8 @@ import DiceRow from './DiceRow.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
-import { SHOUT_TILT, bubbleSx, bubbleTailSx, bubbleToneSx } from '../../ui/bubble.js';
-import { momentBurstSx, rollMoment, useRollMoment } from '../../ui/rollMoment.js';
+import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
+import { useRollMoment } from '../../ui/rollMoment.js';
 import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
 import TagChip from '../../ui/TagChip.jsx';
 import BubbleHeader from '../../ui/BubbleHeader.jsx';
@@ -30,9 +30,9 @@ const toastRootSx = {
 
 export default function DiceToast({ toast, onClose, hidden = false }) {
   const layout = toast ? resolveToastLayout(toast) : null;
-  // A natural 20 or 1: the style's moment (rollMoment.js).
-  const moment = rollMoment(layout);
-  const drawn = useRollMoment(moment, SHOUT_TILT);
+  // Its colour, and a natural 20's or 1's moment (rollMoment.js).
+  const drawn = useRollMoment(layout, SHOUT_TILT);
+  const { moment } = drawn;
 
   useEffect(() => {
     if (!toast) return;
@@ -52,8 +52,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     <Box sx={{
       ...toastRootSx,
       // The roll's colour throws the bubble's shadow; a 20 or a 1 its own.
-      ...(layout.tone ? bubbleToneSx(layout.tone) : null),
-      ...drawn?.bubbleSx,
+      ...drawn.bubbleSx,
     }}>
       <RollMomentEffect key={seed} moment={moment} seed={seed} />
       <BubbleHeader onClose={onClose}>
@@ -62,7 +61,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         </Typography>
       </BubbleHeader>
 
-      {drawn ? (
+      {drawn.label ? (
         <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: drawn.labelColor, mb: 0.25 }}>
           {drawn.label}
         </Typography>
@@ -99,7 +98,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
             // A natural 20 or 1 is written light on its burst, the ink outline
             // keeping it legible on the gold as on the red.
             color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
-            ...(moment ? { ...momentBurstSx(moment), ...drawn.numberSx } : { display: 'inline-block' }),
+            ...(drawn.totalSx ?? { display: 'inline-block' }),
           }}>
             {layout.total}
           </Typography>

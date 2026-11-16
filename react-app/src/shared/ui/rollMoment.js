@@ -350,19 +350,29 @@ export const MOMENT_WORDS = Object.freeze({
   nat1: Object.freeze({ label: 'NATURAL 1', text: 'danger', shadow: 'danger', drop: 3 }),
 });
 
-// A roll's moment as the chosen style draws it: how its bubble moves,
-// settling at `rest` (the dice toast's shouting tilt, the map bubble's own),
-// and the shadow it throws; how its total is lettered; and what it says, in
-// which colour. Null for no moment.
-export function useRollMoment(moment, rest) {
+// A roll as its bubble shows it, for the dice toast and a bubble over a piece
+// (`layout`: rollToastLayout.js), settling at `rest`: its `moment` (a natural
+// 20 or 1, or null), the bubble's sx (its shadow in the roll's colour, or the
+// moment's shadow and motion), its total's sx (on the moment's burst,
+// lettered as the style letters it; null for none) and what the moment says
+// (`label`, `labelColor`; null for none).
+export function useRollMoment(layout, rest) {
   const { moments } = useStyleShapes();
-  if (!moment) return null;
+  const moment = rollMoment(layout);
+  if (!moment) {
+    return { moment, bubbleSx: layout?.tone ? bubbleToneSx(layout.tone) : null, totalSx: null, label: null, labelColor: null };
+  }
   const { motion, number, fill } = moments[moment];
   const { label, text, shadow, drop } = MOMENT_WORDS[moment];
   return {
+    moment,
     bubbleSx: { ...bubbleToneSx(UI_COLORS[shadow], drop), ...BUBBLE_MOTIONS[motion](rest) },
-    numberSx: NUMBER_LOOKS[number](UI_COLORS[fill]),
+    totalSx: { ...momentBurstSx(moment), ...NUMBER_LOOKS[number](UI_COLORS[fill]) },
     label,
     labelColor: UI_COLORS[text],
   };
 }
+
+// The moments' shadows, worked out before the first roll, so a natural 20 or
+// 1 never rewrites the page's variables as it shows.
+Object.values(MOMENT_WORDS).forEach(({ shadow, drop }) => bubbleToneSx(UI_COLORS[shadow], drop));

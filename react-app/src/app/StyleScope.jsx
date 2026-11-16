@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Box, ThemeProvider } from '@mui/material';
-import { buildTheme } from './theme.js';
+import { themeFor } from './theme.js';
 import { themeVariables, useThemedValuesVersion } from './ThemeChoiceProvider.jsx';
 import { paletteOf } from '../shared/ui/colors.js';
 import { SHAPE_STYLES, paletteForStyle } from '../shared/ui/shapes.js';
@@ -23,7 +23,6 @@ export default function StyleScope({ styleId, paletteId: givenPalette, sx, child
   const known = Boolean(SHAPE_STYLES[styleId]);
   const paletteId = givenPalette ?? (known ? paletteForStyle(styleId, paletteOf(viewerPalette).mode) : viewerPalette);
   const own = !known || (styleId === viewerStyle && paletteId === viewerPalette);
-  const theme = useMemo(() => (own ? null : buildTheme({ paletteId, styleId })), [own, paletteId, styleId]);
   // Redrawn when a value is first registered inside it, so it is written too.
   useThemedValuesVersion();
   useEffect(() => {
@@ -32,7 +31,7 @@ export default function StyleScope({ styleId, paletteId: givenPalette, sx, child
 
   if (own) return sx ? <Box sx={sx}>{children}</Box> : children;
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={themeFor(paletteId, styleId)}>
       <Box sx={[themeVariables(paletteId, styleId), sx ?? { display: 'contents' }]}>{children}</Box>
     </ThemeProvider>
   );

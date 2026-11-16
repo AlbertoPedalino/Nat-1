@@ -174,14 +174,14 @@ export const BUBBLE_DECOR_KINDS = Object.freeze(Object.keys(BUBBLE_DECORS));
 export const BUBBLE_TAIL_KINDS = Object.freeze(Object.keys(BUBBLE_TAILS));
 
 // The style's bubble's tail, drawn (its size, overlap and SVG).
-export function bubbleTail(bubble) {
+function bubbleTail(bubble) {
   const { kind, fill, line } = bubble.tail;
   const tail = BUBBLE_TAILS[kind]({ fill: UI_COLORS[fill], line: UI_COLORS[line] });
   return { ...tail, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${tail.width} ${tail.height}">${tail.svg}</svg>` };
 }
 
 // The style's bubble's frame, drawn; null for none.
-export function bubbleFrame(bubble) {
+function bubbleFrame(bubble) {
   const frame = BUBBLE_FRAMES[bubble.frame];
   return frame ? frame({ fill: UI_COLORS[bubble.fill], line: UI_COLORS[bubble.border.role] }) : null;
 }

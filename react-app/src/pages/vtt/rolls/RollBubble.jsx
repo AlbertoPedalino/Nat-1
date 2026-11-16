@@ -6,8 +6,8 @@ import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx, bubbleToneSx } from '../../../shared/ui/bubble.js';
-import { momentBurstSx, rollMoment, useRollMoment } from '../../../shared/ui/rollMoment.js';
+import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
+import { useRollMoment } from '../../../shared/ui/rollMoment.js';
 import RollMomentEffect from '../../../shared/ui/RollMomentEffect.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
@@ -49,10 +49,10 @@ export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) 
 // The bubble itself, in the style its scope draws.
 function RollBubbleCard({ roll, onDismiss }) {
   const layout = resolveToastLayout(rollToast(roll));
-  // A natural 20 or 1: the style's moment (rollMoment.js), resting back on the
-  // piece as the bubble does.
-  const moment = rollMoment(layout);
-  const drawn = useRollMoment(moment, BUBBLE_REST);
+  // Its colour, and a natural 20's or 1's moment (rollMoment.js), resting back
+  // on the piece as the bubble does.
+  const drawn = useRollMoment(layout, BUBBLE_REST);
+  const { moment } = drawn;
 
   return (
       <Box
@@ -75,8 +75,7 @@ function RollBubbleCard({ roll, onDismiss }) {
         } : null)}
         sx={{
           ...rollBubbleSx,
-          ...(layout.tone ? bubbleToneSx(layout.tone) : null),
-          ...drawn?.bubbleSx,
+          ...drawn.bubbleSx,
           ...(onDismiss ? dismissableSx : {}),
         }}
       >
@@ -86,7 +85,7 @@ function RollBubbleCard({ roll, onDismiss }) {
           <Typography sx={{ ...labelSx, ...(layout.tone ? { color: layout.tone } : null) }}>{layout.label}</Typography>
         </BubbleHeader>
 
-        {drawn ? <Typography sx={{ ...natSx, color: drawn.labelColor }}>{drawn.label}</Typography> : null}
+        {drawn.label ? <Typography sx={{ ...natSx, color: drawn.labelColor }}>{drawn.label}</Typography> : null}
 
         {layout.modeChip && (
           <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
@@ -107,7 +106,7 @@ function RollBubbleCard({ roll, onDismiss }) {
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
             color: layout.isCrit || layout.isFail ? VTT_COLORS.text : layout.totalColor,
-            ...(moment ? { ...momentBurstSx(moment), ...drawn.numberSx } : null),
+            ...drawn.totalSx,
           }}>
             {layout.total}
           </Typography>
