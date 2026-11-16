@@ -51,13 +51,14 @@ export const DICE_COLORS = Object.freeze({
   abyssal: colorSet('abyssal', 'Abyss', { face: '#0b2a24', faceLit: '#1f5e4e', number: '#9dffcf', edge: '#020a08' }),
   pixel: colorSet('pixel', '8-bit', { face: '#1b2f9a', faceLit: '#3f63e8', number: '#ffd23f', edge: '#0b0b22' }),
   cyberpunk: colorSet('cyberpunk', 'Hazard', { face: '#151515', faceLit: '#3a3a12', number: '#fcee0a', edge: '#000000' }),
+  lavender: colorSet('lavender', 'Amethyst', { face: '#3b2470', faceLit: '#6e4bc4', number: '#f3efe6', edge: '#0d0b14' }),
 });
 
 // How thick each theme inks a die's edge, as a share (per cent) of a face:
 // Die3D's rim round each face. A console's hairline, a stone's slab.
 const RIMS = Object.freeze({
   comic: 9, scifi: 4, gothic: 11, war: 12, astral: 5, pirate: 10,
-  steampunk: 7, dwarven: 14, fey: 6, abyssal: 8, pixel: 13, cyberpunk: 5,
+  steampunk: 7, dwarven: 14, fey: 6, abyssal: 8, pixel: 13, cyberpunk: 5, lavender: 9,
 });
 
 // A theme's cut of a die: its numbers in the theme's own figures (its shout

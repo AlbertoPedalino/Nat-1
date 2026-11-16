@@ -175,6 +175,20 @@ const CYBERPUNK_FONTS = Object.freeze({
   mono: '"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
+// The lavender faces: the look-book's. Bangers, a comic's hand-lettered
+// capitals, for the signs and the voice; Inter for the text; the comic's
+// Rubik for labels, numbers and a card's name (Bangers' lower case is as tall
+// as its capitals, so the small names fitted to a lower case came out tiny).
+const LAVENDER_FONTS = Object.freeze({
+  display: '"Rubik", system-ui, sans-serif',
+  prose: '"Inter", system-ui, sans-serif',
+  cardName: '"Rubik", system-ui, sans-serif',
+  body: '"Inter", system-ui, sans-serif',
+  shout: '"Bangers", "Rubik", system-ui, sans-serif',
+  heading: '"Bangers", "Rubik", system-ui, sans-serif',
+  mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
 // How large each lettering is drawn against its size (CSS font-size-adjust),
 // by role: the comic faces' own, which the sizes were chosen for. A style's
 // faces are fitted to them (FONT_STYLES `fits`, over these), so a size reads
@@ -255,6 +269,13 @@ export const FONT_STYLES = Object.freeze({
     stacks: CYBERPUNK_FONTS,
     fits: Object.freeze({ heading: 'ex-height 0.5', shout: 'cap-height 0.62', cover: 'ex-height 0.47' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Russo+One&family=Tektur:wght@500;700&display=swap',
+  }),
+  lavender: Object.freeze({
+    stacks: LAVENDER_FONTS,
+    // Bangers is all capitals and narrow: lettered by them, a little taller
+    // than the comic's, so a short name (Int, Str) still reads.
+    fits: Object.freeze({ heading: 'cap-height 0.77' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400..700&display=swap',
   }),
 });
 

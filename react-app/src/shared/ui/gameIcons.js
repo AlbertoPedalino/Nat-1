@@ -1075,6 +1075,8 @@ const STYLE_ICONS = Object.freeze({
     GAME_ICONS: CYBERPUNK_GAME_ICONS,
     TOOL_ICONS: CYBERPUNK_TOOL_ICONS,
   }),
+  // The comic's drawings, in lilac.
+  lavender: COMIC_STYLE_SETS,
 });
 
 // One kind's drawing in every style, { styleId: set or component }.

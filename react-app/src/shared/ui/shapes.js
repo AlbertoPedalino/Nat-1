@@ -1020,8 +1020,21 @@ const CYBERPUNK = deepFreeze({
   motion: { pace: 0.6, hop: 0.3 },
 });
 
-// The looks' styles the viewer can choose from (the "Style" of the account
-// menu's theme panel), each with the palette it is drawn in for each mode
+// The lavender cut: the comic one in lilac. Its ink, ribbons, seals and gems
+// kept, a use's gem amber; a card's mark is a zigzag burst, the solid shadows fall further (the
+// look-book's hard offset), and the page wears only its halftone dots, no
+// stickers.
+const LAVENDER = deepFreeze({
+  ...COMIC,
+  marker: { outline: 'M6 1 L11 6 L8.5 10 L11 15 L8.5 20 L11 24 L6 29 L1 24 L3.5 20 L1 15 L3.5 10 L1 6 Z', lines: 'M6 6 V24' },
+  // A use is amber: the style's accent is the spells' violet.
+  gemCuts: { ...COMIC.gemCuts, uses: { ...COMIC.gemCuts.uses, tones: { uses: 'warning' } } },
+  ink: { ...COMIC.ink, drop: 1.5 },
+  surface: { ...COMIC.surface, paper: 'none' },
+});
+
+// The looks' styles the viewer can choose from (the "Style" of the settings'
+// theme panel), each with the palette it is drawn in for each mode
 // (`palettes`: dark and light, ids of colors.js PALETTES).
 export const SHAPE_STYLES = Object.freeze({
   comic: Object.freeze({ id: 'comic', label: 'Comic fantasy', palettes: Object.freeze({ dark: 'dark', light: 'light' }), shapes: COMIC }),
@@ -1036,6 +1049,7 @@ export const SHAPE_STYLES = Object.freeze({
   abyssal: Object.freeze({ id: 'abyssal', label: 'Abyssal horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: ABYSSAL }),
   pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
   cyberpunk: Object.freeze({ id: 'cyberpunk', label: 'Cyberpunk', palettes: Object.freeze({ dark: 'overdrive', light: 'daylight' }), shapes: CYBERPUNK }),
+  lavender: Object.freeze({ id: 'lavender', label: 'Comic lavender', palettes: Object.freeze({ dark: 'dusk', light: 'lilac' }), shapes: LAVENDER }),
 });
 
 export const BASE_STYLE_ID = 'comic';

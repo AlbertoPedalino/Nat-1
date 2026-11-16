@@ -1422,6 +1422,118 @@ const DOSSIER_LIGHT = Object.freeze({
   pcToken: '#2f5a70',
 });
 
+// The lavender style's dark palette, dusk: the comic's ink on a plum-black
+// page, lilac bars, a lavender accent (chosen from the look-book, 2026-11-16).
+const DUSK_DARK = Object.freeze({
+  ...COMIC_DARK,
+  accent: '#a988f0',
+  accentText: '#c7b0ff',
+  accentHighlight: '#e2d6ff',
+  accentMuted: '#7d62bf',
+  accentPlain: '#b89cff',
+  onAccent: '#16141b',
+  textPrimary: '#ece8f4',
+  textSecondary: '#c3bdd1',
+  textMuted: '#a8a1b8',
+  textFaint: '#6e6880',
+  outline: '#565068',
+  surfaceRaised: '#29253a',
+  bubble: '#3d3752',
+  surfaceHeader: '#2d2640',
+  surface: '#211e28',
+  surfaceDeep: '#1c1a23',
+  page: '#16141b',
+  surfaceSunken: '#121017',
+  surfaceDarkest: '#0d0c11',
+  edge: '#08070b',
+  onFill: '#08070b',
+  pageDrawing: '#29253a',
+  pageLine: '#08070b',
+  ruleEmphasis: '#9fe0b8',
+  armor: '#b4bcd6',
+  dangerStrong: '#ff4d6d',
+  danger: '#ff5c7a',
+  dangerText: '#ff9cb0',
+  dangerMuted: '#d48ca0',
+  dangerDeep: '#a8324e',
+  dangerSurface: '#2c1220',
+  warning: '#ffb547',
+  warningStrong: '#ff9142',
+  warningText: '#ffd08a',
+  penalty: '#ffb547',
+  penaltyText: '#ffd08a',
+  success: '#5cc48a',
+  successText: '#a6e8c2',
+  secondary: '#ff9ad2',
+  secondaryStrong: '#d877ae',
+  secondaryText: '#ffbfe2',
+  onSecondary: '#2a1020',
+  info: '#7ab4ff',
+  infoText: '#b0d2ff',
+  spell: '#d29cff',
+  reference: '#ece4ff',
+  paper: '#f3efe6',
+  paperShade: '#e2dccf',
+  onPaper: '#2a2233',
+  pcToken: '#7ab4ff',
+});
+
+// The lavender style's light palette, lilac: warm paper panels on a lilac
+// page, the same near-black ink, a deep violet accent.
+const LILAC_LIGHT = Object.freeze({
+  ...COMIC_DARK,
+  accent: '#7b4bd6',
+  accentText: '#5a2fb0',
+  accentHighlight: '#d9c9f7',
+  accentMuted: '#5e38a8',
+  accentPlain: '#6a3cc4',
+  onAccent: '#ffffff',
+  textPrimary: '#1b1a1f',
+  textSecondary: '#3d3946',
+  textMuted: '#5d5966',
+  textFaint: '#a49fae',
+  outline: '#bcb4c9',
+  surfaceRaised: '#fffdf8',
+  bubble: '#fffefb',
+  surfaceHeader: '#e9e1f5',
+  surface: '#faf7f0',
+  surfaceDeep: '#f1ede4',
+  page: '#d8cceb',
+  surfaceSunken: '#e7e0d3',
+  surfaceDarkest: '#c4b6db',
+  edge: '#1b1a1f',
+  onFill: '#1b1a1f',
+  pageDrawing: '#e2d8f1',
+  pageLine: '#c2b3dc',
+  ruleEmphasis: '#2f6a3e',
+  armor: '#4a5272',
+  dangerStrong: '#c01a3a',
+  danger: '#c4213f',
+  dangerText: '#a01530',
+  dangerMuted: '#a85a70',
+  dangerDeep: '#80122a',
+  dangerSurface: '#f6dbe2',
+  warning: '#b8650a',
+  warningStrong: '#b24c08',
+  warningText: '#7f4500',
+  penalty: '#b8650a',
+  penaltyText: '#7f4500',
+  success: '#2e8b57',
+  successText: '#1d6038',
+  secondary: '#b8327e',
+  secondaryStrong: '#952765',
+  secondaryText: '#8e2361',
+  onSecondary: '#ffffff',
+  info: '#2a66c4',
+  infoText: '#1d4f9a',
+  spell: '#7a36b8',
+  reference: '#3d2a5c',
+  paper: '#fffdf8',
+  paperShade: '#efe9dc',
+  onPaper: '#2a2233',
+  pcToken: '#2a66c4',
+});
+
 // Every palette, with the MUI mode it is drawn in (which also sets how its
 // inked lettering is lettered, LETTERINGS). A style draws its dark and its
 // light mode in two of them (shapes.js SHAPE_STYLES `palettes`: comic in dark
@@ -1429,7 +1541,8 @@ const DOSSIER_LIGHT = Object.freeze({
 // dossier; gothic in dread and mist; astral in starlight and vellum; pirate
 // in deepSea and seaChart; steampunk in foundry and patent; dwarven in forge
 // and granite; fey in twilight and blossom; abyssal in abyss and asylum; pixel
-// in arcade and cartridge; cyberpunk in overdrive and daylight).
+// in arcade and cartridge; cyberpunk in overdrive and daylight; lavender in
+// dusk and lilac).
 export const PALETTES = Object.freeze({
   dark: Object.freeze({ id: 'dark', mode: 'dark', colors: COMIC_DARK }),
   light: Object.freeze({ id: 'light', mode: 'light', colors: PARCHMENT_LIGHT }),
@@ -1455,6 +1568,8 @@ export const PALETTES = Object.freeze({
   cartridge: Object.freeze({ id: 'cartridge', mode: 'light', colors: CARTRIDGE_LIGHT }),
   overdrive: Object.freeze({ id: 'overdrive', mode: 'dark', colors: OVERDRIVE_DARK }),
   daylight: Object.freeze({ id: 'daylight', mode: 'light', colors: DAYLIGHT_LIGHT }),
+  dusk: Object.freeze({ id: 'dusk', mode: 'dark', colors: DUSK_DARK }),
+  lilac: Object.freeze({ id: 'lilac', mode: 'light', colors: LILAC_LIGHT }),
 });
 
 // The palette a colour saved in data is written in, and the one used where no
