@@ -29,7 +29,6 @@ import { chosenToggles, toggleKeeps } from '../../../shared/ui/toggleChoices.js'
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { classSpellIndexForCharacter, spellsForBooks } from '../../../shared/content/booksView.js';
 import StatTile from '../stats/StatTile.jsx';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import AddButton from '../../../shared/ui/AddButton.jsx';
 
@@ -96,11 +95,11 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   return (
     <Box sx={panelRootSx}>
       {/* Read, as AC and Proficiency Bonus are: the same stat tiles, in the
-          spells' colour. */}
+          tiles' one tone. */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1, mb: 0.75, maxWidth: 420 }}>
-        <StatTile tone={UI_COLORS.spell} label="Spell DC" value={dc} />
-        <StatTile tone={UI_COLORS.spell} label="Spell Attack" value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} />
-        <StatTile tone={UI_COLORS.spell} label="Spell Ability" value={ABILITY_ABBREVIATIONS[ability] || ability.toUpperCase()} />
+        <StatTile label="Spell DC" value={dc} />
+        <StatTile label="Spell Attack" value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} />
+        <StatTile label="Spell Ability" value={ABILITY_ABBREVIATIONS[ability] || ability.toUpperCase()} />
       </Box>
 
       <Box sx={panelToolbarSx}>

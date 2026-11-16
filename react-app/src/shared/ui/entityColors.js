@@ -121,13 +121,11 @@ export const PANEL_TONES = Object.freeze({
   // Everything an item is (starting equipment, currency, the inventory)
   // wears the items' bordeaux, as the attune button and item tags do.
   items: ITEM_ATTUNEMENT,
-  // The stat tiles beside Defenses, each its own: AC steel, Initiative the
-  // accent its roll wears, Proficiency Bonus the skills' green, Inspiration
-  // the violet.
-  armorClass: UI_COLORS.armor,
-  initiative: UI_COLORS.accent,
-  proficiencyBonus: ENTITY_COLORS.skill,
-  inspiration: UI_COLORS.spell,
+  // Every stat tile (AC, Initiative, Proficiency Bonus, Inspiration, the
+  // spell figures, the ability scores): one tone, the theme's accent, as a
+  // panel's bar wears by default, so the tiles read as one family in every
+  // style.
+  statTile: UI_COLORS.accent,
 });
 
 // A counter's gem (GemPip) by what it counts, under a style's own colours
@@ -157,7 +155,7 @@ export const ROLL_KIND_TONES = Object.freeze({
   abilityCheck: PANEL_TONES.abilityScores,
   save: PANEL_TONES.savingThrows,
   skill: PANEL_TONES.skills,
-  initiative: PANEL_TONES.initiative,
+  initiative: PANEL_TONES.statTile,
   attack: ROLL_TONES.attack,
   damage: ROLL_TONES.damage,
   heal: ROLL_TONES.heal,

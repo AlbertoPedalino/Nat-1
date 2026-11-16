@@ -15,6 +15,7 @@ import PanelBanner from './PanelBanner.jsx';
 import { inkOn } from './pressable.js';
 import { useStyleShapes } from './themeIds.js';
 import { useRootStyle } from './liveStyle.js';
+import { useFitText } from './useFitText.js';
 
 // The title bar of a panel (Saving Throws, Skills, Senses, Movement,
 // Proficiencies, a builder step) and of SheetDialog: a header-tint bar over an
@@ -145,12 +146,6 @@ export const panelTitleSx = {
   fontSize: FONT_SIZES.body,
   color: 'primary.main',
 };
-
-// A stat tile's name: a panel title's own size where the tile has room (Str,
-// Dex), shrinking with the tile's own width where it has not (Prof. Bonus,
-// Inspiration in their narrow row, any tile on a phone), so a name is never
-// cut. The tile is its container (containerType on the tile's frame).
-export const tileTitleSx = { ...panelTitleSx, fontSize: `min(${FONT_SIZES.body}, 16cqi)` };
 
 // A main panel (a sheet panel, a builder step's panel): the comic panel's
 // thicker ink frame and its solid shadow (as the style frames and floats it). Boxes inside it keep the thinner
@@ -316,7 +311,6 @@ const BANNER_ZONE_SX = {
   gap: 1,
   pl: `${BANNER_INSET + 20}px`,
   pr: `${BANNER_INSET + 12}px`,
-  containerType: 'inline-size',
 };
 
 // The title lettered as the banner letters it (panelBanner.js BANNER_TITLES):
@@ -324,9 +318,9 @@ const BANNER_ZONE_SX = {
 // (an inked outline and shadow would blot dark letters on a light banner),
 // outlined in the drawing's colour where it is busy under the letters, or
 // inked as the comic letters light letters on a deep banner (inkLettering).
-// On one line, as a banner holds one: shrinking with a narrow bar (its
-// container) rather than wrapping out of the drawing, cut short only past
-// that. Its box keeps room past the last letter and under the line for its
+// On one line, as a banner holds one: shrunk to a narrow bar (useFitText,
+// measured in the style's own face) rather than wrapping out of the drawing,
+// cut short only past that. Its box keeps room past the last letter and under the line for its
 // ink (the outline, the shadow that falls right and down) and a slanted
 // face's overhang, which the cut-short box would clip.
 function bannerTitleSx({ on, color, halo, inked }, size) {
@@ -337,7 +331,7 @@ function bannerTitleSx({ on, color, halo, inked }, size) {
     ...ONE_LINE_SX,
     pr: '0.3em',
     pb: '0.12em',
-    fontSize: `min(${size}, 9.5cqi)`,
+    fontSize: size,
   };
 }
 
@@ -346,10 +340,11 @@ export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent
   const { grip, banner } = useStyleShapes().panel;
   const gripped = grip !== 'none';
   const lettering = bannerTitle(banner);
+  const titleRef = useFitText(title, { enabled: !!lettering });
   const heading = (
     <>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
-      <Typography sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>
+      <Typography ref={titleRef} sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>
       {children}
     </>
   );

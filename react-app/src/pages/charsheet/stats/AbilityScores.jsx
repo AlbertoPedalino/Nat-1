@@ -61,7 +61,7 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
               {/* A stat tile: its name in the bar, then two thirds for the
                   score and one for the modifier the check rolls. */}
               <StatTile
-                tone={advArg === false ? UI_COLORS.warning : PANEL_TONES.abilityScores}
+                tone={advArg === false ? UI_COLORS.warning : undefined}
                 // A tile's name is in the heading's blackletter, which does not read
                 // in capitals: Str, not STR.
                 label={capitalize(s)}
