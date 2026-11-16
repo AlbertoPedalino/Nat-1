@@ -1,10 +1,11 @@
 import { parseFormula, rollD20, rollPool } from './dice.js';
 import { signed } from '../../ui/numberFormat.js';
+import { naturalD20 } from './rollLogPresentation.js';
 
 // A roll typed or clicked as notation — "2d6+3", or "+5" for a d20 test — in
 // the shape the roll logs, the dice toast and the battle map show: the total,
-// the best possible total, the natural d20 when one die decides, the dice as
-// text and a colour class. Used by the encounter builder, the compendium and
+// the best possible total, the natural d20 when one die decides (naturalD20),
+// the dice rolled, the dice as text and a colour class. Used by the encounter builder, the compendium and
 // creatures on the map. The dice themselves are rolled by dice.js.
 
 // A dice formula rolled as written; null when it is not valid notation.
@@ -14,8 +15,8 @@ export function rollDiceFormula(formula, rng = Math.random) {
   const parts = [];
   let result = 0;
   let maxResult = 0;
-  let dieCount = 0;
-  let naturalD20 = null;
+  // Every die rolled, a subtracted one marked as such (naturalD20).
+  const rolls = [];
   for (const term of parsed.terms) {
     if (term.flat != null) {
       const value = term.flat;
@@ -29,8 +30,7 @@ export function rollDiceFormula(formula, rng = Math.random) {
     const values = rollPool(count, faces, rng);
     result += sign * values.reduce((sum, value) => sum + value, 0);
     maxResult += sign > 0 ? count * faces : -count;
-    dieCount += count;
-    if (count === 1 && faces === 20 && sign > 0) naturalD20 = values[0];
+    values.forEach((v) => rolls.push(sign < 0 ? { v, faces, sign: -1 } : { v, faces }));
     const prefix = parts.length === 0 ? (sign < 0 ? '-' : '') : (sign < 0 ? ' - ' : ' + ');
     parts.push(`${prefix}${count}d${faces} [${values.join(', ')}]`);
   }
@@ -38,15 +38,16 @@ export function rollDiceFormula(formula, rng = Math.random) {
   return {
     result,
     maxResult,
-    naturalD20: dieCount === 1 ? naturalD20 : null,
+    naturalD20: naturalD20(rolls)?.v ?? null,
+    rolls,
     mathStr: parts.join(''),
   };
 }
 
-export function resultClass(result, maxResult, naturalD20 = null) {
-  if (naturalD20 != null) {
-    if (naturalD20 === 20) return 'nat20';
-    if (naturalD20 === 1) return 'nat1';
+export function resultClass(result, maxResult, natural = null) {
+  if (natural != null) {
+    if (natural === 20) return 'nat20';
+    if (natural === 1) return 'nat1';
   }
   return result >= maxResult * 0.75 ? 'high' : result >= maxResult * 0.4 ? 'mid' : 'low';
 }

@@ -598,8 +598,15 @@ test('dice parses formulas and d20 modifiers', () => {
     result: 5,
     maxResult: 15,
     naturalD20: null,
+    rolls: [{ v: 1, faces: 6 }, { v: 1, faces: 6 }],
     mathStr: '2d6 [1, 1] + 3',
   });
+  // A natural only where one d20 added to the total is the roll (naturalD20).
+  assert.equal(rollDiceFormula('1d20+5', rng).naturalD20, 1);
+  for (const formula of ['2d20', '1d20+1d6', '-1d20+5']) {
+    assert.equal(rollDiceFormula(formula, rng).naturalD20, null, formula);
+  }
+  assert.deepEqual(rollDiceFormula('-1d20+5', rng).rolls, [{ v: 1, faces: 20, sign: -1 }]);
   const attack = rollDice('+5', 'Attack', rng);
   assert.equal(attack.result, 6);
   assert.equal(attack.naturalD20, 1);

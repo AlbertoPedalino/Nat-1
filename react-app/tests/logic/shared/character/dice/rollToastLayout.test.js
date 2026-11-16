@@ -94,3 +94,22 @@ test('a roll is coloured by its kind, a natural 20 or 1 keeping its own', async 
   assert.equal(resolveToastLayout(d20(20, 'save')).totalColor, UI_COLORS.accentText);
   assert.equal(resolveToastLayout(d20(10, 'save')).modifierColor, UI_COLORS.successText);
 });
+
+test('a custom pool that merely holds a d20 has no natural 20 or 1, a lone d20 does', () => {
+  const custom = (rolls, bonus) => resolveToastLayout({
+    label: 'Custom Roll', total: 0, rolls, ...(bonus ? { meta: { bonus } } : {}),
+  });
+  // Two d20s with no mode, or a d20 among other dice: no single die is the roll.
+  for (const rolls of [
+    [{ v: 20, faces: 20 }, { v: 7, faces: 20 }],
+    [{ v: 1, faces: 20 }, { v: 1, faces: 20 }],
+    [{ v: 20, faces: 20 }, { v: 4, faces: 6 }],
+    [{ v: 1, faces: 20 }, { v: 3, faces: 8 }],
+  ]) {
+    const layout = custom(rolls);
+    assert.equal(layout.isCrit || layout.isFail, false, JSON.stringify(rolls));
+  }
+  // One d20, with or without a flat modifier, still shouts.
+  assert.equal(custom([{ v: 20, faces: 20 }], 5).isCrit, true);
+  assert.equal(custom([{ v: 1, faces: 20 }]).isFail, true);
+});

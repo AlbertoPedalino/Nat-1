@@ -2,7 +2,7 @@ import { isCriticalD20 } from './dice.js';
 import { signed } from '../../ui/numberFormat.js';
 import { UI_COLORS } from '../../ui/colors.js';
 import { ROLL_KIND_TONES } from '../../ui/entityColors.js';
-import { ROLL_LOG_COLORS } from './rollLogPresentation.js';
+import { ROLL_LOG_COLORS, naturalD20 } from './rollLogPresentation.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -33,7 +33,8 @@ export function rollDieColor(value, faces) {
 export function resolveToastLayout(toast) {
   const rolls = toast?.rolls || [];
   const d20s = rolls.filter((r) => r.faces === 20);
-  const keptD20 = d20s.find((r) => r.kept) || d20s[0];
+  // A natural 20 or 1 only where one d20 is the roll (naturalD20).
+  const keptD20 = naturalD20(rolls);
 
   const mode = toast?.meta?.mode;
   const bonus = toast?.meta?.bonus;

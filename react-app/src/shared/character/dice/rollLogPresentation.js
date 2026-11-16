@@ -10,11 +10,23 @@ export const ROLL_LOG_COLORS = Object.freeze({
   nat1: UI_COLORS.danger,
 });
 
+// The d20 a natural 20 or 1 is read from, or null: the one the mode kept
+// (advantage, disadvantage: rollD20 marks it), or the roll's only die when
+// that is a d20 added to the total (a die subtracted, `sign: -1`, as
+// rollNotation writes one, is no natural). A pool that merely holds a d20 — a
+// custom 2d20, or 1d20+1d6 — has no natural: no single die there is the roll.
+// The one rule for every roll and every screen that shows one (the toast, a
+// bubble, the log, a notation roll's colour: rollNotation.js).
+export function naturalD20(rolls) {
+  const dice = Array.isArray(rolls) ? rolls : [];
+  const kept = dice.find((die) => die.faces === 20 && die.kept === true);
+  if (kept) return kept;
+  const [only] = dice;
+  return dice.length === 1 && only.faces === 20 && only.kept !== false && only.sign !== -1 ? only : null;
+}
+
 export function rollOutcome(entry) {
-  const dice = Array.isArray(entry?.rolls) ? entry.rolls : [];
-  const d20s = dice.filter((die) => die.faces === 20 && die.kept !== false);
-  const kept = d20s.find((die) => die.kept === true) || (d20s.length === 1 ? d20s[0] : null);
-  const natural = kept?.v;
+  const natural = naturalD20(entry?.rolls)?.v;
   const kind = natural != null && isCriticalD20(natural, entry?.meta) ? 'nat20' : natural === 1 ? 'nat1' : 'normal';
   return { kind, color: ROLL_LOG_COLORS[kind], isCrit: kind === 'nat20', isFail: kind === 'nat1' };
 }

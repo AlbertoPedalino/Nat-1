@@ -47,6 +47,8 @@ function normalizeSharedDie(die) {
 
   const normalized = { v: value, faces };
   if (typeof die.kept === 'boolean') normalized.kept = die.kept;
+  // A die taken off the total (rollNotation.js) is never a natural.
+  if (die.sign === -1) normalized.sign = -1;
   return normalized;
 }
 

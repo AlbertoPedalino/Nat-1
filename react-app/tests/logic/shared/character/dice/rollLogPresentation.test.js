@@ -73,3 +73,16 @@ test('entries without structured dice retain their original detail', () => {
   assert.equal(rollLogCalculation({ detail: '1d10 [5] + 3', total: 8 }).formula, '1d10 [5] + 3');
   assert.equal(rollLogCalculation({ detail: 'Rest complete', total: null }).total, null);
 });
+
+test('the log reads a natural from one d20 only, as the toast does', () => {
+  assert.equal(rollOutcome({ rolls: [{ v: 20, faces: 20 }, { v: 5, faces: 6 }] }).kind, 'normal');
+  assert.equal(rollOutcome({ rolls: [{ v: 1, faces: 20 }, { v: 1, faces: 20 }] }).kind, 'normal');
+  assert.equal(rollOutcome({ rolls: [{ v: 20, faces: 20, kept: true }, { v: 1, faces: 20, kept: false }] }).kind, 'nat20');
+  assert.equal(rollOutcome({ rolls: [{ v: 1, faces: 20, kept: true }] }).kind, 'nat1');
+});
+
+test('a die taken off the total is no natural, on this screen or after sharing', () => {
+  const subtracted = [{ v: 20, faces: 20, sign: -1 }];
+  assert.equal(rollOutcome({ rolls: subtracted }).kind, 'normal');
+  assert.equal(rollOutcome(normalizeRoll({ label: 'Roll', total: -20, rolls: subtracted })).kind, 'normal');
+});
