@@ -23,6 +23,7 @@ import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import DetailPanel, { DetailNote } from '../layout/DetailPanel.jsx';
 import EmptyLine from '../../../shared/ui/EmptyLine.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { positiveOr } from '../../../shared/numbers.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -58,18 +59,12 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   const emptyHint = detail.emptyHint || 'Nothing available to create.';
   // Per-item active cap (e.g. Replicate Magic Item: one copy of each item).
   // Any non-positive / non-finite config means "no per-item limit".
-  const maxPerItem = useMemo(() => {
-    const n = Number(detail.maxPerItem);
-    return Number.isFinite(n) && n > 0 ? n : Infinity;
-  }, [detail.maxPerItem]);
+  const maxPerItem = positiveOr(detail.maxPerItem, Infinity);
   const searchable = !!detail.searchable;
   const requireResolvedItem = !!detail.requireResolvedItem;
   // Cap the list height (px) past which it scrolls instead of growing forever.
-  // 0 / non-finite means "no cap" (grow to fit).
-  const maxHeight = useMemo(() => {
-    const n = Number(detail.maxHeight);
-    return Number.isFinite(n) && n > 0 ? n : 0;
-  }, [detail.maxHeight]);
+  // None set means "no cap" (the well grows to fit).
+  const maxHeight = positiveOr(detail.maxHeight, 0);
   const [query, setQuery] = useState('');
   const inv = sheet?.sheetInventory || [];
 

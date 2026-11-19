@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, clampInt, roundToTenth } from '../../../src/shared/numbers.js';
+import { clamp, clampInt, positiveOr, roundToTenth } from '../../../src/shared/numbers.js';
+
+test('positiveOr keeps a number above zero, else gives the fallback', () => {
+  assert.deepEqual([3, '2.5', 0, -1, 'abc', undefined, Infinity].map((v) => positiveOr(v, null)), [3, 2.5, null, null, null, null, null]);
+  assert.equal(positiveOr(0), 0);
+  assert.equal(positiveOr('', Infinity), Infinity);
+});
 
 test('clamp holds a value in range; an inverted range gives its min', () => {
   assert.deepEqual([-5, 3, 12].map((v) => clamp(v, 0, 10)), [0, 3, 10]);

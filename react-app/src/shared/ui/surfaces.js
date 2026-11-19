@@ -112,9 +112,10 @@ export function coverRaysSx(color = UI_COLORS.accent) {
 }
 
 // A list that scrolls inside a panel (the builder's options, a picker's
-// results): the sunken well, its height capped at `maxHeight`.
+// results): the sunken well, its height capped at `maxHeight`. No cap (0,
+// none) lets it grow to fit: a 0px cap would hide every row.
 export function scrollWellSx(maxHeight) {
-  return { ...SURFACES.inset, maxHeight, overflow: 'auto' };
+  return { ...SURFACES.inset, ...(maxHeight ? { maxHeight } : {}), overflow: 'auto' };
 }
 
 // A surface lit in a tone (the combatant whose turn it is, the step to take

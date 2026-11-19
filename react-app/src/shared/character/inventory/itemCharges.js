@@ -1,8 +1,7 @@
-import { clamp } from '../../numbers.js';
+import { clamp, positiveOr } from '../../numbers.js';
 import { requiresAttunement } from './itemAttunement.js';
 export function itemChargeMaximum(item) {
-  const maximum = Number(item?.charges);
-  return Number.isFinite(maximum) && maximum > 0 ? Math.floor(maximum) : 0;
+  return Math.floor(positiveOr(item?.charges, 0));
 }
 
 export function itemChargeCurrent(item) {

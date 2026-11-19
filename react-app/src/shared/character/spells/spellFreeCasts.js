@@ -12,6 +12,7 @@
  */
 import { getProficiencyBonus } from '../progression/proficiency.js';
 import { resolveScalingFormula } from '../dice/scalingFormula.js';
+import { positiveOr } from '../../numbers.js';
 import { normalizeRecharge, rechargeLabel, rechargesOnRest } from '../resources/rechargeRules.js';
 
 function resolveMaxUses(raw, character, context = {}) {
@@ -25,8 +26,7 @@ function resolveMaxUses(raw, character, context = {}) {
   }
   const resolved = resolveScalingFormula(formula, character);
   if (resolved != null) return Math.max(1, Math.floor(resolved));
-  const n = Number(raw?.maxUses ?? 1);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
+  return Math.floor(positiveOr(raw?.maxUses ?? 1, 1));
 }
 
 export function formatRechargeLabel(recharge, max) {

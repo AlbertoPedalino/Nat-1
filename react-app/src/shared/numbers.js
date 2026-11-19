@@ -6,6 +6,14 @@ export function numberOr(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+// `value` as a number above zero, or `fallback` for zero, a negative or
+// anything that does not read as a finite number (a cap or a count that is
+// "not set" when 0).
+export function positiveOr(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
 // A stored number, or null when there is none: missing, empty or not a number
 // (Number(null) is 0, which is how a missing total once read as a zero).
 export function numberOrNull(value) {

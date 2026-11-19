@@ -1,6 +1,6 @@
 import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../content/gameData.js';
 import { crKey, crXP } from './challengeRating.js';
-import { clampInt, numberOr } from '../numbers.js';
+import { clampInt, numberOr, positiveOr } from '../numbers.js';
 import { sizeName } from '../content/rulesVocabulary.js';
 import { asArray } from '../lists.js';
 import { stripMarkup } from '../content/markupText.js';
@@ -44,9 +44,8 @@ export function armorClassEntry(ac) {
   const first = Array.isArray(ac) ? ac[0] : ac;
   if (first == null) return { value: null, from: '', special: '' };
   if (typeof first === 'number') return { value: first, from: '', special: '' };
-  const value = Number(first.ac);
   return {
-    value: Number.isFinite(value) && value > 0 ? value : null,
+    value: positiveOr(first.ac, null),
     from: asArray(first.from).map((item) => stripMarkup(item)).join(', '),
     special: String(first.special || '').trim(),
   };
