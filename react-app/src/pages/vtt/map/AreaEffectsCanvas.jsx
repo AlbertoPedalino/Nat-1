@@ -6,6 +6,7 @@ import { createProgram, shaderSeconds } from '../atmosphere/AtmosphereOverlay.js
 import { releaseContext, runWebglLoop, useContextRecovery } from '../atmosphere/webglCanvas.js';
 import { AREA_FRAGMENT_SHADER, AREA_SHAPE_INDEX, AREA_VERTEX_SHADER } from './areaEffectShader.js';
 import { mapLayerSx } from './sceneViewportStyles.js';
+import { useRedrawOnResize } from './useRedrawOnResize.js';
 
 // The animated insides of the areas that carry an effect (fire, poison…). Its
 // own canvas, under the drawing canvas so outlines and labels stay on top, and
@@ -19,6 +20,9 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
   stateRef.current = { effects, grid, view };
   const active = effects.length > 0;
   const { generation, failed, recover } = useContextRecovery();
+  // Shown only while an area carries an effect, and drawn anew when its
+  // context is recovered: measured each time it is.
+  const boxRef = useRedrawOnResize(canvasRef, drawRef, active && !failed ? generation : null);
 
   useEffect(() => {
     if (!active) return undefined;
@@ -63,9 +67,8 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
     };
     const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
     const draw = () => {
-      const host = canvas.parentElement;
-      const width = host?.clientWidth || 0;
-      const height = host?.clientHeight || 0;
+      // Its box as last measured, never read off the page mid-frame.
+      const { width, height } = boxRef.current;
       if (!width || !height) return;
       // Soft, noisy textures: a full-resolution backing store buys nothing.
       const scale = Math.min(globalThis.devicePixelRatio || 1, 1.25) * 0.75;

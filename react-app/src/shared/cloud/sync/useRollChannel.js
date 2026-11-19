@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useLatest } from '../../ui/useLatest.js';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
 import { openRealtimeChannel } from '../realtimeChannel.js';
@@ -56,8 +57,7 @@ function acquire(topic, account, privateChannel, online) {
 export function useRollChannel({ campaignId, onRoll, isGm = false }) {
   const { user, cloudActive } = useAuth();
   const channelsRef = useRef(null);
-  const handlerRef = useRef(onRoll);
-  handlerRef.current = onRoll;
+  const handlerRef = useLatest(onRoll);
   const account = user?.id || 'local';
   const online = Boolean(cloudActive && supabase);
 

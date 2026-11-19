@@ -9,6 +9,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 import { OPACITY } from '../../../shared/ui/colors.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
+import { useLatest } from '../../../shared/ui/useLatest.js';
 import { pieceScreenStyle } from '../map/viewportGeometry.js';
 import { inkEdge } from '../../../shared/ui/shadows.js';
 
@@ -85,11 +86,12 @@ const TokenNode = memo(function TokenNode({
 }) {
   const rect = tokenWorldRect(token, grid);
   const at = worldToScreen(rect, view);
-  const onActiveLayer = !activeLayer || token.layer === activeLayer;
-  const staged = showPlayArea && !isTokenInPlay(token, playArea);
   // Its place and size move every frame of a drag, a pan or a zoom: written
   // onto the element (useLiveStyle), not into sx.
   const placeRef = useLiveStyle(pieceScreenStyle(rect, at, view.zoom));
+  // The handlers the layer gives come new with every frame of a pan (they read
+  // the view); the piece's body calls the latest through this.
+  const actions = useLatest({ onBeginDrag, onBeginResize, onBeginRotate, onDeathSaveChange, onContextMenu });
 
   return (
     <Box
@@ -108,13 +110,11 @@ const TokenNode = memo(function TokenNode({
         },
       }}
     >
-      <TokenSprite
+      <TokenBody
         token={token}
-        size="100%"
         hex={isHexGrid(grid)}
-        dimmed={!onActiveLayer}
-        gmLayerActive={activeLayer === 'gm'}
-        staged={staged}
+        activeLayer={activeLayer}
+        staged={showPlayArea && !isTokenInPlay(token, playArea)}
         interactive={interactive}
         movable={movable}
         resizable={resizable}
@@ -123,18 +123,59 @@ const TokenNode = memo(function TokenNode({
         conditionEntries={conditionEntries}
         presentedInspection={presentedInspection}
         onInspectionChange={onInspectionChange}
-        onPointerDown={interactive ? (event) => onBeginDrag(event, token) : undefined}
-        onResizePointerDown={(event) => (interactive ? onBeginResize(event, token) : undefined)}
-        onRotatePointerDown={(event) => (interactive ? onBeginRotate(event, token) : undefined)}
-        onDeathSaveChange={(type, value) => onDeathSaveChange?.(token, type, value)}
-        onContextMenu={(event) => {
-          if (!interactive || !onContextMenu) return;
-          event.preventDefault();
-          event.stopPropagation();
-          onContextMenu(token, { x: event.clientX, y: event.clientY });
-        }}
+        actions={actions}
       />
     </Box>
+  );
+});
+
+// The piece itself, drawn once and again only when the piece or what it shows
+// changes: never for a frame of a pan or a zoom, which moves its place alone
+// (TokenNode). Drawn again for every piece on every frame, the pieces held a
+// pan back from the pointer. Its handlers call the layer's latest (`actions`).
+const TokenBody = memo(function TokenBody({
+  token,
+  hex,
+  activeLayer,
+  staged,
+  interactive,
+  movable,
+  resizable,
+  rotatable,
+  canSetDeathSaves,
+  conditionEntries,
+  presentedInspection,
+  onInspectionChange,
+  actions,
+}) {
+  return (
+    <TokenSprite
+      token={token}
+      size="100%"
+      hex={hex}
+      dimmed={Boolean(activeLayer) && token.layer !== activeLayer}
+      gmLayerActive={activeLayer === 'gm'}
+      staged={staged}
+      interactive={interactive}
+      movable={movable}
+      resizable={resizable}
+      rotatable={rotatable}
+      canSetDeathSaves={canSetDeathSaves}
+      conditionEntries={conditionEntries}
+      presentedInspection={presentedInspection}
+      onInspectionChange={onInspectionChange}
+      onPointerDown={interactive ? (event) => actions.current.onBeginDrag(event, token) : undefined}
+      onResizePointerDown={(event) => (interactive ? actions.current.onBeginResize(event, token) : undefined)}
+      onRotatePointerDown={(event) => (interactive ? actions.current.onBeginRotate(event, token) : undefined)}
+      onDeathSaveChange={(type, value) => actions.current.onDeathSaveChange?.(token, type, value)}
+      onContextMenu={(event) => {
+        const { onContextMenu } = actions.current;
+        if (!interactive || !onContextMenu) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onContextMenu(token, { x: event.clientX, y: event.clientY });
+      }}
+    />
   );
 });
 

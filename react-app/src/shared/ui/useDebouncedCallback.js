@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { useLatest } from './useLatest.js';
 
 // A function that runs `callback` once calls stop for `delay` ms (with the last
 // arguments). It always calls the latest `callback`, is stable across renders,
@@ -6,13 +7,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 // never writes after it is gone. `.cancel()` drops a pending call; `.flush()`
 // makes it now.
 export function useDebouncedCallback(callback, delay) {
-  const callbackRef = useRef(callback);
+  const callbackRef = useLatest(callback);
   const timerRef = useRef(null);
   const argsRef = useRef(null);
-
-  useLayoutEffect(() => {
-    callbackRef.current = callback;
-  });
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
 

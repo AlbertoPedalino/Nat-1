@@ -13,7 +13,7 @@ export default function FogCanvas({ fog, grid, view, opacity, onTop = false }) {
   const canvasRef = useRef(null);
   // Repainted when the box changes too: the canvas is measured in its own pixels.
   const drawRef = useRef(null);
-  useRedrawOnResize(canvasRef, drawRef);
+  const boxRef = useRedrawOnResize(canvasRef, drawRef);
   const bufferRef = useRef(null);
 
   // Layout effect, not effect: the map image moves by CSS transform, which the
@@ -24,9 +24,8 @@ export default function FogCanvas({ fog, grid, view, opacity, onTop = false }) {
     const draw = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const host = canvas.parentElement;
-      const width = host?.clientWidth || 0;
-      const height = host?.clientHeight || 0;
+      // Its box as last measured, never read off the page mid-frame.
+      const { width, height } = boxRef.current;
       if (!width || !height) return;
 
       // Match the backing store to the CSS size so the fog is not blurry on HiDPI.

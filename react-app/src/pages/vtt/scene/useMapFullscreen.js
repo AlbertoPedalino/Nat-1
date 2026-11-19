@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLatest } from '../../../shared/ui/useLatest.js';
 
 // Whether the board is fullscreen, mirrored to the page, and the floating sheet
 // such a board carries.
@@ -21,9 +22,8 @@ export function useMapFullscreen(onMapFullscreenChange) {
   // page returns to a list with no way out of it. Through a ref, so a caller
   // passing a fresh function every render does not have the cleanup run — and
   // the bar come back mid-fullscreen — on every one of them.
-  const mapFullscreenNoticeRef = useRef(onMapFullscreenChange);
-  mapFullscreenNoticeRef.current = onMapFullscreenChange;
-  useEffect(() => () => mapFullscreenNoticeRef.current?.(false), []);
+  const mapFullscreenNoticeRef = useLatest(onMapFullscreenChange);
+  useEffect(() => () => mapFullscreenNoticeRef.current?.(false), [mapFullscreenNoticeRef]);
 
   return {
     mapFullscreen,

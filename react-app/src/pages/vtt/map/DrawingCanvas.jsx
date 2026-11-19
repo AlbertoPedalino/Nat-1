@@ -17,7 +17,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
   const canvasRef = useRef(null);
   // Repainted when the box changes too: the canvas is measured in its own pixels.
   const drawRef = useRef(null);
-  useRedrawOnResize(canvasRef, drawRef);
+  const boxRef = useRedrawOnResize(canvasRef, drawRef);
   const colors = vttCanvasColors(usePaletteId());
   // A canvas's font is no CSS: the style's stacks themselves.
   const fonts = fontStacks(useStyleId());
@@ -30,9 +30,8 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
     const draw = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const host = canvas.parentElement;
-      const width = host?.clientWidth || 0;
-      const height = host?.clientHeight || 0;
+      // Its box as last measured, never read off the page mid-frame.
+      const { width, height } = boxRef.current;
       if (!width || !height) return;
 
       const ratio = window.devicePixelRatio || 1;

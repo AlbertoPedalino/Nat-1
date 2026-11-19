@@ -133,7 +133,9 @@ export function useViewportPointer({
       && (!playBox || pointInBox(point, playBox));
     dragRef.current = {
       kind: 'pan',
-      last: point,
+      // Where the pointer last was on the page: a pan moves by how far it
+      // went, which needs no measuring of the map's box.
+      last: { x: event.clientX, y: event.clientY },
       from: point,
       hex: canPickHex
         ? worldToHex(screenToWorld(point, view), scene.grid)
@@ -147,8 +149,18 @@ export function useViewportPointer({
     cancelLongPressIfMoved(event);
 
     const state = dragRef.current;
-    const point = screenPoint(event);
-    if (BRUSH_MODES.includes(paintMode)) setHover(point);
+    const panning = state?.kind === 'pan';
+    const brush = BRUSH_MODES.includes(paintMode);
+    // A pan follows the pointer by how far it went on the page (panTo), so only
+    // a brush's preview still needs where it is on the map: measuring the map's
+    // box for every move of a pan (screenPoint) made the browser lay the page
+    // out again in each frame, and the map lagged behind the pointer.
+    const point = panning && !brush ? null : screenPoint(event);
+    if (brush) setHover(point);
+    if (panning) {
+      panTo(state, event);
+      return;
+    }
 
     // The laser follows the cursor as soon as the tool is in hand. Requiring the
     // button to be held made it look broken to everyone else: you point at
@@ -160,20 +172,19 @@ export function useViewportPointer({
 
     if (!state) return;
 
-    if (state.kind === 'pan') {
-      const dx = point.x - state.last.x;
-      const dy = point.y - state.last.y;
-      state.last = point;
-      setView((current) => constrainView(panBy(current, dx, dy)));
-      return;
-    }
-
     if (selection.moveGesture(state, point)) return;
     if (marks.moveGesture(state, point)) return;
     if (fogBrush.moveGesture(state, point)) return;
     if (drawingTools.moveGesture(state, point)) return;
     if (ruler.moveGesture(state, point)) return;
     tokenGestures.moveGesture(state, point);
+  };
+
+  const panTo = (state, event) => {
+    const dx = event.clientX - state.last.x;
+    const dy = event.clientY - state.last.y;
+    state.last = { x: event.clientX, y: event.clientY };
+    setView((current) => constrainView(panBy(current, dx, dy)));
   };
 
   const handlePointerUp = (event) => {

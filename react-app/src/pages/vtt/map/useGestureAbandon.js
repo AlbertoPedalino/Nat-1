@@ -1,4 +1,5 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import { useLatest } from '../../../shared/ui/useLatest.js';
 import { useLongPress } from '../../../shared/ui/useLongPress.js';
 
 // A gesture taken over by another one (a long press opening a menu, a second
@@ -11,10 +12,8 @@ export function useGestureAbandon({
 }) {
   // Read by abandonGesture, which runs from timers and touch handlers created
   // before the latest render.
-  const onDragTokenRef = useRef(onDragToken);
-  onDragTokenRef.current = onDragToken;
-  const onPaintEndRef = useRef(onPaintEnd);
-  onPaintEndRef.current = onPaintEnd;
+  const onDragTokenRef = useLatest(onDragToken);
+  const onPaintEndRef = useLatest(onPaintEnd);
 
   const abandonGesture = useCallback(() => {
     const state = dragRef.current;

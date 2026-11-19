@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLatest } from '../../../shared/ui/useLatest.js';
 import { measureLabel, snapRuler } from '../../../shared/vtt/map/measure.js';
 import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
 import { gridShape, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
@@ -10,8 +11,7 @@ export function useRuler({
   dragRef, paintMode, cellPoint, grid, measureShape, feetPerCellForRuler, onMeasure,
 }) {
   const [measure, setMeasure] = useState(null);
-  const onMeasureRef = useRef(onMeasure);
-  onMeasureRef.current = onMeasure;
+  const onMeasureRef = useLatest(onMeasure);
   const measurePublisherRef = useRef(null);
   if (!measurePublisherRef.current) {
     measurePublisherRef.current = createMeasurePublisher({ send: (value) => onMeasureRef.current?.(value) });

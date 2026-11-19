@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useLatest } from './useLatest.js';
 
 // The one way a component or hook listens to a DOM event for as long as it is
 // mounted: attached after commit, removed on cleanup.
@@ -17,10 +18,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 export function useEventListener(target, type, handler, {
   enabled = true, capture, passive, once,
 } = {}) {
-  const handlerRef = useRef(handler);
-  useLayoutEffect(() => {
-    handlerRef.current = handler;
-  });
+  const handlerRef = useLatest(handler);
 
   useEffect(() => {
     if (!enabled || !type) return undefined;

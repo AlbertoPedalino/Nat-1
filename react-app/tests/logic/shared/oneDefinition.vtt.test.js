@@ -105,3 +105,12 @@ test('the hexcrawl readouts are hexLabel and WeatherTag', () => {
     allow: ['pages/vtt/hexcrawl/WeatherTag.jsx'],
   })), []);
 });
+
+// A map overlay canvas takes its box's size from useRedrawOnResize (kept by a
+// ResizeObserver), never off the page while it paints: repainted for every
+// frame of a pan, each read of clientWidth laid the page out again mid-frame
+// and the map lagged behind the pointer. A pan moves by how far the pointer
+// went, so it measures no box either (useViewportPointer panTo).
+test('a map canvas never measures its box while it paints', () => {
+  assert.deepEqual(sourceFilesMatching(/\.client(Width|Height)/).filter((file) => /^pages\/vtt\/map\/\w+Canvas\.jsx$/.test(file)), []);
+});

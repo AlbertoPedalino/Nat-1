@@ -1,6 +1,7 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
-// Repaint a map overlay canvas the moment its box changes size.
+// Repaint a map overlay canvas the moment its box changes size, and know that
+// size without asking the page for it.
 //
 // The overlays on the map are canvases: their backing store is measured from
 // the box they fill and everything is painted in the box's pixels. When the box
@@ -14,23 +15,36 @@ import { useLayoutEffect } from 'react';
 // in the very frame the box changes. A state update rendered a frame or more
 // later, and longer with the character sheet re-rendering beside the map.
 //
+// The box's size is kept here, from the observer, and returned (`.current`:
+// { width, height }, whole CSS pixels as clientWidth gives them): a canvas
+// repainted for every frame of a pan read its host's clientWidth instead, and
+// each read made the browser lay the page out again in the middle of the
+// frame, after the pieces had just been moved — the map then lagged behind the
+// pointer.
+//
 // `drawRef.current` is the canvas's paint function, kept current by its own
-// drawing effect.
-export function useRedrawOnResize(canvasRef, drawRef) {
+// drawing effect. `mount` names the canvas element now drawn, for a canvas
+// shown only at times or drawn anew (the area effects'): a new one is
+// measured and watched in its turn.
+export function useRedrawOnResize(canvasRef, drawRef, mount = null) {
+  const boxRef = useRef({ width: 0, height: 0 });
   useLayoutEffect(() => {
     const element = canvasRef.current;
-    if (!element || typeof ResizeObserver === 'undefined') return undefined;
+    if (!element) return undefined;
+    boxRef.current = { width: element.clientWidth, height: element.clientHeight };
+    if (typeof ResizeObserver === 'undefined') return undefined;
 
-    let seen = `${element.clientWidth}x${element.clientHeight}`;
-    const observer = new ResizeObserver(() => {
-      const size = `${element.clientWidth}x${element.clientHeight}`;
+    const observer = new ResizeObserver(([entry]) => {
+      const width = Math.round(entry.contentRect.width);
+      const height = Math.round(entry.contentRect.height);
       // The observer fires once on connect, and again for changes that are not
       // changes. Repainting the map's overlays is not free.
-      if (size === seen) return;
-      seen = size;
+      if (width === boxRef.current.width && height === boxRef.current.height) return;
+      boxRef.current = { width, height };
       drawRef.current?.();
     });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [canvasRef, drawRef]);
+  }, [canvasRef, drawRef, mount]);
+  return boxRef;
 }
