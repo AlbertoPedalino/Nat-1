@@ -1437,53 +1437,184 @@ const CYBERPUNK = deepFreeze({
   motion: { pace: 0.6, hop: 0.3 },
 });
 
-// The lavender cut: the comic one in lilac. Its ink, ribbons, seals and gems
-// kept, a use's gem amber; a card's mark is a zigzag burst, the solid shadows fall further (the
-// look-book's hard offset), and the page wears only its halftone dots, no
-// stickers.
-const LAVENDER = deepFreeze({
+// The superhero cut: the comic one off the newsstand. Its ink, seals and
+// switches kept; the bars' ends cut as a lightning bolt, the crest a hero's
+// emblem, a slot's gem a star and a use's a bolt, a card's mark a bolt; the
+// bars a yellow caption box, a bolt and speed lines by the title; Ben-Day
+// dots on the bubble and the page, no stickers; hard offset shadows, squarer
+// panels, quick and springy.
+const SUPERHERO = deepFreeze({
   ...COMIC,
-  // A puffy pastel balloon, its shadow straight under it, two puffs trailing for a tail.
+  // The comic's balloon, Ben-Day dots in its corner, its shadow thrown hard.
+  bubble: { ...COMIC.bubble, texture: 'benday', tilt: -1.2 },
+  moments: {
+    nat20: {
+      // KAPOW in yellow, a spring, POW bursts popping in red and blue.
+      ...COMIC.moments.nat20,
+      effect: { glyph: 'pow', mode: 'pop', count: 9, size: [18, 30], colors: ['secondary', 'info', 'accentHighlight'], look: 'ink' },
+    },
+    nat1: {
+      // A red crash, a groan, stars circling the head.
+      ...COMIC.moments.nat1,
+      effect: { glyph: 'star', mode: 'orbit', count: 4, size: [22, 22], colors: ['accent'], look: 'ink' },
+    },
+  },
+  ribbon: {
+    panel: { notch: 12, pad: 20 },
+    tile: { notch: 4, pad: 5 },
+    // Each end a lightning bolt's zigzag.
+    ends: '0,0 7,42 2,56 10,100',
+  },
+  seal: { radius: '50%' },
+  // A hero's emblem: a shield whose sides run down to a deep point, its
+  // name's band square across the top so no letter is cut, its figures kept
+  // above the point.
+  crest: {
+    clip: 'polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%)',
+    edge: 3,
+    foot: '30%',
+    side: '0%',
+  },
+  // A slot's gem is a star (blue for a spell's slot, the pact's violet), a
+  // use's a lightning bolt in the yellow; a training mark the comic's diamond.
+  gemCuts: {
+    counter: {
+      outline: 'M50 6 L61.8 37.8 L95.6 39.2 L69 60.2 L78.2 92.8 L50 74 L21.8 92.8 L31 60.2 L4.4 39.2 L38.2 37.8 Z',
+      shading: [
+        ['dark', 'M50 6 L61.8 37.8 L95.6 39.2 L69 60.2 L78.2 92.8 L50 74 Z'],
+        ['table', 'M61.8 37.8 L69 60.2 L50 74 L31 60.2 L38.2 37.8 Z'],
+      ],
+      glint: true,
+      centre: [50, 54],
+      shadowDrop: 6,
+    },
+    uses: {
+      outline: 'M56 2 L20 56 H46 L38 98 L80 42 H54 L68 2 Z',
+      shading: [
+        ['light', 'M56 2 L20 56 H30 L60 8 Z'],
+        ['dark', 'M80 42 L38 98 L48 76 L70 46 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 6,
+    },
+    training: COMIC.gemCuts.training,
+  },
+  ornament: { path: 'M7 0 L2 7 H5.5 L4.5 12 L10 4.5 H6.5 L8 0 Z' },
+  marker: { outline: 'M8 1 L2 16 H6 L4 29 L10.5 12 H6.5 L9.5 1 Z' },
+  ink: { ...COMIC.ink, drop: 1.6 },
+  panel: {
+    ...COMIC.panel,
+    flourish: { kind: 'bolt', width: 64, height: 20, at: 'right' },
+    banner: 'caption',
+  },
+  radius: 6,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 1.6, step: 8 },
+    screentone: { line: 2, gap: 6, angle: -45 },
+    rays: 1,
+  },
+  motion: { pace: 0.9, hop: 1.2 },
+});
+
+// The noir cut: a detective's case file on a rainy night. Square frames in
+// heavy black ink, hard shadows thrown off them, art-deco steps for the bars'
+// ends and the crest's foot, a manila case folder for a bar with a red stamp
+// on it, manila labels for the icons (no tone on them), venetian blinds'
+// shadows across the bars and the bubble, a case folder for a bubble,
+// film grain on the page, lettering typed and printed, never inked; poker
+// chips and keyholes for the gems, a spade for the ornament, a keyhole for a
+// card's mark; slow and still.
+const NOIR = deepFreeze({
+  ...COMIC,
+  // A manila case file folder, its labelled tab standing up at the left, the
+  // blinds' shadow across it; no tail, a folder points at nothing.
   bubble: {
-    fill: 'bubble',
-    ink: 'textPrimary',
-    texture: 'wash',
+    fill: 'paperShade',
+    ink: 'onPaper',
+    texture: 'blinds',
     frame: 'none',
-    radius: '26px',
-    border: { width: 3, style: 'solid', role: 'edge' },
+    radius: '3px',
+    border: { width: 1.5, style: 'solid', role: 'edge' },
     outline: { width: 0, offset: 0, role: 'edge' },
-    tilt: -1.2,
-    shadow: 'under',
-    tail: { kind: 'puffs', fill: 'bubble', line: 'edge' },
-    decor: 'none',
+    tilt: 0.6,
+    shadow: 'soft',
+    tail: { kind: 'none', fill: 'paperShade', line: 'edge' },
+    decor: 'folder',
   },
   moments: {
     nat20: {
-      // A puffy POW cloud in pastel, boing, little POW bursts popping.
-      burst: { kind: 'lobes', base: 38, amp: 11, count: 10, scallop: true, width: 120, squash: 0.8 },
+      // A press camera's flashbulb going off, looming out of the dark, sparks of light.
+      burst: { kind: 'star', points: 16, reach: [54, 44], inner: 30, width: 110, squash: 0.9 },
       fill: 'accent',
-      paint: 'pastel',
-      number: 'ink',
-      turn: -6,
-      motion: 'boing',
-      effect: { glyph: 'pow', mode: 'pop', count: 8, size: [16, 24], colors: ['secondary', 'accent', 'accentText'], look: 'ink' },
+      paint: 'engraving',
+      number: 'engrave',
+      turn: 0,
+      motion: 'loom',
+      effect: { glyph: 'sparkle', mode: 'pop', count: 6, size: [14, 24], colors: ['textPrimary', 'accent'], look: 'silhouette' },
     },
     nat1: {
-      // A zigzag bolt, deflating, dizzy spirals.
-      burst: { kind: 'polygon', points: [[58, 0], [18, 56], [46, 56], [30, 100], [86, 38], [56, 38], [74, 0]] },
+      // Blood on the floor, the bubble fainting, smoke rising.
+      burst: { kind: 'splat', base: 32, waves: [[6, 4], [13, 2, 40]], drips: [[80, 24, 8], [110, 30, 6]] },
       fill: 'dangerDeep',
-      paint: 'pastel',
-      number: 'ink',
+      paint: 'inkbleed',
+      number: 'engrave',
       turn: 0,
-      motion: 'deflate',
-      effect: { glyph: 'spiral', mode: 'orbit', count: 3, size: [20, 22], colors: ['accentText'], look: 'ink' },
+      motion: 'faint',
+      effect: { glyph: 'puff', mode: 'rise', count: 6, size: [20, 30], colors: ['textMuted', 'outline'], look: 'soft' },
     },
   },
-  marker: { outline: 'M6 1 L11 6 L8.5 10 L11 15 L8.5 20 L11 24 L6 29 L1 24 L3.5 20 L1 15 L3.5 10 L1 6 Z', lines: 'M6 6 V24' },
-  // A use is amber: the style's accent is the spells' violet.
-  gemCuts: { ...COMIC.gemCuts, uses: { ...COMIC.gemCuts.uses, tones: { uses: 'warning' } } },
-  ink: { ...COMIC.ink, drop: 1.5 },
-  surface: { ...COMIC.surface, paper: 'none' },
+  ribbon: {
+    panel: { notch: 10, pad: 18 },
+    tile: { notch: 4, pad: 6 },
+    // Each end stepped out as an art-deco front.
+    ends: '6,0 6,20 3,20 3,40 0,40 0,60 3,60 3,80 6,80 6,100',
+  },
+  seal: { radius: '3px' },
+  // An art-deco plaque: square across its name's band, its foot stepped
+  // down to the middle.
+  crest: {
+    clip: 'polygon(0 0, 100% 0, 100% 86%, 82% 86%, 82% 93%, 66% 93%, 66% 100%, 34% 100%, 34% 93%, 18% 93%, 18% 86%, 0 86%)',
+    edge: 3,
+    foot: '14%',
+    side: '0%',
+  },
+  bookmarkTab: { radius: '2px 2px 0 0', rise: 3, gap: 3 },
+  // A slot's gem is a poker chip, a use's a keyhole plate; a training mark
+  // the comic's diamond, a card's suit.
+  gemCuts: {
+    counter: { sides: 12, outer: [50, 50, 45, 45], inner: [48, 47, 26, 26], shadowDrop: 4 },
+    uses: {
+      outline: 'M50 6 C61 6 70 15 70 26 C70 33 67 38 62 42 L72 94 H28 L38 42 C33 38 30 33 30 26 C30 15 39 6 50 6 Z',
+      shading: [
+        ['dark', 'M50 6 C61 6 70 15 70 26 C70 33 67 38 62 42 L72 94 H50 Z'],
+        ['light', 'M40 18 C42 14 46 12 50 12 C46 16 44 20 44 26 Z'],
+      ],
+      glint: false,
+      centre: [50, 50],
+      shadowDrop: 4,
+    },
+    training: COMIC.gemCuts.training,
+  },
+  ornament: { path: 'M6 0 C8 3 12 5 12 8 C12 10.2 9.8 11 8 9.8 L9 12 H3 L4 9.8 C2.2 11 0 10.2 0 8 C0 5 4 3 6 0 Z' },
+  marker: { outline: 'M6 2 C8.5 2 10 3.8 10 6 C10 7.6 9.2 8.8 8 9.5 L10 28 H2 L4 9.5 C2.8 8.8 2 7.6 2 6 C2 3.8 3.5 2 6 2 Z' },
+  bookmarkMark: { width: 3, inset: 3, radius: '0' },
+  paper: { corners: [0.2, 0.2, 0.2, 0.2] },
+  // Lettering printed plain, as typed and printed on a file, never inked.
+  ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
+  panel: {
+    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'label', float: 0,
+    flourish: { kind: 'deco', width: 60, height: 14, at: 'right' }, grip: 'none', banner: 'casefile',
+  },
+  radius: 3,
+  surface: {
+    paper: 'none',
+    halftone: { dot: 0.8, step: 3 },
+    screentone: { line: 5, gap: 11, angle: -28 },
+    rays: 0.7,
+  },
+  motion: { pace: 1.3, hop: 0.3 },
 });
 
 // The looks' styles the viewer can choose from (the "Style" of the settings'
@@ -1502,10 +1633,21 @@ export const SHAPE_STYLES = Object.freeze({
   abyssal: Object.freeze({ id: 'abyssal', label: 'Abyssal horror', palettes: Object.freeze({ dark: 'abyss', light: 'asylum' }), shapes: ABYSSAL }),
   pixel: Object.freeze({ id: 'pixel', label: 'Pixel retro', palettes: Object.freeze({ dark: 'arcade', light: 'cartridge' }), shapes: PIXEL }),
   cyberpunk: Object.freeze({ id: 'cyberpunk', label: 'Cyberpunk', palettes: Object.freeze({ dark: 'overdrive', light: 'daylight' }), shapes: CYBERPUNK }),
-  lavender: Object.freeze({ id: 'lavender', label: 'Comic lavender', palettes: Object.freeze({ dark: 'dusk', light: 'lilac' }), shapes: LAVENDER }),
+  superhero: Object.freeze({ id: 'superhero', label: 'Comic superhero', palettes: Object.freeze({ dark: 'heroNight', light: 'newsprint' }), shapes: SUPERHERO }),
+  noir: Object.freeze({ id: 'noir', label: 'Noir detective', palettes: Object.freeze({ dark: 'midnight', light: 'caseFile' }), shapes: NOIR }),
 });
 
 export const BASE_STYLE_ID = 'comic';
+
+// A style's id as kept before it was renamed (a theme choice in this
+// browser, a player's dice, a roll an older client sent) → its id now:
+// comic lavender became comic superhero (2026-11-19).
+const RENAMED_STYLES = Object.freeze({ lavender: 'superhero' });
+
+// A kept style id as it is now: a renamed one's new id, any other as given.
+export function currentStyleId(styleId) {
+  return RENAMED_STYLES[styleId] || styleId;
+}
 
 // The style the viewer draws in, for what reads it outside React: a roll sent
 // to the table carries it (rollFeed.js), so every screen draws that roll's
@@ -1523,7 +1665,8 @@ export function viewerStyleId() {
 // A style a roll carries, if it is one this client knows; null otherwise (an
 // older client's roll, or a style added since), drawn in the viewer's own.
 export function sharedStyle(styleId) {
-  return SHAPE_STYLES[styleId] ? styleId : null;
+  const current = currentStyleId(styleId);
+  return SHAPE_STYLES[current] ? current : null;
 }
 
 // A style's shapes, the base style's for an unknown id.

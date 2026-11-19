@@ -327,7 +327,50 @@ function plank(w) {
   ];
 }
 
-const BANNERS = Object.freeze({ ribbon, scroll, drape, tape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank });
+// Superhero: a narrator's caption box in the full accent, a little askew,
+// inked thick, Ben-Day dots fading in from its far end, a starburst on it.
+function caption(w) {
+  const points = [[4, 10], [w - 4, 8], [w - 2, 42], [2, 44]];
+  const box = polygonPath(points);
+  const dots = [];
+  for (let x = w - 120, column = 0; x < w; x += 6, column += 1) {
+    for (let y = 11 + (column % 2) * 3; y < 44; y += 6) {
+      dots.push({ tag: 'circle', cx: x, cy: y, r: Math.min(1.8, 0.4 + (column / 20) * 1.4), fill: 'accentMuted' });
+    }
+  }
+  const burst = Array.from({ length: 16 }, (_, i) => {
+    const angle = -Math.PI / 2 + (i * Math.PI) / 8;
+    const reach = i % 2 ? 7 : 14;
+    return [w - 34 + Math.cos(angle) * reach, 26 + Math.sin(angle) * reach];
+  });
+  return [
+    castShadow(points),
+    ...sketch('path', box, { seed: 2, roughness: 0.4, fill: 'accent', fillStyle: 'solid' }),
+    { tag: 'g', clip: box, children: dots },
+    ...sketch('path', box, { seed: 3, roughness: 0.4, stroke: 'edge', strokeWidth: 2.6 }),
+    // The burst only where the bar has room past its title.
+    ...(w < 300 ? [] : sketch('polygon', burst, { seed: 4, roughness: 0.5, stroke: 'edge', strokeWidth: 1.8, fill: 'secondary', fillStyle: 'solid' })),
+  ];
+}
+
+// Noir: a manila case folder, its tab at the left, a red stamp on its far end.
+function casefile(w) {
+  const points = [[2, 15], [9, 8], [78, 8], [85, 15], [w - 2, 15], [w - 2, 44], [2, 44]];
+  const folder = polygonPath(points);
+  const stamped = w < 300 ? [] : [
+    ...sketch('rectangle', w - 96, 21, 70, 17, { seed: 3, roughness: 0.9, stroke: 'danger', strokeWidth: 1.6 }),
+    ...sketch('line', w - 88, 27, w - 34, 27, { seed: 4, roughness: 0.7, stroke: 'danger', strokeWidth: 2.2 }),
+    ...sketch('line', w - 88, 32.5, w - 50, 32.5, { seed: 5, roughness: 0.7, stroke: 'danger', strokeWidth: 2.2 }),
+  ];
+  return [
+    castShadow(points),
+    ...sketch('path', folder, { seed: 1, roughness: 0.3, stroke: 'edge', strokeWidth: 1.2, fill: 'paperShade', fillStyle: 'solid' }),
+    { tag: 'path', d: `M2 18.5 H${w - 2}`, fill: 'none', stroke: 'edge', strokeWidth: 0.8, opacity: OPACITY.edge },
+    { tag: 'g', transform: `rotate(-3 ${w - 61} 29)`, opacity: OPACITY.heavy, children: stamped },
+  ];
+}
+
+const BANNERS = Object.freeze({ ribbon, scroll, drape, tape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank, caption, casefile });
 
 // How each banner's title is lettered: the ink that reads `on` a role of the
 // drawing, or a role's `color`; outlined in a role (`halo`) where the drawing
@@ -346,6 +389,8 @@ const BANNER_TITLES = Object.freeze({
   glitch: Object.freeze({ on: 'accent' }),
   marquee: Object.freeze({ color: 'accent' }),
   plank: Object.freeze({ on: 'accentMuted', halo: 'accentMuted' }),
+  caption: Object.freeze({ on: 'accent' }),
+  casefile: Object.freeze({ on: 'paperShade' }),
 });
 
 // How far, px, a banner's ends reach past the panel's sides (the comic's

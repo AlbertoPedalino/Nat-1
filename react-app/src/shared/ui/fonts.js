@@ -175,18 +175,35 @@ const CYBERPUNK_FONTS = Object.freeze({
   mono: '"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
-// The lavender faces: the look-book's. Bangers, a comic's hand-lettered
-// capitals, for the signs and the voice; Inter for the text; the comic's
-// Rubik for labels, numbers and a card's name (Bangers' lower case is as tall
-// as its capitals, so the small names fitted to a lower case came out tiny).
-const LAVENDER_FONTS = Object.freeze({
+// The superhero faces: a newsstand comic's. Bangers, a comic's hand-lettered
+// capitals, for the signs and the voice; Comic Neue, a letterer's balloon
+// hand, for the text; the comic's Rubik for labels, numbers and a card's name
+// (Bangers' lower case is as tall as its capitals, so the small names fitted
+// to a lower case came out tiny).
+const SUPERHERO_FONTS = Object.freeze({
   display: '"Rubik", system-ui, sans-serif',
-  prose: '"Inter", system-ui, sans-serif',
+  prose: '"Comic Neue", "Rubik", system-ui, sans-serif',
   cardName: '"Rubik", system-ui, sans-serif',
-  body: '"Inter", system-ui, sans-serif',
+  body: '"Comic Neue", "Rubik", system-ui, sans-serif',
   shout: '"Bangers", "Rubik", system-ui, sans-serif',
   heading: '"Bangers", "Rubik", system-ui, sans-serif',
   mono: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
+});
+
+// The noir faces: a 1940s case file. Bebas Neue, a film poster's condensed
+// capitals, for the signs and the voice; Oswald for labels, numbers and a
+// card's name (an ability's short name too, STR: a typewriter face's small
+// lower case, raised to the text's fit, ran far past its box); Libre
+// Franklin, the period's newspaper gothic, for the text; a typewriter for the
+// case notes (Courier Prime).
+const NOIR_FONTS = Object.freeze({
+  display: '"Oswald", "Libre Franklin", system-ui, sans-serif',
+  prose: '"Courier Prime", "Courier New", monospace',
+  cardName: '"Oswald", "Libre Franklin", system-ui, sans-serif',
+  body: '"Libre Franklin", system-ui, sans-serif',
+  shout: '"Bebas Neue", "Oswald", system-ui, sans-serif',
+  heading: '"Bebas Neue", "Oswald", system-ui, sans-serif',
+  mono: '"Courier Prime", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace',
 });
 
 // How large each lettering is drawn against its size (CSS font-size-adjust),
@@ -196,10 +213,13 @@ const LAVENDER_FONTS = Object.freeze({
 // condensed sign) is drawn larger, a wide one smaller, where a label or a
 // title has the room the comic's had. Every role a TEXT_STYLES treatment
 // fits: `body` (the theme's text, Alegreya's short lower case raised),
-// `heading`, `figure` (and the tag on its chip), `caps` (the label's small
+// `prose` (descriptions and notes in the prose face: Alegreya's too, the
+// same as the text's in the comic; a typewriter face, wide and short in its
+// lower case, raised as Alegreya is, came out huge), `heading`, `figure` (and the tag on its chip), `caps` (the label's small
 // capitals: a variable named …label breaks Emotion), `shout`, `cover`.
 const COMIC_FITS = Object.freeze({
   body: 'ex-height 0.52',
+  prose: 'ex-height 0.52',
   heading: 'ex-height 0.55',
   figure: 'cap-height 0.92',
   caps: 'none',
@@ -270,12 +290,21 @@ export const FONT_STYLES = Object.freeze({
     fits: Object.freeze({ heading: 'ex-height 0.5', shout: 'cap-height 0.62', cover: 'ex-height 0.47' }),
     stylesheet: 'https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Russo+One&family=Tektur:wght@500;700&display=swap',
   }),
-  lavender: Object.freeze({
-    stacks: LAVENDER_FONTS,
+  superhero: Object.freeze({
+    stacks: SUPERHERO_FONTS,
     // Bangers is all capitals and narrow: lettered by them, a little taller
     // than the comic's, so a short name (Int, Str) still reads.
     fits: Object.freeze({ heading: 'cap-height 0.77' }),
-    stylesheet: 'https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400..700&display=swap',
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap',
+  }),
+  noir: Object.freeze({
+    stacks: NOIR_FONTS,
+    // Bebas Neue is all capitals and condensed, as Bangers is: lettered by
+    // them. Courier Prime, a typewriter's, is wide: its notes drawn at its
+    // own lower case, a little under the text's, so a description reads at
+    // the length the comic's did.
+    fits: Object.freeze({ heading: 'cap-height 0.77', prose: 'ex-height 0.4' }),
+    stylesheet: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400..700&family=Oswald:wght@400..700&display=swap',
   }),
 });
 
@@ -308,7 +337,9 @@ export const FONT_FITS = Object.freeze(Object.fromEntries(
 // The variables a style fills, { '--gb-font-display': '"Rubik", …', … }: its
 // stacks and its fits.
 export function fontVariables(styleId) {
-  const fits = { ...COMIC_FITS, ...fontStyle(styleId).fits };
+  const own = fontStyle(styleId).fits || {};
+  // The prose is fitted as the text is unless the style fits it apart.
+  const fits = { ...COMIC_FITS, ...own, prose: own.prose ?? own.body ?? COMIC_FITS.prose };
   return {
     ...Object.fromEntries(Object.entries(fontStacks(styleId)).map(([role, stack]) => [fontVariableName(role), stack])),
     ...Object.fromEntries(Object.entries(fits).map(([role, fit]) => [fitVariableName(role), fit])),

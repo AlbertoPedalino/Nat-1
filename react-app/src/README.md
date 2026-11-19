@@ -59,14 +59,14 @@ opens the theme panel, `ThemeDialog.jsx`, where
 every style shows as a card drawn in its own theme): the **style**
 (`SHAPE_STYLES` in `shapes.js`: Comic fantasy, the base; Comic gothic; Sci-fi;
 War horror; Arcane astral; Pirate seas; Steampunk; Dwarven forge; Feywild;
-Abyssal horror; Pixel retro; Cyberpunk; Comic lavender) and the **mode** (System, Dark, Light). Each style
+Abyssal horror; Pixel retro; Cyberpunk; Comic superhero; Noir detective) and the **mode** (System, Dark, Light). Each style
 draws each mode in a palette of its own (its `palettes`: comic in `dark` and
 `light`, the parchment; gothic in `dread` and `mist`; sci-fi in `neon` and
 `neonLight`; war in `trench` and `dossier`; astral in `starlight` and
 `vellum`; pirate in `deepSea` and `seaChart`; steampunk in `foundry` and
 `patent`; dwarven in `forge` and `granite`; fey in `twilight` and `blossom`;
 abyssal in `abyss` and `asylum`; pixel in `arcade` and `cartridge`; cyberpunk
-in `overdrive` and `daylight`; lavender in `dusk` and `lilac`; every light
+in `overdrive` and `daylight`; superhero in `heroNight` and `newsprint`; noir in `midnight` and `caseFile`; every light
 one tints its panel bars in its accent and lays a page of its own colour). A new style is data only: its palettes in
 `colors.js`, its cut in `shapes.js`, its faces in `fonts.js`, its icon sets in
 `gameIcons.js` (a set may spread the comic one and redraw some roles) and,
@@ -161,21 +161,26 @@ Every speech bubble (the dice toast and its game notices, the app's
 notices, a roll's or a hex's bubble on the map) is the style's `bubble`
 (`shapes.js`): its `fill` role and `texture`, a drawn `frame` (cut corners,
 a torn edge, a riveted plate…) or none, its `radius`, `border`, `outline`,
-`tilt`, `shadow` and `tail`, each a name from the lists in
-`shared/ui/bubbleLooks.js` (`BUBBLE_TEXTURES`, `BUBBLE_FRAMES`,
-`BUBBLE_SHADOWS`, `BUBBLE_TAILS`), worked out per style and palette as
-themed values. `bubble.js` `bubbleSx` draws it and `bubbleToneSx` sets the
-colour its shadow falls in (a roll's kind, a natural 20 or 1, a notice's
-severity); `bubbleTailSx` gives it a tail only where it speaks from
-something on the screen (a piece, a hex, the dice dock), never on the app's
-notices.
+`tilt`, `shadow`, `tail` (or `none`) and `decor` (tape, brackets, a case
+folder's labelled tab: CSS, or a `picture` drawn in the palette's roles),
+each a name from the lists in `shared/ui/bubbleLooks.js` (`BUBBLE_TEXTURES`,
+`BUBBLE_FRAMES`, `BUBBLE_SHADOWS`, `BUBBLE_TAILS`, `BUBBLE_DECORS`), worked
+out per style and palette as themed values. `bubble.js` `bubbleSx` draws it
+and `bubbleToneSx` sets the colour its shadow falls in (a roll's kind, a
+natural 20 or 1, a notice's severity); `bubbleTailSx` gives it a tail only
+where it speaks from something on the screen (a piece, a hex, the dice
+dock), never on the app's notices. A roll's coloured lettering on a bubble
+(its title, total, modifier) goes through `bubbleTone(tone)`: the colour
+itself, but on a paper bubble over a dark page darkened towards its ink, so
+it reads on the paper.
 
 The style also inks (`ink` in `shapes.js`: `edge` width, `drop` share of the
 solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
 figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels
 (`panel`: the title `bar` a filled strip or only a rule in the panel's tone,
 its `hatch`, a `frame` solid or double `frameWidth` wide, the icon on a seal
-or `bare`, a soft `float` shadow, the title's `flourish`: a line of stars,
+in the panel's tone, `bare`, or a `label` in ink with no tone (a stat tile's
+name then lettered in the text's ink; `BADGES` in `surfaces.js`), a soft `float` shadow, the title's `flourish`: a line of stars,
 rivets, a vine, a tentacle, a glitch, drawn in `panelOrnaments.js`), written as whole
 values by `surfaceVariables` (`--gb-panel-*`), the comic's own where a style
 builds as the comic does, so its panels stay exactly as they were. Each bar's
@@ -209,7 +214,9 @@ that loads them; `UI_FONTS.<role>` is `var(--gb-font-<role>)`; a canvas takes
 chosen. The type scale (`FONT_SIZES`…) stays one for every style; a style
 fits its faces to it (`fits`: font-size-adjust by role over the comic's,
 `FONT_FITS`), so a condensed blackletter or a wide sign reads as large as the
-comic face at the same size.
+comic face at the same size. The prose (descriptions, notes) is fitted as the
+style's text unless it fits it apart (`prose`): a typewriter face, wide and
+short in its lower case, needs its own or it comes out huge.
 
 Its ink may `glow` (a lit line's halo: every solid shadow and inked lettering
 blurs out by `--gb-ink-glow`, 0 in Comic). A theme's variables are composed

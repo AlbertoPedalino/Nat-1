@@ -1,7 +1,7 @@
 import {
   BASE_PALETTE_ID, LOGO_COLORS, PALETTES, UI_COLORS, colorVariableName, uiMix,
 } from './colors.js';
-import { BASE_STYLE_ID, SHAPE_STYLES } from './shapes.js';
+import { BASE_STYLE_ID, SHAPE_STYLES, currentStyleId } from './shapes.js';
 import { fontStacks } from './fonts.js';
 
 // The dice a player rolls with, two choices apart (themeChoice.js): their
@@ -51,14 +51,15 @@ export const DICE_COLORS = Object.freeze({
   abyssal: colorSet('abyssal', 'Abyss', { face: '#0b2a24', faceLit: '#1f5e4e', number: '#9dffcf', edge: '#020a08' }),
   pixel: colorSet('pixel', '8-bit', { face: '#1b2f9a', faceLit: '#3f63e8', number: '#ffd23f', edge: '#0b0b22' }),
   cyberpunk: colorSet('cyberpunk', 'Hazard', { face: '#151515', faceLit: '#3a3a12', number: '#fcee0a', edge: '#000000' }),
-  lavender: colorSet('lavender', 'Amethyst', { face: '#3b2470', faceLit: '#6e4bc4', number: '#f3efe6', edge: '#0d0b14' }),
+  superhero: colorSet('superhero', 'Hero blue', { face: '#1450b4', faceLit: '#3d7be6', number: '#ffd21f', edge: '#060a1c' }),
+  noir: colorSet('noir', 'Ink', { face: '#0d0d0d', faceLit: '#3a3a3a', number: '#ffffff', edge: '#000000' }),
 });
 
 // How thick each theme inks a die's edge, as a share (per cent) of a face:
 // Die3D's rim round each face. A console's hairline, a stone's slab.
 const RIMS = Object.freeze({
   comic: 9, scifi: 4, gothic: 11, war: 12, astral: 5, pirate: 10,
-  steampunk: 7, dwarven: 14, fey: 6, abyssal: 8, pixel: 13, cyberpunk: 5, lavender: 9,
+  steampunk: 7, dwarven: 14, fey: 6, abyssal: 8, pixel: 13, cyberpunk: 5, superhero: 10, noir: 6,
 });
 
 // A theme's cut of a die: its numbers in the theme's own figures (its shout
@@ -76,18 +77,19 @@ function diceStyle(id) {
 export const DICE_STYLES = Object.freeze(Object.fromEntries(Object.keys(SHAPE_STYLES).map((id) => [id, diceStyle(id)])));
 
 // A player's dice as kept and as sent ({ style, colors }), made whole: an
-// unknown or missing id is the base theme's.
+// unknown or missing id is the base theme's, a renamed one's its new id.
 export function normalizeDice(raw) {
+  const [style, colors] = [raw?.style, raw?.colors].map(currentStyleId);
   return Object.freeze({
-    style: DICE_STYLES[raw?.style] ? raw.style : BASE_STYLE_ID,
-    colors: DICE_COLORS[raw?.colors] ? raw.colors : BASE_STYLE_ID,
+    style: DICE_STYLES[style] ? style : BASE_STYLE_ID,
+    colors: DICE_COLORS[colors] ? colors : BASE_STYLE_ID,
   });
 }
 
 // Dice a roll carries, made whole; null for none or unknown ones (an older
 // client's roll, which is drawn in the viewer's dice).
 export function sharedDice(raw) {
-  return raw && (DICE_STYLES[raw.style] || DICE_COLORS[raw.colors]) ? normalizeDice(raw) : null;
+  return raw && (DICE_STYLES[currentStyleId(raw.style)] || DICE_COLORS[currentStyleId(raw.colors)]) ? normalizeDice(raw) : null;
 }
 
 // Dice as drawn: their style's cut and their colours.

@@ -188,7 +188,9 @@ test("every style lays a page, cuts its bar's ends, flourishes its titles, grips
   const { GRIP_KINDS } = await import('../../../../src/shared/ui/panelGrip.js');
   const { BANNER_KINDS } = await import('../../../../src/shared/ui/panelBanner.js');
   const { PAGE_SCENE_KINDS } = await import('../../../../src/shared/ui/pageScenes.js');
+  const { BADGE_KINDS } = await import('../../../../src/shared/ui/surfaces.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
+    assert.ok(BADGE_KINDS.includes(shapes.panel.badge), `${id} badge`);
     assert.ok(['stickers', 'none', ...PAGE_SCENE_KINDS].includes(shapes.surface.paper), `${id} paper`);
     assert.ok(FLOURISH_KINDS.includes(shapes.panel.flourish.kind), `${id} flourish`);
     assert.ok(GRIP_KINDS.includes(shapes.panel.grip), `${id} grip`);
@@ -325,4 +327,14 @@ test("a paper bubble letters its dark ink as a light page does, every other bubb
     });
   });
   assert.equal(bubbleLettering('war', 'dark')['--gb-lettering-drop'], '0');
+});
+
+test("every style fits its prose as its text, unless it fits the prose apart", async () => {
+  const { FONT_STYLES, fontVariables } = await import('../../../../src/shared/ui/fonts.js');
+  Object.keys(SHAPE_STYLES).forEach((styleId) => {
+    const filled = fontVariables(styleId);
+    const own = FONT_STYLES[styleId].fits?.prose;
+    assert.equal(filled['--gb-prose-size-fit'], own ?? filled['--gb-body-size-fit'], styleId);
+  });
+  assert.equal(fontVariables('noir')['--gb-prose-size-fit'], 'ex-height 0.4');
 });

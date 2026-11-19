@@ -48,6 +48,16 @@ const FLOURISHES = Object.freeze({
     ...[[0, 2, 30, 3, 'accent'], [34, 2, 8, 3, 'info'], [10, 7, 46, 2, 'info'], [60, 7, 6, 2, 'accent'], [22, 11, 18, 2, 'danger'], [70, 2, 14, 3, 'accent'], [46, 11, 30, 2, 'accent']]
       .map(([x, y, w, h, role]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${UI_COLORS[role]}"/>`),
   ].join('')),
+  // Superhero: speed lines trailing a lightning bolt.
+  bolt: () => svg(64, 20, [
+    ...[[0, 6, 30], [8, 10, 32], [4, 14, 30]].map(([x, y, w]) => `<path d="M${x} ${y} H${x + w}" stroke="${UI_COLORS.edge}" stroke-width="1.6" stroke-linecap="round"/>`),
+    `<path d="M52 1 L40 11 H47 L43 19 L57 8 H50 L55 1 Z" fill="${UI_COLORS.accent}" stroke="${UI_COLORS.edge}" stroke-width="1.4" stroke-linejoin="round"/>`,
+  ].join('')),
+  // Noir: art-deco lines drawn out to a diamond.
+  deco: () => svg(60, 14, [
+    `<path d="M0 4 H42 M10 7 H42 M20 10 H42" stroke="${UI_COLORS.accent}" stroke-width="1.2"/>`,
+    `<path d="M52 1 L58 7 L52 13 L46 7 Z" fill="none" stroke="${UI_COLORS.accent}" stroke-width="1.4"/>`,
+  ].join('')),
 });
 
 // A title's flourish (shapes' panel.flourish.kind), drawn in the palette's roles.

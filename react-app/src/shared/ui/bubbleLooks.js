@@ -1,4 +1,4 @@
-import { OPACITY, UI_COLORS, letteringVariables, paletteOf, uiAlpha, uiMix, washImage } from './colors.js';
+import { OPACITY, UI_COLORS, letteringVariables, paletteOf, uiAlpha, uiKeep, uiMix, washImage } from './colors.js';
 import { styleShapes } from './shapes.js';
 import { themedValue } from './themedValues.js';
 import { dataPicture } from './svgPicture.js';
@@ -45,6 +45,11 @@ const BUBBLE_TEXTURES = Object.freeze({
   // Stained paper.
   stain: (fill) => `radial-gradient(circle at 30% 20%, ${uiAlpha(UI_COLORS.warning, OPACITY.fill)}, transparent 40%), `
     + `radial-gradient(circle at 80% 90%, ${uiAlpha(UI_COLORS.warning, OPACITY.shade)}, transparent 45%), ${fill}`,
+  // A comic print's Ben-Day dots in the accent, fading in from one corner.
+  benday: (fill) => `linear-gradient(200deg, ${fill} 45%, transparent 80%), `
+    + `radial-gradient(${uiAlpha(UI_COLORS.accent, OPACITY.edge)} 1.2px, transparent 1.7px) 0 0 / 6px 6px, ${fill}`,
+  // A venetian blind's shadow fallen across it.
+  blinds: (fill) => `repeating-linear-gradient(-28deg, transparent 0 9px, ${uiAlpha(BLACK, OPACITY.soft)} 9px 15px), ${fill}`,
   // A stone's grain.
   grain: (fill) => `repeating-linear-gradient(45deg, ${uiAlpha(BLACK, OPACITY.tint)} 0 2px, transparent 2px 5px), linear-gradient(160deg, ${uiMix(fill, WHITE, 0.08)}, ${fill})`,
 });
@@ -117,7 +122,9 @@ const BUBBLE_SHADOWS = Object.freeze({
 });
 
 // What is drawn on the bubble (its ::after), as CSS: where it stands and its
-// background. `line` is the style's border role.
+// background, or a `picture` (an SVG in the palette's roles, stretched over
+// the box it stands in) for a shape CSS cannot draw. `fill` is the bubble's
+// fill role, `line` its border role.
 const NO_DECOR = Object.freeze({ content: 'none', top: 'auto', right: 'auto', bottom: 'auto', left: 'auto', width: 'auto', height: 'auto', background: 'transparent', transform: 'none' });
 const BUBBLE_DECORS = Object.freeze({
   none: () => NO_DECOR,
@@ -133,12 +140,28 @@ const BUBBLE_DECORS = Object.freeze({
   // A hazard stripe along its foot.
   hazard: () => ({ ...NO_DECOR, content: '""', left: '0', right: '0', bottom: '0', height: '5px',
     background: `repeating-linear-gradient(135deg, ${UI_COLORS.accent} 0 6px, ${BLACK} 6px 12px)` }),
+  // A case file folder's tab standing up off its top edge at the left, in
+  // its fill and ink, its foot over the folder's edge so the two are one
+  // sheet: a typed paper label stuck on it (a case number and a name, as
+  // lines of type), a red mark struck on it, the eyelet a file's string ties
+  // through.
+  folder: ({ fill, line }) => ({ ...NO_DECOR, content: '""', top: '-17px', left: '12px', width: '96px', height: '19px',
+    picture: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 19">'
+      + `<path d="M0 19 L7 1.5 Q7.6 0.8 8.6 0.8 H87.4 Q88.4 0.8 89 1.5 L96 19 Z" fill="${fill}"/>`
+      + `<path d="M0.8 17.8 L7.2 2 Q7.8 1 9 1 H87 Q88.2 1 88.8 2 L95.2 17.8" fill="none" stroke="${line}" stroke-width="1.5" stroke-linejoin="round"/>`
+      + `<rect x="14" y="4.5" width="58" height="11" rx="1" fill="${UI_COLORS.paper}" stroke="${line}" stroke-width="0.8"/>`
+      + `<path d="M18 8.3 H31 M34 8.3 H52 M18 12 H44" stroke="${UI_COLORS.onPaper}" stroke-width="1.3" stroke-dasharray="2 0.8"/>`
+      + `<rect x="56" y="6.8" width="12" height="6.4" fill="none" stroke="${UI_COLORS.danger}" stroke-width="1" transform="rotate(-6 62 10)"/>`
+      + `<circle cx="81" cy="10" r="2.6" fill="none" stroke="${line}" stroke-width="1.2"/>`
+      + `<circle cx="81" cy="10" r="1" fill="${line}"/></svg>` }),
 });
 
 // The tail, where a bubble speaks from something: an SVG `width` by `height`
 // px, its point at the bottom, drawn `overlap` px over the bubble's edge so it
 // joins it. `fill` and `line` are the style's tail roles.
 const BUBBLE_TAILS = Object.freeze({
+  // None: the bubble speaks from nothing drawn (a case folder points at nothing).
+  none: () => ({ width: 0, height: 0, overlap: 0, svg: '' }),
   // The comic's: an inked triangle, open where it meets the bubble.
   triangle: ({ fill, line }) => ({ width: 22, height: 18, overlap: 3, svg: `<path d="M0 0L11 18L22 0Z" fill="${fill}"/><path d="M1 3L11 17L21 3" fill="none" stroke="${line}" stroke-width="3"/>` }),
   // Two puffs of cloud trailing off.
@@ -212,7 +235,8 @@ export function bubbleLook(styleId, resolve = (text) => text) {
   const tail = bubbleTail(bubble);
   const picture = (svg) => dataPicture(resolve(svg));
   const { width, style, role } = bubble.border;
-  const decor = BUBBLE_DECORS[bubble.decor]();
+  const { picture: decorPicture, ...decor } = BUBBLE_DECORS[bubble.decor]({ fill, line: UI_COLORS[role] });
+  if (decorPicture) decor.background = `${picture(decorPicture)} center / 100% 100% no-repeat`;
   const ink = inkRoles(bubble);
   const look = {
     background: BUBBLE_TEXTURES[bubble.texture](fill),
@@ -234,6 +258,17 @@ export function bubbleLook(styleId, resolve = (text) => text) {
     borderImage: frame ? `${picture(frame.svg)} ${SLICE} / ${FRAME_WIDTH}px ${frame.repeat}` : 'none',
     tail: picture(tail.svg),
   };
+}
+
+// How much of a roll's own colour (its kind's, a 20's gold) the lettering on a
+// bubble keeps: all of it, but on a paper bubble over a dark page, whose
+// colours are lit to read on the dark, a share, the rest its ink, so a title
+// or a total still reads on the paper. bubbleTone(tone) is that colour.
+const TONE_SHARE = themedValue('bubble:tone-share', (resolve, { styleId, paletteId }) => (
+  styleShapes(styleId).bubble.ink !== 'textPrimary' && paletteOf(paletteId).mode === 'dark' ? '38%' : '100%'));
+
+export function bubbleTone(tone) {
+  return uiKeep(tone, TONE_SHARE, UI_COLORS.textPrimary);
 }
 
 // The style's shadow in `tone`, falling `drop`: { boxShadow, filter }.

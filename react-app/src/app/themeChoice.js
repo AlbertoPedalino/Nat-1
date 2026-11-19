@@ -1,5 +1,5 @@
 import { PALETTES } from '../shared/ui/colors.js';
-import { BASE_STYLE_ID, SHAPE_STYLES } from '../shared/ui/shapes.js';
+import { BASE_STYLE_ID, SHAPE_STYLES, currentStyleId } from '../shared/ui/shapes.js';
 import { getStorageJson, setStorageJson } from '../shared/storage/storage.js';
 import { DICE_COLORS, DICE_STYLES } from '../shared/ui/diceSets.js';
 
@@ -35,10 +35,14 @@ export const DEFAULT_THEME_CHOICE = Object.freeze({
 export function normalizeThemeChoice(raw) {
   const asked = raw?.mode ?? (raw?.colors === SYSTEM_MODE ? SYSTEM_MODE : PALETTES[raw?.colors]?.mode);
   const mode = MODE_CHOICES.some(({ id }) => id === asked) ? asked : DEFAULT_THEME_CHOICE.mode;
-  const style = SHAPE_STYLES[raw?.style] ? raw.style : DEFAULT_THEME_CHOICE.style;
-  const diceStyle = DICE_STYLES[raw?.diceStyle] ? raw.diceStyle : STYLE_DICE;
-  const diceColors = DICE_COLORS[raw?.diceColors] ? raw.diceColors : STYLE_DICE;
-  return { mode, style, diceStyle, diceColors };
+  // A style kept under an old name is read as it is named now.
+  const [style, diceStyle, diceColors] = [raw?.style, raw?.diceStyle, raw?.diceColors].map(currentStyleId);
+  return {
+    mode,
+    style: SHAPE_STYLES[style] ? style : DEFAULT_THEME_CHOICE.style,
+    diceStyle: DICE_STYLES[diceStyle] ? diceStyle : STYLE_DICE,
+    diceColors: DICE_COLORS[diceColors] ? diceColors : STYLE_DICE,
+  };
 }
 
 // The dice a choice rolls with ({ style, colors }, diceSets.js): each the one

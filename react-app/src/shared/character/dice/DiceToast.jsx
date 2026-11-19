@@ -7,6 +7,7 @@ import { UI_COLORS } from '../../ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
 import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
+import { bubbleTone } from '../../ui/bubbleLooks.js';
 import { useRollMoment } from '../../ui/rollMoment.js';
 import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
 import { useWarmRolls } from './warmRolls.js';
@@ -60,13 +61,13 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
     }}>
       <RollMomentEffect key={`moment:${seed}`} moment={moment} seed={seed} />
       <BubbleHeader onClose={onClose}>
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: layout.tone || UI_COLORS.textPrimary, mb: 0.25 }}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: bubbleTone(layout.tone || UI_COLORS.textPrimary), mb: 0.25 }}>
           {layout.label}
         </Typography>
       </BubbleHeader>
 
       {drawn.label ? (
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: drawn.labelColor, mb: 0.25 }}>
+        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: bubbleTone(drawn.labelColor), mb: 0.25 }}>
           {drawn.label}
         </Typography>
       ) : null}
@@ -82,7 +83,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
         key={`dice:${seed}`}
         dice={layout.dice}
         modifier={layout.modifier}
-        modifierColor={layout.modifierColor}
+        modifierColor={layout.modifierColor && bubbleTone(layout.modifierColor)}
         size={58}
         seed={seed}
         rolledWith={toast?.dice}
@@ -101,7 +102,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.display,
             // A natural 20 or 1 is written light on its burst, the ink outline
             // keeping it legible on the gold as on the red.
-            color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : layout.totalColor,
+            color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : bubbleTone(layout.totalColor),
             ...(drawn.totalSx ?? { display: 'inline-block' }),
           }}>
             {layout.total}

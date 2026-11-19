@@ -49,6 +49,13 @@ import {
   GiZeppelin,
   GiCircuitry, GiCpu, GiCyberEye, GiCyborgFace, GiDatabase, GiDeliveryDrone, GiHolosphere, GiKatana,
   GiLaserGun, GiLaserWarning, GiProcessor, GiRobotHelmet, GiServerRack, GiOctopus, GiSquid,
+  GiAtomCore, GiBoltEye, GiBoltShield, GiBottledBolt, GiBrightExplosion, GiCape, GiCapeArmor, GiCrackedMask,
+  GiDominoMask, GiDoubleFaceMask, GiFulguroPunch, GiHighPunch, GiIdCard, GiJusticeStar, GiKnockedOutStars,
+  GiLightningShield, GiLightningShout, GiNewspaper, GiNinjaHeroicStance, GiPowerLightning, GiPunchBlast,
+  GiRocketFlight, GiShieldBounces, GiShiningHeart,
+  GiBriefcase, GiBrokenBottle, GiCardAceSpades, GiCrossedPistols, GiDeskLamp, GiDramaMasks, GiFedora,
+  GiFountainPen, GiGunshot, GiLockedBox, GiLockpicks, GiMagnifyingGlass, GiPhotoCamera, GiPiercedHeart,
+  GiPokerHand, GiPoliceBadge, GiShadowFollower, GiStreetLight, GiTwoShadows,
 } from 'react-icons/gi';
 import {
   AlertTriangle, ArrowBigUp, Backpack, Ban, BookOpen, Castle, Cloud, CloudFog, CloudLightning, CloudRain,
@@ -965,6 +972,89 @@ const CYBERPUNK_TOOL_ICONS = Object.freeze({
   vtt: GiDeliveryDrone,
 });
 
+// The superhero style's icons: the comic drawings, the hero's where it has a
+// face of its own (capes, masks, punches, bolts, a newspaper's front page).
+const SUPERHERO_GAME_ICONS = Object.freeze({
+  ...COMIC_GAME_ICONS,
+  abilityScores: GiNinjaHeroicStance,
+  hitPoints: GiShiningHeart,
+  armorClass: GiBoltShield,
+  inspiration: GiPowerLightning,
+  savingThrows: GiShieldBounces,
+  skills: GiHighPunch,
+  senses: GiBoltEye,
+  movement: GiCape,
+  defenses: GiLightningShield,
+  conditions: GiKnockedOutStars,
+  actions: GiPunchBlast,
+  experience: GiStarMedal,
+  classes: GiDominoMask,
+  subclass: GiCapeArmor,
+  spells: GiAtomCore,
+  spellSlots: GiBottledBolt,
+  species: GiDoubleFaceMask,
+  background: GiNewspaper,
+  sheet: GiIdCard,
+  criticalSuccess: GiBrightExplosion,
+  criticalFailure: GiCrackedMask,
+});
+
+const SUPERHERO_TOOL_ICONS = Object.freeze({
+  ...COMIC_TOOL_ICONS,
+  characters: GiCape,
+  builder: GiFulguroPunch,
+  campaigns: GiNewspaper,
+  gmboard: GiLightningShout,
+  dmscreen: GiIdCard,
+  vtt: GiRocketFlight,
+  encounters: GiPunchBlast,
+  compendium: GiJusticeStar,
+});
+
+// The noir style's icons: the comic drawings, the detective's where it has a
+// face of its own (a fedora, a magnifying glass, a revolver, a case file).
+const NOIR_GAME_ICONS = Object.freeze({
+  ...COMIC_GAME_ICONS,
+  abilityScores: GiSpy,
+  hitPoints: GiPiercedHeart,
+  armorClass: GiPoliceBadge,
+  inspiration: GiDeskLamp,
+  savingThrows: GiTwoShadows,
+  skills: GiLockpicks,
+  senses: GiMagnifyingGlass,
+  movement: GiFootprint,
+  proficiencies: GiFountainPen,
+  defenses: GiTrenchBodyArmor,
+  conditions: GiBrokenBottle,
+  reminders: GiPocketWatch,
+  actions: GiRevolver,
+  experience: GiNewspaper,
+  classes: GiFedora,
+  subclass: GiCardAceSpades,
+  spells: GiShadowFollower,
+  species: GiDramaMasks,
+  background: GiIdCard,
+  equipment: GiBriefcase,
+  currency: GiMoneyStack,
+  inventory: GiLockedBox,
+  sheet: GiFiles,
+  preview: GiPhotoCamera,
+  criticalSuccess: GiPokerHand,
+  criticalFailure: GiGunshot,
+});
+
+const NOIR_TOOL_ICONS = Object.freeze({
+  ...COMIC_TOOL_ICONS,
+  characters: GiFedora,
+  builder: GiFountainPen,
+  campaigns: GiStreetLight,
+  gmboard: GiMagnifyingGlass,
+  dmscreen: GiFiles,
+  vtt: GiFootprint,
+  encounters: GiCrossedPistols,
+  compendium: GiNewspaper,
+});
+
 // A role drawn in the chosen style's set: a component that takes the drawing
 // the style gives it (`icons`: { styleId: component }, the comic one when a
 // style has none), so a panel's badge or a roll button changes with the
@@ -1075,8 +1165,16 @@ const STYLE_ICONS = Object.freeze({
     GAME_ICONS: CYBERPUNK_GAME_ICONS,
     TOOL_ICONS: CYBERPUNK_TOOL_ICONS,
   }),
-  // The comic's drawings, in lilac.
-  lavender: COMIC_STYLE_SETS,
+  superhero: Object.freeze({
+    ...COMIC_STYLE_SETS,
+    GAME_ICONS: SUPERHERO_GAME_ICONS,
+    TOOL_ICONS: SUPERHERO_TOOL_ICONS,
+  }),
+  noir: Object.freeze({
+    ...COMIC_STYLE_SETS,
+    GAME_ICONS: NOIR_GAME_ICONS,
+    TOOL_ICONS: NOIR_TOOL_ICONS,
+  }),
 });
 
 // One kind's drawing in every style, { styleId: set or component }.

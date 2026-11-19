@@ -7,6 +7,7 @@ import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
+import { bubbleTone } from '../../../shared/ui/bubbleLooks.js';
 import { useRollMoment } from '../../../shared/ui/rollMoment.js';
 import RollMomentEffect from '../../../shared/ui/RollMomentEffect.jsx';
 import TagChip from '../../../shared/ui/TagChip.jsx';
@@ -82,10 +83,10 @@ function RollBubbleCard({ roll, onDismiss }) {
         <RollMomentEffect key={roll.id} moment={moment} seed={roll.id} />
         <BubbleHeader hint={Boolean(onDismiss)} centered>
           {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
-          <Typography sx={{ ...labelSx, ...(layout.tone ? { color: layout.tone } : null) }}>{layout.label}</Typography>
+          <Typography sx={{ ...labelSx, ...(layout.tone ? { color: bubbleTone(layout.tone) } : null) }}>{layout.label}</Typography>
         </BubbleHeader>
 
-        {drawn.label ? <Typography sx={{ ...natSx, color: drawn.labelColor }}>{drawn.label}</Typography> : null}
+        {drawn.label ? <Typography sx={{ ...natSx, color: bubbleTone(drawn.labelColor) }}>{drawn.label}</Typography> : null}
 
         {layout.modeChip && (
           <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
@@ -94,7 +95,7 @@ function RollBubbleCard({ roll, onDismiss }) {
         <DiceRow
           dice={layout.dice}
           modifier={layout.modifier}
-          modifierColor={layout.modifierColor}
+          modifierColor={layout.modifierColor && bubbleTone(layout.modifierColor)}
           size={40}
           justify="center"
           seed={roll.id}
@@ -105,7 +106,7 @@ function RollBubbleCard({ roll, onDismiss }) {
           <Typography sx={{
             ...totalSx,
             fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
-            color: layout.isCrit || layout.isFail ? VTT_COLORS.text : layout.totalColor,
+            color: layout.isCrit || layout.isFail ? VTT_COLORS.text : bubbleTone(layout.totalColor),
             ...drawn.totalSx,
           }}>
             {layout.total}

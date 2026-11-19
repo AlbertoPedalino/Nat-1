@@ -1,6 +1,6 @@
 import { Snackbar, Alert, AlertTitle, Portal } from '@mui/material';
 import { UI_COLORS } from './colors.js';
-import { UI_FONTS, FONT_SIZES } from './fonts.js';
+import { FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
 import { activePortalContainer } from './portalContainer.js';
 import { useIsPhone } from './useIsPhone.js';
@@ -65,7 +65,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
             severity={severity}
             variant="outlined"
             sx={{
-              fontFamily: UI_FONTS.prose,
+              ...TEXT_STYLES.prose,
               fontSize: FONT_SIZES.xl,
               // Icon and close beside the exclamation, the message under it.
               alignItems: 'flex-start',

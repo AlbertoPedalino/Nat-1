@@ -95,3 +95,8 @@ test('no theme variable is named like an Emotion label', async () => {
   ]));
   assert.deepEqual(names.filter((name) => /label/i.test(name)), []);
 });
+
+test('a colour kept at a share the page decides mixes the rest towards another', async () => {
+  const { uiKeep } = await import('../../../../src/shared/ui/colors.js');
+  assert.equal(uiKeep(UI_COLORS.success, 'var(--x)', UI_COLORS.textPrimary), 'color-mix(in srgb, var(--gb-success) var(--x), var(--gb-text-primary))');
+});

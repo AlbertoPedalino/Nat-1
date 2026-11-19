@@ -34,7 +34,10 @@ export function useFitText(text, { min = 0.5, enabled = true } = {}) {
       if (!enabled) return;
       const room = el.clientWidth;
       const need = el.scrollWidth;
-      if (!room || need <= room) return;
+      // Both are whole pixels: a name a fraction of a pixel too wide still
+      // measures as wide as its box, and is cut with an ellipsis. Only a name
+      // measured narrower than its box surely fits.
+      if (!room || need < room) return;
       const base = parseFloat(getComputedStyle(el).fontSize);
       // A hair under the exact ratio: the ink's outline and a slanted face's
       // overhang reach past the measured advance.

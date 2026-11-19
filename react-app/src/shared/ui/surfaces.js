@@ -16,9 +16,8 @@ import { bannerReach } from './panelBanner.js';
 // root with the palette's variables (ThemeChoiceProvider), as `--gb-surface-*`.
 export function surfaceVariables(paletteId, styleId) {
   const { surface: { paper, halftone }, panel } = styleShapes(styleId);
-  const bare = panel.badge === 'bare';
   return {
-    ...panelVariables(panel, bare),
+    ...panelVariables(panel),
     ...pagePaper(paper, paletteId),
     '--gb-surface-halftone': halftone
       ? `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} ${halftone.dot}px, transparent ${halftone.dot + 0.4}px)`
@@ -38,12 +37,26 @@ function pagePaper(paper, paletteId) {
   return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
 }
 
+// The badge an icon stands on (shapes.js panel.badge): a seal in the panel's
+// tone with the ink on it, the drawing bare in the tone, or a label: a manila
+// label edged in ink, the icon printed on it in the paper's ink, and a stat
+// tile's name lettered in the text's ink, so the style shows no tone on them.
+// `title` is the ink a stat tile's name is lettered in (initial: its tone).
+const BADGES = Object.freeze({
+  seal: () => ({ fill: 'initial', ink: UI_COLORS.onFill, edge: INK_EDGE, shadow: UI_SHADOWS.box, title: 'initial' }),
+  bare: () => ({ fill: 'transparent', ink: 'initial', edge: 'none', shadow: 'none', title: 'initial' }),
+  label: () => ({ fill: UI_COLORS.paperShade, ink: UI_COLORS.onPaper, edge: INK_EDGE, shadow: UI_SHADOWS.box, title: UI_COLORS.textPrimary }),
+});
+
+export const BADGE_KINDS = Object.freeze(Object.keys(BADGES));
+
 // How the style builds a panel (shapes.js panel), as whole values the panel's
 // recipes read (PanelHeader.jsx, SURFACES.panel): the comic's own values where
 // the style builds as the comic does, so its panels are drawn exactly as they
 // were. A variable set to `initial` is unset: its recipe falls back to the
 // panel's tone.
-function panelVariables(panel, bare) {
+function panelVariables(panel) {
+  const badge = (BADGES[panel.badge] || BADGES.seal)();
   const reaches = panel.grip !== 'none' || bannerReach(panel.banner) > 0;
   const float = (solid, fall, blur) => (panel.float ? `${solid}, ${panelFloatShadow(panel.float, fall, blur)}` : solid);
   return {
@@ -51,11 +64,12 @@ function panelVariables(panel, bare) {
     '--gb-panel-bar-paper': panel.bar === 'fill' ? UI_COLORS.surfaceHeader : 'transparent',
     '--gb-panel-bar-rule': panel.bar === 'rule' ? 'initial' : UI_COLORS.edge,
     '--gb-panel-bar-hatch': panel.hatch ? 'auto' : '0 0',
-    // The badge: a seal in the tone with the ink on it, or the drawing bare.
-    '--gb-panel-badge-fill': bare ? 'transparent' : 'initial',
-    '--gb-panel-badge-ink': bare ? 'initial' : UI_COLORS.onFill,
-    '--gb-panel-badge-edge': bare ? 'none' : INK_EDGE,
-    '--gb-panel-badge-shadow': bare ? 'none' : UI_SHADOWS.box,
+    // The badge and a stat tile's name (BADGES).
+    '--gb-panel-badge-fill': badge.fill,
+    '--gb-panel-badge-ink': badge.ink,
+    '--gb-panel-badge-edge': badge.edge,
+    '--gb-panel-badge-shadow': badge.shadow,
+    '--gb-panel-tile-title': badge.title,
     // A main panel keeps what is in it inside its frame, unless the style
     // draws past its edges (a grip, shapes.js panel.grip; a banner that
     // reaches out, panelBanner.js bannerReach)…

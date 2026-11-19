@@ -8,14 +8,24 @@ import {
   DICE_COLORS, DICE_STYLES, diceVariables, normalizeDice, resolveDice, sharedDice,
 } from '../../../src/shared/ui/diceSets.js';
 import { PALETTES } from '../../../src/shared/ui/colors.js';
-import { SHAPE_STYLES, paletteForStyle } from '../../../src/shared/ui/shapes.js';
+import { SHAPE_STYLES, paletteForStyle, sharedStyle } from '../../../src/shared/ui/shapes.js';
 
 test('a theme choice keeps only known modes and styles', () => {
   assert.deepEqual(normalizeThemeChoice(null), DEFAULT_THEME_CHOICE);
   assert.deepEqual(normalizeThemeChoice({ mode: 'light', style: 'scifi' }), { mode: 'light', style: 'scifi', diceStyle: STYLE_DICE, diceColors: STYLE_DICE });
   assert.deepEqual(normalizeThemeChoice({ mode: 'plaid', style: 'chrome' }), DEFAULT_THEME_CHOICE);
   assert.deepEqual(MODE_CHOICES.map(({ id }) => id), ['system', 'dark', 'light']);
-  assert.deepEqual(STYLE_CHOICES.map(({ id }) => id), ['comic', 'scifi', 'gothic', 'war', 'astral', 'pirate', 'steampunk', 'dwarven', 'fey', 'abyssal', 'pixel', 'cyberpunk', 'lavender']);
+  assert.deepEqual(STYLE_CHOICES.map(({ id }) => id), ['comic', 'scifi', 'gothic', 'war', 'astral', 'pirate', 'steampunk', 'dwarven', 'fey', 'abyssal', 'pixel', 'cyberpunk', 'superhero', 'noir']);
+});
+
+test('a style kept under its old name is read as it is named now', () => {
+  assert.deepEqual(
+    normalizeThemeChoice({ mode: 'dark', style: 'lavender', diceStyle: 'lavender', diceColors: 'lavender' }),
+    { mode: 'dark', style: 'superhero', diceStyle: 'superhero', diceColors: 'superhero' },
+  );
+  assert.deepEqual(normalizeDice({ style: 'lavender', colors: 'lavender' }), { style: 'superhero', colors: 'superhero' });
+  assert.deepEqual(sharedDice({ style: 'lavender', colors: 'lavender' }), { style: 'superhero', colors: 'superhero' });
+  assert.equal(sharedStyle('lavender'), 'superhero');
 });
 
 test('a choice kept before modes is read as the mode of its palette', () => {

@@ -78,6 +78,7 @@ export const TEXT_STYLES = Object.freeze({
   // A quiet aside in the prose face: a hint, an empty state, a rules note.
   note: Object.freeze({
     fontFamily: UI_FONTS.prose,
+    fontSizeAdjust: FONT_FITS.prose,
     fontStyle: 'italic',
     fontWeight: FONT_WEIGHTS.regular,
     color: 'text.secondary',
@@ -92,6 +93,7 @@ export const TEXT_STYLES = Object.freeze({
   // Descriptive text (a description, a rules entry): the prose face.
   prose: Object.freeze({
     fontFamily: UI_FONTS.prose,
+    fontSizeAdjust: FONT_FITS.prose,
   }),
 });
 

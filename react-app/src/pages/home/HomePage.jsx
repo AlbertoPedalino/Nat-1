@@ -14,7 +14,7 @@ import { CARD_SX } from '../../shared/ui/interactive.js';
 import { panelBadgeSx } from '../../shared/ui/PanelHeader.jsx';
 import { bubbleCheerSx } from '../../shared/ui/bubble.js';
 import { DURATIONS, motionTime, motionShift } from '../../shared/ui/motion.js';
-import { CONTROL_FONT_SIZES, UI_FONTS, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
+import { CONTROL_FONT_SIZES, FONT_SIZES, LINE_HEIGHTS } from '../../shared/ui/fonts.js';
 import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
 import NatOneDie, { NAT_ONE_LANDED_MS } from './NatOneDie.jsx';
 import { useFirstArrival } from './useFirstArrival.js';
@@ -209,7 +209,6 @@ const cardDescSx = {
   fontSize: FONT_SIZES.xl,
   textAlign: 'center',
   lineHeight: LINE_HEIGHTS.normal,
-  fontFamily: UI_FONTS.prose,
 };
 
 const clearDataWrapSx = {

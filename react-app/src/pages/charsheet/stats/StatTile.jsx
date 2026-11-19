@@ -30,7 +30,7 @@ export default function StatTile({
     <>
       <Box sx={{ ...panelTitleBarSx(tone, { tile: true }), gap: 0, justifyContent: 'center' }}>
         <Box sx={{ width: 0, height: PANEL_BADGE_BOX, flexShrink: 0 }} />
-        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone, minWidth: 0 }}>{label}</Typography>
+        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: `var(--gb-panel-tile-title, ${tone})`, minWidth: 0 }}>{label}</Typography>
       </Box>
       <Box sx={{ ...bodyBaseSx, ...(crest ? CREST_FOOT_SX : null), ...(active ? { bgcolor: tone, color: inkOn(tone) } : null), ...bodySx }}>
         {typeof value === 'string' || typeof value === 'number'
