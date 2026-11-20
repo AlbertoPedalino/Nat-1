@@ -23,11 +23,12 @@ import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPrope
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
-import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
+import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { cardTitleSx, inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 import ScrollingName from '../../../shared/ui/ScrollingName.jsx';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { getCritRange } from '../../../shared/character/sheet/effectBonuses.js';
 import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
 import CardSection from '../../../shared/ui/CardSection.jsx';
@@ -35,20 +36,43 @@ import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 import ToneBar from '../../../shared/ui/ToneBar.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
-// pips and any choice it asks for. A card whose use is only what it sets off
-// (Font of Magic's Create Slot, a spell slot for a Wild Shape use) names that
-// side effect as its `effect` and shows a button for it, with no resource.
+// pips and any choice it asks for. What a card sets off as often as wanted,
+// with no count of its own (Font of Magic's Create Slot, Wild Resurgence's
+// spell slot for a Wild Shape use), is listed in its `effects` ({ key: side
+// effect, label }): one row each, its label saying what it does, beside the
+// row of the card's uses ("Wild Shape → Level 1 Slot ◆" over "Spell Slot →
+// Wild Shape [Use]").
 
-// The button that sets off a card's side effect: an `effect`, or a resource
-// with no limit (Rage at level 20).
-function EffectButton({ label, onClick }) {
+// One row under a card's title: what it is (Status, Uses, an effect's
+// exchange) and its control, its tone washed over a solid base.
+const CARD_ROW_SX = Object.freeze({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.5,
+  px: 1.25,
+  py: 0.75,
+  ...CARD_PART_RULE_SX,
+});
+
+function CardRow({ label, tone = UI_COLORS.accent, children }) {
+  return (
+    <Box sx={[CARD_ROW_SX, tintedSurfaceSx(tone, { amount: OPACITY.wash })]}>
+      <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{label}</Typography>
+      {children}
+    </Box>
+  );
+}
+
+// The Use button of a row: one of the card's `effects`, or a resource with no
+// limit (Rage at level 20).
+function UseButton({ onClick }) {
   return (
     <Button
       size="small"
       variant="outlined"
       onClick={(e) => { e.stopPropagation(); onClick(); }}
       sx={{ fontSize: FONT_SIZES.xs, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
-    >{label || 'Use'}</Button>
+    >Use</Button>
   );
 }
 
@@ -57,7 +81,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
   const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
-  const hasEffect = Boolean(action.effect && typeof onEffect === 'function');
+  const effects = typeof onEffect === 'function' ? asArray(action.effects).filter((effect) => effect?.key) : [];
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
   const safeMax = resMax === Infinity ? Infinity : Math.max(0, Number(resMax ?? 1) || 1);
   const hasEntries = Array.isArray(action.entries) ? action.entries.length > 0 : Boolean(action.entries);
@@ -79,15 +103,6 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
     || DetailRenderer
   );
   const hasStatusRow = Boolean(action._toggleKey && onUpdateCharacter);
-  const persistentRowSx = (bgcolor, isLast, open) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 0.5,
-    px: 1.25,
-    py: 0.75,
-    ...CARD_PART_RULE_SX,
-    bgcolor,
-  });
 
   const rollers = getActionRollers(action);
   const hasRollers = Number.isFinite(action.attackBonus) || rollers.length > 0;
@@ -148,7 +163,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
             </Box>
           </Box>
       )}
-      persistent={({ open }) => (
+      persistent={() => (
         <>
       {hasStatusRow ? (() => {
         const toggleCtx = { C, action, hasRes, resCur };
@@ -163,8 +178,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
         const statusTone = isSuppressed ? CHIP_TONES.negative : (isActive ? CHIP_TONES.positive : CHIP_TONES.info);
         const statusStyle = chipToneStyle(statusTone);
         return (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.infoText, OPACITY.wash), !hasRes, open)}>
-          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>Status</Typography>
+        <CardRow label="Status" tone={UI_COLORS.infoText}>
           <Chip
             size="small"
             label={label}
@@ -184,17 +198,17 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
               '&:hover': { borderColor: (isActive || canToggleOn) ? statusTone : statusStyle.borderColor },
             }}
           />
-        </Box>
+        </CardRow>
         );
       })() : null}
 
       {hasRes ? (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, OPACITY.wash), true, open)}>
-          {/* `resLabel`: the resource covers only part of the card (Totems: the Primal Knowledge Totem). */}
-          <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{action.resLabel || (resTrack === 'used' ? 'Spent' : 'Uses')}</Typography>
+        // `resLabel`: what a use is, when the card says more (Totems: the Primal
+        // Knowledge Totem; Wild Resurgence: Wild Shape → Level 1 Slot).
+        <CardRow label={action.resLabel || (resTrack === 'used' ? 'Spent' : 'Uses')}>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
-              <EffectButton label={action.buttonLabel} onClick={() => onResChange(action.resKey, -1)} />
+              <UseButton onClick={() => onResChange(action.resKey, -1)} />
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>
             )
@@ -217,13 +231,13 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
               );
             })
           )}
-        </Box>
+        </CardRow>
       ) : null}
-      {hasEffect ? (
-        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, OPACITY.wash), true, open)}>
-          <EffectButton label={action.buttonLabel} onClick={() => onEffect(action.effect)} />
-        </Box>
-      ) : null}
+      {effects.map((effect) => (
+        <CardRow key={effect.key} label={effect.label}>
+          <UseButton onClick={() => onEffect(effect.key)} />
+        </CardRow>
+      ))}
         </>
       )}
       detailsSx={ENTRY_BODY_SX}

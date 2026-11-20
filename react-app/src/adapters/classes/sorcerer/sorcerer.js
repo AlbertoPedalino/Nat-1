@@ -60,16 +60,14 @@ registerClassSheetActions("Sorcerer", [
   {
     "name": "Create Spell Slot (Font of Magic)",
     "cat": "bonus",
-    "effect": "sorc_create_slot",
-    "minLevel": 2,
-    "buttonLabel": "Create Slot"
+    "effects": [{ "key": "sorc_create_slot", "label": "Sorcery Points → Spell Slot" }],
+    "minLevel": 2
   },
   {
     "name": "Convert Spell Slot (Font of Magic)",
     "cat": "special",
-    "effect": "sorc_convert_slot",
-    "minLevel": 2,
-    "buttonLabel": "Convert Slot"
+    "effects": [{ "key": "sorc_convert_slot", "label": "Spell Slot → Sorcery Points" }],
+    "minLevel": 2
   },
   {
     "name": "Sorcery Incarnate",

@@ -9,9 +9,9 @@ import { createAdapterRegistry, installAdapters } from '../../../src/adapters/re
 // cards, its rest side effects, effects that refill it — and linked only by
 // the resource key written in each. A typo in one of those copies unlinks it
 // without any error, so every reference must name a registered resource. A
-// card that only sets off a side effect names it as its `effect` instead: each
-// side effect belongs to a resource or to such a card, and each card effect
-// has its side effect.
+// card sets off a side effect with no count of its own through its `effects`:
+// each side effect belongs to a resource or to a card's effects, and each card
+// effect has its side effect.
 
 const ADAPTERS = fileURLToPath(new URL('../../../src/adapters/', import.meta.url));
 const REFERENCE_FIELDS = /\b(?:resKey|resourceKey|targetResourceKey|targetKey)\s*:\s*['"]([A-Za-z0-9_]+)['"]/g;
@@ -41,7 +41,9 @@ test('every resource key an adapter refers to is a registered resource', async (
   Object.keys(registry).filter((name) => /^register\w*SheetActions$/.test(name)).forEach((name) => {
     const original = registry[name].bind(registry);
     registry[name] = (...args) => {
-      args.filter(Array.isArray).flat().forEach((card) => { if (card?.effect) cardEffects.add(card.effect); });
+      args.filter(Array.isArray).flat().forEach((card) => {
+        (card?.effects || []).forEach((effect) => cardEffects.add(effect.key));
+      });
       return original(...args);
     };
   });

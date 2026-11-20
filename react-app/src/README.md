@@ -289,10 +289,12 @@ What a class, subclass, species or feat adds to the sheet is declared in its
 adapter (`adapters/classes/<class>/<subclass>.js`, `adapters/feats/`,
 `adapters/species/`): action cards, resources, effects, proficiencies, item
 flags (`registerItemFlagDef`) and what spending a resource triggers
-(`registerResourceSideEffect`). A card whose use is only what it sets off,
-with no count of its own (Font of Magic's Create Slot, Font of Inspiration),
-names that side effect as its `effect` and gets a button for it: no stand-in
-resource. A side effect returns what follows (a dialog, a recovery, a created
+(`registerResourceSideEffect`). What a card sets off with no count of its own
+(Font of Magic's Create Slot, Font of Inspiration, Wild Resurgence's slot for a
+Wild Shape use) is listed in its `effects` (`{ key, label }`, the side
+effect's key), with no stand-in resource: one row each, its label saying the
+exchange ("Spell Slot → Wild Shape") and a Use button, beside the row of the
+card's own uses when it has some (`resLabel` says what a use does). A side effect returns what follows (a dialog, a recovery, a created
 slot, or `{ type: 'notice' }` when it cannot happen). An adapter destructures from
 `createAdapterBindings` only the names it calls. The register/get pairs are
 generated from `KEYED_SLOTS` in `adapters/registry.js`; a new kind of

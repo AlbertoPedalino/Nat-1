@@ -82,21 +82,17 @@ registerClassSheetActions("Druid", [
     "minLevel": 2,
     detailType: 'wildCompanion'
   },
-  // Wild Resurgence (level 5), both halves with no action required: a Wild
-  // Shape use for a level 1 slot once per Long Rest, and a spell slot for a
-  // Wild Shape use while none is left (once per turn: the player's to keep).
+  // Wild Resurgence (level 5), both halves with no action required: its use,
+  // once per Long Rest, turns a Wild Shape use into a level 1 slot; its effect,
+  // as often as wanted, a spell slot into a Wild Shape use while none is left
+  // (once per turn: the player's to keep).
   {
-    name: "Wild Resurgence: Spell Slot",
+    name: "Wild Resurgence",
     cat: "special",
     resKey: "wild_resurgence",
+    resLabel: "Wild Shape → Level 1 Slot",
+    effects: [{ key: "wild_resurgence_shape", label: "Spell Slot → Wild Shape" }],
     minLevel: 5
-  },
-  {
-    name: "Wild Resurgence: Wild Shape",
-    cat: "special",
-    effect: "wild_resurgence_shape",
-    minLevel: 5,
-    buttonLabel: "Spend Slot"
   }
 ]);
 registerClassSheetResources("Druid", [

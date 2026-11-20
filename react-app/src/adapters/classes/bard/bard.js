@@ -62,8 +62,8 @@ registerClassSheetActions("Bard", [
       return `1d${die}`;
     } }],
     rollLabelPrefix: "Bardic Inspiration" },
-  { name: "Font of Inspiration", cat: "special", effect: "bard_font_insp", minLevel: 5,
-    buttonLabel: "Spend Slot" },
+  { name: "Font of Inspiration", cat: "special", minLevel: 5,
+    effects: [{ key: "bard_font_insp", label: "Spell Slot → Bardic Inspiration" }] },
   { name: "Countercharm",       cat: "bonus", minLevel: 7 },
 ]);
 
