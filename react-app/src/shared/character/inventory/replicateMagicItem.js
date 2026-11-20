@@ -28,7 +28,7 @@ import { itemHasProperty } from './weaponProperties.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
 import { byName, compareText } from '../../lists.js';
-import { ARMOR_OR_SHIELD_CODES, isBodyArmor, isWeaponItem, itemBaseType } from './itemKinds.js';
+import { ARMOR_OR_SHIELD_CODES, isBodyArmor, isWeaponItem, itemBaseType, weaponCategory } from './itemKinds.js';
 import { hasItemFlag } from './itemFlags.js';
 
 const lc = (value) => String(value || '').toLowerCase();
@@ -51,7 +51,7 @@ export const isReplicateArmorItem = (item) => {
 const isMundaneWeapon = (item) => isWeaponItem(item) && !item.age;
 const isBaseWeapon = (item) => (
   isMundaneWeapon(item)
-  && ['simple', 'martial'].includes(lc(item.weaponCategory))
+  && weaponCategory(item) !== ''
   && ['none', ''].includes(lc(item.rarity))
   && !item.bonusVariant
 );
@@ -338,6 +338,36 @@ export function replicatedItemProperty(item) {
 // rather than as a suffix; anything else keeps its display name.
 export function itemCardName(item, fallback = '') {
   return replicatedItemProperty(item) ? String(item?.name || fallback) : itemDisplayName(item, fallback);
+}
+
+// An item to pick, told apart from another copy of the same item only when it
+// is a different item: a replicated plan. Saved as the pick (C.spellWeapons).
+export function itemPickKey(item) {
+  return `${itemIdentityKey(item)}|${item?.craftedFrom || ''}`;
+}
+
+// A row of items to pick one from (the weapon True Strike is cast through, the
+// Arcane Firearm): one option per distinct item (itemPickKey), the first copy
+// kept, each labelled with its card name — the replicated plan added only where
+// two would otherwise read the same ("Pistol", "Pistol · Repeating Shot").
+export function itemPickOptions(items) {
+  const seen = new Set();
+  const distinct = (items || []).filter((item) => {
+    const key = itemPickKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const names = distinct.map((item) => itemCardName(item));
+  return distinct.map((item, index) => {
+    const property = replicatedItemProperty(item);
+    const clash = names.some((name, other) => other !== index && name === names[index]);
+    return {
+      key: itemPickKey(item),
+      item,
+      label: clash && property ? `${names[index]} · ${property.title}` : names[index],
+    };
+  });
 }
 
 function findReferencedItem(items, itemName, itemSource) {

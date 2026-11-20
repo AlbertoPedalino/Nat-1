@@ -15,7 +15,7 @@ import {
   itemChargeMaximum,
   shouldShowItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
-import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/inventory/itemFlags.js';
+import { hasItemFlag, itemFlagFitsItem, itemFlagOwnerKind } from '../../../shared/character/inventory/itemFlags.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
 import { isItemCarried, itemQty } from '../../../shared/character/inventory/weight.js';
@@ -163,7 +163,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
 });
 
 function ItemFlagButton({ def, active, onClick }) {
-  const tone = def.tone || ENTITY_COLORS.class;
+  const tone = ENTITY_COLORS[itemFlagOwnerKind(def)];
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={ICON_SIZES.xxs} /> : null}
       sx={{ ...ENTRY_BUTTON_SX, ...toggleSx(active, tone) }}>

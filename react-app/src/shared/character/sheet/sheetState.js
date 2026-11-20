@@ -18,7 +18,6 @@ export function deriveSheetState(C) {
 
   const spellSlotUsed = C?.spellSlotsUsed && typeof C.spellSlotsUsed === 'object' ? C.spellSlotsUsed : {};
   const createdSpellSlots = C?.createdSpellSlots && typeof C.createdSpellSlots === 'object' ? C.createdSpellSlots : {};
-  const arcaneArmorItemKey = C?.arcaneArmorItemKey || null;
 
   const sheetInventory = Array.isArray(C?.inventory) ? structuredClone(C.inventory) : [];
   const sheetCurrency = normalizeCurrency(
@@ -32,6 +31,6 @@ export function deriveSheetState(C) {
 
   return {
     currentHP, maxHP, baseMaxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
-    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, activeEffects, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
+    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, activeEffects, exhaustionLevel, xpStored, notes,
   };
 }

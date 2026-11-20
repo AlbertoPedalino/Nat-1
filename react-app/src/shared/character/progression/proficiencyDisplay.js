@@ -3,6 +3,7 @@ import { matchKey, uniqueLabels } from '../../content/nameKeys.js';
 import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
 import { compareText } from '../../lists.js';
 import { stripMarkup } from '../../content/markupText.js';
+import { weaponCategory } from '../inventory/itemKinds.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -48,20 +49,12 @@ function itemNameKey(item) {
   return labelKey(String(item?.name || '').replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, ''));
 }
 
-function itemWeaponCategory(item) {
-  const raw = item?.weaponCategory || item?.weaponType || item?.category || item?._weaponCategory || item?.weaponGroup || '';
-  const categoryKey = labelKey(raw);
-  if (categoryKey.includes('simple')) return 'simple';
-  if (categoryKey.includes('martial')) return 'martial';
-  return '';
-}
-
 // A weapon's category from the item data (`weaponCategory`); '' when the
 // item database is not at hand.
 function lookupWeaponCategory(label, allItemsDb) {
   const baseKey = labelKey(splitSource(label).base);
   const item = (allItemsDb || []).find((entry) => itemNameKey(entry) === baseKey);
-  return item ? itemWeaponCategory(item) : '';
+  return item ? weaponCategory(item) : '';
 }
 
 export function uniqueDisplayLabels(values) {

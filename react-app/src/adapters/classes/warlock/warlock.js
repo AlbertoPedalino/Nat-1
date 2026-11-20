@@ -342,7 +342,6 @@ registerClassSheetActions("Warlock", [
 registerItemFlagDef("pactWeapon", {
   label: "Pact Weapon",
   activeLabel: "Pact",
-  tone: "#9d7fb8",
   types: ['M', 'R', 'WEAPON'],
   maxCount: 1,
   requireClass: "Warlock",

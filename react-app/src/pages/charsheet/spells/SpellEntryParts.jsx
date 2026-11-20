@@ -6,8 +6,7 @@ import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { inlineMetaLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import Caption from '../../../shared/ui/Caption.jsx';
-import ChoiceToggle from '../../../shared/ui/ChoiceToggle.jsx';
+import ItemPickToggle from '../inventory/ItemPickToggle.jsx';
 import CardSection from '../../../shared/ui/CardSection.jsx';
 import { INK_EDGE } from '../../../shared/ui/shadows.js';
 
@@ -78,24 +77,16 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
 // The weapon a spell attacks through (True Strike). Stored per spell on the
 // character, so the collapsed card keeps rolling the one picked.
 export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
-  if (!options.length) {
-    return (
-      <Caption sx={{ display: 'block', mt: 0.75 }}>
-        No weapon you are proficient with in your inventory.
-      </Caption>
-    );
-  }
   return (
     <CardSection title="Weapon" tone={RICH_TEXT_ACCENT}>
-      <ChoiceToggle
-        size="xs"
-        wrap
+      <ItemPickToggle
+        options={options}
         value={selectedKey}
+        emptyText="No weapon you are proficient with in your inventory."
         onChange={(next) => onUpdateCharacter?.((prev) => ({
           ...prev,
           spellWeapons: { ...(prev?.spellWeapons || {}), [spellName]: next },
         }))}
-        options={options.map((option) => ({ value: option.key, label: option.name }))}
       />
     </CardSection>
   );

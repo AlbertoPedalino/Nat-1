@@ -1,7 +1,5 @@
 import { byName } from '../../lists.js';
-import { isMeleeWeapon, isWeaponItem, itemBaseType } from '../../character/inventory/itemKinds.js';
-
-const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
+import { isMeleeWeapon, isWeaponItem, itemBaseType, weaponCategory } from '../../character/inventory/itemKinds.js';
 
 // Maps 5etools `equipmentType` codes (exactly as they appear in startingEquipment
 // data) to a predicate selecting the concrete items a player may pick for that
@@ -13,10 +11,10 @@ export const EQUIPMENT_TYPE_MATCHERS = Object.freeze({
   instrumentMusical: (item) => itemBaseType(item) === 'INS',
   setGaming: (item) => itemBaseType(item) === 'GS',
   toolArtisan: (item) => itemBaseType(item) === 'AT',
-  weaponSimple: (item) => weaponCategoryOf(item) === 'simple' && isWeaponItem(item),
-  weaponSimpleMelee: (item) => weaponCategoryOf(item) === 'simple' && isMeleeWeapon(item),
-  weaponMartial: (item) => weaponCategoryOf(item) === 'martial' && isWeaponItem(item),
-  weaponMartialMelee: (item) => weaponCategoryOf(item) === 'martial' && isMeleeWeapon(item),
+  weaponSimple: (item) => weaponCategory(item) === 'simple' && isWeaponItem(item),
+  weaponSimpleMelee: (item) => weaponCategory(item) === 'simple' && isMeleeWeapon(item),
+  weaponMartial: (item) => weaponCategory(item) === 'martial' && isWeaponItem(item),
+  weaponMartialMelee: (item) => weaponCategory(item) === 'martial' && isMeleeWeapon(item),
 });
 
 // Concrete items the player can pick for an `equipmentType` slot (e.g. setGaming

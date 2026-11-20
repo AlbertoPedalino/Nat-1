@@ -1,6 +1,7 @@
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from '../inventory/CreatedItemsPanel.jsx';
 import MagicItemTinkerPanel from '../inventory/MagicItemTinkerPanel.jsx';
+import ItemFlagPickerPanel from '../inventory/ItemFlagPickerPanel.jsx';
 import WildShapePanel from '../forms/WildShapePanel.jsx';
 import WildCompanionPanel from '../forms/WildCompanionPanel.jsx';
 import EldritchCannonPanel from '../forms/EldritchCannonPanel.jsx';
@@ -19,4 +20,5 @@ export const ACTION_DETAIL_RENDERERS = {
   magicItemTinker: MagicItemTinkerPanel,
   summonedCreature: SummonedCreaturePanel,
   primalCompanion: PrimalCompanionPanel,
+  itemFlagPicker: ItemFlagPickerPanel,
 };

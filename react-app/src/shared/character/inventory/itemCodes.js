@@ -7,7 +7,7 @@ import { formatCopper } from './currency.js';
 import { formatPounds } from './weight.js';
 import { rarityLabel } from './itemRarity.js';
 import { attunementRequirementText } from './itemAttunement.js';
-import { ANY_WEAPON_CODES, itemBaseType } from './itemKinds.js';
+import { ANY_WEAPON_CODES, itemBaseType, weaponCategory } from './itemKinds.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -107,8 +107,7 @@ function collectRawProperties(item) {
 }
 
 function weaponCategoryLabel(item) {
-  const cat = String(item?.weaponCategory || '').toLowerCase();
-  return WEAPON_CATEGORY_LABELS[cat] || '';
+  return WEAPON_CATEGORY_LABELS[weaponCategory(item)] || '';
 }
 
 export function decodeItemTypeLabel(item) {

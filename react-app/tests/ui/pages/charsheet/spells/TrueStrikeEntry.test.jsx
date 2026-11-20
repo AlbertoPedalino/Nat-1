@@ -6,7 +6,7 @@ import { SheetActionsProvider } from '../../../../../src/pages/charsheet/state/S
 import { ProficiencySetsProvider } from '../../../../../src/pages/charsheet/proficiency/ProficiencySetsContext.jsx';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installCantrips from '../../../../../src/adapters/spells/cantrips.js';
-import { spellWeaponKey } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
+import { itemPickKey } from '../../../../../src/shared/character/inventory/replicateMagicItem.js';
 import { theme } from '../../../../../src/app/theme.js';
 
 installCantrips(adapterRegistry);
@@ -60,7 +60,7 @@ test('True Strike rolls the picked weapon, and picking another one is saved on t
   fireEvent.click(screen.getByRole('button', { name: 'Dagger' }));
   expect(onUpdateCharacter).toHaveBeenCalledTimes(1);
   const next = onUpdateCharacter.mock.calls[0][0](baseCharacter);
-  expect(next.spellWeapons).toEqual({ 'True Strike': spellWeaponKey(dagger) });
+  expect(next.spellWeapons).toEqual({ 'True Strike': itemPickKey(dagger) });
 
   rerender(view(next, onUpdateCharacter));
   expect(screen.getByRole('button', { name: /1d4\+1d6\+3/ })).toBeInTheDocument();

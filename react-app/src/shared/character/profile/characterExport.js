@@ -24,7 +24,9 @@ const CHARACTER_PLAY_STATE_FIELDS = [
   'spellSlotsUsed', 'createdSpellSlots',
   'resources', 'freeCastUses',
   'inspiration', 'exhaustionLevel',
-  'notes', 'arcaneArmorItemKey', 'consumedItemBonuses',
+  'notes', 'consumedItemBonuses',
+  // The weapon each weapon-attack spell is cast through (True Strike).
+  'spellWeapons',
   // Class features with their own state (shared/character/forms/*Form.js).
   'wildShape', 'wildCompanion', 'eldritchCannons', 'primalCompanion',
 ];

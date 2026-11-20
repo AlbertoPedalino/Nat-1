@@ -7,13 +7,19 @@ import { itemBaseType } from './itemKinds.js';
 // Arcane Armor…). Adapters declare them with `registerItemFlagDef(key, def)`:
 //
 //   label / activeLabel   button text, unset / set
-//   tone                  button accent
 //   types                 item types the flag may go on (5etools `type`)
+//   fits(item)            the item test instead, when a type list cannot say it
+//                         (Arcane Firearm: a rod, staff, wand or martial ranged weapon)
+//   weaponDamageDice      dice the flagged weapon adds to its damage roll, on
+//                         its own card and through a spell (True Strike)
 //   maxCount              items that may hold the flag at once (1 = it moves)
 //   requireClass          class the character needs levels in
 //   requireMinLevel       minimum level in that class
 //   requireSubclass       subclass of that class (short name)
 //   requireInvocation     Eldritch Invocation the character must know
+//
+// The button takes the colour of where the feature comes from (itemFlagOwnerKind),
+// never one of its own.
 //
 // Rules effects read the flag itself (`requiredItemFlag`, weapon overrides);
 // this module only decides who may set it and on what.
@@ -50,10 +56,28 @@ export function availableItemFlagDefs(defs, C) {
   return (defs || []).filter((def) => itemFlagDefAvailable(def, C));
 }
 
+// Where the feature that sets the flag comes from, read off its requirements:
+// 'subclass' (Arcane Armor, Arcane Firearm) or 'class' (Pact Weapon: a
+// Warlock invocation). An ENTITY_COLORS key.
+export function itemFlagOwnerKind(def) {
+  return def?.requireSubclass ? 'subclass' : 'class';
+}
+
 export function itemFlagFitsItem(def, item) {
   if (!def || !item) return false;
+  if (typeof def.fits === 'function') return Boolean(def.fits(item));
   const types = (def.types || []).map((type) => String(type).toUpperCase());
   return !types.length || types.includes(itemBaseType(item));
+}
+
+// The dice the flags on a weapon add to its damage roll ('1d8' for an Arcane
+// Firearm), joined with '+'; '' when none. Only the flags this character can
+// still use count: an Artillerist who loses the subclass keeps no bonus.
+export function itemFlagWeaponDice(item, defs, C) {
+  return availableItemFlagDefs(defs, C)
+    .filter((def) => def.weaponDamageDice && hasItemFlag(item, def.key))
+    .map((def) => def.weaponDamageDice)
+    .join('+');
 }
 
 // Sets or clears `def.key` on inventory[index]. With `maxCount: 1` setting it

@@ -9,6 +9,7 @@ import {
   replicateBucketChoiceValue,
   replicatedItemProperty,
   itemCardName,
+  itemPickOptions,
 } from '../../../../../src/shared/character/inventory/replicateMagicItem.js';
 
 const bucket = (id) => REPLICATE_BUCKETS.find((entry) => entry.id === id);
@@ -92,4 +93,19 @@ test('a replicated plan weapon names the rule it adds, and nothing else does', (
   assert.equal(itemCardName({ name: 'Dagger', displayName: 'Dagger (silvered)' }), 'Dagger (silvered)');
   assert.equal(replicatedItemProperty(crossbow), null);
   assert.equal(replicatedItemProperty({ ...crossbow, flags: ['replicated'], craftedFrom: 'replicate-choice:v1:item:Bag:XPHB' }), null);
+});
+
+// Every pick of an item (True Strike's weapon, the Arcane Firearm) reads the
+// same: the card name, the plan only where two would read alike, one option
+// per distinct item.
+test('an item pick names each item as its card does, and tells copies apart only by their plan', () => {
+  const crossbow = { name: 'Light Crossbow', source: 'XPHB', type: 'R', property: ['A', 'LD', '2H'] };
+  const replicated = {
+    ...applyReplicateItemPlan(crossbow, bucket('repeating-shot')),
+    flags: ['replicated'],
+    craftedFrom: replicateBucketChoiceValue(bucket('repeating-shot'), crossbow),
+  };
+  const labels = (items) => itemPickOptions(items).map((option) => option.label);
+  assert.deepEqual(labels([replicated]), ['Light Crossbow']);
+  assert.deepEqual(labels([crossbow, replicated, { ...crossbow }]), ['Light Crossbow', 'Light Crossbow · Repeating Shot']);
 });

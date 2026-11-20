@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   availableItemFlagDefs,
   itemFlagFitsItem,
+  itemFlagOwnerKind,
+  itemFlagWeaponDice,
   toggleItemFlag,
 } from '../../../../../src/shared/character/inventory/itemFlags.js';
 
@@ -59,4 +61,28 @@ test('a flag with a higher limit refuses once the limit is reached', () => {
   const inventory = [{ flags: ['mark'] }, { flags: ['mark'] }, {}];
   assert.equal(toggleItemFlag(inventory, 2, twice), inventory);
   assert.deepEqual(toggleItemFlag(inventory, 0, twice)[0].flags, []);
+});
+
+test('a flag can test the item itself instead of a type list', () => {
+  const ranged = { key: 'mark', fits: (item) => item.type === 'R' };
+  assert.equal(itemFlagFitsItem(ranged, { type: 'R' }), true);
+  assert.equal(itemFlagFitsItem(ranged, { type: 'M' }), false);
+  assert.deepEqual(toggleItemFlag([{ type: 'R' }], 0, ranged), [{ type: 'R', flags: ['mark'] }]);
+});
+
+test('a flagged weapon adds its dice only while the character can still use the flag', () => {
+  const FIREARM = {
+    key: 'arcaneFirearm', weaponDamageDice: '1d8', maxCount: 1,
+    requireClass: 'Artificer', requireSubclass: 'Artillerist', requireMinLevel: 5,
+  };
+  const crossbow = { name: 'Heavy Crossbow', type: 'R', flags: ['arcaneFirearm'] };
+  const artillerist = { className: 'Artificer', classLevel: 5, subclassShortName: 'Artillerist' };
+  assert.equal(itemFlagWeaponDice(crossbow, [FIREARM, PACT], artillerist), '1d8');
+  assert.equal(itemFlagWeaponDice({ ...crossbow, flags: [] }, [FIREARM], artillerist), '');
+  assert.equal(itemFlagWeaponDice(crossbow, [FIREARM], { ...artillerist, subclassShortName: 'Armorer' }), '');
+});
+
+test('a flag takes the colour of where its feature comes from', () => {
+  assert.equal(itemFlagOwnerKind(PACT), 'class');
+  assert.equal(itemFlagOwnerKind(ARCANE), 'subclass');
 });

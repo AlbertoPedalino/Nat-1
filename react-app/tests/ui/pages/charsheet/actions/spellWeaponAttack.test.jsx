@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
-import { spellWeaponAttack, spellWeaponKey, spellWeaponOptions } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
+import { spellWeaponAttack, spellWeaponOptions } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
+import { itemPickKey } from '../../../../../src/shared/character/inventory/replicateMagicItem.js';
 import { cantripScalingDamages, cantripScalingDice } from '../../../../../src/pages/charsheet/spells/spellDice.js';
 import { collectEquipmentProficiencySets } from '../../../../../src/shared/character/proficiency/equipmentSets.js';
 
@@ -28,9 +29,9 @@ test('only weapons the character is proficient with are offered, the ones in han
   const inventory = [dagger, { ...dagger }, longsword, { ...quarterstaff, equipped: true, equippedSlot: 'twoHands' }];
   const options = spellWeaponOptions(character, inventory, collectEquipmentProficiencySets(character));
 
-  expect(options.map((option) => option.name)).toEqual(['Quarterstaff', 'Dagger']);
+  expect(options.map((option) => option.label)).toEqual(['Quarterstaff', 'Dagger']);
   expect(options[0].held).toBe(true);
-  expect(options[1].key).toBe(spellWeaponKey(dagger));
+  expect(options[1].key).toBe(itemPickKey(dagger));
 });
 
 test('the attack and damage use the spellcasting ability, the weapon die as held, and the cantrip dice', () => {

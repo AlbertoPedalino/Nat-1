@@ -18,9 +18,12 @@ export const ANY_WEAPON_CODES = Object.freeze(new Set([...WEAPON_CODES, CUSTOM_W
 export const ANY_ARMOR_CODES = Object.freeze(new Set([...ARMOR_OR_SHIELD_CODES, CUSTOM_ARMOR_CODE]));
 // Ammunition (Arrow, Firearm bullet).
 const AMMO_CODES = Object.freeze(new Set(['A', 'AF']));
+// Rods, staffs and wands of their own type, and the spellcasting focus.
+const ROD_STAFF_WAND_CODES = Object.freeze(new Set(['RD', 'ST', 'WD']));
+const FOCUS_CODE = 'SCF';
 // Held or worn while it works: weapons, armor and shields, spellcasting
 // focuses (wand, rod, staff, focus).
-const HELD_OR_WORN_CODES = Object.freeze(new Set([...ANY_WEAPON_CODES, ...ANY_ARMOR_CODES, 'WD', 'RD', 'ST', 'SCF']));
+const HELD_OR_WORN_CODES = Object.freeze(new Set([...ANY_WEAPON_CODES, ...ANY_ARMOR_CODES, ...ROD_STAFF_WAND_CODES, FOCUS_CODE]));
 // What the inventory lets you equip: held or worn, and wondrous items.
 const EQUIPPABLE_CODES = Object.freeze(new Set([...HELD_OR_WORN_CODES, 'WI']));
 
@@ -43,3 +46,20 @@ export const isArmorOrShield = is(ARMOR_OR_SHIELD_CODES);
 export const isAmmo = is(AMMO_CODES);
 export const isHeldOrWorn = is(HELD_OR_WORN_CODES);
 export const isEquippable = is(EQUIPPABLE_CODES);
+
+// A rod, staff or wand: by its own type, a spellcasting focus so named (the
+// Arcane Focus Rod/Staff/Wand), or a magic staff built on a Quarterstaff
+// (5etools `staff`).
+export function isRodStaffOrWand(item) {
+  const type = itemBaseType(item);
+  if (ROD_STAFF_WAND_CODES.has(type) || item?.staff === true) return true;
+  return type === FOCUS_CODE && /\b(?:rod|staff|wand)\b/i.test(String(item?.name || ''));
+}
+
+// A weapon's category from its item data: 'simple', 'martial', or ''.
+export function weaponCategory(item) {
+  const raw = String(item?.weaponCategory || '').toLowerCase();
+  if (raw.includes('simple')) return 'simple';
+  if (raw.includes('martial')) return 'martial';
+  return '';
+}

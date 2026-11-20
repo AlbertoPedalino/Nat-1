@@ -2,7 +2,8 @@ import { collectOwnedFeatNames } from '../../../shared/character/progression/sel
 import { classEntities, ownedClassFeatureNames } from '../../../shared/character/progression/classLevel.js';
 import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
 import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../../shared/character/proficiency/armorRules.js';
-import { getWeaponCategory, weaponMatchesRule } from '../../../shared/character/proficiency/weaponRules.js';
+import { weaponMatchesRule } from '../../../shared/character/proficiency/weaponRules.js'
+import { weaponCategory } from '../../../shared/character/inventory/itemKinds.js';;
 import { getSpellEntities, getSpellcastingProfile } from '../../../shared/character/spells/spellcasting.js';
 import { normalizeCasterProgression } from '../../../shared/character/spells/casterProgression.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
@@ -50,7 +51,7 @@ function hasWeaponGroup(equipmentSets, items, group) {
     Object.keys(rule).length === 0 || matchKey(rule.category) === wanted
   ))) return true;
   return (items || []).some((item) => (
-    matchKey(getWeaponCategory(item)) === wanted
+    matchKey(weaponCategory(item)) === wanted
     && equipmentSets.weaponRules.some((rule) => weaponMatchesRule(item, rule))
   ));
 }

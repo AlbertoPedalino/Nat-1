@@ -8,17 +8,10 @@ import { capitalize } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 import { nameWithoutBonus } from '../inventory/itemIdentity.js';
-import { isMeleeWeapon, isRangedWeapon, itemBaseType } from '../inventory/itemKinds.js';
+import { isMeleeWeapon, isRangedWeapon, itemBaseType, weaponCategory } from '../inventory/itemKinds.js';
 
 // Properties are read by the shared reader.
 export { canonicalProperty, itemHasProperty };
-
-export function getWeaponCategory(item) {
-  const raw = String(item?.weaponCategory || '').toLowerCase();
-  if (raw.includes('simple')) return 'simple';
-  if (raw.includes('martial')) return 'martial';
-  return '';
-}
 
 const WEAPON_NAME_ALIASES = {
   crossbowhand: 'handcrossbow',
@@ -47,7 +40,7 @@ export function weaponMatchesRule(item, rule) {
   const itemType = itemBaseType(item);
   if (rule.type && itemType !== rule.type) return false;
   if (Array.isArray(rule.types) && !rule.types.includes(itemType)) return false;
-  const cat = getWeaponCategory(item);
+  const cat = weaponCategory(item);
   if (rule.category && cat !== String(rule.category).toLowerCase()) return false;
   if (rule.melee === true && !isMeleeWeapon(item)) return false;
   if (rule.ranged === true && !isRangedWeapon(item)) return false;

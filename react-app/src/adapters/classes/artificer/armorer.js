@@ -192,7 +192,6 @@ registerSubclassSheetProficiencies("Artificer_Armorer", [
 registerItemFlagDef("arcaneArmor", {
   label: "Arcane Armor",
   activeLabel: "Arcane",
-  tone: "#58b879",
   types: ['LA','MA','HA'],
   maxCount: 1,
   requireClass: "Artificer",

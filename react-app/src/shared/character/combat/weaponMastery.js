@@ -3,7 +3,6 @@ import {
   isSupportedEdition,
   ITEM_SOURCE_PRIORITY,
 } from '../../content/sourcePriority.js';
-import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { compareText, flattenList } from '../../lists.js';
 import { matchKey, splitNameSource, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
@@ -11,13 +10,14 @@ import { titleCase } from '../../ui/textCase.js';
 import { stripMarkup } from '../../content/markupText.js';
 import { cachedLoader } from '../../content/cachedLoader.js';
 import { nameWithoutBonus } from '../inventory/itemIdentity.js';
-import { ANY_WEAPON_CODES, isMeleeWeapon, itemBaseType } from '../inventory/itemKinds.js';
+import { ANY_WEAPON_CODES, itemBaseType } from '../inventory/itemKinds.js';
+import { weaponMatchesRule } from '../proficiency/weaponRules.js';
 
 const _masteries = new Map();
 
 function isMundaneWeapon(item) {
   if (!item || typeof item !== 'object' || !item.name) return false;
-  const isWeapon = ANY_WEAPON_CODES.has(itemBaseType(item)) || item?._meta?.isWeapon === true;
+  const isWeapon = ANY_WEAPON_CODES.has(itemBaseType(item));
   const rarity = String(item.rarity || 'none').toLowerCase();
   return isWeapon && rarity === 'none';
 }
@@ -65,23 +65,6 @@ const WEAPON_MASTERY_PROGRESSIONS = Object.freeze({
     Object.freeze({ level: 1, count: 2 }),
   ]),
 });
-
-function weaponMatchesRule(item, rule) {
-  if (rule?.melee === true) {
-    if (!isMeleeWeapon(item) && item?._meta?.isMeleeWeapon !== true) return false;
-  }
-
-  if (rule?.category) {
-    const category = String(item?.weaponCategory || item?.category || '').toLowerCase();
-    if (category !== String(rule.category).toLowerCase()) return false;
-  }
-
-  if (Array.isArray(rule?.propertiesAny) && rule.propertiesAny.length > 0) {
-    if (!rule.propertiesAny.some((property) => itemHasProperty(item, property))) return false;
-  }
-
-  return true;
-}
 
 export function getWeaponMasteryChoiceNames(items, fallbackItems = [], rules = ALL_WEAPON_MASTERY_RULES) {
   const primary = flattenList(items).filter((item) => item && typeof item === 'object');

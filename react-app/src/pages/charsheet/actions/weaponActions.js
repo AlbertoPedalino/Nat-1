@@ -11,12 +11,10 @@ import {
 import { getOneHandDamageDice, getWeaponDamageDice, canUseLightExtraAttack, getOffHandDamageMod, hasTwoWeaponFightingStyle, isTwoHandedWeapon, isThrownWeapon, isHeavyWeapon, isWieldingWeaponOrShield, isLightWeapon, isFinesseWeapon, isCrossbow, isPolearmMasterWeapon, hasEquippedShield } from '../inventory/equipmentSlots.js';
 import { weaponEnhancement, weaponExtraDamage } from '../../../shared/character/inventory/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
-import {
-  itemIdentityKey,
-  matchesItemReference,
-} from '../../../shared/character/inventory/itemIdentity.js';
+import { matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
 import {
   itemCardName,
+  itemPickOptions,
   replicatedItemProperty,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
 import {
@@ -27,7 +25,7 @@ import {
 } from '../../../shared/character/sheet/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { isMeleeWeapon, isRangedWeapon, isWeaponItem, itemBaseType } from '../../../shared/character/inventory/itemKinds.js';
-import { hasItemFlag } from '../../../shared/character/inventory/itemFlags.js';
+import { hasItemFlag, itemFlagWeaponDice } from '../../../shared/character/inventory/itemFlags.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -86,6 +84,60 @@ function matchingWeaponOverride(C, item, overrides) {
   }) || null;
 }
 
+// What the attacks with weapons share: Rage-like damage, how many weapons are
+// in hand ("solo weapon" = exactly one, any hand slot or equipped with no
+// explicit slot: Dueling's "no other weapons"; a Shield is not a weapon, so
+// sword-and-board still qualifies) and whether a Shield is.
+function weaponContext(C, inventory) {
+  return {
+    strMeleeDamageBonus: getMeleeStrDamageBonus(C),
+    wieldedWeaponCount: (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length,
+    shieldEquipped: hasEquippedShield(inventory),
+  };
+}
+
+// A weapon as it is held, for weapon-scoped effects and notes (Fighting
+// Styles, Great Weapon Master). A weapon readied to throw is not among those
+// wielded, but it is in hand alongside them once drawn. An off-hand attack
+// always has a second weapon beside it: never one-handed alone (no Dueling),
+// while ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
+function heldWeaponInfo(item, ctx, { offHand = false } = {}) {
+  const twoHanded = !offHand && (item?.equippedSlot === TWO_HANDS_SLOT || isTwoHandedWeapon(item));
+  return {
+    ...weaponKindInfo(item, ctx),
+    twoHanded,
+    oneHanded: !offHand && !twoHanded,
+    soloWeapon: !offHand && ctx.wieldedWeaponCount + (isHeldWeapon(item) ? 0 : 1) <= 1,
+  };
+}
+
+// Rage Damage (and similar, getMeleeStrDamageBonus): Strength-based melee
+// attacks only, with a weapon or an Unarmed Strike.
+function strMeleeDamage(ctx, ability, melee) {
+  return ability === 'str' && melee ? (ctx.strMeleeDamageBonus || 0) : 0;
+}
+
+// The numbers of one attack with a weapon, the same on its card, its off-hand
+// card and through a spell (True Strike). Attack: ability modifier + magic
+// bonus + style bonus (proficiency is the caller's). Damage, one roll: the
+// weapon's dice, the dice its flags add (Arcane Firearm's 1d8), the spell's
+// own dice, then ability modifier (`damageAbilityMod` when the off hand drops
+// it) + magic bonus + Rage + style bonus.
+function weaponAttackNumbers(C, item, { ability, dice, extraDice = '', damageAbilityMod, info, ctx }) {
+  const mod = getMod(getFinal(C, ability));
+  const enhancement = weaponEnhancement(item);
+  const style = getWeaponEffectBonuses(C, info);
+  const rage = strMeleeDamage(ctx, ability, !isRangedWeapon(item));
+  const flagDice = dice ? itemFlagWeaponDice(item, adapterRegistry.getAllItemFlagDefs(), C) : '';
+  const allDice = [dice, flagDice, extraDice].filter(Boolean).join('+');
+  const flat = (damageAbilityMod ?? mod) + enhancement.damage + rage + style.damage;
+  return {
+    enhancement,
+    attack: mod + enhancement.attack + style.attack,
+    damageFormula: allDice ? withModifier(allDice, flat) : '',
+  };
+}
+
 // XPHB 2024 Heavy property: Disadvantage on attack rolls with both Strength
 // and Dexterity under 13.
 function heavyWeaponDisadvantage(C, item) {
@@ -106,55 +158,37 @@ function isHeldWeapon(item) {
   return HAND_SLOTS.includes(item?.equippedSlot) || Boolean(item?.equipped && !item?.equippedSlot);
 }
 
-// A weapon a spell attacks through (True Strike), told apart from another copy
-// of the same weapon only when it is a different item: a replicated plan.
-export function spellWeaponKey(item) {
-  return `${itemIdentityKey(item)}|${item?.craftedFrom || ''}`;
-}
-
-// The weapons True Strike can be cast through — its material component is "a
-// weapon with which you have proficiency" — the ones in hand first.
+// The weapons True Strike can be cast through, one per distinct weapon
+// (itemPickOptions): its material component is "a weapon with which you have
+// proficiency". The ones in hand come first.
 export function spellWeaponOptions(C, inventory, profSets) {
   const overrides = adapterRegistry.getWeaponAbilityOverrides();
-  const seen = new Set();
-  return (inventory || [])
+  const weapons = (inventory || [])
     .filter((item) => isWeaponItem(item)
       && getWeaponProficiencyInfo(C, item, matchingWeaponOverride(C, item, overrides), profSets).proficient)
-    .sort((a, b) => Number(isHeldWeapon(b)) - Number(isHeldWeapon(a)))
-    .filter((item) => {
-      const key = spellWeaponKey(item);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .map((item) => ({ key: spellWeaponKey(item), item, name: weaponCardName(item).name, held: isHeldWeapon(item) }));
+    .sort((a, b) => Number(isHeldWeapon(b)) - Number(isHeldWeapon(a)));
+  return itemPickOptions(weapons).map((option) => ({ ...option, held: isHeldWeapon(option.item) }));
 }
 
 // One attack with a weapon, made through a spell that swaps Strength or
 // Dexterity for the spellcasting ability (True Strike). Everything else is the
-// weapon's own: its damage die (two-handed when so held), magic bonus, Fighting
-// Style bonuses, and the Heavy property's Disadvantage. `extraDamage` is the
-// spell's own dice, added to the one damage roll of the hit.
+// weapon's own (weaponAttackNumbers) plus the Heavy property's Disadvantage.
+// `extraDamage` is the spell's own dice, added to the one damage roll of the
+// hit: weapon die + flag dice + spell dice + modifier.
 export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '' } = {}) {
   if (!item) return null;
-  const mod = getMod(getFinal(C, ability));
-  const enhancement = weaponEnhancement(item);
-  const held = (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length;
-  const twoHanded = item.equippedSlot === TWO_HANDS_SLOT || isTwoHandedWeapon(item);
-  const info = {
-    ...weaponKindInfo(item, { shieldEquipped: hasEquippedShield(inventory) }),
-    twoHanded,
-    oneHanded: !twoHanded,
-    soloWeapon: held <= 1,
-  };
-  const bonus = getWeaponEffectBonuses(C, info);
-  const flat = mod + enhancement.damage + bonus.damage;
-  const dice = [getWeaponDamageDice(item, item.equippedSlot), extraDamage].filter(Boolean).join('+');
-  const damageFormula = dice ? withModifier(dice, flat) : '';
+  const ctx = weaponContext(C, inventory);
+  const numbers = weaponAttackNumbers(C, item, {
+    ability,
+    dice: getWeaponDamageDice(item, item.equippedSlot),
+    extraDice: extraDamage,
+    info: heldWeaponInfo(item, ctx),
+    ctx,
+  });
   return {
     name: weaponCardName(item).name,
-    attackBonus: getPB(C) + mod + enhancement.attack + bonus.attack,
-    damageFormula,
+    attackBonus: getPB(C) + numbers.attack,
+    damageFormula: numbers.damageFormula,
     damageType: weaponDamageType(item),
     extraRollers: weaponExtraDamageRollers(item),
     disadvantage: heavyWeaponDisadvantage(C, item),
@@ -178,51 +212,43 @@ function weaponDamageRollers(item, damageFormula, damageType) {
   ];
 }
 
-function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, ctx = {}, opts = {}) {
+// A weapon's attack card. `offHand` ({ twf }) makes it the Light property's
+// extra attack with the off-hand weapon: one-handed die, no ability modifier
+// to damage unless negative or with Two-Weapon Fighting, a Bonus Action (an
+// Action with the Nick mastery).
+function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, items, ctx, { offHand = null } = {}) {
   const { profSets, untrainedArmor } = ctx;
   const weaponOverride = matchingWeaponOverride(C, item, overrides);
   const profInfo = getWeaponProficiencyInfo(C, item, weaponOverride, profSets);
   const ability = weaponAbility(C, item, weaponOverride);
   const overrideBlocked = weaponOverride?.requiresProficiency && !profInfo.proficient;
   const finalAbility = overrideBlocked ? baseWeaponAbility(C, item) : ability;
-  const mod = getMod(getFinal(C, finalAbility));
-  const enhancement = weaponEnhancement(item);
-  const base = opts.damageBase != null ? opts.damageBase : getOneHandDamageDice(item);
-  // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
-  const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon(item) ? (ctx.strMeleeDamageBonus || 0) : 0;
-  // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon)
-  // plus weapon-scoped rule reminders (Great Weapon Master) share one weapon profile.
-  const wieldedTwoHanded = item?.equippedSlot === TWO_HANDS_SLOT || isTwoHandedWeapon(item);
-  const weaponInfo = {
-    ...weaponKindInfo(item, ctx),
-    twoHanded: wieldedTwoHanded,
-    oneHanded: !wieldedTwoHanded,
-    // A weapon readied to throw is not among those wielded, but it is in hand
-    // alongside them once drawn.
-    soloWeapon: ctx.wieldedWeaponCount + (isHeldWeapon(item) ? 0 : 1) <= 1,
-  };
-  const fsBonus = getWeaponEffectBonuses(C, weaponInfo);
-  const weaponNotes = getWeaponNotes(C, weaponInfo);
-  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus + fsBonus.damage;
-  const damageFormula = base ? withModifier(base, finalMod) : '';
-  const dtype = weaponDamageType(item);
+  const info = heldWeaponInfo(item, ctx, { offHand: Boolean(offHand) });
+  const numbers = weaponAttackNumbers(C, item, {
+    ability: finalAbility,
+    dice: offHand ? getOneHandDamageDice(item) : getWeaponDamageDice(item, item.equippedSlot),
+    damageAbilityMod: offHand ? getOffHandDamageMod(getMod(getFinal(C, finalAbility)), offHand.twf) : undefined,
+    info,
+    ctx,
+  });
+  const { enhancement } = numbers;
   const disAdv = (untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex')) || heavyWeaponDisadvantage(C, item);
   const mastery = selectedWeaponMastery(item, selectedMasteriesByWeapon, items);
   const card = weaponCardName(item);
   return {
-    name: opts.name || card.name,
-    cat: opts.cat || 'action',
+    name: card.name,
+    cat: offHand && mastery !== 'Nick' ? 'bonus' : 'action',
     _source: 'Weapon',
     _weaponAttack: true,
-    attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
-    rollers: weaponDamageRollers(item, damageFormula, dtype),
-    rollLabelPrefix: opts.rollLabelPrefix || card.name,
+    attackBonus: (profInfo.proficient ? getPB(C) : 0) + numbers.attack,
+    rollers: weaponDamageRollers(item, numbers.damageFormula, weaponDamageType(item)),
+    rollLabelPrefix: offHand ? `Off-hand ${card.name}` : card.name,
     noDescription: true,
     _item: item,
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
-    _weaponNotes: weaponNotes,
+    _weaponNotes: getWeaponNotes(C, info),
     _itemProperty: card.property,
     _weaponSlot: item.equippedSlot || null,
     _colorBarCat: 'attack',
@@ -265,17 +291,10 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       .filter(([name]) => !!name),
   );
 
-  const untrainedArmor = hasNonProficientArmor(C, inventory, equipmentSets);
-  // "Solo weapon" = exactly one weapon wielded (any hand slot, or equipped with no
-  // explicit slot). Gates Fighting Style: Dueling ("a melee weapon in one hand and
-  // no other weapons"); a Shield is not a weapon, so sword-and-board still qualifies.
-  const wieldedWeaponCount = (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length;
   const ctx = {
+    ...weaponContext(C, inventory),
     profSets: equipmentSets,
-    untrainedArmor,
-    strMeleeDamageBonus: getMeleeStrDamageBonus(C),
-    wieldedWeaponCount,
-    shieldEquipped: hasEquippedShield(inventory),
+    untrainedArmor: hasNonProficientArmor(C, inventory, equipmentSets),
   };
 
   const weaponActions = [];
@@ -286,57 +305,16 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
 
   attacks.forEach((item) => {
     if (item.equippedSlot === OFF_HAND_SLOT && canLightExtra) return;
-    const base = getWeaponDamageDice(item, item.equippedSlot);
-    const mainAction = makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, ctx, { damageBase: base });
+    const mainAction = makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, items, ctx);
     weaponActions.push(mainAction);
     pushWeaponExtraAttacks(weaponActions, mainAction, item, C, extraAttackOverrides);
   });
 
   if (canLightExtra && offHandItem) {
-    const ohIndex = attacks.indexOf(offHandItem);
-    const ohOverride = matchingWeaponOverride(C, offHandItem, overrides);
-    const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride, equipmentSets);
-    const ohAbility = weaponAbility(C, offHandItem, ohOverride);
-    const ohMod = getMod(getFinal(C, ohAbility));
-    const ohEnhancement = weaponEnhancement(offHandItem);
-    const ohBase = getOneHandDamageDice(offHandItem);
-    const ohDtype = weaponDamageType(offHandItem);
-    const ohStrMeleeDamageBonus = ohAbility === 'str' && !isRangedWeapon(offHandItem) ? ctx.strMeleeDamageBonus : 0;
-    // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
-    // ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
-    const ohWeaponInfo = {
-      ...weaponKindInfo(offHandItem, ctx),
-      twoHanded: false,
-      oneHanded: false,
-      soloWeapon: false, // off-hand implies a second weapon → never solo
-    };
-    const ohFsBonus = getWeaponEffectBonuses(C, ohWeaponInfo);
-    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus + ohFsBonus.damage;
-    const ohMastery = selectedWeaponMastery(offHandItem, selectedMasteriesByWeapon, items);
-    const isNick = ohMastery === 'Nick';
-    const ohDamageFormula = ohBase ? withModifier(ohBase, ohDmgMod) : '';
-
-    const ohCard = weaponCardName(offHandItem);
-    weaponActions.push({
-      name: ohCard.name,
-      cat: isNick ? 'action' : 'bonus',
-      _source: 'Weapon',
-      _weaponAttack: true,
-      _colorBarCat: 'attack',
-      attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
-      rollers: weaponDamageRollers(offHandItem, ohDamageFormula, ohDtype),
-      rollLabelPrefix: `Off-hand ${ohCard.name}`,
-      noDescription: true,
-      _item: offHandItem,
-      _enhancement: ohEnhancement.attack || ohEnhancement.damage ? ohEnhancement : null,
-      _weaponIndex: ohIndex,
-      _weaponSlot: offHandItem.equippedSlot || null,
-      _weaponMastery: ohMastery || null,
-      _weaponNotes: getWeaponNotes(C, ohWeaponInfo),
-      _itemProperty: ohCard.property,
-      _notProficient: !ohProfInfo.proficient,
-      _disadvantage: false,
-    });
+    weaponActions.push(makeWeaponAction(
+      C, offHandItem, attacks.indexOf(offHandItem), overrides, selectedMasteriesByWeapon, items, ctx,
+      { offHand: { twf: hasTWF } },
+    ));
   }
 
   // Die, Dexterity and label come from the features that change the Unarmed
@@ -346,8 +324,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const useDexUnarmed = unarmed.dexterity && getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str'));
   const ability = useDexUnarmed ? 'dex' : 'str';
   const mod = getMod(getFinal(C, ability));
-  // Rage Damage applies to Strength-based Unarmed Strikes too.
-  const unarmedDmgMod = mod + (ability === 'str' ? ctx.strMeleeDamageBonus : 0);
+  const unarmedDmgMod = mod + strMeleeDamage(ctx, ability, true);
   const die = unarmed.face > 1 ? `1d${unarmed.face}` : '1';
   const unarmedDamageFormula = withModifier(die, unarmedDmgMod);
   weaponActions.push({
