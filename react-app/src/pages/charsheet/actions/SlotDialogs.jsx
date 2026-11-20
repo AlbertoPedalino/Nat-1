@@ -4,7 +4,6 @@ import SheetDialog, { CancelButton } from '../../../shared/ui/SheetDialog.jsx';
 import CountStepper from '../../../shared/ui/CountStepper.jsx';
 import { UI_COLORS, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { tintedSurfaceSx } from '../../../shared/ui/surfaces.js';
 import { INK_EDGE, INK_SOLID } from '../../../shared/ui/shadows.js';
 
@@ -25,8 +24,7 @@ function optionRowSx(selected) {
 }
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
-// the slot to create, convert or spend, the Wild Resurgence option, the Pact
-// Magic slot, or the slots an Arcane Recovery style budget restores.
+// the slot to create, convert or spend, the Pact Magic slot, or the slots an Arcane Recovery style budget restores.
 export default function SlotDialogs({ dialogs, resNameMap }) {
   const {
     slotRecovery,
@@ -40,8 +38,6 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
     setConvertSlotDialog,
     convertSlotSelection,
     setConvertSlotSelection,
-    wildResurgenceDialog,
-    setWildResurgenceDialog,
     spendSlotRecoverDialog,
     setSpendSlotRecoverDialog,
     spendSlotRecoverSelection,
@@ -50,7 +46,6 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
     setConsumePactSlotDialog,
     confirmCreateSlot,
     confirmConvertSlot,
-    confirmWildResurgence,
     confirmSpendSlotRecover,
     confirmConsumePactSlot,
     adjustSlotRecoveryLevel,
@@ -126,30 +121,6 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.spell }}>
                   +{level} SP
                 </Typography>
-              </Box>
-            ))}
-          </Box>
-        ) : null}
-      </SheetDialog>
-
-      <SheetDialog
-        open={Boolean(wildResurgenceDialog)}
-        onClose={() => setWildResurgenceDialog(null)}
-        title={wildResurgenceDialog?.label || 'Wild Resurgence'}
-        actions={<CancelButton onClick={() => setWildResurgenceDialog(null)} />}
-      >
-        {wildResurgenceDialog ? (
-          <Box sx={{ display: 'grid', gap: 0.75 }}>
-            <Typography sx={{ fontSize: FONT_SIZES.md, color: 'text.secondary' }}>
-              Choose an option (Wild Shape remaining: {wildResurgenceDialog.currentWS}).
-            </Typography>
-            {wildResurgenceDialog.options.map((opt) => (
-              <Box
-                key={opt.key}
-                onClick={() => { confirmWildResurgence(opt.key); }}
-                sx={optionRowSx(false)}
-              >
-                <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.md, color: UI_COLORS.accentText }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>

@@ -1,4 +1,4 @@
-import ActionDetailPanel from './ActionDetailPanel.jsx';
+import RollTablePanel from './RollTablePanel.jsx';
 import CreatedItemsPanel from '../inventory/CreatedItemsPanel.jsx';
 import MagicItemTinkerPanel from '../inventory/MagicItemTinkerPanel.jsx';
 import ItemFlagPickerPanel from '../inventory/ItemFlagPickerPanel.jsx';
@@ -12,7 +12,7 @@ import PrimalCompanionPanel from '../forms/PrimalCompanionPanel.jsx';
 // A feature with its own interactive panel (a form, a creature, crafted items)
 // adds one entry here; the Actions tab never checks for a class or feature.
 export const ACTION_DETAIL_RENDERERS = {
-  panel: ActionDetailPanel,
+  rollTable: RollTablePanel,
   createdItems: CreatedItemsPanel,
   wildShape: WildShapePanel,
   wildCompanion: WildCompanionPanel,

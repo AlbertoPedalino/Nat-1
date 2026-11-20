@@ -2,10 +2,10 @@ import { adapterRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from '../../../shared/character/spells/spellGrants.js';
 import {
   enumerateAutoGrantedSpells,
-  grantSourceLabel,
+  grantFreeCasts,
+  grantSourceContext,
 } from '../../../shared/character/spells/autoGrantedSpells.js';
 import {
-  collectFreeCastsForGrant,
   mergeFreeCastsById,
   normalizeFreeCast,
   getFeatFreeCastTemplate,
@@ -50,22 +50,19 @@ export function collectAutoGrantedSpells(C) {
   // species, all gated & level-filtered. Project each canonical record into the
   // sheet's source-object shape (branching only on species vs class origin).
   const runtimeOut = enumerateAutoGrantedSpells(C).filter((r) => !r.atWill).map((r) => {
+    const { label: srcLabel, sourceType } = grantSourceContext(r, C);
     if (r.origin === 'species') {
-      const srcLabel = grantSourceLabel(r, C?.speciesName || 'Species');
-      const sourceType = r.sourceType || 'species';
       return {
         name: r.name,
         level: Number(r.level ?? 0),
         source: { label: srcLabel, color: SRC_COLOR.species, originType: 'species', originLabel: C?.speciesName || 'Species' },
         ownerClassName: null,
         spellcastingAbility: r.ability,
-        freeCasts: collectFreeCastsForGrant(r.entry, { character: C, ownerLevel: r.ownerLevel, source: srcLabel, sourceType, spellName: r.name }),
+        freeCasts: grantFreeCasts(r, C),
         spellOverrides: r.entry?.spellOverrides || null,
         modifiers: r.entry?.modifiers || [],
       };
     }
-    const srcLabel = grantSourceLabel(r);
-    const sourceType = r.sourceType || (r.explicitSource ? 'auto_granted' : (r.subclassShortName ? 'subclass' : 'class'));
     return {
       name: r.name,
       level: Number(r.level ?? 0),
@@ -73,7 +70,7 @@ export function collectAutoGrantedSpells(C) {
       ownerClassName: r.ownerClassName,
       ownerSubclassShortName: r.subclassShortName,
       spellcastingAbility: r.ability,
-      freeCasts: collectFreeCastsForGrant(r.entry, { character: C, ownerLevel: r.ownerLevel, source: srcLabel, sourceType, spellName: r.name }),
+      freeCasts: grantFreeCasts(r, C),
       spellOverrides: r.entry?.spellOverrides || null,
       modifiers: r.entry?.modifiers || [],
     };

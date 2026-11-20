@@ -7,6 +7,7 @@ import { classEntities } from '../progression/classLevel.js';
 import { choiceKey, matchKey, stripSource } from '../../content/nameKeys.js';
 import { SUBCLASS_SPELL_LIST_KEY, choiceValueNames, readChoiceValue } from '../progression/choiceUtils.js';
 import { asArray } from '../../lists.js';
+import { collectFreeCastsForGrant } from './spellFreeCasts.js';
 
 /**
  * Shared enumeration of auto-granted spells from class/subclass/species runtime
@@ -392,10 +393,18 @@ export function enumerateOptionalFeatureGrants(entity, character) {
  */
 export function enumerateEntityGrants(entity, character) {
   const subclassGrants = enumerateSubclassDataGrants(entity, character);
-  const dataGrants = [...enumerateClassDataGrants(entity), ...subclassGrants];
+  const classDataGrants = enumerateClassDataGrants(entity);
+  const dataGrants = [...classDataGrants, ...subclassGrants];
   const fromData = new Set(dataGrants.map((r) => matchKey(r.name)));
+  const fromClassData = new Set(classDataGrants.map((r) => matchKey(r.name)));
+  // A class skin's data spells come with its own version of the feature and
+  // replace the base class's config one (Death Knight's Faithful Steed: Find
+  // Steed with its own free cast, not the Paladin's as well). A subclass config
+  // entry stays beside its data only to add a free cast.
   const configGrants = enumerateClassGrants(entity, character)
-    .filter((r) => !(r.subclassShortName && fromData.has(matchKey(r.name)) && !r.entry?.freeCast));
+    .filter((r) => (r.subclassShortName
+      ? !(fromData.has(matchKey(r.name)) && !r.entry?.freeCast)
+      : !fromClassData.has(matchKey(r.name))));
   const subclassSpellcasting = adapterRegistry.getSubclassRuntimeConfig(
     entity?.className,
     entity?.subclassShortName,
@@ -420,6 +429,27 @@ export function grantSourceLabel(record, fallback = 'Auto') {
     || record?.subclassShortName
     || record?.ownerClassName
     || fallback;
+}
+
+// What a grant's spell row and its free casts go by: its label
+// (grantSourceLabel) and its source type. The spells tab and the rests read it
+// here, so a free cast spent on the row is the one a rest gives back (its id
+// is made of both).
+export function grantSourceContext(record, character) {
+  if (record?.origin === 'species') {
+    return { label: grantSourceLabel(record, character?.speciesName || 'Species'), sourceType: record.sourceType || 'species' };
+  }
+  const sourceType = record?.sourceType
+    || (record?.explicitSource ? 'auto_granted' : (record?.subclassShortName ? 'subclass' : 'class'));
+  return { label: grantSourceLabel(record), sourceType };
+}
+
+// The free casts of one grant, named by its source context.
+export function grantFreeCasts(record, character) {
+  const { label, sourceType } = grantSourceContext(record, character);
+  return collectFreeCastsForGrant(record?.entry, {
+    character, ownerLevel: record?.ownerLevel, source: label, sourceType, spellName: record?.name,
+  });
 }
 
 /**

@@ -8,7 +8,10 @@ import { createAdapterRegistry, installAdapters } from '../../../src/adapters/re
 // A feature's pieces are registered separately — its resource, its action
 // cards, its rest side effects, effects that refill it — and linked only by
 // the resource key written in each. A typo in one of those copies unlinks it
-// without any error, so every reference must name a registered resource.
+// without any error, so every reference must name a registered resource. A
+// card that only sets off a side effect names it as its `effect` instead: each
+// side effect belongs to a resource or to such a card, and each card effect
+// has its side effect.
 
 const ADAPTERS = fileURLToPath(new URL('../../../src/adapters/', import.meta.url));
 const REFERENCE_FIELDS = /\b(?:resKey|resourceKey|targetResourceKey|targetKey)\s*:\s*['"]([A-Za-z0-9_]+)['"]/g;
@@ -34,6 +37,15 @@ test('every resource key an adapter refers to is a registered resource', async (
     };
   });
 
+  const cardEffects = new Set();
+  Object.keys(registry).filter((name) => /^register\w*SheetActions$/.test(name)).forEach((name) => {
+    const original = registry[name].bind(registry);
+    registry[name] = (...args) => {
+      args.filter(Array.isArray).flat().forEach((card) => { if (card?.effect) cardEffects.add(card.effect); });
+      return original(...args);
+    };
+  });
+
   const sideEffects = [];
   const registerSideEffect = registry.registerResourceSideEffect.bind(registry);
   registry.registerResourceSideEffect = (key, fn) => { sideEffects.push(key); return registerSideEffect(key, fn); };
@@ -52,7 +64,8 @@ test('every resource key an adapter refers to is a registered resource', async (
       if (!declared.has(match[1])) unknown.push(`${path.relative(ADAPTERS, file)}: ${match[1]}`);
     }
   }
-  sideEffects.filter((key) => !declared.has(key)).forEach((key) => unknown.push(`side effect: ${key}`));
+  sideEffects.filter((key) => !declared.has(key) && !cardEffects.has(key)).forEach((key) => unknown.push(`side effect: ${key}`));
+  [...cardEffects].filter((key) => !sideEffects.includes(key)).forEach((key) => unknown.push(`card effect: ${key}`));
   assert.ok(declared.size > 50 && sideEffects.length > 0, 'the adapters were installed');
   assert.deepEqual(unknown, []);
 });

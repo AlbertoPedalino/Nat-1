@@ -59,15 +59,15 @@ registerClassSheetActions("Sorcerer", [
   },
   {
     "name": "Create Spell Slot (Font of Magic)",
-    "cat": "action",
-    "resKey": "sorc_create_slot",
+    "cat": "bonus",
+    "effect": "sorc_create_slot",
     "minLevel": 2,
     "buttonLabel": "Create Slot"
   },
   {
     "name": "Convert Spell Slot (Font of Magic)",
-    "cat": "action",
-    "resKey": "sorc_convert_slot",
+    "cat": "special",
+    "effect": "sorc_convert_slot",
     "minLevel": 2,
     "buttonLabel": "Convert Slot"
   },
@@ -107,20 +107,6 @@ registerClassSheetResources("Sorcerer", [
     "recharge": "LR",
     "max": (lv)=>lv,
     "pool": true
-  },
-  {
-    "key": "sorc_create_slot",
-    "name": "Create/Restore Slot",
-    "recharge": "LR",
-    "max": () => Infinity,
-    "pool": true
-  },
-  {
-    "key": "sorc_convert_slot",
-    "name": "Convert Spell Slot",
-    "recharge": "LR",
-    "max": () => Infinity,
-    "pool": true
   }
 ]);
 
@@ -140,7 +126,7 @@ registerResourceSideEffect('sorc_create_slot', function (ctx = {}) {
   const C = ctx.character;
   const res = ctx.resources || {};
   const currentSP = Number(res.sorc_pts || 0);
-  if (currentSP < 2) return null;
+  if (currentSP < 2) return { type: 'notice', label: 'Create Spell Slot', message: 'Not enough Sorcery Points.' };
   const sorcLv = classLevel(C, 'Sorcerer');
   return {
     type: 'create_spell_slot_from_points',

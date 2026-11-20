@@ -289,7 +289,11 @@ What a class, subclass, species or feat adds to the sheet is declared in its
 adapter (`adapters/classes/<class>/<subclass>.js`, `adapters/feats/`,
 `adapters/species/`): action cards, resources, effects, proficiencies, item
 flags (`registerItemFlagDef`) and what spending a resource triggers
-(`registerResourceSideEffect`). An adapter destructures from
+(`registerResourceSideEffect`). A card whose use is only what it sets off,
+with no count of its own (Font of Magic's Create Slot, Font of Inspiration),
+names that side effect as its `effect` and gets a button for it: no stand-in
+resource. A side effect returns what follows (a dialog, a recovery, a created
+slot, or `{ type: 'notice' }` when it cannot happen). An adapter destructures from
 `createAdapterBindings` only the names it calls. The register/get pairs are
 generated from `KEYED_SLOTS` in `adapters/registry.js`; a new kind of
 per-owner data is one row there. Class runtime config (spellcasting tables,

@@ -46,3 +46,33 @@ test('the builder spell panel lists the subclass data spells at their level', as
   assert.deepEqual(names(5), []);
   assert.deepEqual(names(6), ['elementalism']);
 });
+
+// Faithful Steed (Paladin 5): Find Steed always prepared, cast once per Long
+// Rest without a slot.
+test('a level 5 Paladin has Find Steed prepared, once a Long Rest without a slot', async () => {
+  const { grantFreeCasts } = await import('../../../../../src/shared/character/spells/autoGrantedSpells.js');
+  const paladin = (level) => ({ className: 'Paladin', classLevel: level, level });
+  const steed = (C) => enumerateAutoGrantedSpells(C).find((record) => record.name === 'Find Steed');
+  assert.equal(steed(paladin(4)), undefined);
+  const grant = steed(paladin(5));
+  assert.equal(grant.mode, 'prepared');
+  assert.equal(grant.explicitSource, 'Faithful Steed');
+  const [freeCast] = grantFreeCasts(grant, paladin(5));
+  assert.deepEqual(
+    [freeCast.label, freeCast.max, freeCast.recharge, freeCast.consumesSlot, freeCast.canAlsoUseSlots],
+    ['Faithful Steed', 1, 'longRest', false, true],
+  );
+});
+
+// A skin bringing its own Faithful Steed gets Find Steed from its data alone.
+test("a class skin's own feature spells replace the base class's config ones", async () => {
+  const { enumerateEntityGrants } = await import('../../../../../src/shared/character/spells/autoGrantedSpells.js');
+  adapterRegistry.registerClassSkin('Death Knight', { base: 'Paladin', removedFeatures: ["Paladin's Smite"] });
+  const entity = {
+    className: 'Death Knight', level: 5,
+    entry: { clsSnapshot: { skinAdditionalSpells: [{ prepared: { 5: { daily: { 1: ['find steed|xphb'] } } } }] } },
+  };
+  const steeds = enumerateEntityGrants(entity, {}).filter((record) => record.name.toLowerCase() === 'find steed');
+  assert.equal(steeds.length, 1);
+  assert.equal(steeds[0].entry.freeCast.maxUses, 1);
+});

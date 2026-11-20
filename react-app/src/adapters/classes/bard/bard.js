@@ -62,8 +62,8 @@ registerClassSheetActions("Bard", [
       return `1d${die}`;
     } }],
     rollLabelPrefix: "Bardic Inspiration" },
-  { name: "Font of Inspiration",cat: "action", resKey: "bard_font_insp", minLevel: 5,
-    controller: true },
+  { name: "Font of Inspiration", cat: "special", effect: "bard_font_insp", minLevel: 5,
+    buttonLabel: "Spend Slot" },
   { name: "Countercharm",       cat: "bonus", minLevel: 7 },
 ]);
 
@@ -72,27 +72,16 @@ registerClassSheetResources("Bard", [
     srMinLevel: 5,
     actionName: 'Bardic Inspiration',
     max: 'abilityMod:cha', minMax: 1 },
-  { key: 'bard_font_insp', name: 'Font of Inspiration', recharge: 'SR',
-    srMinLevel: 5,
-    actionName: 'Font of Inspiration',
-    minLevel: 5, max: 1 },
 ]);
 
-registerResourceSideEffect('bard_font_insp', ({ resources, resourceMax }) => {
-  const biMax = Number(resourceMax?.bardic_insp ?? 1);
-  const biCur = Number(resources?.['bardic_insp'] ?? biMax);
-  if (biCur >= biMax) {
-    return { type: 'recover_resource', targetResourceKey: 'bardic_insp', amount: 0, label: 'Font of Inspiration' };
-  }
-  return {
-    type: 'spend_slot_recover_resource',
-    targetKey: 'bardic_insp',
-    recoverAmount: 1,
-    recoverMax: biMax,
-    label: 'Font of Inspiration',
-    note: 'Expend a spell slot to regain one use of Bardic Inspiration (no action required).',
-  };
-});
+registerResourceSideEffect('bard_font_insp', ({ resourceMax }) => ({
+  type: 'spend_slot_recover_resource',
+  targetKey: 'bardic_insp',
+  recoverAmount: 1,
+  recoverMax: Number(resourceMax?.bardic_insp ?? 1),
+  label: 'Font of Inspiration',
+  note: 'Expend a spell slot to regain one use of Bardic Inspiration (no action required).',
+}));
 
 registerClassSheetEffects("Bard", [
   {

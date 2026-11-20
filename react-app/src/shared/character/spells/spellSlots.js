@@ -80,15 +80,7 @@ export function availableRegularSlotLevels(regularSlots, sheet) {
 // Lowest regular spell-slot level with a slot left (created slots included), or
 // 0 when none: features that take "a spell slot" of any level spend the cheapest.
 export function lowestAvailableSlotLevel(regularSlots, sheet) {
-  const used = sheet?.spellSlotUsed || {};
-  const created = sheet?.createdSpellSlots || {};
-  for (let lv = 1; lv <= regularSlots.length; lv++) {
-    const total = Number(regularSlots[lv - 1] || 0);
-    const extra = Number(created[lv] || 0);
-    if (!total && !extra) continue;
-    if (total - getRegularSlotUsed(used, lv) + extra > 0) return lv;
-  }
-  return 0;
+  return availableRegularSlotLevels(regularSlots, sheet)[0]?.level || 0;
 }
 
 export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter) {

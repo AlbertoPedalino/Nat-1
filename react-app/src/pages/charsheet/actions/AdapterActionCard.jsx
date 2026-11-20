@@ -35,13 +35,29 @@ import { actionButtonToneSx } from '../../../shared/ui/actionButton.js';
 import ToneBar from '../../../shared/ui/ToneBar.jsx';
 
 // An adapter-defined action on the Actions tab: uses, rollers, resource
-// pips and any choice it asks for.
+// pips and any choice it asks for. A card whose use is only what it sets off
+// (Font of Magic's Create Slot, a spell slot for a Wild Shape use) names that
+// side effect as its `effect` and shows a button for it, with no resource.
 
-export function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, onNotice, resMax, isPool, resTrack, colorBarCat, displayName }) {
+// The button that sets off a card's side effect: an `effect`, or a resource
+// with no limit (Rage at level 20).
+function EffectButton({ label, onClick }) {
+  return (
+    <Button
+      size="small"
+      variant="outlined"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      sx={{ fontSize: FONT_SIZES.xs, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
+    >{label || 'Use'}</Button>
+  );
+}
+
+export function AdapterActionCard({ C, sheet, action, resources, onResChange, onEffect, onRoll, onShowToast, onNotice, resMax, isPool, resTrack, colorBarCat, displayName }) {
   const barCat = colorBarCat || action._colorBarCat || action.cat;
   const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
+  const hasEffect = Boolean(action.effect && typeof onEffect === 'function');
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
   const safeMax = resMax === Infinity ? Infinity : Math.max(0, Number(resMax ?? 1) || 1);
   const hasEntries = Array.isArray(action.entries) ? action.entries.length > 0 : Boolean(action.entries);
@@ -63,7 +79,6 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
     || DetailRenderer
   );
   const hasStatusRow = Boolean(action._toggleKey && onUpdateCharacter);
-  const hasPersistentRows = hasStatusRow || hasRes;
   const persistentRowSx = (bgcolor, isLast, open) => ({
     display: 'flex',
     alignItems: 'center',
@@ -179,12 +194,7 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
           <Typography sx={{ ...inlineMetaLabelSx, mr: 0.5 }}>{action.resLabel || (resTrack === 'used' ? 'Spent' : 'Uses')}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: FONT_SIZES.xs, minWidth: 0, py: 0.25, px: 0.5, ...actionButtonToneSx(UI_COLORS.accentText) }}
-              >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
+              <EffectButton label={action.buttonLabel} onClick={() => onResChange(action.resKey, -1)} />
             ) : (
               <Typography sx={{ fontSize: FONT_SIZES.md, color: UI_COLORS.accentText, ...TEXT_STYLES.figure }}>∞</Typography>
             )
@@ -207,6 +217,11 @@ export function AdapterActionCard({ C, sheet, action, resources, onResChange, on
               );
             })
           )}
+        </Box>
+      ) : null}
+      {hasEffect ? (
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.accent, OPACITY.wash), true, open)}>
+          <EffectButton label={action.buttonLabel} onClick={() => onEffect(action.effect)} />
         </Box>
       ) : null}
         </>

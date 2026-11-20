@@ -84,6 +84,12 @@ export default function install(registry, context = {}) {
       casterProgression: "half",
       preparedMode: "prepared",
       preparedSpellsProgression: _PREP_HALF,
+      // A base class's always-prepared spells stay here, not read from the
+      // class's 5etools additionalSpells: each names its feature (`source`),
+      // by which a class skin drops the ones of the features it replaces, and
+      // carries the free cast the data leaves out. A free cast takes its
+      // label, source and id from its grant (normalizeFreeCast); an `id` is
+      // spelled out only where saved uses already go by it.
       alwaysPreparedSpells: [
         {
           name: "Divine Smite",
@@ -91,16 +97,15 @@ export default function install(registry, context = {}) {
           level: 1,
           source: "Paladin's Smite",
           sourceType: "class",
-          freeCast: {
-            id: "paladin-paladins-smite-divine-smite",
-            label: "Paladin's Smite",
-            source: "Paladin's Smite",
-            sourceType: "class",
-            maxUses: 1,
-            recharge: "longRest",
-            consumesSlot: false,
-            canAlsoUseSlots: true,
-          },
+          freeCast: { id: "paladin-paladins-smite-divine-smite", maxUses: 1, recharge: "longRest" },
+        },
+        {
+          name: "Find Steed",
+          minLevel: 5,
+          level: 2,
+          source: "Faithful Steed",
+          sourceType: "class",
+          freeCast: { maxUses: 1, recharge: "longRest" },
         },
       ],
     },
@@ -121,9 +126,6 @@ export default function install(registry, context = {}) {
           sourceType: "class",
           freeCast: {
             id: "ranger-favored-enemy-hunters-mark",
-            label: "Favored Enemy",
-            source: "Favored Enemy",
-            sourceType: "class",
             usesFormula: ({ ownerLevel = 1 }) => {
               if (ownerLevel >= 17) return 6;
               if (ownerLevel >= 13) return 5;
@@ -132,8 +134,6 @@ export default function install(registry, context = {}) {
               return 2;
             },
             recharge: "longRest",
-            consumesSlot: false,
-            canAlsoUseSlots: true,
           },
         },
       ],

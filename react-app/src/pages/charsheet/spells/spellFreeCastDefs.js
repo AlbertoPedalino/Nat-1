@@ -1,7 +1,6 @@
 import { classEntities } from '../../../shared/character/progression/classLevel.js';
-import { enumerateEntityGrants, enumerateSpeciesGrants } from '../../../shared/character/spells/autoGrantedSpells.js';
+import { enumerateEntityGrants, enumerateSpeciesGrants, grantFreeCasts } from '../../../shared/character/spells/autoGrantedSpells.js';
 import {
-  collectFreeCastsForGrant,
   mergeFreeCastsById,
   normalizeFreeCast,
   getFeatFreeCastTemplate,
@@ -22,17 +21,7 @@ export function getFreeCastDefsForCharacter(C) {
   [
     ...enumerateSpeciesGrants(C),
     ...classEntities(C).flatMap((entity) => enumerateEntityGrants(entity, C)),
-  ].forEach((grant) => {
-    const sourceType = grant.origin === 'species' ? 'species' : (grant.subclassShortName ? 'subclass' : 'class');
-    const source = grant.origin === 'species' ? C?.speciesName : (grant.subclassShortName || grant.ownerClassName);
-    defs.push(...collectFreeCastsForGrant(grant.entry, {
-      character: C,
-      ownerLevel: grant.ownerLevel,
-      source: grant.explicitSource || source,
-      sourceType: grant.sourceType || sourceType,
-      spellName: grant.name,
-    }));
-  });
+  ].forEach((grant) => defs.push(...grantFreeCasts(grant, C)));
 
   const featMeta = buildFeatMetaMap(C);
   Object.entries(C?.choices || {}).forEach(([key, value]) => {

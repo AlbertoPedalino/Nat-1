@@ -82,11 +82,21 @@ registerClassSheetActions("Druid", [
     "minLevel": 2,
     detailType: 'wildCompanion'
   },
+  // Wild Resurgence (level 5), both halves with no action required: a Wild
+  // Shape use for a level 1 slot once per Long Rest, and a spell slot for a
+  // Wild Shape use while none is left (once per turn: the player's to keep).
   {
-    "name": "Wild Resurgence",
-    "cat": "bonus",
-    "resKey": "wild_resurgence",
-    "minLevel": 5
+    name: "Wild Resurgence: Spell Slot",
+    cat: "special",
+    resKey: "wild_resurgence",
+    minLevel: 5
+  },
+  {
+    name: "Wild Resurgence: Wild Shape",
+    cat: "special",
+    effect: "wild_resurgence_shape",
+    minLevel: 5,
+    buttonLabel: "Spend Slot"
   }
 ]);
 registerClassSheetResources("Druid", [
@@ -98,11 +108,11 @@ registerClassSheetResources("Druid", [
     "max": (lv)=>lv>=17?4:lv>=6?3:2
   },
   {
-    "key": "wild_resurgence",
-    "name": "Wild Resurgence",
-    "recharge": "LR",
-    "max": () => Infinity,
-    "pool": true
+    key: "wild_resurgence",
+    name: "Wild Resurgence",
+    recharge: "LR",
+    minLevel: 5,
+    max: () => 1
   }
 ]);
 registerClassSheetProficiencies("Druid", [
@@ -111,26 +121,26 @@ registerClassSheetProficiencies("Druid", [
   { type: "weapon", values: ["Martial"], minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } }
 ]);
 
-registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
-  const res = ctx.resources || {};
-  const currentWS = Number(res.wild_shape || 0);
-  const slots = ctx.slots || { regular: [] };
-  const used = ctx.sheet?.spellSlotUsed || {};
-  const created = ctx.sheet?.createdSpellSlots || {};
-  const hasWildShape = currentWS > 0;
-  let hasAvailableSlot = false;
-  for (let lv = 1; lv <= slots.regular.length; lv++) {
-    const total = Number(slots.regular[lv - 1] || 0);
-    if (!total) continue;
-    const avail = total - Number(used[lv] || used[String(lv)] || 0) + Number(created[lv] || 0);
-    if (avail > 0) { hasAvailableSlot = true; break; }
+// A Wild Shape use for a level 1 spell slot (the 1/Long Rest use just spent).
+registerResourceSideEffect('wild_resurgence', () => ({
+  type: 'spend_resource_for_slot',
+  costKey: 'wild_shape',
+  slotLevel: 1,
+  label: 'Wild Resurgence',
+}));
+
+// A spell slot for a Wild Shape use, only with none left.
+registerResourceSideEffect('wild_resurgence_shape', ({ resources, resourceMax }) => {
+  if (Number(resources?.wild_shape || 0) > 0) {
+    return { type: 'notice', label: 'Wild Resurgence', message: 'Only when you have no uses of Wild Shape left.' };
   }
   return {
-    type: 'wild_resurgence',
-    hasWildShape,
-    hasAvailableSlot,
-    currentWS,
+    type: 'spend_slot_recover_resource',
+    targetKey: 'wild_shape',
+    recoverAmount: 1,
+    recoverMax: Number(resourceMax?.wild_shape ?? 1),
     label: 'Wild Resurgence',
+    note: 'Expend a spell slot to give yourself one use of Wild Shape (no action required).',
   };
 });
 

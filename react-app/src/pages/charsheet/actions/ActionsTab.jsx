@@ -141,7 +141,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   };
   adapterActions.forEach((a) => warnDanglingResKey(a, resMaxMap));
 
-  const { handleResChange, dialogs: slotDialogs } = useResourceSideEffects({
+  const { handleResChange, handleEffect, dialogs: slotDialogs } = useResourceSideEffects({
     C, sheet, resources, setResources, onNotice, onUpdateSheet, onUpdateCharacter, resMaxMap, resNameMap,
   });
 
@@ -200,6 +200,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 action={action}
                 resources={resources}
                 onResChange={handleResChange}
+                onEffect={handleEffect}
                 onRoll={onRoll}
                 onShowToast={onShowToast}
                 onNotice={onNotice}
