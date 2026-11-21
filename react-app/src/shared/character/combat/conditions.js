@@ -90,6 +90,7 @@ export const EXHAUSTION_KEY = 'exhaustion';
 // Its last level (XPHB 2024): death.
 export const EXHAUSTION_MAX = 6;
 export const DEAD_CONDITION_KEY = 'dead';
+export const UNCONSCIOUS_CONDITION_KEY = 'unconscious';
 export const ASSIGNABLE_CONDITIONS = CONDITIONS.filter((c) => c.key !== EXHAUSTION_KEY);
 
 export function setConditionActive(activeConditions, key, active) {
@@ -119,11 +120,27 @@ export function normalizeConditions(value) {
 export function toggleCondition(activeConditions, key) {
   const list = Array.isArray(activeConditions) ? activeConditions : [];
   if (list.includes(key)) return list.filter((active) => active !== key);
-  const next = [...list, key];
-  (CONDITION_IMPLIES[key] || []).forEach((implied) => {
-    if (!next.includes(implied)) next.push(implied);
+  return addCondition(list, key);
+}
+
+// `key` and the conditions it imposes, added to what is there.
+export function addCondition(activeConditions, key) {
+  const next = Array.isArray(activeConditions) ? [...activeConditions] : [];
+  [key, ...(CONDITION_IMPLIES[key] || [])].forEach((condition) => {
+    if (!next.includes(condition)) next.push(condition);
   });
   return next;
+}
+
+// A condition ending by rule rather than by a click: it goes, and so do the
+// conditions it imposed that no other active condition still imposes — except
+// those in `keep`, which outlast it (Unconscious ends with the creature still
+// Prone).
+export function endCondition(activeConditions, key, { keep = [] } = {}) {
+  const rest = normalizeConditions(activeConditions).filter((active) => active !== key);
+  const stillImposed = new Set(rest.flatMap((active) => CONDITION_IMPLIES[active] || []));
+  const ended = (CONDITION_IMPLIES[key] || []).filter((implied) => !keep.includes(implied) && !stillImposed.has(implied));
+  return rest.filter((active) => !ended.includes(active));
 }
 
 // Active conditions that ALWAYS impose `flag` (value === true), as labels.

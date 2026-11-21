@@ -82,3 +82,11 @@ test('a reminder removed on the map leaves the ones the sheet added meanwhile', 
   );
   assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Bless' }]);
 });
+test('damage to 0 HP knocks a character Unconscious; healing wakes it still Prone', () => {
+  const down = apply({ currentHP: 4, activeConditions: [] }, { type: 'modifyHp', delta: -10 });
+  assert.deepEqual(down.activeConditions, ['incapacitated', 'prone', 'unconscious']);
+  assert.deepEqual(apply(down, { type: 'modifyHp', delta: 3 }).activeConditions, ['prone']);
+  assert.deepEqual(apply(down, { type: 'deathSaveRoll', roll: 20, total: 20 }).activeConditions, ['prone']);
+  // Exhaustion's last level kills outright: no Unconscious on a dead character.
+  assert.deepEqual(apply({ currentHP: 4 }, { type: 'setExhaustion', value: 6 }).activeConditions, ['dead', 'exhaustion']);
+});

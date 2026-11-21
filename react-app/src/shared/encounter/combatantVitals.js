@@ -8,7 +8,8 @@ import { addReminder, normalizeEffects, removeEffect } from '../character/combat
 import { changeHp, clampCombatHpMax, clampTempHp, tempHpAfter } from '../character/combat/vitals.js';
 import { clamp, numberOr } from '../numbers.js';
 import {
-  clickedDeathSaveCount, markDead, resolveMortality, revive, toggleMortalCondition, withDeathSave,
+  clickedDeathSaveCount, markDead, resolveMortality, revive, toggleMortalCondition, withConsciousness,
+  withDeathSave,
 } from '../character/combat/mortality.js';
 
 // A combatant's vitals in a running fight: hit points, temporary and maximum
@@ -132,8 +133,8 @@ export function hpCommandFields(before, command) {
 }
 
 // A hit point command on one combatant, with mortality resolved (0 HP is Dead
-// for a monster, dying for a player; regaining hit points clears a player's
-// death saves). Only the fields it changes are written, so the result diffs
+// for a monster, dying and Unconscious for a player; regaining hit points
+// clears a player's death saves and wakes them, still Prone). Only the fields it changes are written, so the result diffs
 // into a minimal fight patch (monsterVitalsPatch). The builder, the battle
 // map's creatures and its loose pieces all step hit points through this.
 export function applyCombatantHpCommand(combatant, command) {
@@ -200,7 +201,12 @@ function withHp(next, before, hpCurrent) {
   const player = before?.type === 'player';
   const saves = player && hpCurrent > 0 && before.deathSaves ? { success: 0, fail: 0 } : before?.deathSaves;
   const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
-  const resolved = resolveMortality({ player, hp: hpCurrent, deathSaves: saves, conditions });
+  const resolved = resolveMortality({
+    player,
+    hp: hpCurrent,
+    deathSaves: saves,
+    conditions: withConsciousness({ player, hpBefore: before?.hpCurrent, hp: hpCurrent, conditions }),
+  });
   const out = { ...next, hpCurrent };
   if (normalizeConditions(conditions).join('|') !== resolved.conditions.join('|')) out.activeConditions = resolved.conditions;
   if (Boolean(before?.isDead) !== resolved.dead) out.isDead = resolved.dead;

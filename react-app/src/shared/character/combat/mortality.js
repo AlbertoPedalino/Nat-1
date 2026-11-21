@@ -1,7 +1,26 @@
 import {
-  DEAD_CONDITION_KEY, EXHAUSTION_KEY, normalizeConditions, setConditionActive, toggleCondition,
+  DEAD_CONDITION_KEY, EXHAUSTION_KEY, UNCONSCIOUS_CONDITION_KEY as UNCONSCIOUS,
+  addCondition, endCondition, normalizeConditions, setConditionActive, toggleCondition,
 } from './conditions.js';
 import { clampDeathSaveCount, normalizeDeathSaves } from './vitals.js';
+
+// A character's conditions as its hit points go from `hpBefore` to `hp`
+// (XPHB 2024): dropped to 0 and not killed, it has the Unconscious condition —
+// and so Incapacitated and Prone — until it regains any hit points; then
+// Unconscious ends and Incapacitated with it (unless another condition still
+// imposes it), but the character stays Prone until it stands up. Only a
+// crossing of 0 changes anything, so whatever the GM sets or clears while the
+// character lies there stands. An unknown `hpBefore` is an undamaged creature.
+// A monster at 0 HP is dead instead (resolveMortality), so it is left alone.
+export function withConsciousness({ player, hpBefore, hp, conditions }) {
+  const list = normalizeConditions(conditions);
+  if (!player) return list;
+  const wasUp = hpBefore == null || Number(hpBefore) > 0;
+  const isUp = Number(hp) > 0;
+  if (wasUp && !isUp && !list.includes(DEAD_CONDITION_KEY)) return normalizeConditions(addCondition(list, UNCONSCIOUS));
+  if (!wasUp && isUp && list.includes(UNCONSCIOUS)) return endCondition(list, UNCONSCIOUS, { keep: ['prone'] });
+  return list;
+}
 
 // Whether a creature at `hp` is dead, and the Dead condition and death saves
 // that go with it — the one rule every place that changes hit points, death
@@ -52,12 +71,15 @@ export function markDead({ player, deathSaves, conditions }) {
   };
 }
 
-// Removing Dead brings a creature back at 1 HP with clean death saves.
+// Removing Dead brings a creature back at 1 HP with clean death saves, and a
+// character comes round (withConsciousness).
 export function revive({ player, deathSaves, conditions }) {
   return {
     hp: 1,
     deathSaves: player ? { success: 0, fail: 0 } : deathSaves,
-    conditions: setConditionActive(conditions, DEAD_CONDITION_KEY, false),
+    conditions: withConsciousness({
+      player, hpBefore: 0, hp: 1, conditions: setConditionActive(conditions, DEAD_CONDITION_KEY, false),
+    }),
     dead: false,
   };
 }

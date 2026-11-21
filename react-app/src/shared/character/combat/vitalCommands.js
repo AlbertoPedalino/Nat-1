@@ -1,5 +1,7 @@
 import { changeHp, clampCharacterVitals, maxHpFor, tempHpAfter } from './vitals.js';
-import { clickedDeathSaveCount, markDead, toggleMortalCondition, withDeathSave } from './mortality.js';
+import {
+  clickedDeathSaveCount, markDead, toggleMortalCondition, withConsciousness, withDeathSave,
+} from './mortality.js';
 import {
   DEAD_CONDITION_KEY as DEAD, EXHAUSTION_KEY as EXHAUSTION, EXHAUSTION_MAX, setConditionActive,
 } from './conditions.js';
@@ -11,13 +13,15 @@ import { addReminder, removeEffect } from './combatEffects.js';
 // applies the same function to its own state, so what it shows at once is what
 // the digest then confirms.
 //
-// Dead, revived and the death-save count go through mortality.js, the rule the
-// encounter builder and the map follow for every creature.
+// Dead, revived, the death-save count and falling Unconscious at 0 HP go
+// through mortality.js, the rule the encounter builder and the map follow for
+// every creature.
 export function applyVitalCommand(data, command, baseMaxHP) {
   const maxFor = (bonus) => maxHpFor(baseMaxHP, bonus);
   const maxHP = maxFor(Number(data.maxHPBonus) || 0);
   let v = clampCharacterVitals(data, { maxHP, fallback: { currentHP: maxHP } });
-  const n = Math.trunc(Number(command.value ?? command.delta) || 0);
+  const hpBefore = v.currentHP;
+  const n =Math.trunc(Number(command.value ?? command.delta) || 0);
   let recover = false;
   switch (command.type) {
     case 'modifyHp': {
@@ -73,6 +77,9 @@ export function applyVitalCommand(data, command, baseMaxHP) {
     default: throw new Error('Unknown character health command.');
   }
   v = clampCharacterVitals(v, { maxHP: maxFor(v.maxHPBonus) });
+  v.activeConditions = withConsciousness({
+    player: true, hpBefore, hp: v.currentHP, conditions: v.activeConditions,
+  });
   if (recover && v.currentHP > 0) {
     v.deathSaves = { success: 0, fail: 0 };
     v.activeConditions = setConditionActive(v.activeConditions, DEAD, false);

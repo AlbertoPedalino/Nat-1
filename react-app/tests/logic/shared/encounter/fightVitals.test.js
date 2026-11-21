@@ -113,3 +113,11 @@ test('conditions and reminders reach the creature without touching hit points', 
   });
   assert.deepEqual(monsterVitalsPatch(ogre, applyCombatantEdit(ogre, {})), {});
 });
+
+test('a party member dropped to 0 HP in a fight falls Unconscious and wakes Prone', () => {
+  const hero = { type: 'player', hpCurrent: 6, hpMax: 20, activeConditions: [], isDead: false, deathSaves: { success: 0, fail: 0 } };
+  const down = applyMonsterVitalCommand(hero, { type: 'modifyHp', delta: -9 });
+  assert.equal(down.isDead, false);
+  assert.deepEqual(down.activeConditions, ['incapacitated', 'prone', 'unconscious']);
+  assert.deepEqual(applyMonsterVitalCommand(down, { type: 'modifyHp', delta: 5 }).activeConditions, ['prone']);
+});
