@@ -1,28 +1,23 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
-import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { rollToast } from '../../../shared/vtt/rolls/rollFeed.js';
-import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
 import { BUBBLE_FROM_TAIL_SX, BUBBLE_REST, bubbleSx, bubbleTailSx } from '../../../shared/ui/bubble.js';
-import { bubbleTone } from '../../../shared/ui/bubbleLooks.js';
 import { useRollMoment } from '../../../shared/ui/rollMoment.js';
 import RollMomentEffect from '../../../shared/ui/RollMomentEffect.jsx';
-import TagChip from '../../../shared/ui/TagChip.jsx';
 import { focusRingSx } from '../../../shared/ui/interactive.js';
 import { useLiveStyle } from '../../../shared/ui/liveStyle.js';
 import { hungOverStyle } from '../map/viewportGeometry.js';
-import BubbleHeader from '../../../shared/ui/BubbleHeader.jsx';
 import StyleScope from '../../../app/StyleScope.jsx';
+import DrawnToast, { useDrawnToast } from '../../../shared/ui/DrawnToast.jsx';
+import RollSaid from '../../../shared/character/dice/RollSaid.jsx';
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and
 // is never written anywhere.
 //
-// Laid out by the same function as the sheet's toast, so the player who rolled
-// and the table watching the map read the same thing.
+// It says what the sheet's toast says, in the same words (RollSaid.jsx), so
+// the player who rolled and the table watching the map read the same thing.
 //
 // With `onDismiss`, a tap anywhere on it closes it early: the bubble sits right
 // over the pieces, and on a phone eight seconds is long to wait for the board
@@ -30,7 +25,9 @@ import StyleScope from '../../../app/StyleScope.jsx';
 //
 // It is drawn in the style of the player who rolled it (`roll.style`,
 // StyleScope), whatever style each screen wears: the table sees the bubble,
-// and its natural 20 or 1, as the roller does.
+// and its natural 20 or 1, as the roller does. Where that style draws a roll
+// in place of its bubble (shapes.js rollToast.drawing), so it is drawn here:
+// the same drawn thing as the roller's toast (DrawnToast.jsx), smaller.
 export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
   // It rides the board through a pan: its place is written onto the element
   // (useLiveStyle), not into sx.
@@ -55,71 +52,41 @@ function RollBubbleCard({ roll, onDismiss }) {
   const drawn = useRollMoment(layout, BUBBLE_REST);
   const { moment } = drawn;
 
+  const { kind: drawing, drawn: drawnToast } = useDrawnToast();
+
+  const dismiss = onDismiss ? {
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': 'Close roll',
+    'data-viewport-control': true,
+    // Not a pan, a drag or a long press on whatever is underneath.
+    onPointerDown: (event) => event.stopPropagation(),
+    onClick: (event) => {
+      event.stopPropagation();
+      onDismiss(roll.id);
+    },
+    onKeyDown: (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Escape') return;
+      event.preventDefault();
+      onDismiss(roll.id);
+    },
+  } : null;
+
+  const said = <RollSaid layout={layout} moment={drawn} size="bubble" seed={roll.id} rolledWith={roll.dice} actor={roll.actorName} hint={Boolean(onDismiss)} />;
+
+  if (drawnToast) {
+    return (
+      <DrawnToast kind={drawing} moment={moment} seed={roll.id} compact {...dismiss} sx={{ ...drawnBubbleSx, ...(onDismiss ? dismissableSx : null) }}>
+        {said}
+      </DrawnToast>
+    );
+  }
+
   return (
-      <Box
-        {...(onDismiss ? {
-          role: 'button',
-          tabIndex: 0,
-          'aria-label': 'Close roll',
-          'data-viewport-control': true,
-          // Not a pan, a drag or a long press on whatever is underneath.
-          onPointerDown: (event) => event.stopPropagation(),
-          onClick: (event) => {
-            event.stopPropagation();
-            onDismiss(roll.id);
-          },
-          onKeyDown: (event) => {
-            if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Escape') return;
-            event.preventDefault();
-            onDismiss(roll.id);
-          },
-        } : null)}
-        sx={{
-          ...rollBubbleSx,
-          ...drawn.bubbleSx,
-          ...(onDismiss ? dismissableSx : {}),
-        }}
-      >
-        <RollMomentEffect key={roll.id} moment={moment} seed={roll.id} />
-        <BubbleHeader hint={Boolean(onDismiss)} centered>
-          {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
-          <Typography sx={{ ...labelSx, ...(layout.tone ? { color: bubbleTone(layout.tone) } : null) }}>{layout.label}</Typography>
-        </BubbleHeader>
-
-        {drawn.label ? <Typography sx={{ ...natSx, color: bubbleTone(drawn.labelColor) }}>{drawn.label}</Typography> : null}
-
-        {layout.modeChip && (
-          <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
-        )}
-
-        <DiceRow
-          dice={layout.dice}
-          modifier={layout.modifier}
-          modifierColor={layout.modifierColor && bubbleTone(layout.modifierColor)}
-          size={40}
-          justify="center"
-          seed={roll.id}
-          rolledWith={roll.dice}
-        />
-
-        {layout.total != null && (
-          <Typography sx={{
-            ...totalSx,
-            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.display : FONT_SIZES.heading,
-            color: layout.isCrit || layout.isFail ? VTT_COLORS.text : bubbleTone(layout.totalColor),
-            ...drawn.totalSx,
-          }}>
-            {layout.total}
-          </Typography>
-        )}
-
-        {/* A rest or a death-save guard has no total and no dice — the line the
-            roller saw is the whole message. */}
-        {layout.total == null && layout.dice.length === 0 && layout.detail && (
-          <Typography sx={detailSx}>{layout.detail}</Typography>
-        )}
-
-      </Box>
+    <Box {...dismiss} sx={{ ...rollBubbleSx, ...drawn.bubbleSx, ...(onDismiss ? dismissableSx : null) }}>
+      <RollMomentEffect key={roll.id} moment={moment} seed={roll.id} />
+      {said}
+    </Box>
   );
 }
 
@@ -146,45 +113,12 @@ const rollBubbleSx = {
   ...BUBBLE_FROM_TAIL_SX,
 };
 
+// A roll drawn in place of the bubble (DrawnToast.jsx): standing on the piece
+// that rolled, rising from it as the bubble does.
+const drawnBubbleSx = { minWidth: 180, maxWidth: 260, ...BUBBLE_FROM_TAIL_SX };
+
 const dismissableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
   ...focusRingSx({ tone: VTT_COLORS.accent }),
 };
-
-const actorSx = {
-  ...TEXT_STYLES.figure,
-  fontSize: FONT_SIZES.xs,
-  color: VTT_COLORS.accent,
-  lineHeight: LINE_HEIGHTS.tight,
-};
-
-// The roll's name, lettered like the sheet toast's.
-const labelSx = {
-  ...TEXT_STYLES.shout,
-  fontSize: FONT_SIZES.xxl,
-  color: UI_COLORS.textPrimary,
-  mb: 0.25,
-};
-
-const natSx = {
-  ...TEXT_STYLES.shout,
-  fontSize: FONT_SIZES.lg,
-  mb: 0.25,
-};
-
-
-
-// A roll's numbers are shouted, as on the sheet's toast.
-const totalSx = {
-  ...TEXT_STYLES.shout,
-  lineHeight: LINE_HEIGHTS.none,
-  my: 0.25,
-};
-
-const detailSx = {
-  fontSize: FONT_SIZES.sm,
-  color: UI_COLORS.textPrimary,
-  lineHeight: LINE_HEIGHTS.normal,
-};
-

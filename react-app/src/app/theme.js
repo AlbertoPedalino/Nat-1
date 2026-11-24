@@ -11,12 +11,12 @@ import {
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
-import { SURFACES, washImage } from '../shared/ui/surfaces.js';
+import { SURFACES, pageLightSx, surfaceFinish, washImage } from '../shared/ui/surfaces.js';
 import { LINE_SHARE, PAGE_SCENE_KINDS, VEIL, pageScene, sceneSvg } from '../shared/ui/pageScenes.js';
 import { dataPicture } from '../shared/ui/svgPicture.js';
 import { focusRingSx } from '../shared/ui/interactive.js';
-import { INK_EDGE, inkShadow, INK_WIDTH } from '../shared/ui/shadows.js';
-import { DIALOG_MOTION, DURATIONS, motionTime } from '../shared/ui/motion.js';
+import { INK_EDGE, inkShadow, INK_WIDTH, wellShadow } from '../shared/ui/shadows.js';
+import { DIALOG_MOTION, DURATIONS, STILL_WHEN_REDUCED, motionTime } from '../shared/ui/motion.js';
 import { BASE_STYLE_ID, SEAL_RADIUS, styleShapes } from '../shared/ui/shapes.js';
 import { CheckMark, SealMark } from '../shared/ui/ChoiceMarks.jsx';
 import { RARITY_COLORS } from '../shared/character/inventory/itemRarity.js';
@@ -112,6 +112,7 @@ function sceneLayerSx(chosen, paper) {
 
 function themeOptions(chosen, styleId) {
   const hex = chosen.colors;
+  const pageLight = pageLightSx(styleShapes(styleId).light.page);
   // MUI writes a coloured outlined or text button's label in its palette's
   // main: on a dark palette the role's own colour reads as lettering, on a
   // light one its readable tone (`<role>Text`) is given instead, so a Rest key
@@ -157,14 +158,12 @@ function themeOptions(chosen, styleId) {
       // GM Board semantic tokens, read in sx as 'gmboard.<group>.<key>'. Status
       // groups (difficulty, results, weather, badges, overlays) are interface
       // roles from UI_COLORS; treasure tiers and item rarity keep their own
-      // conventional colours, which are game data rather than interface style.
+      // conventional colours, which are game data rather than interface
+      // style: colours of meaning (colors.js MEANING_COLORS).
       gmboard: {
-        tier: {
-          1: { border: '#c04040', color: '#ff8080', dim: '#8b3030' },
-          2: { border: '#c07030', color: '#ffb060', dim: '#7a5530' },
-          3: { border: '#b0a030', color: '#ffe060', dim: '#7a7030' },
-          4: { border: '#40a0a0', color: '#a0ffff', dim: '#507878' },
-        },
+        tier: Object.fromEntries([1, 2, 3, 4].map((tier) => [tier, {
+          border: UI_COLORS[`tier${tier}Edge`], color: UI_COLORS[`tier${tier}`], dim: UI_COLORS[`tier${tier}Dim`],
+        }])),
         difficulty: {
           High: UI_COLORS.danger,
           Moderate: UI_COLORS.warning,
@@ -254,8 +253,11 @@ function themeOptions(chosen, styleId) {
             overflowX: 'var(--gb-page-overflow-x)',
             backgroundImage: SURFACES.page.backgroundImage,
             backgroundSize: SURFACES.page.backgroundSize,
-            // The style's scene (pageScenes.js), still behind every screen.
+            // The style's scene (pageScenes.js), still behind every screen,
+            // and over it the light it throws on its page (surfaces.js
+            // PAGE_LIGHTS), where it has either.
             ...sceneLayerSx(chosen, shapes.surface.paper),
+            ...(pageLight ? { '&::after': pageLight } : null),
           },
           // Every scrollbar of the app drawn in its own ink: a gold thumb edged
           // in ink on a sunken track, not the system's grey. The colours are
@@ -425,6 +427,8 @@ function themeOptions(chosen, styleId) {
           notchedOutline: { borderColor: UI_COLORS.edge, borderWidth: INK_WIDTH },
           root: {
             backgroundColor: UI_COLORS.surfaceHeader,
+            // A field is sunken: shaded inside as the style sinks its wells.
+            boxShadow: wellShadow(),
             transition: `box-shadow ${motionTime(DURATIONS.fast)} ease`,
             '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
               borderColor: UI_COLORS.textSecondary,
@@ -567,14 +571,14 @@ function themeOptions(chosen, styleId) {
               '0%': { transform: 'scale(0.86)' },
               '100%': { transform: 'scale(1)' },
             },
-            '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+            ...STILL_WHEN_REDUCED,
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            backgroundImage: 'none',
+            backgroundImage: surfaceFinish('box', 'none'),
             border: INK_EDGE,
           },
         },

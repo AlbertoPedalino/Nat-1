@@ -2,7 +2,7 @@ import { getContrastRatio } from '@mui/material';
 import { UI_COLORS, OPACITY, panelScreentone, paletteOf, uiLighten, uiMix } from './colors.js';
 import { themedValue } from './themedValues.js';
 import { INK_EDGE, UI_SHADOWS } from './shadows.js';
-import { DURATIONS, ICON_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
+import { DURATIONS, ICON_MOTION, STILL_WHEN_REDUCED, motionTime, motionShift, motionSquash } from './motion.js';
 import { LINE_HEIGHTS } from './fonts.js';
 
 // The drawn, raised button: an ink edge, a solid shadow under it, pushed down
@@ -153,7 +153,7 @@ const ICON_TWITCH_SX = Object.freeze({
     '60%': { rotate: '10deg' },
     '100%': { rotate: '0deg' },
   },
-  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  ...STILL_WHEN_REDUCED,
 });
 
 // An icon button that is part of something else, not a button of its own:

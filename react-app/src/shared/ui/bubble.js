@@ -1,5 +1,5 @@
 import { OPACITY, UI_COLORS, colorVariableName } from './colors.js';
-import { DURATIONS, motionTime } from './motion.js';
+import { DURATIONS, STILL_WHEN_REDUCED, motionTime } from './motion.js';
 import { BUBBLE, BUBBLE_DECOR_PROPS, BUBBLE_INK_ROLES, BUBBLE_LETTERING, bubbleShadowSx } from './bubbleLooks.js';
 import { ROLL_KIND_TONES } from './entityColors.js';
 
@@ -62,7 +62,7 @@ export function bubbleSx({ tone = UI_COLORS.edge, pop = true } = {}) {
         from: { opacity: 0, transform: 'rotate(-4deg) scale(0.7)' },
         to: { opacity: 1, transform: `rotate(${TILT}) scale(1)` },
       },
-      '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+      ...STILL_WHEN_REDUCED,
     } : null),
   };
 }
@@ -98,7 +98,7 @@ export const BUBBLE_FROM_TAIL_SX = Object.freeze({
     from: { opacity: 0, transform: 'scale(0.25)' },
     to: { opacity: 1, transform: 'scale(1)' },
   },
-  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  ...STILL_WHEN_REDUCED,
 });
 
 // Where a moving bubble comes to rest: a variable its motion's frames end on,
@@ -106,7 +106,6 @@ export const BUBBLE_FROM_TAIL_SX = Object.freeze({
 // toast's shouting tilt, the map bubble's own, the home cover's title).
 const REST = 'var(--gb-bubble-rest)';
 const restingAt = (rest) => ({ '--gb-bubble-rest': rest, transform: rest });
-const STILL = Object.freeze({ '@media (prefers-reduced-motion: reduce)': { animation: 'none' } });
 
 // A motion: `frames` played once over `ms` (paced by the style), settling at
 // `rest`; `both` holds its first frame while it waits and its last after.
@@ -116,7 +115,7 @@ function motionSx(name, rest, ms, easing, frames, { both = false, origin = null 
     ...(origin ? { transformOrigin: origin } : null),
     animation: `${name} ${motionTime(ms)} ${easing}${both ? ' both' : ''}`,
     [`@keyframes ${name}`]: frames,
-    ...STILL,
+    ...STILL_WHEN_REDUCED,
   };
 }
 
@@ -140,7 +139,7 @@ export function bubbleCheerSx(end = SHOUT_TILT, { delay = 0 } = {}) {
       '86%': { transform: 'rotate(1deg)' },
       '100%': { transform: REST },
     },
-    ...STILL,
+    ...STILL_WHEN_REDUCED,
   };
 }
 
@@ -349,21 +348,5 @@ export const BUBBLE_MOTIONS = Object.freeze({
     '30%': { filter: 'brightness(.2)' },
     '58%': { filter: 'brightness(1.5)', transform: 'translate(2px, 3px) rotate(-3deg)' },
     '70%': { filter: 'brightness(.6)' },
-  }),
-  // Boing: squashed flat, sprung up tall, bouncing.
-  boing: (rest) => motionSx('gbMomentBoing', rest, 1300, 'cubic-bezier(.3,1.5,.5,1)', {
-    '0%': { transform: 'translateY(30px) scale(1.5, .3)' },
-    '30%': { transform: 'translateY(-26px) scale(.8, 1.3) rotate(4deg)' },
-    '50%': { transform: 'translateY(4px) scale(1.25, .8) rotate(-3deg)' },
-    '66%': { transform: 'translateY(-8px) scale(.94, 1.1)' },
-    '82%': { transform: 'scale(1.08, .96)' },
-    '100%': { transform: REST },
-  }),
-  // Deflating like a balloon, and filling again.
-  deflate: (rest) => motionSx('gbMomentDeflate', rest, 1600, 'ease-in-out', {
-    '0%, 100%': { transform: REST },
-    '25%': { transform: 'translateY(10px) scale(1.1, .7) rotate(-4deg)' },
-    '45%': { transform: 'translateY(14px) scale(.86, .66) rotate(3deg)' },
-    '65%': { transform: 'translateY(8px) scale(.94, .82) rotate(-2deg)' },
   }),
 });

@@ -6,6 +6,9 @@ import { inkCutShadow } from '../../../shared/ui/shadows.js';
 import { CREST } from '../../../shared/ui/shapes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { useFitText } from '../../../shared/ui/useFitText.js';
+import { useStyleShapes } from '../../../shared/ui/themeIds.js';
+import { abilityPlace, abilityTile, drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
+import MeasuredDrawing from '../../../shared/ui/MeasuredDrawing.jsx';
 
 // A stat tile (AC, Initiative, Proficiency Bonus, Inspiration, the spell
 // figures, the ability scores): a small panel of its own, drawn in the same
@@ -21,16 +24,30 @@ import { useFitText } from '../../../shared/ui/useFitText.js';
 // its edge in its tone under the cursor; `active` fills the body with its tone
 // (Inspiration held), its figure in the ink that reads on it. `crest` cuts the
 // tile as a heraldic crest, pointed at the foot (the six ability scores), its
-// ink edge and solid shadow following the cut.
+// ink edge and solid shadow following the cut; where the style draws the
+// scores (shapes.js abilities.drawing), a crest is that drawing instead, the
+// one at `place` in its row.
 export default function StatTile({
-  tone = PANEL_TONES.statTile, label, value, clickable = false, active = false, crest = false, onClick, bodySx,
+  tone = PANEL_TONES.statTile, label, value, clickable = false, active = false, crest = false, place = 0, onClick, bodySx,
 }) {
   const titleRef = useFitText(label);
+  const { drawing } = useStyleShapes().abilities;
+  if (crest && drawsAbilities(drawing)) {
+    const { tilt, sink, head } = abilityPlace(drawing, place);
+    return (
+      <Box onClick={onClick} sx={[DRAWN_SX, { rotate: `${tilt}deg`, translate: `0 ${sink}px`, pt: `${head}px` }, clickable && DRAWN_CLICKABLE_SX]}>
+        <MeasuredDrawing draw={(w, h) => abilityTile(drawing, w, h, place)} />
+        {/* Carved in the stone's own letters; a tone only where it says something (a check at disadvantage). */}
+        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone === PANEL_TONES.abilityScores ? 'text.primary' : tone, minWidth: 0, maxWidth: '100%' }}>{label}</Typography>
+        {value}
+      </Box>
+    );
+  }
   const content = (
     <>
       <Box sx={{ ...panelTitleBarSx(tone, { tile: true }), gap: 0, justifyContent: 'center' }}>
         <Box sx={{ width: 0, height: PANEL_BADGE_BOX, flexShrink: 0 }} />
-        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: `var(--gb-panel-tile-title, ${tone})`, minWidth: 0 }}>{label}</Typography>
+        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone, minWidth: 0 }}>{label}</Typography>
       </Box>
       <Box sx={{ ...bodyBaseSx, ...(crest ? CREST_FOOT_SX : null), ...(active ? { bgcolor: tone, color: inkOn(tone) } : null), ...bodySx }}>
         {typeof value === 'string' || typeof value === 'number'
@@ -73,6 +90,24 @@ const bodyBaseSx = {
   position: 'relative',
   bgcolor: UI_COLORS.surfaceHeader,
 };
+
+// A drawn score: its drawing behind it (a layer of its own), its name and
+// figures stacked on it, leaning and sunk as its place has it (the individual
+// transform properties, so a press still hops it).
+const DRAWN_SX = {
+  position: 'relative',
+  isolation: 'isolate',
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  minWidth: Math.round(STAT_TILE_SIZE * 0.8),
+  px: 0.25,
+  pb: 1.5,
+  transformOrigin: '50% 100%',
+};
+
+const DRAWN_CLICKABLE_SX = { ...PRESS_MOTION_SX, cursor: 'pointer' };
 
 // The crest's cut, its ink and its foot are shapes.js's (CREST).
 const crestSx = {

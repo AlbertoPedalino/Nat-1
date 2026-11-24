@@ -19,11 +19,14 @@ import { sheetResponsive } from '../layout/layout.js';
 import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
+import { useStyleShapes } from '../../../shared/ui/themeIds.js';
+import { drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
 
 export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
   const profSets = useProficiencySets();
   const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
   const activeConditions = sheet?.activeConditions || [];
+  const { drawing, figures } = useStyleShapes().abilities;
 
   return (
     <Panel icon={GAME_ICONS.abilityScores} title="Ability Scores" tone={PANEL_TONES.abilityScores} sx={{ height: '100%' }} bodySx={{ p: '0.45rem' }}>
@@ -32,8 +35,10 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
         // where the sheet has the width.
         display: 'grid', gridTemplateColumns: sheetResponsive(embedded, { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' }),
         gap: '0.6rem', minWidth: 0,
+        // Drawn scores lean: room between them and at the row's ends.
+        ...(drawsAbilities(drawing) ? DRAWN_ROW_SX : null),
       }}>
-        {ABILITIES.map(s => {
+        {ABILITIES.map((s, place) => {
           const val = getFinal(C, s);
           const mod = getAbilityCheckBonus(C, s);
           const shownMod = effectiveD20Modifier(mod, sheet?.exhaustionLevel);
@@ -66,24 +71,20 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
                 // in capitals: Str, not STR.
                 label={capitalize(s)}
                 crest
+                place={place}
                 clickable
                 bodySx={{ alignItems: 'stretch' }}
                 value={(
-                  <Box sx={splitSx}>
-                    <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: 'text.primary', lineHeight: LINE_HEIGHTS.none }}>
-                      {val}
-                    </Typography>
-                    <Box sx={modifierCellSx}>
-                      <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: UI_COLORS.accentText, lineHeight: LINE_HEIGHTS.none }}>
-                        {signed(shownMod)}
-                      </Typography>
-                      {visual ? (
-                        <Tooltip title={tooltipText}>
-                          <visual.Icon size={ICON_SIZES.xs} style={{ ...ROLL_FIGURE_MARK_STYLE, top: 2, right: 2, color: visual.color }} />
-                        </Tooltip>
-                      ) : null}
-                    </Box>
-                  </Box>
+                  <AbilityFigures
+                    layout={figures}
+                    score={val}
+                    modifier={signed(shownMod)}
+                    mark={visual ? (
+                      <Tooltip title={tooltipText}>
+                        <visual.Icon size={ICON_SIZES.xs} style={{ ...ROLL_FIGURE_MARK_STYLE, top: 2, right: 2, color: visual.color }} />
+                      </Tooltip>
+                    ) : null}
+                  />
                 )}
               />
             </RollModeArea>
@@ -93,6 +94,48 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
     </Panel>
   );
 }
+
+// A score and the modifier its check rolls, as the style lays them (shapes.js
+// abilities.figures): the score beside its modifier, two thirds and one
+// ('split'), or the modifier large over the score ('stacked'). `mark` is laid
+// on the modifier's corner (disadvantage).
+function AbilityFigures({ layout, score, modifier, mark }) {
+  if (layout === 'stacked') {
+    return (
+      <>
+        <Box sx={stackedModifierSx}>
+          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.display, color: 'text.primary', lineHeight: LINE_HEIGHTS.none }}>{modifier}</Typography>
+          {mark}
+        </Box>
+        <Typography component="div" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary', lineHeight: LINE_HEIGHTS.none }}>
+          score
+          <Box component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: UI_COLORS.secondaryText, ml: 0.5 }}>{score}</Box>
+        </Typography>
+      </>
+    );
+  }
+  return (
+    <Box sx={splitSx}>
+      <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.heading, color: 'text.primary', lineHeight: LINE_HEIGHTS.none }}>
+        {score}
+      </Typography>
+      <Box sx={modifierCellSx}>
+        <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.lead, color: UI_COLORS.accentText, lineHeight: LINE_HEIGHTS.none }}>
+          {modifier}
+        </Typography>
+        {mark}
+      </Box>
+    </Box>
+  );
+}
+
+// A row of drawn scores: they lean and sink, so room between them, at the
+// row's ends and under it.
+const DRAWN_ROW_SX = { columnGap: '1rem', rowGap: '1.25rem', px: 1, pt: 0.75, pb: 1, alignItems: 'end' };
+
+// The modifier of a stacked score: the figure its check rolls, with room
+// either side for the mark on its corner.
+const stackedModifierSx = { position: 'relative', px: 1.25, mt: 0.25, mb: 0.25 };
 
 // Score | modifier, two thirds and one, filling the tile's body.
 const splitSx = {

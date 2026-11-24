@@ -1,4 +1,4 @@
-import { Snackbar, Alert, AlertTitle, Portal } from '@mui/material';
+import { Box, Snackbar, Alert, AlertTitle, Portal } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { FONT_SIZES } from './fonts.js';
 import { APP_TOP_BAR_HEIGHT } from './appBar.js';
@@ -7,6 +7,10 @@ import { useIsPhone } from './useIsPhone.js';
 import { bubbleSx } from './bubble.js';
 import { TEXT_STYLES } from './textStyles.js';
 import BubbleHeader from './BubbleHeader.jsx';
+import { useStyleShapes } from './themeIds.js';
+import { drawsNotice, noticeFrame, noticeHang } from './noticeDrawing.js';
+import MeasuredDrawing from './MeasuredDrawing.jsx';
+import { PLAIN_LETTERING } from './shadows.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -36,9 +40,44 @@ const TOP_BELOW_BAR = `calc(${APP_TOP_BAR_HEIGHT} + 10px + env(safe-area-inset-t
 const MOBILE_ANCHOR = { vertical: 'top', horizontal: 'center' };
 const DESKTOP_ANCHOR = { vertical: 'top', horizontal: 'right' };
 
+// A notice the style draws in place of its bubble (shapes.js notice.drawing,
+// noticeDrawing.js): nothing of the bubble's, the drawing behind what it says,
+// lettered in the ink that reads on what is drawn; the drawing carries the
+// severity's colour and mark, so the alert's own icon is left out.
+const DRAWN_FRAME_SX = { position: 'relative', isolation: 'isolate' };
+// Its title printed plain in the ink that reads on what is drawn: an inked
+// outline and shadow would blot dark letters on paper.
+const DRAWN_TITLE_SX = { ...PLAIN_LETTERING, color: UI_COLORS.onPaper };
+const drawnSx = {
+  position: 'relative',
+  overflow: 'visible',
+  border: 'none',
+  backgroundColor: 'transparent',
+  boxShadow: 'none',
+  color: UI_COLORS.onPaper,
+  // A strip, long and low, with air round what is written on it.
+  minWidth: 320,
+  maxWidth: 440,
+  px: 3,
+  py: 1.5,
+  '& .MuiAlert-icon': { display: 'none' },
+  '& .MuiAlert-message': { flex: 1, minWidth: 0 },
+};
+
 export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
   const severity = SEVERITY_COLOR[toast?.severity] ? toast.severity : 'info';
   const color = SEVERITY_COLOR[severity];
+  const { drawing } = useStyleShapes().notice;
+  const drawn = drawsNotice(drawing);
+  // A drawn notice stands in a box of its own, the drawing behind it and to
+  // its size (the alert keeps its words in a box of their own, narrower),
+  // with room under it for what hangs from it.
+  const framed = (alert) => (drawn ? (
+    <Box sx={[DRAWN_FRAME_SX, { mb: `${noticeHang(drawing)}px` }]}>
+      <MeasuredDrawing draw={(w, h) => noticeFrame(drawing, w, h, severity)} />
+      {alert}
+    </Box>
+  ) : alert);
 
   // noSsr resolves the breakpoint from matchMedia on the first paint (same
   // pattern as CurrencyCoinBox). Phone: top centre; tablet and desktop: top right.
@@ -60,7 +99,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
         anchorOrigin={isMobile ? MOBILE_ANCHOR : DESKTOP_ANCHOR}
         sx={{ top: { xs: TOP_BELOW_BAR, sm: TOP_BELOW_BAR } }}
       >
-        {toast ? (
+        {toast ? framed(
           <Alert
             severity={severity}
             variant="outlined"
@@ -72,21 +111,24 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               minWidth: 240,
               maxWidth: 360,
               // The style's bubble, its shadow in the notice's colour; no tail:
-              // a notice speaks from nothing on the screen.
-              ...bubbleSx({ tone: color, pop: false }),
-              position: 'relative',
-              overflow: 'visible',
-              color: UI_COLORS.textPrimary,
-              '& .MuiAlert-icon': { color },
+              // a notice speaks from nothing on the screen. Or what the style
+              // draws in its place, with room under it for what hangs from it.
+              ...(drawn ? drawnSx : {
+                ...bubbleSx({ tone: color, pop: false }),
+                position: 'relative',
+                overflow: 'visible',
+                color: UI_COLORS.textPrimary,
+                '& .MuiAlert-icon': { color },
+              }),
             }}
           >
             <BubbleHeader onClose={onClose}>
-              <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25 }}>
+              <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25, ...(drawn ? DRAWN_TITLE_SX : null) }}>
                 {SEVERITY_SHOUT[severity]}
               </AlertTitle>
             </BubbleHeader>
             {toast.msg}
-          </Alert>
+          </Alert>,
         ) : undefined}
       </Snackbar>
     </Portal>

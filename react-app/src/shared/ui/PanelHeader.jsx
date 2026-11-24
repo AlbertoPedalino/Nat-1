@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { UI_COLORS, panelScreentone } from './colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { ONE_LINE_SX, TEXT_STYLES } from './textStyles.js';
-import { SURFACES } from './surfaces.js';
+import { SURFACES, surfaceFinish } from './surfaces.js';
 import { ICON_SIZES } from './iconSizes.js';
 import { INK_SOLID, PLAIN_LETTERING, inkLettering } from './shadows.js';
 import { RIBBON, SEAL_RADIUS } from './shapes.js';
@@ -175,6 +175,8 @@ export const panelFrameSx = {
   // The style's frame (shapes.js panel.frame, frameWidth), scaled with its ink.
   border: `calc(var(--gb-panel-frame-width) * var(--gb-ink-line)) var(--gb-panel-frame-style) ${UI_COLORS.edge}`,
   boxShadow: 'var(--gb-panel-shadow)',
+  // Shaded as the style lights a main panel (surfaces.js SURFACE_FINISHES).
+  backgroundImage: surfaceFinish('panel'),
   // What is in it kept inside its frame; or let past it where the style grips
   // the panel (shapes.js panel.grip), the drawing reaching over its edges.
   // Either way the panel shrinks in a row or a column as a clipped one does.

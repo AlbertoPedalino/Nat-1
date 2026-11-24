@@ -17,7 +17,97 @@
 // in CSS (color-mix) when it is given a variable. What cannot read CSS (a
 // canvas, a picture drawn as a data URL, a colour saved in data) takes the
 // palette's hexes through resolveColors / storedColor.
+// The colours of meaning: each says what a thing is (a class, a feat, fire,
+// a rare item, a tier) wherever it is shown, apart from every interface role
+// even where a hex happens to match one. Named where they are used
+// (entityColors.js ENTITY_COLORS, ACTION_COLORS…, itemRarity.js, the theme's
+// tiers), kept here as roles so they are one hex each and every palette
+// carries them: the same in all of them, unless a palette fades them into its
+// own light (litPalette: noir's faded inks).
+export const MEANING_COLORS = Object.freeze({
+  // What an entity is.
+  entityClass: '#d7ad52',
+  entitySubclass: '#70b7a6',
+  entitySpecies: '#b58fd9',
+  entityBackground: '#d69245',
+  entityFeat: '#de675f',
+  entitySkill: '#58b879',
+  entityTool: '#4d95d6',
+  entityLanguage: '#8ecae6',
+  // Everything an item is, and its attunement.
+  item: '#a23b4d',
+  // What an action costs: an action, a bonus action, a reaction, none.
+  actionMain: '#22c7e0',
+  actionBonus: '#8fd14f',
+  actionReaction: '#c46fd9',
+  actionOther: '#9aa5b1',
+  // A spell's tags.
+  spellConcentration: '#e07a9e',
+  spellRitual: '#58b879',
+  // A damage type; the physical ones share one stone.
+  damageAcid: '#cde04a',
+  damageCold: '#86d4ff',
+  damageFire: '#ff7a2a',
+  damageForce: '#d46fd0',
+  damageLightning: '#a9c4ff',
+  damageNecrotic: '#9a6ad8',
+  damagePoison: '#7cc444',
+  damagePsychic: '#e07ab8',
+  damageRadiant: '#ffd86a',
+  damageThunder: '#4fb3bf',
+  damagePhysical: '#b3a58a',
+  // A fact on an action's chip: neutral, good, bad, an active mastery.
+  factNeutral: '#a7b1bd',
+  factGood: '#a8d8b9',
+  factBad: '#e7a6a1',
+  factMastery: '#d7c37a',
+  // A roll button: a malus baked into an attack, damage, healing, a utility roll.
+  rollMalus: '#de675f',
+  rollDamage: '#ff6b35',
+  rollHeal: '#58b879',
+  rollUtility: '#4d95d6',
+  // A magic item's rarity, and the GM board's "no rarity".
+  rarityArtifact: '#ff6fb5',
+  rarityLegendary: '#ff9a3c',
+  rarityVeryRare: '#c38cff',
+  rarityRare: '#5aa9ff',
+  rarityUncommon: '#5fd48a',
+  rarityCommon: '#d6cdc1',
+  rarityNone: '#7a6040',
+  // A treasure tier: its edge, its lettering and its dimmed edge.
+  tier1Edge: '#c04040',
+  tier1: '#ff8080',
+  tier1Dim: '#8b3030',
+  tier2Edge: '#c07030',
+  tier2: '#ffb060',
+  tier2Dim: '#7a5530',
+  tier3Edge: '#b0a030',
+  tier3: '#ffe060',
+  tier3Dim: '#7a7030',
+  tier4Edge: '#40a0a0',
+  tier4: '#a0ffff',
+  tier4Dim: '#507878',
+});
+
+// A palette for a style lit rather than drawn (shapes.js `light`), of `mode`
+// (dark or light). Its `edge` is no ink but a hairline, part of the way from
+// its surface to its lettering (further on a light page, where a line a
+// shade off the paper is lost); `hairline: false` keeps the palette's own (a
+// lit line: neon's cyan). Its colours of meaning are faded `fade` of the way
+// to its quiet text (textMuted): inks that have lost their brightness, still
+// told apart, in a palette that keeps a bright colour of its own.
+const HAIRLINE = Object.freeze({ dark: 0.17, light: 0.45 });
+function litPalette(colors, { mode, fade = 0, hairline = true }) {
+  const between = (from, to, share) => `#${mixedChannels(from, to, share).map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+  return Object.freeze({
+    ...colors,
+    ...(hairline ? { edge: between(colors.surface, colors.textPrimary, HAIRLINE[mode]) } : null),
+    ...Object.fromEntries(Object.keys(MEANING_COLORS).map((role) => [role, between(colors[role], colors.textMuted, fade)])),
+  });
+}
+
 const COMIC_DARK = Object.freeze({
+  ...MEANING_COLORS,
   // Accent: the interface's one highlight colour (sunflower), its text and line
   // tones, and the ink written on a filled accent.
   accent: '#ffc83d',
@@ -1310,60 +1400,63 @@ const DAYLIGHT_LIGHT = Object.freeze({
   pcToken: '#006f8a',
 });
 
-// The war style's dark palette, the trench: olive drab in the mud, khaki
-// lettering, blood red for what matters, brass.
+// The war style's dark palette, the trench: a dugout at night. The mud nearly
+// black, olive only where the light reaches (the style's light shades it,
+// shapes.js WAR.light), lettered in ash and bone; dried blood for what
+// matters, the one colour; `edge` no ink but a hairline of the mud's olive;
+// every other tone gone dull, as under smoke (2026-11-24; olive drab in black
+// ink before).
 const TRENCH_DARK = Object.freeze({
   ...COMIC_DARK,
-  accent: '#d32f2f',
-  accentText: '#e06d6d',
-  accentHighlight: '#edacac',
-  accentMuted: '#942121',
-  accentPlain: '#e06d6d',
+  accent: '#bf2a22',
+  accentText: '#e0766a',
+  accentHighlight: '#e8b3a8',
+  accentMuted: '#7c1b16',
+  accentPlain: '#e0766a',
   onAccent: '#ffffff',
-  textPrimary: '#ecebd8',
-  textSecondary: '#b4b4a6',
-  textMuted: '#909183',
-  textFaint: '#6a6d5f',
-  outline: '#595c50',
-  surfaceRaised: '#242920',
-  bubble: '#41453d',
-  surfaceHeader: '#20251b',
-  surface: '#1a1f15',
-  surfaceDeep: '#161b12',
-  page: '#0f120b',
-  surfaceSunken: '#0c0e08',
-  surfaceDarkest: '#090a06',
-  edge: '#070805',
+  textPrimary: '#dddcc9',
+  textSecondary: '#afb0a0',
+  textMuted: '#8c8e7f',
+  textFaint: '#5f6255',
+  outline: '#4d5144',
+  surfaceRaised: '#1b2016',
+  bubble: '#33382c',
+  surfaceHeader: '#151911',
+  surface: '#11140d',
+  surfaceDeep: '#0d100a',
+  page: '#080a06',
+  surfaceSunken: '#070905',
+  surfaceDarkest: '#040503',
   onFill: '#070805',
-  pageDrawing: '#242920',
-  pageLine: '#070805',
-  ruleEmphasis: '#d8c27a',
-  armor: '#a3ab90',
-  dangerStrong: '#ff4830',
-  danger: '#ff5a3c',
-  dangerText: '#ff9480',
-  dangerMuted: '#e17e66',
-  dangerDeep: '#993624',
-  dangerSurface: '#311c12',
-  warning: '#e8b04a',
-  warningStrong: '#ef9646',
-  warningText: '#f0cc89',
-  penalty: '#e8b04a',
-  penaltyText: '#f0cc89',
-  success: '#8fbf5a',
-  successText: '#b6d594',
-  secondary: '#b5c96a',
-  secondaryStrong: '#91a155',
-  secondaryText: '#cbd997',
+  pageDrawing: '#1b2016',
+  pageLine: '#040503',
+  ruleEmphasis: '#cdb97a',
+  armor: '#9ba28b',
+  dangerStrong: '#f04a32',
+  danger: '#e9553b',
+  dangerText: '#f59582',
+  dangerMuted: '#c97a66',
+  dangerDeep: '#8c2f20',
+  dangerSurface: '#2a1710',
+  warning: '#cfa04c',
+  warningStrong: '#d58a44',
+  warningText: '#e3c489',
+  penalty: '#cfa04c',
+  penaltyText: '#e3c489',
+  success: '#86a862',
+  successText: '#b0c998',
+  secondary: '#a9b574',
+  secondaryStrong: '#8a955c',
+  secondaryText: '#c3cc9a',
   onSecondary: '#1b1e10',
-  info: '#8fb0c8',
-  infoText: '#b6ccdb',
-  spell: '#b08ad8',
-  reference: '#e3dcc0',
+  info: '#8aa3b3',
+  infoText: '#b3c5d0',
+  spell: '#9d87b8',
+  reference: '#d9d2b8',
   paper: '#e6dcbc',
   paperShade: '#d4caad',
   onPaper: '#2a2410',
-  pcToken: '#8fb0c8',
+  pcToken: '#8aa3b3',
 });
 
 // The war style's light palette, the dossier: pale khaki forms on an olive
@@ -1389,7 +1482,6 @@ const DOSSIER_LIGHT = Object.freeze({
   page: '#a9b08a',
   surfaceSunken: '#cfd3b9',
   surfaceDarkest: '#9fa582',
-  edge: '#14160d',
   onFill: '#14160d',
   pageDrawing: '#c8cdb1',
   pageLine: '#989e7c',
@@ -1536,36 +1628,39 @@ const NEWSPRINT_LIGHT = Object.freeze({
   pcToken: '#1452b8',
 });
 
-// The noir style's dark palette, midnight: a detective's desk at night. A
-// dark walnut desk, black files on it lettered in cream, manila folders for
-// the bars and the badges, yellowed typing paper for the bubbles, black ink
-// for every line and shadow, a rubber stamp's red the one bright colour; the
-// tones faded inks, so the panels are still told apart (2026-11-19).
+// The noir style's dark palette, midnight: a detective's office at night,
+// under a tungsten lamp. The room nearly black and warm, the surfaces rising
+// out of it a shade at a time (the style's light shades them, shapes.js
+// NOIR.light), lettered in the lamp's cream; the lamp's amber the accent, and
+// its pale light (`accentHighlight`) what the style lights with; `edge` no
+// ink but a hairline a shade off the dark; yellowed typing paper for the
+// bubbles, a rubber stamp's red the one bright colour; the tones faded inks,
+// so the panels are still told apart (2026-11-24; a sepia desk in black ink
+// before).
 const MIDNIGHT_DARK = Object.freeze({
   ...COMIC_DARK,
-  accent: '#dcbd78',
-  accentText: '#ecd39a',
-  accentHighlight: '#f6e7c2',
-  accentMuted: '#a88a4e',
-  accentPlain: '#e2c482',
-  onAccent: '#120f0b',
-  textPrimary: '#f4ecda',
-  textSecondary: '#d4c9b1',
-  textMuted: '#b0a58e',
-  textFaint: '#6e6556',
-  outline: '#5a5144',
-  surfaceRaised: '#1d1915',
-  bubble: '#262119',
-  surfaceHeader: '#1a1612',
-  surface: '#13110e',
-  surfaceDeep: '#0f0d0b',
-  page: '#2e261d',
-  surfaceSunken: '#0c0a08',
-  surfaceDarkest: '#080706',
-  edge: '#000000',
-  onFill: '#000000',
-  pageDrawing: '#3a3026',
-  pageLine: '#000000',
+  accent: '#e2a94a',
+  accentText: '#eec47e',
+  accentHighlight: '#f7e2b2',
+  accentMuted: '#a67b33',
+  accentPlain: '#e6b35c',
+  onAccent: '#150e05',
+  textPrimary: '#f1e6cf',
+  textSecondary: '#d0c3a7',
+  textMuted: '#a89b7e',
+  textFaint: '#6c604b',
+  outline: '#5c4c36',
+  surfaceRaised: '#261d13',
+  bubble: '#32271a',
+  surfaceHeader: '#1e1710',
+  surface: '#19130d',
+  surfaceDeep: '#130e09',
+  page: '#0d0a07',
+  surfaceSunken: '#0a0705',
+  surfaceDarkest: '#070504',
+  onFill: '#150e05',
+  pageDrawing: '#1c150d',
+  pageLine: '#070504',
   ruleEmphasis: '#f0dfb4',
   armor: '#c4c0b6',
   dangerStrong: '#e5372d',
@@ -1591,7 +1686,7 @@ const MIDNIGHT_DARK = Object.freeze({
   reference: '#f1e8d4',
   paper: '#efe4c8',
   paperShade: '#d8bf86',
-  onPaper: '#120f0b',
+  onPaper: '#150e05',
   pcToken: '#a8b9c6',
 });
 
@@ -1619,7 +1714,6 @@ const CASE_FILE_LIGHT = Object.freeze({
   page: '#b99a63',
   surfaceSunken: '#e8dcc0',
   surfaceDarkest: '#9c7f4c',
-  edge: '#0f0c08',
   onFill: '#0f0c08',
   pageDrawing: '#c6a972',
   pageLine: '#8d7244',
@@ -1661,35 +1755,47 @@ const CASE_FILE_LIGHT = Object.freeze({
 // and granite; fey in twilight and blossom; abyssal in abyss and asylum; pixel
 // in arcade and cartridge; cyberpunk in overdrive and daylight; superhero in
 // heroNight and newsprint; noir in midnight and caseFile).
+// How far each style lit rather than drawn fades its colours of meaning, in
+// both its palettes (litPalette): noir's and war's about half gone, so their
+// one bright colour is the one left; neon's signs and the megacity's barely
+// or not at all.
+const FADE = Object.freeze({
+  scifi: 0.15, astral: 0.25, pirate: 0.3, steampunk: 0.35, dwarven: 0.35, fey: 0.15, abyssal: 0.45, cyberpunk: 0, war: 0.5, noir: 0.45,
+});
+
+// A lit style's palette (litPalette) as PALETTES lists it; `hairline` false
+// keeps the palette's own edge (a lit line: neon's cyan).
+const lit = (id, mode, colors, fade, hairline = true) => Object.freeze({ id, mode, colors: litPalette(colors, { mode, fade, hairline }) });
+
 export const PALETTES = Object.freeze({
   dark: Object.freeze({ id: 'dark', mode: 'dark', colors: COMIC_DARK }),
   light: Object.freeze({ id: 'light', mode: 'light', colors: PARCHMENT_LIGHT }),
-  neon: Object.freeze({ id: 'neon', mode: 'dark', colors: NEON_DARK }),
-  neonLight: Object.freeze({ id: 'neonLight', mode: 'light', colors: NEON_LIGHT }),
-  trench: Object.freeze({ id: 'trench', mode: 'dark', colors: TRENCH_DARK }),
-  dossier: Object.freeze({ id: 'dossier', mode: 'light', colors: DOSSIER_LIGHT }),
+  neon: lit('neon', 'dark', NEON_DARK, FADE.scifi, false),
+  neonLight: lit('neonLight', 'light', NEON_LIGHT, FADE.scifi, false),
+  trench: lit('trench', 'dark', TRENCH_DARK, FADE.war),
+  dossier: lit('dossier', 'light', DOSSIER_LIGHT, FADE.war),
   dread: Object.freeze({ id: 'dread', mode: 'dark', colors: DREAD_DARK }),
   mist: Object.freeze({ id: 'mist', mode: 'light', colors: MIST_LIGHT }),
-  starlight: Object.freeze({ id: 'starlight', mode: 'dark', colors: STARLIGHT_DARK }),
-  vellum: Object.freeze({ id: 'vellum', mode: 'light', colors: VELLUM_LIGHT }),
-  deepSea: Object.freeze({ id: 'deepSea', mode: 'dark', colors: DEEP_SEA_DARK }),
-  seaChart: Object.freeze({ id: 'seaChart', mode: 'light', colors: SEA_CHART_LIGHT }),
-  foundry: Object.freeze({ id: 'foundry', mode: 'dark', colors: FOUNDRY_DARK }),
-  patent: Object.freeze({ id: 'patent', mode: 'light', colors: PATENT_LIGHT }),
-  forge: Object.freeze({ id: 'forge', mode: 'dark', colors: FORGE_DARK }),
-  granite: Object.freeze({ id: 'granite', mode: 'light', colors: GRANITE_LIGHT }),
-  twilight: Object.freeze({ id: 'twilight', mode: 'dark', colors: TWILIGHT_DARK }),
-  blossom: Object.freeze({ id: 'blossom', mode: 'light', colors: BLOSSOM_LIGHT }),
-  abyss: Object.freeze({ id: 'abyss', mode: 'dark', colors: ABYSS_DARK }),
-  asylum: Object.freeze({ id: 'asylum', mode: 'light', colors: ASYLUM_LIGHT }),
+  starlight: lit('starlight', 'dark', STARLIGHT_DARK, FADE.astral),
+  vellum: lit('vellum', 'light', VELLUM_LIGHT, FADE.astral),
+  deepSea: lit('deepSea', 'dark', DEEP_SEA_DARK, FADE.pirate),
+  seaChart: lit('seaChart', 'light', SEA_CHART_LIGHT, FADE.pirate),
+  foundry: lit('foundry', 'dark', FOUNDRY_DARK, FADE.steampunk),
+  patent: lit('patent', 'light', PATENT_LIGHT, FADE.steampunk),
+  forge: lit('forge', 'dark', FORGE_DARK, FADE.dwarven),
+  granite: lit('granite', 'light', GRANITE_LIGHT, FADE.dwarven),
+  twilight: lit('twilight', 'dark', TWILIGHT_DARK, FADE.fey),
+  blossom: lit('blossom', 'light', BLOSSOM_LIGHT, FADE.fey),
+  abyss: lit('abyss', 'dark', ABYSS_DARK, FADE.abyssal),
+  asylum: lit('asylum', 'light', ASYLUM_LIGHT, FADE.abyssal),
   arcade: Object.freeze({ id: 'arcade', mode: 'dark', colors: ARCADE_DARK }),
   cartridge: Object.freeze({ id: 'cartridge', mode: 'light', colors: CARTRIDGE_LIGHT }),
-  overdrive: Object.freeze({ id: 'overdrive', mode: 'dark', colors: OVERDRIVE_DARK }),
-  daylight: Object.freeze({ id: 'daylight', mode: 'light', colors: DAYLIGHT_LIGHT }),
+  overdrive: lit('overdrive', 'dark', OVERDRIVE_DARK, FADE.cyberpunk),
+  daylight: lit('daylight', 'light', DAYLIGHT_LIGHT, FADE.cyberpunk),
   heroNight: Object.freeze({ id: 'heroNight', mode: 'dark', colors: HERO_NIGHT_DARK }),
   newsprint: Object.freeze({ id: 'newsprint', mode: 'light', colors: NEWSPRINT_LIGHT }),
-  midnight: Object.freeze({ id: 'midnight', mode: 'dark', colors: MIDNIGHT_DARK }),
-  caseFile: Object.freeze({ id: 'caseFile', mode: 'light', colors: CASE_FILE_LIGHT }),
+  midnight: lit('midnight', 'dark', MIDNIGHT_DARK, FADE.noir),
+  caseFile: lit('caseFile', 'light', CASE_FILE_LIGHT, FADE.noir),
 });
 
 // The palette a colour saved in data is written in, and the one used where no
@@ -1836,10 +1942,7 @@ export function uiKeep(color, share, to) {
 // being `to`: how a die shades its faces between two greens.
 export function uiMix(from, to, amount) {
   if (HEX_COLOR.test(from) && HEX_COLOR.test(to)) {
-    const start = hexChannels(from);
-    const end = hexChannels(to);
-    const mixed = start.map((channel, index) => Math.round(channel + (end[index] - channel) * amount));
-    return `rgb(${mixed.join(', ')})`;
+    return `rgb(${mixedChannels(from, to, amount).join(', ')})`;
   }
   return `color-mix(in srgb, ${from}, ${to} ${percent(amount)}%)`;
 }
@@ -1854,6 +1957,12 @@ export function uiDarken(color, amount) {
   return uiMix(color, UI_COLORS.black, amount);
 }
 
+// Two hexes' channels, `amount` of the way from the first to the second.
+function mixedChannels(from, to, amount) {
+  const end = hexChannels(to);
+  return hexChannels(from).map((channel, index) => Math.round(channel + (end[index] - channel) * amount));
+}
+
 // A hex's red, green and blue, 0-255.
 export function hexChannels(hex) {
   const value = String(hex).replace('#', '');
@@ -1864,6 +1973,13 @@ export function hexChannels(hex) {
 // the palette's roles, so it reads differently in each palette.
 export function readsPalette(text) {
   return typeof text === 'string' && (text.includes('var(--gb-') || text.includes('color-mix('));
+}
+
+// Whether a value is a colour of the palette: a hex, a role, or a colour
+// worked from one. What is not (a theme path MUI reads, currentColor) cannot
+// be worked on by the recipes here, and is left as it is given.
+export function isPaletteColor(value) {
+  return isHexColor(value) || readsPalette(value);
 }
 
 // `text` with every role written in `paletteId`'s hexes and every color-mix
@@ -1943,6 +2059,6 @@ export function normalizeHexColor(value, fallback = null) {
 // hatches (shapes.js surface.screentone: `--gb-screentone-*`): a line of 0 is
 // no hatching at all.
 export function panelScreentone(tone = UI_COLORS.accent) {
-  const ink = HEX_COLOR.test(tone) || readsPalette(tone) ? tone : UI_COLORS.accent;
+  const ink = isPaletteColor(tone) ? tone : UI_COLORS.accent;
   return `repeating-linear-gradient(var(--gb-screentone-angle), ${uiAlpha(ink, OPACITY.soft)} 0 var(--gb-screentone-line), transparent var(--gb-screentone-line) var(--gb-screentone-gap))`;
 }

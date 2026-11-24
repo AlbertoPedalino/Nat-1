@@ -84,6 +84,21 @@ export function brushPath(points, size, options = {}) {
   return d.join(' ');
 }
 
+// How a brush stroke ends: thinning to nothing at both ends (`tapered`), cut
+// square at both (`blunt`), or square where it starts and thinning to its tip
+// (`pointed`: a stem, a feather).
+export const STROKE_ENDS = Object.freeze({
+  tapered: Object.freeze({ start: { taper: true, cap: true }, end: { taper: true, cap: true } }),
+  blunt: Object.freeze({ start: { taper: 0, cap: true }, end: { taper: 0, cap: true } }),
+  pointed: Object.freeze({ start: { taper: 0, cap: true }, end: { taper: true, cap: true } }),
+});
+
+// A brush stroke as a piece, in `fill` (a role): tapered unless told. In ink
+// (`inkStroke`), what a drawing is marked with: a crack, a cross, a seal's
+// mark.
+export const brushStroke = (points, size, fill, options = STROKE_ENDS.tapered) => ({ tag: 'path', d: brushPath(points, size, { thinning: 0.85, ...options }), fill });
+export const inkStroke = (points, size, options) => brushStroke(points, size, 'edge', options);
+
 // The bounds of a brush stroke's outline, for what must know how far it reaches.
 export function brushBounds(points, size, options = {}) {
   const stroke = getStroke(points, { ...BRUSH, size, ...options });
@@ -105,14 +120,10 @@ export function sketch(shape, ...args) {
     }));
 }
 
-// A torn edge from (x0, y) to (x1, y): a point every `step` px, each up to
-// `amp` px off the line; its two ends on it.
-export function raggedEdge(x0, x1, y, amp, step, random) {
-  const count = Math.max(2, Math.round(Math.abs(x1 - x0) / step));
-  return Array.from({ length: count + 1 }, (_, i) => [
-    x0 + ((x1 - x0) * i) / count,
-    y + (i === 0 || i === count ? 0 : (random() - 0.5) * 2 * amp),
-  ]);
+// A drawing's pieces with the box they are seen through: the w by h box they
+// were drawn to and `reach` px past it, for a shadow and the sketch's wander.
+export function drawingBox(pieces, w, h, reach = 6) {
+  return { pieces, box: { left: -reach, top: -reach, width: w + reach * 2, height: h + reach * 2 } };
 }
 
 // The worked-out drawings of one kind, kept per size: the same panel size

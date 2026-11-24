@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
 import { GEM_TONES, TRAINING_TONES } from './entityColors.js';
 import { focusRingSx } from './interactive.js';
-import { DURATIONS, GEM_MOTION, motionTime, motionShift, motionSquash } from './motion.js';
+import { DURATIONS, GEM_MOTION, GONE_WHEN_REDUCED, STILL_WHEN_REDUCED, motionTime, motionShift, motionSquash } from './motion.js';
 import { PARTICLE_GLYPHS } from './momentParticles.js';
 import { useStyleId } from './themeIds.js';
 import { styleShapes } from './shapes.js';
@@ -299,7 +299,7 @@ const MOTION_SX = Object.freeze({
       '60%': { transform: 'scale(1.22)' },
       '100%': { transform: 'scale(1)' },
     },
-    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+    ...STILL_WHEN_REDUCED,
   },
   spent: {
     animation: `gbGemSpent ${motionTime(GEM_MOTION.spent)} ease-out`,
@@ -309,7 +309,7 @@ const MOTION_SX = Object.freeze({
       '70%': { transform: 'scale(1.04) rotate(3deg)' },
       '100%': { transform: 'scale(1)' },
     },
-    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+    ...STILL_WHEN_REDUCED,
   },
 });
 
@@ -332,6 +332,6 @@ function sparkSx(px, dx, dy, index) {
       '0%': { transform: 'translate(0, 0) scale(0.3)', opacity: 1 },
       '100%': { transform: 'translate(var(--gem-dx), var(--gem-dy)) scale(1)', opacity: 0 },
     },
-    '@media (prefers-reduced-motion: reduce)': { display: 'none' },
+    ...GONE_WHEN_REDUCED,
   };
 }

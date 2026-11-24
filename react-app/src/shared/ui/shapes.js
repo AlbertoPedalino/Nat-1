@@ -82,6 +82,21 @@ const COMIC = deepFreeze({
     foot: '22%',
     side: '0%',
   },
+  // How the six ability scores stand (StatTile.jsx, AbilityScores.jsx): their
+  // `drawing`, each score a drawn thing of its own in place of the crest's cut
+  // (abilityDrawing.js: 'headstones'; 'none' for the crest), and their
+  // `figures`: the score beside the modifier its check rolls ('split'), or
+  // the modifier large over the score ('stacked').
+  abilities: { drawing: 'none', figures: 'split' },
+  // What a roll's toast is written on (DiceToast.jsx): the style's speech
+  // bubble (`drawing: 'none'`), or one drawn thing in its place
+  // (toastDrawing.js: 'tombstone'), which shows a natural 20 and a natural 1
+  // its own way.
+  rollToast: { drawing: 'none' },
+  // What an app notice is written on (AppToast.jsx): the style's speech bubble
+  // (`drawing: 'none'`), or one drawn thing in its place (noticeDrawing.js:
+  // 'sealed'), in the notice's colour and with its mark.
+  notice: { drawing: 'none' },
   // A tab is a notebook's bookmark: rounded at the top, open at the foot where
   // it stands on its bar's ruled line; the open one rises by `rise` px. `gap`
   // spaces the bookmarks.
@@ -199,6 +214,19 @@ const COMIC = deepFreeze({
   // `lettering` how strongly titles and figures are inked (an outline and a
   // solid shadow, shadows.js inkLettering): 1 the comic's, 0 printed plain.
   ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 1 },
+  // The light: how a style lights what the comic only inks, the comic's own
+  // none of it (flat colour inside a drawn line). `finish` how a panel, a
+  // box and what floats are shaded (surfaces.js SURFACE_FINISHES: 'flat' one
+  // colour, 'lamp' lit from the upper left, 'glow' from overhead, 'ember'
+  // from below, 'grime' dark in its corners); `page` the light thrown on the
+  // page behind every screen (surfaces.js PAGE_LIGHTS: 'none', 'vignette',
+  // 'blinds', 'smoke');
+  // `soft` how strongly a soft shadow falls under whatever casts the ink's
+  // solid one (a button, a card, a seal; 0: none), `bevel` how strongly its
+  // top edge catches the light and its foot falls in shade (0: none), `well`
+  // how deep what is sunken (a well, a field) is shaded inside (0: flat)
+  // (shadows.js lightShadowVariables).
+  light: { finish: 'flat', page: 'none', soft: 0, bevel: 0, well: 0 },
   // How a panel is built (PanelHeader.jsx): its title `bar` a filled strip
   // ('fill') or only a rule in the panel's tone under the title ('rule'),
   // `hatch` its screentone, the `frame` round it 'solid' or 'double' and
@@ -222,7 +250,7 @@ const COMIC = deepFreeze({
   // ('stickers', the game's things as stickers: stickerPaper.js; a scene
   // drawn behind every screen, pageScenes.js: 'graveyard', 'tropics'…;
   // 'none'); the
-  // page's `halftone` dots (`dot` px across, every `step` px; null for none);
+  // page's `halftone` dots (`dot` px across, every `step` px; a dot of 0 for none);
   // the `screentone` hatching of a panel's bar (`line` px of every `gap` px,
   // at `angle` degrees; a line of 0 for none); and how strongly a title's
   // cover `rays` shine (0–1).
@@ -238,10 +266,30 @@ const COMIC = deepFreeze({
   motion: { pace: 1, hop: 1 },
 });
 
+// What every style lit rather than drawn (its `light`) lays the same way,
+// having no ink to cut or to print with: named once, here.
+//
+// Its ink: a hairline for an edge, no solid shadow, its soft ones deep,
+// lettering printed plain; a style adds its own glow or depth.
+const LIT_INK = deepFreeze({ edge: 1, drop: 0, depth: 1.4, glow: 0, lettering: 0 });
+// Its bar: no notch and no cut, a rule under its title, its ends straight.
+const STRAIGHT_BAR = deepFreeze({ panel: { notch: 0, pad: 12 }, tile: { notch: 0, pad: 6 }, ends: '0,0 0,100' });
+// Its panel: a hairline frame (`double`: two) on a soft shadow, no hatching
+// and no flourish, its title drawn by its `banner` and, where a bar has none
+// (a tab bar, a tile), set over a rule in the panel's tone; its icon bare,
+// or on a `badge`; what `grip`s it.
+const litPanel = ({ banner, badge = 'bare', grip = 'none', double = false }) => ({
+  bar: 'rule', hatch: false, frame: double ? 'double' : 'solid', frameWidth: double ? 6 : 2, badge, float: 1,
+  flourish: COMIC.panel.flourish, grip, banner,
+});
+// Its page: `paper` behind every screen and nothing printed over it (no dots,
+// no hatching, no rays).
+const unprinted = (paper) => ({ paper, halftone: { dot: 0, step: 8 }, screentone: { line: 0, gap: 8, angle: 0 }, rays: 0 });
+
 // The sci-fi cut: a ship's console. Chamfered, near-square corners, thin lit
-// lines that glow instead of solid shadows, diamond gems, an octagonal crest,
-// scanlines over the bars and a grid of points over the page, quick moves
-// with no hop. Made to test that a style changing every piece carries.
+// lines that glow, panels lit from overhead, a HUD plate for a panel's head,
+// diamond gems, an octagonal crest, the planets behind every screen; quick
+// moves with no hop.
 const SCIFI = deepFreeze({
   // A console's panel: two corners cut, a lit line, corner brackets, scanlines, a glow, a leader line for a tail.
   bubble: {
@@ -257,12 +305,7 @@ const SCIFI = deepFreeze({
     tail: { kind: 'leader', fill: 'edge', line: 'edge' },
     decor: 'brackets',
   },
-  // Straight bars: no swallowtail.
-  ribbon: {
-    panel: { notch: 10, pad: 18 },
-    tile: { notch: 4, pad: 7 },
-    ends: '10,0 0,30 0,70 10,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '4px' },
   crest: {
     clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 86%, 88% 100%, 12% 100%, 0 86%, 0 14%)',
@@ -310,18 +353,14 @@ const SCIFI = deepFreeze({
   focusRing: { width: 2, gap: 2 },
   choiceMark: { size: 18 },
   dieGlyph: { path: 'M6 0.5 L11.5 6 L6 11.5 L0.5 6 Z' },
-  ink: { edge: 1, drop: 0, depth: 1.5, glow: 6, lettering: 1 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'hud',
-  },
+  abilities: COMIC.abilities,
+  rollToast: COMIC.rollToast,
+  notice: COMIC.notice,
+  ink: { ...LIT_INK, depth: 1.5, glow: 6, lettering: 1 },
+  light: { finish: 'glow', page: 'vignette', soft: 0.6, bevel: 0.4, well: 1 },
+  panel: litPanel({ banner: 'hud' }),
   radius: 3,
-  surface: {
-    paper: 'planets',
-    halftone: { dot: 1, step: 22 },
-    screentone: { line: 1, gap: 4, angle: 0 },
-    rays: 0.6,
-  },
+  surface: unprinted('planets'),
   motion: { pace: 0.7, hop: 0 },
 });
 
@@ -373,7 +412,17 @@ const GOTHIC = deepFreeze({
     ends: '10,0 0,50 10,100',
   },
   seal: { radius: '42% 58% 50% 50% / 60% 44% 56% 40%' },
-  // The ability scores' crest is a headstone: a round arch over a flat foot.
+  // The ability scores are six headstones in a row, drawn by hand, the
+  // modifier carved large over the score.
+  abilities: { drawing: 'headstones', figures: 'stacked' },
+  // A roll is carved on a tombstone: at a natural 20 roses climb its sides,
+  // each on its own stem, at a natural 1 it splits and a black hand claws up
+  // before it.
+  rollToast: { drawing: 'tombstone' },
+  // A notice is a strip of parchment, a seal of wax hanging from it.
+  notice: { drawing: 'sealed' },
+  // Their crest, where one is cut and not drawn, is a headstone too: a round
+  // arch over a flat foot.
   crest: {
     clip: 'polygon(0 30%, 1.7% 22.2%, 6.7% 15%, 14.6% 8.8%, 25% 4%, 37.1% 1%, 50% 0, 62.9% 1%, 75% 4%, 85.4% 8.8%, 93.3% 15%, 98.3% 22.2%, 100% 30%, 100% 100%, 0 100%)',
     edge: 3,
@@ -434,12 +483,15 @@ const GOTHIC = deepFreeze({
   motion: { pace: 1.15, hop: 0.8 },
 });
 
-// The war cut: a WWII dossier gone wrong. Straight labels like a crate's
-// stencil, round rubber-stamp seals, a rank chevron for the crest, folder
-// tabs, a military star, paper grain over the page and hatching over the
-// bars, heavy ink and slow, wary moves.
+// The war cut: a dugout at night, a war gone wrong. Lit, never drawn (as
+// noir, on the light instead of the ink): plates and canvas gone dirty, the
+// dark gathered in their corners, edged in a hairline of the mud's own olive;
+// no light on the page but what the smoke catches, over the ruins; a title
+// on a plate of rusted steel, its icon bare, no hatching, no rays; a dog tag for
+// the crest, cartridges and grenades for the gems, a taped field form for a
+// bubble; slow, wary moves, nothing hops.
 const WAR = deepFreeze({
-  // A typed field form on paper, taped on: square, ruled, askew, a paper corner for a tail.
+  // A typed field form on paper, taped on: square, ruled, lying straight, a paper corner for a tail.
   bubble: {
     fill: 'paper',
     ink: 'onPaper',
@@ -448,21 +500,17 @@ const WAR = deepFreeze({
     radius: '2px',
     border: { width: 0, style: 'solid', role: 'edge' },
     outline: { width: 0, offset: 0, role: 'edge' },
-    tilt: -1.6,
+    tilt: 0,
     shadow: 'ink',
     tail: { kind: 'paper', fill: 'paper', line: 'edge' },
     decor: 'tape',
   },
-  ribbon: {
-    panel: { notch: 12, pad: 20 },
-    tile: { notch: 5, pad: 7 },
-    ends: '10,0 0,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '50%' },
   crest: {
     // A dog tag: rounded corners, the chain's notch in its side.
     clip: 'polygon(8% 0, 92% 0, 97% 3%, 100% 10%, 100% 90%, 97% 97%, 92% 100%, 8% 100%, 3% 97%, 0 90%, 0 62%, 4% 58%, 4% 42%, 0 38%, 0 10%, 3% 3%)',
-    edge: 2,
+    edge: 1,
     foot: '0%',
     side: '2%',
   },
@@ -540,24 +588,24 @@ const WAR = deepFreeze({
   focusRing: { width: 3, gap: 2 },
   choiceMark: { size: 20 },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
-  ink: { edge: 2, drop: 1, depth: 1.2, glow: 0, lettering: 1 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'tape',
-  },
+  abilities: COMIC.abilities,
+  rollToast: COMIC.rollToast,
+  notice: COMIC.notice,
+  ink: { ...LIT_INK, depth: 1.5 },
+  // Dirty plate under the smoke: the dark in every corner, a worn edge that
+  // barely catches the light, whatever is sunken shaded deep.
+  light: { finish: 'grime', page: 'smoke', soft: 1, bevel: 0.5, well: 1 },
+  // Its title stencilled on a plate of rusted steel bolted across the panel's head.
+  panel: litPanel({ banner: 'plate' }),
   radius: 2,
-  surface: {
-    paper: 'ruins',
-    halftone: { dot: 0.8, step: 4 },
-    screentone: { line: 1, gap: 5, angle: 45 },
-    rays: 0.5,
-  },
-  motion: { pace: 1.2, hop: 0.4 },
+  surface: unprinted('ruins'),
+  motion: { pace: 1.2, hop: 0 },
 });
 
-// The astral cut: a wizard's tower under the stars. Fine swallowtails, moon
-// seals, an orb for the crest, glowing lines instead of solid shadows, stars,
-// moons and sparkles for the gems, stars over the page.
+// The astral cut: a wizard's tower under the stars. Glowing hairlines, panels
+// in the moon's light from overhead, a night band between two crescents for
+// a panel's head, moon seals, an orb for the crest, stars, moons and sparkles
+// for the gems, the moonrise behind every screen; nothing hops.
 const ASTRAL = deepFreeze({
   ...COMIC,
   // Night glass dusted with stars, a soft glow, three stars trailing for a tail.
@@ -597,16 +645,12 @@ const ASTRAL = deepFreeze({
       effect: { glyph: 'ember', mode: 'fall', count: 5, size: [8, 12], colors: ['accentText', 'spell'], look: 'glow' },
     },
   },
-  ribbon: {
-    panel: { notch: 0, pad: 14 },
-    tile: { notch: 0, pad: 4 },
-    ends: '0,0 0,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '50%' },
   crest: {
     // A plaque, its corners cut round inwards.
     clip: 'polygon(90% 0, 91.3% 8%, 95% 13.9%, 100% 16%, 100% 84%, 95% 86.1%, 91.3% 92%, 90% 100%, 10% 100%, 8.7% 92%, 5% 86.1%, 0 84%, 0 16%, 5% 13.9%, 8.7% 8%, 10% 0)',
-    edge: 2,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -654,23 +698,18 @@ const ASTRAL = deepFreeze({
   marker: { outline: 'M6 0.5 Q7 12.5 11.5 15 Q7 17.5 6 29.5 Q5 17.5 0.5 15 Q5 12.5 6 0.5 Z', glow: true },
   bookmarkMark: { width: 4, inset: 4, radius: '0 6px 6px 0' },
   paper: { corners: [1, 1, 1, 1] },
-  ink: { edge: 2, drop: 0, depth: 1.2, glow: 4, lettering: 0 },
-  panel: {
-    bar: 'rule', hatch: false, frame: 'double', frameWidth: 6, badge: 'bare', float: 1,
-    flourish: { kind: 'stars', width: 96, height: 16, at: 'right' }, grip: 'none', banner: 'moons',
-  },
+  ink: { ...LIT_INK, glow: 4 },
+  light: { finish: 'glow', page: 'vignette', soft: 1, bevel: 0.6, well: 1 },
+  panel: litPanel({ banner: 'moons', double: true }),
   radius: 12,
-  surface: {
-    paper: 'moonrise',
-    halftone: { dot: 1, step: 16 },
-    screentone: { line: 1, gap: 8, angle: 30 },
-    rays: 1,
-  },
-  motion: { pace: 1.1, hop: 0.6 },
+  surface: unprinted('moonrise'),
+  motion: { pace: 1.1, hop: 0 },
 });
 
-// The pirate cut: a ship's deck. Long pennants, doubloon seals, a wooden
-// sign for the crest, planks over the bars, a deck that rolls a little.
+// The pirate cut: a captain's cabin by lantern. Lit, never drawn: panels in
+// the lantern's light from the upper left, edged in a hairline, a parchment
+// scroll for a panel's head, the tropics behind every screen; its crest,
+// gems and marks its own, below; nothing hops.
 const PIRATE = deepFreeze({
   ...COMIC,
   // A torn scrap of a stained sea chart, in sepia ink, a torn strip for a tail.
@@ -682,7 +721,7 @@ const PIRATE = deepFreeze({
     radius: 'theme',
     border: { width: 0, style: 'solid', role: 'edge' },
     outline: { width: 0, offset: 0, role: 'edge' },
-    tilt: -1,
+    tilt: 0,
     shadow: 'drop',
     tail: { kind: 'torn', fill: 'paper', line: 'paper' },
     decor: 'none',
@@ -709,15 +748,11 @@ const PIRATE = deepFreeze({
       effect: { glyph: 'bubble', mode: 'rise', count: 8, size: [8, 16], colors: ['info'], look: 'soft' },
     },
   },
-  ribbon: {
-    panel: { notch: 16, pad: 24 },
-    tile: { notch: 6, pad: 7 },
-    ends: '10,0 5,7 1.3,25 0,50 1.3,75 5,93 10,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '50%' },
   crest: {
     clip: 'polygon(4% 0, 96% 0, 100% 10%, 98% 50%, 100% 90%, 96% 100%, 4% 100%, 0 90%, 2% 50%, 0 10%)',
-    edge: 3,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -759,25 +794,23 @@ const PIRATE = deepFreeze({
       shadowDrop: 6,
     },
   },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 5, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'scroll',
-  },
+  ink: LIT_INK,
+  light: { finish: 'lamp', page: 'vignette', soft: 1, bevel: 0.8, well: 1 },
+  // Its icon on a seal: bare, a pale drawing is lost on the banner's light ground.
+  panel: litPanel({ banner: 'scroll', badge: 'seal' }),
   ornament: { path: 'M1 0 L6 4.5 L11 0 L12 1 L7.5 6 L12 11 L11 12 L6 7.5 L1 12 L0 11 L4.5 6 L0 1 Z' },
   marker: { outline: 'M2 1 H10.5 V29 L6.2 23.5 L2 29 Z', lines: 'M2 1 V29' },
   paper: { corners: [1.5, 0.5, 2, 0.75] },
   radius: 6,
-  surface: {
-    paper: 'tropics',
-    halftone: { dot: 0.8, step: 6 },
-    screentone: { line: 2, gap: 9, angle: 0 },
-    rays: 0.8,
-  },
-  motion: { pace: 1, hop: 1.2 },
+  surface: unprinted('tropics'),
+  motion: { pace: 1, hop: 0 },
 });
 
-// The steampunk cut: a brass machine. Straight riveted plates, a hex nut for
-// the crest, gears, bulbs and nuts for the gems, pinstripes over the bars.
+// The steampunk cut: the lower city by its furnaces. Lit, never drawn: plates
+// warmed by a fire below, their heads in the dark, a double hairline frame,
+// blackened iron between two brass pipes for a panel's head, the foundries
+// behind every screen; its crest, gems and marks its own, below; nothing
+// hops.
 const STEAMPUNK = deepFreeze({
   ...COMIC,
   // A brass plate, bevelled and riveted, a bracket for a tail.
@@ -816,16 +849,12 @@ const STEAMPUNK = deepFreeze({
       effect: { glyph: 'nut', mode: 'fly', count: 6, size: [12, 16], colors: ['accent', 'textSecondary'], look: 'flat' },
     },
   },
-  ribbon: {
-    panel: { notch: 0, pad: 14 },
-    tile: { notch: 0, pad: 4 },
-    ends: '0,0 0,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '30%' },
   crest: {
     // A cartouche: a long plate pointed at each side.
     clip: 'polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%)',
-    edge: 3,
+    edge: 1,
     foot: '0%',
     side: '5%',
   },
@@ -869,27 +898,22 @@ const STEAMPUNK = deepFreeze({
     },
   },
   meterSegments: { bar: 12, piece: 6, smooth: 0 },
-  ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'double', frameWidth: 6, badge: 'seal', float: 1,
-    flourish: { kind: 'rivets', width: 10, height: 10, at: 'ends' }, grip: 'none', banner: 'undercity',
-  },
+  ink: LIT_INK,
+  light: { finish: 'ember', page: 'vignette', soft: 1, bevel: 1, well: 1 },
+  panel: litPanel({ banner: 'undercity', double: true }),
   ornament: { path: 'M4.6 1.8 L4.8 0.1 L7.2 0.1 L7.4 1.8 L8.9 2.7 L10.5 2 L11.7 4.1 L10.3 5.1 L10.3 6.9 L11.7 7.9 L10.5 10 L8.9 9.3 L7.4 10.2 L7.2 11.9 L4.8 11.9 L4.6 10.2 L3.1 9.3 L1.5 10 L0.3 7.9 L1.7 6.9 L1.7 5.1 L0.3 4.1 L1.5 2 L3.1 2.7 Z' },
   marker: { outline: 'M6 1 L11 6 V24 L6 29 L1 24 V6 Z', cap: 'M1 6 L6 1 L11 6 V8.5 H1 Z M1 21.5 H11 V24 L6 29 L1 24 Z', capFill: 'accent' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
   paper: { corners: [0.3, 0.3, 0.3, 0.3] },
   radius: 4,
-  surface: {
-    paper: 'foundries',
-    halftone: { dot: 0.6, step: 5 },
-    screentone: { line: 1, gap: 4, angle: 90 },
-    rays: 0.6,
-  },
-  motion: { pace: 1.1, hop: 0.6 },
+  surface: unprinted('foundries'),
+  motion: { pace: 1.1, hop: 0 },
 });
 
-// The dwarven cut: a hall carved in the mountain. Plain hewn bars, chipped
-// stone seals, a stone tablet for the crest, heavy ink, slow and heavy moves.
+// The dwarven cut: a hall by the forge. Lit, never drawn: stone warmed by the
+// fire below, edged in a hairline, a carved lintel for a panel's head, the
+// caverns behind every screen; its crest, gems and marks its own, below;
+// slow, nothing hops.
 const DWARVEN = deepFreeze({
   ...COMIC,
   // A carved slab, every corner chiselled, grained, a stone wedge for a tail.
@@ -928,15 +952,11 @@ const DWARVEN = deepFreeze({
       effect: { glyph: 'rock', mode: 'fall', count: 7, size: [8, 14], colors: ['textFaint', 'outline'], look: 'flat' },
     },
   },
-  ribbon: {
-    panel: { notch: 8, pad: 16 },
-    tile: { notch: 4, pad: 6 },
-    ends: '0,0 0,35 10,35 10,65 0,65 0,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '18% 26% 22% 14%' },
   crest: {
     clip: 'polygon(12% 0, 88% 0, 100% 14%, 100% 100%, 0 100%, 0 14%)',
-    edge: 4,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -983,24 +1003,18 @@ const DWARVEN = deepFreeze({
   marker: { outline: 'M1 3 L6 1 L11 3 V22 L6 29 L1 22 Z', lines: 'M6 6 V20 M6 9 L9 7 M6 13 L3 11' },
   bookmarkMark: { width: 5, inset: 3, radius: '0' },
   paper: { corners: [0.5, 0.25, 0.5, 0.25] },
-  ink: { edge: 3, drop: 1.2, depth: 1, glow: 0, lettering: 0 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 4, badge: 'bare', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'lintel',
-  },
+  ink: LIT_INK,
+  light: { finish: 'ember', page: 'vignette', soft: 1, bevel: 0.8, well: 1 },
+  panel: litPanel({ banner: 'lintel' }),
   radius: 3,
-  surface: {
-    paper: 'caverns',
-    halftone: { dot: 1.2, step: 9 },
-    screentone: { line: 3, gap: 10, angle: 0 },
-    rays: 0.7,
-  },
-  motion: { pace: 1.3, hop: 0.5 },
+  surface: unprinted('caverns'),
+  motion: { pace: 1.3, hop: 0 },
 });
 
-// The fey cut: a grove where the fair folk dance. Bars scalloped as petals,
-// petal seals, a scalloped arch of leaves for the crest, a soft glow,
-// flowers, mushrooms and leaves for the gems, bouncy moves.
+// The fey cut: a glade at twilight. Lit, never drawn: soft-cornered panels in
+// a light from overhead, hairlines with a faint glow, a long leaf for a
+// panel's head, the enchanted wood behind every screen; its crest, gems and
+// marks its own, below; nothing hops.
 const FEY = deepFreeze({
   ...COMIC,
   // A leaf-shaped petal, a soft glow, a curling tendril for a tail.
@@ -1039,16 +1053,11 @@ const FEY = deepFreeze({
       effect: { glyph: 'leaf', mode: 'fall', count: 6, size: [12, 18], colors: ['secondary', 'dangerDeep'], look: 'soft' },
     },
   },
-  ribbon: {
-    panel: { notch: 10, pad: 20 },
-    tile: { notch: 4, pad: 6 },
-    // Each end a pair of scallops, as petals.
-    ends: '10,0 3,12 0,25 3,38 10,50 3,62 0,75 3,88 10,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '50% 50% 50% 8%' },
   crest: {
     clip: 'polygon(0 100%, 0 12%, 4.2% 7.4%, 8.3% 3.5%, 12.5% 0.9%, 16.7% 0, 20.8% 0.9%, 25% 3.5%, 29.2% 7.4%, 33.3% 12%, 37.5% 7.4%, 41.7% 3.5%, 45.8% 0.9%, 50% 0, 54.2% 0.9%, 58.3% 3.5%, 62.5% 7.4%, 66.7% 12%, 70.8% 7.4%, 75% 3.5%, 79.2% 0.9%, 83.3% 0, 87.5% 0.9%, 91.7% 3.5%, 95.8% 7.4%, 100% 12%, 100% 100%)',
-    edge: 3,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -1090,26 +1099,19 @@ const FEY = deepFreeze({
   marker: { outline: 'M6 1 C12 9 11.5 21 6 29 C0.5 21 0 9 6 1 Z', lines: 'M6 4 V26 M6 12 L8.5 9.5 M6 17 L3.5 14.5' },
   bookmarkMark: { width: 5, inset: 4, radius: '0 8px 8px 0' },
   paper: { corners: [2, 1, 2, 1] },
-  ink: { edge: 2, drop: 0.8, depth: 1, glow: 2, lettering: 1 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'vine', width: 96, height: 22, at: 'right' }, grip: 'none', banner: 'leaf',
-  },
+  ink: { ...LIT_INK, depth: 1.2, glow: 2 },
+  light: { finish: 'glow', page: 'vignette', soft: 0.8, bevel: 0.5, well: 0.8 },
+  panel: litPanel({ banner: 'leaf' }),
   radius: 14,
-  surface: {
-    paper: 'enchanted',
-    halftone: { dot: 1.4, step: 14 },
-    screentone: { line: 1, gap: 6, angle: 60 },
-    rays: 1,
-  },
-  motion: { pace: 1.2, hop: 1.4 },
+  surface: unprinted('enchanted'),
+  motion: { pace: 1.2, hop: 0 },
 });
 
-// The abyssal cut: what sleeps in the drowned city, as a 1920s expedition
-// finds it. A tentacle gripping every panel (over its top edge, round its
-// corner and down its side), bars whose ends taper as one does, shapeless
-// seals, a warped slab for the crest, a faint sickly glow, eyes and tentacles
-// for the gems, slow and uneasy moves.
+// The abyssal cut: a wreck in the deep. Lit, never drawn: what little light
+// comes from above, falling off fast, hairlines with a sick glow, a wreck's
+// plank for a panel's head and a tentacle gripping it, the drowned depths
+// behind every screen; its crest, gems and marks its own, below; slow,
+// nothing hops.
 const ABYSSAL = deepFreeze({
   ...COMIC,
   // A wet blot of ink, its edge uneven, ink dripping off for a tail.
@@ -1148,16 +1150,11 @@ const ABYSSAL = deepFreeze({
       effect: { glyph: 'drop', mode: 'fall', count: 6, size: [12, 18], colors: ['spell', 'surfaceDarkest'], look: 'soft' },
     },
   },
-  ribbon: {
-    panel: { notch: 12, pad: 22 },
-    tile: { notch: 5, pad: 7 },
-    // Each end tapering as a tentacle does.
-    ends: '10,0 7,14 4,30 1.5,46 0,55 1.5,66 4,78 7,90 10,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '58% 42% 63% 37% / 41% 56% 44% 59%' },
   crest: {
     clip: 'polygon(6% 4%, 30% 0, 52% 5%, 74% 0, 96% 6%, 100% 34%, 95% 62%, 100% 92%, 72% 100%, 48% 95%, 24% 100%, 2% 94%, 5% 64%, 0 34%)',
-    edge: 3,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -1201,19 +1198,12 @@ const ABYSSAL = deepFreeze({
   ornament: { path: 'M0 6 C3 1 9 1 12 6 C9 11 3 11 0 6 Z' },
   marker: { outline: 'M6 1 C11.5 10 11.5 20 6 29 C0.5 20 0.5 10 6 1 Z', pupil: 'M6 8 C7.3 12 7.3 18 6 22 C4.7 18 4.7 12 6 8 Z' },
   paper: { corners: [0.5, 2, 1, 1.5] },
-  ink: { edge: 2, drop: 0.6, depth: 1.4, glow: 3, lettering: 1 },
-  panel: {
-    bar: 'rule', hatch: false, frame: 'solid', frameWidth: 3, badge: 'seal', float: 1,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'tentacle', banner: 'plank',
-  },
+  ink: { ...LIT_INK, depth: 1.5, glow: 3 },
+  light: { finish: 'glow', page: 'vignette', soft: 1, bevel: 0.4, well: 1 },
+  panel: litPanel({ banner: 'plank', grip: 'tentacle' }),
   radius: 6,
-  surface: {
-    paper: 'depths',
-    halftone: { dot: 1, step: 11 },
-    screentone: { line: 1, gap: 5, angle: 15 },
-    rays: 0.4,
-  },
-  motion: { pace: 1.4, hop: 0.3 },
+  surface: unprinted('depths'),
+  motion: { pace: 1.4, hop: 0 },
 });
 
 // The pixel cut: an 8-bit cartridge. Square everything, stepped corners,
@@ -1327,10 +1317,10 @@ const PIXEL = deepFreeze({
   motion: { pace: 0.6, hop: 1 },
 });
 
-// The cyberpunk cut: a megacity's interface. The console's build cut harder:
-// bars and crests with their corners sliced off, data shards, energy bolts
-// and slanted marks for the gems, a glitch on the titles, scanlines, snappy
-// moves.
+// The cyberpunk cut: the megacity's signs. The sci-fi cut's lit lines, without
+// their glow: panels lit from overhead, a slanted sign plate in the full
+// accent for a panel's head, the megacity behind every screen; fast, nothing
+// hops.
 const CYBERPUNK = deepFreeze({
   ...SCIFI,
   // A slanted panel, its corners sliced, a lit bar down its side, a hazard stripe at its foot, an angular tab for a tail.
@@ -1369,16 +1359,11 @@ const CYBERPUNK = deepFreeze({
       effect: { glyph: 'virus', mode: 'pop', count: 8, size: [12, 18], colors: ['danger', 'secondary'], look: 'glow' },
     },
   },
-  ribbon: {
-    panel: { notch: 10, pad: 18 },
-    tile: { notch: 5, pad: 7 },
-    ends: '0,0 0,55 10,100',
-  },
   seal: { radius: '0 8px 0 8px' },
   crest: {
     // Two corners sliced off, as a cut plate of armour.
     clip: 'polygon(0 0, 84% 0, 100% 22%, 100% 100%, 16% 100%, 0 78%)',
-    edge: 2,
+    edge: 1,
     foot: '0%',
     side: '0%',
   },
@@ -1422,19 +1407,13 @@ const CYBERPUNK = deepFreeze({
   bookmarkMark: { width: 4, inset: 2, radius: '0' },
   paper: { corners: [0, 1.5, 0, 1.5] },
   dieGlyph: { path: 'M3 0.5 H11.5 V9 L9 11.5 H0.5 V3 Z' },
-  ink: { edge: 1.5, drop: 1, depth: 1, glow: 0, lettering: 1 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'bare', float: 0,
-    flourish: { kind: 'glitch', width: 84, height: 14, at: 'right' }, grip: 'none', banner: 'glitch',
-  },
+  ink: { ...LIT_INK, depth: 1.2 },
+  light: { finish: 'glow', page: 'vignette', soft: 0.8, bevel: 0.5, well: 1 },
+  // Its icon on a seal: bare, a pale drawing is lost on the banner's light ground.
+  panel: litPanel({ banner: 'glitch', badge: 'seal' }),
   radius: 2,
-  surface: {
-    paper: 'megacity',
-    halftone: { dot: 0.7, step: 4 },
-    screentone: { line: 1, gap: 3, angle: 0 },
-    rays: 0.5,
-  },
-  motion: { pace: 0.6, hop: 0.3 },
+  surface: unprinted('megacity'),
+  motion: { pace: 0.6, hop: 0 },
 });
 
 // The superhero cut: the comic one off the newsstand. Its ink, seals and
@@ -1518,27 +1497,30 @@ const SUPERHERO = deepFreeze({
   motion: { pace: 0.9, hop: 1.2 },
 });
 
-// The noir cut: a detective's case file on a rainy night. Square frames in
-// heavy black ink, hard shadows thrown off them, art-deco steps for the bars'
-// ends and the crest's foot, a manila case folder for a bar with a red stamp
-// on it, manila labels for the icons (no tone on them), venetian blinds'
-// shadows across the bars and the bubble, a case folder for a bubble,
-// film grain on the page, lettering typed and printed, never inked; poker
-// chips and keyholes for the gems, a spade for the ornament, a keyhole for a
-// card's mark; slow and still.
+// The noir cut: a detective's office at night, lit and never drawn. No ink
+// line and no solid shadow: square panels edged in a hairline a shade off
+// the dark, raised by a soft shadow and the light along their top edge,
+// shaded as a desk lamp lights them from the upper left; a street lamp's
+// light through venetian blinds on the page, under a film's grain; a title
+// in gold on a pane of door glass, its icon bare, no screentone, no rays; an
+// art-deco plaque for the crest, a case folder for a bubble, lettering typed
+// and printed, never inked; poker chips and keyholes for the gems, a spade
+// for the ornament, a keyhole for a card's mark; slow and still, nothing
+// hops. The first style built on the light instead of the ink (2026-11-24).
 const NOIR = deepFreeze({
   ...COMIC,
   // A manila case file folder, its labelled tab standing up at the left, the
-  // blinds' shadow across it; no tail, a folder points at nothing.
+  // blinds' shadow across it, lying straight; no tail, a folder points at
+  // nothing.
   bubble: {
     fill: 'paperShade',
     ink: 'onPaper',
     texture: 'blinds',
     frame: 'none',
     radius: '3px',
-    border: { width: 1.5, style: 'solid', role: 'edge' },
+    border: { width: 2, style: 'solid', role: 'edge' },
     outline: { width: 0, offset: 0, role: 'edge' },
-    tilt: 0.6,
+    tilt: 0,
     shadow: 'soft',
     tail: { kind: 'none', fill: 'paperShade', line: 'edge' },
     decor: 'folder',
@@ -1565,18 +1547,13 @@ const NOIR = deepFreeze({
       effect: { glyph: 'puff', mode: 'rise', count: 6, size: [20, 30], colors: ['textMuted', 'outline'], look: 'soft' },
     },
   },
-  ribbon: {
-    panel: { notch: 10, pad: 18 },
-    tile: { notch: 4, pad: 6 },
-    // Each end stepped out as an art-deco front.
-    ends: '6,0 6,20 3,20 3,40 0,40 0,60 3,60 3,80 6,80 6,100',
-  },
+  ribbon: STRAIGHT_BAR,
   seal: { radius: '3px' },
   // An art-deco plaque: square across its name's band, its foot stepped
-  // down to the middle.
+  // down to the middle, edged in the hairline.
   crest: {
     clip: 'polygon(0 0, 100% 0, 100% 86%, 82% 86%, 82% 93%, 66% 93%, 66% 100%, 34% 100%, 34% 93%, 18% 93%, 18% 86%, 0 86%)',
-    edge: 3,
+    edge: 1,
     foot: '14%',
     side: '0%',
   },
@@ -1601,20 +1578,16 @@ const NOIR = deepFreeze({
   marker: { outline: 'M6 2 C8.5 2 10 3.8 10 6 C10 7.6 9.2 8.8 8 9.5 L10 28 H2 L4 9.5 C2.8 8.8 2 7.6 2 6 C2 3.8 3.5 2 6 2 Z' },
   bookmarkMark: { width: 3, inset: 3, radius: '0' },
   paper: { corners: [0.2, 0.2, 0.2, 0.2] },
-  // Lettering printed plain, as typed and printed on a file, never inked.
-  ink: { edge: 2, drop: 1, depth: 1, glow: 0, lettering: 0 },
-  panel: {
-    bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'label', float: 0,
-    flourish: { kind: 'deco', width: 60, height: 14, at: 'right' }, grip: 'none', banner: 'casefile',
-  },
+  ink: LIT_INK,
+  // Lit, not drawn: the desk lamp on every surface, the blinds on the page,
+  // whatever is raised on a soft shadow with the light along its top edge,
+  // whatever is sunken shaded inside.
+  light: { finish: 'lamp', page: 'blinds', soft: 1, bevel: 1, well: 1 },
+  // Its title lettered in gold on a pane of door glass.
+  panel: litPanel({ banner: 'doorglass' }),
   radius: 3,
-  surface: {
-    paper: 'none',
-    halftone: { dot: 0.8, step: 3 },
-    screentone: { line: 5, gap: 11, angle: -28 },
-    rays: 0.7,
-  },
-  motion: { pace: 1.3, hop: 0.3 },
+  surface: unprinted('none'),
+  motion: { pace: 1.3, hop: 0 },
 });
 
 // The looks' styles the viewer can choose from (the "Style" of the settings'

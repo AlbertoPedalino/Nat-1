@@ -1,18 +1,13 @@
 import { useEffect } from 'react';
 import { LAYERS } from '../../ui/layers.js';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { resolveToastLayout } from './rollToastLayout.js';
-import DiceRow from './DiceRow.jsx';
-import { UI_COLORS } from '../../ui/colors.js';
-import { FONT_SIZES, LINE_HEIGHTS } from '../../ui/fonts.js';
-import { TEXT_STYLES } from '../../ui/textStyles.js';
 import { SHOUT_TILT, bubbleSx, bubbleTailSx } from '../../ui/bubble.js';
-import { bubbleTone } from '../../ui/bubbleLooks.js';
 import { useRollMoment } from '../../ui/rollMoment.js';
 import RollMomentEffect from '../../ui/RollMomentEffect.jsx';
 import { useWarmRolls } from './warmRolls.js';
-import TagChip from '../../ui/TagChip.jsx';
-import BubbleHeader from '../../ui/BubbleHeader.jsx';
+import DrawnToast, { useDrawnToast } from '../../ui/DrawnToast.jsx';
+import RollSaid from './RollSaid.jsx';
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is
@@ -30,10 +25,15 @@ const toastRootSx = {
 };
 
 
+// A toast the style draws in place of its bubble (DrawnToast.jsx): where it
+// stands.
+const drawnRootSx = { position: 'fixed', bottom: '1.6rem', right: '1.6rem', zIndex: LAYERS.diceToast, minWidth: 250, maxWidth: 330 };
+
 export default function DiceToast({ toast, onClose, hidden = false }) {
   // What a roll draws worked out ahead, so the first one after a page load
   // does not restyle the page as it shows (warmRolls.js).
   useWarmRolls();
+  const { kind: drawing, drawn: drawnToast } = useDrawnToast();
   const layout = toast ? resolveToastLayout(toast) : null;
   // Its colour, and a natural 20's or 1's moment (rollMoment.js).
   const drawn = useRollMoment(layout, SHOUT_TILT);
@@ -53,6 +53,12 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   // same throw re-rendered is still one.
   const seed = `${toast.timestamp || 0}:${layout.label}`;
 
+  const said = <RollSaid layout={layout} moment={drawn} seed={seed} rolledWith={toast.dice} onClose={onClose} />;
+
+  if (drawnToast) {
+    return <DrawnToast kind={drawing} moment={moment} seed={seed} sx={drawnRootSx}>{said}</DrawnToast>;
+  }
+
   return (
     <Box sx={{
       ...toastRootSx,
@@ -60,61 +66,7 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       ...drawn.bubbleSx,
     }}>
       <RollMomentEffect key={`moment:${seed}`} moment={moment} seed={seed} />
-      <BubbleHeader onClose={onClose}>
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: bubbleTone(layout.tone || UI_COLORS.textPrimary), mb: 0.25 }}>
-          {layout.label}
-        </Typography>
-      </BubbleHeader>
-
-      {drawn.label ? (
-        <Typography sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color: bubbleTone(drawn.labelColor), mb: 0.25 }}>
-          {drawn.label}
-        </Typography>
-      ) : null}
-
-      {layout.modeChip && (
-        <TagChip label={layout.modeChip.label} tone={layout.modeChip.tone} sx={{ mb: 0.25 }} />
-      )}
-
-      <DiceRow
-        // Keyed by the throw, not just seeded by it: rolling again while the
-        // toast is still up replaces its contents rather than remounting them,
-        // and a CSS animation that never remounts never plays again.
-        key={`dice:${seed}`}
-        dice={layout.dice}
-        modifier={layout.modifier}
-        modifierColor={layout.modifierColor && bubbleTone(layout.modifierColor)}
-        size={58}
-        seed={seed}
-        rolledWith={toast?.dice}
-        // The whole solid, however many faces it has: a toast shows one roll at
-        // a time, and this is where you actually look at what came up. A fistful
-        // of hundred-sided dice is thousands of separately composited planes, so
-        // a big handful still falls back to the face they landed on.
-        solid={layout.dice.length <= 3}
-      />
-
-      {layout.total != null && (
-        <Box sx={{ textAlign: 'center', my: 0.25 }}>
-          <Typography component="span" sx={{
-            // A roll's numbers are shouted, in the comic's lettering.
-            ...TEXT_STYLES.shout, lineHeight: LINE_HEIGHTS.none,
-            fontSize: (layout.isCrit || layout.isFail) ? FONT_SIZES.hero : FONT_SIZES.display,
-            // A natural 20 or 1 is written light on its burst, the ink outline
-            // keeping it legible on the gold as on the red.
-            color: layout.isCrit || layout.isFail ? UI_COLORS.textPrimary : bubbleTone(layout.totalColor),
-            ...(drawn.totalSx ?? { display: 'inline-block' }),
-          }}>
-            {layout.total}
-          </Typography>
-        </Box>
-      )}
-
-      {layout.total == null && layout.dice.length === 0 && layout.detail && (
-        <Typography sx={{ fontSize: FONT_SIZES.xl, color: UI_COLORS.textPrimary, mt: 0.25 }}>
-          {layout.detail}
-        </Typography>
-      )}
+      {said}
     </Box>
   );
 }

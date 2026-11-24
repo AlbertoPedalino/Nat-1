@@ -112,6 +112,100 @@ test("every style fills the ink's variables, the comic one at full strength", ()
   );
 });
 
+// The light is what a style lays where the comic only inks: every style
+// names a finish and a page light that exist, and fills every variable a
+// shadow or a surface reads (a shadow list with one unset is no shadow at
+// all); the comic lays none of it, so it is drawn as it always was.
+test('every style lights its surfaces from kinds that exist, the comic one not at all', async () => {
+  const { PAGE_LIGHT_KINDS, SURFACE_FINISH_KINDS, pageLightSx, surfaceVariables } = await import('../../../../src/shared/ui/surfaces.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, palettes, shapes: { light } }) => {
+    assert.ok(SURFACE_FINISH_KINDS.includes(light.finish), `${id} finish ${light.finish}`);
+    assert.ok(PAGE_LIGHT_KINDS.includes(light.page), `${id} page light ${light.page}`);
+    ['soft', 'bevel', 'well'].forEach((key) => assert.ok(light[key] >= 0 && light[key] <= 1, `${id} ${key}`));
+    Object.values(palettes).forEach((paletteId) => {
+      const filled = surfaceVariables(paletteId, id);
+      ['--gb-light-soft', '--gb-light-shade', '--gb-light-bevel', '--gb-light-well', '--gb-surface-finish-panel', '--gb-surface-finish-box']
+        .forEach((name) => assert.ok(filled[name], `${id} ${paletteId} ${name}`));
+    });
+  });
+  const comic = surfaceVariables('dark', 'comic');
+  assert.deepEqual(
+    [comic['--gb-light-soft'], comic['--gb-light-shade'], comic['--gb-light-bevel'], comic['--gb-light-well'], comic['--gb-surface-finish-panel'], comic['--gb-surface-finish-box']],
+    ['0', 'transparent', '0 0 transparent', 'initial', 'initial', 'initial'],
+  );
+  assert.equal(pageLightSx('none'), null);
+  assert.equal(comic['--gb-surface-page-fill'], undefined, 'the comic page keeps its own colour');
+  // A lit page is laid behind the app, so the page lets it through.
+  assert.equal(surfaceVariables('midnight', 'noir')['--gb-surface-page-fill'], 'transparent');
+});
+
+// Every role a drawing's pieces are coloured in (handDrawing.js pieces: their
+// fill and stroke, a group's children with them).
+function roles(pieces) {
+  return pieces.flatMap((piece) => [piece.fill, piece.stroke, ...(piece.children ? roles(piece.children) : [])]).filter((role) => role && role !== 'none');
+}
+
+// The ability scores are cut as a crest or drawn (abilityDrawing.js): every
+// style names a drawing that exists and a way to lay the figures, the comic
+// keeps its crest, and a drawing gives every place in the row a tile and a
+// stand, in the palette's roles.
+test('every style stands its ability scores from kinds that exist, the comic one on its crest', async () => {
+  const { ABILITY_DRAWING_KINDS, abilityPlace, abilityTile, drawsAbilities } = await import('../../../../src/shared/ui/abilityDrawing.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes: { abilities } }) => {
+    assert.ok(ABILITY_DRAWING_KINDS.includes(abilities.drawing), `${id} drawing ${abilities.drawing}`);
+    assert.ok(['split', 'stacked'].includes(abilities.figures), `${id} figures ${abilities.figures}`);
+  });
+  assert.deepEqual(styleShapes('comic').abilities, { drawing: 'none', figures: 'split' });
+  assert.equal(drawsAbilities('none'), false);
+  assert.equal(abilityTile('none', 80, 120, 0), null);
+  ABILITY_DRAWING_KINDS.filter(drawsAbilities).forEach((kind) => {
+    for (let place = 0; place < 6; place += 1) {
+      const { pieces, box } = abilityTile(kind, 80, 120, place);
+      assert.ok(pieces.length > 3 && box.width > 80, `${kind} ${place}`);
+      roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind} ${place}: ${role} is no palette role`));
+      const { tilt, sink, head } = abilityPlace(kind, place);
+      assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0, `${kind} ${place} stands`);
+    }
+  });
+});
+
+// A roll's toast is the style's bubble or one drawn thing (toastDrawing.js):
+// every style names a drawing that exists, the comic keeps its bubble, and a
+// drawing draws its frame at every moment and its hand in the palette's
+// roles.
+test("every style writes a roll's toast on a kind that exists, the comic one on its bubble", async () => {
+  const { TOAST_DRAWING_KINDS, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastHand, toastHead } = await import('../../../../src/shared/ui/toastDrawing.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes: { rollToast } }) => assert.ok(TOAST_DRAWING_KINDS.includes(rollToast.drawing), `${id} toast ${rollToast.drawing}`));
+  assert.deepEqual(styleShapes('comic').rollToast, { drawing: 'none' });
+  assert.equal(toastFrame('none', 280, 320), null);
+  TOAST_DRAWING_KINDS.filter(drawsToast).forEach((kind) => {
+    const plain = toastFrame(kind, 280, 320);
+    assert.ok(toastHead(kind) > 0 && plain.pieces.length > 5, kind);
+    assert.ok(toastFrame(kind, 280, 320, 'nat1').pieces.length > plain.pieces.length, `${kind} shows a natural 1`);
+    assert.ok(toastBlooms(kind).every(({ side, up, size }) => Math.abs(side) === 1 && up > 0 && up < 1 && size > 0), `${kind} blooms`);
+    [plain, toastHand(kind), toastClimbers(kind, 280, 320), ...toastBlooms(kind).map((_, index) => toastBloom(kind, index))].forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
+  });
+});
+
+// An app notice is the style's bubble or one drawn thing (noticeDrawing.js):
+// every style names a drawing that exists, the comic keeps its bubble, and a
+// drawing draws every severity in the palette's roles.
+test('every style writes an app notice on a kind that exists, the comic one on its bubble', async () => {
+  const { NOTICE_DRAWING_KINDS, NOTICE_SEVERITIES, drawsNotice, noticeFrame, noticeHang } = await import('../../../../src/shared/ui/noticeDrawing.js');
+  Object.values(SHAPE_STYLES).forEach(({ id, shapes: { notice } }) => assert.ok(NOTICE_DRAWING_KINDS.includes(notice.drawing), `${id} notice ${notice.drawing}`));
+  assert.deepEqual(styleShapes('comic').notice, { drawing: 'none' });
+  assert.equal(noticeFrame('none', 300, 70, 'info'), null);
+  assert.deepEqual([...NOTICE_SEVERITIES].sort(), ['error', 'info', 'success', 'warning']);
+  NOTICE_DRAWING_KINDS.filter(drawsNotice).forEach((kind) => {
+    assert.ok(noticeHang(kind) >= 0, kind);
+    NOTICE_SEVERITIES.forEach((severity) => {
+      const { pieces } = noticeFrame(kind, 300, 70, severity);
+      assert.ok(pieces.length > 5, `${kind} ${severity}`);
+      roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind} ${severity}: ${role} is no palette role`));
+    });
+  });
+});
+
 test('the comic style lays its page and hatching as before', async () => {
   const { surfaceVariables } = await import('../../../../src/shared/ui/surfaces.js');
   const page = surfaceVariables('dark', 'comic');
@@ -297,8 +391,8 @@ test("every style draws its speech bubble from kinds that exist, in the palette'
       Object.entries(look).forEach(([key, value]) => {
         assert.equal(typeof value, 'string', `${id} ${key}`);
         assert.ok(!value.includes('undefined'), `${id} ${key}`);
-        // Only the style's ink widths and falls are left to the page.
-        const left = (value.match(/var\(--gb-[a-z0-9-]+\)/g) || []).filter((name) => !/--gb-(ink-(drop|glow|line|depth)|bubble-tilt)\)/.test(name));
+        // Only the style's ink widths and falls, and its light, are left to the page.
+        const left = (value.match(/var\(--gb-[a-z0-9-]+\)/g) || []).filter((name) => !/--gb-(ink-(drop|glow|line|depth)|light-(soft|shade|bevel)|bubble-tilt)\)/.test(name));
         assert.deepEqual(left, [], `${id} ${paletteId} ${key}`);
       });
     });

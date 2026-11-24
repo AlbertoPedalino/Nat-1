@@ -1,7 +1,10 @@
-import { UI_COLORS, uiAlpha, OPACITY, washImage } from './colors.js';
+import { UI_COLORS, uiAlpha, OPACITY, paletteOf, washImage } from './colors.js';
 import { PAGE_SCENE_KINDS } from './pageScenes.js';
 import { VTT_COLORS } from '../vtt/colors.js';
-import { INK_EDGE, UI_SHADOWS, INK_SOLID, panelFloatShadow } from './shadows.js';
+import {
+  INK_EDGE, UI_SHADOWS, INK_SOLID, lightShadowVariables, panelFloatShadow, shadeShare, wellShadow,
+} from './shadows.js';
+import { dataPicture } from './svgPicture.js';
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
 import { cornerRadius } from './radius.js';
 import { styleShapes } from './shapes.js';
@@ -15,37 +18,154 @@ import { bannerReach } from './panelBanner.js';
 // faint halftone dots, `dot` px across every `step` px. Written on the page's
 // root with the palette's variables (ThemeChoiceProvider), as `--gb-surface-*`.
 export function surfaceVariables(paletteId, styleId) {
-  const { surface: { paper, halftone }, panel } = styleShapes(styleId);
+  const { surface: { paper, halftone }, panel, light } = styleShapes(styleId);
+  const { mode } = paletteOf(paletteId);
+  // No dots where the style prints none (a dot of 0).
+  const dots = halftone && halftone.dot > 0;
   return {
     ...panelVariables(panel),
-    ...pagePaper(paper, paletteId),
-    '--gb-surface-halftone': halftone
+    ...pagePaper(paper, paletteId, light.page),
+    ...lightShadowVariables(light, mode),
+    ...finishVariables(light.finish, mode),
+    '--gb-surface-halftone': dots
       ? `radial-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)} ${halftone.dot}px, transparent ${halftone.dot + 0.4}px)`
       : 'none',
-    '--gb-surface-halftone-size': halftone ? `${halftone.step}px ${halftone.step}px` : 'auto',
+    '--gb-surface-halftone-size': dots ? `${halftone.step}px ${halftone.step}px` : 'auto',
   };
 }
 
 // The page's drawings, as the style lays them (shapes.js surface.paper): the
 // comic's sticker paper (pictures painted per palette, stickerPaper.js), a
 // scene (pageScenes.js) or none.
-function pagePaper(paper, paletteId) {
+function pagePaper(paper, paletteId, pageLight) {
   if (paper === 'stickers') return { '--gb-surface-paper': stickerPaperImage(paletteId), '--gb-surface-paper-size': STICKER_PAPER_SIZE };
-  // A scene is laid once behind the whole app (theme.js): the page lets it
-  // through.
-  if (PAGE_SCENE_KINDS.includes(paper)) return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto', '--gb-surface-page-fill': 'transparent' };
-  return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto' };
+  // A scene, and the light a style throws on its page (PAGE_LIGHTS), are laid
+  // once behind the whole app (theme.js): the page lets them through.
+  const behind = PAGE_SCENE_KINDS.includes(paper) || pageLight !== 'none';
+  return { '--gb-surface-paper': 'none', '--gb-surface-paper-size': 'auto', ...(behind ? { '--gb-surface-page-fill': 'transparent' } : null) };
+}
+
+// How a style shades its surfaces (shapes.js light.finish), where the comic
+// lays one flat colour: the shading of a main panel (`panel`, panelFrameSx)
+// and of a box, a card or what floats (`box`), each a background image laid
+// over the surface's own colour, its shades as deep as the palette's mode
+// takes them (`shade`: a share). `flat` shades none.
+//   lamp: a desk lamp from the upper left — a pool of warm light in a panel's
+//   corner, its foot falling into shade; a box lit along its top.
+// A box lit along its top in `light`, its foot in shade: a finish's `box`
+// wherever the light comes from above.
+const litFromAbove = (light, shade) => `linear-gradient(${uiAlpha(light, OPACITY.wash)}, transparent 55%, ${uiAlpha(UI_COLORS.black, OPACITY.shade * shade)})`;
+
+const SURFACE_FINISHES = Object.freeze({
+  flat: null,
+  lamp: (shade) => ({
+    panel: [
+      `radial-gradient(120% 90% at 0% 0%, ${uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft)}, transparent 60%)`,
+      `linear-gradient(${uiAlpha(UI_COLORS.white, OPACITY.faint)}, transparent 30%, ${uiAlpha(UI_COLORS.black, OPACITY.line * shade)})`,
+    ].join(', '),
+    box: litFromAbove(UI_COLORS.white, shade),
+  }),
+  // glow: a cold light from overhead — a panel lit across its head, its foot
+  // falling into shade; a box lit along its top.
+  glow: (shade) => ({
+    panel: [
+      `radial-gradient(90% 70% at 50% 0%, ${uiAlpha(UI_COLORS.textPrimary, OPACITY.soft)}, transparent 70%)`,
+      `linear-gradient(transparent 35%, ${uiAlpha(UI_COLORS.black, OPACITY.line * shade)})`,
+    ].join(', '),
+    box: litFromAbove(UI_COLORS.textPrimary, shade),
+  }),
+  // ember: a fire below — a warm glow rising from a panel's foot, its head
+  // in the dark; a box warmed along its foot.
+  ember: (shade) => ({
+    panel: [
+      `radial-gradient(100% 60% at 50% 100%, ${uiAlpha(UI_COLORS.accent, OPACITY.tint)}, transparent 70%)`,
+      `linear-gradient(${uiAlpha(UI_COLORS.black, OPACITY.line * shade)}, transparent 45%)`,
+    ].join(', '),
+    box: `linear-gradient(${uiAlpha(UI_COLORS.black, OPACITY.shade * shade)}, transparent 55%, ${uiAlpha(UI_COLORS.accent, OPACITY.wash)})`,
+  }),
+  // grime: plate and canvas gone dirty — the dark gathered in a panel's
+  // corners, a cold light thin along its top; a box dark at its corners.
+  grime: (shade) => ({
+    panel: [
+      `radial-gradient(130% 115% at 50% 40%, transparent 52%, ${uiAlpha(UI_COLORS.black, OPACITY.strong * shade)})`,
+      `linear-gradient(${uiAlpha(UI_COLORS.textPrimary, OPACITY.wash)}, transparent 22%)`,
+    ].join(', '),
+    box: `radial-gradient(140% 135% at 50% 35%, transparent 48%, ${uiAlpha(UI_COLORS.black, OPACITY.edge * shade)})`,
+  }),
+});
+
+export const SURFACE_FINISH_KINDS = Object.freeze(Object.keys(SURFACE_FINISHES));
+
+// A finish as the variables the surfaces read (surfaceFinish). Unset
+// (`initial`) where the style lays flat colour, so a surface keeps whatever
+// background it had.
+function finishVariables(kind, mode) {
+  const finish = SURFACE_FINISHES[kind]?.(shadeShare(mode));
+  return {
+    '--gb-surface-finish-panel': finish ? finish.panel : 'initial',
+    '--gb-surface-finish-box': finish ? finish.box : 'initial',
+  };
+}
+
+// The style's shading of a surface (`panel` or `box`) as its background
+// image; `otherwise` where it shades none: what the element would have had
+// (MUI's own overlay on a raised Paper, by default).
+export function surfaceFinish(kind, otherwise = 'var(--Paper-overlay)') {
+  return `var(--gb-surface-finish-${kind}, ${otherwise})`;
+}
+
+// The light a style throws on its page (shapes.js light.page), behind every
+// screen: background images, the topmost first. `none` throws none.
+//   blinds: a street lamp through venetian blinds — slats of warm light
+//   slanting from the upper left, lost in the dark towards the corners, under
+//   a film's grain.
+const GRAIN = dataPicture('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180">'
+  + '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>'
+  + '<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0"/></filter>'
+  + '<rect width="100%" height="100%" filter="url(#n)" opacity=".12"/></svg>');
+// The page's corners lost in the dark, as deep as `depth` (an OPACITY step),
+// the middle left clear out to `clear` percent.
+const darkCorners = (clear, depth) => `radial-gradient(120% 95% at 50% 32%, transparent ${clear}%, ${uiAlpha(UI_COLORS.surfaceDarkest, depth)})`;
+
+const PAGE_LIGHTS = Object.freeze({
+  none: null,
+  // vignette: the page's corners lost in the dark, under a film's grain: a
+  // scene that keeps behind the panels.
+  vignette: [
+    darkCorners(34, OPACITY.heavy),
+    GRAIN,
+  ].join(', '),
+  // smoke: no light but what the smoke catches — banks of it drifting low
+  // across the page, its corners lost in the dark, under a film's grain.
+  smoke: [
+    darkCorners(28, OPACITY.veil),
+    GRAIN,
+    `radial-gradient(60% 34% at 16% 80%, ${uiAlpha(UI_COLORS.textMuted, OPACITY.fill)}, transparent 72%)`,
+    `radial-gradient(70% 28% at 84% 60%, ${uiAlpha(UI_COLORS.textMuted, OPACITY.tint)}, transparent 72%)`,
+    `radial-gradient(95% 24% at 46% 100%, ${uiAlpha(UI_COLORS.textMuted, OPACITY.shade)}, transparent 76%)`,
+  ].join(', '),
+  blinds: [
+    `radial-gradient(95% 85% at 22% 10%, transparent 12%, ${UI_COLORS.page} 80%)`,
+    GRAIN,
+    `repeating-linear-gradient(-24deg, ${uiAlpha(UI_COLORS.accentHighlight, OPACITY.soft)} 0 18px, transparent 18px 47px)`,
+  ].join(', '),
+});
+
+export const PAGE_LIGHT_KINDS = Object.freeze(Object.keys(PAGE_LIGHTS));
+
+// The page's light as the layer the theme lays behind the app (theme.js);
+// null where the style throws none.
+export function pageLightSx(kind) {
+  const light = PAGE_LIGHTS[kind];
+  if (!light) return null;
+  return { content: '""', position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', backgroundImage: light };
 }
 
 // The badge an icon stands on (shapes.js panel.badge): a seal in the panel's
-// tone with the ink on it, the drawing bare in the tone, or a label: a manila
-// label edged in ink, the icon printed on it in the paper's ink, and a stat
-// tile's name lettered in the text's ink, so the style shows no tone on them.
-// `title` is the ink a stat tile's name is lettered in (initial: its tone).
+// tone with the ink on it, or the drawing bare in the tone.
 const BADGES = Object.freeze({
-  seal: () => ({ fill: 'initial', ink: UI_COLORS.onFill, edge: INK_EDGE, shadow: UI_SHADOWS.box, title: 'initial' }),
-  bare: () => ({ fill: 'transparent', ink: 'initial', edge: 'none', shadow: 'none', title: 'initial' }),
-  label: () => ({ fill: UI_COLORS.paperShade, ink: UI_COLORS.onPaper, edge: INK_EDGE, shadow: UI_SHADOWS.box, title: UI_COLORS.textPrimary }),
+  seal: () => ({ fill: 'initial', ink: UI_COLORS.onFill, edge: INK_EDGE, shadow: UI_SHADOWS.box }),
+  bare: () => ({ fill: 'transparent', ink: 'initial', edge: 'none', shadow: 'none' }),
 });
 
 export const BADGE_KINDS = Object.freeze(Object.keys(BADGES));
@@ -64,12 +184,11 @@ function panelVariables(panel) {
     '--gb-panel-bar-paper': panel.bar === 'fill' ? UI_COLORS.surfaceHeader : 'transparent',
     '--gb-panel-bar-rule': panel.bar === 'rule' ? 'initial' : UI_COLORS.edge,
     '--gb-panel-bar-hatch': panel.hatch ? 'auto' : '0 0',
-    // The badge and a stat tile's name (BADGES).
+    // The badge (BADGES).
     '--gb-panel-badge-fill': badge.fill,
     '--gb-panel-badge-ink': badge.ink,
     '--gb-panel-badge-edge': badge.edge,
     '--gb-panel-badge-shadow': badge.shadow,
-    '--gb-panel-tile-title': badge.title,
     // A main panel keeps what is in it inside its frame, unless the style
     // draws past its edges (a grip, shapes.js panel.grip; a banner that
     // reaches out, panelBanner.js bannerReach)…
@@ -159,6 +278,8 @@ export const SURFACES = Object.freeze({
   // A raised box: a section, a card, a block of the sheet.
   panel: Object.freeze({
     bgcolor: 'background.paper',
+    // Shaded as the style lights its boxes (SURFACE_FINISHES).
+    backgroundImage: surfaceFinish('box'),
     border: INK_EDGE,
     borderRadius: 1,
     // Its solid shadow, and a soft one as the style floats its panels.
@@ -168,6 +289,7 @@ export const SURFACES = Object.freeze({
   // (interactive.js CARD_SX lights it under the cursor).
   card: Object.freeze({
     bgcolor: 'background.paper',
+    backgroundImage: surfaceFinish('box'),
     border: INK_EDGE,
     borderRadius: 1,
     boxShadow: UI_SHADOWS.box,
@@ -193,6 +315,8 @@ export const SURFACES = Object.freeze({
     bgcolor: UI_COLORS.surfaceSunken,
     border: INK_EDGE,
     borderRadius: 1,
+    // Shaded inside as deep as the style sinks its wells.
+    boxShadow: wellShadow('var(--Paper-shadow)'),
   }),
   // A light row or tile laid on the page: list entries, stat tiles.
   wash: Object.freeze({
@@ -234,7 +358,7 @@ export const SURFACES = Object.freeze({
   // keys, so the theme's overrides can take it as it is.
   floating: Object.freeze({
     backgroundColor: UI_COLORS.surfaceRaised,
-    backgroundImage: 'none',
+    backgroundImage: surfaceFinish('box', 'none'),
     border: INK_EDGE,
     boxShadow: UI_SHADOWS.box,
   }),

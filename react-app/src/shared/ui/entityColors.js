@@ -5,25 +5,28 @@ import { inkShadow } from './shadows.js';
 // Canonical color coding for game entity kinds, shared by builder and sheet.
 // Use these instead of hardcoding hex values when tagging an entity type.
 // These are colours of meaning, not of style: each says "class", "feat",
-// "fire"… and stays the same whatever the interface palette (UI_COLORS) is,
-// even where a value happens to match one of its roles. Something that is not
-// an entity (a heading, a neutral highlight) takes UI_COLORS.accentText.
+// "fire"… wherever it is shown, apart from every interface role even where a
+// value happens to match one. Their hexes are the palettes' (colors.js
+// MEANING_COLORS: one each, the same in every palette unless a palette fades
+// them into its own light); here each is named for what it means. Something
+// that is not an entity (a heading, a neutral highlight) takes
+// UI_COLORS.accentText.
 export const ENTITY_COLORS = {
-  class: '#d7ad52',
-  subclass: '#70b7a6',
-  species: '#b58fd9',
-  background: '#d69245',
-  feat: '#de675f',
-  skill: '#58b879',
-  tool: '#4d95d6',
-  language: '#8ecae6',
+  class: UI_COLORS.entityClass,
+  subclass: UI_COLORS.entitySubclass,
+  species: UI_COLORS.entitySpecies,
+  background: UI_COLORS.entityBackground,
+  feat: UI_COLORS.entityFeat,
+  skill: UI_COLORS.entitySkill,
+  tool: UI_COLORS.entityTool,
+  language: UI_COLORS.entityLanguage,
 };
 
 
 // Bordeaux accent for everything item/attunement related: item source chips on
 // spells and the attune button/attuned state. Items are not an entity kind, so
 // this lives apart from ENTITY_COLORS but follows the same "one hex" rule.
-export const ITEM_ATTUNEMENT = '#a23b4d';
+export const ITEM_ATTUNEMENT = UI_COLORS.item;
 
 // Dedicated accent for structured rich-text descriptions. Kept separate from
 // entity, action, spell-tag, and item-state colors so highlighted rules text
@@ -36,34 +39,34 @@ export const RICH_TEXT_ACCENT = UI_COLORS.ruleEmphasis;
 // reads as an entity. Shared by the Actions tab category bar and the spell
 // tab's cast-time chip, so a given action type looks identical everywhere.
 export const ACTION_COLORS = {
-  action: '#22c7e0',   // vivid electric cyan (kept clear of the muted subclass teal)
-  bonus: '#8fd14f',    // lime green: told apart from the action's cyan at a glance (user, 2026-11-13)
-  reaction: '#c46fd9', // orchid purple
-  special: '#9aa5b1',  // neutral slate: no-action / triggered features ("Other")
+  action: UI_COLORS.actionMain,       // vivid electric cyan (kept clear of the muted subclass teal)
+  bonus: UI_COLORS.actionBonus,       // lime green: told apart from the action's cyan at a glance (user, 2026-11-13)
+  reaction: UI_COLORS.actionReaction, // orchid purple
+  special: UI_COLORS.actionOther,     // neutral slate: no-action / triggered features ("Other")
 };
 
 // Spell-tag mini-chip accents (Concentration / Ritual) shown next to spell
 // names everywhere: sheet spell card, builder lists, picker dialogs and the
 // wizard spellbook. One home so the chip reads identically across all of them.
 export const SPELL_TAG_COLORS = {
-  concentration: '#e07a9e', // rose, kept clear of the species/choice violets
-  ritual: '#58b879',        // green
+  concentration: UI_COLORS.spellConcentration, // rose, kept clear of the species/choice violets
+  ritual: UI_COLORS.spellRitual,               // green
 };
 
 // One hue per damage type, for the sheet's Defenses chips (resistances and
 // immunities). Physical types share one stone tone; `all` covers "All damage".
-const PHYSICAL_DAMAGE_TONE = '#b3a58a';
+const PHYSICAL_DAMAGE_TONE = UI_COLORS.damagePhysical;
 export const DAMAGE_TYPE_COLORS = {
-  acid: '#cde04a',
-  cold: '#86d4ff',
-  fire: '#ff7a2a',
-  force: '#d46fd0',
-  lightning: '#a9c4ff',
-  necrotic: '#9a6ad8',
-  poison: '#7cc444',
-  psychic: '#e07ab8',
-  radiant: '#ffd86a',
-  thunder: '#4fb3bf',
+  acid: UI_COLORS.damageAcid,
+  cold: UI_COLORS.damageCold,
+  fire: UI_COLORS.damageFire,
+  force: UI_COLORS.damageForce,
+  lightning: UI_COLORS.damageLightning,
+  necrotic: UI_COLORS.damageNecrotic,
+  poison: UI_COLORS.damagePoison,
+  psychic: UI_COLORS.damagePsychic,
+  radiant: UI_COLORS.damageRadiant,
+  thunder: UI_COLORS.damageThunder,
   bludgeoning: PHYSICAL_DAMAGE_TONE,
   piercing: PHYSICAL_DAMAGE_TONE,
   slashing: PHYSICAL_DAMAGE_TONE,
@@ -84,10 +87,10 @@ export function damageTypeTone(label) {
 // (weapon hand, range, duration, save DC…), `positive`/`negative` = good/bad
 // status (Active vs Suppressed, proficient vs not), `mastery` = active mastery.
 export const CHIP_TONES = {
-  info: '#A7B1BD',
-  positive: '#A8D8B9',
-  negative: '#E7A6A1',
-  mastery: '#D7C37A',
+  info: UI_COLORS.factNeutral,
+  positive: UI_COLORS.factGood,
+  negative: UI_COLORS.factBad,
+  mastery: UI_COLORS.factMastery,
 };
 
 // Tones for the inline roll buttons on the sheet (attack, damage, heal, …).
@@ -96,11 +99,11 @@ export const CHIP_TONES = {
 // penalized roll reads like a negative status chip.
 export const ROLL_TONES = {
   attack: UI_COLORS.accent,
-  attackNotProficient: '#de675f',
+  attackNotProficient: UI_COLORS.rollMalus,
   attackDisadvantage: CHIP_TONES.negative,
-  damage: '#ff6b35',
-  heal: '#58b879',
-  utility: '#4d95d6',
+  damage: UI_COLORS.rollDamage,
+  heal: UI_COLORS.rollHeal,
+  utility: UI_COLORS.rollUtility,
   // The temporary hit points' own colour, as on their bar.
   tempHp: TEMP_HP_TONE,
 };

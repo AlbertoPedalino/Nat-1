@@ -26,7 +26,8 @@ test('a panel is gripped only where its style grips panels, and bannered as its 
   const banner = abyssal.find((svg) => svg.style.zIndex === '-1');
   expect(grip.style.pointerEvents).toBe('none');
   expect(grip.querySelectorAll('path').length).toBeGreaterThan(20);
-  expect(banner.querySelectorAll('path').length).toBeGreaterThan(5);
+  // The plank: its board, its grain and its barnacles, in clean shapes.
+  expect(banner.querySelectorAll('path, circle').length).toBeGreaterThan(5);
   const comic = drawings(panelIn('comic').container);
   expect(comic.map((svg) => svg.style.zIndex)).toEqual(['-1']);
 });

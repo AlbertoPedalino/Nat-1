@@ -1,7 +1,7 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { OPACITY, UI_COLORS } from '../../../shared/ui/colors.js';
-import { DURATIONS, motionTime } from '../../../shared/ui/motion.js';
+import { DURATIONS, STILL_WHEN_REDUCED, motionTime } from '../../../shared/ui/motion.js';
 import { inkPieceShadow, inkEdge } from '../../../shared/ui/shadows.js';
 import { chipSolidStyle } from '../../../shared/ui/entityColors.js';
 import { SEAL_RADIUS } from '../../../shared/ui/shapes.js';
@@ -329,7 +329,7 @@ export const turnActiveSx = {
     '0%, 100%': { boxShadow: `${turnRing}, 0 0 12px 3px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.strong)}` },
     '50%': { boxShadow: `${turnRing}, 0 0 26px 10px ${vttAlpha(VTT_COLORS.turnActive, OPACITY.veil)}` },
   },
-  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  ...STILL_WHEN_REDUCED,
 };
 
 export const deadBadgeSx = {

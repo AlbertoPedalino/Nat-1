@@ -1,14 +1,14 @@
 import { Box } from '@mui/material';
 import { FONT_SIZES, LINE_HEIGHTS } from './fonts.js';
 import { TEXT_STYLES } from './textStyles.js';
-import { OPACITY, normalizeHexColor } from './colors.js';
+import { OPACITY, isPaletteColor } from './colors.js';
 import { chipTintStyle } from './entityColors.js';
 
 // The badge's tint: the one chip tint (its colour washed over the raised
-// paper), its edge the full colour. A colour MUI cannot read (a theme path)
-// gets no wash.
+// paper), its edge the full colour. A colour that is not the palette's (a
+// theme path MUI reads) gets no wash.
 function tint(color) {
-  if (!normalizeHexColor(color)) return { borderColor: color, color };
+  if (!isPaletteColor(color)) return { borderColor: color, color };
   return chipTintStyle(color, { bgAlpha: OPACITY.fill, borderAlpha: 1 });
 }
 

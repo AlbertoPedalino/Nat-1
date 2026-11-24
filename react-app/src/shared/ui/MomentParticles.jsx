@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { OPACITY, UI_COLORS, uiMix } from './colors.js';
 import { PARTICLE_GLYPHS, particleLayout } from './momentParticles.js';
+import { GONE_WHEN_REDUCED } from './motion.js';
 
 // A roll's moment's particles round its bubble (momentParticles.js): its
 // glyphs laid out for the throw (`seed`), moving in their mode and drawn in
@@ -57,12 +58,6 @@ const MODES = Object.freeze({
     '84%': { opacity: 1, transform: 'scaleY(1)' },
     '100%': { opacity: 0, transform: 'scaleY(0)' },
   } },
-  glitch: { ms: 1400, easing: 'steps(1)', frames: {
-    '0%, 25%, 70%, 100%': { opacity: 0, transform: 'translateX(0)' },
-    '10%': { opacity: 1, transform: 'translateX(0)' },
-    '35%, 80%': { opacity: 1, transform: 'translateX(var(--dx))' },
-    '55%': { opacity: 1, transform: 'translateX(0) scaleX(1.6)' },
-  } },
 });
 
 // The two swings an orbiting particle rides (left and right, up and down, a
@@ -82,7 +77,6 @@ function paintOf(look, color) {
     case 'soft': return { fill: color, line: 'none', detail: dark, filter: 'blur(.5px)', opacity: OPACITY.veil };
     // Dark against a dark page: an outline and a halo in the colour carry it.
     case 'silhouette': return { fill: UI_COLORS.surfaceDarkest, line: color, detail: UI_COLORS.surfaceDarkest, filter: `drop-shadow(0 0 2px ${color}) drop-shadow(0 0 5px ${color})` };
-    case 'sepia': return { fill: uiMix(color, UI_COLORS.paper, 0.5), line: UI_COLORS.onPaper, detail: UI_COLORS.onPaper };
     case 'gold': return { fill: color, line: dark, detail: dark, filter: `drop-shadow(0 0 3px ${uiMix(color, UI_COLORS.white, 0.4)})` };
     default: return { fill: color, line: UI_COLORS.edge, detail: UI_COLORS.edge };
   }
@@ -111,7 +105,7 @@ const layerSx = {
   pointerEvents: 'none',
   zIndex: 2,
   perspective: '400px',
-  '@media (prefers-reduced-motion: reduce)': { display: 'none' },
+  ...GONE_WHEN_REDUCED,
 };
 
 // `delay` (ms) holds them back (the home die sees stars only once it lands on

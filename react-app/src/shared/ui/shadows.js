@@ -24,13 +24,57 @@ export function panelFloatShadow(float, fall, blur) {
   return `0 ${depth(fall)} ${depth(blur)} ${uiAlpha(UI_COLORS.black, OPACITY.shade * float)}`;
 }
 
+// The light a style lays on what the comic only inks (shapes.js `light`): a
+// soft shadow under whatever casts a solid one, falling `offset` px and
+// blurred four times as far, as strongly as the style lights (`soft`; 0:
+// none), and the bevel on it (`bevel`: its top edge catching the light, its
+// foot in shade). Part of every solid shadow below, so a style with no solid
+// shadow (`ink.drop` 0) still raises its buttons, cards and seals.
+const SOFT = 'var(--gb-light-soft)';
+function litShadow(offset) {
+  return `0 calc(${offset} * 1px * ${SOFT}) calc(${offset} * 4px * ${SOFT}) var(--gb-light-shade), var(--gb-light-bevel)`;
+}
+
+// No shadow, as one layer of a list of them.
+const NO_SHADOW = '0 0 transparent';
+
+// How much of a shade a palette of `mode` takes: a light page a fifth of what
+// a dark one does, where the whole of it would soil the paper. The one share
+// for every shade the light lays (the shadows here, the surfaces' finishes).
+export function shadeShare(mode) {
+  return mode === 'light' ? 0.2 : 1;
+}
+
+// The light's shadows as the style lights (shapes.js `light`), for a palette
+// of `mode`. Written on the page's root with the surfaces' variables
+// (surfaces.js surfaceVariables). `well` shades the inside of what is sunken
+// (SURFACES.inset, a field); unset where the style shades none, so its recipe
+// keeps whatever shadow the element had.
+export function lightShadowVariables({ soft, bevel, well }, mode) {
+  const shade = (amount) => uiAlpha(UI_COLORS.black, amount * shadeShare(mode));
+  return {
+    '--gb-light-soft': String(soft),
+    '--gb-light-shade': soft ? shade(OPACITY.strong) : 'transparent',
+    '--gb-light-bevel': bevel
+      ? `inset 0 1px 0 ${uiAlpha(UI_COLORS.white, OPACITY.tint * bevel)}, inset 0 -1px 0 ${shade(OPACITY.edge * bevel)}`
+      : NO_SHADOW,
+    '--gb-light-well': well ? `inset 0 2px 6px ${shade(OPACITY.strong * well)}` : 'initial',
+  };
+}
+
+// The shade inside what is sunken, as the style lights it; `otherwise` where
+// it shades none (the shadow the element would have had).
+export function wellShadow(otherwise = 'none') {
+  return `var(--gb-light-well, ${otherwise})`;
+}
+
 // The drop shadows of surfaces that sit above the page, one per height, so a
 // restyle changes depth in one place. Glows and focus rings stay with the
 // accent they echo; shadows under map pieces and dice are drawn with them.
 // A solid shadow set off to the lower right, in ink or in a moment's colour:
-// the comic panel's and the speech bubble's.
+// the comic panel's and the speech bubble's; with it, the style's light.
 export function inkShadow(color = UI_COLORS.edge, offset = 3) {
-  return `${drop(offset)} ${drop(offset)} ${GLOW} ${color}`;
+  return `${drop(offset)} ${drop(offset)} ${GLOW} ${color}, ${litShadow(offset)}`;
 }
 
 // The same solid shadow under a shape cut out of its box (a crest, a
@@ -134,10 +178,10 @@ export const UI_SHADOWS = Object.freeze({
   popup: `0 ${depth(8)} ${depth(28)} ${uiAlpha(UI_COLORS.black, OPACITY.strong)}`,
   // Under what can be pressed (a filled button): a solid ink edge, the drawn
   // look's depth; `pressed` is the same button pushed down.
-  press: `0 ${drop(2)} ${GLOW} ${UI_COLORS.edge}`,
-  pressed: `0 ${drop(1)} ${GLOW} ${UI_COLORS.edge}`,
+  press: `0 ${drop(2)} ${GLOW} ${UI_COLORS.edge}, ${litShadow(2)}`,
+  pressed: `0 ${drop(1)} ${GLOW} ${UI_COLORS.edge}, ${litShadow(1)}`,
   // The same button lifted under the cursor.
-  lifted: `0 ${drop(3)} ${GLOW} ${UI_COLORS.edge}`,
+  lifted: `0 ${drop(3)} ${GLOW} ${UI_COLORS.edge}, ${litShadow(3)}`,
   // The comic panel's solid shadow, set off to the lower right: a main panel
   // (`panel`) and a box on the page (`box`).
   panel: inkShadow(),

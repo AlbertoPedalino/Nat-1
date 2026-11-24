@@ -1,8 +1,7 @@
 import { clamp } from '../numbers.js';
 import {
-  HP_TONE_COLORS, TEMP_HP_TONE, UI_COLORS, isHexColor, readsPalette, resolveColors, uiAlpha, uiDarken,
+  HP_TONE_COLORS, MEANING_COLORS, TEMP_HP_TONE, UI_COLORS, isPaletteColor, resolveColors, uiAlpha, uiDarken,
 } from '../ui/colors.js';
-import { DAMAGE_TYPE_COLORS } from '../ui/entityColors.js';
 // One source of truth for VTT colours used outside MUI's simple theme-aware
 // properties (canvas pixels, SVG attributes, gradients and compound shadows).
 // Components should still prefer `gmboard.vtt.*` in `sx` when a theme token is
@@ -53,15 +52,17 @@ export const VTT_COLORS = Object.freeze({
   objectDefault: '#6f5b32',
   exploredHex: '#6f8f5a',
   // Areas of effect: the outline each effect suggests, and the hue its
-  // animation is built around — a damage type's own colour, the same as on
-  // the sheet's defenses.
-  areaFire: DAMAGE_TYPE_COLORS.fire,
-  areaPoison: DAMAGE_TYPE_COLORS.poison,
-  areaCold: DAMAGE_TYPE_COLORS.cold,
-  areaAcid: DAMAGE_TYPE_COLORS.acid,
-  areaLightning: DAMAGE_TYPE_COLORS.lightning,
-  areaNecrotic: DAMAGE_TYPE_COLORS.necrotic,
-  areaRadiant: DAMAGE_TYPE_COLORS.radiant,
+  // animation is built around — a damage type's own colour. Its hex, never
+  // the palette's role: an area's colour is saved with the scene, sent to the
+  // whole table and painted on a canvas, so it is one colour for every
+  // viewer, whatever style each wears.
+  areaFire: MEANING_COLORS.damageFire,
+  areaPoison: MEANING_COLORS.damagePoison,
+  areaCold: MEANING_COLORS.damageCold,
+  areaAcid: MEANING_COLORS.damageAcid,
+  areaLightning: MEANING_COLORS.damageLightning,
+  areaNecrotic: MEANING_COLORS.damageNecrotic,
+  areaRadiant: MEANING_COLORS.damageRadiant,
   areaDarkness: '#7a6a9a',
   areaThorns: '#8f9a45',
   // Whose turn it is: a colour nothing else on the board uses (gold already
@@ -90,6 +91,6 @@ export const VTT_HP_TONE_COLORS = Object.freeze({
 // palette (or a colour worked from one) in color-mix(), as uiAlpha; anything
 // else (currentColor) is returned as it is.
 export function vttAlpha(color, alpha) {
-  if (!isHexColor(color) && !readsPalette(color)) return color;
+  if (!isPaletteColor(color)) return color;
   return uiAlpha(color, clamp(Number(alpha), 0, 1));
 }

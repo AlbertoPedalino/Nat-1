@@ -189,13 +189,6 @@ const PAINTS = Object.freeze({
       + `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#dots)"/>`
       + `<path d="${d}" fill="none" stroke="${EDGE}" stroke-width="3.4" stroke-linejoin="miter" stroke-miterlimit="6"/>`;
   },
-  // The comic in pastel: a paler colour under large light dots, a rounder ink.
-  pastel: ({ d, fill }) => {
-    const dot = uiMix(fill, WHITE, 0.65);
-    return `<defs><pattern id="dots" width="8" height="16" patternUnits="userSpaceOnUse"><g fill="${dot}"><circle cx="2" cy="4" r="2"/><circle cx="6" cy="12" r="2"/></g></pattern></defs>`
-      + `<path d="${d}" fill="${uiMix(fill, WHITE, 0.25)}"/><path d="${d}" fill="url(#dots)"/>`
-      + `<path d="${d}" fill="none" stroke="${EDGE}" stroke-width="3" stroke-linejoin="round"/>`;
-  },
   // A woodcut: hatched one way, cross-hatched below, its edge chiselled.
   engraving: ({ d, fill, width }) => `<defs><pattern id="hatch" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><rect width="3.2" height="1.1" fill="${BLACK}" opacity=".6"/></pattern>`
     + `<pattern id="cross" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(-42)"><rect width="4" height=".9" fill="${BLACK}" opacity=".45"/></pattern>`

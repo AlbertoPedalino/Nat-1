@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { BUSY_MOTION, motionTime } from './motion.js';
+import { BUSY_MOTION, STILL_WHEN_REDUCED, motionTime } from './motion.js';
 import { publicAsset } from '../publicAsset.js';
 import { appDieIcon, useDiceSet } from './DiceSetScope.jsx';
 import { BASE_STYLE_ID } from './shapes.js';
@@ -39,6 +39,6 @@ function frameSx(size) {
     flexShrink: 0,
     animation: `gbBusyDie ${motionTime(BUSY_MOTION.turn)} cubic-bezier(.5, 0, .5, 1) infinite`,
     '@keyframes gbBusyDie': { to: { transform: 'rotate(360deg)' } },
-    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+    ...STILL_WHEN_REDUCED,
   };
 }

@@ -138,7 +138,7 @@ style's `moments` (`nat20`, `nat1`), each data only: a `burst` behind the
 total (a kind of `BURSTS` in `shared/ui/rollMoment.js` and its measures:
 kapow, crash, star, lobes, splat, gear, crescent, lens, virus, notched,
 polygon, stairs), its `fill` role, the technique it is painted in (`paint`,
-`BURST_PAINTS`: comic, pastel, engraving, hologram, stencil, stamp,
+`BURST_PAINTS`: comic, engraving, hologram, stencil, stamp,
 starlight, chart, brass, molten, stone, watercolor, inkbleed, pixel, neon),
 how the total is lettered on it (`number`, `NUMBER_LOOK_KINDS`), its `turn`,
 how the bubble moves (`motion`, `BUBBLE_MOTIONS` in `bubble.js`, every one
@@ -179,8 +179,7 @@ solid shadows, `depth` of the soft ones, `lettering` how strongly titles and
 figures are inked, 0 printed plain, as `--gb-ink-*`) and builds its panels
 (`panel`: the title `bar` a filled strip or only a rule in the panel's tone,
 its `hatch`, a `frame` solid or double `frameWidth` wide, the icon on a seal
-in the panel's tone, `bare`, or a `label` in ink with no tone (a stat tile's
-name then lettered in the text's ink; `BADGES` in `surfaces.js`), a soft `float` shadow, the title's `flourish`: a line of stars,
+in the panel's tone or `bare` (`BADGES` in `surfaces.js`), a soft `float` shadow, the title's `flourish`: a line of stars,
 rivets, a vine, a tentacle, a glitch, drawn in `panelOrnaments.js`), written as whole
 values by `surfaceVariables` (`--gb-panel-*`), the comic's own where a style
 builds as the comic does, so its panels stay exactly as they were. Each bar's
@@ -197,6 +196,76 @@ style's: CraftPix free assets, credited in the root README). Every length in
 never written by hand (guarded): `INK_EDGE` (the line in ink), `INK_SOLID`
 (width and style, colour set apart), `INK_WIDTH` (a width alone),
 `inkEdge(px, colour)` (another line of the comic cut, as a bubble's 3px).
+
+A style may light its surfaces instead of drawing them (`light` in
+`shapes.js`; the comic's is none of it, and every style that does not name
+its own takes the comic's, so it is drawn as before). What makes a style read
+as a comic is the ink — a line round every shape, a solid shadow set off from
+it, one flat colour inside — so a style that is no comic turns the ink down
+(`ink.edge` a hairline in a palette `edge` a shade off its surfaces,
+`ink.drop` 0, no `hatch`, a halftone `dot` and `rays` of 0, `motion.hop` 0)
+and the light up: `finish` shades a main panel and a box, a card or what
+floats (`SURFACE_FINISHES` in `surfaces.js`, read by `surfaceFinish(kind)` in
+`panelFrameSx`, `SURFACES.panel` / `card` / `floating` and the theme's cards);
+`soft` and `bevel` ride on every solid shadow (`inkShadow`, `UI_SHADOWS.press`
+/ `box` / `panel` in `shadows.js`), so whatever was raised by the ink is
+raised by a soft shadow and the light along its top edge with no change where
+it is used; `well` shades the inside of what is sunken (`wellShadow()`:
+`SURFACES.inset`, every field); `page` throws a light on the page behind the
+app (`PAGE_LIGHTS`, laid by the theme's `body::after` over the style's scene).
+Written as `--gb-light-*` and `--gb-surface-finish-*` by `surfaceVariables`,
+shades at a fifth on a light palette (`shadeShare`). A new look is an
+entry in `SURFACE_FINISHES` or `PAGE_LIGHTS` and a name in the style's
+`light`; no component changes. Every style but the comic ones (Comic
+fantasy, Comic gothic, Comic superhero) and Pixel retro is built this way: noir a desk
+`lamp` and the `blinds` on its page, war `grime` and `smoke` over its ruins,
+the others a `glow` from overhead, an `ember` below or a `lamp`, their scene
+under a `vignette`; their palettes are `litPalette`s (the `edge` a hairline
+worked out from the surface and the lettering, the colours of meaning faded
+as far as each asks: `FADE`, applied where `PALETTES` lists them, `lit(…)`),
+and their banners (`panelBanner.js`) clean shapes shaded top to foot, with
+volume and detail (a soft shadow under them, `softShadow`; lights caught on
+what is round, `glint`, `stud`) and no sketched line. What they all lay the
+same way is named once in `shapes.js` and never repeated in a style:
+`LIT_INK`, `STRAIGHT_BAR`, `litPanel({ banner, badge, grip, double })` and
+`unprinted(paper)`; a style writes only what is its own. What a
+style stops using (a banner, a flourish, a bubble's texture, a particle) is
+removed from its list: a list holds only what some style draws.
+
+The colours of meaning (a class, a feat, an action's cost, a damage type, a
+roll's kind, an item's rarity, a treasure tier) are palette roles too
+(`MEANING_COLORS` in `colors.js`: one hex each, carried by every palette), so
+they are never a hex in a component: `entityColors.js` (`ENTITY_COLORS`,
+`ACTION_COLORS`, `DAMAGE_TYPE_COLORS`, `ROLL_TONES`…), `itemRarity.js`
+(`RARITY_COLORS`) and the theme's tiers only name them. They are the same in
+every palette, apart from every interface role, unless a palette fades them
+into its own light (`litPalette(colors, { mode, fade })`: noir's and war's
+about half the way to their quiet text, the others less), so a style that keeps one bright colour is not
+lit up by a dozen others.
+
+The six ability scores stand as the style stands them (`abilities` in
+`shapes.js`): cut as a crest (`drawing: 'none'`, the `crest`'s clip) or each
+drawn as a thing of its own with the hand-drawing kit (`abilityDrawing.js`:
+the gothic's `headstones`, six stones in a row, each its cut, lean and
+mark), their `figures`
+the score beside its modifier (`split`) or the modifier large over the score
+(`stacked`). `StatTile` frames a tile either way and `AbilityScores` lays the
+figures; a new drawing is an entry in `abilityDrawing.js` and a name in the
+style. A roll's toast is the style's bubble or one drawn thing in its place
+(`rollToast.drawing`, `toastDrawing.js`: the gothic's `tombstone`, drawn by `DrawnToast.jsx` for the sheet's `DiceToast`
+and, smaller, for the map's `RollBubble`); each says the same things on either, the dice over
+the total, and a drawn toast shows a natural 20 and a natural 1 its own way:
+roses climbing its sides, each on its own stem; the stone split, leaning, a black hand clawing
+up before it). What the gothic's stones share is `stonework.js`. An
+app notice is the style's bubble too, or one drawn thing (`notice.drawing`,
+`noticeDrawing.js`: the gothic's `sealed` strip of parchment, a seal of wax in
+the notice's colour hanging from it, its mark pressed in it; in `AppToast`),
+so a notice is never taken for a roll. All three are drawn by the one
+`MeasuredDrawing.jsx` (a drawing made to the size of the box it is in), each
+module answering the same way: its kinds (`…_DRAWING_KINDS`), whether a kind
+draws (`draws…`), and its pieces for a size.
+A mark or an ornament on a themed piece is always drawn with that kit
+(`handDrawing.js`: `sketch`, `brushPath`), never as a shape written in CSS.
 
 It sets the corner `radius` (the theme's, so every sx `borderRadius: n`) and
 lays the surfaces (`surface`): the page's `paper` (the stickers, painted per
@@ -232,13 +301,13 @@ and squashes (`PRESS_MOTION_SX`).
 
 | File (`shared/ui/`) | What it decides |
 | --- | --- |
-| `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palettes (`PALETTES`: each role's hex per palette) and the interface roles as variables, the colour of each kind of thing, the map's tones (derived from the interface's) |
+| `colors.js`, `entityColors.js`, `../vtt/colors.js` | the palettes (`PALETTES`: each role's hex per palette) and the interface roles and the colours of meaning as variables, what each colour of meaning is the colour of, the map's tones (derived from the interface's) |
 | `fonts.js`, `textStyles.js` | the faces (per style: `FONT_STYLES`), the type scale, each text role |
-| `shadows.js`, `surfaces.js` | the ink (scaled by the style's `ink`): edges, solid shadows, surfaces (paper, stripe), the meter track |
+| `shadows.js`, `surfaces.js` | the ink (scaled by the style's `ink`): edges, solid shadows, surfaces (paper, stripe), the meter track; the light (the style's `light`): the soft shadow and bevel on every solid shadow, a well's shade, the surfaces' finishes, the page's light |
 | `shapes.js` | the styles (`SHAPE_STYLES`) and every cut shape: a panel bar's ribbon, the seal (badges, counts, a radio, a slider's thumb), the ability crest, the bookmark tab and mark, the gems' cuts, a meter's segments, a roll's moments (`moments`: its bursts, motion and effect), a switch, a checkbox, the ornament, the focus ring, a formula's die |
 | `ornament.js`, `ruleText.js`, `rollToken.js` | the ornament drawn once (card rules, page and section titles, a rule's list); a rule's list, boxed text and table in both renderers; a dice formula in the rules' text |
 | `gameIcons.js` | every drawing of the game's world: roles, tools (`TOOL_ICONS`), classes — each role drawn in the chosen style's set (comic: game-icons.net and lucide; sci-fi: Tabler line icons), the same role keys in every set (`ICON_SETS`, tested); a role is a component that picks its drawing by `useStyleId()` |
-| `motion.js` | how long things move (`motionTime`: at the style's pace) |
+| `motion.js` | how long things move (`motionTime`: at the style's pace), and an animation left out for whoever asked for less motion (`STILL_WHEN_REDUCED`) |
 | `app/theme.js` | how MUI's own components take the above (tabs, switches, checkboxes and radios via `ChoiceMarks`, sliders, dialogs, links, menus and chosen rows, focused fields, the focus ring, scrollbars, text selection, chips) |
 
 ## Page features

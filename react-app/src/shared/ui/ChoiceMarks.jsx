@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { UI_COLORS } from './colors.js';
 import { INK_EDGE, inkShadow } from './shadows.js';
 import { CHOICE_MARK, SEAL_RADIUS } from './shapes.js';
-import { DURATIONS, motionTime } from './motion.js';
+import { DURATIONS, STILL_WHEN_REDUCED, motionTime } from './motion.js';
 
 // The marks of a choice, drawn in the app's ink and set by the theme on every
 // checkbox and radio (MuiCheckbox, MuiRadio): a box edged in ink with its solid
@@ -45,7 +45,7 @@ const CHECKED_SX = { backgroundColor: UI_COLORS.accent };
 // The tick and the dot snap in, a little past their size and back.
 const SNAP = {
   animation: `gbChoiceSnap ${motionTime(DURATIONS.slow)} cubic-bezier(.3, 1.8, .5, 1)`,
-  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  ...STILL_WHEN_REDUCED,
 };
 
 const TICK_SX = {

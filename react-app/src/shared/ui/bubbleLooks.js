@@ -28,8 +28,6 @@ const { black: BLACK, white: WHITE } = UI_COLORS;
 // The inside of the bubble: CSS backgrounds over its fill.
 const BUBBLE_TEXTURES = Object.freeze({
   plain: (fill) => fill,
-  // A wash of the accent from one corner.
-  wash: (fill) => `linear-gradient(160deg, ${uiMix(fill, UI_COLORS.accent, 0.14)}, ${fill})`,
   // Darker at the top, under an arch.
   arch: (fill) => `linear-gradient(180deg, ${uiMix(fill, BLACK, 0.12)}, ${fill})`,
   // A screen's scanlines.
@@ -109,8 +107,6 @@ const BUBBLE_FRAMES = Object.freeze({
 const BUBBLE_SHADOWS = Object.freeze({
   // The comic's solid shadow, down and right: the ink's own.
   ink: (tone, drop) => ({ boxShadow: inkShadow(tone, drop), filter: 'none' }),
-  // A solid shadow straight under it.
-  under: (tone, drop) => ({ boxShadow: `0 ${inkDrop(drop * 1.6)} 0 ${tone}`, filter: 'none' }),
   // A soft dark shadow, as a hanging thing casts, edged in its colour.
   soft: (tone, drop) => ({ boxShadow: `${UI_SHADOWS.popup}, 0 ${inkDrop(drop * 0.6)} 0 ${tone}`, filter: 'none' }),
   // A glow of its colour round it.
@@ -164,8 +160,6 @@ const BUBBLE_TAILS = Object.freeze({
   none: () => ({ width: 0, height: 0, overlap: 0, svg: '' }),
   // The comic's: an inked triangle, open where it meets the bubble.
   triangle: ({ fill, line }) => ({ width: 22, height: 18, overlap: 3, svg: `<path d="M0 0L11 18L22 0Z" fill="${fill}"/><path d="M1 3L11 17L21 3" fill="none" stroke="${line}" stroke-width="3"/>` }),
-  // Two puffs of cloud trailing off.
-  puffs: ({ fill, line }) => ({ width: 26, height: 30, overlap: 2, svg: `<circle cx="10" cy="9" r="7" fill="${fill}" stroke="${line}" stroke-width="3"/><circle cx="20" cy="23" r="4.5" fill="${fill}" stroke="${line}" stroke-width="3"/>` }),
   // Candle wax running off it.
   drip: ({ fill }) => ({ width: 24, height: 18, overlap: 2, svg: `<path d="M2 0h10v11a5 5 0 0 1-10 0z" fill="${fill}"/><path d="M15 0h6v6a3 3 0 0 1-6 0z" fill="${fill}"/>` }),
   // A console's leader line, ending in a dot on what it points at.

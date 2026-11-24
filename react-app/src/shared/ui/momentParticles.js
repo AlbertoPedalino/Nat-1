@@ -37,22 +37,20 @@ export const PARTICLE_GLYPHS = Object.freeze({
   pixel: { d: 'M6 6h12v12H6z' },
   pixelCoin: { d: 'M8 2h8v2h2v2h2v12h-2v2h-2v2H8v-2H6v-2H4V6h2V4h2zM10 6v12h4V6z', evenodd: true },
   shard: { d: 'M12 1l6 9-4 13-9-9z' },
-  bar: { d: 'M0 9h24v6H0z' },
   // A virus: a body and six knobbed stems.
   virus: { d: `${dot(12, 12, 4.6)}${VIRUS_KNOBS.map(([x, y]) => dot(x, y, 1.8)).join('')}`, detail: VIRUS_KNOBS.map(([x, y]) => `M12 12L${x} ${y}`).join('') },
-  spiral: { line: 'M12 12m0 0c1 0 2 1 2 2s-1 3-3 3-4-2-4-4 2-6 6-6 6 3 6 6-3 8-8 8-9-4-9-9' },
 });
 
 // The ways particles move (MomentParticles.jsx holds their frames): popping
 // up round the edge and twinkling, rising, falling, flying out, tossed
-// spinning (a coin), rings spreading, eyes blinking open, glitch bars
-// flashing, or circling over the bubble (seeing stars).
-export const PARTICLE_MODES = Object.freeze(['pop', 'rise', 'fall', 'fly', 'toss', 'ring', 'blink', 'glitch', 'orbit']);
+// spinning (a coin), rings spreading, eyes blinking open, or circling over
+// the bubble (seeing stars).
+export const PARTICLE_MODES = Object.freeze(['pop', 'rise', 'fall', 'fly', 'toss', 'ring', 'blink', 'orbit']);
 
 // How a particle is drawn: inked like the comic, lit (no ink, a glow), flat
-// (hard pixels), soft (a little blurred), a dark silhouette with a halo,
-// sepia ink, or struck gold (a coin: its face a shade darker).
-export const PARTICLE_LOOKS = Object.freeze(['ink', 'glow', 'flat', 'soft', 'silhouette', 'sepia', 'gold']);
+// (hard pixels), soft (a little blurred), a dark silhouette with a halo, or
+// struck gold (a coin: its face a shade darker).
+export const PARTICLE_LOOKS = Object.freeze(['ink', 'glow', 'flat', 'soft', 'silhouette', 'gold']);
 
 // Where the popping particles stand round the bubble (% of it), most of them
 // along the top and the left: the dice toast sits in the screen's lower
@@ -76,7 +74,6 @@ export function particleLayout(mode, count, seed) {
       return { x: 50, y: 62, delay: random() * 0.25, dx: Math.cos(angle) * reach, dy: Math.sin(angle) * reach * 0.8 - (mode === 'toss' ? 30 : 0), turn: (random() - 0.5) * 720 };
     }
     if (mode === 'ring') return { x: 50, y: 62, delay: index * 0.35, dx: 0, dy: 0, turn: 0 };
-    if (mode === 'glitch') return { x: random() * 100, y: random() * 100, delay: random() * 0.8, dx: (random() - 0.5) * 30, dy: 0, turn: 0 };
     // orbit: spread evenly round the circle they ride.
     return { x: 50, y: 0, delay: (-index * 0.9) / count, dx: 0, dy: 0, turn: 0 };
   });

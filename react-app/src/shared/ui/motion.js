@@ -23,6 +23,12 @@ export function motionSquash(amount) {
   return `scale(calc(1 - ${amount} * var(--gb-motion-hop)))`;
 }
 
+// An animation left out for whoever asked their system for less motion: what
+// it animates stands as it rests. Spread last in the sx that animates.
+export const STILL_WHEN_REDUCED = Object.freeze({ '@media (prefers-reduced-motion: reduce)': { animation: 'none' } });
+// What is there only to move (a spark, a burst's particles), left out whole.
+export const GONE_WHEN_REDUCED = Object.freeze({ '@media (prefers-reduced-motion: reduce)': { display: 'none' } });
+
 export const DURATIONS = Object.freeze({
   fast: 120,
   normal: 160,
@@ -34,6 +40,20 @@ export const BUSY_MOTION = Object.freeze({ turn: 900 });
 
 // An icon button's icon twitching under the pointer (iconButtonLook).
 export const ICON_MOTION = Object.freeze({ twitch: 400 });
+
+// A drawn roll toast's moments (DiceToast): at a natural 20 what grows up it
+// (`grow`) and each flower opening on it (`bloom`); at a natural 1 the toast
+// leaning (`lean`) and what claws up before it (`claw`); `…After`, the beat
+// each waits first.
+export const TOAST_MOTION = Object.freeze({
+  grow: 1100,
+  bloom: 500,
+  bloomAfter: 150,
+  lean: 700,
+  leanAfter: 150,
+  claw: 1500,
+  clawAfter: 250,
+});
 
 // A dialog popping open (the theme's MuiDialog), a little past its size and
 // back, as a toast lands.
