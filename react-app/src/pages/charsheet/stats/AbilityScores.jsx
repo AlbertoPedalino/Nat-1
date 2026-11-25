@@ -94,7 +94,7 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
           );
         })}
         {/* What a drawing lays over the whole row (a thread from score to score, the earth before each row of stones). */}
-        {drawsAbilities(drawing) ? <MeasuredDrawing front draw={(w, h, row) => abilityStrand(drawing, w, h, tilesOf(row))} /> : null}
+        {drawsAbilities(drawing) ? <MeasuredDrawing front read={tilesOf} draw={(w, h, tiles) => abilityStrand(drawing, w, h, tiles)} /> : null}
       </Box>
     </Panel>
   );

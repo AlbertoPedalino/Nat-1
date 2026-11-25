@@ -323,7 +323,11 @@ rarity) is the style's cut shape (`marker`) or drawn by the kit
 corner), in the kind's own colour (`currentColor`, which `HandDrawnSvg`
 paints as given). A drawing that has not changed is not drawn again
 (`HandDrawnSvg` is memoised: pass it a stable `style`), and a title shrunk to
-fit is measured with every other title in one pass (`useFitText`).
+fit is measured with every other title in one pass (`useFitText`). A drawing
+laid by what its box holds (a toast's dice and total, a row's tiles) reads
+them only when the box is laid out (`MeasuredDrawing`'s `read`,
+`useElementSize`'s third argument), never while it is drawn: each read then
+made the browser lay the page out halfway, and a natural 1 stalled a frame.
 A mark or an ornament on a themed piece is always drawn with that kit
 (`handDrawing.js`: `sketch`, `brushPath`), never as a shape written in CSS.
 

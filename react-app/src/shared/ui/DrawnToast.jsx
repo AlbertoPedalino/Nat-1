@@ -6,7 +6,7 @@ import { TEXT_STYLES } from './textStyles.js';
 import { BUBBLE_INK_SX } from './bubble.js';
 import { bubbleTone } from './bubbleLooks.js';
 import { useStyleShapes } from './themeIds.js';
-import { useElementSize } from './useElementSize.js';
+import { parentOf, useElementSize } from './useElementSize.js';
 import { GONE_WHEN_REDUCED, STILL_WHEN_REDUCED, TOAST_MOTION, motionTime } from './motion.js';
 import { TOAST_HAND_BOX, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastHand, toastHead, toastLook, toastMarks, toastMasthead, toastStamp, toastStampFrame } from './toastDrawing.js';
 import MeasuredDrawing from './MeasuredDrawing.jsx';
@@ -107,7 +107,8 @@ const STAMP_WORDS_SX = { ...TEXT_STYLES.printed, fontSize: FONT_SIZES.sm, lineHe
 // Where a toast places what its drawing is laid by (toastDrawing.js places):
 // the top of its dice, the middle and the foot of its total, the foot of its
 // masthead, and how wide the dice or the total's figure stand, px in the
-// toast, read off what the toast says (each marked `data-roll-part`).
+// toast, read off what the toast says (each marked `data-roll-part`): read
+// when the face is laid out (useElementSize `read`), never while it is drawn.
 function placesOf(face) {
   const part = (name) => face?.querySelector(`[data-roll-part="${name}"]`);
   const [dice, total, masthead] = [part('dice'), part('total'), part('masthead')];
@@ -152,6 +153,9 @@ function arrivalSx(arrive, jolts) {
   const jolt = `gbToastJolt-${arrive} ${motionTime(TOAST_MOTION.jolt)} ${motionTime(TOAST_MOTION.joltAfter)}`;
   return {
     transformOrigin: '50% 50%',
+    // Painted once and moved as it is: a page shaken while its marks open on
+    // it was painted again, blurred shadows and all, on every frame.
+    willChange: 'transform',
     animation: jolts ? `${animation}, ${jolt}` : animation,
     ...frames,
     ...(jolts ? {
@@ -234,8 +238,8 @@ export function drawnTotalColor(layout, kind) {
 
 function DrawnMarks({ kind, moment }) {
   const ref = useRef(null);
-  const box = useElementSize(ref);
-  const marks = box?.width > 0 ? toastMarks(kind, box.width, box.height, moment, placesOf(ref.current?.parentElement)) : [];
+  const face = useElementSize(ref, parentOf, placesOf);
+  const marks = face?.width > 0 ? toastMarks(kind, face.width, face.height, moment, face.read) : [];
   return (
     <Box ref={ref} sx={MARKS_SX}>
       {marks.map(({ pieces, box: seen, at: [x, y], beat, motion }, index) => (
@@ -260,7 +264,7 @@ export default function DrawnToast({ kind, moment, seed, compact = false, sx, ch
         sx={[FACE_SX, paper && BUBBLE_INK_SX, compact && COMPACT_FACE_SX, { pt: `${toastHead(kind)}px` }, footRoom ? { pb: `${footRoom}px` } : null, tilt ? { rotate: `${tilt}deg` } : null,
           moment === 'nat1' && lean && LEAN_SX, arrival && ARRIVAL_SX[moment === 'nat1' && jolts ? `${arrival}:hit` : arrival]]}
       >
-        <MeasuredDrawing draw={(w, h, face) => toastFrame(kind, w, h, moment, placesOf(face))} />
+        <MeasuredDrawing read={placesOf} draw={(w, h, places) => toastFrame(kind, w, h, moment, places)} />
         {masthead ? <Typography data-roll-part="masthead" sx={[MASTHEAD_SX, compact && COMPACT_MASTHEAD_SX, mastRoom ? { mb: `${mastRoom}px` } : null]}>{masthead}</Typography> : null}
         {children}
         <DrawnMarks kind={kind} moment={moment} />
