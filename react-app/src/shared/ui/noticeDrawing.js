@@ -1,6 +1,6 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
-import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, polygonPath, sketch, solidShadow } from './handDrawing.js';
+import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, polygonPath, sketch, softShadow, solidShadow } from './handDrawing.js';
 import { deepened, paperPieces, printPieces, rulePieces } from './paperwork.js';
 import { barbedWirePieces, boltPieces, steelPieces } from './ironwork.js';
 
@@ -98,7 +98,7 @@ const DRAWINGS = Object.freeze({
         return brushStroke([[x, y, 0.3], [x + 3, y + 2, 0.9], [x + 5, y - 2, 0.2]], 3.4, 'surfaceHeader');
       });
       return [
-        { tag: 'path', d: strip, fill: 'black', blur: 4, opacity: OPACITY.heavy, transform: 'translate(0 4)' },
+        softShadow(strip, { blur: 4, opacity: OPACITY.heavy }),
         ...steelPieces(strip, w, 0, h, 'notice-tin', 4),
         ...boltPieces(w - 9, 9),
         ...boltPieces(w - 9, h - 9),

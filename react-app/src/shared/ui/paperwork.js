@@ -1,6 +1,6 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
-import { STROKE_ENDS, brushStroke, sagPoints, sketch } from './handDrawing.js';
+import { STROKE_ENDS, brushStroke, sagPoints, sketch, softShadow } from './handDrawing.js';
 
 // Paper, and what a detective does with it, as the hand-drawing kit draws it
 // (handDrawing.js): what the noir's case is made of, wherever a piece of it
@@ -16,7 +16,7 @@ const SHEET = Object.freeze({ shade: [[0, 'paper'], [1, 'paperShade']] });
 // A sheet of paper cut to the path `d`: its soft shadow, the sheet, its edge.
 export function paperPieces(d, seed, roughness = 0.7) {
   return [
-    { tag: 'path', d, fill: 'black', blur: 3, opacity: OPACITY.strong, transform: 'translate(0 3)' },
+    softShadow(d),
     { tag: 'path', d, fill: SHEET },
     ...sketch('path', d, { seed, roughness, bowing: 0.4, stroke: 'onPaper', strokeWidth: 1, opacity: OPACITY.strong }),
   ];

@@ -1,6 +1,7 @@
 import rough from 'roughjs';
 import { getStroke } from 'perfect-freehand';
 import { roundToTenth } from '../numbers.js';
+import { OPACITY } from './colors.js';
 
 // The kit every hand-drawn part of a panel is drawn with (panelGrip.js,
 // panelBanner.js): Rough.js's sketchy shapes and perfect-freehand's brush
@@ -145,6 +146,15 @@ export function sketch(shape, ...args) {
 // strip of parchment): its outline `d` again, in the ink, dropped down and to
 // the right.
 export const solidShadow = (d) => ({ tag: 'path', d, fill: 'edge', transform: 'translate(4 4)' });
+
+// The soft shadow under what is lit rather than drawn (a sheet of paper, a
+// plate of steel, a lit banner): its outline `d` in black, blurred `blur` px
+// and dropped as far straight under it (or moved by `shift`, [x, y] px), at
+// `opacity`. What lifts it off the panel where no ink does.
+export function softShadow(d, { blur = 3, opacity = OPACITY.strong, shift = [0, blur] } = {}) {
+  const moved = `translate(${shift[0]} ${shift[1]})`;
+  return { tag: 'path', d, fill: 'black', blur, opacity, transform: moved };
+}
 
 // A drawing's pieces with the box they are seen through: the w by h box they
 // were drawn to and `reach` px past it, for a shadow and the sketch's wander.

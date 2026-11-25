@@ -1,7 +1,7 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
 import { styleShapes } from './shapes.js';
-import { boxPath, crescentPoints, drawingBox, drawingCache, polygonPath, sagPoints, sketch } from './handDrawing.js';
+import { boxPath, crescentPoints, drawingBox, drawingCache, polygonPath, sagPoints, sketch, softShadow } from './handDrawing.js';
 import { paperPieces } from './paperwork.js';
 import { STEEL, barbedWirePieces, boltPieces, dentPieces, dripPieces, staplePieces, steelPieces, tallyPieces } from './ironwork.js';
 
@@ -37,9 +37,6 @@ function stripes(clip, width, role, { line, gap, angle }, opacity) {
   return { tag: 'g', clip, opacity, children: lines };
 }
 
-// A lit banner's shadow: soft, straight under its shape (its path `d`), what
-// lifts it off the panel where no ink does.
-const softShadow = (d) => ({ tag: 'path', d, fill: 'black', blur: 3, opacity: OPACITY.strong, transform: 'translate(0 3)' });
 
 // A head of metal catching the light (a rivet, a nail): a round of `fill`
 // `r` px across at (cx, cy), a glint off its near shoulder.
@@ -521,7 +518,7 @@ function folder(w) {
   return [
     ...paperPieces(`M12 22 H${w - 16} V34 H12 Z`, 7, 0.5),
     ...paperPieces(`M7 24.5 H${w - 9} V34 H7 Z`, 8, 0.5),
-    { tag: 'path', d: edge, fill: 'black', blur: 3, opacity: OPACITY.strong, transform: 'translate(0 3)' },
+    softShadow(edge),
     ...manilaPieces(edge, 3),
     { tag: 'g', clip: edge, children: [{ tag: 'ellipse', cx: 0, cy: FOLDER.top, rx: Math.min(w * 0.5, 220), ry: 26, fill: 'white', blur: 10, opacity: OPACITY.shade }] },
     ...(w > 300 ? sketch('path', `M${w - 40} 17 v21 a5 5 0 0 0 10 0 v-17 a3.4 3.4 0 0 0 -6.8 0 v14`, { seed: 9, roughness: 0.4, stroke: 'textMuted', strokeWidth: 1.7 }) : []),
@@ -601,7 +598,7 @@ const tabs = drawingCache((kind, width, height) => {
   const foot = height / 2 + FOLDER.foot - BANNER_HEIGHT / 2;
   const tab = `M-12 ${foot} V2 Q-12 -5 -5 -5 H${width + 2} Q${width + 9} -5 ${width + 12} 1 L${width + 27} ${foot} Z`;
   return drawingBox([
-    { tag: 'path', d: tab, fill: 'black', blur: 3, opacity: OPACITY.edge, transform: 'translate(2 1)' },
+    softShadow(tab, { opacity: OPACITY.edge, shift: [2, 1] }),
     ...manilaPieces(tab, 4),
   ], width, height, 30);
 });
