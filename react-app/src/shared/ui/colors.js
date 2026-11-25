@@ -152,6 +152,10 @@ const COMIC_DARK = Object.freeze({
   // more than seen.
   pageDrawing: '#2e2a26',
   pageLine: '#0d0b09',
+  // The earth a drawing sets its things in (the clod the gothic's headstones
+  // stand in, stonework.js): soil, told from the surface it lies on and from
+  // the stone set in it.
+  earth: '#4a3423',
   // What a rule's text marks as its own (a sub-heading, a bold word, a
   // reference, a card's rule section): apart from every entity, action and
   // spell colour, so it never reads as one of their meanings.
@@ -416,6 +420,7 @@ const DREAD_DARK = Object.freeze({
   onFill: '#0e0a12',
   pageDrawing: '#221a29',
   pageLine: '#07050a',
+  earth: '#4a3324',
   ruleEmphasis: '#c9a0e8',
   armor: '#a8b0c0',
   dangerStrong: '#ff2a40',
@@ -472,6 +477,7 @@ const MIST_LIGHT = Object.freeze({
   onFill: '#1a1220',
   pageDrawing: '#d1c6dd',
   pageLine: '#a697b8',
+  earth: '#6b4b37',
   ruleEmphasis: '#5a2e7a',
   armor: '#4a5466',
   dangerStrong: '#d01a34',

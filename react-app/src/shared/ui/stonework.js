@@ -1,5 +1,5 @@
 import { OPACITY } from './colors.js';
-import { STROKE_ENDS, inkStroke, polygonPath, sketch } from './handDrawing.js';
+import { STROKE_ENDS, inkStroke, polygonPath, sketch, solidShadow } from './handDrawing.js';
 import { seededRandom } from '../seededRandom.js';
 
 // Stone, as the hand-drawing kit draws it (handDrawing.js: Rough.js sketches,
@@ -8,10 +8,6 @@ import { seededRandom } from '../seededRandom.js';
 // toastDrawing.js), and the earth a row of them is set in. Pieces coloured by
 // the palette's role names.
 
-
-// The solid shadow under what is drawn here, its outline `d` dropped down
-// and to the right.
-const solidShadow = (d) => ({ tag: 'path', d, fill: 'edge', transform: 'translate(4 4)' });
 
 // A stone's cut, in a box w by h: a tall arch, a low one, squared shoulders.
 const CUTS = Object.freeze({
@@ -104,7 +100,7 @@ export function earthPieces(sills, thick, past, seed) {
   }).flat();
   return [
     solidShadow(polygonPath(clod)),
-    ...sketch('curve', clod, { seed, roughness: 1, bowing: 0.6, stroke: 'edge', strokeWidth: 2.2, fill: 'onPaper', fillStyle: 'solid' }),
+    ...sketch('curve', clod, { seed, roughness: 1, bowing: 0.6, stroke: 'edge', strokeWidth: 2.2, fill: 'earth', fillStyle: 'solid' }),
     ...sketch('curve', clod, { seed: seed + 1, roughness: 0.8, fill: 'edge', fillStyle: 'hachure', hachureAngle: 24, hachureGap: 6, fillWeight: 1, opacity: OPACITY.line }),
     ...pebbles,
   ];

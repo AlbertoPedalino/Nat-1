@@ -141,6 +141,11 @@ export function sketch(shape, ...args) {
     }));
 }
 
+// The solid shadow under what is drawn in ink (a stone, a clod of earth, a
+// strip of parchment): its outline `d` again, in the ink, dropped down and to
+// the right.
+export const solidShadow = (d) => ({ tag: 'path', d, fill: 'edge', transform: 'translate(4 4)' });
+
 // A drawing's pieces with the box they are seen through: the w by h box they
 // were drawn to and `reach` px past it, for a shadow and the sketch's wander.
 export function drawingBox(pieces, w, h, reach = 6) {

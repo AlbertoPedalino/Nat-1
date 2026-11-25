@@ -1,6 +1,6 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
-import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, polygonPath, sketch } from './handDrawing.js';
+import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, polygonPath, sketch, solidShadow } from './handDrawing.js';
 import { deepened, paperPieces, printPieces, rulePieces } from './paperwork.js';
 import { barbedWirePieces, boltPieces, steelPieces } from './ironwork.js';
 
@@ -48,7 +48,7 @@ const DRAWINGS = Object.freeze({
       const [cx, cy] = [w - 36, h - 1];
       const strip = boxPath(w, h);
       return [
-        { tag: 'path', d: strip, fill: 'edge', transform: 'translate(4 4)' },
+        solidShadow(strip),
         ...sketch('path', strip, { seed: 61, roughness: 1, bowing: 0.8, stroke: 'edge', strokeWidth: 2.4, fill: 'paper', fillStyle: 'solid' }),
         ...sketch('path', strip, { seed: 62, roughness: 0.7, fill: 'onPaper', fillStyle: 'hachure', hachureAngle: -38, hachureGap: 9, fillWeight: 0.8, opacity: OPACITY.soft }),
         // The two ribbons the seal hangs on, their ends cut in a swallowtail.
