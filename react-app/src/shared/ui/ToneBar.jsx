@@ -2,13 +2,16 @@ import { useId } from 'react';
 import { Box } from '@mui/material';
 import { UI_COLORS, OPACITY } from './colors.js';
 import { useStyleShapes } from './themeIds.js';
+import { markerDrawing } from './markerDrawing.js';
+import HandDrawnSvg from './HandDrawnSvg.jsx';
 
 // The mark of colour at the head of a card's name that says what kind of
 // thing it is at a glance: an action's category (action, bonus, reaction), an
 // item's rarity. Its shape is the style's (shapes.js marker: the comic's gem
-// shard, a coffin, a cartridge, a leaf…), its colour always the kind's, inked
-// like everything else and cel-shaded with a hard band of light and of
-// shade. One mark for every card that carries one, so a kind reads the same
+// shard, a coffin, a leaf…), its colour always the kind's, inked like
+// everything else and cel-shaded with a hard band of light and of shade; or
+// drawn by the hand-drawing kit where the style draws it (marker.drawing,
+// markerDrawing.js: the war's drape of cloth), lit in the kind's colour. One mark for every card that carries one, so a kind reads the same
 // in every list. `tone` is a palette colour or a theme path.
 const WIDTH = 12;
 const HEIGHT = 30;
@@ -21,6 +24,13 @@ export default function ToneBar({ tone }) {
   const { marker } = useStyleShapes();
   const id = useId().replace(/[^\w-]/g, '');
   if (!tone) return null;
+  if (marker.drawing) {
+    return (
+      <Box component="span" aria-hidden sx={[DRAWN_SX, { color: tone }]}>
+        <HandDrawnSvg {...markerDrawing(marker.drawing, WIDTH, HEIGHT)} />
+      </Box>
+    );
+  }
   const clip = `tone-${id}`;
   const glow = `tone-glow-${id}`;
   return (
@@ -48,3 +58,6 @@ export default function ToneBar({ tone }) {
     </Box>
   );
 }
+
+// A drawn mark's box: the cut mark's size, its drawing laid in it.
+const DRAWN_SX = { position: 'relative', width: WIDTH, height: HEIGHT, flexShrink: 0, display: 'block' };

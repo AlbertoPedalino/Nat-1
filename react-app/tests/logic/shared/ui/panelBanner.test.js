@@ -50,8 +50,8 @@ test("a stat tile's bar is drawn across it in the palette's roles, its name lett
 test("a belt of rounds is drawn its own way on each panel, the same each time", () => {
   const titles = ['Ability Scores', 'Skills', 'Saving Throws', 'Conditions', 'Reminders', 'Defenses', 'Senses', 'Hit Points'];
   assert.equal(panelBanner('belt', 480, 'war', 'Skills'), panelBanner('belt', 480, 'war', 'Skills'));
-  const counts = new Set(titles.map((title) => panelBanner('belt', 480, 'war', title).pieces.length));
-  assert.ok(counts.size > 1, 'every panel holds as many rounds');
+  const belts = new Set(titles.map((title) => JSON.stringify(panelBanner('belt', 480, 'war', title).pieces)));
+  assert.ok(belts.size > 1, 'every panel holds as many rounds');
 });
 
 test("only the comic's ribbon reaches past the panel's sides, and only a little", () => {

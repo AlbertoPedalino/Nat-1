@@ -127,8 +127,8 @@ shape worked out in code is read from the style (`useStyleShapes()` in
 `shared/ui/themeIds.js`: GemPip's cuts — a cut gem, or a token the style
 draws (`outline` and `shading`, `tones` by kind over GEM_TONES: gothic's
 drops of blood, skulls and crosses, war's grenades and chevrons,
-sci-fi's power cells), or a counter the hand-drawing kit draws (`drawing`:
-war's tally in chalk); a slot's counter and a feature's uses differ in their
+sci-fi's power cells), or a counter or training mark the hand-drawing kit
+draws (`drawing`: war's rifle rounds, its tally in chalk); a slot's counter and a feature's uses differ in their
 cut or their colour —,
 SegmentedMeter's counts — pass it a
 `METER_SEGMENTS` kind, not a number); the theme's own controls (tabs,
@@ -317,16 +317,28 @@ links, lit, never many live among the spent cases; each panel's belt holds what 
 the panel's title), the same every time. A stat tile's narrow bar, where a panel's banner would not
 fit, may be drawn too (`panel.tileBanner`, `tileBanner`: the war's sheet of
 `corrugated` iron), by `PanelHeader`'s `TileBar`.
+A card's mark of colour (`ToneBar`: an action's category, an item's
+rarity) is the style's cut shape (`marker`) or drawn by the kit
+(`marker.drawing`, `markerDrawing.js`: the war's `drape`, a cloth hung by one
+corner), in the kind's own colour (`currentColor`, which `HandDrawnSvg`
+paints as given). A drawing that has not changed is not drawn again
+(`HandDrawnSvg` is memoised: pass it a stable `style`), and a title shrunk to
+fit is measured with every other title in one pass (`useFitText`).
 A mark or an ornament on a themed piece is always drawn with that kit
 (`handDrawing.js`: `sketch`, `brushPath`), never as a shape written in CSS.
 
 A style's gems (`gemCuts`: a slot's `counter`, a feature's `uses`, a skill's
-`training` mark; drawn by `GemPip.jsx`) are a cut gem or a drawn token, or,
-for a counter, marks the hand-drawing kit draws (`drawing`,
-`counterDrawing.js`: the war's `tally` in chalk, a stroke for each counter
-there to spend, every fifth struck across the four before it, one spent
-rubbed out; `GemRow` lays a row of counters in those groups and draws the
-strike over each, so a level's slots and a pool's hit dice are a `GemRow`). A
+`training` mark; drawn by `GemPip.jsx`) are a cut gem or a drawn token, or
+marks the hand-drawing kit draws (`drawing`, `counterDrawing.js`): a
+counter as the war's `cartridge`, a live rifle round while there to spend
+and its spent case once spent, its case in the kind's colour; or as a
+`tally` in chalk, a stroke for each counter, every fifth struck across the
+four before it, one spent rubbed out (`GemRow` lays a row of counters in
+the drawing's groups, where it counts in groups, and draws the strike over
+each, so a level's slots and a pool's hit dice are a `GemRow`); a training
+mark as the war's chalk: nothing untrained, a stroke for half proficiency,
+two for proficiency, the two struck through for expertise
+(`trainingMark`). A
 drawn token has parts each in a shade of the gem's colour or in a palette
 role of their own (the noir's bullets of the twenties: a lead nose in the
 slot's colour over a brass case); it may bring what is left of it once

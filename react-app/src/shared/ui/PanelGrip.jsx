@@ -10,10 +10,13 @@ import HandDrawnSvg from './HandDrawnSvg.jsx';
 
 const panelOf = (drawing) => parentOf(parentOf(drawing)) || parentOf(drawing);
 
+// Over the panel's frame, always the same object, so the grip is not drawn again.
+const OVER = Object.freeze({ zIndex: 1 });
+
 export default function PanelGrip({ kind }) {
   const ref = useRef(null);
   const bar = useElementSize(ref, parentOf);
   const panel = useElementSize(ref, panelOf);
   const grip = bar?.width > 0 && panel ? panelGrip(kind, bar.width, panel.height) : null;
-  return <HandDrawnSvg ref={ref} pieces={grip?.pieces} box={grip?.box} style={{ zIndex: 1 }} />;
+  return <HandDrawnSvg ref={ref} pieces={grip?.pieces} box={grip?.box} style={OVER} />;
 }

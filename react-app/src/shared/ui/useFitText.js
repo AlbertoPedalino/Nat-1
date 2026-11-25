@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useStyleId } from './themeIds.js';
 import { parentOf, useElementSize } from './useElementSize.js';
 import { useEventListener } from './useEventListener.js';
@@ -19,37 +19,65 @@ const NO_ELEMENT = Object.freeze({ current: null });
 // (Typography noWrap, ONE_LINE_SX), so it is as wide as its box and
 // scrollWidth is the text's own width. `enabled` false leaves the name at its
 // size (a title that wraps instead). Returns the ref to put on the element.
+//
+// Every name on the page is fitted together, in one pass: each name's size
+// cleared, then every name measured, then every size written; so the page is
+// laid out once for all of them, not once a name. A sheet holds some fifty,
+// and a face loading (a toast's typewriter, its first time) refitted them one
+// by one, a layout each: a click's toast came late.
+const QUEUED = new Map();
+let flushing = false;
+function fitQueued() {
+  flushing = false;
+  const names = [...QUEUED].filter(([el]) => el.isConnected);
+  QUEUED.clear();
+  names.forEach(([el]) => writeLiveStyle(el, { fontSize: null }));
+  const sizes = names.map(([el, min]) => {
+    const room = el.clientWidth;
+    const need = el.scrollWidth;
+    // Both are whole pixels: a name a fraction of a pixel too wide still
+    // measures as wide as its box, and is cut with an ellipsis. Only a name
+    // measured narrower than its box surely fits.
+    if (!room || need < room) return null;
+    const base = parseFloat(getComputedStyle(el).fontSize);
+    // A hair under the exact ratio: the ink's outline and a slanted face's
+    // overhang reach past the measured advance.
+    return Math.max(base * min, (base * room * 0.96) / need);
+  });
+  names.forEach(([el], i) => { if (sizes[i] !== null) writeLiveStyle(el, { fontSize: sizes[i] }); });
+}
+// Fits `el` with the names queued with it: before the page is painted (the
+// end of the render that asked), or on the next frame.
+function queueFit(el, min, { frame = false } = {}) {
+  QUEUED.set(el, min);
+  if (flushing) return;
+  flushing = true;
+  if (frame && typeof requestAnimationFrame === 'function') requestAnimationFrame(fitQueued);
+  else queueMicrotask(fitQueued);
+}
+
 export function useFitText(text, { min = 0.5, enabled = true } = {}) {
   const ref = useRef(null);
   const styleId = useStyleId();
   const box = useElementSize(enabled ? ref : NO_ELEMENT, parentOf);
-  const [facesLoaded, setFacesLoaded] = useState(0);
-  useEventListener(globalThis.document?.fonts, 'loadingdone', () => setFacesLoaded((n) => n + 1), { enabled });
+  // A face finishing loading: the name joins the next frame's one pass, with
+  // no render of its own.
+  useEventListener(globalThis.document?.fonts, 'loadingdone', () => ref.current && queueFit(ref.current, min, { frame: true }), { enabled });
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
-    const fit = () => {
+    if (!enabled) {
       writeLiveStyle(el, { fontSize: null });
-      if (!enabled) return;
-      const room = el.clientWidth;
-      const need = el.scrollWidth;
-      // Both are whole pixels: a name a fraction of a pixel too wide still
-      // measures as wide as its box, and is cut with an ellipsis. Only a name
-      // measured narrower than its box surely fits.
-      if (!room || need < room) return;
-      const base = parseFloat(getComputedStyle(el).fontSize);
-      // A hair under the exact ratio: the ink's outline and a slanted face's
-      // overhang reach past the measured advance.
-      writeLiveStyle(el, { fontSize: Math.max(base * min, (base * room * 0.96) / need) });
-    };
-    fit();
-    if (!enabled || typeof requestAnimationFrame !== 'function') return undefined;
+      return undefined;
+    }
+    queueFit(el, min);
     // Once more after the frame: a new style's faces and fits are written on
     // the page's root by an effect that runs after this one.
-    const frame = requestAnimationFrame(fit);
+    if (typeof requestAnimationFrame !== 'function') return undefined;
+    const frame = requestAnimationFrame(() => queueFit(el, min));
     return () => cancelAnimationFrame(frame);
-  }, [text, styleId, min, enabled, box?.width, facesLoaded]);
+  }, [text, styleId, min, enabled, box?.width]);
 
   return ref;
 }

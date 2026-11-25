@@ -7,7 +7,7 @@ import { DURATIONS, GEM_MOTION, GONE_WHEN_REDUCED, STILL_WHEN_REDUCED, motionTim
 import { PARTICLE_GLYPHS } from './momentParticles.js';
 import { useStyleId } from './themeIds.js';
 import { styleShapes } from './shapes.js';
-import { counterGroup, counterMark, counterStrike } from './counterDrawing.js';
+import { counterGroup, counterMark, counterStrike, trainingMark, trainingScale } from './counterDrawing.js';
 import HandDrawnSvg from './HandDrawnSvg.jsx';
 import MeasuredDrawing from './MeasuredDrawing.jsx';
 
@@ -43,9 +43,9 @@ import MeasuredDrawing from './MeasuredDrawing.jsx';
 // style's own (stars and moons, doubloons, gears, rune stones, flowers, eyes,
 // pixel coins). A cut may colour a
 // kind its own way (`tones`, over GEM_TONES). Drawn here from them. Or the
-// style draws its counters with the hand-drawing kit instead (a cut's
-// `drawing`, counterDrawing.js: the war's tally in chalk), each a mark in the
-// role its `tones` give its kind.
+// style draws its counters or its training marks with the hand-drawing kit
+// instead (a cut's `drawing`, counterDrawing.js: the war's rounds and its
+// tally in chalk), each a mark in the role its `tones` give its kind.
 
 // Sizes easy to hit with a finger: 'md' in a panel of its own, 'sm' inside a
 // card's row.
@@ -225,15 +225,15 @@ export default function GemPip({
 
 // A row of counters (a level's slots, a pool's hit dice): gems side by side,
 // wrapping. Where the style draws its counters by hand in groups
-// (counterDrawing.js: the war's tally), the row is laid in those groups, each
+// (counterDrawing.js: a tally in chalk), the row is laid in those groups, each
 // kept whole on its line, every counter told its place, and the last of a
 // full group struck across the others: the strike drawn over the group, to
 // its size. `gap` is the room between gems, in the theme's steps.
 export function GemRow({ gap = 0.5, sx, children }) {
   const { counter } = useGemCuts();
   const gems = Children.toArray(children);
-  if (!counter.drawing) return <Box sx={[ROW_SX, { gap }, sx]}>{gems}</Box>;
-  const { every } = counterGroup(counter.drawing);
+  const every = counter.drawing ? counterGroup(counter.drawing).every : 0;
+  if (!every) return <Box sx={[ROW_SX, { gap }, sx]}>{gems}</Box>;
   const groups = Array.from({ length: Math.ceil(gems.length / every) }, (_, group) => gems.slice(group * every, (group + 1) * every));
   return (
     <Box sx={[ROW_SX, GROUPED_ROW_SX, sx]}>
@@ -261,10 +261,20 @@ const MARK_SX = { position: 'absolute', inset: 0, display: 'block' };
 // cut, small and still, as it is read and never spent: an empty setting
 // untrained, half lit for half proficiency, lit in its tone when proficient
 // or expert (TRAINING_TONES), or in the cut's own colour at every level (its
-// `tones.training`) where the cut marks an expert itself. `training`: 'none',
-// 'half', 'prof' or 'exp'.
+// `tones.training`) where the cut marks an expert itself; or, where the style
+// draws it by hand (counterDrawing.js: the war's chalk), that mark, in the
+// role its `tones.training` gives it. `training`: 'none', 'half', 'prof' or
+// 'exp'.
 export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx }) {
   const { training: cut } = useGemCuts();
+  if (cut.drawing) {
+    const drawn = Math.round(size * trainingScale(cut.drawing));
+    return (
+      <Box component="span" aria-hidden sx={[trainingGemSx(drawn), { position: 'relative' }, sx]}>
+        <HandDrawnSvg {...trainingMark(cut.drawing, drawn, drawn, cut.roles.training, training)} />
+      </Box>
+    );
+  }
   const shades = shadesOf(cut.tones.training || TRAINING_TONES[training] || TRAINING_TONES.prof);
   return (
     <Box component="svg" viewBox="0 0 100 100" aria-hidden sx={[trainingGemSx(size), sx]}>

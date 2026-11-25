@@ -116,10 +116,11 @@ const COMIC = deepFreeze({
   // `glint` whether the comic glint shines on it, `centre` the point its spent
   // setting shrinks to; and, where it has them, `spent`, what is left of it
   // once spent (parts drawn in place of the bare setting), and `expert`, what
-  // marks an expert on a training mark. Or the counter is not a gem at all
-  // but drawn by the hand-drawing kit (`drawing`, counterDrawing.js: WAR's
-  // tally in chalk), its `tones` then the role each kind it counts is drawn
-  // in, every one named. Either may bring `tones`, a palette
+  // marks an expert on a training mark. Or the counter or the training mark
+  // is not a gem at all but drawn by the hand-drawing kit (`drawing`,
+  // counterDrawing.js: WAR's rounds, its tally in chalk), its `tones` then
+  // the role each kind it counts (or `training`) is drawn in, every one
+  // named. Either may bring `tones`, a palette
   // role by what it counts (GEM_TONES' kinds; `training` for a training mark,
   // then one colour at every level), over the colour GemPip gives it: blood is
   // red, brass a cartridge's. A style's counter and uses must differ in
@@ -535,14 +536,15 @@ const WAR = deepFreeze({
     side: '2%',
   },
   bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
-  // A counter is a mark of chalk in a tally (counterDrawing.js): a stroke
-  // while it is there to spend, every fifth struck across the four before
-  // it, one spent rubbed out with a thumb. A slot's in a warm chalk (never
-  // the olive of a use, in either palette), a pact's in blue, a temporary
-  // one's in green, a hit die's in red. A use is an olive grenade, an empty
-  // pouch once thrown; a training mark a rank chevron.
+  // A counter is a rifle round (counterDrawing.js), as in the belts over the
+  // panels: live while it is there to spend, the spent case once spent; its
+  // case in brass for a slot (never the olive of a use, in either palette),
+  // steel for a pact's, green for a temporary one, red for a hit die. A use
+  // is an olive grenade, an empty pouch once thrown. A training mark is a
+  // tally in a warm chalk: nothing untrained, a stroke for half proficiency,
+  // two for proficiency, the two struck through for expertise.
   gemCuts: {
-    counter: { drawing: 'tally', tones: { slot: 'warningText', pact: 'info', temporary: 'success', hitDice: 'dangerText' } },
+    counter: { drawing: 'cartridge', tones: { slot: 'warning', pact: 'armor', temporary: 'success', hitDice: 'dangerText' } },
     uses: {
       outline: 'M24 62 A26 32 0 0 1 76 62 A26 32 0 0 1 24 62 Z M40 14 H60 V32 H40 Z M60 16 H68 C74 16 76 22 76 30 V46 L70 44 V28 C70 24 68 22 64 22 H60 Z',
       shading: [
@@ -557,16 +559,7 @@ const WAR = deepFreeze({
       shadowDrop: 4,
       tones: { uses: 'secondary' },
     },
-    training: {
-      outline: 'M4 50 L50 10 L96 50 V84 L50 46 L4 84 Z',
-      shading: [
-        ['dark', 'M50 46 L96 84 V70 L50 32 Z'],
-        ['light', 'M4 50 L50 10 L50 20 L4 60 Z'],
-      ],
-      glint: false,
-      centre: [50, 48],
-      shadowDrop: 4,
-    },
+    training: { drawing: 'tally', tones: { training: 'warningText' } },
   },
   meterSegments: { bar: 10, piece: 5, smooth: 0 },
   moments: {
@@ -594,7 +587,8 @@ const WAR = deepFreeze({
   switch: { width: 46, height: 26, thumb: 16, inset: 5 },
   sliderThumb: { size: 18 },
   ornament: { path: 'M6 0 L7.4 4.1 L11.7 4.1 L8.2 6.7 L9.5 10.8 L6 8.3 L2.5 10.8 L3.8 6.7 L0.3 4.1 L4.6 4.1 Z' },
-  marker: { outline: 'M6 1 C9 4.5 10 8 10 11 V28.5 H2 V11 C2 8 3 4.5 6 1 Z', lines: 'M2 11.5 H10 M2 25 H10', cap: 'M2 25 H10 V28.5 H2 Z' },
+  // A card's mark is a drape of cloth hung by one corner, in the kind's colour (markerDrawing.js).
+  marker: { drawing: 'drape' },
   bookmarkMark: { width: 4, inset: 3, radius: '0' },
   paper: { corners: [0, 0.4, 0, 0.8] },
   focusRing: { width: 3, gap: 2 },

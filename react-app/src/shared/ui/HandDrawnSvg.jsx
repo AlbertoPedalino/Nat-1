@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { memo, useId } from 'react';
 import { UI_COLORS } from './colors.js';
 
 // A hand-drawn drawing's pieces (handDrawing.js) as an SVG: every role named
@@ -8,7 +8,10 @@ import { UI_COLORS } from './colors.js';
 // to foot) through a gradient. What a panel's grip and banner are drawn with
 // (PanelGrip.jsx, PanelBanner.jsx). It never takes a pointer. With no
 // `pieces` yet (its box not measured), it is there unseen, for its `ref` to
-// find the box by.
+// find the box by. Drawn again only when what it is given changes: a
+// drawing's pieces come from its module's cache, the same for the same size,
+// so a page re-rendered (a roll, a toast) leaves its thousands of drawn
+// shapes (a belt of rounds, a folder's sheets) as they are.
 
 const META = new Set(['tag', 'fill', 'stroke', 'strokeWidth', 'opacity', 'blur', 'children', 'clip', 'crisp']);
 
@@ -40,7 +43,7 @@ function drawPiece(piece, key, scope) {
   );
 }
 
-export default function HandDrawnSvg({ pieces, box, style, ref }) {
+function HandDrawnSvg({ pieces, box, style, ref }) {
   const prefix = `hd${useId().replace(/[^\w-]/g, '')}`;
   if (!pieces) return <svg ref={ref} aria-hidden="true" focusable="false" style={{ display: 'none' }} />;
   const clips = [];
@@ -57,6 +60,8 @@ export default function HandDrawnSvg({ pieces, box, style, ref }) {
     },
     paint(fill) {
       if (!fill || fill === 'none') return 'none';
+      // A mark drawn in whatever colour it is given (ToneBar's): the colour it sits in.
+      if (fill === 'currentColor') return fill;
       if (typeof fill === 'string') return UI_COLORS[fill];
       const key = JSON.stringify(fill.shade);
       if (!shades.has(key)) shades.set(key, { id: `${prefix}g${shades.size}`, stops: fill.shade });
@@ -91,3 +96,5 @@ export default function HandDrawnSvg({ pieces, box, style, ref }) {
     </svg>
   );
 }
+
+export default memo(HandDrawnSvg);

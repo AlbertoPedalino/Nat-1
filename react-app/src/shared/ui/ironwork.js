@@ -230,69 +230,77 @@ const bulletPath = (x, base) => {
   const mouth = base - length;
   return `M${x - neck} ${mouth} Q${x - neck} ${mouth - bullet * 0.6} ${x} ${mouth - bullet} Q${x + neck} ${mouth - bullet * 0.6} ${x + neck} ${mouth} Z`;
 };
-// The light and shade of something round standing at x, `radius` px, cut to `outline`.
-const roundLit = (outline, x, radius, top, bottom) => ({
-  tag: 'g',
-  clip: outline,
-  children: [
-    { tag: 'rect', x: x - radius * 0.55, y: top, width: radius * 0.45, height: bottom - top, fill: 'white', blur: 0.5, opacity: OPACITY.strong },
-    { tag: 'rect', x: x + radius * 0.2, y: top, width: radius, height: bottom - top, fill: 'black', blur: 0.8, opacity: OPACITY.edge },
-    { tag: 'rect', x: x - radius - 0.4, y: top, width: 1, height: bottom - top, fill: 'black', opacity: OPACITY.line },
-  ],
-});
-function cartridgePieces(x, base, live) {
-  const { radius, length, bullet } = CARTRIDGE;
-  const brass = casePath(x, base);
-  const groove = { tag: 'rect', x: x - radius, y: base - 3.4, width: radius * 2, height: 0.9, fill: 'black', opacity: OPACITY.strong };
-  if (!live) {
-    return [
-      { tag: 'path', d: brass, fill: 'warning' },
-      { tag: 'path', d: brass, fill: 'black', opacity: OPACITY.line },
-      roundLit(brass, x, radius, base - length, base),
-      { tag: 'g', clip: brass, children: [{ tag: 'ellipse', cx: x, cy: base - length, rx: radius, ry: 4, fill: 'black', blur: 1.5, opacity: OPACITY.strong }] },
-      { tag: 'ellipse', cx: x, cy: base - length, rx: CARTRIDGE.neck, ry: 0.8, fill: 'black' },
-      groove,
-      { tag: 'path', d: brass, fill: 'none', stroke: 'black', strokeWidth: 0.5, opacity: OPACITY.edge },
-    ];
-  }
-  const lead = bulletPath(x, base);
+// Rounds standing in a row on `base` ([{ x, live }] each: live, its bullet
+// in it, or the spent case of one fired), their cases in `metal` (brass, or
+// a kind's own colour on a counter): the one drawing of a round, for one
+// alone (a slot's counter) as for a whole belt. Drawn as few shapes as can
+// be, each part of every round in one path with the same part of the others
+// (all the brass in one, all the light down them in another…): a sheet holds
+// a belt on every panel, some forty rounds each, and drawn a round at a time
+// they were thousands of shapes, each its own clip and blur, laid out and
+// painted again whenever the page changed.
+// One path of a part of each thing in `list` (`part` its path for one).
+const join = (list, part) => list.map(part).join(' ');
+function roundsPieces(rounds, base, metal = 'warning') {
+  const { radius, neck, length, bullet } = CARTRIDGE;
+  const live = rounds.filter((round) => round.live);
+  const spent = rounds.filter((round) => !round.live);
+  const brass = join(rounds, ({ x }) => casePath(x, base));
+  const lead = join(live, ({ x }) => bulletPath(x, base));
+  const whole = `${brass} ${lead}`;
+  const top = (round) => base - length - (round.live ? bullet : 0);
+  // A strip down every round, as far out from its middle as `from` and as wide as `wide`, shares of its radius.
+  const strip = (from, wide, extra = 0) => join(rounds, (round) => boxPath(radius * wide + extra, base - top(round), round.x + radius * from, top(round)));
   return [
-    { tag: 'path', d: lead, fill: 'warningStrong' },
-    roundLit(lead, x, radius, base - length - bullet, base - length),
-    { tag: 'path', d: brass, fill: 'warning' },
-    roundLit(brass, x, radius, base - length, base),
-    groove,
-    { tag: 'path', d: `${brass} ${lead}`, fill: 'none', stroke: 'black', strokeWidth: 0.5, opacity: OPACITY.edge },
+    ...(lead ? [{ tag: 'path', d: lead, fill: 'warningStrong' }] : []),
+    { tag: 'path', d: brass, fill: metal },
+    // A spent case: its brass gone dark.
+    ...(spent.length ? [{ tag: 'path', d: join(spent, ({ x }) => casePath(x, base)), fill: 'black', opacity: OPACITY.line }] : []),
+    // Round as a cylinder is round: the light down its left, the shade down its right.
+    {
+      tag: 'g',
+      clip: whole,
+      children: [
+        { tag: 'path', d: strip(-0.55, 0.45), fill: 'white', opacity: OPACITY.edge },
+        { tag: 'path', d: strip(0.2, 1), fill: 'black', opacity: OPACITY.line },
+        { tag: 'path', d: strip(-1, 0, 1), fill: 'black', opacity: OPACITY.line },
+        // A spent case's mouth, open and sooted.
+        ...spent.map(({ x }) => ({ tag: 'ellipse', cx: x, cy: base - length, rx: radius, ry: 4, fill: 'black', opacity: OPACITY.edge })),
+      ],
+    },
+    ...(spent.length ? [{ tag: 'path', d: join(spent, ({ x }) => `M${x - neck} ${base - length}a${neck} 0.8 0 1 0 ${neck * 2} 0a${neck} 0.8 0 1 0 ${-neck * 2} 0Z`), fill: 'black' }] : []),
+    // The groove round its base.
+    { tag: 'path', d: join(rounds, ({ x }) => boxPath(radius * 2, 0.9, x - radius, base - 3.4)), fill: 'black', opacity: OPACITY.strong },
+    { tag: 'path', d: whole, fill: 'none', stroke: 'black', strokeWidth: 0.5, opacity: OPACITY.edge },
   ];
 }
-// The steel link a round sits in, two loops round its case and the strap to the next.
-function linkPieces(x, base, last) {
-  const { radius } = CARTRIDGE;
-  const loop = (y) => [
-    { tag: 'path', d: roundedBoxPath(radius * 2 + 2.4, 4.2, 1.2, x - radius - 1.2, y), fill: 'textMuted' },
-    { tag: 'path', d: roundedBoxPath(radius * 2 + 2.4, 4.2, 1.2, x - radius - 1.2, y), fill: 'black', opacity: OPACITY.strong },
-    { tag: 'rect', x: x - radius - 1, y: y + 0.4, width: radius * 2 + 2, height: 0.9, fill: 'white', opacity: OPACITY.line },
-    { tag: 'rect', x: x - radius - 1, y: y + 3, width: radius * 2 + 2, height: 1.2, fill: 'black', opacity: OPACITY.edge },
-    { tag: 'path', d: roundedBoxPath(radius * 2 + 2.4, 4.2, 1.2, x - radius - 1.2, y), fill: 'none', stroke: 'black', strokeWidth: 0.5, opacity: OPACITY.strong },
-  ];
-  return [
-    ...loop(base - 21),
-    ...loop(base - 9),
-    ...(last ? [] : [
-      { tag: 'rect', x: x + radius + 1.2, y: base - 15.6, width: BELT_PITCH - radius * 2 - 2.4, height: 2.4, fill: 'textMuted' },
-      { tag: 'rect', x: x + radius + 1.2, y: base - 15.6, width: BELT_PITCH - radius * 2 - 2.4, height: 2.4, fill: 'black', opacity: OPACITY.heavy },
-    ]),
-  ];
-}
+
+// A rifle round standing at x, its base at `base`: live or spent, its case in
+// `metal`. CARTRIDGE_HEIGHT px from its base to its bullet's point.
+export const CARTRIDGE_HEIGHT = CARTRIDGE.length + CARTRIDGE.bullet;
+export const cartridgePieces = (x, base, live, metal) => roundsPieces([{ x, live }], base, metal);
+
 export function cartridgeBeltPieces(from, to, cy, { seed = 3, held = 1 } = {}) {
   const random = seededRandom(`belt-${seed}`);
   const base = cy + 17;
-  const loops = [];
-  for (let x = from + 8; x < to - 4; x += BELT_PITCH) loops.push({ x, live: random() < held });
+  const { radius } = CARTRIDGE;
+  const rounds = [];
+  for (let x = from + 8; x < to - 4; x += BELT_PITCH) rounds.push({ x, live: random() < held });
+  const loop = (y) => join(rounds, ({ x }) => roundedBoxPath(radius * 2 + 2.4, 4.2, 1.2, x - radius - 1.2, y));
+  const loops = `${loop(base - 21)} ${loop(base - 9)}`;
+  const straps = join(rounds.slice(0, -1), ({ x }) => boxPath(BELT_PITCH - radius * 2 - 2.4, 2.4, x + radius + 1.2, base - 15.6));
+  const along = (y, height) => join(rounds, ({ x }) => boxPath(radius * 2 + 2, height, x - radius - 1, y));
   return [
     softShadow(boxPath(to - from, 26, from, base - 26), { blur: 3, opacity: OPACITY.strong, shift: [0, 3] }),
-    ...loops.flatMap(({ x, live }) => cartridgePieces(x, base, live)),
-    ...loops.flatMap(({ x }, i) => linkPieces(x, base, i === loops.length - 1)),
+    ...roundsPieces(rounds, base),
+    // The steel links: two loops round every case, a strap to the next.
+    { tag: 'path', d: loops, fill: 'textMuted' },
+    { tag: 'path', d: loops, fill: 'black', opacity: OPACITY.strong },
+    { tag: 'path', d: `${along(base - 20.6, 0.9)} ${along(base - 8.6, 0.9)}`, fill: 'white', opacity: OPACITY.line },
+    { tag: 'path', d: `${along(base - 18, 1.2)} ${along(base - 6, 1.2)}`, fill: 'black', opacity: OPACITY.edge },
+    { tag: 'path', d: loops, fill: 'none', stroke: 'black', strokeWidth: 0.5, opacity: OPACITY.strong },
+    { tag: 'path', d: straps, fill: 'textMuted' },
+    { tag: 'path', d: straps, fill: 'black', opacity: OPACITY.heavy },
   ];
 }
 
