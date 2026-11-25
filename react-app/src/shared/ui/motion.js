@@ -41,11 +41,23 @@ export const BUSY_MOTION = Object.freeze({ turn: 900 });
 // An icon button's icon twitching under the pointer (iconButtonLook).
 export const ICON_MOTION = Object.freeze({ twitch: 400 });
 
-// A drawn roll toast's moments (DiceToast): at a natural 20 what grows up it
+// A drawn roll toast's moments (DrawnToast.jsx): at a natural 20 what grows up it
 // (`grow`) and each flower opening on it (`bloom`); at a natural 1 the toast
 // leaning (`lean`) and what claws up before it (`claw`); `…After`, the beat
-// each waits first.
+// each waits first. What is marked on one (a hole, a pen's ring: `mark`)
+// comes a `beat` after the last; a `flash` goes off before it, a `bulb`
+// goes off beside it. One that arrives spinning takes `spin`, one slapped
+// down takes `slap`; one that is hit takes `jolt` to stop shaking, starting
+// `joltAfter` its arrival began.
 export const TOAST_MOTION = Object.freeze({
+  beat: 250,
+  mark: 400,
+  flash: 700,
+  bulb: 1100,
+  spin: 850,
+  slap: 460,
+  jolt: 1300,
+  joltAfter: 975,
   grow: 1100,
   bloom: 500,
   bloomAfter: 150,

@@ -28,8 +28,9 @@ export function bubbleToneSx(tone, drop = 3) {
   .forEach((tone) => bubbleShadowSx(tone));
 
 // The text roles the bubble writes in (a paper bubble's ink), and how its
-// inked lettering is lettered on it, set on it.
-const INK_SX = {
+// inked lettering is lettered on it, set on it; and on whatever else the
+// style draws on that paper (a drawn score, a drawn toast: their `paper`).
+export const BUBBLE_INK_SX = {
   ...Object.fromEntries(BUBBLE_INK_ROLES.map((role) => [colorVariableName(role), BUBBLE[`ink:${role}`]])),
   ...BUBBLE_LETTERING,
 };
@@ -53,7 +54,7 @@ export function bubbleSx({ tone = UI_COLORS.edge, pop = true } = {}) {
     outline: BUBBLE.outline,
     outlineOffset: BUBBLE.outlineOffset,
     color: UI_COLORS.textPrimary,
-    ...INK_SX,
+    ...BUBBLE_INK_SX,
     ...DECOR_SX,
     transform: `rotate(${TILT})`,
     ...(pop ? {

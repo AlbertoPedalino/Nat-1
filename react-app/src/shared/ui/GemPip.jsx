@@ -32,7 +32,8 @@ import { styleShapes } from './shapes.js';
 // counter, a feature's uses, a training mark. The comic style's hexagons (the
 // counter and the uses told apart by colour) and four-sided diamond; the
 // gothic one's drops of blood, candles and crosses; the war one's cartridges,
-// grenades and chevrons; the sci-fi one's power cells; and every other
+// grenades and chevrons; the noir one's bullets, shots of whiskey and
+// detective's shields; the sci-fi one's power cells; and every other
 // style's own (stars and moons, doubloons, gears, rune stones, flowers, eyes,
 // pixel coins). A cut may colour a
 // kind its own way (`tones`, over GEM_TONES). Drawn here from them.
@@ -59,7 +60,11 @@ const pathOf = (list) => `M${points(list)}Z`;
 // empty setting, all as SVG paths. A cut gem (`sides`, outline and table as
 // centre and radii): light from the top left, a facet facing it lit, one
 // facing away in shade, the others in the gem's own colour. A drawn token
-// (`outline`, `shading`) brings its parts drawn.
+// (`outline`, `shading`) brings its parts drawn, each in a shade of the gem's
+// colour or in a palette role of its own (a bullet's copper on its case); it
+// may bring what is left of it once `spent` (an empty case, an empty glass)
+// in place of the bare setting, and what marks an `expert` on a training
+// mark (a star struck in a shield).
 function gemCut(cut) {
   const tones = Object.fromEntries(Object.entries(cut.tones || {}).map(([kind, role]) => [kind, UI_COLORS[role]]));
   return Object.freeze({ tones, ...(cut.outline ? drawnCut(cut) : cutGem(cut)) });
@@ -87,12 +92,15 @@ function cutGem(cut) {
   };
 }
 
-function drawnCut({ outline, shading, glint, centre: [cx, cy], shadowDrop }) {
+function drawnCut({ outline, shading, spent, expert, glint, centre: [cx, cy], shadowDrop }) {
   // The shadow dropped and the setting's rim shrunk towards the centre.
   const shadowShift = `translate(0 ${shadowDrop})`;
   const settingRimShift = `translate(${cx} ${cy + 3}) scale(0.78) translate(${-cx} ${-cy})`;
+  const parts = (list) => list?.map(([shade, shape]) => ({ shape, shade })) ?? null;
   return {
-    parts: shading.map(([shade, shape]) => ({ shape, shade })),
+    parts: parts(shading),
+    spent: parts(spent),
+    expert: parts(expert),
     table: null,
     glint,
     outer: outline,
@@ -180,16 +188,19 @@ export default function GemPip({
 // A training mark (a skill's or a save's proficiency): a gem of the four-sided
 // cut, small and still, as it is read and never spent: an empty setting
 // untrained, half lit for half proficiency, lit in its tone when proficient
-// or expert (TRAINING_TONES). `training`: 'none', 'half', 'prof' or 'exp'.
+// or expert (TRAINING_TONES), or in the cut's own colour at every level (its
+// `tones.training`) where the cut marks an expert itself. `training`: 'none',
+// 'half', 'prof' or 'exp'.
 export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx }) {
-  const shades = shadesOf(TRAINING_TONES[training] || TRAINING_TONES.prof);
   const { training: cut } = useGemCuts();
+  const shades = shadesOf(cut.tones.training || TRAINING_TONES[training] || TRAINING_TONES.prof);
   return (
     <Box component="svg" viewBox="0 0 100 100" aria-hidden sx={[trainingGemSx(size), sx]}>
       {training === 'prof' || training === 'exp'
         ? <LitGem cut={cut} shades={shades} />
         : <GemSetting cut={cut} shades={shades} />}
       {training === 'half' ? <Box component="g" sx={HALF_LIT_SX}><LitGem cut={cut} shades={shades} /></Box> : null}
+      {training === 'exp' && cut.expert ? <GemParts parts={cut.expert} shades={shades} /> : null}
       <GemOutline cut={cut} width={1.6} />
     </Box>
   );
@@ -198,16 +209,21 @@ export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx })
 export const TRAINING_GEM_SIZE = 14;
 
 // A gem's drawing, for either cut: lit (its parts in their shades over its
-// own colour, table, glint and its solid shadow), its empty setting, its
-// outline.
+// own colour, table, glint and its solid shadow), its empty setting (or what
+// the cut leaves of it once spent), its outline. A part is painted in a shade
+// of the gem's colour, or in the palette role it names.
+function GemParts({ parts, shades }) {
+  return parts.map((part) => (
+    <path key={`${part.shade}:${part.shape}`} d={part.shape} fill={shades[part.shade] ?? UI_COLORS[part.shade]} {...FACET_LINE} />
+  ));
+}
+
 function LitGem({ cut, shades }) {
   return (
     <>
       <path d={cut.shadow} transform={cut.shadowShift} fill={UI_COLORS.edge} />
       {cut.table ? null : <path d={cut.outer} fill={shades.base} />}
-      {cut.parts.map((part) => (
-        <path key={part.shape} d={part.shape} fill={shades[part.shade]} {...FACET_LINE} />
-      ))}
+      <GemParts parts={cut.parts} shades={shades} />
       {cut.table ? <path d={cut.table} fill={shades.table} {...FACET_LINE} /> : null}
       {cut.glint ? (
         <>
@@ -223,7 +239,9 @@ function GemSetting({ cut, shades }) {
   return (
     <>
       <path d={cut.outer} fill={UI_COLORS.surfaceSunken} />
-      <path d={cut.settingRim} transform={cut.settingRimShift} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />
+      {cut.spent
+        ? <GemParts parts={cut.spent} shades={shades} />
+        : <path d={cut.settingRim} transform={cut.settingRimShift} fill="none" stroke={shades.rim} strokeWidth={1.3} vectorEffect="non-scaling-stroke" />}
     </>
   );
 }

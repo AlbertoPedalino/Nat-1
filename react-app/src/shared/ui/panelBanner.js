@@ -1,7 +1,9 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
 import { styleShapes } from './shapes.js';
-import { crescentPoints, drawingCache, polygonPath, sketch } from './handDrawing.js';
+import { boxPath, crescentPoints, drawingBox, drawingCache, polygonPath, sagPoints, sketch } from './handDrawing.js';
+import { paperPieces } from './paperwork.js';
+import { STEEL, barbedWirePieces, boltPieces, dentPieces, dripPieces, staplePieces, steelPieces, tallyPieces } from './ironwork.js';
 
 // A panel's title bar drawn as the style draws it (shapes.js panel.banner): a
 // ribbon, a scroll, a nameplate, a slab… with the title lettered on it, drawn
@@ -207,7 +209,6 @@ const GLASS = Object.freeze({ shade: [[0, 'surfaceRaised'], [1, 'surfaceSunken']
 // A metal's sheen, top to foot, in roles: lit, the metal, its shade.
 const BRASS = Object.freeze({ shade: [[0, 'accentHighlight'], [0.45, 'accent'], [1, 'accentMuted']] });
 const IRON = Object.freeze({ shade: [[0, 'surfaceHeader'], [1, 'surfaceDeep']] });
-const STONE = Object.freeze({ shade: [[0, 'surfaceRaised'], [0.5, 'surfaceHeader'], [1, 'surfaceDeep']] });
 
 // A gear's outline: `teeth` teeth round a wheel `r` px across its tips.
 const gearPoints = (cx, cy, r, teeth) => Array.from({ length: teeth * 4 }, (_, i) => {
@@ -298,7 +299,7 @@ function lintel(w) {
   // The emblem only where the bar has room past its title.
   const emblem = w > 300 ? [diamond(w - 32, 27, 12, 'warning'), diamond(w - 32, 27, 8, 'surfaceHeader'), diamond(w - 32, 27, 5, 'warning')] : [];
   return [
-    { tag: 'path', d: polygonPath(points), fill: STONE, stroke: 'edge', strokeWidth: 1.6 },
+    { tag: 'path', d: polygonPath(points), fill: STEEL, stroke: 'edge', strokeWidth: 1.6 },
     { tag: 'path', d: polygonPath(face), fill: 'none', stroke: 'edge', strokeWidth: 1.2, opacity: OPACITY.heavy },
     { tag: 'path', d: polygonPath(face.map(([x, y]) => [x + 0.8, y + 0.8])), fill: 'none', stroke: 'textSecondary', strokeWidth: 0.8, opacity: OPACITY.strong },
     interlace(10.5, 1), interlace(43.5, -1),
@@ -501,45 +502,62 @@ function caption(w) {
 // the light falls on: clean shapes shaded top to foot, a glow, a rule; no
 // sketched line under it and no cast shadow.
 
-// Noir: the lettering on an office door. A pane of dark glass under a brass
-// hairline, the lamp caught in its near end, and under it three art-deco
-// rules running out, each shorter than the one above.
-function doorglass(w) {
-  const pane = `M0 10 H${w} V44 H0 Z`;
-  // Each rule: how far it runs, where, how thick, in what.
-  const rules = [[w, 46, 1.4, 'accent'], [w - 20, 49.2, 0.9, 'accentMuted'], [w - 48, 51.8, 0.9, 'accentMuted']];
+// Noir: a case file. The manila folder's own edge across the bar, the
+// sheets in it standing a little out of its top, the lamp caught in its near
+// end, a paperclip on its far end where the bar has room; and up at its
+// left, its tab (bannerTab), where the panel's badge is stuck and its title
+// typed on a label (bannerSlip).
+// Where the folder's edge runs in the bar, px: a tab stands from above it
+// down to its foot.
+const FOLDER = Object.freeze({ top: 27, foot: 46 });
+// Card gone a little dark where the hand does not reach.
+const manilaPieces = (d, seed) => [
+  { tag: 'path', d, fill: 'paperShade' },
+  { tag: 'g', clip: d, children: [{ tag: 'rect', x: -40, y: FOLDER.foot - 7, width: 4000, height: 9, fill: 'black', blur: 3, opacity: OPACITY.shade }] },
+  ...sketch('path', d, { seed, roughness: 0.5, stroke: 'onPaper', strokeWidth: 1, opacity: OPACITY.strong }),
+];
+function folder(w) {
+  const edge = boxPath(w, FOLDER.foot - FOLDER.top, 0, FOLDER.top);
   return [
-    { tag: 'path', d: pane, fill: GLASS, opacity: OPACITY.veil },
-    { tag: 'g', clip: pane, children: [{ tag: 'ellipse', cx: 0, cy: 10, rx: Math.min(w * 0.5, 220), ry: 30, fill: 'accentHighlight', blur: 10, opacity: OPACITY.fill }] },
-    { tag: 'rect', x: 0, y: 9.2, width: w, height: 0.8, fill: 'accentMuted' },
-    ...rules.map(([length, y, height, fill]) => ({ tag: 'rect', x: 0, y, width: Math.max(0, length), height, fill })),
+    ...paperPieces(`M12 22 H${w - 16} V34 H12 Z`, 7, 0.5),
+    ...paperPieces(`M7 24.5 H${w - 9} V34 H7 Z`, 8, 0.5),
+    { tag: 'path', d: edge, fill: 'black', blur: 3, opacity: OPACITY.strong, transform: 'translate(0 3)' },
+    ...manilaPieces(edge, 3),
+    { tag: 'g', clip: edge, children: [{ tag: 'ellipse', cx: 0, cy: FOLDER.top, rx: Math.min(w * 0.5, 220), ry: 26, fill: 'white', blur: 10, opacity: OPACITY.shade }] },
+    ...(w > 300 ? sketch('path', `M${w - 40} 17 v21 a5 5 0 0 0 10 0 v-17 a3.4 3.4 0 0 0 -6.8 0 v14`, { seed: 9, roughness: 0.4, stroke: 'textMuted', strokeWidth: 1.7 }) : []),
   ];
 }
 
-// War: a plate of rusted steel bolted across the panel's head. Its corners
-// cut, worn bright along its top, rust bloomed over it (as its width seeds
-// it; in the palette's orange, never its red: on a pale plate red reads as
-// blood), a bolt at each corner.
+// War: a plate of rusted steel bolted across the panel's head, under a run
+// of barbed wire stapled to it. Its corners cut, worn bright along its top,
+// rust bloomed over it and run down from its bolts; where the bar has room, a
+// round or two has dented it, and somebody has counted the days on it in
+// scratches.
 function plate(w) {
-  const random = seededRandom(`banner-plate-${Math.round(w)}`);
   const outline = polygonPath([[3, 10], [w - 3, 10], [w, 13], [w, 41], [w - 3, 44], [3, 44], [0, 41], [0, 13]]);
-  const rust = Array.from({ length: Math.max(2, Math.round(w / 140)) }, () => ({
-    tag: 'ellipse', cx: random() * w, cy: 14 + random() * 28, rx: 18 + random() * 34, ry: 5 + random() * 9, fill: 'warningStrong', blur: 4, opacity: OPACITY.shade,
-  }));
-  const bolt = ([cx, cy]) => [{ tag: 'circle', cx, cy, r: 2.4, fill: 'outline' }, { tag: 'circle', cx: cx - 0.5, cy: cy - 0.5, r: 1, fill: 'surfaceDarkest' }];
+  const posts = w > 240 ? [w * 0.34, w * 0.72] : [w / 2];
+  const stops = [-10, ...posts, w + 10];
   return [
-    { tag: 'path', d: outline, fill: STONE, stroke: 'edge', strokeWidth: 1 },
-    { tag: 'g', clip: outline, children: [...rust, { tag: 'rect', x: 0, y: 10, width: w, height: 1.2, fill: 'textPrimary', opacity: OPACITY.tint }] },
-    ...[[8, 16], [w - 8, 16], [8, 38], [w - 8, 38]].flatMap(bolt),
+    ...steelPieces(outline, w, 10, 34, `banner-plate-${Math.round(w)}`),
+    ...dripPieces(8, 18, 22),
+    ...dripPieces(w - 8, 18, 16),
+    ...(w > 380 ? tallyPieces(w - 150, 19, 16, [5, 5, 3]) : []),
+    ...(w > 240 ? [...dentPieces(w * 0.56, 31, 4), ...dentPieces(w * 0.63, 23, 3)] : []),
+    ...[[8, 16], [w - 8, 16], [8, 38], [w - 8, 38]].flatMap(([x, y]) => boltPieces(x, y)),
+    ...barbedWirePieces(stops.slice(1).flatMap((x, i) => sagPoints([stops[i], 8 + (i % 2)], [x, 9], 6))),
+    ...posts.flatMap((x) => staplePieces(x, 10)),
   ];
 }
 
-const BANNERS = Object.freeze({ ribbon, scroll, drape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank, caption, doorglass, plate });
+const BANNERS = Object.freeze({ ribbon, scroll, drape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank, caption, folder, plate });
 
 // How each banner's title is lettered: the ink that reads `on` a role of the
 // drawing, or a role's `color`; outlined in a role (`halo`) where the drawing
 // is busy under the letters, or `inked` as the comic letters (an ink outline
-// and its shadow).
+// and its shadow); on a `slip` of its own, drawn to the title's size
+// (bannerSlip), where the title is on a label; behind a `tab`, drawn to the
+// size of the badge and the title together (bannerTab), where the banner
+// stands them on a tab of its own.
 const BANNER_TITLES = Object.freeze({
   ribbon: Object.freeze({ color: 'paper', inked: true }),
   scroll: Object.freeze({ on: 'paperShade' }),
@@ -553,7 +571,7 @@ const BANNER_TITLES = Object.freeze({
   marquee: Object.freeze({ color: 'accent' }),
   plank: Object.freeze({ color: 'textPrimary' }),
   caption: Object.freeze({ on: 'accent' }),
-  doorglass: Object.freeze({ color: 'accentText' }),
+  folder: Object.freeze({ on: 'paper', slip: true, tab: true }),
   plate: Object.freeze({ color: 'textPrimary' }),
 });
 
@@ -566,6 +584,29 @@ export const BANNER_KINDS = Object.freeze(['none', ...Object.keys(BANNERS)]);
 // How the banner `kind` letters its title (BANNER_TITLES); null for 'none'.
 export function bannerTitle(kind) {
   return BANNER_TITLES[kind] || null;
+}
+
+// The slip a banner's title is lettered on (BANNER_TITLES `slip`), `width`
+// by `height` px, the title's own size: the folder's, a typed label.
+const slips = drawingCache((kind, width, height) => drawingBox(paperPieces(boxPath(width, height), 5), width, height, 8));
+export function bannerSlip(kind, width, height) {
+  return BANNER_TITLES[kind]?.slip ? slips(kind, width, height) : null;
+}
+
+// The tab a banner stands its badge and title on (BANNER_TITLES `tab`),
+// `width` by `height` px, the two of them together: the folder's, cut with
+// round shoulders and a slanted end, down to the folder's foot (the pair is
+// centred in the bar), so the two are one sheet of card.
+const tabs = drawingCache((kind, width, height) => {
+  const foot = height / 2 + FOLDER.foot - BANNER_HEIGHT / 2;
+  const tab = `M-12 ${foot} V2 Q-12 -5 -5 -5 H${width + 2} Q${width + 9} -5 ${width + 12} 1 L${width + 27} ${foot} Z`;
+  return drawingBox([
+    { tag: 'path', d: tab, fill: 'black', blur: 3, opacity: OPACITY.edge, transform: 'translate(2 1)' },
+    ...manilaPieces(tab, 4),
+  ], width, height, 30);
+});
+export function bannerTab(kind, width, height) {
+  return BANNER_TITLES[kind]?.tab ? tabs(kind, width, height) : null;
 }
 
 // How far the banner `kind` reaches past the panel's sides, px.

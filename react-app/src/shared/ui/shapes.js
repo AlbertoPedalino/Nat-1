@@ -95,7 +95,7 @@ const COMIC = deepFreeze({
   rollToast: { drawing: 'none' },
   // What an app notice is written on (AppToast.jsx): the style's speech bubble
   // (`drawing: 'none'`), or one drawn thing in its place (noticeDrawing.js:
-  // 'sealed'), in the notice's colour and with its mark.
+  // 'sealed', 'clipping', 'tin'), in the notice's colour and with its mark.
   notice: { drawing: 'none' },
   // A tab is a notebook's bookmark: rounded at the top, open at the foot where
   // it stands on its bar's ruled line; the open one rises by `rise` px. `gap`
@@ -112,10 +112,14 @@ const COMIC = deepFreeze({
   // like a gem that is spent. A style may draw a token of its own instead of
   // a cut gem (GOTHIC's drop of blood): `outline` an SVG path, `shading` its
   // lit and shaded parts ([shade, path], the shades of GemPip: light, dark,
-  // table), `glint` whether the comic glint shines on it, `centre` the point
-  // its spent setting shrinks to. Either may bring `tones`, a palette role by
-  // what it counts (GEM_TONES' kinds), over the colour GemPip gives it: blood
-  // is red, brass a cartridge's. A style's counter and uses must differ in
+  // table; or a palette role, for a part that keeps a colour of its own),
+  // `glint` whether the comic glint shines on it, `centre` the point its spent
+  // setting shrinks to; and, where it has them, `spent`, what is left of it
+  // once spent (parts drawn in place of the bare setting), and `expert`, what
+  // marks an expert on a training mark. Either may bring `tones`, a palette
+  // role by what it counts (GEM_TONES' kinds; `training` for a training mark,
+  // then one colour at every level), over the colour GemPip gives it: blood is
+  // red, brass a cartridge's. A style's counter and uses must differ in
   // their cut or in every colour.
   gemCuts: {
     counter: HEXAGON_GEM,
@@ -590,7 +594,8 @@ const WAR = deepFreeze({
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
   abilities: COMIC.abilities,
   rollToast: COMIC.rollToast,
-  notice: COMIC.notice,
+  // A notice is a strip of tin nailed up, a disc of paint in its colour.
+  notice: { drawing: 'tin' },
   ink: { ...LIT_INK, depth: 1.5 },
   // Dirty plate under the smoke: the dark in every corner, a worn edge that
   // barely catches the light, whatever is sunken shaded deep.
@@ -1497,14 +1502,20 @@ const SUPERHERO = deepFreeze({
   motion: { pace: 0.9, hop: 1.2 },
 });
 
+// What a noir shot glass keeps whether full or drunk: its thick foot and its
+// two walls.
+const GLASS_FOOT = 'M32.2 80 H67.8 L66 92 H34 Z';
+const GLASS_WALLS = [['textMuted', 'M22 12 H25.5 L36.6 92 H34 Z'], ['textMuted', 'M74.5 12 H78 L66 92 H63.4 Z']];
+
 // The noir cut: a detective's office at night, lit and never drawn. No ink
 // line and no solid shadow: square panels edged in a hairline a shade off
 // the dark, raised by a soft shadow and the light along their top edge,
 // shaded as a desk lamp lights them from the upper left; a street lamp's
 // light through venetian blinds on the page, under a film's grain; a title
-// in gold on a pane of door glass, its icon bare, no screentone, no rays; an
+// typed on the label of a case folder's tab, its icon on a sticker beside
+// it, no screentone, no rays; an
 // art-deco plaque for the crest, a case folder for a bubble, lettering typed
-// and printed, never inked; poker chips and keyholes for the gems, a spade
+// and printed, never inked; bullets, shots of whiskey and shields for the gems, a spade
 // for the ornament, a keyhole for a card's mark; slow and still, nothing
 // hops. The first style built on the light instead of the ink (2026-11-24).
 const NOIR = deepFreeze({
@@ -1558,21 +1569,60 @@ const NOIR = deepFreeze({
     side: '0%',
   },
   bookmarkTab: { radius: '2px 2px 0 0', rise: 3, gap: 3 },
-  // A slot's gem is a poker chip, a use's a keyhole plate; a training mark
-  // the comic's diamond, a card's suit.
+  // A slot is a bullet of the twenties: a short, stout round standing on its
+  // rim, a round nose of lead in the slot's colour over a brass case crimped
+  // at its mouth; spent, it is gone, its place left empty. A use is a shot of
+  // whiskey, drunk once spent, a drop left in the glass. A training mark is a
+  // detective's shield in brass, a star struck in it for an expert.
   gemCuts: {
-    counter: { sides: 12, outer: [50, 50, 45, 45], inner: [48, 47, 26, 26], shadowDrop: 4 },
-    uses: {
-      outline: 'M50 6 C61 6 70 15 70 26 C70 33 67 38 62 42 L72 94 H28 L38 42 C33 38 30 33 30 26 C30 15 39 6 50 6 Z',
+    counter: {
+      outline: 'M27 94 V88 H30 V46 C30 22 40 12 50 12 C60 12 70 22 70 46 V88 H73 V94 Z',
       shading: [
-        ['dark', 'M50 6 C61 6 70 15 70 26 C70 33 67 38 62 42 L72 94 H50 Z'],
-        ['light', 'M40 18 C42 14 46 12 50 12 C46 16 44 20 44 26 Z'],
+        ['light', 'M36 42 C36 30 40 22 46 18 C42 25 39.5 33 39.5 42 Z'],
+        ['dark', 'M62 46 C62 30 58 20 52 13 C62 15 70 26 70 46 Z'],
+        ['warning', 'M30 46 H70 V88 H30 Z'],
+        ['warningStrong', 'M60 46 H70 V88 H60 Z'],
+        ['accentHighlight', 'M35 54 H37.5 V82 H35 Z'],
+        ['outline', 'M30 46 H70 V50 H30 Z'],
+        ['warningStrong', 'M27 88 H73 V94 H27 Z'],
       ],
       glint: false,
-      centre: [50, 50],
+      centre: [50, 54],
       shadowDrop: 4,
     },
-    training: COMIC.gemCuts.training,
+    uses: {
+      outline: 'M22 12 H78 L66 92 H34 Z',
+      shading: [
+        ['surfaceSunken', 'M22 12 H78 L74.4 36 H25.6 Z'],
+        ['light', 'M25.6 36 H74.4 L73.8 40 H26.2 Z'],
+        ['light', 'M31 46 H35.5 L38.5 76 H35 Z'],
+        ['dark', GLASS_FOOT],
+        ...GLASS_WALLS,
+      ],
+      spent: [
+        ['outline', GLASS_FOOT],
+        ['base', 'M42 78 A8 3 0 1 0 58 78 A8 3 0 1 0 42 78 Z'],
+        ...GLASS_WALLS,
+      ],
+      glint: false,
+      centre: [50, 52],
+      shadowDrop: 4,
+      tones: { uses: 'warning' },
+    },
+    training: {
+      outline: 'M50 4 L88 20 V52 C88 76 68 90 50 98 C32 90 12 76 12 52 V20 Z',
+      shading: [
+        ['dark', 'M88 20 V52 C88 76 68 90 50 98 C64 88 78 74 78 52 V24 Z'],
+        ['light', 'M24 42 C24 30 30 24 46 17 C36 25 32 33 32 43 Z'],
+      ],
+      expert: [
+        ['black', 'M50 26 L55.9 41.9 L72.8 42.6 L59.5 53.1 L64.1 69.4 L50 60 L35.9 69.4 L40.5 53.1 L27.2 42.6 L44.1 41.9 Z'],
+      ],
+      glint: false,
+      centre: [50, 52],
+      shadowDrop: 4,
+      tones: { training: 'warning' },
+    },
   },
   ornament: { path: 'M6 0 C8 3 12 5 12 8 C12 10.2 9.8 11 8 9.8 L9 12 H3 L4 9.8 C2.2 11 0 10.2 0 8 C0 5 4 3 6 0 Z' },
   marker: { outline: 'M6 2 C8.5 2 10 3.8 10 6 C10 7.6 9.2 8.8 8 9.5 L10 28 H2 L4 9.5 C2.8 8.8 2 7.6 2 6 C2 3.8 3.5 2 6 2 Z' },
@@ -1583,8 +1633,19 @@ const NOIR = deepFreeze({
   // whatever is raised on a soft shadow with the light along its top edge,
   // whatever is sunken shaded inside.
   light: { finish: 'lamp', page: 'blinds', soft: 1, bevel: 1, well: 1 },
-  // Its title lettered in gold on a pane of door glass.
-  panel: litPanel({ banner: 'doorglass' }),
+  // Its title typed on the label of a case folder's tab, its icon on a
+  // sticker beside it.
+  panel: litPanel({ banner: 'folder', badge: 'seal' }),
+  // The ability scores are six cards pinned to the board, a red thread from
+  // pin to pin, the modifier large over the score.
+  abilities: { drawing: 'cards', figures: 'stacked' },
+  // A roll makes the front page of "Tonight's Roll". At a natural 20 it
+  // spins in under "Breaking news: Natural 20!" printed on red, among the
+  // photographers' bulbs; at a natural 1 it is slapped down on the table
+  // under "Found dead: You" printed on ink, and shot through three times.
+  rollToast: { drawing: 'newspaper' },
+  // A notice is a clipping from that paper, stamped in its colour.
+  notice: { drawing: 'clipping' },
   radius: 3,
   surface: unprinted('none'),
   motion: { pace: 1.3, hop: 0 },

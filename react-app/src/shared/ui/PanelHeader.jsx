@@ -10,7 +10,8 @@ import { svgStylePicture } from './svgPicture.js';
 import { barEndInkSvg, flourishSvg } from './panelOrnaments.js';
 import { GRIP_ROOM } from './panelGrip.js';
 import PanelGrip from './PanelGrip.jsx';
-import { BANNER_HEIGHT, BANNER_INSET, bannerTitle } from './panelBanner.js';
+import { BANNER_HEIGHT, BANNER_INSET, bannerSlip, bannerTab, bannerTitle } from './panelBanner.js';
+import MeasuredDrawing from './MeasuredDrawing.jsx';
 import PanelBanner from './PanelBanner.jsx';
 import { inkOn } from './pressable.js';
 import { useStyleShapes } from './themeIds.js';
@@ -337,16 +338,28 @@ function bannerTitleSx({ on, color, halo, inked }, size) {
   };
 }
 
+// The label a banner letters its title on (panelBanner.js bannerSlip): drawn
+// to the title's size, behind it, stuck on a little askew. And the tab it
+// stands badge and title on (bannerTab): drawn to the size of the two.
+const SLIP_SX = { position: 'relative', isolation: 'isolate', minWidth: 0, px: 1, py: 0.25, rotate: '-0.8deg' };
+const TAB_SX = { position: 'relative', isolation: 'isolate', display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 };
+
 // `children` follow the title (a count); `action` stands at the bar's end.
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, action, children }) {
   const { grip, banner } = useStyleShapes().panel;
   const gripped = grip !== 'none';
   const lettering = bannerTitle(banner);
   const titleRef = useFitText(title, { enabled: !!lettering });
-  const heading = (
+  const name = <Typography ref={titleRef} sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>;
+  const named = (
     <>
       {Icon ? <Box sx={panelBadgeSx(tone)}><Icon size={PANEL_BADGE_ICON} /></Box> : null}
-      <Typography ref={titleRef} sx={{ ...panelTitleSx, ...titleSx, color: tone, ...(lettering ? bannerTitleSx(lettering, titleSx?.fontSize ?? panelTitleSx.fontSize) : null) }}>{title}</Typography>
+      {lettering?.slip ? <Box sx={SLIP_SX}><MeasuredDrawing draw={(w, h) => bannerSlip(banner, w, h)} />{name}</Box> : name}
+    </>
+  );
+  const heading = (
+    <>
+      {lettering?.tab ? <Box sx={TAB_SX}><MeasuredDrawing draw={(w, h) => bannerTab(banner, w, h)} />{named}</Box> : named}
       {children}
     </>
   );

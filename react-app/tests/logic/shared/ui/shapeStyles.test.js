@@ -26,16 +26,20 @@ test('every style cuts the same shapes as the base one', () => {
 test('every gem cut is cut or drawn whole', () => {
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
     Object.entries(shapes.gemCuts).forEach(([kind, cut]) => {
-      const keys = Object.keys(cut).filter((key) => key !== 'tones').sort();
+      // What a drawn token may bring more: what is left of it spent, what marks an expert.
+      const keys = Object.keys(cut).filter((key) => !['tones', 'spent', 'expert'].includes(key)).sort();
       const cutGem = ['inner', 'outer', 'shadowDrop', 'sides'];
       const drawn = ['centre', 'glint', 'outline', 'shading', 'shadowDrop'];
       assert.ok(
         String(keys) === String(cutGem) || String(keys) === String(drawn),
         `${id} ${kind}: ${keys}`,
       );
-      (cut.shading || []).forEach(([shade]) => assert.ok(['light', 'dark', 'table'].includes(shade), `${id} ${kind} ${shade}`));
+      // A part in a shade of the gem's colour, or in a palette role of its own.
+      [...(cut.shading || []), ...(cut.spent || []), ...(cut.expert || [])]
+        .forEach(([shade]) => assert.ok(['light', 'base', 'dark', 'table'].includes(shade) || UI_COLORS[shade], `${id} ${kind} ${shade}`));
+      assert.ok(!cut.expert || kind === 'training', `${id} ${kind}: only a training mark marks an expert`);
       Object.entries(cut.tones || {}).forEach(([counted, role]) => {
-        assert.ok(GEM_TONES[counted], `${id} ${kind} colours ${counted}, no counter's kind`);
+        assert.ok(kind === 'training' ? counted === 'training' : GEM_TONES[counted], `${id} ${kind} colours ${counted}, no counter's kind`);
         assert.ok(UI_COLORS[role], `${id} ${kind} ${counted}: ${role} is no palette role`);
       });
     });
@@ -140,9 +144,10 @@ test('every style lights its surfaces from kinds that exist, the comic one not a
 });
 
 // Every role a drawing's pieces are coloured in (handDrawing.js pieces: their
-// fill and stroke, a group's children with them).
+// fill and stroke, a shaded fill's roles, a group's children with them).
+const colours = (paint) => (paint && typeof paint === 'object' ? paint.shade.map(([, role]) => role) : [paint]);
 function roles(pieces) {
-  return pieces.flatMap((piece) => [piece.fill, piece.stroke, ...(piece.children ? roles(piece.children) : [])]).filter((role) => role && role !== 'none');
+  return pieces.flatMap((piece) => [...colours(piece.fill), ...colours(piece.stroke), ...(piece.children ? roles(piece.children) : [])]).filter((role) => role && role !== 'none');
 }
 
 // The ability scores are cut as a crest or drawn (abilityDrawing.js): every
@@ -150,7 +155,7 @@ function roles(pieces) {
 // keeps its crest, and a drawing gives every place in the row a tile and a
 // stand, in the palette's roles.
 test('every style stands its ability scores from kinds that exist, the comic one on its crest', async () => {
-  const { ABILITY_DRAWING_KINDS, abilityPlace, abilityTile, drawsAbilities } = await import('../../../../src/shared/ui/abilityDrawing.js');
+  const { ABILITY_DRAWING_KINDS, abilityLook, abilityPlace, abilityRing, abilityStrand, abilityTile, drawsAbilities } = await import('../../../../src/shared/ui/abilityDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes: { abilities } }) => {
     assert.ok(ABILITY_DRAWING_KINDS.includes(abilities.drawing), `${id} drawing ${abilities.drawing}`);
     assert.ok(['split', 'stacked'].includes(abilities.figures), `${id} figures ${abilities.figures}`);
@@ -166,7 +171,16 @@ test('every style stands its ability scores from kinds that exist, the comic one
       const { tilt, sink, head } = abilityPlace(kind, place);
       assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0, `${kind} ${place} stands`);
     }
+    // A score figured in a role, ringed only by a drawing that draws a ring;
+    // what is laid over the row in the palette's roles too.
+    const { score, ring } = abilityLook(kind);
+    assert.ok(UI_COLORS[score], `${kind} score in ${score}`);
+    assert.equal(Boolean(abilityRing(kind, 20, 16, 0)), ring, `${kind} ring`);
+    const tiles = Array.from({ length: 6 }, (_, i) => [i * 96, 0, 80, 120]);
+    [abilityRing(kind, 20, 16, 0), abilityStrand(kind, 576, 120, tiles)].filter(Boolean)
+      .forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
   });
+  assert.equal(abilityStrand('none', 576, 120, []), null);
 });
 
 // A roll's toast is the style's bubble or one drawn thing (toastDrawing.js):
@@ -174,30 +188,54 @@ test('every style stands its ability scores from kinds that exist, the comic one
 // drawing draws its frame at every moment and its hand in the palette's
 // roles.
 test("every style writes a roll's toast on a kind that exists, the comic one on its bubble", async () => {
-  const { TOAST_DRAWING_KINDS, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastHand, toastHead } = await import('../../../../src/shared/ui/toastDrawing.js');
+  const { TOAST_ARRIVALS, TOAST_DRAWING_KINDS, TOAST_MARK_MOTIONS, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastBand, toastHand, toastHead, toastHeadline, toastLook, toastMarks, toastMasthead } = await import('../../../../src/shared/ui/toastDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes: { rollToast } }) => assert.ok(TOAST_DRAWING_KINDS.includes(rollToast.drawing), `${id} toast ${rollToast.drawing}`));
   assert.deepEqual(styleShapes('comic').rollToast, { drawing: 'none' });
   assert.equal(toastFrame('none', 280, 320), null);
   TOAST_DRAWING_KINDS.filter(drawsToast).forEach((kind) => {
     const plain = toastFrame(kind, 280, 320);
     assert.ok(toastHead(kind) > 0 && plain.pieces.length > 5, kind);
-    assert.ok(toastFrame(kind, 280, 320, 'nat1').pieces.length > plain.pieces.length, `${kind} shows a natural 1`);
+    // A natural 1 shows on the frame itself or in what is marked on it.
+    const struck = toastFrame(kind, 280, 320, 'nat1').pieces.length + toastMarks(kind, 280, 320, 'nat1').length;
+    assert.ok(struck > plain.pieces.length + toastMarks(kind, 280, 320).length, `${kind} shows a natural 1`);
     assert.ok(toastBlooms(kind).every(({ side, up, size }) => Math.abs(side) === 1 && up > 0 && up < 1 && size > 0), `${kind} blooms`);
-    [plain, toastHand(kind), toastClimbers(kind, 280, 320), ...toastBlooms(kind).map((_, index) => toastBloom(kind, index))].forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
+    assert.ok(UI_COLORS[toastLook(kind).gold], `${kind} gold`);
+    const marks = ['nat20', 'nat1'].flatMap((moment) => toastMarks(kind, 280, 320, moment));
+    assert.ok(marks.every(({ at, beat, motion }) => at.length === 2 && beat >= 0 && TOAST_MARK_MOTIONS.includes(motion)), `${kind} marks`);
+    assert.ok(Object.values(toastLook(kind).arrive || {}).every((arrival) => TOAST_ARRIVALS.includes(arrival)), `${kind} arrives`);
+    // Laid by where the toast stands its dice and its total, where it is told.
+    const placed = toastFrame(kind, 280, 320, 'nat20', [150, 250, 280, 40, 160]);
+    assert.ok(placed.pieces.length >= plain.pieces.length, `${kind} placed`);
+    roles(placed.pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`));
+    // What it prints of its own: a name over everything, the news at a moment, never at none.
+    assert.ok(toastMasthead(kind) === null || typeof toastMasthead(kind) === 'string', `${kind} masthead`);
+    assert.ok(['nat20', 'nat1'].map((moment) => toastHeadline(kind, moment)).every((words) => words === null || (typeof words.news === 'string' && ['undefined', 'string'].includes(typeof words.deck))), `${kind} news`);
+    assert.equal(toastHeadline(kind), null, `${kind} has no news of a plain roll`);
+    // The news is printed on a block of its own, a different one at each moment.
+    const bands = ['nat20', 'nat1'].map((moment) => toastBand(kind, 200, 60, moment));
+    assert.equal(bands.every(Boolean), Boolean(toastHeadline(kind, 'nat20')), `${kind} bands`);
+    if (bands[0]) assert.notDeepEqual(roles(bands[0].pieces), roles(bands[1].pieces), `${kind}: the two moments told apart`);
+    bands.filter(Boolean).forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
+    [plain, toastHand(kind), toastClimbers(kind, 280, 320), ...toastBlooms(kind).map((_, index) => toastBloom(kind, index)), ...marks].filter(Boolean)
+      .forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
   });
+  assert.deepEqual(toastMarks('none', 280, 320, 'nat1'), []);
+  assert.equal(toastMasthead('none'), null);
+  assert.equal(toastHeadline('none', 'nat20'), null);
 });
 
 // An app notice is the style's bubble or one drawn thing (noticeDrawing.js):
 // every style names a drawing that exists, the comic keeps its bubble, and a
 // drawing draws every severity in the palette's roles.
 test('every style writes an app notice on a kind that exists, the comic one on its bubble', async () => {
-  const { NOTICE_DRAWING_KINDS, NOTICE_SEVERITIES, drawsNotice, noticeFrame, noticeHang } = await import('../../../../src/shared/ui/noticeDrawing.js');
+  const { NOTICE_DRAWING_KINDS, NOTICE_SEVERITIES, drawsNotice, noticeFrame, noticeLook } = await import('../../../../src/shared/ui/noticeDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes: { notice } }) => assert.ok(NOTICE_DRAWING_KINDS.includes(notice.drawing), `${id} notice ${notice.drawing}`));
   assert.deepEqual(styleShapes('comic').notice, { drawing: 'none' });
   assert.equal(noticeFrame('none', 300, 70, 'info'), null);
   assert.deepEqual([...NOTICE_SEVERITIES].sort(), ['error', 'info', 'success', 'warning']);
   NOTICE_DRAWING_KINDS.filter(drawsNotice).forEach((kind) => {
-    assert.ok(noticeHang(kind) >= 0, kind);
+    const { ink, left, right, under } = noticeLook(kind);
+    assert.ok(UI_COLORS[ink] && left >= 0 && right >= 0 && under >= 0, kind);
     NOTICE_SEVERITIES.forEach((severity) => {
       const { pieces } = noticeFrame(kind, 300, 70, severity);
       assert.ok(pieces.length > 5, `${kind} ${severity}`);

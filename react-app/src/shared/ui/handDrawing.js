@@ -24,6 +24,9 @@ export const unit = ([x, y]) => {
 // carries a third of the text.
 const tidy = (d) => d.replace(/-?\d+\.\d+(e-?\d+)?/g, (number) => String(roundToTenth(Number(number))));
 
+// The outline of a box `w` by `h` px, its corner at (x, y).
+export const boxPath = (w, h, x = 0, y = 0) => `M${x} ${y} H${x + w} V${y + h} H${x} Z`;
+
 // A closed path through points.
 export const polygonPath = (points) => `M${points.map(([x, y]) => `${roundToTenth(x)} ${roundToTenth(y)}`).join(' L')} Z`;
 
@@ -82,6 +85,24 @@ export function brushPath(points, size, options = {}) {
   }, ['M', roundToTenth(stroke[0][0]), roundToTenth(stroke[0][1]), 'Q']);
   d.push('Z');
   return d.join(' ');
+}
+
+// A run from `from` to `to` ([x, y] each) sagging `drop` px at its middle, in
+// `steps` steps: a thread between two pins, a wire between two posts.
+export const sagPoints = ([x1, y1], [x2, y2], drop, steps = 10) => Array.from({ length: steps + 1 }, (_, i) => {
+  const u = i / steps;
+  return [x1 + (x2 - x1) * u, y1 + (y2 - y1) * u + Math.sin(u * Math.PI) * drop];
+});
+
+// A run of points with a point every `step` px along it, for what is laid
+// along a run at even paces (a wire's twist, its barbs).
+export function resampled(points, step) {
+  const run = points.slice(0, -1).flatMap(([x1, y1], i) => {
+    const [x2, y2] = points[i + 1];
+    const count = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / step));
+    return Array.from({ length: count }, (_, k) => [x1 + ((x2 - x1) * k) / count, y1 + ((y2 - y1) * k) / count]);
+  });
+  return [...run, points[points.length - 1]];
 }
 
 // How a brush stroke ends: thinning to nothing at both ends (`tapered`), cut

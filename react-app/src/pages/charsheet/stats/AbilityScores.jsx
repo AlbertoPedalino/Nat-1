@@ -20,7 +20,8 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { useStyleShapes } from '../../../shared/ui/themeIds.js';
-import { drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
+import { abilityLook, abilityRing, abilityStrand, drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
+import MeasuredDrawing from '../../../shared/ui/MeasuredDrawing.jsx';
 
 export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
   const profSets = useProficiencySets();
@@ -77,6 +78,8 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
                 value={(
                   <AbilityFigures
                     layout={figures}
+                    drawing={drawing}
+                    place={place}
                     score={val}
                     modifier={signed(shownMod)}
                     mark={visual ? (
@@ -90,6 +93,8 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
             </RollModeArea>
           );
         })}
+        {/* What a drawing lays over the whole row (a thread from score to score). */}
+        {drawsAbilities(drawing) ? <MeasuredDrawing front draw={(w, h, row) => abilityStrand(drawing, w, h, tilesOf(row))} /> : null}
       </Box>
     </Panel>
   );
@@ -99,17 +104,23 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
 // abilities.figures): the score beside its modifier, two thirds and one
 // ('split'), or the modifier large over the score ('stacked'). `mark` is laid
 // on the modifier's corner (disadvantage).
-function AbilityFigures({ layout, score, modifier, mark }) {
+function AbilityFigures({ layout, drawing, place, score, modifier, mark }) {
   if (layout === 'stacked') {
+    // As the drawing figures a score (abilityDrawing.js look): in a role of
+    // its own, ringed where it rings one.
+    const look = drawsAbilities(drawing) ? abilityLook(drawing) : UNDRAWN_LOOK;
     return (
       <>
         <Box sx={stackedModifierSx}>
-          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.display, color: 'text.primary', lineHeight: LINE_HEIGHTS.none }}>{modifier}</Typography>
+          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.display, color: UI_COLORS.textPrimary, lineHeight: LINE_HEIGHTS.none }}>{modifier}</Typography>
           {mark}
         </Box>
-        <Typography component="div" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: 'text.secondary', lineHeight: LINE_HEIGHTS.none }}>
+        <Typography component="div" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.textSecondary, lineHeight: LINE_HEIGHTS.none }}>
           score
-          <Box component="span" sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: UI_COLORS.secondaryText, ml: 0.5 }}>{score}</Box>
+          <Box component="span" sx={[{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: UI_COLORS[look.score], ml: 0.5 }, look.ring && RINGED_SX]}>
+            {look.ring ? <MeasuredDrawing draw={(w, h) => abilityRing(drawing, w, h, place)} /> : null}
+            {score}
+          </Box>
         </Typography>
       </>
     );
@@ -130,8 +141,18 @@ function AbilityFigures({ layout, score, modifier, mark }) {
 }
 
 // A row of drawn scores: they lean and sink, so room between them, at the
-// row's ends and under it.
-const DRAWN_ROW_SX = { columnGap: '1rem', rowGap: '1.25rem', px: 1, pt: 0.75, pb: 1, alignItems: 'end' };
+// row's ends and under it; what is drawn over the row is laid to it.
+const DRAWN_ROW_SX = { position: 'relative', columnGap: '1rem', rowGap: '1.25rem', px: 1, pt: 0.75, pb: 1, alignItems: 'end' };
+
+// Where each score of a row stands in it, [left, top, width, height] px: the
+// row's own boxes, whatever is drawn over it left out.
+const tilesOf = (row) => [...row.children].filter((child) => child.tagName.toLowerCase() !== 'svg')
+  .map((tile) => [tile.offsetLeft, tile.offsetTop, tile.offsetWidth, tile.offsetHeight]);
+
+// How a stacked score is figured where nothing draws it, and a ringed score's
+// box: the ring drawn round the figure, behind it.
+const UNDRAWN_LOOK = Object.freeze({ score: 'secondaryText', ring: false });
+const RINGED_SX = { position: 'relative', isolation: 'isolate', display: 'inline-block', px: 0.75, py: 0.25, ml: 0.75 };
 
 // The modifier of a stacked score: the figure its check rolls, with room
 // either side for the mark on its corner.

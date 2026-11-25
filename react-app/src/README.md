@@ -246,26 +246,63 @@ lit up by a dozen others.
 The six ability scores stand as the style stands them (`abilities` in
 `shapes.js`): cut as a crest (`drawing: 'none'`, the `crest`'s clip) or each
 drawn as a thing of its own with the hand-drawing kit (`abilityDrawing.js`:
-the gothic's `headstones`, six stones in a row, each its cut, lean and
-mark), their `figures`
-the score beside its modifier (`split`) or the modifier large over the score
-(`stacked`). `StatTile` frames a tile either way and `AbilityScores` lays the
-figures; a new drawing is an entry in `abilityDrawing.js` and a name in the
-style. A roll's toast is the style's bubble or one drawn thing in its place
-(`rollToast.drawing`, `toastDrawing.js`: the gothic's `tombstone`, drawn by `DrawnToast.jsx` for the sheet's `DiceToast`
-and, smaller, for the map's `RollBubble`); each says the same things on either, the dice over
-the total, and a drawn toast shows a natural 20 and a natural 1 its own way:
-roses climbing its sides, each on its own stem; the stone split, leaning, a black hand clawing
-up before it). What the gothic's stones share is `stonework.js`. An
+the gothic's `headstones`, six stones in a row, each its cut, lean and mark;
+the noir's `cards`, six index cards pinned up, the score ringed in red, a red
+thread from pin to pin over the whole row), their `figures` the score beside
+its modifier (`split`) or the modifier large over the score (`stacked`).
+`StatTile` frames a tile either way and `AbilityScores` lays the figures; a
+new drawing is an entry in `abilityDrawing.js` and a name in the style. A
+roll's toast is the style's bubble or one drawn thing in its place
+(`rollToast.drawing`, `toastDrawing.js`: the gothic's `tombstone`, the noir's
+`newspaper`; drawn by `DrawnToast.jsx` for the sheet's `DiceToast` and,
+smaller, for the map's `RollBubble`, both saying the roll through
+`RollSaid.jsx`). A drawn toast shows a natural 20 and a natural 1 its own
+way, from what its drawing has: what grows up it and claws up before it (the
+tombstone's roses and hand), the marks made on it on their beat (the
+newspaper's flashbulbs and pen ring, its bullet holes and its strike), a
+flash, words of its own (the newspaper's name over everything, "Tonight's
+Roll"; its headline at a moment on a block of its own, "Breaking news: Natural
+20!" on red or "Found dead: You" on ink over its typed deck, the roll's name
+then under it), an arrival of its own (the newspaper spins in at a natural
+20, is slapped down on the table at a natural 1); a
+drawing is laid by where the toast stands its masthead, its dice and its
+total and by how wide they stand (each marked `data-roll-part`, read by
+`DrawnToast`: the newspaper's columns of print narrow for two dice, its
+underline and pen ring shrink with the smaller total over a piece on the
+map). On such a page `RollSaid` prints how the roll was made as a line of
+the page, not a chip, and `BubbleHeader` draws its X in the paper's colours
+(`paper`). The newspaper is a folded one, lying a little askew (its look's
+`tilt`; `paperwork.js` `frontPage`, `foldedPaperPieces`: a front page a
+little waved, the pages behind it seen edge on: a hair of each over its top,
+thin bands turning round the fold down its left side into its lower corner). An
 app notice is the style's bubble too, or one drawn thing (`notice.drawing`,
-`noticeDrawing.js`: the gothic's `sealed` strip of parchment, a seal of wax in
-the notice's colour hanging from it, its mark pressed in it; in `AppToast`),
-so a notice is never taken for a roll. All three are drawn by the one
-`MeasuredDrawing.jsx` (a drawing made to the size of the box it is in), each
-module answering the same way: its kinds (`…_DRAWING_KINDS`), whether a kind
-draws (`draws…`), and its pieces for a size.
+`noticeDrawing.js`: the gothic's `sealed` strip of parchment, the noir's
+newspaper `clipping`, the war's nailed `tin`; in `AppToast`), in the notice's colour
+and with its mark, laid as the drawing says (`noticeLook`: its ink, the room
+it keeps for what it carries), so a notice is never taken for a roll. All
+three are drawn by the one `MeasuredDrawing.jsx` (a drawing made to the size
+of the box it is in; it may look at that box, for what is laid by what the
+box holds), each module answering the same way: its kinds
+(`…_DRAWING_KINDS`), whether a kind draws (`draws…`), its `look`, and its
+pieces for a size. What a world is made of is drawn once, for every piece of
+it: the gothic's stone in `stonework.js`, the noir's paper, print, pins, thread and
+bullet holes in `paperwork.js`, the war's rusted steel and barbed wire in
+`ironwork.js`. What is drawn on the style's paper (`look.paper`) is written
+in its bubble's ink (`bubble.js` `BUBBLE_INK_SX`). A banner may stand its
+badge and title on a tab of its own and letter the title on a label
+(`panelBanner.js` `bannerTab`, `bannerSlip`: the noir's case `folder`), both
+drawn to their size by `PanelHeader`.
 A mark or an ornament on a themed piece is always drawn with that kit
 (`handDrawing.js`: `sketch`, `brushPath`), never as a shape written in CSS.
+
+A style's gems (`gemCuts`: a slot's `counter`, a feature's `uses`, a skill's
+`training` mark; drawn by `GemPip.jsx`) are a cut gem or a drawn token. A
+drawn token has parts each in a shade of the gem's colour or in a palette
+role of their own (the noir's bullets of the twenties: a lead nose in the
+slot's colour over a brass case); it may bring what is left of it once
+`spent`, in place of the bare setting (the noir's shot of whiskey, an empty
+glass), and what marks an `expert` on a training mark (the star in the
+noir's detective's shield).
 
 It sets the corner `radius` (the theme's, so every sx `borderRadius: n`) and
 lays the surfaces (`surface`): the page's `paper` (the stickers, painted per

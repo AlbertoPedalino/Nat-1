@@ -367,6 +367,8 @@ export const FONT_SIZES = Object.freeze({
   heading: '1.5rem',
   display: '1.75rem',
   hero: '2rem',
+  // A poster's figure: the total on a front page.
+  poster: '3.5rem',
 });
 
 // The two sizes of a control's label (buttons, tabs, keys, clickable chips):

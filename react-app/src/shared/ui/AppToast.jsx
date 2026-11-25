@@ -8,7 +8,7 @@ import { bubbleSx } from './bubble.js';
 import { TEXT_STYLES } from './textStyles.js';
 import BubbleHeader from './BubbleHeader.jsx';
 import { useStyleShapes } from './themeIds.js';
-import { drawsNotice, noticeFrame, noticeHang } from './noticeDrawing.js';
+import { drawsNotice, noticeFrame, noticeLook } from './noticeDrawing.js';
 import MeasuredDrawing from './MeasuredDrawing.jsx';
 import { PLAIN_LETTERING } from './shadows.js';
 
@@ -45,35 +45,42 @@ const DESKTOP_ANCHOR = { vertical: 'top', horizontal: 'right' };
 // lettered in the ink that reads on what is drawn; the drawing carries the
 // severity's colour and mark, so the alert's own icon is left out.
 const DRAWN_FRAME_SX = { position: 'relative', isolation: 'isolate' };
-// Its title printed plain in the ink that reads on what is drawn: an inked
-// outline and shadow would blot dark letters on paper.
-const DRAWN_TITLE_SX = { ...PLAIN_LETTERING, color: UI_COLORS.onPaper };
-const drawnSx = {
-  position: 'relative',
-  overflow: 'visible',
-  border: 'none',
-  backgroundColor: 'transparent',
-  boxShadow: 'none',
-  color: UI_COLORS.onPaper,
-  // A strip, long and low, with air round what is written on it.
-  minWidth: 320,
-  maxWidth: 440,
-  px: 3,
-  py: 1.5,
-  '& .MuiAlert-icon': { display: 'none' },
-  '& .MuiAlert-message': { flex: 1, minWidth: 0 },
-};
+// The air round what is written on a drawn notice, px, before the room its
+// drawing keeps (noticeLook).
+const DRAWN_PAD = 24;
+// A strip, long and low: its words in the drawing's ink, clear of what the
+// drawing carries at its ends; its title printed plain (an inked outline and
+// shadow would blot dark letters on paper).
+function drawnSx({ ink, left, right }) {
+  return {
+    position: 'relative',
+    overflow: 'visible',
+    border: 'none',
+    backgroundColor: 'transparent',
+    boxShadow: 'none',
+    color: UI_COLORS[ink],
+    minWidth: 320,
+    maxWidth: 440,
+    pl: `${DRAWN_PAD + left}px`,
+    pr: `${DRAWN_PAD + right}px`,
+    py: 1.5,
+    '& .MuiAlert-icon': { display: 'none' },
+    '& .MuiAlert-message': { flex: 1, minWidth: 0 },
+    '& .MuiAlertTitle-root': { ...PLAIN_LETTERING, color: UI_COLORS[ink] },
+  };
+}
 
 export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
   const severity = SEVERITY_COLOR[toast?.severity] ? toast.severity : 'info';
   const color = SEVERITY_COLOR[severity];
   const { drawing } = useStyleShapes().notice;
   const drawn = drawsNotice(drawing);
+  const look = drawn ? noticeLook(drawing) : null;
   // A drawn notice stands in a box of its own, the drawing behind it and to
   // its size (the alert keeps its words in a box of their own, narrower),
   // with room under it for what hangs from it.
   const framed = (alert) => (drawn ? (
-    <Box sx={[DRAWN_FRAME_SX, { mb: `${noticeHang(drawing)}px` }]}>
+    <Box sx={[DRAWN_FRAME_SX, { mb: `${look.under}px` }]}>
       <MeasuredDrawing draw={(w, h) => noticeFrame(drawing, w, h, severity)} />
       {alert}
     </Box>
@@ -113,7 +120,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               // The style's bubble, its shadow in the notice's colour; no tail:
               // a notice speaks from nothing on the screen. Or what the style
               // draws in its place, with room under it for what hangs from it.
-              ...(drawn ? drawnSx : {
+              ...(drawn ? drawnSx(look) : {
                 ...bubbleSx({ tone: color, pop: false }),
                 position: 'relative',
                 overflow: 'visible',
@@ -123,7 +130,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
             }}
           >
             <BubbleHeader onClose={onClose}>
-              <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25, ...(drawn ? DRAWN_TITLE_SX : null) }}>
+              <AlertTitle sx={{ ...TEXT_STYLES.shout, fontSize: FONT_SIZES.title, color, mb: 0.25 }}>
                 {SEVERITY_SHOUT[severity]}
               </AlertTitle>
             </BubbleHeader>
