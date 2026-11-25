@@ -116,7 +116,10 @@ const COMIC = deepFreeze({
   // `glint` whether the comic glint shines on it, `centre` the point its spent
   // setting shrinks to; and, where it has them, `spent`, what is left of it
   // once spent (parts drawn in place of the bare setting), and `expert`, what
-  // marks an expert on a training mark. Either may bring `tones`, a palette
+  // marks an expert on a training mark. Or the counter is not a gem at all
+  // but drawn by the hand-drawing kit (`drawing`, counterDrawing.js: WAR's
+  // tally in chalk), its `tones` then the role each kind it counts is drawn
+  // in, every one named. Either may bring `tones`, a palette
   // role by what it counts (GEM_TONES' kinds; `training` for a training mark,
   // then one colour at every level), over the colour GemPip gives it: blood is
   // red, brass a cartridge's. A style's counter and uses must differ in
@@ -243,10 +246,12 @@ const COMIC = deepFreeze({
   // side, cut to its size (panelGrip.js: the abyssal's tentacle), 'none' for
   // none; a gripped panel lets it reach past its frame. Its title bar's
   // `banner`: the bar drawn as a ribbon, a scroll, a plate… across its width
-  // with the title on it (panelBanner.js), 'none' for the bar as above.
+  // with the title on it (panelBanner.js), 'none' for the bar as above. A stat
+  // tile's narrow bar its `tileBanner` (panelBanner.js TILE_BANNERS: the war's
+  // corrugated iron), 'none' for the bar as above.
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'ribbon',
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'ribbon', tileBanner: 'none',
   },
   // The theme's corner radius, px: every `borderRadius: n` in sx is n times it.
   radius: 10,
@@ -282,9 +287,9 @@ const STRAIGHT_BAR = deepFreeze({ panel: { notch: 0, pad: 12 }, tile: { notch: 0
 // and no flourish, its title drawn by its `banner` and, where a bar has none
 // (a tab bar, a tile), set over a rule in the panel's tone; its icon bare,
 // or on a `badge`; what `grip`s it.
-const litPanel = ({ banner, badge = 'bare', grip = 'none', double = false }) => ({
+const litPanel = ({ banner, badge = 'bare', grip = 'none', double = false, tileBanner = 'none' }) => ({
   bar: 'rule', hatch: false, frame: double ? 'double' : 'solid', frameWidth: double ? 6 : 2, badge, float: 1,
-  flourish: COMIC.panel.flourish, grip, banner,
+  flourish: COMIC.panel.flourish, grip, banner, tileBanner,
 });
 // Its page: `paper` behind every screen and nothing printed over it (no dots,
 // no hatching, no rays).
@@ -530,22 +535,14 @@ const WAR = deepFreeze({
     side: '2%',
   },
   bookmarkTab: { radius: '6px 6px 0 0', rise: 3, gap: 3 },
-  // A counter is a cartridge (brass for a spell's slot, steel for the
-  // pact's), spent an empty chamber; a use an olive grenade, an empty pouch once
-  // thrown; a training mark a rank chevron.
+  // A counter is a mark of chalk in a tally (counterDrawing.js): a stroke
+  // while it is there to spend, every fifth struck across the four before
+  // it, one spent rubbed out with a thumb. A slot's in a warm chalk (never
+  // the olive of a use, in either palette), a pact's in blue, a temporary
+  // one's in green, a hit die's in red. A use is an olive grenade, an empty
+  // pouch once thrown; a training mark a rank chevron.
   gemCuts: {
-    counter: {
-      outline: 'M34 94 V46 C34 28 41 13 50 4 C59 13 66 28 66 46 V94 Z',
-      shading: [
-        ['table', 'M34 46 C34 28 41 13 50 4 C59 13 66 28 66 46 Z'],
-        ['dark', 'M58 46 H66 V94 H58 Z'],
-        ['dark', 'M34 84 H66 V94 H34 Z'],
-      ],
-      glint: true,
-      centre: [50, 50],
-      shadowDrop: 4,
-      tones: { slot: 'warning', pact: 'armor' },
-    },
+    counter: { drawing: 'tally', tones: { slot: 'warningText', pact: 'info', temporary: 'success', hitDice: 'dangerText' } },
     uses: {
       outline: 'M24 62 A26 32 0 0 1 76 62 A26 32 0 0 1 24 62 Z M40 14 H60 V32 H40 Z M60 16 H68 C74 16 76 22 76 30 V46 L70 44 V28 C70 24 68 22 64 22 H60 Z',
       shading: [
@@ -603,16 +600,22 @@ const WAR = deepFreeze({
   focusRing: { width: 3, gap: 2 },
   choiceMark: { size: 20 },
   dieGlyph: { path: 'M1.5 1.5 L10.5 1.5 L10.5 10.5 L1.5 10.5 Z' },
-  abilities: COMIC.abilities,
-  rollToast: COMIC.rollToast,
+  // The ability scores are the soldiers' tags, in pairs, lying flat three to
+  // a row: the score stamped beside the name, the modifier large under them.
+  abilities: { drawing: 'tags', figures: 'stamped' },
+  // A roll is a military telegram, half torn: its words typed on strips of
+  // tape, a medal with it at a natural 20, a mourning edge and a stamp at a
+  // natural 1.
+  rollToast: { drawing: 'telegram' },
   // A notice is a strip of tin nailed up, a disc of paint in its colour.
   notice: { drawing: 'tin' },
   ink: { ...LIT_INK, depth: 1.5 },
   // Dirty plate under the smoke: the dark in every corner, a worn edge that
   // barely catches the light, whatever is sunken shaded deep.
   light: { finish: 'grime', page: 'smoke', soft: 1, bevel: 0.5, well: 1 },
-  // Its title stencilled on a plate of rusted steel bolted across the panel's head.
-  panel: litPanel({ banner: 'plate' }),
+  // A belt of rounds across the panel's head, its title on the belt's tab of
+  // webbing; a stat tile's name on a sheet of corrugated iron.
+  panel: litPanel({ banner: 'belt', tileBanner: 'corrugated' }),
   radius: 2,
   surface: unprinted('ruins'),
   motion: { pace: 1.2, hop: 0 },
@@ -1321,7 +1324,7 @@ const PIXEL = deepFreeze({
   ink: { edge: 3, drop: 1, depth: 1, glow: 0, lettering: 1 },
   panel: {
     bar: 'fill', hatch: true, frame: 'solid', frameWidth: 3, badge: 'seal', float: 0,
-    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'marquee',
+    flourish: { kind: 'none', width: 0, height: 0, at: 'right' }, grip: 'none', banner: 'marquee', tileBanner: 'none',
   },
   radius: 1,
   surface: {

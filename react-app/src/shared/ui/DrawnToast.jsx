@@ -8,13 +8,13 @@ import { bubbleTone } from './bubbleLooks.js';
 import { useStyleShapes } from './themeIds.js';
 import { useElementSize } from './useElementSize.js';
 import { GONE_WHEN_REDUCED, STILL_WHEN_REDUCED, TOAST_MOTION, motionTime } from './motion.js';
-import { TOAST_HAND_BOX, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastHand, toastHead, toastLook, toastMarks, toastMasthead } from './toastDrawing.js';
+import { TOAST_HAND_BOX, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastHand, toastHead, toastLook, toastMarks, toastMasthead, toastStamp, toastStampFrame } from './toastDrawing.js';
 import MeasuredDrawing from './MeasuredDrawing.jsx';
 import HandDrawnSvg from './HandDrawnSvg.jsx';
 
 // A roll shown on what the style draws in place of its bubble (shapes.js
 // rollToast.drawing, toastDrawing.js: the gothic's tombstone, the noir's
-// newspaper): the drawn thing to the size of what the roll says (`children`),
+// newspaper, the war's telegram): the drawn thing to the size of what the roll says (`children`),
 // centred on it, and the roll's `moment` its own way (how it arrives, what
 // grows and claws, what is marked on it, a flash). The sheet's toast
 // (DiceToast) and the bubble over a piece on the map (RollBubble) are both
@@ -78,7 +78,31 @@ const MARK_MOTIONS = {
     },
     ...GONE_WHEN_REDUCED,
   },
+  // Hung, and swinging to rest about the point it hangs from.
+  swing: {
+    animation: `gbToastSwing ${motionTime(TOAST_MOTION.swing)} both ease-out`,
+    '@keyframes gbToastSwing': {
+      '0%': { opacity: 0, transform: 'rotate(-38deg)' },
+      '30%': { opacity: 1, transform: 'rotate(16deg)' },
+      '55%': { transform: 'rotate(-9deg)' },
+      '80%': { transform: 'rotate(4deg)' },
+      '100%': { transform: 'none' },
+    },
+    ...STILL_WHEN_REDUCED,
+  },
 };
+
+// What a drawing has stamped across its toast at a moment (toastDrawing.js
+// toastStamp): its words in the stamp's ink, askew in a frame the drawing
+// draws to their size, brought down once the moment has played; smaller on a
+// compact toast.
+const STAMP_SX = {
+  position: 'absolute', right: 12, bottom: 26, zIndex: 3, isolation: 'isolate', px: 1, pt: 0.5, pb: 0.25, rotate: '-12deg', pointerEvents: 'none',
+  ...opening(TOAST_MOTION.mark),
+  animationDelay: motionTime(TOAST_MOTION.beat * 6),
+};
+const COMPACT_STAMP_SX = { scale: '0.75', transformOrigin: '100% 100%' };
+const STAMP_WORDS_SX = { ...TEXT_STYLES.printed, fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.none, color: UI_COLORS.dangerDeep, maxWidth: '6.5em' };
 
 // Where a toast places what its drawing is laid by (toastDrawing.js places):
 // the top of its dice, the middle and the foot of its total, the foot of its
@@ -224,21 +248,28 @@ function DrawnMarks({ kind, moment }) {
 }
 
 export default function DrawnToast({ kind, moment, seed, compact = false, sx, children, ...root }) {
-  const { paper, lean, flash, arrive, jolts, tilt } = toastLook(kind);
+  const { paper, lean, flash, arrive, jolts, tilt, mastRoom, footRoom } = toastLook(kind);
   const arrival = arrive?.[moment];
   const hand = moment === 'nat1' ? toastHand(kind) : null;
   const masthead = toastMasthead(kind);
+  const stamp = toastStamp(kind, moment);
   return (
     <Box {...root} sx={[ROOT_SX, sx]}>
       <Box
         key={`face:${seed}`}
-        sx={[FACE_SX, paper && BUBBLE_INK_SX, compact && COMPACT_FACE_SX, { pt: `${toastHead(kind)}px` }, tilt ? { rotate: `${tilt}deg` } : null,
+        sx={[FACE_SX, paper && BUBBLE_INK_SX, compact && COMPACT_FACE_SX, { pt: `${toastHead(kind)}px` }, footRoom ? { pb: `${footRoom}px` } : null, tilt ? { rotate: `${tilt}deg` } : null,
           moment === 'nat1' && lean && LEAN_SX, arrival && ARRIVAL_SX[moment === 'nat1' && jolts ? `${arrival}:hit` : arrival]]}
       >
         <MeasuredDrawing draw={(w, h, face) => toastFrame(kind, w, h, moment, placesOf(face))} />
-        {masthead ? <Typography data-roll-part="masthead" sx={[MASTHEAD_SX, compact && COMPACT_MASTHEAD_SX]}>{masthead}</Typography> : null}
+        {masthead ? <Typography data-roll-part="masthead" sx={[MASTHEAD_SX, compact && COMPACT_MASTHEAD_SX, mastRoom ? { mb: `${mastRoom}px` } : null]}>{masthead}</Typography> : null}
         {children}
         <DrawnMarks kind={kind} moment={moment} />
+        {stamp ? (
+          <Box sx={[STAMP_SX, compact && COMPACT_STAMP_SX]}>
+            <MeasuredDrawing draw={(w, h) => toastStampFrame(kind, w, h)} />
+            <Typography sx={STAMP_WORDS_SX}>{stamp}</Typography>
+          </Box>
+        ) : null}
       </Box>
       {moment === 'nat20' && flash ? <Box key={`flash:${seed}`} sx={FLASH_SX} /> : null}
       {moment === 'nat20' && toastBlooms(kind).length ? (

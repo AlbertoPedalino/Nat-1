@@ -20,7 +20,7 @@ import { GAME_ICONS } from '../../../shared/ui/gameIcons.js';
 import Panel from '../../../shared/ui/Panel.jsx';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
 import { useStyleShapes } from '../../../shared/ui/themeIds.js';
-import { abilityLook, abilityRing, abilityStrand, drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
+import { abilityLook, abilityPlace, abilityRing, abilityStrand, drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
 import MeasuredDrawing from '../../../shared/ui/MeasuredDrawing.jsx';
 
 export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
@@ -101,20 +101,35 @@ export default function AbilityScores({ C, sheet, embedded = false, onRoll }) {
 }
 
 // A score and the modifier its check rolls, as the style lays them (shapes.js
-// abilities.figures): the score beside its modifier, two thirds and one
-// ('split'), or the modifier large over the score ('stacked'). `mark` is laid
-// on the modifier's corner (disadvantage).
+// abilities.figures, ABILITY_FIGURE_LAYOUTS): the score beside its modifier,
+// two thirds and one ('split'), the modifier large over the score
+// ('stacked'), or the modifier large and the score in the tile's corner
+// beside its name ('stamped': a tag's). `mark` is laid on the modifier's
+// corner (disadvantage).
 function AbilityFigures({ layout, drawing, place, score, modifier, mark }) {
-  if (layout === 'stacked') {
+  if (layout !== 'split') {
     // As the drawing figures a score (abilityDrawing.js look): in a role of
     // its own, ringed where it rings one.
     const look = drawsAbilities(drawing) ? abilityLook(drawing) : UNDRAWN_LOOK;
+    const stamped = layout === 'stamped';
+    const large = (
+      <Box sx={stackedModifierSx}>
+        <Typography sx={stamped ? STAMPED_MODIFIER_SX : { ...TEXT_STYLES.figure, fontSize: FONT_SIZES.display, color: UI_COLORS.textPrimary, lineHeight: LINE_HEIGHTS.none }}>{modifier}</Typography>
+        {mark}
+      </Box>
+    );
+    if (stamped) {
+      const head = drawsAbilities(drawing) ? abilityPlace(drawing, place).head : 0;
+      return (
+        <>
+          <Typography sx={[STAMPED_SCORE_SX, { top: `${head}px`, color: UI_COLORS[look.score] }]}>{score}</Typography>
+          {large}
+        </>
+      );
+    }
     return (
       <>
-        <Box sx={stackedModifierSx}>
-          <Typography sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.display, color: UI_COLORS.textPrimary, lineHeight: LINE_HEIGHTS.none }}>{modifier}</Typography>
-          {mark}
-        </Box>
+        {large}
         <Typography component="div" sx={{ ...TEXT_STYLES.label, fontSize: FONT_SIZES.xxs, color: UI_COLORS.textSecondary, lineHeight: LINE_HEIGHTS.none }}>
           score
           <Box component="span" sx={[{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.body, color: UI_COLORS[look.score], ml: 0.5 }, look.ring && RINGED_SX]}>
@@ -153,6 +168,11 @@ const tilesOf = (row) => [...row.children].filter((child) => child.tagName.toLow
 // box: the ring drawn round the figure, behind it.
 const UNDRAWN_LOOK = Object.freeze({ score: 'secondaryText', ring: false });
 const RINGED_SX = { position: 'relative', isolation: 'isolate', display: 'inline-block', px: 0.75, py: 0.25, ml: 0.75 };
+
+// Figures stamped in metal (a tag's), typed and raised: the score in the
+// tile's top right corner, on the line of its name; the modifier under them.
+const STAMPED_SCORE_SX = { ...TEXT_STYLES.stamped, fontSize: FONT_SIZES.sm, lineHeight: LINE_HEIGHTS.tight, position: 'absolute', right: '0.7rem' };
+const STAMPED_MODIFIER_SX = { ...TEXT_STYLES.stamped, fontSize: FONT_SIZES.heading, color: UI_COLORS.textPrimary, lineHeight: LINE_HEIGHTS.none };
 
 // The modifier of a stacked score: the figure its check rolls, with room
 // either side for the mark on its corner.

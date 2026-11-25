@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { inkOn, PRESS_MOTION_SX } from '../../../shared/ui/pressable.js';
-import { PANEL_BADGE_BOX, panelFrameSx, panelTitleBarSx, panelTitleSx, STAT_TILE_SIZE, statValueSx } from '../../../shared/ui/PanelHeader.jsx';
+import { panelFrameSx, panelTitleSx, STAT_TILE_SIZE, statValueSx, TileBar } from '../../../shared/ui/PanelHeader.jsx';
 import { inkCutShadow } from '../../../shared/ui/shadows.js';
 import { CREST } from '../../../shared/ui/shapes.js';
 import { PANEL_TONES } from '../../../shared/ui/entityColors.js';
@@ -9,6 +9,8 @@ import { useFitText } from '../../../shared/ui/useFitText.js';
 import { useStyleShapes } from '../../../shared/ui/themeIds.js';
 import { abilityLook, abilityPlace, abilityTile, drawsAbilities } from '../../../shared/ui/abilityDrawing.js';
 import { BUBBLE_INK_SX } from '../../../shared/ui/bubble.js';
+import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
+import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import MeasuredDrawing from '../../../shared/ui/MeasuredDrawing.jsx';
 
 // A stat tile (AC, Initiative, Proficiency Bonus, Inspiration, the spell
@@ -34,22 +36,20 @@ export default function StatTile({
   const titleRef = useFitText(label);
   const { drawing } = useStyleShapes().abilities;
   if (crest && drawsAbilities(drawing)) {
-    const { tilt, sink, head, under, foot } = abilityPlace(drawing, place);
+    const { tilt, sink, head, under, foot, left, widest } = abilityPlace(drawing, place);
+    const { paper, stamped } = abilityLook(drawing);
     return (
-      <Box onClick={onClick} sx={[DRAWN_SX, abilityLook(drawing).paper && BUBBLE_INK_SX, { rotate: `${tilt}deg`, translate: `0 ${sink}px`, pt: `${head}px`, pb: `${foot}px` }, clickable && DRAWN_CLICKABLE_SX]}>
+      <Box onClick={onClick} sx={[DRAWN_SX, paper && BUBBLE_INK_SX, { rotate: `${tilt}deg`, translate: `0 ${sink}px`, pt: `${head}px`, pb: `${foot}px` }, left ? { pl: `${left}px` } : null, widest ? { maxWidth: widest, width: '100%', alignSelf: 'center' } : null, clickable && DRAWN_CLICKABLE_SX]}>
         <MeasuredDrawing draw={(w, h) => abilityTile(drawing, w, h, place)} />
         {/* Lettered in the drawing's own ink; a tone only where it says something (a check at disadvantage). */}
-        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone === PANEL_TONES.abilityScores ? UI_COLORS.textPrimary : tone, minWidth: 0, maxWidth: '100%', mb: `${under}px` }}>{label}</Typography>
+        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, ...(stamped ? STAMPED_NAME_SX : null), color: tone === PANEL_TONES.abilityScores ? UI_COLORS.textPrimary : tone, minWidth: 0, maxWidth: '100%', mb: `${under}px`, ...(left ? NAME_AT_START_SX : null) }}>{label}</Typography>
         {value}
       </Box>
     );
   }
   const content = (
     <>
-      <Box sx={{ ...panelTitleBarSx(tone, { tile: true }), gap: 0, justifyContent: 'center' }}>
-        <Box sx={{ width: 0, height: PANEL_BADGE_BOX, flexShrink: 0 }} />
-        <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone, minWidth: 0 }}>{label}</Typography>
-      </Box>
+      <TileBar tone={tone} titleRef={titleRef}>{label}</TileBar>
       <Box sx={{ ...bodyBaseSx, ...(crest ? CREST_FOOT_SX : null), ...(active ? { bgcolor: tone, color: inkOn(tone) } : null), ...bodySx }}>
         {typeof value === 'string' || typeof value === 'number'
           ? <Typography sx={{ ...statValueSx, ...(active ? { color: inkOn(tone) } : null) }}>{value}</Typography>
@@ -108,6 +108,13 @@ const DRAWN_SX = {
 };
 
 const DRAWN_CLICKABLE_SX = { ...PRESS_MOTION_SX, cursor: 'pointer' };
+
+// A drawn score that keeps room at its left end (a tag's hole) starts its
+// name there, the room at its right left to its score.
+const NAME_AT_START_SX = { alignSelf: 'flex-start', maxWidth: '62%' };
+
+// A name stamped in metal (a tag's): typed small, raised.
+const STAMPED_NAME_SX = { ...TEXT_STYLES.stamped, fontSize: FONT_SIZES.sm };
 
 // The crest's cut, its ink and its foot are shapes.js's (CREST).
 const crestSx = {

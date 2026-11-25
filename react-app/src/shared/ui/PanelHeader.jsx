@@ -10,7 +10,7 @@ import { svgStylePicture } from './svgPicture.js';
 import { barEndInkSvg, flourishSvg } from './panelOrnaments.js';
 import { GRIP_ROOM } from './panelGrip.js';
 import PanelGrip from './PanelGrip.jsx';
-import { BANNER_HEIGHT, BANNER_INSET, bannerSlip, bannerTab, bannerTitle } from './panelBanner.js';
+import { BANNER_HEIGHT, BANNER_INSET, bannerSlip, bannerTab, bannerTitle, tileBanner, tileBannerTitle } from './panelBanner.js';
 import MeasuredDrawing from './MeasuredDrawing.jsx';
 import PanelBanner from './PanelBanner.jsx';
 import { inkOn } from './pressable.js';
@@ -120,7 +120,7 @@ export const PANEL_BADGE_ICON = ICON_SIZES.xl;
 // The badge's outer size: its icon, 4px of padding (the seal is round: the
 // drawing keeps clear of its edge) and 2px of edge a side. A bar without a
 // badge (a stat tile's) holds this height to line up with one.
-export const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 12;
+const PANEL_BADGE_BOX = PANEL_BADGE_ICON + 12;
 
 // The room round a panel bar's badge, the same for every bar (a PanelHeader,
 // the sheet's tab bar).
@@ -344,6 +344,24 @@ function bannerTitleSx({ on, color, halo, inked }, size) {
 const SLIP_SX = { position: 'relative', isolation: 'isolate', minWidth: 0, px: 1, py: 0.25, rotate: '-0.8deg' };
 const TAB_SX = { position: 'relative', isolation: 'isolate', display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 };
 
+// A stat tile's bar (StatTile): its name in `tone` on the bar every tile
+// takes (panelTitleBarSx), or on what the style draws in the bar's place
+// (shapes.js panel.tileBanner, panelBanner.js), lettered as that drawing
+// letters it.
+const DRAWN_TILE_BAR_SX = { ...UNCUT_BAR_SX, position: 'relative', isolation: 'isolate', bgcolor: 'transparent', backgroundImage: 'none', borderBottom: 0 };
+export function TileBar({ tone, titleRef, children }) {
+  const { tileBanner: kind } = useStyleShapes().panel;
+  const lettering = tileBannerTitle(kind);
+  return (
+    <Box sx={[panelTitleBarSx(tone, { tile: true }), TILE_BAR_SX, lettering && DRAWN_TILE_BAR_SX]}>
+      {lettering ? <MeasuredDrawing draw={(w, h) => tileBanner(kind, w, h)} /> : null}
+      <Box sx={{ width: 0, height: PANEL_BADGE_BOX, flexShrink: 0 }} />
+      <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone, minWidth: 0, ...(lettering ? bannerTitleSx(lettering, panelTitleSx.fontSize) : null) }}>{children}</Typography>
+    </Box>
+  );
+}
+const TILE_BAR_SX = { gap: 0, justifyContent: 'center' };
+
 // `children` follow the title (a count); `action` stands at the bar's end.
 export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent, titleSx, action, children }) {
   const { grip, banner } = useStyleShapes().panel;
@@ -366,7 +384,7 @@ export default function PanelHeader({ icon: Icon, title, tone = UI_COLORS.accent
   return (
     <Box sx={[panelTitleBarSx(tone), lettering && BANNER_BAR_SX, gripped && GRIPPED_BAR_SX]}>
       {gripped ? <PanelGrip kind={grip} /> : null}
-      {lettering ? <Box sx={BANNER_ZONE_SX}><PanelBanner kind={banner} />{heading}</Box> : heading}
+      {lettering ? <Box sx={BANNER_ZONE_SX}><PanelBanner kind={banner} seed={typeof title === 'string' ? title : ''} />{heading}</Box> : heading}
       {action ? <Box data-panel-action sx={PANEL_ACTION_SX}>{action}</Box> : null}
     </Box>
   );

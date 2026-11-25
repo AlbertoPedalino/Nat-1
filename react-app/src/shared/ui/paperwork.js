@@ -6,7 +6,8 @@ import { STROKE_ENDS, brushStroke, sagPoints, sketch, softShadow } from './handD
 // (handDrawing.js): what the noir's case is made of, wherever a piece of it
 // lies (a panel's banner, panelBanner.js; the ability scores,
 // abilityDrawing.js; a roll's toast, toastDrawing.js; an app notice,
-// noticeDrawing.js): a folder's sheets, cards on a thread, a newspaper.
+// noticeDrawing.js): a folder's sheets, cards on a thread, a newspaper. And
+// what the war does with it: a telegram, torn.
 // Pieces coloured by the palette's role names. Lit, not inked: a sheet is
 // shaded top to foot and lifted by a soft shadow, its edge a thin sketched
 // line.
@@ -65,6 +66,25 @@ export function foldedPaperPieces(w, h, seed) {
   ];
 }
 
+// A torn line from `from` to `to` ([x, y] each), as paper tears: ragged, a
+// point every `step` px or so thrown up to `reach` px off the line, as `seed`
+// throws it. And the pale fibre a tear leaves along such a `line`, inside
+// the sheet cut to `outline`.
+export function tornLine(seed, [x1, y1], [x2, y2], step = 6, reach = 3.2) {
+  const random = seededRandom(`torn-${seed}`);
+  const far = Math.hypot(x2 - x1, y2 - y1);
+  const count = Math.max(2, Math.round(far / step));
+  const [nx, ny] = [-(y2 - y1) / far, (x2 - x1) / far];
+  return Array.from({ length: count + 1 }, (_, i) => {
+    const along = i === 0 || i === count ? i / count : (i + (random() - 0.5) * 0.8) / count;
+    const off = (random() * 2 - 1) * reach * (random() < 0.3 ? 1.9 : 0.8);
+    return [x1 + (x2 - x1) * along + nx * off, y1 + (y2 - y1) * along + ny * off];
+  });
+}
+export const fibrePieces = (outline, line) => [{
+  tag: 'g', clip: outline, children: [{ ...brushStroke(line.map(([x, y]) => [x, y, 0.8]), 5, 'white', STROKE_ENDS.blunt), opacity: OPACITY.veil }],
+}];
+
 // A pushpin's head at (cx, cy) in `fill`: its shadow on the paper, the head,
 // the light on it.
 export function pinPieces(cx, cy, fill, seed) {
@@ -108,6 +128,12 @@ export function bulletHolePieces(cx, cy, r, { rim = 'onPaper', cracks = 6, reach
 export function printPieces(x, y, width, height, seed) {
   return sketch('rectangle', x, y, width, height, { seed, roughness: 0.6, fill: 'onPaper', fillStyle: 'hachure', hachureAngle: 90, hachureGap: 4.5, fillWeight: 1.1, opacity: OPACITY.line });
 }
+
+// A block printed on a page, `width` by `height` px, solid in `role`: what a
+// headline is printed on (the newspaper's news, the telegram's).
+export const printedBlockPieces = (width, height, role) => sketch('rectangle', 0, 0, width, height, {
+  seed: 5, roughness: 0.8, bowing: 0.5, stroke: role, strokeWidth: 1.2, fill: role, fillStyle: 'solid',
+});
 
 // A rule across a page from (x, y), `length` px long and `size` px thick.
 export const rulePieces = (x, y, length, size) => [brushStroke([[x, y, 0.8], [x + length, y, 0.8]], size, 'onPaper', STROKE_ENDS.blunt)];

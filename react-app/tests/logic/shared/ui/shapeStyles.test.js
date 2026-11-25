@@ -8,8 +8,8 @@ import { UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
 import { GEM_TONES } from '../../../../src/shared/ui/entityColors.js';
 
 // The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
-// cut is one shape, cut (`sides`) or drawn (`outline`), whichever a style
-// picks; so is a card's marker, with whatever lines, cap or pupil it draws,
+// cut is one shape, cut (`sides`), drawn (`outline`) or the hand-drawing
+// kit's (`drawing`), whichever a style picks; so is a card's marker, with whatever lines, cap or pupil it draws,
 // and a roll moment's burst and effect, each with its kind's own measures.
 function shapeKeys(value, prefix = '') {
   if (!value || typeof value !== 'object' || Array.isArray(value) || /^gemCuts\.|^marker$|^moments\.[a-z0-9]+\.(burst|effect)$/.test(prefix)) return [prefix];
@@ -23,7 +23,8 @@ test('every style cuts the same shapes as the base one', () => {
   });
 });
 
-test('every gem cut is cut or drawn whole', () => {
+test('every gem cut is cut or drawn whole', async () => {
+  const { COUNTER_DRAWING_KINDS, counterGroup, counterMark, counterStrike } = await import('../../../../src/shared/ui/counterDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
     Object.entries(shapes.gemCuts).forEach(([kind, cut]) => {
       // What a drawn token may bring more: what is left of it spent, what marks an expert.
@@ -31,9 +32,23 @@ test('every gem cut is cut or drawn whole', () => {
       const cutGem = ['inner', 'outer', 'shadowDrop', 'sides'];
       const drawn = ['centre', 'glint', 'outline', 'shading', 'shadowDrop'];
       assert.ok(
-        String(keys) === String(cutGem) || String(keys) === String(drawn),
+        String(keys) === String(cutGem) || String(keys) === String(drawn) || String(keys) === 'drawing',
         `${id} ${kind}: ${keys}`,
       );
+      // Only a counter is the kit's: a drawing that exists, in groups, every
+      // kind it counts given its role, each mark and the strike across a
+      // group in the palette's roles, there to spend or spent.
+      if (cut.drawing) {
+        assert.ok(kind === 'counter' && COUNTER_DRAWING_KINDS.includes(cut.drawing), `${id} ${kind} drawn as ${cut.drawing}`);
+        assert.deepEqual(Object.keys(cut.tones).sort(), Object.keys(GEM_TONES).filter((counted) => counted !== 'uses').sort(), `${id} ${kind} names every counter's role`);
+        const { every, tall, narrow } = counterGroup(cut.drawing);
+        assert.ok(every > 1 && tall > 0 && narrow > 0 && narrow <= 1, `${id} ${kind} groups`);
+        [true, false].forEach((available) => [counterMark(cut.drawing, 14, 34, 'warningText', available, 2), counterStrike(cut.drawing, 70, 34, 'warningText', available)]
+          .forEach(({ pieces, box }) => {
+            assert.ok(pieces.length > 0 && box.width > 14, `${id} ${kind} ${available}`);
+            roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${id} ${kind}: ${role} is no palette role`));
+          }));
+      }
       // A part in a shade of the gem's colour, or in a palette role of its own.
       [...(cut.shading || []), ...(cut.spent || []), ...(cut.expert || [])]
         .forEach(([shade]) => assert.ok(['light', 'base', 'dark', 'table'].includes(shade) || UI_COLORS[shade], `${id} ${kind} ${shade}`));
@@ -155,10 +170,10 @@ function roles(pieces) {
 // keeps its crest, and a drawing gives every place in the row a tile and a
 // stand, in the palette's roles.
 test('every style stands its ability scores from kinds that exist, the comic one on its crest', async () => {
-  const { ABILITY_DRAWING_KINDS, abilityLook, abilityPlace, abilityRing, abilityStrand, abilityTile, drawsAbilities } = await import('../../../../src/shared/ui/abilityDrawing.js');
+  const { ABILITY_DRAWING_KINDS, ABILITY_FIGURE_LAYOUTS, abilityLook, abilityPlace, abilityRing, abilityStrand, abilityTile, drawsAbilities } = await import('../../../../src/shared/ui/abilityDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes: { abilities } }) => {
     assert.ok(ABILITY_DRAWING_KINDS.includes(abilities.drawing), `${id} drawing ${abilities.drawing}`);
-    assert.ok(['split', 'stacked'].includes(abilities.figures), `${id} figures ${abilities.figures}`);
+    assert.ok(ABILITY_FIGURE_LAYOUTS.includes(abilities.figures), `${id} figures ${abilities.figures}`);
   });
   assert.deepEqual(styleShapes('comic').abilities, { drawing: 'none', figures: 'split' });
   assert.equal(drawsAbilities('none'), false);
@@ -168,8 +183,9 @@ test('every style stands its ability scores from kinds that exist, the comic one
       const { pieces, box } = abilityTile(kind, 80, 120, place);
       assert.ok(pieces.length > 3 && box.width > 80, `${kind} ${place}`);
       roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind} ${place}: ${role} is no palette role`));
-      const { tilt, sink, head, under, foot } = abilityPlace(kind, place);
-      assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0 && under >= 0 && foot > 0, `${kind} ${place} stands`);
+      const { tilt, sink, head, under, foot, left, widest } = abilityPlace(kind, place);
+      assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0 && under >= 0 && foot > 0 && left >= 0, `${kind} ${place} stands`);
+      assert.ok(widest === null || widest >= 62, `${kind} ${place} grows to ${widest}`);
     }
     // A score figured in a role, ringed only by a drawing that draws a ring;
     // what is laid over the row in the palette's roles too.
@@ -193,7 +209,7 @@ test('every style stands its ability scores from kinds that exist, the comic one
 // drawing draws its frame at every moment and its hand in the palette's
 // roles.
 test("every style writes a roll's toast on a kind that exists, the comic one on its bubble", async () => {
-  const { TOAST_ARRIVALS, TOAST_DRAWING_KINDS, TOAST_MARK_MOTIONS, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastBand, toastHand, toastHead, toastHeadline, toastLook, toastMarks, toastMasthead } = await import('../../../../src/shared/ui/toastDrawing.js');
+  const { TOAST_ARRIVALS, TOAST_DRAWING_KINDS, TOAST_MARK_MOTIONS, drawsToast, toastBloom, toastBlooms, toastClimbers, toastFrame, toastBand, toastHand, toastHead, toastHeadline, toastLook, toastMarks, toastMasthead, toastSlip, toastStamp, toastStampFrame } = await import('../../../../src/shared/ui/toastDrawing.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes: { rollToast } }) => assert.ok(TOAST_DRAWING_KINDS.includes(rollToast.drawing), `${id} toast ${rollToast.drawing}`));
   assert.deepEqual(styleShapes('comic').rollToast, { drawing: 'none' });
   assert.equal(toastFrame('none', 280, 320), null);
@@ -221,10 +237,20 @@ test("every style writes a roll's toast on a kind that exists, the comic one on 
     assert.equal(bands.every(Boolean), Boolean(toastHeadline(kind, 'nat20')), `${kind} bands`);
     if (bands[0]) assert.notDeepEqual(roles(bands[0].pieces), roles(bands[1].pieces), `${kind}: the two moments told apart`);
     bands.filter(Boolean).forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
+    // A drawing whose lines are pasted on slips draws each slip; one that
+    // stamps a moment draws the stamp's frame, and stamps no plain roll.
+    assert.equal(Boolean(toastSlip(kind, 120, 24, 0)), Boolean(toastLook(kind).slips), `${kind} slips`);
+    assert.equal(toastStamp(kind), null, `${kind} stamps no plain roll`);
+    const stamped = ['nat20', 'nat1'].some((moment) => typeof toastStamp(kind, moment) === 'string');
+    assert.equal(Boolean(toastStampFrame(kind, 90, 30)), stamped, `${kind} stamp`);
+    [toastSlip(kind, 120, 24, 1), toastStampFrame(kind, 90, 30)].filter(Boolean)
+      .forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
     [plain, toastHand(kind), toastClimbers(kind, 280, 320), ...toastBlooms(kind).map((_, index) => toastBloom(kind, index)), ...marks].filter(Boolean)
       .forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
   });
   assert.deepEqual(toastMarks('none', 280, 320, 'nat1'), []);
+  assert.equal(toastSlip('none', 120, 24), null);
+  assert.equal(toastStamp('none', 'nat1'), null);
   assert.equal(toastMasthead('none'), null);
   assert.equal(toastHeadline('none', 'nat20'), null);
 });
@@ -323,7 +349,7 @@ test('every style draws every icon role', async () => {
 test("every style lays a page, cuts its bar's ends, flourishes its titles, grips its panels and draws their banners with drawings that exist", async () => {
   const { FLOURISH_KINDS } = await import('../../../../src/shared/ui/panelOrnaments.js');
   const { GRIP_KINDS } = await import('../../../../src/shared/ui/panelGrip.js');
-  const { BANNER_KINDS } = await import('../../../../src/shared/ui/panelBanner.js');
+  const { BANNER_KINDS, TILE_BANNER_KINDS } = await import('../../../../src/shared/ui/panelBanner.js');
   const { PAGE_SCENE_KINDS } = await import('../../../../src/shared/ui/pageScenes.js');
   const { BADGE_KINDS } = await import('../../../../src/shared/ui/surfaces.js');
   Object.values(SHAPE_STYLES).forEach(({ id, shapes }) => {
@@ -332,6 +358,7 @@ test("every style lays a page, cuts its bar's ends, flourishes its titles, grips
     assert.ok(FLOURISH_KINDS.includes(shapes.panel.flourish.kind), `${id} flourish`);
     assert.ok(GRIP_KINDS.includes(shapes.panel.grip), `${id} grip`);
     assert.ok(BANNER_KINDS.includes(shapes.panel.banner), `${id} banner`);
+    assert.ok(TILE_BANNER_KINDS.includes(shapes.panel.tileBanner), `${id} tile banner`);
     const points = shapes.ribbon.ends.split(' ').map((point) => point.split(',').map(Number));
     assert.ok(points.every(([x, y]) => x >= 0 && x <= 10 && y >= 0 && y <= 100), `${id} ends`);
     assert.deepEqual([points[0][1], points.at(-1)[1]], [0, 100], `${id} ends run top to foot`);

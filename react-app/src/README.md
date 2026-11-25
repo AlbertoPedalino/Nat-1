@@ -126,8 +126,9 @@ that is a CSS value is the chosen style's variable (`SEAL_RADIUS`, `CREST`,
 shape worked out in code is read from the style (`useStyleShapes()` in
 `shared/ui/themeIds.js`: GemPip's cuts — a cut gem, or a token the style
 draws (`outline` and `shading`, `tones` by kind over GEM_TONES: gothic's
-drops of blood, skulls and crosses, war's cartridges, grenades and chevrons,
-sci-fi's power cells); a slot's counter and a feature's uses differ in their
+drops of blood, skulls and crosses, war's grenades and chevrons,
+sci-fi's power cells), or a counter the hand-drawing kit draws (`drawing`:
+war's tally in chalk); a slot's counter and a feature's uses differ in their
 cut or their colour —,
 SegmentedMeter's counts — pass it a
 `METER_SEGMENTS` kind, not a number); the theme's own controls (tabs,
@@ -250,13 +251,20 @@ the gothic's `headstones`, six stones in a row, each its cut, lean and mark,
 set in a clod of earth laid before each row of them (one row, or two of three
 on a phone), which rises as far up each stone's foot however deep it has sunk;
 the noir's `cards`, six index cards pinned up, the score ringed in red, a red
-thread from pin to pin over the whole row), their `figures` the score beside
-its modifier (`split`) or the modifier large over the score (`stacked`).
+thread from pin to pin over the whole row; the war's `tags`, six pairs of a
+soldier's tags lying flat, the size of real ones (a drawing's place may say
+how wide a tile grows at most, `widest`), brushed steel with a rolled rim,
+the end of a ball chain through each one's hole, their words typed and
+raised (look `stamped`, `TEXT_STYLES.stamped`; the place keeps room at its
+`left` end),
+their `figures` the score beside its modifier (`split`), the modifier large
+over the score (`stacked`) or the modifier large and the score in the tile's
+corner beside its name (`stamped`: `ABILITY_FIGURE_LAYOUTS`).
 `StatTile` frames a tile either way and `AbilityScores` lays the figures; a
 new drawing is an entry in `abilityDrawing.js` and a name in the style. A
 roll's toast is the style's bubble or one drawn thing in its place
 (`rollToast.drawing`, `toastDrawing.js`: the gothic's `tombstone`, the noir's
-`newspaper`; drawn by `DrawnToast.jsx` for the sheet's `DiceToast` and,
+`newspaper`, the war's `telegram`; drawn by `DrawnToast.jsx` for the sheet's `DiceToast` and,
 smaller, for the map's `RollBubble`, both saying the roll through
 `RollSaid.jsx`). A drawn toast shows a natural 20 and a natural 1 its own
 way, from what its drawing has: what grows up it and claws up before it (the
@@ -276,7 +284,16 @@ the page, not a chip, and `BubbleHeader` draws its X in the paper's colours
 (`paper`). The newspaper is a folded one, lying a little askew (its look's
 `tilt`; `paperwork.js` `frontPage`, `foldedPaperPieces`: a front page a
 little waved, the pages behind it seen edge on: a hair of each over its top,
-thin bands turning round the fold down its left side into its lower corner). An
+thin bands turning round the fold down its left side into its lower corner).
+The telegram is a military one, half torn (`paperwork.js` `tornLine`,
+`fibrePieces`: a corner torn off beside its name, its foot torn away, the pale
+fibre along both tears): its words `typed` (`TEXT_STYLES.typed`), each line
+on a slip of tape the drawing pastes down (`slips`, `toastSlip`), with room
+of its own under its masthead and its foot (`mastRoom`, `footRoom`); at a
+natural 20 a medal hung at its side swings to rest (a mark's `swing`), at a
+natural 1 a mourning edge comes up round whatever shape is left of it and
+"Return to sender" is stamped across its foot (`toastStamp`, the words in a
+frame the drawing draws). An
 app notice is the style's bubble too, or one drawn thing (`notice.drawing`,
 `noticeDrawing.js`: the gothic's `sealed` strip of parchment, the noir's
 newspaper `clipping`, the war's nailed `tin`; in `AppToast`), in the notice's colour
@@ -288,17 +305,28 @@ box holds), each module answering the same way: its kinds
 (`…_DRAWING_KINDS`), whether a kind draws (`draws…`), its `look`, and its
 pieces for a size. What a world is made of is drawn once, for every piece of
 it: the gothic's stone and earth in `stonework.js`, the noir's paper, print, pins, thread and
-bullet holes in `paperwork.js`, the war's rusted steel and barbed wire in
+bullet holes (and what is torn) in `paperwork.js`, the war's rusted steel, barbed wire,
+corrugated iron, webbing, belts of rounds, tags, chalk and medals in
 `ironwork.js`. What is drawn on the style's paper (`look.paper`) is written
 in its bubble's ink (`bubble.js` `BUBBLE_INK_SX`). A banner may stand its
 badge and title on a tab of its own and letter the title on a label
-(`panelBanner.js` `bannerTab`, `bannerSlip`: the noir's case `folder`), both
-drawn to their size by `PanelHeader`.
+(`panelBanner.js` `bannerTab`, `bannerSlip`: the noir's case `folder`, the
+tab of webbing on the war's `belt`), both drawn to their size by
+`PanelHeader`. The war's belt is a machine gun's: rifle rounds in steel
+links, lit, never many live among the spent cases; each panel's belt holds what it holds (`panelBanner`'s `seed`,
+the panel's title), the same every time. A stat tile's narrow bar, where a panel's banner would not
+fit, may be drawn too (`panel.tileBanner`, `tileBanner`: the war's sheet of
+`corrugated` iron), by `PanelHeader`'s `TileBar`.
 A mark or an ornament on a themed piece is always drawn with that kit
 (`handDrawing.js`: `sketch`, `brushPath`), never as a shape written in CSS.
 
 A style's gems (`gemCuts`: a slot's `counter`, a feature's `uses`, a skill's
-`training` mark; drawn by `GemPip.jsx`) are a cut gem or a drawn token. A
+`training` mark; drawn by `GemPip.jsx`) are a cut gem or a drawn token, or,
+for a counter, marks the hand-drawing kit draws (`drawing`,
+`counterDrawing.js`: the war's `tally` in chalk, a stroke for each counter
+there to spend, every fifth struck across the four before it, one spent
+rubbed out; `GemRow` lays a row of counters in those groups and draws the
+strike over each, so a level's slots and a pool's hit dice are a `GemRow`). A
 drawn token has parts each in a shade of the gem's colour or in a palette
 role of their own (the noir's bullets of the twenties: a lead nose in the
 slot's colour over a brass case); it may bring what is left of it once

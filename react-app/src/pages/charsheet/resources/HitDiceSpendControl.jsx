@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import GemPip from '../../../shared/ui/GemPip.jsx';
+import GemPip, { GemRow } from '../../../shared/ui/GemPip.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { FONT_SIZES } from '../../../shared/ui/fonts.js';
 import { clamp } from '../../../shared/numbers.js';
@@ -23,7 +23,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
           {pool.remaining}/{pool.total} left
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+      <GemRow gap={0.75}>
         {Array.from({ length: pool.total }, (_, i) => {
           const used = i >= pool.remaining;
           const spending = !used && i < value;
@@ -39,7 +39,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
             />
           );
         })}
-      </Box>
+      </GemRow>
       <Typography sx={{ fontSize: FONT_SIZES.sm, color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
         Spend: {withModifier(`${value}d${pool.faces}`, conMod)} each
       </Typography>

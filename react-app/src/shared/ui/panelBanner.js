@@ -1,9 +1,9 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
 import { styleShapes } from './shapes.js';
-import { boxPath, crescentPoints, drawingBox, drawingCache, polygonPath, sagPoints, sketch, softShadow } from './handDrawing.js';
+import { STROKE_ENDS, boxPath, brushStroke, crescentPoints, drawingBox, drawingCache, polygonPath, roundedBoxPath, sketch, softShadow } from './handDrawing.js';
 import { paperPieces } from './paperwork.js';
-import { STEEL, barbedWirePieces, boltPieces, dentPieces, dripPieces, staplePieces, steelPieces, tallyPieces } from './ironwork.js';
+import { STEEL, cartridgeBeltPieces, corrugatedPieces, webbingPieces } from './ironwork.js';
 
 // A panel's title bar drawn as the style draws it (shapes.js panel.banner): a
 // ribbon, a scroll, a nameplate, a slab… with the title lettered on it, drawn
@@ -525,28 +525,21 @@ function folder(w) {
   ];
 }
 
-// War: a plate of rusted steel bolted across the panel's head, under a run
-// of barbed wire stapled to it. Its corners cut, worn bright along its top,
-// rust bloomed over it and run down from its bolts; where the bar has room, a
-// round or two has dented it, and somebody has counted the days on it in
-// scratches.
-function plate(w) {
-  const outline = polygonPath([[3, 10], [w - 3, 10], [w, 13], [w, 41], [w - 3, 44], [3, 44], [0, 41], [0, 13]]);
-  const posts = w > 240 ? [w * 0.34, w * 0.72] : [w / 2];
-  const stops = [-10, ...posts, w + 10];
-  return [
-    ...steelPieces(outline, w, 10, 34, `banner-plate-${Math.round(w)}`),
-    ...dripPieces(8, 18, 22),
-    ...dripPieces(w - 8, 18, 16),
-    ...(w > 380 ? tallyPieces(w - 150, 19, 16, [5, 5, 3]) : []),
-    ...(w > 240 ? [...dentPieces(w * 0.56, 31, 4), ...dentPieces(w * 0.63, 23, 3)] : []),
-    ...[[8, 16], [w - 8, 16], [8, 38], [w - 8, 38]].flatMap(([x, y]) => boltPieces(x, y)),
-    ...barbedWirePieces(stops.slice(1).flatMap((x, i) => sagPoints([stops[i], 8 + (i % 2)], [x, 9], 6))),
-    ...posts.flatMap((x) => staplePieces(x, 10)),
-  ];
+// War: a machine gun's belt run across the panel's head (ironwork.js): the
+// webbing, its loops from end to end, never many live rounds left among the
+// spent cases. Each panel's belt (its `seed`, the panel's title) holds what
+// it holds: most nearly fired out, some half, now and then one nearly full,
+// the same every time the panel is drawn. The panel's badge and title stand on the
+// belt's starter tab (bannerTab), a tongue of the same webbing over its
+// first loops.
+const BELT_HELD = Object.freeze([[0.5, 0.12], [0.82, 0.35], [1, 0.7]]);
+function belt(w, shapes, seed) {
+  const pick = seededRandom(`belt-held-${seed}`)();
+  const [, held] = BELT_HELD.find(([upTo]) => pick < upTo);
+  return cartridgeBeltPieces(0, w, BANNER_HEIGHT / 2, { seed, held });
 }
 
-const BANNERS = Object.freeze({ ribbon, scroll, drape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank, caption, folder, plate });
+const BANNERS = Object.freeze({ ribbon, scroll, drape, moons, undercity, lintel, leaf, hud, glitch, marquee, plank, caption, folder, belt });
 
 // How each banner's title is lettered: the ink that reads `on` a role of the
 // drawing, or a role's `color`; outlined in a role (`halo`) where the drawing
@@ -569,7 +562,7 @@ const BANNER_TITLES = Object.freeze({
   plank: Object.freeze({ color: 'textPrimary' }),
   caption: Object.freeze({ on: 'accent' }),
   folder: Object.freeze({ on: 'paper', slip: true, tab: true }),
-  plate: Object.freeze({ color: 'textPrimary' }),
+  belt: Object.freeze({ color: 'paper', tab: true }),
 });
 
 // How far, px, a banner's ends reach past the panel's sides (the comic's
@@ -591,19 +584,58 @@ export function bannerSlip(kind, width, height) {
 }
 
 // The tab a banner stands its badge and title on (BANNER_TITLES `tab`),
-// `width` by `height` px, the two of them together: the folder's, cut with
+// `width` by `height` px, the two of them together. The folder's: cut with
 // round shoulders and a slanted end, down to the folder's foot (the pair is
-// centred in the bar), so the two are one sheet of card.
-const tabs = drawingCache((kind, width, height) => {
-  const foot = height / 2 + FOLDER.foot - BANNER_HEIGHT / 2;
-  const tab = `M-12 ${foot} V2 Q-12 -5 -5 -5 H${width + 2} Q${width + 9} -5 ${width + 12} 1 L${width + 27} ${foot} Z`;
-  return drawingBox([
-    softShadow(tab, { opacity: OPACITY.edge, shift: [2, 1] }),
-    ...manilaPieces(tab, 4),
-  ], width, height, 30);
+// centred in the bar), so the two are one sheet of card. The belt's: its
+// starter tab, a tongue of webbing stitched along both edges, an eyelet at
+// its end.
+const TABS = Object.freeze({
+  folder(width, height) {
+    const foot = height / 2 + FOLDER.foot - BANNER_HEIGHT / 2;
+    const tab = `M-12 ${foot} V2 Q-12 -5 -5 -5 H${width + 2} Q${width + 9} -5 ${width + 12} 1 L${width + 27} ${foot} Z`;
+    return [softShadow(tab, { opacity: OPACITY.edge, shift: [2, 1] }), ...manilaPieces(tab, 4)];
+  },
+  belt(width, height) {
+    const [left, right, top, foot] = [-16, width + 26, height / 2 - 19, height / 2 + 19];
+    const stitch = (y) => Array.from({ length: Math.floor((right - left - 26) / 10) }, (_, i) => (
+      { ...brushStroke([[left + 6 + i * 10, y, 0.8], [left + 12 + i * 10, y, 0.8]], 1.1, 'paper', STROKE_ENDS.blunt), opacity: OPACITY.edge }
+    ));
+    return [
+      ...webbingPieces(roundedBoxPath(right - left, foot - top, 5, left, top), 9),
+      ...stitch(top + 5),
+      ...stitch(foot - 5),
+      ...sketch('circle', right - 11, height / 2, 9, { seed: 14, roughness: 0.5, stroke: 'warning', strokeWidth: 2.2, fill: 'black', fillStyle: 'solid' }),
+    ];
+  },
 });
+const tabs = drawingCache((kind, width, height) => drawingBox(TABS[kind](width, height), width, height, 30));
 export function bannerTab(kind, width, height) {
   return BANNER_TITLES[kind]?.tab ? tabs(kind, width, height) : null;
+}
+
+// A stat tile's narrow bar drawn as the style draws it (shapes.js
+// panel.tileBanner), behind its name: where a panel's banner would not fit.
+// The war's: a sheet of corrugated iron (ironwork.js), bolted at both ends
+// where the tile has the width. How its name is lettered on it is
+// TILE_BANNER_TITLES' (a role's `color`, outlined in a role: `halo`).
+const TILE_BANNERS = Object.freeze({
+  corrugated: (w, h) => corrugatedPieces(0, w, 4, h - 4, `tile-${Math.round(w)}`, w > 96 ? [0.09, 0.91] : []),
+});
+const TILE_BANNER_TITLES = Object.freeze({
+  corrugated: Object.freeze({ color: 'textPrimary', halo: 'surfaceDarkest' }),
+});
+
+export const TILE_BANNER_KINDS = Object.freeze(['none', ...Object.keys(TILE_BANNERS)]);
+
+// How the tile banner `kind` letters a tile's name; null for 'none'.
+export function tileBannerTitle(kind) {
+  return TILE_BANNER_TITLES[kind] || null;
+}
+
+// The tile banner `kind` across a bar `width` by `height` px; null for 'none'.
+const tileBanners = drawingCache((kind, width, height) => drawingBox(TILE_BANNERS[kind](width, height), width, height));
+export function tileBanner(kind, width, height) {
+  return TILE_BANNERS[kind] ? tileBanners(kind, width, height) : null;
 }
 
 // How far the banner `kind` reaches past the panel's sides, px.
@@ -612,16 +644,18 @@ export function bannerReach(kind) {
 }
 
 // The banner `kind` across a bar `width` px wide in the style `styleId` (whose
-// screentone a ribbon takes): its `pieces`, set in from the bar's ends (less
-// by its reach), and the `box` they are seen through (BANNER_HEIGHT high, from
-// that inset before the drawing's start: the bar's left). Null for 'none'.
-const drawn = drawingCache((kind, width, styleId) => {
+// screentone a ribbon takes) for the panel `seed` names (its title: what a
+// banner draws its own way on each panel, the war's belt its rounds): its
+// `pieces`, set in from the bar's ends (less by its reach), and the `box`
+// they are seen through (BANNER_HEIGHT high, from that inset before the
+// drawing's start: the bar's left). Null for 'none'.
+const drawn = drawingCache((kind, width, styleId, seed) => {
   const inset = BANNER_INSET - bannerReach(kind);
   return {
     box: { left: -inset, top: 0, width, height: BANNER_HEIGHT },
-    pieces: BANNERS[kind](width - inset * 2, styleShapes(styleId)),
+    pieces: BANNERS[kind](width - inset * 2, styleShapes(styleId), seed),
   };
 });
-export function panelBanner(kind, width, styleId) {
-  return BANNERS[kind] ? drawn(kind, width, styleId) : null;
+export function panelBanner(kind, width, styleId, seed = '') {
+  return BANNERS[kind] ? drawn(kind, width, styleId, seed) : null;
 }

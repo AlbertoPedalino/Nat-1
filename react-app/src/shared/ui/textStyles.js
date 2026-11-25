@@ -1,5 +1,5 @@
 import { FONT_FITS, UI_FONTS, LETTER_SPACINGS, FONT_WEIGHTS } from './fonts.js';
-import { inkLettering } from './shadows.js';
+import { PLAIN_LETTERING, STAMPED_LETTERING, inkLettering } from './shadows.js';
 
 // The interface's text treatments, by role. Each fixes the typeface, weight,
 // spacing and case; size and colour stay with the place that uses it
@@ -89,6 +89,35 @@ export const TEXT_STYLES = Object.freeze({
     fontFamily: UI_FONTS.cardName,
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: LETTER_SPACINGS.sm,
+  }),
+  // What a machine typed (a telegram's words): the mono face, in capitals,
+  // spaced as a typewriter spaces them, never inked.
+  typed: Object.freeze({
+    fontFamily: UI_FONTS.mono,
+    // At its own size: a typewriter's letters are not fitted to the text round them.
+    fontSizeAdjust: 'none',
+    fontWeight: FONT_WEIGHTS.bold,
+    letterSpacing: LETTER_SPACINGS.md,
+    textTransform: 'uppercase',
+    ...PLAIN_LETTERING,
+  }),
+  // What a machine stamped into metal (a soldier's tag): typed, and raised.
+  stamped: Object.freeze({
+    fontFamily: UI_FONTS.mono,
+    fontSizeAdjust: 'none',
+    fontWeight: FONT_WEIGHTS.bold,
+    letterSpacing: LETTER_SPACINGS.md,
+    textTransform: 'uppercase',
+    ...STAMPED_LETTERING,
+  }),
+  // The voice printed rather than inked: the shout's face set on a drawing
+  // of its own (a page's news on its block, a stamp's words in its frame).
+  printed: Object.freeze({
+    fontFamily: UI_FONTS.shout,
+    fontSizeAdjust: FONT_FITS.shout,
+    fontWeight: FONT_WEIGHTS.regular,
+    letterSpacing: LETTER_SPACINGS.md,
+    ...PLAIN_LETTERING,
   }),
   // Descriptive text (a description, a rules entry): the prose face.
   prose: Object.freeze({

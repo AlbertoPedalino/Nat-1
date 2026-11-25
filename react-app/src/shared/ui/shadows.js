@@ -162,6 +162,14 @@ export const PLAIN_LETTERING = Object.freeze({
   [APPLE_WEBKIT_QUERY]: { filter: 'none' },
 });
 
+// Lettering stamped into metal (a soldier's tag): plain, a light caught
+// along the foot of each letter and the shade along its head, as a raised
+// letter takes the light from above.
+export const STAMPED_LETTERING = Object.freeze({
+  ...PLAIN_LETTERING,
+  textShadow: `0 1px 0 ${uiAlpha(UI_COLORS.white, OPACITY.strong)}, 0 -1px 0 ${uiAlpha(UI_COLORS.black, OPACITY.line)}`,
+});
+
 // An ink outline drawn round a silhouette (an icon drawn large, as the AC
 // shield) as a CSS filter, with the solid shadow under it in `shadow`.
 export function inkOutlineFilter(color = UI_COLORS.edge, shadow = color) {

@@ -8,13 +8,13 @@ import HandDrawnSvg from './HandDrawnSvg.jsx';
 // panelBanner.js), behind what the bar holds: across the part of the bar it
 // is drawn in (the drawing's parent: the badge, the title and the count),
 // measured as it is laid out and again whenever it is resized, centred in
-// its height.
+// its height; `seed` names the panel, for a banner drawn its own way on each.
 
-export default function PanelBanner({ kind }) {
+export default function PanelBanner({ kind, seed = '' }) {
   const ref = useRef(null);
   const styleId = useStyleId();
   const bar = useElementSize(ref, parentOf);
-  const banner = bar?.width > 0 ? panelBanner(kind, bar.width, styleId) : null;
+  const banner = bar?.width > 0 ? panelBanner(kind, bar.width, styleId, seed) : null;
   const top = bar ? Math.max(0, bar.height - BANNER_HEIGHT) / 2 : 0;
   return <HandDrawnSvg ref={ref} pieces={banner?.pieces} box={banner?.box} style={{ left: 0, top, zIndex: -1 }} />;
 }

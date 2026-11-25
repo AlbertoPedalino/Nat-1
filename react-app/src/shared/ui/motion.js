@@ -46,14 +46,15 @@ export const ICON_MOTION = Object.freeze({ twitch: 400 });
 // leaning (`lean`) and what claws up before it (`claw`); `…After`, the beat
 // each waits first. What is marked on one (a hole, a pen's ring: `mark`)
 // comes a `beat` after the last; a `flash` goes off before it, a `bulb`
-// goes off beside it. One that arrives spinning takes `spin`, one slapped
-// down takes `slap`; one that is hit takes `jolt` to stop shaking, starting
-// `joltAfter` its arrival began.
+// goes off beside it; what is hung on one swings to rest (`swing`). One that
+// arrives spinning takes `spin`, one slapped down takes `slap`; one that is
+// hit takes `jolt` to stop shaking, starting `joltAfter` its arrival began.
 export const TOAST_MOTION = Object.freeze({
   beat: 250,
   mark: 400,
   flash: 700,
   bulb: 1100,
+  swing: 1300,
   spin: 850,
   slap: 460,
   jolt: 1300,

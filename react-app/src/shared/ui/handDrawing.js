@@ -28,6 +28,9 @@ const tidy = (d) => d.replace(/-?\d+\.\d+(e-?\d+)?/g, (number) => String(roundTo
 // The outline of a box `w` by `h` px, its corner at (x, y).
 export const boxPath = (w, h, x = 0, y = 0) => `M${x} ${y} H${x + w} V${y + h} H${x} Z`;
 
+// The outline of a box `w` by `h` px with corners rounded `r` px, its corner at (x, y).
+export const roundedBoxPath = (w, h, r, x = 0, y = 0) => `M${x + r} ${y} H${x + w - r} Q${x + w} ${y} ${x + w} ${y + r} V${y + h - r} Q${x + w} ${y + h} ${x + w - r} ${y + h} H${x + r} Q${x} ${y + h} ${x} ${y + h - r} V${y + r} Q${x} ${y} ${x + r} ${y} Z`;
+
 // A closed path through points.
 export const polygonPath = (points) => `M${points.map(([x, y]) => `${roundToTenth(x)} ${roundToTenth(y)}`).join(' L')} Z`;
 

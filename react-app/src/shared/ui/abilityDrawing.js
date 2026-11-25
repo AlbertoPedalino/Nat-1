@@ -1,7 +1,8 @@
 import { OPACITY } from './colors.js';
-import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, sketch } from './handDrawing.js';
+import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, polygonPath, sketch } from './handDrawing.js';
 import { crackPieces, crossPieces, earthPieces, skullPieces, stonePieces } from './stonework.js';
 import { paperPieces, pinPieces, threadPieces } from './paperwork.js';
+import { ballChainPieces, dentPieces, tagOutline, tagPieces } from './ironwork.js';
 
 // The ability scores drawn as the style draws them (shapes.js
 // abilities.drawing), in place of the crest's cut: each score a thing of its
@@ -13,7 +14,12 @@ import { paperPieces, pinPieces, threadPieces } from './paperwork.js';
 // crack in two of them, and before each row of them the earth they are set
 // in. The noir's cards (paperwork.js): six index cards
 // pinned up askew, the name typed over a double rule, the score ringed in red
-// ink, and the red thread run from pin to pin across the row.
+// ink, and the red thread run from pin to pin across the row. The war's tags
+// (ironwork.js): six pairs of a soldier's tags lying flat, each the size and
+// shape of a real one, its name, score and modifier stamped in it, the
+// second of each pair showing from under the first, the end of a ball chain
+// through the hole at their left end; each with what it has been through: a
+// scratch, a dent, a bent corner.
 
 // The marks over a name, about (cx, cy).
 const MARKS = Object.freeze({ cross: (cx, cy) => crossPieces(cx, cy, 7), skull: (cx, cy, seed) => skullPieces(cx, cy, 7, seed) });
@@ -39,6 +45,20 @@ const CARDS = Object.freeze([
 const PIN = 7;
 const NAME_LINE = 21;
 
+// The six pairs of tags, in their rows: how far each lies askew (degrees),
+// how far the tag under it is turned (`turn`, degrees), and what it has been
+// through.
+const TAGS = Object.freeze([
+  { tilt: -1.5, sink: 0, turn: 8 },
+  { tilt: 1, sink: 1, turn: -7, scratch: true },
+  { tilt: -0.8, sink: 0, turn: 10 },
+  { tilt: 1.4, sink: 2, turn: -9, dent: true },
+  { tilt: -1.1, sink: 1, turn: 7 },
+  { tilt: 0.9, sink: 0, turn: -8, bent: true },
+].map(Object.freeze));
+// Where a tag's hole is from its left end, px.
+const TAG_HOLE = 10;
+
 // A drawing's place at `index` of its row: its `places` over again past the
 // sixth.
 const placeAt = (places, index) => places[index % places.length];
@@ -60,12 +80,16 @@ function rowsOf(tiles) {
 }
 
 // Each drawing: the room a tile keeps over its name (`head`, px), under it
-// (`under`: for what is ruled there) and under its figures (`foot`: for what
-// it is set in), how its six tiles stand (`places`), its `look` (whether it is the style's paper,
-// written in the bubble's ink; the role its score is figured in; whether the
-// score is ringed), a tile's pieces, and what it draws more: the ring round
-// a score, the `strand` laid over all its tiles ([left, top, width, height]
-// each, in the row's box).
+// (`under`: for what is ruled there), under its figures (`foot`: for what
+// it is set in) and at its left end (`left`: a tag's hole; its name then
+// starts there), how wide a tile grows at most (`widest`, px, where a thing
+// has a size of its own), how far its pieces reach past the tile (`reach`,
+// px, where further than a sketch's wander), how its six tiles stand
+// (`places`), its `look` (whether it is written in the bubble's ink, as on
+// the style's paper; the role its score is figured in; whether the score is
+// ringed; whether it is lettered as `stamped` in metal), a tile's pieces,
+// and what it draws more: the ring round a score, the `strand` laid over
+// all its tiles ([left, top, width, height] each, in the row's box).
 const DRAWINGS = Object.freeze({
   headstones: Object.freeze({
     head: 30,
@@ -120,7 +144,53 @@ const DRAWINGS = Object.freeze({
       return [...threadPieces(pins, 9), ...pins.flatMap(([x, y], i) => pinPieces(x, y, i % 3 === 1 ? 'accent' : 'danger', 50 + i * 3))];
     },
   }),
+  tags: Object.freeze({
+    head: 7,
+    under: 0,
+    foot: 7,
+    left: 20,
+    widest: 128,
+    reach: 14,
+    places: TAGS,
+    look: Object.freeze({ paper: true, score: 'textPrimary', ring: false, stamped: true }),
+    tile(w, h, index) {
+      const { turn, scratch, dent, bent } = placeAt(TAGS, index);
+      const seed = 40 + index * 7;
+      const outline = tagOutline(w, h);
+      const [hx, cy] = [TAG_HOLE, h / 2];
+      // The second of the pair, under the first: dropped a little, turned about the hole.
+      const under = `translate(1 2) rotate(${turn} ${hx} ${cy})`;
+      const fine = (points, size, fill, opacity) => ({ ...brushStroke(points, size, fill, STROKE_ENDS.blunt), opacity });
+      return [
+        { tag: 'g', transform: under, children: tagPieces(outline, w, h, seed + 1, { dull: true, hole: hx }) },
+        ...tagPieces(outline, w, h, seed, { hole: hx }),
+        {
+          tag: 'g',
+          clip: outline,
+          children: [
+            // A scratch: cut bright, its lip dark.
+            ...(scratch ? [fine([[w * 0.42, h * 0.86, 0.8], [w * 0.96, h * 0.7, 0.8]], 0.9, 'white', OPACITY.strong), fine([[w * 0.42, h * 0.86 + 1, 0.8], [w * 0.96, h * 0.7 + 1, 0.8]], 0.7, 'black', OPACITY.line)] : []),
+            ...(dent ? dentPieces(w * 0.86, h * 0.76, 2.6) : []),
+            // A corner bent back: its fold, the steel behind it in shade.
+            ...(bent ? [
+              { tag: 'path', d: polygonPath([[w - 13, 0], [w, 0], [w, 13]]), fill: 'black', opacity: OPACITY.line },
+              fine([[w - 13, 0, 0.8], [w, 13, 0.8]], 1, 'white', OPACITY.strong),
+            ] : []),
+          ],
+        },
+        // The end of its chain, through the hole and away.
+        ...ballChainPieces([[hx, cy], [hx - 4, cy - 9], [hx - 3, cy - 20], [hx + 3, cy - 28]]),
+      ];
+    },
+  }),
 });
+
+// How a score and the modifier its check rolls are laid (shapes.js
+// abilities.figures, AbilityScores.jsx): the score beside its modifier
+// ('split'), the modifier large over the score ('stacked'), or the modifier
+// large and the score stamped in the tile's corner, beside its name
+// ('stamped').
+export const ABILITY_FIGURE_LAYOUTS = Object.freeze(['split', 'stacked', 'stamped']);
 
 export const ABILITY_DRAWING_KINDS = Object.freeze(['none', ...Object.keys(DRAWINGS)]);
 
@@ -131,17 +201,19 @@ export function drawsAbilities(kind) {
 }
 
 // How the tile at `index` of its row stands as `kind` draws it: `tilt`
-// degrees, `sink` px, and the room it keeps over its name (`head`), under it
-// (`under`) and under its figures (`foot`).
+// degrees, `sink` px, the room it keeps over its name (`head`), under it
+// (`under`), under its figures (`foot`) and at its left end (`left`, 0 where
+// it keeps none), and how wide it grows at most (`widest`, px; null for as
+// wide as its place in the row).
 export function abilityPlace(kind, index) {
   const drawing = DRAWINGS[kind];
   const { tilt, sink } = placeAt(drawing.places, index);
-  return { tilt, sink, head: drawing.head, under: drawing.under, foot: drawing.foot };
+  return { tilt, sink, head: drawing.head, under: drawing.under, foot: drawing.foot, left: drawing.left ?? 0, widest: drawing.widest ?? null };
 }
 
-// How scores drawn as `kind` are written: whether on the style's paper
-// (`paper`: in its bubble's ink), the role a score is figured in (`score`),
-// whether the score is ringed (`ring`).
+// How scores drawn as `kind` are written: whether in the bubble's ink
+// (`paper`), the role a score is figured in (`score`), whether the score is
+// ringed (`ring`), whether its letters are stamped in metal (`stamped`).
 export function abilityLook(kind) {
   return DRAWINGS[kind].look;
 }
@@ -163,7 +235,7 @@ export function abilityStrand(kind, width, height, tiles) {
 }
 
 // The tile at `index`, `width` by `height` px, as `kind` draws it.
-const tiles = drawingCache((kind, width, height, index) => drawingBox(DRAWINGS[kind].tile(width, height, index), width, height));
+const tiles = drawingCache((kind, width, height, index) => drawingBox(DRAWINGS[kind].tile(width, height, index), width, height, DRAWINGS[kind].reach));
 export function abilityTile(kind, width, height, index) {
   return DRAWINGS[kind] ? tiles(kind, width, height, index) : null;
 }

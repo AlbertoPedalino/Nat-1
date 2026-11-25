@@ -4,7 +4,7 @@ import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/s
 import { UI_COLORS, uiAlpha, OPACITY } from '../../../shared/ui/colors.js';
 import { FONT_SIZES, LINE_HEIGHTS } from '../../../shared/ui/fonts.js';
 import { TEXT_STYLES } from '../../../shared/ui/textStyles.js';
-import GemPip from '../../../shared/ui/GemPip.jsx';
+import GemPip, { GemRow } from '../../../shared/ui/GemPip.jsx';
 
 export function SpellSection({ title, children }) {
   return (
@@ -67,7 +67,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
     <Box sx={{ minWidth: 42 }}>
       {/* The level in the figures' face: a number, read at a glance. */}
       <Box sx={{ ...TEXT_STYLES.figure, fontSize: FONT_SIZES.xxl, color: 'text.secondary', textAlign: 'center', lineHeight: LINE_HEIGHTS.none, mb: 0.5 }}>{level}</Box>
-      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'center' }}>
+      <GemRow sx={{ justifyContent: 'center' }}>
         {Array.from({ length: total }, (_, position) => {
           const available = position < total - used;
           return (
@@ -91,7 +91,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
             onClick={toggle(total)}
           />
         ))}
-      </Box>
+      </GemRow>
     </Box>
   );
 }

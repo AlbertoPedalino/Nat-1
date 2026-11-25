@@ -1,7 +1,8 @@
 import { OPACITY } from './colors.js';
-import { STROKE_ENDS, brushStroke, drawingBox, drawingCache, inkStroke, sketch } from './handDrawing.js';
+import { STROKE_ENDS, brushStroke, drawingBox, drawingCache, inkStroke, polygonPath, sketch } from './handDrawing.js';
 import { crackPieces, skullPieces, stonePieces } from './stonework.js';
-import { bulletHolePieces, foldedPaperPieces, frontPage, paperPieces, printPieces, rulePieces } from './paperwork.js';
+import { bulletHolePieces, fibrePieces, foldedPaperPieces, frontPage, paperPieces, printPieces, printedBlockPieces, rulePieces, tornLine } from './paperwork.js';
+import { medalPieces } from './ironwork.js';
 
 // A roll's toast drawn as the style draws it (shapes.js rollToast.drawing), in
 // place of the style's speech bubble: one thing the roll is written on,
@@ -29,6 +30,17 @@ import { bulletHolePieces, foldedPaperPieces, frontPage, paperPieces, printPiece
 // typed under it, the page slapped down on the table and left askew, three
 // rounds through it one after the other, the page jolting at each, the total
 // struck out.
+//
+// The war's telegram (paperwork.js, ironwork.js): a military telegram, half
+// torn, lying a little askew. A corner torn off beside its name ("Telegram"),
+// its foot torn away, the pale fibre of the paper along both tears; under its
+// name a double rule and the boxes the clerk filled in, the office's date
+// stamp low at its left; its words typed, each line on a strip of tape pasted
+// down. At a moment its news is on a block of its own, a line typed under
+// it: "Commended for gallantry" on olive, a medal hung at its side swinging
+// to rest; "Killed in action: You" on ink, a mourning edge coming up round
+// whatever shape is left of the sheet, "Return to sender" stamped across its
+// foot.
 
 // The winged skull about (cx, cy): its feathers brush strokes fanning from
 // the skull, longest at the top.
@@ -123,9 +135,13 @@ const totalScale = (totalMid, totalFoot) => (totalFoot === undefined ? 1 : Math.
 // role a natural 20's total is written in; whether it leans at a natural 1,
 // whether a flash goes off at a natural 20; how it `arrive`s at a moment:
 // 'spin' or 'slap'; whether it `jolts` when hit at a natural 1; whether the
-// roll's name is its `headline`, and its total lettered as a page's), the
-// `masthead` it prints over everything, the `headlines` it prints over the
-// roll's name at a moment and the `band` they are printed on, its frame's
+// roll's name is its `headline`, and its total lettered as a page's; whether
+// its words are `typed`, each line on a slip of its own: `slips`; the room,
+// px, it keeps under its masthead and under what it says: `mastRoom`,
+// `footRoom`), the `masthead` it prints over everything, the `headlines` it
+// prints over the roll's name at a moment and the `band` they are printed
+// on, the `slip` a typed line is pasted on, what it has `stamp`ed across it
+// at a moment and the stamp's frame, its frame's
 // pieces at a moment (laid by where the toast `places` its masthead, its dice
 // and its total, where it is told), and what more it has: what grows up it
 // and claws up before it (the tombstone's), the marks made on it at a moment
@@ -134,8 +150,20 @@ const totalScale = (totalMid, totalFoot) => (totalFoot === undefined ? 1 : Math.
 //
 // How a mark comes (its `motion`) and how a toast arrives (its look's
 // `arrive`), by the names DrawnToast.jsx moves them by.
-export const TOAST_MARK_MOTIONS = Object.freeze(['pop', 'fade', 'bulb']);
+export const TOAST_MARK_MOTIONS = Object.freeze(['pop', 'fade', 'bulb', 'swing']);
 export const TOAST_ARRIVALS = Object.freeze(['spin', 'slap']);
+
+// The telegram's sheet, w by h: the line its corner was torn off along,
+// the line its foot was torn away along, and the outline they leave.
+// Smaller tears on a smaller sheet (the one over a piece on the map).
+function telegramSheet(w, h) {
+  const small = Math.min(1, Math.max(0.6, w / 290));
+  const corner = tornLine('telegram-corner', [0, 84 * small], [w * 0.3, 0], 6, 3.4);
+  const foot = tornLine('telegram-foot', [w, h - 6], [0, h - 22 * small], 6, 4.4);
+  return { small, corner, foot, outline: polygonPath([...corner, [w - 1, 0], ...foot]) };
+}
+// The boxes of its head, as shares of the width between its margins.
+const TELEGRAM_BOXES = Object.freeze([0.24, 0.2, 0.3, 0.26]);
 
 const DRAWINGS = Object.freeze({
   tombstone: Object.freeze({
@@ -175,10 +203,7 @@ const DRAWINGS = Object.freeze({
       nat1: Object.freeze({ news: 'Found dead: You', deck: 'Cause of death: Natural 1' }),
     }),
     // The block a headline is printed on: red for the news, ink for the dead.
-    band(w, h, moment) {
-      const block = moment === 'nat1' ? 'onPaper' : 'dangerDeep';
-      return sketch('rectangle', 0, 0, w, h, { seed: 5, roughness: 0.8, bowing: 0.5, stroke: block, strokeWidth: 1.2, fill: block, fillStyle: 'solid' });
-    },
+    band: (w, h, moment) => printedBlockPieces(w, h, moment === 'nat1' ? 'onPaper' : 'dangerDeep'),
     frame(w, h, moment, { dice = h * 0.5, totalMid, totalFoot, masthead = 36, wide = 0 } = {}) {
       // Its two outer columns of print, down the page beside the dice and the
       // total: as wide as those leave them (two dice and what is added take
@@ -232,6 +257,79 @@ const DRAWINGS = Object.freeze({
       ];
     },
   }),
+  telegram: Object.freeze({
+    head: 18,
+    look: Object.freeze({ paper: true, gold: 'textPrimary', lean: false, flash: false, headline: true, typed: true, slips: true, tilt: 1.2, mastRoom: 40, footRoom: 44 }),
+    masthead: 'TELEGRAM',
+    headlines: Object.freeze({
+      nat20: Object.freeze({ news: 'COMMENDED FOR GALLANTRY', deck: 'Natural 20 stop' }),
+      nat1: Object.freeze({ news: 'KILLED IN ACTION: YOU', deck: 'Cause of death Natural 1 stop' }),
+    }),
+    stamp: Object.freeze({ nat1: 'RETURN TO SENDER' }),
+    stampFrame: (w, h) => sketch('rectangle', 0, 0, w, h, { seed: 8, roughness: 1, bowing: 0.6, stroke: 'dangerDeep', strokeWidth: 2.4 }),
+    // The block the news is typed on: olive for the commended, ink for the dead.
+    band(w, h, moment) {
+      if (moment === 'nat1') return printedBlockPieces(w, h, 'onPaper');
+      return [...printedBlockPieces(w, h, 'secondaryStrong'), { tag: 'rect', x: -1, y: -1, width: w + 2, height: h + 2, fill: 'black', opacity: OPACITY.strong }];
+    },
+    // A strip of tape pasted down a little askew: a slip of paper, paler than the sheet.
+    slip(w, h, index) {
+      const lean = index % 2 ? 1.6 : -1.6;
+      const strip = polygonPath([[-2, -lean], [w + 2, lean - 1], [w + 1, h + lean], [-1, h - lean + 1]]);
+      return [...paperPieces(strip, 12 + index, 0.8), { tag: 'path', d: strip, fill: 'white', opacity: OPACITY.edge }];
+    },
+    frame(w, h, moment, { masthead = 36 } = {}) {
+      const { small, corner, foot, outline } = telegramSheet(w, h);
+      const under = masthead + 4;
+      const [boxTop, boxHigh, room] = [under + 9, 19 * small, w - 28];
+      let left = 14;
+      const boxes = TELEGRAM_BOXES.flatMap((share, index) => {
+        const [x, wide] = [left, room * share];
+        left += wide;
+        return [
+          ...sketch('rectangle', x, boxTop, wide, boxHigh, { seed: 30 + index, roughness: 0.4, stroke: 'onPaper', strokeWidth: 0.9, opacity: OPACITY.heavy }),
+          ...printPieces(x + 4, boxTop + 3, wide * 0.42, 3, 40 + index),
+          ...printPieces(x + 4, boxTop + boxHigh * 0.5, wide * 0.66, boxHigh * 0.36, 50 + index),
+        ];
+      });
+      const [px, py] = [46 * small, h - 76 * small];
+      const inked = { roughness: 1, stroke: 'spell', opacity: OPACITY.strong };
+      return [
+        ...paperPieces(outline, 4),
+        ...fibrePieces(outline, corner),
+        ...fibrePieces(outline, foot),
+        {
+          tag: 'g',
+          clip: outline,
+          children: [
+            // What has stained it, the creases it was folded on.
+            { tag: 'ellipse', cx: w, cy: h, rx: 70, ry: 50, fill: 'onPaper', blur: 14, opacity: OPACITY.tint },
+            { tag: 'ellipse', cx: 0, cy: h * 0.5, rx: 18, ry: 60, fill: 'onPaper', blur: 10, opacity: OPACITY.soft },
+            ...[0.36, 0.7].flatMap((share) => [
+              { tag: 'rect', x: 0, y: h * share, width: w, height: 1, fill: 'onPaper', opacity: OPACITY.fill },
+              { tag: 'rect', x: 0, y: h * share + 1.6, width: w, height: 1, fill: 'white', opacity: OPACITY.line },
+            ]),
+            // Its head: a double rule under its name, the boxes the clerk filled in.
+            ...rulePieces(14, under, room, 2),
+            ...rulePieces(14, under + 3.6, room, 0.7),
+            ...boxes,
+            // The office's date stamp.
+            ...sketch('circle', px, py, 44 * small, { ...inked, seed: 9, strokeWidth: 1.4 }),
+            ...sketch('circle', px, py, 29 * small, { ...inked, seed: 10, strokeWidth: 0.9 }),
+            ...[-3, 3].flatMap((dy) => sketch('line', px - 11 * small, py + dy * small, px + 11 * small, py + dy * small, { ...inked, seed: 11, strokeWidth: 1.2 })),
+          ],
+        },
+      ];
+    },
+    marks(w, h, moment) {
+      // A natural 20: the medal that came with it, hung at its side.
+      if (moment === 'nat20') return [{ pieces: medalPieces(3, 94, 14, 21), at: [3, 94], beat: 3, motion: 'swing' }];
+      if (moment !== 'nat1') return [];
+      // A natural 1: its mourning edge, round whatever shape is left of it.
+      const { outline } = telegramSheet(w, h);
+      return [{ pieces: [{ tag: 'g', clip: outline, children: sketch('path', outline, { seed: 14, roughness: 0.3, stroke: 'onPaper', strokeWidth: 15 }) }], at: [w / 2, h / 2], beat: 2, motion: 'fade' }];
+    },
+  }),
 });
 
 export const TOAST_DRAWING_KINDS = Object.freeze(['none', ...Object.keys(DRAWINGS)]);
@@ -243,8 +341,9 @@ export function drawsToast(kind) {
 }
 
 // How a toast drawn as `kind` is written and moved (its `look`): `paper`,
-// `gold`, `lean`, `flash`, `arrive`, `jolts`, `headline`, `tilt` (the degrees
-// it lies askew at rest, if any).
+// `gold`, `lean`, `flash`, `arrive`, `jolts`, `headline`, `typed`, `slips`,
+// `tilt` (the degrees it lies askew at rest, if any), `mastRoom` and
+// `footRoom` (px, where it keeps more than a toast does).
 export function toastLook(kind) {
   return DRAWINGS[kind].look;
 }
@@ -266,6 +365,24 @@ export function toastHeadline(kind, moment = '') {
 const bands = drawingCache((kind, width, height, moment) => drawingBox(DRAWINGS[kind].band(width, height, moment), width, height, 6));
 export function toastBand(kind, width, height, moment = '') {
   return DRAWINGS[kind]?.band && moment ? bands(kind, width, height, moment) : null;
+}
+
+// The slip the typed line `index` of a toast drawn as `kind` is pasted on,
+// `width` by `height` px (the line's own size); null where it pastes none.
+const slips = drawingCache((kind, width, height, index) => drawingBox(DRAWINGS[kind].slip(width, height, index), width, height, 6));
+export function toastSlip(kind, width, height, index = 0) {
+  return DRAWINGS[kind]?.slip ? slips(kind, width, height, index) : null;
+}
+
+// What a toast drawn as `kind` has stamped across it at `moment`, and the
+// stamp's frame `width` by `height` px (the words' own size); null where it
+// stamps nothing.
+export function toastStamp(kind, moment = '') {
+  return DRAWINGS[kind]?.stamp?.[moment || ''] ?? null;
+}
+const stampFrames = drawingCache((kind, width, height) => drawingBox(DRAWINGS[kind].stampFrame(width, height), width, height, 6));
+export function toastStampFrame(kind, width, height) {
+  return DRAWINGS[kind]?.stampFrame ? stampFrames(kind, width, height) : null;
 }
 
 // Where a toast places what its drawing is laid by, as a drawing takes it:

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Children, cloneElement, useEffect, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import { UI_COLORS, uiAlpha, uiDarken, uiLighten, OPACITY } from './colors.js';
 import { GEM_TONES, TRAINING_TONES } from './entityColors.js';
@@ -7,6 +7,9 @@ import { DURATIONS, GEM_MOTION, GONE_WHEN_REDUCED, STILL_WHEN_REDUCED, motionTim
 import { PARTICLE_GLYPHS } from './momentParticles.js';
 import { useStyleId } from './themeIds.js';
 import { styleShapes } from './shapes.js';
+import { counterGroup, counterMark, counterStrike } from './counterDrawing.js';
+import HandDrawnSvg from './HandDrawnSvg.jsx';
+import MeasuredDrawing from './MeasuredDrawing.jsx';
 
 // Every counter of the sheet that is spent and recovered one at a time — a
 // spell slot, a pact slot, a feature's uses, a free cast, a hit die — is a
@@ -26,6 +29,9 @@ import { styleShapes } from './shapes.js';
 // - `size`: 'md' in a panel of its own, 'sm' inside a card's row.
 // - `selected`: ringed in the accent, lifted (a hit die chosen to spend).
 // - `onClick` makes it a button; without one it only shows.
+// - `place`, `struck`: its place in a row and whether it is the one struck
+//   across its group, where the style draws its counters by hand (GemRow
+//   gives them).
 // Other props (aria-label, title, disabled…) go to the element.
 
 // The cuts are the style's (shapes.js gemCuts): a slot's or a hit die's
@@ -36,7 +42,10 @@ import { styleShapes } from './shapes.js';
 // detective's shields; the sci-fi one's power cells; and every other
 // style's own (stars and moons, doubloons, gears, rune stones, flowers, eyes,
 // pixel coins). A cut may colour a
-// kind its own way (`tones`, over GEM_TONES). Drawn here from them.
+// kind its own way (`tones`, over GEM_TONES). Drawn here from them. Or the
+// style draws its counters with the hand-drawing kit instead (a cut's
+// `drawing`, counterDrawing.js: the war's tally in chalk), each a mark in the
+// role its `tones` give its kind.
 
 // Sizes easy to hit with a finger: 'md' in a panel of its own, 'sm' inside a
 // card's row.
@@ -67,6 +76,8 @@ const pathOf = (list) => `M${points(list)}Z`;
 // mark (a star struck in a shield).
 function gemCut(cut) {
   const tones = Object.fromEntries(Object.entries(cut.tones || {}).map(([kind, role]) => [kind, UI_COLORS[role]]));
+  // A counter the kit draws keeps its kinds' roles: its pieces are coloured by role.
+  if (cut.drawing) return Object.freeze({ tones, drawing: cut.drawing, roles: cut.tones });
   return Object.freeze({ tones, ...(cut.outline ? drawnCut(cut) : cutGem(cut)) });
 }
 
@@ -140,16 +151,43 @@ function shadesOf(tone) {
 // Where the sparkles of a relit gem fly to, as fractions of its size.
 const SPARKS = [[-0.9, -0.7], [0.95, -0.55], [0.85, 0.75], [-0.8, 0.8]];
 
+// The role a counter the kit draws is drawn in: its kind's, or the accent
+// while it is chosen.
+const markRole = (cut, { kind = 'slot', selected = false }) => (selected ? 'accent' : cut.roles[kind] || cut.roles.slot);
+
 export default function GemPip({
-  available, kind = 'slot', size = 'md', selected = false, onClick, sx, ...props
+  available, kind = 'slot', size = 'md', selected = false, place = 0, struck = false, onClick, sx, ...props
 }) {
   const px = GEM_SIZES[size] || GEM_SIZES.md;
   const cuts = useGemCuts();
   // A feature's uses take the uses' cut, every other counter the counter's.
   const cut = kind === 'uses' ? cuts.uses : cuts.counter;
-  const shades = shadesOf(cut.tones[kind] || GEM_TONES[kind] || GEM_TONES.slot);
   const interactive = typeof onClick === 'function';
   const motion = useStateChangeMotion(available);
+  if (cut.drawing) {
+    // A mark of the kit's, taller and narrower than a gem; the one struck
+    // across its group keeps a place to be pressed at, the strike itself the
+    // row's.
+    const { tall, narrow } = counterGroup(cut.drawing);
+    const high = Math.round(px * tall);
+    const wide = Math.round(high * narrow);
+    return (
+      <Box
+        component={interactive ? 'button' : 'span'}
+        type={interactive ? 'button' : undefined}
+        onClick={onClick}
+        sx={[gemBoxSx(px, interactive, selected), { width: wide, height: high }, sx]}
+        {...props}
+      >
+        {struck ? null : (
+          <Box component="span" aria-hidden sx={[MARK_SX, motion.state ? MOTION_SX[motion.state] : null]} onAnimationEnd={motion.done}>
+            <HandDrawnSvg {...counterMark(cut.drawing, wide, high, markRole(cut, { kind, selected }), available, place)} />
+          </Box>
+        )}
+      </Box>
+    );
+  }
+  const shades = shadesOf(cut.tones[kind] || GEM_TONES[kind] || GEM_TONES.slot);
   const outline = px >= GEM_SIZES.md ? 2.2 : 1.9;
 
   return (
@@ -184,6 +222,40 @@ export default function GemPip({
     </Box>
   );
 }
+
+// A row of counters (a level's slots, a pool's hit dice): gems side by side,
+// wrapping. Where the style draws its counters by hand in groups
+// (counterDrawing.js: the war's tally), the row is laid in those groups, each
+// kept whole on its line, every counter told its place, and the last of a
+// full group struck across the others: the strike drawn over the group, to
+// its size. `gap` is the room between gems, in the theme's steps.
+export function GemRow({ gap = 0.5, sx, children }) {
+  const { counter } = useGemCuts();
+  const gems = Children.toArray(children);
+  if (!counter.drawing) return <Box sx={[ROW_SX, { gap }, sx]}>{gems}</Box>;
+  const { every } = counterGroup(counter.drawing);
+  const groups = Array.from({ length: Math.ceil(gems.length / every) }, (_, group) => gems.slice(group * every, (group + 1) * every));
+  return (
+    <Box sx={[ROW_SX, GROUPED_ROW_SX, sx]}>
+      {groups.map((group, index) => {
+        const last = group.length === every ? group[every - 1] : null;
+        return (
+          <Box key={index} sx={GROUP_SX}>
+            {group.map((gem, at) => cloneElement(gem, { place: index * every + at, struck: gem === last }))}
+            {last ? <MeasuredDrawing front draw={(w, h) => counterStrike(counter.drawing, w, h, markRole(counter, last.props), last.props.available)} /> : null}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
+const ROW_SX = { display: 'flex', flexWrap: 'wrap' };
+// Groups stand further apart than the marks in them.
+const GROUPED_ROW_SX = { gap: 1.25 };
+const GROUP_SX = { position: 'relative', display: 'inline-flex', flexWrap: 'nowrap', gap: 0.25 };
+// A mark the kit draws, to its counter's box.
+const MARK_SX = { position: 'absolute', inset: 0, display: 'block' };
 
 // A training mark (a skill's or a save's proficiency): a gem of the four-sided
 // cut, small and still, as it is read and never spent: an empty setting
