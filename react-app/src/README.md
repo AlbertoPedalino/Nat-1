@@ -246,7 +246,9 @@ lit up by a dozen others.
 The six ability scores stand as the style stands them (`abilities` in
 `shapes.js`): cut as a crest (`drawing: 'none'`, the `crest`'s clip) or each
 drawn as a thing of its own with the hand-drawing kit (`abilityDrawing.js`:
-the gothic's `headstones`, six stones in a row, each its cut, lean and mark;
+the gothic's `headstones`, six stones in a row, each its cut, lean and mark,
+set in a clod of earth laid before each row of them (one row, or two of three
+on a phone), which rises as far up each stone's foot however deep it has sunk;
 the noir's `cards`, six index cards pinned up, the score ringed in red, a red
 thread from pin to pin over the whole row), their `figures` the score beside
 its modifier (`split`) or the modifier large over the score (`stacked`).
@@ -285,7 +287,7 @@ of the box it is in; it may look at that box, for what is laid by what the
 box holds), each module answering the same way: its kinds
 (`…_DRAWING_KINDS`), whether a kind draws (`draws…`), its `look`, and its
 pieces for a size. What a world is made of is drawn once, for every piece of
-it: the gothic's stone in `stonework.js`, the noir's paper, print, pins, thread and
+it: the gothic's stone and earth in `stonework.js`, the noir's paper, print, pins, thread and
 bullet holes in `paperwork.js`, the war's rusted steel and barbed wire in
 `ironwork.js`. What is drawn on the style's paper (`look.paper`) is written
 in its bubble's ink (`bubble.js` `BUBBLE_INK_SX`). A banner may stand its

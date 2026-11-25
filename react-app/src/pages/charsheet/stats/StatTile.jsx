@@ -34,9 +34,9 @@ export default function StatTile({
   const titleRef = useFitText(label);
   const { drawing } = useStyleShapes().abilities;
   if (crest && drawsAbilities(drawing)) {
-    const { tilt, sink, head, under } = abilityPlace(drawing, place);
+    const { tilt, sink, head, under, foot } = abilityPlace(drawing, place);
     return (
-      <Box onClick={onClick} sx={[DRAWN_SX, abilityLook(drawing).paper && BUBBLE_INK_SX, { rotate: `${tilt}deg`, translate: `0 ${sink}px`, pt: `${head}px` }, clickable && DRAWN_CLICKABLE_SX]}>
+      <Box onClick={onClick} sx={[DRAWN_SX, abilityLook(drawing).paper && BUBBLE_INK_SX, { rotate: `${tilt}deg`, translate: `0 ${sink}px`, pt: `${head}px`, pb: `${foot}px` }, clickable && DRAWN_CLICKABLE_SX]}>
         <MeasuredDrawing draw={(w, h) => abilityTile(drawing, w, h, place)} />
         {/* Lettered in the drawing's own ink; a tone only where it says something (a check at disadvantage). */}
         <Typography ref={titleRef} noWrap sx={{ ...panelTitleSx, color: tone === PANEL_TONES.abilityScores ? UI_COLORS.textPrimary : tone, minWidth: 0, maxWidth: '100%', mb: `${under}px` }}>{label}</Typography>
@@ -104,7 +104,6 @@ const DRAWN_SX = {
   alignItems: 'center',
   minWidth: Math.round(STAT_TILE_SIZE * 0.8),
   px: 0.25,
-  pb: 1.5,
   transformOrigin: '50% 100%',
 };
 

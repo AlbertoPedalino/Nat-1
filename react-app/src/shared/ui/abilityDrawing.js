@@ -1,6 +1,6 @@
 import { OPACITY } from './colors.js';
 import { STROKE_ENDS, boxPath, brushStroke, drawingBox, drawingCache, sketch } from './handDrawing.js';
-import { crackPieces, crossPieces, skullPieces, stonePieces } from './stonework.js';
+import { crackPieces, crossPieces, earthPieces, skullPieces, stonePieces } from './stonework.js';
 import { paperPieces, pinPieces, threadPieces } from './paperwork.js';
 
 // The ability scores drawn as the style draws them (shapes.js
@@ -10,7 +10,8 @@ import { paperPieces, pinPieces, threadPieces } from './paperwork.js';
 //
 // The gothic's headstones (stonework.js): six stones standing in a row, each
 // cut, tilted and sunk its own way, a cross or a skull over its name, a
-// crack in two of them. The noir's cards (paperwork.js): six index cards
+// crack in two of them, and before each row of them the earth they are set
+// in. The noir's cards (paperwork.js): six index cards
 // pinned up askew, the name typed over a double rule, the score ringed in red
 // ink, and the red thread run from pin to pin across the row.
 
@@ -38,19 +39,42 @@ const CARDS = Object.freeze([
 const PIN = 7;
 const NAME_LINE = 21;
 
-// Each drawing: the room a tile keeps over its name (`head`, px) and under
-// it (`under`: for what is ruled there), how its six tiles stand (`places`), its `look` (whether it is the style's paper,
+// A drawing's place at `index` of its row: its `places` over again past the
+// sixth.
+const placeAt = (places, index) => places[index % places.length];
+
+// The earth before a row of headstones, px: how far it rises up each stone's
+// foot, how thick it is, and how far it runs past the row's two ends.
+const EARTH = Object.freeze({ rise: 9, thick: 14, past: 11 });
+
+// The rows a drawing's tiles ([left, top, width, height] each) stand in, top
+// to foot (one where the sheet has the width, two of three on a phone): each
+// tile with its place in the drawing after it.
+function rowsOf(tiles) {
+  const rows = new Map();
+  tiles.forEach((tile, place) => {
+    const foot = tile[1] + tile[3];
+    rows.set(foot, [...(rows.get(foot) || []), [...tile, place]]);
+  });
+  return [...rows].sort(([a], [b]) => a - b).map(([, row]) => row);
+}
+
+// Each drawing: the room a tile keeps over its name (`head`, px), under it
+// (`under`: for what is ruled there) and under its figures (`foot`: for what
+// it is set in), how its six tiles stand (`places`), its `look` (whether it is the style's paper,
 // written in the bubble's ink; the role its score is figured in; whether the
 // score is ringed), a tile's pieces, and what it draws more: the ring round
-// a score, the strand over the whole row.
+// a score, the `strand` laid over all its tiles ([left, top, width, height]
+// each, in the row's box).
 const DRAWINGS = Object.freeze({
   headstones: Object.freeze({
     head: 30,
     under: 0,
+    foot: 18,
     places: HEADSTONES,
     look: Object.freeze({ paper: false, score: 'secondaryText', ring: false }),
     tile(w, h, index) {
-      const { cut, mark, crack } = HEADSTONES[index % HEADSTONES.length];
+      const { cut, mark, crack } = placeAt(HEADSTONES, index);
       const seed = 10 + index * 7;
       return [
         ...stonePieces(w, h, cut, seed),
@@ -59,10 +83,21 @@ const DRAWINGS = Object.freeze({
         ...(crack === 'left' ? crackPieces([0, h * 0.46], [[9, 4], [2, 9], [8, 7]]) : []),
       ];
     },
+    // The earth before each row of stones: level across each stone, as far up
+    // its foot as up any other's however deep it has sunk, sloping from one
+    // stone to the next.
+    strand: (tiles) => rowsOf(tiles).flatMap((row, index) => {
+      const sills = row.flatMap(([left, top, w, h, place]) => {
+        const y = top + h + placeAt(HEADSTONES, place).sink - EARTH.rise;
+        return [[left, y], [left + w, y]];
+      });
+      return earthPieces(sills, EARTH.thick, EARTH.past, 70 + index * 11);
+    }),
   }),
   cards: Object.freeze({
     head: 18,
     under: 9,
+    foot: 12,
     places: CARDS,
     look: Object.freeze({ paper: true, score: 'dangerDeep', ring: true }),
     tile(w, h, index) {
@@ -75,8 +110,15 @@ const DRAWINGS = Object.freeze({
       ];
     },
     ring: (w, h, index) => sketch('ellipse', w / 2, h / 2, w + 2, h + 1, { seed: 30 + index * 3, roughness: 1.3, stroke: 'dangerDeep', strokeWidth: 1.6 }),
-    // The thread from pin to pin, and the pins it is wound on.
-    strand: (pins) => [...threadPieces(pins, 9), ...pins.flatMap(([x, y], i) => pinPieces(x, y, i % 3 === 1 ? 'accent' : 'danger', 50 + i * 3))],
+    // The thread from pin to pin, and the pins it is wound on: each where its
+    // card's lean and drop have carried it.
+    strand(tiles) {
+      const pins = tiles.map(([left, top, w, h], i) => {
+        const { tilt, sink } = placeAt(CARDS, i);
+        return [left + w / 2 + Math.sin((tilt * Math.PI) / 180) * (h - PIN), top + sink + PIN];
+      });
+      return [...threadPieces(pins, 9), ...pins.flatMap(([x, y], i) => pinPieces(x, y, i % 3 === 1 ? 'accent' : 'danger', 50 + i * 3))];
+    },
   }),
 });
 
@@ -89,12 +131,12 @@ export function drawsAbilities(kind) {
 }
 
 // How the tile at `index` of its row stands as `kind` draws it: `tilt`
-// degrees, `sink` px, and the room it keeps over its name (`head`) and under
-// it (`under`).
+// degrees, `sink` px, and the room it keeps over its name (`head`), under it
+// (`under`) and under its figures (`foot`).
 export function abilityPlace(kind, index) {
   const drawing = DRAWINGS[kind];
-  const { tilt, sink } = drawing.places[index % drawing.places.length];
-  return { tilt, sink, head: drawing.head, under: drawing.under };
+  const { tilt, sink } = placeAt(drawing.places, index);
+  return { tilt, sink, head: drawing.head, under: drawing.under, foot: drawing.foot };
 }
 
 // How scores drawn as `kind` are written: whether on the style's paper
@@ -112,17 +154,10 @@ export function abilityRing(kind, width, height, index) {
 }
 
 // What `kind` draws over the whole row, `width` by `height` px, its `tiles`
-// each [left, top, width, height] in it: the noir's thread, from the pin of
-// one card (where the card's lean and drop have carried it) to the next.
+// each [left, top, width, height] in it: the noir's thread from the pin of
+// one card to the next, the earth before each row of the gothic's headstones.
 // Null where it draws none.
-const strands = drawingCache((kind, width, height, tiles) => {
-  const { places, strand } = DRAWINGS[kind];
-  const pins = tiles.map(([left, top, w, h], i) => {
-    const { tilt, sink } = places[i % places.length];
-    return [left + w / 2 + Math.sin((tilt * Math.PI) / 180) * (h - PIN), top + sink + PIN];
-  });
-  return drawingBox(strand(pins), width, height, 12);
-});
+const strands = drawingCache((kind, width, height, tiles) => drawingBox(DRAWINGS[kind].strand(tiles), width, height, 12));
 export function abilityStrand(kind, width, height, tiles) {
   return DRAWINGS[kind]?.strand && tiles.length ? strands(kind, width, height, tiles) : null;
 }

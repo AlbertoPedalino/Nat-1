@@ -168,8 +168,8 @@ test('every style stands its ability scores from kinds that exist, the comic one
       const { pieces, box } = abilityTile(kind, 80, 120, place);
       assert.ok(pieces.length > 3 && box.width > 80, `${kind} ${place}`);
       roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind} ${place}: ${role} is no palette role`));
-      const { tilt, sink, head } = abilityPlace(kind, place);
-      assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0, `${kind} ${place} stands`);
+      const { tilt, sink, head, under, foot } = abilityPlace(kind, place);
+      assert.ok(Math.abs(tilt) <= 5 && sink >= 0 && head > 0 && under >= 0 && foot > 0, `${kind} ${place} stands`);
     }
     // A score figured in a role, ringed only by a drawing that draws a ring;
     // what is laid over the row in the palette's roles too.
@@ -181,6 +181,11 @@ test('every style stands its ability scores from kinds that exist, the comic one
       .forEach(({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${kind}: ${role} is no palette role`)));
   });
   assert.equal(abilityStrand('none', 576, 120, []), null);
+  // The headstones' earth is laid once before each row: twice where the six
+  // stand in two rows of three.
+  const shadows = (tiles) => abilityStrand('headstones', 576, 280, tiles).pieces.filter(({ transform }) => transform).length;
+  assert.equal(shadows(Array.from({ length: 6 }, (_, i) => [i * 96, 0, 80, 120])), 1);
+  assert.equal(shadows(Array.from({ length: 6 }, (_, i) => [(i % 3) * 96, i < 3 ? 0 : 140, 80, 120])), 2);
 });
 
 // A roll's toast is the style's bubble or one drawn thing (toastDrawing.js):
