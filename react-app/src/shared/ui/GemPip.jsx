@@ -31,7 +31,7 @@ import { styleShapes } from './shapes.js';
 // The cuts are the style's (shapes.js gemCuts): a slot's or a hit die's
 // counter, a feature's uses, a training mark. The comic style's hexagons (the
 // counter and the uses told apart by colour) and four-sided diamond; the
-// gothic one's drops of blood, candles and crosses; the war one's cartridges,
+// gothic one's drops of blood, skulls and crosses; the war one's cartridges,
 // grenades and chevrons; the noir one's bullets, shots of whiskey and
 // detective's shields; the sci-fi one's power cells; and every other
 // style's own (stars and moons, doubloons, gears, rune stones, flowers, eyes,

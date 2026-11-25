@@ -435,8 +435,8 @@ const GOTHIC = deepFreeze({
   },
   bookmarkTab: { radius: '10px 10px 0 0', rise: 4, gap: 4 },
   // A counter is a drop of blood (red for a spell's slot, the pact's violet),
-  // spent a dried stain; a use an amber candle, burnt out once spent; a training
-  // mark a grave's cross.
+  // spent a dried stain; a use a skull of pale bone, only its face left in the
+  // dark once spent; a training mark a grave's cross.
   gemCuts: {
     counter: {
       outline: 'M50 4 C46 18 20 42 20 64 A30 30 0 0 0 80 64 C80 42 54 18 50 4 Z',
@@ -450,17 +450,26 @@ const GOTHIC = deepFreeze({
       tones: { slot: 'danger' },
     },
     uses: {
-      outline: 'M50 4 C58 16 64 24 64 34 A14 14 0 0 1 36 34 C36 24 42 16 50 4 Z M36 54 H64 V94 H36 Z',
+      outline: 'M50 5 C26 5 11 21 11 43 C11 55 17 64 26 69 V85 C26 91 30 95 36 95 H64 C70 95 74 91 74 85 V69 C83 64 89 55 89 43 C89 21 74 5 50 5 Z',
       shading: [
-        ['table', 'M50 20 C54 27 56 31 56 36 A6 6 0 0 1 44 36 C44 31 46 27 50 20 Z'],
-        ['dark', 'M56 54 H64 V94 H56 Z'],
-        ['light', 'M39 54 H44 V90 H39 Z'],
+        ['dark', 'M68 10 C80 17 89 29 89 43 C89 55 83 64 74 69 V85 C74 91 70 95 64 95 H56 C62 93 66 89 66 83 V65 C75 60 80 52 80 42 C80 29 76 18 68 10 Z'],
+        // The sockets, the nose and the gaps between the teeth, in the ink.
+        ['edge', 'M22 45 A11 12 0 1 0 44 45 A11 12 0 1 0 22 45 Z'],
+        ['edge', 'M56 45 A11 12 0 1 0 78 45 A11 12 0 1 0 56 45 Z'],
+        ['edge', 'M50 58 L56 70 H44 Z'],
+        ['edge', 'M41 82 H45 V95 H41 Z'],
+        ['edge', 'M55 82 H59 V95 H55 Z'],
+      ],
+      spent: [
+        ['textFaint', 'M22 45 A11 12 0 1 0 44 45 A11 12 0 1 0 22 45 Z'],
+        ['textFaint', 'M56 45 A11 12 0 1 0 78 45 A11 12 0 1 0 56 45 Z'],
+        ['textFaint', 'M50 58 L56 70 H44 Z'],
       ],
       glint: false,
       centre: [50, 50],
       shadowDrop: 5,
-      // Amber: the style's accent is blood's red.
-      tones: { uses: 'warning' },
+      // Bone: the style's accent is blood's red.
+      tones: { uses: 'paper' },
     },
     training: {
       outline: 'M36 2 H64 V22 H90 V48 H64 V98 H36 V48 H10 V22 H36 Z',

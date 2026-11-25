@@ -126,7 +126,7 @@ that is a CSS value is the chosen style's variable (`SEAL_RADIUS`, `CREST`,
 shape worked out in code is read from the style (`useStyleShapes()` in
 `shared/ui/themeIds.js`: GemPip's cuts — a cut gem, or a token the style
 draws (`outline` and `shading`, `tones` by kind over GEM_TONES: gothic's
-drops of blood, candles and crosses, war's cartridges, grenades and chevrons,
+drops of blood, skulls and crosses, war's cartridges, grenades and chevrons,
 sci-fi's power cells); a slot's counter and a feature's uses differ in their
 cut or their colour —,
 SegmentedMeter's counts — pass it a
