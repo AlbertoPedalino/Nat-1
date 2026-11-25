@@ -368,6 +368,14 @@ const SCIFI = deepFreeze({
   motion: { pace: 0.7, hop: 0 },
 });
 
+// What a gothic skull keeps whether there to spend or spent: its two sockets
+// and its nose.
+const SKULL_FACE = [
+  'M22 45 A11 12 0 1 0 44 45 A11 12 0 1 0 22 45 Z',
+  'M56 45 A11 12 0 1 0 78 45 A11 12 0 1 0 56 45 Z',
+  'M50 58 L56 70 H44 Z',
+];
+
 // The gothic cut: the comic one in a haunted land. Deeper, tattered
 // swallowtails, a headstone for the crest, seals like dripped wax, arched tabs, a
 // cross for the ornament, torn paper; the comic ink, stickers and gems kept,
@@ -453,18 +461,12 @@ const GOTHIC = deepFreeze({
       outline: 'M50 5 C26 5 11 21 11 43 C11 55 17 64 26 69 V85 C26 91 30 95 36 95 H64 C70 95 74 91 74 85 V69 C83 64 89 55 89 43 C89 21 74 5 50 5 Z',
       shading: [
         ['dark', 'M68 10 C80 17 89 29 89 43 C89 55 83 64 74 69 V85 C74 91 70 95 64 95 H56 C62 93 66 89 66 83 V65 C75 60 80 52 80 42 C80 29 76 18 68 10 Z'],
-        // The sockets, the nose and the gaps between the teeth, in the ink.
-        ['edge', 'M22 45 A11 12 0 1 0 44 45 A11 12 0 1 0 22 45 Z'],
-        ['edge', 'M56 45 A11 12 0 1 0 78 45 A11 12 0 1 0 56 45 Z'],
-        ['edge', 'M50 58 L56 70 H44 Z'],
+        // Its face and the gaps between the teeth, in the ink.
+        ...SKULL_FACE.map((part) => ['edge', part]),
         ['edge', 'M41 82 H45 V95 H41 Z'],
         ['edge', 'M55 82 H59 V95 H55 Z'],
       ],
-      spent: [
-        ['textFaint', 'M22 45 A11 12 0 1 0 44 45 A11 12 0 1 0 22 45 Z'],
-        ['textFaint', 'M56 45 A11 12 0 1 0 78 45 A11 12 0 1 0 56 45 Z'],
-        ['textFaint', 'M50 58 L56 70 H44 Z'],
-      ],
+      spent: SKULL_FACE.map((part) => ['textFaint', part]),
       glint: false,
       centre: [50, 50],
       shadowDrop: 5,
