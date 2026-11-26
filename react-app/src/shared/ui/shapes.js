@@ -541,8 +541,8 @@ const WAR = deepFreeze({
   // case in brass for a slot (never the olive of a use, in either palette),
   // steel for a pact's, green for a temporary one, red for a hit die. A use
   // is an olive grenade, an empty pouch once thrown. A training mark is a
-  // tally in a warm chalk: nothing untrained, a stroke for half proficiency,
-  // two for proficiency, the two struck through for expertise.
+  // tally in a warm chalk: a stroke rubbed out untrained, a stroke for half
+  // proficiency, two for proficiency, the two struck through for expertise.
   gemCuts: {
     counter: { drawing: 'cartridge', tones: { slot: 'warning', pact: 'armor', temporary: 'success', hitDice: 'dangerText' } },
     uses: {

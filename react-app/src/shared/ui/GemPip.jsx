@@ -268,10 +268,14 @@ const MARK_SX = { position: 'absolute', inset: 0, display: 'block' };
 export function TrainingGem({ training = 'none', size = TRAINING_GEM_SIZE, sx }) {
   const { training: cut } = useGemCuts();
   if (cut.drawing) {
+    // Drawn larger than a gem, as chalk is, over the gem's own room: the row
+    // it stands in keeps a gem's height.
     const drawn = Math.round(size * trainingScale(cut.drawing));
     return (
-      <Box component="span" aria-hidden sx={[trainingGemSx(drawn), { position: 'relative' }, sx]}>
-        <HandDrawnSvg {...trainingMark(cut.drawing, drawn, drawn, cut.roles.training, training)} />
+      <Box component="span" aria-hidden sx={[trainingGemSx(size), { position: 'relative' }, sx]}>
+        <Box component="span" sx={{ position: 'absolute', width: drawn, height: drawn, left: (size - drawn) / 2, top: (size - drawn) / 2 }}>
+          <HandDrawnSvg {...trainingMark(cut.drawing, drawn, drawn, cut.roles.training, training)} />
+        </Box>
       </Box>
     );
   }

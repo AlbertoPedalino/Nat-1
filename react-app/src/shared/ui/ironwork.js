@@ -1,6 +1,6 @@
 import { OPACITY } from './colors.js';
 import { seededRandom } from '../seededRandom.js';
-import { STROKE_ENDS, boxPath, brushStroke, polygonPath, resampled, roundedBoxPath, sketch, softShadow } from './handDrawing.js';
+import { STROKE_ENDS, boxPath, brushStroke, flatShadow, polygonPath, resampled, roundedBoxPath, sketch, softShadow } from './handDrawing.js';
 
 // Rusted steel and barbed wire, as the hand-drawing kit draws them
 // (handDrawing.js): what the war's dugout is made of, wherever a piece of it
@@ -60,7 +60,7 @@ const CHALKED = Object.freeze({ ...STROKE_ENDS.tapered, thinning: 0.5 });
 export function chalkPieces(points, size, fill, rubbed = false) {
   if (rubbed) {
     return [
-      { ...brushStroke(points, size * 2.6, fill, { ...CHALKED, thinning: 0.2 }), blur: size * 0.5, opacity: OPACITY.tint },
+      { ...brushStroke(points, size * 2.6, fill, { ...CHALKED, thinning: 0.2 }), opacity: OPACITY.soft },
       { ...brushStroke(points, size * 0.5, fill, CHALKED), opacity: OPACITY.fill },
     ];
   }
@@ -79,6 +79,10 @@ export function tagOutline(width, height) {
   return `M${r} 0 H${width - r} Q${width} 0 ${width} ${r} V${notch - 4} L${width - 4} ${notch} L${width} ${notch + 4} V${height - r} Q${width} ${height} ${width - r} ${height} H${r} Q0 ${height} 0 ${height - r} V${r} Q0 0 ${r} 0 Z`;
 }
 
+// The light across a tag, and the dull of its foot: shades that fade out.
+const TAG_GLINT = Object.freeze({ across: true, shade: [[0.02, 'white', 0], [0.2, 'white', OPACITY.fill], [0.38, 'white', 0]] });
+const TAG_FOOT = Object.freeze({ shade: [[0.5, 'black', 0], [1, 'black', OPACITY.shade]] });
+
 // A soldier's tag lying flat, cut to `outline` in a box `width` by `height`
 // px: its shadow, close under it; the steel, a cool grey (the paper's shade
 // greyed and cooled, so what is stamped on it reads in the paper's ink in
@@ -95,12 +99,12 @@ export function tagPieces(outline, width, height, seed, { dull = false, hole = 1
     const moved = `translate(${4 + shift} ${4 + shift})`;
     return { tag: 'g', transform: moved, opacity, children: [{ tag: 'path', d: rim, fill: 'none', stroke: fill, strokeWidth: 1.1 }] };
   };
-  const lower = height / 2;
+  // Flecks of rust at its edges.
   const rust = Array.from({ length: 2 }, () => ({
-    tag: 'ellipse', cx: random() * width, cy: random() < 0.5 ? 2 : height - 2, rx: 3 + random() * 4, ry: 2 + random() * 2, fill: 'warningStrong', blur: 1.5, opacity: OPACITY.line,
+    tag: 'ellipse', cx: random() * width, cy: random() < 0.5 ? 2 : height - 2, rx: 2 + random() * 3, ry: 1 + random() * 1.4, fill: 'warningStrong', opacity: OPACITY.line,
   }));
   return [
-    softShadow(outline, { blur: 1.5, opacity: OPACITY.heavy, shift: [1, 2] }),
+    flatShadow(outline),
     { tag: 'path', d: outline, fill: 'paperShade' },
     {
       tag: 'g',
@@ -109,8 +113,9 @@ export function tagPieces(outline, width, height, seed, { dull = false, hole = 1
         { tag: 'rect', x: 0, y: 0, width, height, fill: 'textMuted', opacity: OPACITY.edge },
         { tag: 'rect', x: 0, y: 0, width, height, fill: 'info', opacity: OPACITY.tint },
         ...sketch('rectangle', -4, 1, width + 8, height - 2, { seed, roughness: 0.2, fill: 'white', fillStyle: 'hachure', hachureAngle: 0, hachureGap: 1.8, fillWeight: 0.3, opacity: OPACITY.tint }),
-        { tag: 'path', d: polygonPath([[width * 0.18, 0], [width * 0.36, 0], [width * 0.22, height], [width * 0.04, height]]), fill: 'white', blur: 3, opacity: OPACITY.fill },
-        { tag: 'rect', x: 0, y: height * 0.6, width, height: lower, fill: 'black', blur: 4, opacity: OPACITY.tint },
+        // A light caught across it, fading in and out; its foot gone dull.
+        { tag: 'rect', x: 0, y: 0, width, height, fill: TAG_GLINT },
+        { tag: 'rect', x: 0, y: 0, width, height, fill: TAG_FOOT },
         ...rust,
         ...(dull ? [{ tag: 'rect', x: 0, y: 0, width, height, fill: 'black', opacity: OPACITY.shade }] : []),
         rolled(-0.6, 'white', OPACITY.strong),
@@ -166,32 +171,36 @@ export function barbedWirePieces(points, { every = 24 } = {}) {
 // over it as `seed` throws it; at each of `bolts` (shares of its width) a
 // bolt on its washer, and the rust run down from it.
 const RIDGE = 20;
+const RIDGE_LIGHT = Object.freeze({
+  across: true,
+  shade: [[0, 'black', OPACITY.edge], [0.3, 'black', OPACITY.soft], [0.48, 'white', 0], [0.75, 'white', OPACITY.strong], [0.95, 'black', OPACITY.line]],
+});
+const RUSTED_FOOT = Object.freeze({ shade: [[0, 'warningStrong', 0], [1, 'warningStrong', OPACITY.strong]] });
 export function corrugatedPieces(x0, x1, top, foot, seed, bolts = []) {
   const random = seededRandom(`corrugated-${seed}`);
   const span = x1 - x0;
   const wave = (x) => Math.sin((x / RIDGE) * Math.PI * 2) * 2.6;
   const edge = (y) => [...resampled([[x0, y], [x1, y]], 4)].map(([x]) => [x, y + wave(x)]);
   const outline = polygonPath([...edge(top), ...edge(foot).reverse()]);
+  // Each ridge dark in its trough, lit along its crown: one shade across it.
   const ridges = [];
   for (let x = Math.floor(x0 / RIDGE) * RIDGE - RIDGE; x < x1; x += RIDGE) {
-    ridges.push(
-      { tag: 'rect', x: x + RIDGE * 0.61, y: top - 4, width: RIDGE * 0.28, height: foot - top + 8, fill: 'white', blur: 2, opacity: OPACITY.strong },
-      { tag: 'rect', x: x + RIDGE * 0.09, y: top - 4, width: RIDGE * 0.32, height: foot - top + 8, fill: 'black', blur: 2, opacity: OPACITY.edge },
-    );
+    ridges.push({ tag: 'rect', x, y: top - 4, width: RIDGE, height: foot - top + 8, fill: RIDGE_LIGHT });
   }
+  // Patches of rust, as `seed` throws them.
   const rust = Array.from({ length: Math.max(2, Math.round(span / 80)) }, () => ({
-    tag: 'ellipse', cx: x0 + random() * span, cy: top + random() * (foot - top), rx: 10 + random() * 18, ry: 5 + random() * 8, fill: 'warningStrong', blur: 4, opacity: OPACITY.shade,
+    tag: 'ellipse', cx: x0 + random() * span, cy: top + random() * (foot - top), rx: 6 + random() * 10, ry: 3 + random() * 4, fill: 'warningStrong', opacity: OPACITY.fill,
   }));
   const at = (share) => x0 + span * share;
   return [
-    softShadow(outline),
+    flatShadow(outline, { opacity: OPACITY.edge, shift: [0, 2] }),
     { tag: 'path', d: outline, fill: 'outline' },
     {
       tag: 'g',
       clip: outline,
       children: [
         ...ridges,
-        { tag: 'rect', x: x0, y: foot - 4, width: span, height: 8, fill: 'warningStrong', blur: 4, opacity: OPACITY.edge },
+        { tag: 'rect', x: x0, y: foot - 8, width: span, height: 12, fill: RUSTED_FOOT },
         ...rust,
         ...bolts.flatMap((share) => dripPieces(at(share), top + 12, foot - top - 12, 3)),
       ],
@@ -204,7 +213,7 @@ export function corrugatedPieces(x0, x1, top, foot, seed, bolts = []) {
 // Webbing cut to the path `outline`: olive canvas, its weave, its edge.
 export function webbingPieces(outline, seed) {
   return [
-    softShadow(outline),
+    flatShadow(outline, { opacity: OPACITY.edge, shift: [0, 3] }),
     { tag: 'path', d: outline, fill: 'secondaryStrong' },
     { tag: 'path', d: outline, fill: 'black', opacity: OPACITY.strong },
     ...sketch('path', outline, { seed, roughness: 0.6, fill: 'black', fillStyle: 'cross-hatch', hachureAngle: 45, hachureGap: 3.4, fillWeight: 0.5, opacity: OPACITY.line }),
@@ -291,7 +300,7 @@ export function cartridgeBeltPieces(from, to, cy, { seed = 3, held = 1 } = {}) {
   const straps = join(rounds.slice(0, -1), ({ x }) => boxPath(BELT_PITCH - radius * 2 - 2.4, 2.4, x + radius + 1.2, base - 15.6));
   const along = (y, height) => join(rounds, ({ x }) => boxPath(radius * 2 + 2, height, x - radius - 1, y));
   return [
-    softShadow(boxPath(to - from, 26, from, base - 26), { blur: 3, opacity: OPACITY.strong, shift: [0, 3] }),
+    flatShadow(boxPath(to - from, 26, from, base - 26), { opacity: OPACITY.line, shift: [0, 3] }),
     ...roundsPieces(rounds, base),
     // The steel links: two loops round every case, a strap to the next.
     { tag: 'path', d: loops, fill: 'textMuted' },

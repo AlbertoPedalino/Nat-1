@@ -11,7 +11,7 @@ import {
 import { TEXT_STYLES } from '../shared/ui/textStyles.js';
 import { CONTROL_HEIGHTS } from '../shared/ui/controlHeights.js';
 import { KEY_BAR_SX, PRESSABLE_EDGE_SX, iconButtonLook, pressableSx } from '../shared/ui/pressable.js';
-import { SURFACES, pageLightSx, surfaceFinish, washImage } from '../shared/ui/surfaces.js';
+import { FIXED_PAGE_LAYER, SURFACES, pageLightSx, surfaceFinish, washImage } from '../shared/ui/surfaces.js';
 import { LINE_SHARE, PAGE_SCENE_KINDS, VEIL, pageScene, sceneSvg } from '../shared/ui/pageScenes.js';
 import { dataPicture } from '../shared/ui/svgPicture.js';
 import { focusRingSx } from '../shared/ui/interactive.js';
@@ -93,11 +93,7 @@ function sceneLayerSx(chosen, paper) {
   const inked = (options) => dataPicture(sceneSvg(paper, colors.page, mode === 'dark' ? colors.textPrimary : colors.edge, LINE_SHARE[mode], options));
   return {
     '&::before': {
-      content: '""',
-      position: 'fixed',
-      inset: 0,
-      zIndex: -1,
-      pointerEvents: 'none',
+      ...FIXED_PAGE_LAYER,
       backgroundImage: scene.inked ? inked() : `${washImage(colors.page, OPACITY[VEIL])}, url("${scene.picture}")`,
       backgroundSize: 'cover',
       backgroundPosition: 'center bottom',

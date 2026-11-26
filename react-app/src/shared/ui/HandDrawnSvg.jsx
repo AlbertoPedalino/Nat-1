@@ -4,7 +4,11 @@ import { UI_COLORS } from './colors.js';
 // A hand-drawn drawing's pieces (handDrawing.js) as an SVG: every role named
 // in the palette's colour (in style: the roles are CSS variables), each group
 // cut to its path, each blurred piece through a soft filter, each shaded fill
-// (a `{ shade: [[offset, role], …] }` in place of a role: a metal's sheen, top
+// (a `{ shade: [[offset, role, opacity?], …], across? }` in place of a role:
+// top to foot, or left to right `across`, a stop as faint as its `opacity`:
+// a metal's sheen, a glint fading out — the soft light and dark a blur gives,
+// for nothing: a blur is the dearest thing to paint, again wherever the
+// page scrolls a drawing into view;
 // to foot) through a gradient. What a panel's grip and banner are drawn with
 // (PanelGrip.jsx, PanelBanner.jsx). It never takes a pointer. With no
 // `pieces` yet (its box not measured), it is there unseen, for its `ref` to
@@ -63,8 +67,8 @@ function HandDrawnSvg({ pieces, box, style, ref }) {
       // A mark drawn in whatever colour it is given (ToneBar's): the colour it sits in.
       if (fill === 'currentColor') return fill;
       if (typeof fill === 'string') return UI_COLORS[fill];
-      const key = JSON.stringify(fill.shade);
-      if (!shades.has(key)) shades.set(key, { id: `${prefix}g${shades.size}`, stops: fill.shade });
+      const key = JSON.stringify([fill.shade, Boolean(fill.across)]);
+      if (!shades.has(key)) shades.set(key, { id: `${prefix}g${shades.size}`, stops: fill.shade, across: Boolean(fill.across) });
       return `url(#${shades.get(key).id})`;
     },
   };
@@ -86,9 +90,9 @@ function HandDrawnSvg({ pieces, box, style, ref }) {
             <feGaussianBlur stdDeviation={amount} />
           </filter>
         ))}
-        {[...shades.values()].map(({ id, stops }) => (
-          <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-            {stops.map(([offset, role]) => <stop key={offset} offset={offset} style={{ stopColor: UI_COLORS[role] }} />)}
+        {[...shades.values()].map(({ id, stops, across }) => (
+          <linearGradient key={id} id={id} x1="0" y1="0" x2={across ? '1' : '0'} y2={across ? '0' : '1'}>
+            {stops.map(([offset, role, opacity]) => <stop key={offset} offset={offset} style={{ stopColor: UI_COLORS[role], stopOpacity: opacity }} />)}
           </linearGradient>
         ))}
       </defs>

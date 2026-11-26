@@ -214,6 +214,10 @@ raised by a soft shadow and the light along its top edge with no change where
 it is used; `well` shades the inside of what is sunken (`wellShadow()`:
 `SURFACES.inset`, every field); `page` throws a light on the page behind the
 app (`PAGE_LIGHTS`, laid by the theme's `body::after` over the style's scene).
+The scene and the light are each one `FIXED_PAGE_LAYER` (surfaces.js), a
+layer of their own for the graphics card, painted once and kept while the
+page scrolls; a light's film grain is a picture (`public/textures/grain.png`,
+`SURFACE_PICTURES`), never a noise filter worked out behind the page.
 Written as `--gb-light-*` and `--gb-surface-finish-*` by `surfaceVariables`,
 shades at a fifth on a light palette (`shadeShare`). A new look is an
 entry in `SURFACE_FINISHES` or `PAGE_LIGHTS` and a name in the style's
@@ -226,7 +230,11 @@ worked out from the surface and the lettering, the colours of meaning faded
 as far as each asks: `FADE`, applied where `PALETTES` lists them, `lit(…)`),
 and their banners (`panelBanner.js`) clean shapes shaded top to foot, with
 volume and detail (a soft shadow under them, `softShadow`; lights caught on
-what is round, `glint`, `stud`) and no sketched line. What they all lay the
+what is round, `glint`, `stud`) and no sketched line. What lies flat on the
+page and comes in numbers (a row of tags, sheets of iron, a belt) casts
+`flatShadow`, unblurred, and is lit by shades that fade (a `shade` stop's
+opacity, `across` for left to right: HandDrawnSvg) rather than blurred
+shapes: each blur is painted again wherever a scroll brings it into view. What they all lay the
 same way is named once in `shapes.js` and never repeated in a style:
 `LIT_INK`, `STRAIGHT_BAR`, `litPanel({ banner, badge, grip, double })` and
 `unprinted(paper)`; a style writes only what is its own. What a
@@ -340,7 +348,7 @@ and its spent case once spent, its case in the kind's colour; or as a
 four before it, one spent rubbed out (`GemRow` lays a row of counters in
 the drawing's groups, where it counts in groups, and draws the strike over
 each, so a level's slots and a pool's hit dice are a `GemRow`); a training
-mark as the war's chalk: nothing untrained, a stroke for half proficiency,
+mark as the war's chalk: a stroke rubbed out untrained, a stroke for half proficiency,
 two for proficiency, the two struck through for expertise
 (`trainingMark`). A
 drawn token has parts each in a shade of the gem's colour or in a palette

@@ -4,7 +4,7 @@ import {
   BASE_STYLE_ID, CHOICE_MARK, CREST, FOCUS_RING, MOMENT_BURST, RIBBON, SEAL_RADIUS, SHAPE_STYLES,
   shapeVariables, styleShapes,
 } from '../../../../src/shared/ui/shapes.js';
-import { UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
+import { OPACITY, UI_COLORS, resolveColors } from '../../../../src/shared/ui/colors.js';
 import { GEM_TONES } from '../../../../src/shared/ui/entityColors.js';
 
 // The keys of a shapes object, nested, as paths ('crest.clip', …). A gem's
@@ -39,14 +39,17 @@ test('every gem cut is cut or drawn whole', async () => {
       // exists, every kind it counts given its role (a training mark its
       // one), each mark (and the strike across a group, where it counts in
       // groups) in the palette's roles, there to spend or spent, at every
-      // level; nothing drawn untrained.
+      // level; untrained only a faint, rubbed-out place.
       if (cut.drawing) {
         assert.ok(['counter', 'training'].includes(kind) && COUNTER_DRAWING_KINDS.includes(cut.drawing), `${id} ${kind} drawn as ${cut.drawing}`);
         const painted = ({ pieces }) => roles(pieces).forEach((role) => assert.ok(UI_COLORS[role], `${id} ${kind}: ${role} is no palette role`));
         if (kind === 'training') {
           assert.deepEqual(Object.keys(cut.tones), ['training'], `${id} training names its role`);
           assert.ok(drawsTraining(cut.drawing), `${id} ${cut.drawing} draws a training mark`);
-          ['none', null, undefined].forEach((level) => assert.equal(trainingMark(cut.drawing, 14, 14, 'warningText', level).pieces.length, 0, `${id} untrained (${level}) draws nothing`));
+          ['none', null, undefined].forEach((level) => {
+            const { pieces } = trainingMark(cut.drawing, 14, 14, 'warningText', level);
+            assert.ok(pieces.length > 0 && pieces.every((piece) => piece.opacity <= OPACITY.fill), `${id} untrained (${level}) is a faint place`);
+          });
           TRAINING_LEVELS.filter((level) => level !== 'none').forEach((level) => {
             const mark = trainingMark(cut.drawing, 14, 14, 'warningText', level);
             assert.ok(mark.pieces.length > 0, `${id} ${level}`);
@@ -391,6 +394,8 @@ test('every painted scene ships its pictures', async () => {
   const { existsSync } = await import('node:fs');
   const { SCENE_PICTURES } = await import('../../../../src/shared/ui/pageScenes.js');
   SCENE_PICTURES.forEach((file) => assert.ok(existsSync(`public/scenes/${file}`), file));
+  const { SURFACE_PICTURES } = await import('../../../../src/shared/ui/surfaces.js');
+  SURFACE_PICTURES.forEach((file) => assert.ok(existsSync(`public/${file}`), file));
 });
 
 test("every style marks a card's kind with a shape of its own, in the 12 by 30 box", async () => {

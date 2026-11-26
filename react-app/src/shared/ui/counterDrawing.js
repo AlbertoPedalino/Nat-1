@@ -9,8 +9,9 @@ import { CARTRIDGE_HEIGHT, cartridgePieces, chalkPieces, tallyAcross, tallyUprig
 // The war's (ironwork.js). Its counters are rounds: a live round while it is
 // there to spend, the spent case once spent, standing in a row as rounds
 // stand in a belt; its case in the colour of what it counts. Its training
-// marks are a tally in chalk: nothing untrained, a stroke for half
-// proficiency, two for proficiency, the two struck through for expertise. The tally's counters, where a style counts in chalk: an upright
+// marks are a tally in chalk: a stroke rubbed out untrained (the empty
+// place), a stroke for half proficiency, two for proficiency, the two struck
+// through for expertise. The tally's counters, where a style counts in chalk: an upright
 // stroke while there to spend, every fifth of a row struck across the four
 // before it, so a full group reads as five; one spent rubbed out with a
 // thumb, its smear and the ghost of its line left.
@@ -20,7 +21,8 @@ import { CARTRIDGE_HEIGHT, cartridgePieces, chalkPieces, tallyAcross, tallyUprig
 const one = (w, h) => tallyUpright(w / 2, h * 0.04, h * 0.92);
 const two = (w, h) => [tallyUpright(w * 0.33, h * 0.04, h * 0.92, -0.5), tallyUpright(w * 0.67, h * 0.04, h * 0.92, 0.5)];
 const TALLY_LEVELS = Object.freeze({
-  none: () => [],
+  // Untrained: the place a stroke would go, rubbed out (rubbed: drawn as a spent counter is).
+  none: (w, h) => [{ points: one(w, h), rubbed: true }],
   half: (w, h) => [one(w, h)],
   prof: two,
   exp: (w, h) => [...two(w, h), tallyAcross(-w * 0.02, w * 1.04, h * 0.04, h * 0.92)],
@@ -48,7 +50,7 @@ const DRAWINGS = Object.freeze({
     // A training mark stands nearly twice a gem's height, as a counter's
     // stroke stands taller than a gem: the same chalk, to the same measure.
     trainingTall: 1.85,
-    training: (width, height, role, level) => TALLY_LEVELS[level](width, height).flatMap((points) => chalkPieces(points, height * 0.17, role)),
+    training: (width, height, role, level) => TALLY_LEVELS[level](width, height).flatMap((mark) => (mark.rubbed ? chalkPieces(mark.points, height * 0.17, role, true) : chalkPieces(mark, height * 0.17, role))),
   }),
   cartridge: Object.freeze({
     every: 0,

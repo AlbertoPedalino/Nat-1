@@ -1,10 +1,10 @@
 import { UI_COLORS, uiAlpha, OPACITY, paletteOf, washImage } from './colors.js';
 import { PAGE_SCENE_KINDS } from './pageScenes.js';
+import { publicAsset } from '../publicAsset.js';
 import { VTT_COLORS } from '../vtt/colors.js';
 import {
   INK_EDGE, UI_SHADOWS, INK_SOLID, lightShadowVariables, panelFloatShadow, shadeShare, wellShadow,
 } from './shadows.js';
-import { dataPicture } from './svgPicture.js';
 import { STICKER_PAPER_SIZE, stickerPaperImage } from './stickerPaper.js';
 import { cornerRadius } from './radius.js';
 import { styleShapes } from './shapes.js';
@@ -119,10 +119,14 @@ export function surfaceFinish(kind, otherwise = 'var(--Paper-overlay)') {
 //   blinds: a street lamp through venetian blinds — slats of warm light
 //   slanting from the upper left, lost in the dark towards the corners, under
 //   a film's grain.
-const GRAIN = dataPicture('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180">'
-  + '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>'
-  + '<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0"/></filter>'
-  + '<rect width="100%" height="100%" filter="url(#n)" opacity=".12"/></svg>');
+// A film's grain: a tile of white specks, faint. A picture made once
+// (public/textures/grain.png, the fractal noise the page used to work out in
+// an SVG filter, rendered), as a noise filter behind a page being scrolled
+// cost the most of anything on it to paint.
+const GRAIN_FILE = 'textures/grain.png';
+const GRAIN = `url("${publicAsset(GRAIN_FILE)}")`;
+// The pictures the surfaces ship (public/), for what checks they are there.
+export const SURFACE_PICTURES = Object.freeze([GRAIN_FILE]);
 // The page's corners lost in the dark, as deep as `depth` (an OPACITY step),
 // the middle left clear out to `clear` percent.
 const darkCorners = (clear, depth) => `radial-gradient(120% 95% at 50% 32%, transparent ${clear}%, ${uiAlpha(UI_COLORS.surfaceDarkest, depth)})`;
@@ -153,12 +157,20 @@ const PAGE_LIGHTS = Object.freeze({
 
 export const PAGE_LIGHT_KINDS = Object.freeze(Object.keys(PAGE_LIGHTS));
 
+// A layer held still behind every screen (the style's scene, the light it
+// throws on its page: theme.js), the whole window's size. Its own layer for
+// the graphics card (will-change): painted once and kept, where the page
+// would otherwise paint it again at every step of a scroll.
+export const FIXED_PAGE_LAYER = Object.freeze({
+  content: '""', position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', willChange: 'transform',
+});
+
 // The page's light as the layer the theme lays behind the app (theme.js);
 // null where the style throws none.
 export function pageLightSx(kind) {
   const light = PAGE_LIGHTS[kind];
   if (!light) return null;
-  return { content: '""', position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', backgroundImage: light };
+  return { ...FIXED_PAGE_LAYER, backgroundImage: light };
 }
 
 // The badge an icon stands on (shapes.js panel.badge): a seal in the panel's

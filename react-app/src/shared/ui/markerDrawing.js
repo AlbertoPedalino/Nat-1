@@ -1,5 +1,5 @@
 import { OPACITY } from './colors.js';
-import { STROKE_ENDS, brushStroke, drawingBox, drawingCache } from './handDrawing.js';
+import { STROKE_ENDS, brushStroke, drawingBox, drawingCache, softShadow } from './handDrawing.js';
 
 // The mark of colour at the head of a card's name drawn by the hand-drawing
 // kit (shapes.js marker.drawing, ToneBar.jsx) in place of the style's cut
@@ -38,14 +38,14 @@ const DRAWINGS = Object.freeze({
     const nearLap = path('M6.2 6.6 C4.4 8.4 1.8 9.8 0.2 10.6 C0.4 14 0.7 17.4 1 20.4 L1.5 21.8 L1.8 20.6 L2.4 21.2 L2.5 19.6 C3.2 17.4 4 15 5 13.2 C5.4 11 5.8 8.8 6.2 6.6 Z');
     const farLap = path('M8 8.6 C9.6 10.4 11.4 11.8 12 12.6 C12.2 16.6 11.8 20.6 11 24.2 C10.4 21 9.6 17.6 8.8 15 C8.6 12.8 8.3 10.6 8 8.6 Z');
     const lap = (d, light, foldAt, seed, creases) => [
-      { tag: 'path', d, fill: 'black', blur: 0.8, opacity: OPACITY.edge, transform: 'translate(0.5 0.8)' },
+      softShadow(d, { blur: 0.8, opacity: OPACITY.edge, shift: [0.5, 0.8] }),
       { tag: 'path', d, fill: MARKER_INK },
       { tag: 'path', d, fill: light ? 'white' : 'black', opacity: light ? OPACITY.fill : OPACITY.shade },
       { tag: 'g', clip: d, children: [fold(foldAt, w * 0.07, 'black', OPACITY.shade), ...creases.flatMap(crease)] },
       { tag: 'path', d, fill: 'none', stroke: 'black', strokeWidth: 0.4, opacity: seed ? OPACITY.line : OPACITY.edge },
     ];
     return [
-      { tag: 'path', d: body, fill: 'black', blur: 1.2, opacity: OPACITY.strong, transform: 'translate(0.8 1.2)' },
+      softShadow(body, { blur: 1.2, opacity: OPACITY.strong, shift: [0.8, 1.2] }),
       { tag: 'path', d: body, fill: MARKER_INK },
       {
         tag: 'g',

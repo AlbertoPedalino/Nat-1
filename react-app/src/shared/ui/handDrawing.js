@@ -159,6 +159,11 @@ export function softShadow(d, { blur = 3, opacity = OPACITY.strong, shift = [0, 
   return { tag: 'path', d, fill: 'black', blur, opacity, transform: moved };
 }
 
+// The same shadow with no blur, close under what lies flat on the page (a
+// tag, a sheet of iron, a belt): a blur is the dearest thing to paint, again
+// wherever a scroll brings it into view, and many of them stuttered the scroll.
+export const flatShadow = (d, { opacity = OPACITY.strong, shift = [1, 2] } = {}) => softShadow(d, { blur: 0, opacity, shift });
+
 // A drawing's pieces with the box they are seen through: the w by h box they
 // were drawn to and `reach` px past it, for a shadow and the sketch's wander.
 export function drawingBox(pieces, w, h, reach = 6) {
